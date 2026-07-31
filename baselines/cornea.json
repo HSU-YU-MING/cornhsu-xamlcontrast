@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "summary": {
+    "paletteSource": "none",
+    "paletteMode": "none",
+    "paletteDetail": "no palette found (no ResourceDictionary color keys, no C# tuples) \u2014 auditing hardcoded colors only",
+    "paletteKeys": 0,
+    "singleTheme": true,
+    "configLoaded": false,
+    "thresholds": {
+      "normalText": 4.5,
+      "largeText": 3,
+      "failFactor": 0.67
+    },
+    "files": 5,
+    "pairs": 0,
+    "unresolved": 1,
+    "skipped": 2,
+    "deadForeground": 0,
+    "disabledExempt": 0,
+    "parseErrors": 0,
+    "suppressed": 0,
+    "counts": {
+      "fail": 0,
+      "warn": 0,
+      "ok": 0,
+      "decorative": 0
+    }
+  },
+  "findings": []
+}

@@ -135,6 +135,79 @@ public class NewRuleTests
         Assert.Equal(Wcag.Contrast("#FFFFFF", "#CC3A3A"), f.RatioDark);
     }
 
+    [Fact] // 規則 13：TargetName=模板根 的觸發 Setter 等同設在宿主上
+    public void RootTargetedTriggerBackgroundIsResolved()
+    {
+        using var fx = new Fixture();
+        // Kindling CellDeleteBtn hover 形狀：觸發器用 TargetName 把「模板根」換底＋白字。
+        // 規則 13 前：工具只看到白字、誤配祖先白底報 1:1 假警報。
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Btn" TargetType="Button">
+                  <Setter Property="Foreground" Value="#111111"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="#EEEEEE">
+                          <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="#CC3A3A"/>
+                            <Setter Property="Foreground" Value="#FFFFFF"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Btn}" Content="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        // hover 的字底同出一個 Style 節點 → WalkStyles 定義處檢（正確配對），
+        // 鏈路徑讓位 —— 不能再出現「白字疊祖先白底」的假警報
+        Assert.DoesNotContain(r.Findings, f => f.Fg == "#FFFFFF" && f.Bg == "#FFFFFF");
+        var hover = Assert.Single(r.Findings, f => f.Fg == "#FFFFFF");
+        Assert.Equal("#CC3A3A", hover.Bg);
+    }
+
+    [Fact] // 規則 13 的邊界：TargetName 指向「非根」的內部元素 → 維持不做
+    public void NonRootTargetNameIsStillIgnored()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#000000">
+              <Grid.Resources>
+                <Style x:Key="Btn" TargetType="Button">
+                  <Setter Property="Foreground" Value="#FFFFFF"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Border x:Name="root" Background="#000000">
+                          <Border x:Name="inner"><ContentPresenter/></Border>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="inner" Property="Background" Value="#FFFFFF"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Btn}" Content="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        // inner 的換底解析不到（要模板內部樹的版面關係）—— 不猜，
+        // hover 狀態沒有可歸屬的底變更 → 與基礎同組（白字疊模板根黑底）
+        Assert.All(r.Findings, f => Assert.Equal("#000000", f.Bg));
+    }
+
     [Fact] // 分工：字與底同出一個 Style 節點 → WalkStyles 定義處已檢，元素端不重複
     public void SameStyleNodePairIsNotDoubleCounted()
     {

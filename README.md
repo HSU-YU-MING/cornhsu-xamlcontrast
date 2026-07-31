@@ -76,13 +76,13 @@ of intent — it's just bad twice. Everything below AA gets reported; a human de
 ## Why the hard part isn't the WCAG formula
 
 The formula is 20 lines. The value is in resolving **what color the text actually sits on** —
-twelve parsing rules, each one discovered by auditing real shipped products:
+thirteen parsing rules, each one discovered by auditing real shipped products:
 
 transparent passthrough · alpha compositing · opacity accumulation down the tree ·
 ControlTemplate subtrees · Style setter pairing · trigger states · dead-setter filtering ·
 named/inline Style resolution with BasedOn chains · per-state trigger merging ·
 disabled-state exemption (WCAG 1.4.3) · translucent palette keys ·
-template-root backgrounds
+template-root backgrounds · root-targeted trigger setters
 
 Any implementation that just copies the formula misses all of them.
 
@@ -182,7 +182,7 @@ How that trust was earned — the highlights, with the full story in the
 
 Honest list — see the [blind-spot table](XamlContrast專案規畫書.md) for details:
 
-- `TargetName` setters inside template triggers (background swapped on a named part) — false alarms
+- `TargetName` setters aimed at **inner** template parts (root-targeted ones are resolved)
 - Cross-element correlated triggers (same condition flips fg on one element, bg on another) — false alarms
 - Sibling-element backgrounds; text over images; implicit styles
 - `Binding` / `TemplateBinding` colors are reported as *unresolved*, never guessed —

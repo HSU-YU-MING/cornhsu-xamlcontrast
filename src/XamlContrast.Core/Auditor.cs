@@ -250,7 +250,13 @@ public sealed partial class Auditor
                 if (fgV is null) continue;
 
                 string? bgV = null; object? bgSrc = null;
-                if (localBgRaw is not null) { bgV = localBgRaw; bgSrc = "local"; }
+                // WPF 屬性優先序的分岔：觸發器「直接設在模板根」的底（TargetName=根）
+                // 蓋過經 TemplateBinding 進來的宿主本地值；「設在宿主」的觸發 Setter
+                // 則輸給宿主的本地屬性（CalendarView 日曆格實證：選取態 DayBorder
+                // 直接換 PrimaryButtonBrush，蓋掉 local SurfaceBrush）
+                if (st.Set.TryGetValue("Background", out var rootBg) && st.RootTargeted.Contains("Background"))
+                { bgV = rootBg; bgSrc = st.SetSrc["Background"]; }
+                else if (localBgRaw is not null) { bgV = localBgRaw; bgSrc = "local"; }
                 else if (st.Set.TryGetValue("Background", out var sBg)) { bgV = sBg; bgSrc = st.SetSrc["Background"]; }
                 else if (chain.Props.TryGetValue("Background", out var pb)) { bgV = pb.V; bgSrc = pb.Src; }
                 else if (chain.TemplateRootBg is not null)
@@ -428,6 +434,15 @@ public sealed partial class Auditor
                 if (prop is not null && val is not null) setters[prop] = val;
             }
 
+            // 規則 13 也適用於定義處：只收「無 TargetName（套宿主）或指向模板根」的
+            // Setter。指向內部元素的換底配上宿主字色是錯的配對（內部元素的底不一定
+            // 墊在宿主文字下面）—— 不猜。
+            var tmplRootEl = style.Descendants()
+                .FirstOrDefault(e => e.Name.LocalName == "ControlTemplate")
+                ?.Elements().FirstOrDefault(e => !e.Name.LocalName.Contains('.'));
+            var tmplRootName = tmplRootEl?.Attribute(XName.Get("Name", "http://schemas.microsoft.com/winfx/2006/xaml"))?.Value
+                               ?? tmplRootEl?.Attribute("Name")?.Value;
+
             // 觸發器裡的 Setter 也算進來（它們覆蓋同一個 Style 的基礎值）
             var trigSetters = new List<(Dictionary<string, string> Set, bool Disabled)>();
             foreach (var t in style.Descendants().Where(e => e.Name.LocalName is "Trigger" or "DataTrigger"))
@@ -437,7 +452,9 @@ public sealed partial class Auditor
                 {
                     var prop = s.Attribute("Property")?.Value;
                     var val = s.Attribute("Value")?.Value;
-                    if (prop is not null && val is not null) ts[prop] = val;
+                    if (prop is null || val is null) continue;
+                    var tn = s.Attribute("TargetName")?.Value;
+                    if (tn is null || (tmplRootName is not null && tn == tmplRootName)) ts[prop] = val;
                 }
                 if (ts.Count > 0) trigSetters.Add((ts, StyleIndex.IsDisabledTrigger(t)));
             }

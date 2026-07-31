@@ -24,6 +24,9 @@ internal sealed partial class StyleIndex
         public bool FromTemplate;
         public Dictionary<string, string> Set = new();
         public Dictionary<string, int> SetSrc = new(); // 屬性 → 來源 Style Id
+        /// <summary>來自「TargetName=模板根」Setter 的屬性 —— 直接設在根元素上，
+        /// WPF 屬性優先序會蓋過經 TemplateBinding 進來的宿主本地值</summary>
+        public HashSet<string> RootTargeted = new();
         public string? Cond;
     }
 
@@ -93,17 +96,26 @@ internal sealed partial class StyleIndex
         var tmplEl = style.Descendants().FirstOrDefault(e => e.Name.LocalName == "ControlTemplate");
         rec.HasTemplate = tmplEl is not null;
         // 模板根＝第一個視覺元素（跳過 <ControlTemplate.Resources> 之類的屬性元素）
-        rec.TemplateRootBg = tmplEl?.Elements()
-            .FirstOrDefault(e => !e.Name.LocalName.Contains('.'))
-            ?.Attribute("Background")?.Value;
+        var tmplRoot = tmplEl?.Elements().FirstOrDefault(e => !e.Name.LocalName.Contains('.'));
+        rec.TemplateRootBg = tmplRoot?.Attribute("Background")?.Value;
+        // 模板根的名字：規則 13 —— 觸發器裡「TargetName=模板根」的 Setter 等同
+        // 直接設在宿主上（Kindling CellDeleteBtn hover 換底、QuillNest RadioButton
+        // 選取態換底，共六筆假警報全是這形狀）。指向內部元素的 TargetName 仍不做。
+        var rootName = tmplRoot?.Attribute(XName.Get("Name", "http://schemas.microsoft.com/winfx/2006/xaml"))?.Value
+                       ?? tmplRoot?.Attribute("Name")?.Value;
         foreach (var t in style.Descendants().Where(e => e.Name.LocalName is "Trigger" or "DataTrigger"))
         {
             var set = new Dictionary<string, string>();
+            var rootTargeted = new HashSet<string>();
             foreach (var s in t.Elements().Where(e => e.Name.LocalName == "Setter"))
             {
                 var p = s.Attribute("Property")?.Value;
                 var v = s.Attribute("Value")?.Value;
-                if (p is not null && v is not null && s.Attribute("TargetName") is null) set[p] = v;
+                if (p is null || v is null) continue;
+                var tn = s.Attribute("TargetName")?.Value;
+                // 無 TargetName＝套宿主；TargetName=模板根＝實質也是宿主的視覺（規則 13）
+                if (tn is null) { set[p] = v; rootTargeted.Remove(p); }
+                else if (rootName is not null && tn == rootName) { set[p] = v; rootTargeted.Add(p); }
             }
             if (set.Count == 0) continue;
             var inTmpl = false;
@@ -120,6 +132,7 @@ internal sealed partial class StyleIndex
                 Disabled = IsDisabledTrigger(t),
                 FromTemplate = inTmpl,
                 Set = set,
+                RootTargeted = rootTargeted,
                 Cond = cond,
             });
         }
@@ -196,6 +209,7 @@ internal sealed partial class StyleIndex
                 FromTemplate = s.FromTemplate,
                 Set = new Dictionary<string, string>(s.Set),
                 SetSrc = srcMap,
+                RootTargeted = new HashSet<string>(s.RootTargeted),
                 Cond = s.Cond,
             });
         }
@@ -221,6 +235,7 @@ internal sealed partial class StyleIndex
                     FromTemplate = s.FromTemplate,
                     Set = new Dictionary<string, string>(s.Set),
                     SetSrc = new Dictionary<string, int>(s.SetSrc),
+                    RootTargeted = new HashSet<string>(s.RootTargeted),
                     Cond = s.Cond,
                 };
                 order.Add(c);
@@ -230,11 +245,19 @@ internal sealed partial class StyleIndex
             {
                 // template 觸發只補 style 觸發沒設的屬性
                 foreach (var (k, v) in s.Set)
-                    if (!t.Set.ContainsKey(k)) { t.Set[k] = v; t.SetSrc[k] = s.SetSrc[k]; }
+                    if (!t.Set.ContainsKey(k))
+                    {
+                        t.Set[k] = v; t.SetSrc[k] = s.SetSrc[k];
+                        if (s.RootTargeted.Contains(k)) t.RootTargeted.Add(k);
+                    }
             }
             else
             {
-                foreach (var (k, v) in s.Set) { t.Set[k] = v; t.SetSrc[k] = s.SetSrc[k]; }
+                foreach (var (k, v) in s.Set)
+                {
+                    t.Set[k] = v; t.SetSrc[k] = s.SetSrc[k];
+                    if (s.RootTargeted.Contains(k)) t.RootTargeted.Add(k); else t.RootTargeted.Remove(k);
+                }
                 t.FromTemplate = t.FromTemplate && s.FromTemplate;
             }
             t.Disabled = t.Disabled || s.Disabled;

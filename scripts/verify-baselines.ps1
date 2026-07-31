@@ -1,15 +1,23 @@
-﻿# M2 驗收（持續有效）：C# 版在四個真實專案上必須重現原型基準線的數字。
-# 期望值直接從 prototype/baseline-*.txt 解析 —— 基準線更新時本腳本自動跟上，
-# 不會出現「腳本裡的硬編數字」與基準線各說各話的第二真相源。
+﻿# 驗收（C# 快照回歸模式）
 #
-# 比對項目：檔案數／配對數／無法解析／跳過／死 setter 排除／停用態豁免／
-# 各分級數／「破」的每一筆 file:line。
+# 原型已於 v0.1.0 凍結（治理決定，規劃書 M5 節）：規則 13 起 C# 是權威實作，
+# 期望值改為 baselines/<name>.json —— C# 自己產的快照，比對「這次跑」與「上次凍結」。
+# prototype/baseline-*.txt 保留為凍結原型的歷史規格，不再是驗收來源。
 #
-# 用法：powershell -ExecutionPolicy Bypass -File .\scripts\verify-baselines.ps1
+# 用法：
+#   powershell -File .\scripts\verify-baselines.ps1           # 驗收（比對快照）
+#   powershell -File .\scripts\verify-baselines.ps1 -Update   # 重新凍結快照
+#                                                              （行為變更後用；diff 要人工檢視再 commit）
+#
+# 比對項目：summary 全部計數器 + 每筆 fail 的 file:line + 退出碼。
+
+param([switch]$Update)
 
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
 $cli = Join-Path $repo 'src\XamlContrast.Cli'
+$snapDir = Join-Path $repo 'baselines'
+New-Item -ItemType Directory -Force $snapDir | Out-Null
 
 $projects = @{
     kindling  = 'D:\應用程式\Kindling\Kindling.WPF'
@@ -18,63 +26,59 @@ $projects = @{
     cornea    = 'D:\應用程式\Cornea'
 }
 
-function Parse-Baseline([string]$path) {
-    $t = Get-Content $path -Raw
-    $e = @{ files=0; pairs=0; unresolved=0; skipped=0; deadfg=0; disabled=0
-            ok=0; fail=0; warn=0; decorative=0; failLines=@() }
-    if ($t -match '檔案 (\d+) 個｜解析出 (\d+) 組') { $e.files=[int]$Matches[1]; $e.pairs=[int]$Matches[2] }
-    if ($t -match '無法解析（[^）]*）: (\d+) 處｜跳過（[^）]*）: (\d+) 處') { $e.unresolved=[int]$Matches[1]; $e.skipped=[int]$Matches[2] }
-    if ($t -match '已排除 (\d+) 組 Style 配對') { $e.deadfg=[int]$Matches[1] }
-    if ($t -match '已豁免 (\d+) 組停用態配對') { $e.disabled=[int]$Matches[1] }
-    if ($t -match '(?m)^\s+OK\s+(\d+) 組') { $e.ok=[int]$Matches[1] }
-    if ($t -match '(?m)^\s+破\s+(\d+) 組') { $e.fail=[int]$Matches[1] }
-    if ($t -match '(?m)^\s+偏低\s+(\d+) 組') { $e.warn=[int]$Matches[1] }
-    if ($t -match '(?m)^\s+裝飾\s+(\d+) 組') { $e.decorative=[int]$Matches[1] }
-    # 「破」區塊的每一筆 file:line
-    if ($t -match '(?s)===== 破 [^\r\n]*=====\r?\n(.*?)(\r?\n\r?\n|$)') {
-        $e.failLines = @([regex]::Matches($Matches[1], '(?m)^(\S+\.xaml:\d+)') | ForEach-Object { $_.Groups[1].Value })
-    }
-    return $e
-}
-
 $anyFail = $false
 foreach ($name in @('kindling', 'quillnest', 'celflow', 'cornea')) {
-    $e = Parse-Baseline (Join-Path $repo "prototype\baseline-$name.txt")
     $json = Join-Path $env:TEMP "xamlcontrast-verify-$name.json"
     dotnet run --project $cli -c Release -- $projects[$name] --json $json *> $null
     $exit = $LASTEXITCODE
-    $r = Get-Content $json -Raw | ConvertFrom-Json
-    $s = $r.summary
+    $snapPath = Join-Path $snapDir "$name.json"
 
-    # 退出碼合約：破>0 → 1；配對 0 → 1（空掃綠燈）；否則 0
-    $expExit = if ($e.fail -gt 0 -or $e.pairs -eq 0) { 1 } else { 0 }
+    if ($Update) {
+        Copy-Item $json $snapPath -Force
+        $s = (Get-Content $json -Raw | ConvertFrom-Json).summary
+        Write-Host "[$name] 快照已更新（$($s.pairs) 組，fail $($s.counts.fail)，exit=$exit）" -ForegroundColor Cyan
+        continue
+    }
+
+    if (-not (Test-Path $snapPath)) {
+        Write-Host "[$name] 沒有快照 —— 先跑 -Update 凍結" -ForegroundColor Red
+        $anyFail = $true; continue
+    }
+
+    $cur = Get-Content $json -Raw | ConvertFrom-Json
+    $exp = Get-Content $snapPath -Raw | ConvertFrom-Json
+    $s = $cur.summary; $e = $exp.summary
+    $expExit = if ($e.counts.fail -gt 0 -or $e.pairs -eq 0) { 1 } else { 0 }
 
     $checks = [ordered]@{
-        files = @($e.files, $s.files);            pairs = @($e.pairs, $s.pairs)
-        unresolved = @($e.unresolved, $s.unresolved); skipped = @($e.skipped, $s.skipped)
-        deadForeground = @($e.deadfg, $s.deadForeground)
-        disabledExempt = @($e.disabled, $s.disabledExempt)
-        ok = @($e.ok, $s.counts.ok);              fail = @($e.fail, $s.counts.fail)
-        warn = @($e.warn, $s.counts.warn);        decorative = @($e.decorative, $s.counts.decorative)
+        files = @($e.files, $s.files);                    pairs = @($e.pairs, $s.pairs)
+        unresolved = @($e.unresolved, $s.unresolved);     skipped = @($e.skipped, $s.skipped)
+        deadForeground = @($e.deadForeground, $s.deadForeground)
+        disabledExempt = @($e.disabledExempt, $s.disabledExempt)
+        suppressed = @($e.suppressed, $s.suppressed)
+        ok = @($e.counts.ok, $s.counts.ok);               fail = @($e.counts.fail, $s.counts.fail)
+        warn = @($e.counts.warn, $s.counts.warn);         decorative = @($e.counts.decorative, $s.counts.decorative)
         exitCode = @($expExit, $exit)
     }
     $bad = @()
     foreach ($k in $checks.Keys) {
         if ("$($checks[$k][0])" -ne "$($checks[$k][1])") { $bad += "$k 期望 $($checks[$k][0]) 實得 $($checks[$k][1])" }
     }
-    $gotFails = @($r.findings | Where-Object category -eq 'fail' | ForEach-Object { "$($_.file):$($_.line)" })
-    foreach ($fl in $e.failLines) { if ($fl -notin $gotFails) { $bad += "缺少 fail: $fl" } }
-    foreach ($gf in $gotFails) { if ($gf -notin $e.failLines) { $bad += "多出 fail: $gf" } }
+    $expFails = @($exp.findings | Where-Object category -eq 'fail' | ForEach-Object { "$($_.file):$($_.line)" })
+    $gotFails = @($cur.findings | Where-Object category -eq 'fail' | ForEach-Object { "$($_.file):$($_.line)" })
+    foreach ($fl in $expFails) { if ($fl -notin $gotFails) { $bad += "缺少 fail: $fl" } }
+    foreach ($gf in $gotFails) { if ($gf -notin $expFails) { $bad += "多出 fail: $gf" } }
 
     if ($bad.Count -gt 0) {
         $anyFail = $true
-        Write-Host "[$name] 不一致：" -ForegroundColor Red
+        Write-Host "[$name] 與快照不一致：" -ForegroundColor Red
         $bad | ForEach-Object { Write-Host "    $_" -ForegroundColor Red }
     } else {
         Write-Host "[$name] 一致（$($s.pairs) 組配對，fail $($s.counts.fail)，豁免 $($s.disabledExempt)）" -ForegroundColor Green
     }
 }
 
-if ($anyFail) { Write-Host "驗收失敗" -ForegroundColor Red; exit 1 }
-Write-Host "驗收通過：四個專案的數字全部與原型基準線一致" -ForegroundColor Green
+if ($Update) { Write-Host "快照凍結完成 —— 檢視 git diff baselines/ 後 commit" -ForegroundColor Cyan; exit 0 }
+if ($anyFail) { Write-Host "驗收失敗：行為變了 —— 若為刻意，人工檢視後跑 -Update 重新凍結" -ForegroundColor Red; exit 1 }
+Write-Host "驗收通過：四個專案與凍結快照一致" -ForegroundColor Green
 exit 0

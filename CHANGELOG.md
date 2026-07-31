@@ -13,6 +13,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   message — a silently ignored config would mean you think you changed the audit
   standard when you didn't. Precedence: CLI flags > config > defaults.
 - NuGet package icon (split-theme "A" mark).
+- Rule 13: trigger setters with `TargetName` aimed at the **template root** are resolved
+  as host visuals (and, per WPF precedence, beat the host's local value fed in via
+  `TemplateBinding`). Eliminates all six documented false alarms of this class across
+  two validation projects; inner-part `TargetName` remains explicitly out of scope.
+  First C#-first rule after the prototype freeze — verification switched to
+  C#-snapshot regression (`baselines/*.json`, `verify-baselines.ps1 -Update`).
 
 ## [0.1.0] - 2026-07-31
 

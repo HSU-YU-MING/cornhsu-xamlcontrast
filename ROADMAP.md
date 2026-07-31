@@ -17,7 +17,8 @@
       requireReason；寫錯 exit 2 給欄位級訊息
 - [x] findings 的 `file` 改成 root 相對路徑（正斜線，跨 OS baseline 可攜）——
       2026-07-31，同名檔不再互撞
-- [ ] 已知盲區中「可修」項：TargetName 模板 Setter 的解析
+- [x] TargetName 模板 Setter 的解析（指向模板根）—— 2026-07-31 規則 13，
+      六筆假警報全消；指向內部元素維持明文不做
 - [x] 「Style＋半透明底」逐狀態路徑的重複合成修正 —— 2026-07-31，兩實作同步修
 - [ ] npm 包裝（自帶執行環境的原生執行檔，照 Parity）
 - [ ] SARIF 輸出（GitHub code scanning）
