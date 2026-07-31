@@ -126,18 +126,32 @@ something, that fact is machine-readable. Consumers should check `schemaVersion`
 ## Validated against real products
 
 Not "runs on a demo" — this tool found and drove fixes for **250+ real contrast issues
-across four shipped WPF apps** (before/after audited by the tool itself):
+across three shipped WPF apps** (before/after audited by the tool itself):
 
 | project | before | after |
 |---|---|---|
 | CelFlow | 39 fail / 57 warn | **0** (21 disabled-state exempted) |
-| Kindling | 41 fail / 14 warn | in progress |
-| QuillNest | 13 fail / 31 warn | 7 remaining, all verified false alarms of two known classes |
+| Kindling | 41 fail / 14 warn | **0 real** (3 remaining, all verified false alarms of known classes) |
+| QuillNest | 13 fail / 31 warn | **0 real** (7 remaining, same) |
 
-Along the way the tool itself produced **eight** "healthy-looking but wrong" reports.
-Each one is now a regression test. The project's core rule, written in blood:
-**an audit tool's worst failure mode is not missing issues — it's false confidence.**
-Degradations must shout; nothing gets silently excused.
+How that trust was earned — the highlights, with the full story in the
+[development retrospective](docs/開發歷程回顧.md) (zh-Hant):
+
+- **Two independent implementations cross-verified.** The PowerShell prototype (the spec)
+  and this .NET port agree on every number across all four validation projects —
+  down to each failing pair's `file:line` and the exit code. Re-run it yourself:
+  `scripts/verify-baselines.ps1`.
+- **Every parsing rule came from a real false alarm or a real miss** — none were designed
+  at a whiteboard. The 12th (template-root backgrounds) was found while verifying the
+  fixes the tool itself had driven.
+- **The tool produced eight "healthy-looking but wrong" reports during development.
+  Each one is now a regression test.** The project's core rule, written in blood:
+  **an audit tool's worst failure mode is not missing issues — it's false confidence.**
+  Degradations must shout; nothing gets silently excused — exemptions, exclusions,
+  suppressions, and parse failures are all counted and reported.
+- **Remaining fails are named, not hidden**: every residual finding above maps to a
+  documented false-alarm class (see Known limitations) and is absorbed by the
+  baseline ratchet on adoption.
 
 ## Known limitations
 
