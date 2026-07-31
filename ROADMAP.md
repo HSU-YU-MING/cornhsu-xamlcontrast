@@ -35,6 +35,11 @@
 
 ## 與 Parity 的交會點（構想，尚未排程）
 
+- **XamlContrast.Core 抽成獨立套件**（`Cornhsu.XamlContrast.Core`）供 Parity 的
+  `WpfImplementationSource` 引用（靜態預期值產生器）。**觸發條件才動工**：
+  (a) Parity 的 WPF adapter 實際動工、或 (b) 出現第二個想吃解析引擎的消費者。
+  在那之前不發 —— 沒有消費者的公開 API 只是提前凍結自己的重構自由。
+
 - **Figma 色票當色盤來源**：Parity 已會從 Figma 抽真實數值 —— 色盤偵測加一個
   `figma` 模式，就能在**設計稿階段**稽核對比（程式碼還沒寫就先攔）；
   同時「實作色盤 vs Figma 色票」的漂移也有了對照組
