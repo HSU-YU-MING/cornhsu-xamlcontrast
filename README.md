@@ -1,4 +1,4 @@
-# XamlContrast
+# <img src="icon.png" width="28" alt=""/> XamlContrast
 
 **Static WCAG contrast audit for XAML source. No app launch, whole-project scan, CI-ready exit codes.**
 

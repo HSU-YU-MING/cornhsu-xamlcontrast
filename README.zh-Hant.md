@@ -1,4 +1,4 @@
-# XamlContrast
+# <img src="icon.png" width="28" alt=""/> XamlContrast
 
 **XAML 原始碼的對比度靜態稽核。不用開 App、一次掃完整個專案、低於 WCAG AA 就讓 CI 紅燈。**
 
