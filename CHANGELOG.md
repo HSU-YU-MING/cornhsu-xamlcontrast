@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+### Added
+- `xamlcontrast.config.json` is now actually loaded (schema: docs/config-schema.md):
+  forced palette modes (`pair`/`csharp`/`single`/`none`), threshold and classification
+  overrides (non-default thresholds are announced in output and JSON), `failOn`,
+  `strictPalette`, `ignore.requireReason`. Invalid config exits 2 with a field-level
+  message — a silently ignored config would mean you think you changed the audit
+  standard when you didn't. Precedence: CLI flags > config > defaults.
+- NuGet package icon (split-theme "A" mark).
+
 ## [0.1.0] - 2026-07-31
 
 First public release.

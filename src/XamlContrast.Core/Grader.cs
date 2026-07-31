@@ -25,11 +25,12 @@ public static class Grader
             var best = Math.Max(f.RatioDark, f.RatioLight);
             f.Gap = Math.Round(best - worst, 2);
 
-            // 門檻依元素而異：一般文字 4.5、大字級 3.0、裝飾元素不設限（Need = 0）
+            // 門檻依元素而異：一般文字 4.5、大字級 3.0、裝飾元素不設限（Need = 0）；
+            // failFactor 可由 config 覆寫（改它等於改稽核標準，Report 會標明非預設）
             f.Category =
                 f.Need <= 0 ? Category.Decorative :
                 worst >= f.Need ? Category.Ok :
-                worst < f.Need * 0.67 ? Category.Fail :
+                worst < f.Need * result.Config.Thresholds.FailFactor ? Category.Fail :
                 Category.Warn;
 
             f.Symmetry =

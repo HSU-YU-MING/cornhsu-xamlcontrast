@@ -62,8 +62,25 @@ if (!Directory.Exists(root))
     return 2;
 }
 
-var detection = PaletteDetector.Detect(root);
-var result = Auditor.Run(root, detection);
+ToolConfig config;
+PaletteDetection detection;
+try
+{
+    // config 是逃生口不是必經之路；寫錯要有好訊息，不能靜默忽略
+    config = ToolConfig.Load(root);
+    detection = PaletteDetector.Detect(root, config);
+}
+catch (ConfigException ex)
+{
+    Console.Error.WriteLine($"config error: {ex.Message}");
+    return 2;
+}
+
+// 優先序：CLI 旗標 > config > 內建預設（旗標只能加嚴，不能替 config 鬆綁）
+failOnWarn = failOnWarn || config.FailOn == "warn";
+strictPalette = strictPalette || config.StrictPalette;
+
+var result = Auditor.Run(root, detection, config);
 
 Console.Write(Report.ToConsole(result, showOk));
 

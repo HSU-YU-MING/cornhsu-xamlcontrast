@@ -12,8 +12,9 @@ public sealed class PaletteDetection
     public required HashSet<string> ExcludedFiles { get; init; }
     /// <summary>偵測結果的人話描述，一律印出來（偵測結果不靜默）。</summary>
     public required string Description { get; init; }
-    /// <summary>找不到色盤、退回只算寫死色碼 —— 這是退化，要喊（規劃書 8.1 規則 3）。</summary>
-    public bool IsDegraded => Mode == PaletteMode.None;
+    /// <summary>自動偵測找不到色盤、退回只算寫死色碼 —— 退化要喊（規劃書 8.1 規則 3）。
+    /// config 明選 mode "none" 不算退化：那是使用者的決定，不是工具的失敗。</summary>
+    public bool IsDegraded { get; init; }
 }
 
 /// <summary>
@@ -55,25 +56,32 @@ public static partial class PaletteDetector
             .Where(f => !f.Replace('/', '\\').Contains("\\obj\\") && !f.Replace('/', '\\').Contains("\\bin\\"))
             .OrderBy(f => f, StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>解析單一 XAML 檔的 brush 定義（字面值＋同檔 Color 引用）。
+    /// 自動偵測與 config 強制模式共用。</summary>
+    internal static Dictionary<string, string> ParseXamlPalette(string file)
+    {
+        var colors = new Dictionary<string, string>();
+        var brushes = new Dictionary<string, string>();
+        var refs = new Dictionary<string, string>();
+        foreach (var line in File.ReadLines(file))
+        {
+            Match m;
+            if ((m = ColorDef().Match(line)).Success) colors[m.Groups["k"].Value] = m.Groups["v"].Value.ToUpperInvariant();
+            else if ((m = BrushLiteral().Match(line)).Success) brushes[m.Groups["k"].Value] = m.Groups["v"].Value.ToUpperInvariant();
+            else if ((m = BrushRef().Match(line)).Success) refs[m.Groups["k"].Value] = m.Groups["c"].Value;
+        }
+        // brush 引用同檔的 Color 定義 → 解成實際色值
+        foreach (var (k, c) in refs)
+            if (colors.TryGetValue(c, out var v)) brushes[k] = v;
+        return brushes;
+    }
+
     internal static List<XamlCandidate> XamlCandidates(string root)
     {
         var cands = new List<XamlCandidate>();
         foreach (var f in EnumerateFiles(root, "*.xaml"))
         {
-            var colors = new Dictionary<string, string>();
-            var brushes = new Dictionary<string, string>();
-            var refs = new Dictionary<string, string>();
-            foreach (var line in File.ReadLines(f))
-            {
-                Match m;
-                if ((m = ColorDef().Match(line)).Success) colors[m.Groups["k"].Value] = m.Groups["v"].Value.ToUpperInvariant();
-                else if ((m = BrushLiteral().Match(line)).Success) brushes[m.Groups["k"].Value] = m.Groups["v"].Value.ToUpperInvariant();
-                else if ((m = BrushRef().Match(line)).Success) refs[m.Groups["k"].Value] = m.Groups["c"].Value;
-            }
-            // brush 引用同檔的 Color 定義 → 解成實際色值
-            foreach (var (k, c) in refs)
-                if (colors.TryGetValue(c, out var v)) brushes[k] = v;
-
+            var brushes = ParseXamlPalette(f);
             if (brushes.Count < 3) continue;
 
             // ⚠ 提示只看「專案內的相對路徑」。看完整路徑的話，專案放在
@@ -104,8 +112,96 @@ public static partial class PaletteDetector
         return cands;
     }
 
-    public static PaletteDetection Detect(string root)
+    /// <summary>config 強制模式共用：解析 C# 檔的 (key, dark, light) 三元組。</summary>
+    private static Palette ParseCsPalette(string file, Regex pattern)
     {
+        var pal = new Palette();
+        foreach (var line in File.ReadLines(file))
+        {
+            var m = pattern.Match(line);
+            if (m.Success)
+                pal.Entries[m.Groups["key"].Success ? m.Groups["key"].Value : m.Groups["k"].Value] =
+                    ((m.Groups["dark"].Success ? m.Groups["dark"] : m.Groups["d"]).Value.ToUpperInvariant(),
+                     (m.Groups["light"].Success ? m.Groups["light"] : m.Groups["l"]).Value.ToUpperInvariant());
+        }
+        return pal;
+    }
+
+    private static string RequireFile(string root, string rel, string field)
+    {
+        var full = Path.GetFullPath(Path.Combine(root, rel));
+        if (!File.Exists(full))
+            throw new ConfigException($"palette.{field} not found: {rel}");
+        return full;
+    }
+
+    public static PaletteDetection Detect(string root, ToolConfig? config = null)
+    {
+        // ── config 強制模式：使用者說了算，檔案不存在是錯誤而不是退化 ──
+        switch (config?.Palette.Mode)
+        {
+            case "pair":
+            {
+                var dFile = RequireFile(root, config.Palette.DarkFile!, "darkFile");
+                var lFile = RequireFile(root, config.Palette.LightFile!, "lightFile");
+                var d = ParseXamlPalette(dFile);
+                var l = ParseXamlPalette(lFile);
+                var pal = new Palette();
+                foreach (var (k, v) in d)
+                    if (l.TryGetValue(k, out var lv)) pal.Entries[k] = (v, lv);
+                return new PaletteDetection
+                {
+                    Palette = pal, Mode = PaletteMode.Pair,
+                    ExcludedFiles = new HashSet<string>([dFile, lFile], StringComparer.OrdinalIgnoreCase),
+                    Description = $"config-forced theme pair: {config.Palette.DarkFile} + {config.Palette.LightFile} ({pal.Count} keys)",
+                };
+            }
+            case "csharp":
+            {
+                var cFile = RequireFile(root, config.Palette.CsharpFile!, "csharpFile");
+                Regex pattern;
+                try
+                {
+                    pattern = config.Palette.CsharpPattern is null
+                        ? CsTuple()
+                        : new Regex(config.Palette.CsharpPattern);
+                }
+                catch (ArgumentException ex) { throw new ConfigException($"palette.csharpPattern is not a valid regex: {ex.Message}"); }
+                var pal = ParseCsPalette(cFile, pattern);
+                var excl = XamlCandidates(root)
+                    .Where(c => c.Brushes.Count > 0 &&
+                                (double)c.Brushes.Keys.Count(pal.Entries.ContainsKey) / c.Brushes.Count >= 0.5)
+                    .Select(c => c.File);
+                return new PaletteDetection
+                {
+                    Palette = pal, Mode = PaletteMode.CSharp,
+                    ExcludedFiles = new HashSet<string>(excl, StringComparer.OrdinalIgnoreCase),
+                    Description = $"config-forced C# source: {config.Palette.CsharpFile} ({pal.Count} keys)",
+                };
+            }
+            case "single":
+            {
+                var sFile = RequireFile(root, config.Palette.DarkFile!, "darkFile");
+                var brushes = ParseXamlPalette(sFile);
+                var pal = new Palette();
+                foreach (var (k, v) in brushes) pal.Entries[k] = (v, v);
+                return new PaletteDetection
+                {
+                    Palette = pal, Mode = PaletteMode.Single,
+                    ExcludedFiles = new HashSet<string>([sFile], StringComparer.OrdinalIgnoreCase),
+                    Description = $"config-forced single-theme palette: {config.Palette.DarkFile} ({pal.Count} keys)",
+                };
+            }
+            case "none":
+                // 明選 none = 使用者的決定，不算退化（不觸發 --strict-palette）
+                return new PaletteDetection
+                {
+                    Palette = new Palette(), Mode = PaletteMode.None,
+                    ExcludedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase),
+                    Description = "config-forced: no palette — auditing hardcoded colors only",
+                };
+        }
+
         var xaml = XamlCandidates(root);
         var cs = CsCandidates(root);
 
@@ -176,6 +272,7 @@ public static partial class PaletteDetector
         {
             Palette = new Palette(),
             Mode = PaletteMode.None,
+            IsDegraded = true,
             ExcludedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase),
             Description = "no palette found (no ResourceDictionary color keys, no C# tuples) — auditing hardcoded colors only",
         };

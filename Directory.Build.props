@@ -18,6 +18,7 @@
     <RepositoryUrl>https://github.com/HSU-YU-MING/cornhsu-xamlcontrast</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageTags>xaml;wpf;accessibility;a11y;contrast;wcag;static-analysis;ci;dotnet-tool</PackageTags>
 
     <!-- 可除錯性:讓使用者能 step-in 進原始碼 -->
@@ -33,6 +34,7 @@
 
   <ItemGroup Condition="'$(IsPackable)' != 'false'">
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" Condition="Exists('$(MSBuildThisFileDirectory)README.md')" />
+    <None Include="$(MSBuildThisFileDirectory)icon.png" Pack="true" PackagePath="\" Visible="false" Condition="Exists('$(MSBuildThisFileDirectory)icon.png')" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
 </Project>

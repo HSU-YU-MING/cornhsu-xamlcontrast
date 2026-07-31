@@ -53,6 +53,8 @@ public sealed class AuditResult
     public int Suppressed { get; init; }
     /// <summary>沒附理由的 ignore（無效，不壓）—— 要警告</summary>
     public required List<string> InvalidIgnores { get; init; }
+    /// <summary>本次生效的設定（分級門檻等；預設值 = 沒有 config 檔）</summary>
+    public ToolConfig Config { get; init; } = new();
 
     public int CountOf(Category c) => Findings.Count(f => f.Category == c);
 }

@@ -67,6 +67,9 @@ public sealed partial class Auditor
     private static partial Regex TemplateBindingFg();
 
     private readonly Palette _pal;
+    private readonly ToolConfig _cfg;
+    private readonly HashSet<string> _textEls;
+    private readonly HashSet<string> _nonTextEls;
     private readonly List<Finding> _findings = new();
     private readonly List<string> _parseErrors = new();
     private readonly List<string> _invalidIgnores = new();
@@ -90,7 +93,7 @@ public sealed partial class Auditor
         if (prev is not XComment c) return false;
         var m = IgnoreComment().Match(c.Value);
         if (!m.Success) return false;
-        if (!m.Groups["reason"].Success)
+        if (!m.Groups["reason"].Success && _cfg.Ignore.RequireReason)
         {
             var line = c is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
             _invalidIgnores.Add($"{file}:{line}: xamlcontrast-ignore without a reason is invalid (not suppressed)");
@@ -104,11 +107,21 @@ public sealed partial class Auditor
     private static bool ParseDouble(string s, out double value)
         => double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
 
-    private Auditor(Palette palette) => _pal = palette;
-
-    public static AuditResult Run(string root, PaletteDetection detection)
+    private Auditor(Palette palette, ToolConfig cfg)
     {
-        var auditor = new Auditor(detection.Palette);
+        _pal = palette;
+        _cfg = cfg;
+        // config 的 classification 覆寫：加進內建分類表（排除清單優先於元素型別判斷）
+        _textEls = new HashSet<string>(TextEls.Concat(cfg.Classification.ExtraText));
+        _nonTextEls = new HashSet<string>(NonTextEls.Concat(cfg.Classification.ExtraNonText));
+    }
+
+    private double NeedFor(bool isText, bool isLarge) =>
+        !isText ? 0.0 : isLarge ? _cfg.Thresholds.LargeText : _cfg.Thresholds.NormalText;
+
+    public static AuditResult Run(string root, PaletteDetection detection, ToolConfig? config = null)
+    {
+        var auditor = new Auditor(detection.Palette, config ?? new ToolConfig());
         // 具名 Style 索引含色盤／主題字典 ——「排除出 UI 掃描」不等於「排除出索引」
         auditor._styles = StyleIndex.Build(root);
         var files = PaletteDetector.EnumerateFiles(root, "*.xaml")
@@ -150,6 +163,7 @@ public sealed partial class Auditor
             ParseErrors = auditor._parseErrors,
             Suppressed = auditor._suppressed,
             InvalidIgnores = auditor._invalidIgnores,
+            Config = auditor._cfg,
         };
         Grader.Grade(result);
         return result;
@@ -282,7 +296,7 @@ public sealed partial class Auditor
                 // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複
                 if (!emitted.Add($"{fgR.Dark}|{bgObj.Dark}")) continue;
 
-                var isTextC = !NonTextEls.Contains(el.Name.LocalName);
+                var isTextC = !_nonTextEls.Contains(el.Name.LocalName);
                 var fsC = 0.0;
                 var fsRawC = el.Attribute("FontSize")?.Value;
                 if (fsRawC is not null) ParseDouble(fsRawC, out fsC);
@@ -293,7 +307,7 @@ public sealed partial class Auditor
                 var boldC = fwV is not null && Regex.IsMatch(fwV, "Bold|Black|Heavy|SemiBold");
                 var ptC = fsC * 0.75;
                 var isLargeC = ptC >= 18 || (boldC && ptC >= 14);
-                var needC = !isTextC ? 0.0 : isLargeC ? 3.0 : 4.5;
+                var needC = NeedFor(isTextC, isLargeC);
 
                 var fgDC = fgR.Dark!;
                 var fgLC = fgR.Light!;
@@ -350,8 +364,8 @@ public sealed partial class Auditor
 
             // ── 這是文字還是裝飾？WCAG 的 4.5:1 只管文字 ──
             var localName = el.Name.LocalName;
-            var isText = !NonTextEls.Contains(localName) &&
-                         (TextEls.Contains(localName) || attrName == "Foreground");
+            var isText = !_nonTextEls.Contains(localName) &&
+                         (_textEls.Contains(localName) || attrName == "Foreground");
 
             // ── WCAG 大字級豁免：≥18pt 或 ≥14pt 粗體只需 3:1 ──
             // ⚠ WPF 的 FontSize 是「裝置獨立像素」(1/96 吋) 不是 point (1/72 吋)，
@@ -364,7 +378,7 @@ public sealed partial class Auditor
             var bold = fw is not null && Regex.IsMatch(fw, "Bold|Black|Heavy|SemiBold");
             var pt = fs * 0.75;
             var isLarge = pt >= 18 || (bold && pt >= 14);
-            var need = !isText ? 0.0 : isLarge ? 3.0 : 4.5;
+            var need = NeedFor(isText, isLarge);
 
             // Opacity < 1 時，螢幕上看到的是「文字色以 op 疊在背景上」的混色結果
             var fgD = fg.Dark!;
@@ -482,14 +496,14 @@ public sealed partial class Auditor
                 //   「沒有 Need」當裝飾 → 所有 Style 配對被靜默歸為裝飾、完全不受檢。
                 //   分類沿用排除清單：TargetType 是非文字控制項才免檢；
                 //   不確定（匿名、沒 TargetType）就當文字報出來 —— 不替使用者放過。
-                var isText = ttName is null || !NonTextEls.Contains(ttName);
+                var isText = ttName is null || !_nonTextEls.Contains(ttName);
                 var fs = 0.0;
                 if (set.TryGetValue("FontSize", out var fsv)) ParseDouble(fsv, out fs);
                 var bold = set.TryGetValue("FontWeight", out var fwv) &&
                            Regex.IsMatch(fwv, "Bold|Black|Heavy|SemiBold");
                 var pt = fs * 0.75; // WPF FontSize 是 DIP，換 point 要 ×0.75（規劃書 4.3）
                 var isLarge = pt >= 18 || (bold && pt >= 14);
-                var need = !isText ? 0.0 : isLarge ? 3.0 : 4.5;
+                var need = NeedFor(isText, isLarge);
 
                 _pairs++;
                 if (styleSuppressed) { _suppressed++; continue; }

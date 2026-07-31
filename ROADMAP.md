@@ -12,8 +12,9 @@
 
 ## 0.x（介面凍結前）
 
-- [ ] `xamlcontrast.config.json` 實際載入（schema 已定於 docs/config-schema.md；
-      CLI 尚未讀取 —— 目前只有旗標）
+- [x] `xamlcontrast.config.json` 實際載入 —— 2026-07-31：強制色盤模式（pair/csharp/
+      single/none）、門檻與分類覆寫（非預設會標明）、failOn/strictPalette、
+      requireReason；寫錯 exit 2 給欄位級訊息
 - [x] findings 的 `file` 改成 root 相對路徑（正斜線，跨 OS baseline 可攜）——
       2026-07-31，同名檔不再互撞
 - [ ] 已知盲區中「可修」項：TargetName 模板 Setter 的解析

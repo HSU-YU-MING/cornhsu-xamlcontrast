@@ -55,6 +55,13 @@ public static class Report
                 paletteDetail = r.Detection.Description,
                 paletteKeys = r.Detection.Palette.Count,
                 singleTheme = r.Detection.Palette.IsSingleTheme,
+                configLoaded = r.Config.SourcePath is not null,
+                thresholds = new
+                {
+                    normalText = r.Config.Thresholds.NormalText,
+                    largeText = r.Config.Thresholds.LargeText,
+                    failFactor = r.Config.Thresholds.FailFactor,
+                },
                 files = r.FileCount,
                 pairs = r.Pairs,
                 unresolved = r.Unresolved,
@@ -102,6 +109,15 @@ public static class Report
         var sb = new StringBuilder();
 
         sb.AppendLine((r.Detection.IsDegraded ? "!! palette: " : "palette: ") + r.Detection.Description);
+        if (r.Config.SourcePath is not null)
+            sb.AppendLine($"config: {Path.GetFileName(r.Config.SourcePath)} loaded");
+        if (!r.Config.Thresholds.IsDefault)
+        {
+            // 改門檻等於改稽核標準 —— 允許，但要標明，報告的讀者才知道基準不是 WCAG 預設
+            var t = r.Config.Thresholds;
+            sb.AppendLine(string.Create(inv,
+                $"!! non-default thresholds: normal {t.NormalText}, large {t.LargeText}, fail-factor {t.FailFactor}"));
+        }
         sb.AppendLine(string.Create(inv,
             $"files {r.FileCount} | text-on-background pairs {r.Pairs}"));
         sb.AppendLine(string.Create(inv,
