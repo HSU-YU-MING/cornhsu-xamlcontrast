@@ -8,7 +8,7 @@
 - [x] M1 色盤自動偵測（四形狀：配對／C# 真相源／單一主題／無色盤退路）
 - [x] M2/M3 .NET 移植＋輸出合約（46+ 測試；兩套獨立實作數字互證）
 - [x] M4 導入模式（baseline ratchet＋ignore 註解）
-- [ ] M5 GitHub repo＋Action＋NuGet 發佈（Trusted Publishing）
+- [x] M5 GitHub repo＋Action＋NuGet 發佈（Trusted Publishing，2026-07-31 v0.1.0）
 
 ## 0.x（介面凍結前）
 

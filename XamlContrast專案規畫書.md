@@ -304,7 +304,7 @@ ratio-dark/ratio-light/threshold/category/symmetry、退出碼政策
 照第 4.6 節：baseline/ratchet（只擋新增與惡化）、`xamlcontrast-ignore` 註解
 （理由必填、計入 suppressed）。這是既有專案唯一的導入路徑。
 
-### M5 — GitHub Action（本地骨架 ✅ 2026-07-31；開 repo＋push＋NuGet 發佈待使用者）
+### M5 — GitHub Action ✅ 2026-07-31 完成（repo 公開、CI 兩次全綠、v0.1.0 以 Trusted Publishing 發佈至 NuGet）
 `action.yml`，照 Parity 的形狀。0.x 期間 README 要明寫 pin 到確切版本。
 
 **治理決定（2026-07-31）**：M5 發佈後**凍結原型** —— PS 腳本退役為歷史規格，
