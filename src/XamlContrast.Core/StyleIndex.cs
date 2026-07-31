@@ -36,6 +36,9 @@ internal sealed partial class StyleIndex
         public Dictionary<string, string> Setters = new();
         public List<State> States = new();
         public bool HasTemplate;
+        /// <summary>模板根元素自帶的 Background（CellDeleteBtn 形狀：Style 層沒有
+        /// Background setter，真正的底是模板根 Border 的色票 —— 少了它會誤配祖先背景）</summary>
+        public string? TemplateRootBg;
     }
 
     internal sealed class Merged
@@ -43,6 +46,8 @@ internal sealed partial class StyleIndex
         /// <summary>各屬性最後生效的 Setter（帶來源 Style Id）</summary>
         public Dictionary<string, (string V, int Src)> Props = new();
         public List<State> States = new();
+        /// <summary>生效模板的根元素背景（衍生自帶模板時整個換掉，含根背景）</summary>
+        public string? TemplateRootBg;
         public required string Label;
     }
 
@@ -85,7 +90,12 @@ internal sealed partial class StyleIndex
             var v = s.Attribute("Value")?.Value;
             if (p is not null && v is not null) rec.Setters[p] = v;
         }
-        rec.HasTemplate = style.Descendants().Any(e => e.Name.LocalName == "ControlTemplate");
+        var tmplEl = style.Descendants().FirstOrDefault(e => e.Name.LocalName == "ControlTemplate");
+        rec.HasTemplate = tmplEl is not null;
+        // 模板根＝第一個視覺元素（跳過 <ControlTemplate.Resources> 之類的屬性元素）
+        rec.TemplateRootBg = tmplEl?.Elements()
+            .FirstOrDefault(e => !e.Name.LocalName.Contains('.'))
+            ?.Attribute("Background")?.Value;
         foreach (var t in style.Descendants().Where(e => e.Name.LocalName is "Trigger" or "DataTrigger"))
         {
             var set = new Dictionary<string, string>();
@@ -173,6 +183,7 @@ internal sealed partial class StyleIndex
                     if (s.FromTemplate && rec.HasTemplate) continue; // 模板被換掉
                     merged.States.Add(s);
                 }
+                merged.TemplateRootBg = m.TemplateRootBg;
             }
         }
         foreach (var (p, v) in rec.Setters) merged.Props[p] = (v, rec.Id);
@@ -188,6 +199,7 @@ internal sealed partial class StyleIndex
                 Cond = s.Cond,
             });
         }
+        if (rec.HasTemplate) merged.TemplateRootBg = rec.TemplateRootBg;
         return merged;
     }
 

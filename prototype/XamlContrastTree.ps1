@@ -447,8 +447,21 @@ function New-StyleRecord($style, [string]$file) {
         $p = $s.Attribute('Property'); $v = $s.Attribute('Value')
         if ($p -and $v) { $setters[$p.Value] = $v.Value }
     }
-    $hasTmpl = [bool]($style.Descendants() |
-        Where-Object { $_.Name.LocalName -eq 'ControlTemplate' } | Select-Object -First 1)
+    $tmplEl = $style.Descendants() |
+        Where-Object { $_.Name.LocalName -eq 'ControlTemplate' } | Select-Object -First 1
+    $hasTmpl = [bool]$tmplEl
+    # 模板根元素自帶的 Background（CellDeleteBtn 形狀：Style 層沒有 Background setter，
+    # 真正的底是模板根 Border 的 DangerSolid —— 少了這條，字會誤配到祖先背景）。
+    # 跳過 <ControlTemplate.Resources> 之類的屬性元素，取第一個視覺元素。
+    $tmplBg = $null
+    if ($tmplEl) {
+        $rootEl = $tmplEl.Elements() |
+            Where-Object { $_.Name.LocalName -notmatch '\.' } | Select-Object -First 1
+        if ($rootEl) {
+            $a = $rootEl.Attribute('Background')
+            if ($a) { $tmplBg = $a.Value }
+        }
+    }
     $states = @()
     foreach ($t in $style.Descendants() | Where-Object { $_.Name.LocalName -in @('Trigger','DataTrigger') }) {
         $ts = @{}
@@ -480,6 +493,7 @@ function New-StyleRecord($style, [string]$file) {
         Id = $script:styleIdSeq; File = $file
         Key = if ($keyAttr) { $keyAttr.Value } else { $null }
         BasedOn = $boKey; Setters = $setters; States = $states; HasTemplate = $hasTmpl
+        TmplBg = $tmplBg
     }
 }
 
@@ -512,8 +526,9 @@ function Find-StyleRecord([string]$key, [string]$file) {
 
 function Merge-StyleChain($rec, $seen) {
     # 把 BasedOn 鏈揉平：Props = 各屬性最後生效的 Setter（帶來源 Style Id），
-    # States = 鏈上所有觸發器狀態（Set 逐屬性帶來源，供「同節點配對跳過」判斷）。
-    $props = @{}; $states = @()
+    # States = 鏈上所有觸發器狀態（Set 逐屬性帶來源，供「同節點配對跳過」判斷），
+    # TmplBg = 生效模板的根元素背景（衍生自帶模板時整個換掉，含根背景）。
+    $props = @{}; $states = @(); $tmplBg = $null
     if ($rec.BasedOn -and $seen.Add($rec.BasedOn)) {
         $base = Find-StyleRecord $rec.BasedOn $rec.File
         if ($base) {
@@ -523,6 +538,7 @@ function Merge-StyleChain($rec, $seen) {
                 if ($s.FromTemplate -and $rec.HasTemplate) { continue }   # 模板被換掉
                 $states += ,$s
             }
+            $tmplBg = $m.TmplBg
         }
     }
     foreach ($p in $rec.Setters.Keys) { $props[$p] = @{ V = $rec.Setters[$p]; Src = $rec.Id } }
@@ -531,7 +547,8 @@ function Merge-StyleChain($rec, $seen) {
         $states += ,@{ name='觸發'; Disabled=$s.Disabled; FromTemplate=$s.FromTemplate
                        Set=$s.Set; SetSrc=$srcMap; Cond=$s.Cond }
     }
-    return @{ Props = $props; States = $states }
+    if ($rec.HasTemplate) { $tmplBg = $rec.TmplBg }
+    return @{ Props = $props; States = $states; TmplBg = $tmplBg }
 }
 
 function Merge-SameConditionStates($states) {
@@ -629,6 +646,7 @@ function Walk($el, $bg, $file, $op = 1.0) {
     $bgVal = $null
     if ($localBgRaw) { $bgVal = $localBgRaw.Value }
     elseif ($chain -and $chain.Props.ContainsKey('Background')) { $bgVal = $chain.Props['Background'].V }
+    elseif ($chain -and $chain.TmplBg) { $bgVal = $chain.TmplBg }   # 模板根的背景管到內容
     if ($bgVal) {
         $r = Resolve $bgVal
         if ($r) {
@@ -680,6 +698,11 @@ function Walk($el, $bg, $file, $op = 1.0) {
             elseif ($st.Set.ContainsKey('Background')) { $bgV = $st.Set['Background']; $bgSrc = $st.SetSrc['Background'] }
             elseif ($chain.Props.ContainsKey('Background')) {
                 $bgV = $chain.Props['Background'].V; $bgSrc = $chain.Props['Background'].Src
+            }
+            elseif ($chain.TmplBg) {
+                # 模板根元素自帶的背景（CellDeleteBtn 形狀）。來源標 'tmpl'——
+                # 它不是 Style 層 setter，WalkStyles 不會在定義處檢到，這裡必須報
+                $bgV = $chain.TmplBg; $bgSrc = 'tmpl'
             }
 
             # 字與底都出自同一個 Style 節點 → WalkStyles 在定義處已檢過，不重複

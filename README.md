@@ -51,12 +51,13 @@ of intent — it's just bad twice. Everything below AA gets reported; a human de
 ## Why the hard part isn't the WCAG formula
 
 The formula is 20 lines. The value is in resolving **what color the text actually sits on** —
-eleven parsing rules, each one discovered by auditing real shipped products:
+twelve parsing rules, each one discovered by auditing real shipped products:
 
 transparent passthrough · alpha compositing · opacity accumulation down the tree ·
 ControlTemplate subtrees · Style setter pairing · trigger states · dead-setter filtering ·
 named/inline Style resolution with BasedOn chains · per-state trigger merging ·
-disabled-state exemption (WCAG 1.4.3) · translucent palette keys
+disabled-state exemption (WCAG 1.4.3) · translucent palette keys ·
+template-root backgrounds
 
 Any implementation that just copies the formula misses all of them.
 

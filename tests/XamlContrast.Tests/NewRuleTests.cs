@@ -104,6 +104,37 @@ public class NewRuleTests
         Assert.NotEqual(Wcag.Contrast("#EEEEEE", "#378ADD"), f.RatioDark); // 不是純藍
     }
 
+    [Fact] // 規則 12：模板根元素自帶背景 —— Style 層沒 Background setter 時的真正底色
+    public void TemplateRootBackgroundIsUsedNotAncestor()
+    {
+        using var fx = new Fixture();
+        // Kindling CellDeleteBtn 實證形狀：白 ✕ 疊模板根 Border 的紅底，
+        // 少了這條規則會誤配到祖先的白（報 1:1 假警報）
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="CellDeleteBtn" TargetType="Button">
+                  <Setter Property="Foreground" Value="#FFFFFF"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Border Background="#CC3A3A">
+                          <TextBlock Text="✕" Foreground="{TemplateBinding Foreground}"/>
+                        </Border>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource CellDeleteBtn}"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings, x => x.Element.Contains("⊕"));
+        Assert.Equal("#CC3A3A", f.Bg);                          // 模板根的紅，不是祖先的白
+        Assert.Equal(Wcag.Contrast("#FFFFFF", "#CC3A3A"), f.RatioDark);
+    }
+
     [Fact] // 分工：字與底同出一個 Style 節點 → WalkStyles 定義處已檢，元素端不重複
     public void SameStyleNodePairIsNotDoubleCounted()
     {

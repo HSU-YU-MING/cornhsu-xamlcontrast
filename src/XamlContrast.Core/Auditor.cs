@@ -179,7 +179,8 @@ public sealed partial class Auditor
 
         var localBgRaw = el.Attribute("Background")?.Value;
         var bgVal = localBgRaw
-                    ?? (chain is not null && chain.Props.TryGetValue("Background", out var chainBg) ? chainBg.V : null);
+                    ?? (chain is not null && chain.Props.TryGetValue("Background", out var chainBg) ? chainBg.V : null)
+                    ?? chain?.TemplateRootBg; // 模板根的背景管到內容
         if (bgVal is not null)
         {
             var r = ColorResolver.Resolve(bgVal, _pal);
@@ -238,6 +239,12 @@ public sealed partial class Auditor
                 if (localBgRaw is not null) { bgV = localBgRaw; bgSrc = "local"; }
                 else if (st.Set.TryGetValue("Background", out var sBg)) { bgV = sBg; bgSrc = st.SetSrc["Background"]; }
                 else if (chain.Props.TryGetValue("Background", out var pb)) { bgV = pb.V; bgSrc = pb.Src; }
+                else if (chain.TemplateRootBg is not null)
+                {
+                    // 模板根元素自帶的背景（CellDeleteBtn 形狀）。來源標 "tmpl" ——
+                    // 它不是 Style 層 setter，WalkStyles 不會在定義處檢到，這裡必須報
+                    bgV = chain.TemplateRootBg; bgSrc = "tmpl";
+                }
 
                 // 字與底都出自同一個 Style 節點 → WalkStyles 在定義處已檢過，不重複
                 if (fgSrc is int fi && bgSrc is int bi && fi == bi) continue;

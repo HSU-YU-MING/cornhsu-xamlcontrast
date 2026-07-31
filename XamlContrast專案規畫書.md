@@ -101,10 +101,14 @@ WCAG 相對亮度與對比度公式**只有 20 行**，網路上到處都是。
     BasedOn 鏈揉平、Style/模板觸發器逐狀態檢、同條件觸發器跨節點合併
   IsEnabled=False 觸發態＝停用態：WCAG 1.4.3 豁免，計數回報、不評分
   半透明「色票」（palette 鍵的值是 #AARRGGBB）同樣疊底合成，深淺各帶自己的 alpha
+  模板根元素自帶的 Background：Style 層沒有 Background setter 時的真正底色
+    （Kindling CellDeleteBtn 實證：白 ✕ 疊模板根的 DangerSolid 紅底，
+     少這條會誤配祖先背景報 1:1 假警報）
 ```
 
-這十一條是 2026-07-30～31 用四個真實專案一條一條踩出來的（第八條來自 QuillNest
-DataGridCheckBoxStyle 誤報實查，後三條來自 CelFlow 觸發態實查，4929b69）。
+這十二條是 2026-07-30～31 用四個真實專案一條一條踩出來的（第八條來自 QuillNest
+DataGridCheckBoxStyle 誤報實查，九～十一條來自 CelFlow 觸發態實查（4929b69）、
+第十二條來自 Kindling 修正驗收的殘餘假警報實查）。
 **任何抄公式的實作都會漏掉它們。**
 
 ### 4.2 色盤偵測（v0.2 的頭號任務）
@@ -323,7 +327,7 @@ WinUI 3 / Uno / Avalonia 也吃 XAML，解析邏輯大致共用，差在色盤�
 |---|---|---|---|
 | ~~不合成「背景」的 alpha 疊層~~ | CelFlow `TimelineView:542`，`InfoL` 疊 16% alpha 的 `BlueOverlay` | 假警報 | ✅ **已修**（4929b69 半透明色票合成：色票鍵的 8 碼值走疊底合成） |
 | ~~看不到 Style 設定的背景~~ | QuillNest `ProjectView:326` 等，徽章底色由 Style setter 給 | 假警報（報成白配白 1:1） | ✅ **已修**（4929b69 具名/行內 Style 解析：跨檔索引、BasedOn 揉平、觸發器逐狀態）。殘餘限制見下兩列 |
-| **TargetName 的模板 Setter** | QuillNest `NoteEditorWindow:641/673/704`、`CalendarView:234` —— 觸發器用 `TargetName="Border"` 換底＋白字，工具只看到白字、誤落祖先底 | 假警報（4 筆，2026-07-31 逐筆實查） | **明確不做**（4929b69 記在檔頭）—— 要解析模板內元素樹的對應關係 |
+| **TargetName 的模板 Setter** | QuillNest `NoteEditorWindow:641/673/704`、`CalendarView:234`；Kindling `ProjectWallView:152/156` hover —— 觸發器用 `TargetName` 換底＋白字，工具只看到白字、誤配靜止態的底 | 假警報（6 筆，2026-07-31 逐筆實查） | **明確不做**（4929b69 記在檔頭）—— 要解析模板內元素樹的對應關係。導入時用 baseline ratchet 承接 |
 | **跨元素同條件觸發器** | QuillNest `TodoView:115/262`、`CalendarView:783` —— Border 的底與 TextBlock 的字由同一個 DataTrigger 條件同步翻，字底分屬兩元素 | 假警報（4 筆，同上實查；原始碼有註解證明是刻意設計） | **v1 不修** —— 要理解觸發條件的相關性，超出靜態逐元素分析 |
 | **看不到 sibling 元素的背景** | Kindling `TimelineView:368`，「空」標記的底是同層 `<Border Background="Black"/>` 而非祖先 | 假警報 | **v1 不修** —— 要解版面疊層，超出靜態分析的合理範圍 |
 | **Binding / TemplateBinding 的顏色** | 標籤徽章底色綁使用者選的顏色 | 標為「無法解析」而不猜 —— **這是正確行為**，猜了會誤判 | **維持現狀** —— 不猜是設計決定 |
@@ -448,7 +452,7 @@ Parity 的 README 明寫：`@v0.9.7  # 0.x 時 pin 到確切版本；1.0 後改�
 1.0 的條件（照 Parity 的「1.0 介面凍結審查」）：
 - [ ] 色盤自動偵測在四個專案上零設定可用
 - [ ] CLI 參數與 JSON schema（**含 summary 區塊**）不再預期變動
-- [ ] 測試涵蓋十一條解析規則＋八個「謊報健康」回歸形狀
+- [ ] 測試涵蓋十二條解析規則＋八個「謊報健康」回歸形狀
 - [ ] baseline 模式與 ignore 註解至少在一個既有專案上實際用過
 - [ ] 至少一個非自己的專案用過並回報
 - [ ] **重新辯論預設 gate**：目前 warn（3.0~4.5，低於 AA）預設放行 ——
