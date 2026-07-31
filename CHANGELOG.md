@@ -5,7 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
-## [0.1.0] - TBD
+## [0.1.0] - 2026-07-31
 
 First public release.
 
