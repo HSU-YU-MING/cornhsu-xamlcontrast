@@ -42,6 +42,11 @@ for (var i = 0; i < args.Length; i++)
         case "-h" or "--help":
             PrintUsage();
             return 0;
+        case "--version":
+            Console.WriteLine(typeof(Program).Assembly
+                .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+                is [System.Reflection.AssemblyInformationalVersionAttribute a, ..] ? a.InformationalVersion.Split('+')[0] : "unknown");
+            return 0;
         default:
             if (root is null && !args[i].StartsWith('-')) { root = args[i]; break; }
             Console.Error.WriteLine($"unknown argument: {args[i]}");

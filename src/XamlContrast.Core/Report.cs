@@ -46,6 +46,8 @@ public static class Report
     {
         var payload = new
         {
+            // JSON 消費端要能偵測格式演進 —— 0.x 期間欄位可能變動，變動時遞增
+            schemaVersion = 1,
             summary = new
             {
                 paletteSource = r.Detection.Mode == PaletteMode.None ? "none" : "project",

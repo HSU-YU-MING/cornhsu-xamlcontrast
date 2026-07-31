@@ -1,0 +1,89 @@
+name: 'XamlContrast WCAG audit'
+description: 'Static WCAG contrast audit for XAML source: scans the whole project, fails the PR when text falls below AA, annotates failing lines.'
+author: 'Cornhsu'
+branding:
+  icon: 'eye'
+  color: 'purple'
+
+inputs:
+  root:
+    description: '要掃的專案根目錄（含 XAML）'
+    required: true
+  version:
+    description: 'Cornhsu.XamlContrast 工具版本（省略 = 最新；0.x 期間建議 pin）'
+    required: false
+    default: ''
+  fail-on:
+    description: 'fail（預設）或 warn（偏低也擋——AA 全過）'
+    required: false
+    default: 'fail'
+  baseline:
+    description: 'baseline 檔路徑（ratchet 模式：只擋新增/惡化；檔案需 commit 進 repo）'
+    required: false
+    default: ''
+  strict-palette:
+    description: '色盤偵測退化（退回只算寫死色碼）時直接失敗'
+    required: false
+    default: 'false'
+  upload-report:
+    description: '把 report.json 當 artifact 上傳'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Install XamlContrast
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.version }}" ]; then
+          dotnet tool install --global Cornhsu.XamlContrast --version "${{ inputs.version }}"
+        else
+          dotnet tool install --global Cornhsu.XamlContrast
+        fi
+        echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+    # 先跑、先產報告與註記，最後一步才依結論擋（讓失敗的 PR 也看得到完整輸出）
+    - name: Run audit
+      id: audit
+      shell: bash
+      run: |
+        set +e
+        args=("${{ inputs.root }}" --json "$RUNNER_TEMP/xamlcontrast-report.json")
+        [ "${{ inputs.fail-on }}" = "warn" ] && args+=(--fail-on warn)
+        [ "${{ inputs.strict-palette }}" = "true" ] && args+=(--strict-palette)
+        [ -n "${{ inputs.baseline }}" ] && args+=(--baseline "${{ inputs.baseline }}")
+        xamlcontrast "${args[@]}"
+        echo "exit=$?" >> "$GITHUB_OUTPUT"
+
+    # 破的配對直接標在 PR 的行上（::error 註記吃 workspace 相對路徑；
+    # findings 的 file 目前是檔名，先用 root 前綴近似，0.x 會改成相對路徑）
+    - name: Annotate failing pairs
+      if: ${{ always() }}
+      shell: bash
+      run: |
+        report="$RUNNER_TEMP/xamlcontrast-report.json"
+        [ -f "$report" ] || exit 0
+        jq -r --arg root "${{ inputs.root }}" '
+          .findings[]
+          | select(.category == "fail" or .category == "warn")
+          | "::\(if .category == "fail" then "error" else "warning" end) file=\($root)/\(.file),line=\(.line)::contrast \(.ratioDark):1 dark / \(.ratioLight):1 light (need \(.threshold)) — fg=\(.fg) bg=\(.bg) [\(.symmetry)]"
+        ' "$report" || true
+
+    - name: Upload report
+      if: ${{ always() && inputs.upload-report == 'true' }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: xamlcontrast-report
+        path: ${{ runner.temp }}/xamlcontrast-report.json
+        if-no-files-found: ignore
+
+    # 報告與註記都出去了，現在才依 gate 結論決定 job 成敗
+    - name: Enforce gate
+      shell: bash
+      run: exit ${{ steps.audit.outputs.exit }}
