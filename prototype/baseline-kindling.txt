@@ -1,26 +1,21 @@
-﻿自動偵測：C# 真相源 Services\SystemThemeService.cs（37 個色票；假設三元組＝鍵,深,淺）
+﻿自動偵測：C# 真相源 Services\SystemThemeService.cs（38 個色票；假設三元組＝鍵,深,淺）
 檔案 15 個｜解析出 171 組『文字色 × 生效背景色』配對
 無法解析（背景在樹上找不到／來自 Binding）: 0 處｜跳過（半透明、漸層等）: 2 處
 已豁免 2 組停用態配對（IsEnabled=False 觸發；WCAG 1.4.3 不要求停用控制項的文字對比）
 
-  OK         163 組
+  OK         165 組
   破          3 組
-  偏低         2 組
   裝飾         3 組
 
-  低於 AA 的 5 組，依成因細分：
-    淺色壞            5 組
+  低於 AA 的 3 組，依成因細分：
+    淺色壞            3 組
 
   『兩邊皆低』代表色票本身就不夠亮，換主題救不了；
   『深色壞／淺色壞』代表設計意圖沒跨主題保住。兩者都要處理，只是解法不同。
 
 ===== 破 （3 組）=====
-Views/ProjectWallView.xaml:156     Button⊕Style[CardDeleteButton]/觸發 字=#FFD0D0                    底={#33000000 疊於 {Bg1}} 深=  13.2:1 淺=  1.29:1  [淺色壞] 需 4.5
-Views/ProjectWallView.xaml:152     Button⊕Style[CardEditButton]/觸發 字=#FFFFFF                    底={#33000000 疊於 {Bg1}} 深= 18.26:1 淺=  1.78:1  [淺色壞] 需 4.5
+Views/ProjectWallView.xaml:156     Button⊕Style[CardDeleteButton]/觸發 字=#FFD0D0                    底={{DynamicResource CardScrim} 疊於 {Bg1}} 深=  13.2:1 淺=  1.01:1  [淺色壞] 需 4.5
+Views/ProjectWallView.xaml:152     Button⊕Style[CardEditButton]/觸發 字=#FFFFFF                    底={{DynamicResource CardScrim} 疊於 {Bg1}} 深= 18.26:1 淺=   1.4:1  [淺色壞] 需 4.5
 Views/TimelineView.xaml:379        TextBlock            字=#9A9A9A                    底={Bg1}              深=  6.19:1 淺=  2.54:1  [淺色壞] 需 4.5 9px
 
-===== 偏低 （2 組）=====
-Views/ProjectWallView.xaml:156     Button⊕Style[CardDeleteButton]/基礎 字={DynamicResource Fg1}      底={#33000000 疊於 {Bg1}} 深=  6.98:1 淺=  3.87:1  [淺色壞] 需 4.5
-Views/ProjectWallView.xaml:152     Button⊕Style[CardEditButton]/基礎 字={DynamicResource Fg1}      底={#33000000 疊於 {Bg1}} 深=  6.98:1 淺=  3.87:1  [淺色壞] 需 4.5
-
-退出碼 1：有 3 組低於門檻的 2/3（另有 2 組偏低）
+退出碼 1：有 3 組低於門檻的 2/3（另有 0 組偏低）
