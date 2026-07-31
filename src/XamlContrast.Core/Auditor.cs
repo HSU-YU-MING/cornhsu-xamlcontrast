@@ -70,7 +70,9 @@ public sealed partial class Auditor
     private readonly List<Finding> _findings = new();
     private readonly List<string> _parseErrors = new();
     private readonly List<string> _invalidIgnores = new();
-    private int _pairs, _unresolved, _skipped, _deadFg, _suppressed;
+    private int _pairs, _unresolved, _skipped, _deadFg, _suppressed, _disabled;
+    private StyleIndex _styles = null!;
+    private string _curFile = ""; // 具名 Style 查找的「同檔優先」範圍（完整路徑）
 
     [GeneratedRegex(@"^\s*xamlcontrast-ignore(?:\s*:\s*(?<reason>.*\S))?\s*$")]
     private static partial Regex IgnoreComment();
@@ -107,6 +109,8 @@ public sealed partial class Auditor
     public static AuditResult Run(string root, PaletteDetection detection)
     {
         var auditor = new Auditor(detection.Palette);
+        // 具名 Style 索引含色盤／主題字典 ——「排除出 UI 掃描」不等於「排除出索引」
+        auditor._styles = StyleIndex.Build(root);
         var files = PaletteDetector.EnumerateFiles(root, "*.xaml")
             .Where(f => !detection.ExcludedFiles.Contains(f))
             .ToList();
@@ -124,6 +128,7 @@ public sealed partial class Auditor
             }
             if (doc.Root is not null)
             {
+                auditor._curFile = f;
                 auditor.Walk(doc.Root, null, name, 1.0, suppressed: false);
                 auditor.WalkStyles(doc, name);
             }
@@ -138,6 +143,7 @@ public sealed partial class Auditor
             Unresolved = auditor._unresolved,
             Skipped = auditor._skipped,
             DeadForeground = auditor._deadFg,
+            DisabledExempt = auditor._disabled,
             ParseErrors = auditor._parseErrors,
             Suppressed = auditor._suppressed,
             InvalidIgnores = auditor._invalidIgnores,
@@ -161,21 +167,27 @@ public sealed partial class Auditor
         // Opacity 也可能是 Binding；只處理字面數值，其餘維持原值
         if (opRaw is not null && ParseDouble(opRaw, out var opVal)) op *= opVal;
 
+        // 元素套用的 Style（具名引用或 <X.Style> 行內）：底色與觸發態的另一個來源
+        var chain = _styles.GetElementChain(el, _curFile);
+
         var localBgRaw = el.Attribute("Background")?.Value;
-        if (localBgRaw is not null)
+        var bgVal = localBgRaw
+                    ?? (chain is not null && chain.Props.TryGetValue("Background", out var chainBg) ? chainBg.V : null);
+        if (bgVal is not null)
         {
-            var r = ColorResolver.Resolve(localBgRaw, _pal);
+            var r = ColorResolver.Resolve(bgVal, _pal);
             if (r is not null)
             {
                 if (r.Kind == ColorKind.Alpha)
                 {
-                    // 半透明遮罩：疊在目前生效的背景上算出實際顏色（WPF 以 sRGB 混合）
+                    // 半透明遮罩：疊在目前生效的背景上算出實際顏色（WPF 以 sRGB 混合；
+                    // 半透明「色票」深淺各帶自己的 alpha）
                     if (bg is { Dark: not null, Light: not null })
                     {
                         bg = new Resolved(ColorKind.Hard,
                             Dark: Wcag.Composite(r.Rgb!, r.Alpha, bg.Dark),
-                            Light: Wcag.Composite(r.Rgb!, r.Alpha, bg.Light),
-                            Key: $"{localBgRaw} over {(bg.Key is not null ? "{" + bg.Key + "}" : bg.Dark)}");
+                            Light: Wcag.Composite(r.RgbLight!, r.AlphaLight, bg.Light),
+                            Key: $"{bgVal} over {(bg.Key is not null ? "{" + bg.Key + "}" : bg.Dark)}");
                     }
                     // 找不到底色就維持原本的（無法判定，後面會計入 unresolved）
                 }
@@ -194,8 +206,113 @@ public sealed partial class Auditor
             }
         }
 
+        // ── 元素 × Style 鏈的逐狀態檢查（具名 Style 底色盲區）──
+        // CelFlow 實證：刪除鈕 Foreground=RedL 配 BasedOn=DarkBtn，DarkBtn 的底是
+        // Bg3、hover Bg4 —— 樹走訪看不到 Style 的底色會誤落到祖先卡片的 Bg2，
+        // 低估實況；「忽略」鈕（Fg1 疊 Border0/Border1）則整組漏掉。
+        var handledFg = false;
+        if (chain is not null)
+        {
+            handledFg = true; // Foreground 一律由這裡接手，避免與下面的舊路徑重複輸出
+            var localFgRaw = el.Attribute("Foreground")?.Value;
+            var emitted = new HashSet<string>();
+            var allStates = new List<StyleIndex.State> { new() };
+            allStates.AddRange(chain.States);
+            foreach (var st in allStates)
+            {
+                // WPF 優先序：元素屬性 > Style 觸發 > Style Setter
+                string? fgV = null; object? fgSrc = null;
+                if (localFgRaw is not null) { fgV = localFgRaw; fgSrc = "local"; }
+                else if (st.Set.TryGetValue("Foreground", out var sf)) { fgV = sf; fgSrc = st.SetSrc["Foreground"]; }
+                else if (chain.Props.TryGetValue("Foreground", out var pf)) { fgV = pf.V; fgSrc = pf.Src; }
+                if (fgV is null) continue;
+
+                string? bgV = null; object? bgSrc = null;
+                if (localBgRaw is not null) { bgV = localBgRaw; bgSrc = "local"; }
+                else if (st.Set.TryGetValue("Background", out var sBg)) { bgV = sBg; bgSrc = st.SetSrc["Background"]; }
+                else if (chain.Props.TryGetValue("Background", out var pb)) { bgV = pb.V; bgSrc = pb.Src; }
+
+                // 字與底都出自同一個 Style 節點 → WalkStyles 在定義處已檢過，不重複
+                if (fgSrc is int fi && bgSrc is int bi && fi == bi) continue;
+                // 停用態：WCAG 1.4.3 豁免，計數回報、不評分
+                if (st.Disabled) { _disabled++; continue; }
+
+                var fgR = ColorResolver.Resolve(fgV, _pal);
+                if (fgR is null) continue;
+                if (fgR.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.Transparent or ColorKind.UnknownKey)
+                { _skipped++; continue; }
+
+                Resolved? bgObj;
+                if (bgV is not null)
+                {
+                    var rb = ColorResolver.Resolve(bgV, _pal);
+                    if (rb is null) continue;
+                    if (rb.Kind == ColorKind.Transparent) bgObj = bg;
+                    else if (rb.Kind == ColorKind.Alpha)
+                    {
+                        bgObj = bg is { Dark: not null, Light: not null }
+                            ? new Resolved(ColorKind.Hard,
+                                Dark: Wcag.Composite(rb.Rgb!, rb.Alpha, bg.Dark),
+                                Light: Wcag.Composite(rb.RgbLight!, rb.AlphaLight, bg.Light),
+                                Key: $"{bgV} over {(bg.Key is not null ? "{" + bg.Key + "}" : bg.Dark)}")
+                            : null;
+                    }
+                    else if (rb.Kind is ColorKind.Other or ColorKind.UnknownKey) { _unresolved++; continue; }
+                    else bgObj = rb;
+                }
+                else bgObj = bg; // Style 鏈沒設底 → 退回祖先背景
+                if (bgObj is null) { _unresolved++; continue; }
+                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey) { _unresolved++; continue; }
+                if (op < 0.01) { _skipped++; continue; }
+
+                // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複
+                if (!emitted.Add($"{fgR.Dark}|{bgObj.Dark}")) continue;
+
+                var isTextC = !NonTextEls.Contains(el.Name.LocalName);
+                var fsC = 0.0;
+                var fsRawC = el.Attribute("FontSize")?.Value;
+                if (fsRawC is not null) ParseDouble(fsRawC, out fsC);
+                else if (st.Set.TryGetValue("FontSize", out var sfs)) ParseDouble(sfs, out fsC);
+                else if (chain.Props.TryGetValue("FontSize", out var pfs)) ParseDouble(pfs.V, out fsC);
+                var fwV = el.Attribute("FontWeight")?.Value
+                          ?? (chain.Props.TryGetValue("FontWeight", out var pfw) ? pfw.V : null);
+                var boldC = fwV is not null && Regex.IsMatch(fwV, "Bold|Black|Heavy|SemiBold");
+                var ptC = fsC * 0.75;
+                var isLargeC = ptC >= 18 || (boldC && ptC >= 14);
+                var needC = !isTextC ? 0.0 : isLargeC ? 3.0 : 4.5;
+
+                var fgDC = fgR.Dark!;
+                var fgLC = fgR.Light!;
+                if (op < 0.999)
+                {
+                    fgDC = Wcag.Composite(fgR.Dark!, op, bgObj.Dark!);
+                    fgLC = Wcag.Composite(fgR.Light!, op, bgObj.Light!);
+                }
+
+                _pairs++;
+                if (suppressed) { _suppressed++; continue; }
+                var lineC = el is IXmlLineInfo cli && cli.HasLineInfo() ? cli.LineNumber : 0;
+                _findings.Add(new Finding
+                {
+                    File = file,
+                    Line = lineC,
+                    Element = $"{el.Name.LocalName}⊕{chain.Label}/{(st.Cond is null && st.Set.Count == 0 ? "base" : "trigger")}",
+                    Fg = op < 0.999 ? $"{fgV} ×{Math.Round(op, 2)}" : fgV,
+                    Bg = bgObj.Key is not null ? "{" + bgObj.Key + "}" : bgObj.Dark!,
+                    Mixed = fgR.Kind != bgObj.Kind,
+                    RatioDark = Wcag.Contrast(fgDC, bgObj.Dark!),
+                    RatioLight = Wcag.Contrast(fgLC, bgObj.Light!),
+                    IsText = isTextC,
+                    Need = needC,
+                    Size = fsC > 0 ? $"{(int)Math.Round(fsC, MidpointRounding.ToEven)}px" : "",
+                    Large = isLargeC,
+                });
+            }
+        }
+
         foreach (var attrName in (ReadOnlySpan<string>)["Foreground", "Fill"])
         {
+            if (attrName == "Foreground" && handledFg) continue;
             var fgRaw = el.Attribute(attrName)?.Value;
             if (fgRaw is null) continue;
             var fg = ColorResolver.Resolve(fgRaw, _pal);
@@ -284,7 +401,7 @@ public sealed partial class Auditor
             }
 
             // 觸發器裡的 Setter 也算進來（它們覆蓋同一個 Style 的基礎值）
-            var trigSetters = new List<Dictionary<string, string>>();
+            var trigSetters = new List<(Dictionary<string, string> Set, bool Disabled)>();
             foreach (var t in style.Descendants().Where(e => e.Name.LocalName is "Trigger" or "DataTrigger"))
             {
                 var ts = new Dictionary<string, string>();
@@ -294,7 +411,7 @@ public sealed partial class Auditor
                     var val = s.Attribute("Value")?.Value;
                     if (prop is not null && val is not null) ts[prop] = val;
                 }
-                if (ts.Count > 0) trigSetters.Add(ts);
+                if (ts.Count > 0) trigSetters.Add((ts, StyleIndex.IsDisabledTrigger(t)));
             }
 
             // ── 規則 8，誤報過濾：模板沒有 Foreground 消費者 → Style 層 Foreground 是死 setter ──
@@ -325,19 +442,22 @@ public sealed partial class Auditor
             var line = style is IXmlLineInfo sli && sli.HasLineInfo() ? sli.LineNumber : 0;
 
             // 基礎 + 每個觸發器狀態各檢一次
-            var states = new List<(string Name, Dictionary<string, string> Set)> { ("base", setters) };
-            foreach (var ts in trigSetters)
+            var states = new List<(string Name, Dictionary<string, string> Set, bool Disabled)>
+            { ("base", setters, false) };
+            foreach (var (ts, dis) in trigSetters)
             {
                 var merged = new Dictionary<string, string>(setters);
                 foreach (var (k, v) in ts) merged[k] = v;
-                states.Add(("trigger", merged));
+                states.Add(("trigger", merged, dis));
             }
 
-            foreach (var (stateName, set) in states)
+            foreach (var (stateName, set, stDisabled) in states)
             {
                 if (!set.TryGetValue("Foreground", out var fgv) ||
                     !set.TryGetValue("Background", out var bgv)) continue;
                 if (fgDead) { _deadFg++; continue; }
+                // 停用態（IsEnabled=False 觸發）：WCAG 1.4.3 豁免，計數回報、不評分
+                if (stDisabled) { _disabled++; continue; }
                 var fg = ColorResolver.Resolve(fgv, _pal);
                 var bgr = ColorResolver.Resolve(bgv, _pal);
                 if (fg is null || bgr is null) continue;

@@ -58,6 +58,7 @@ public static class Report
                 unresolved = r.Unresolved,
                 skipped = r.Skipped,
                 deadForeground = r.DeadForeground,
+                disabledExempt = r.DisabledExempt,
                 parseErrors = r.ParseErrors.Count,
                 parseErrorFiles = r.ParseErrors.Count > 0 ? r.ParseErrors : null,
                 suppressed = r.Suppressed,
@@ -109,6 +110,9 @@ public static class Report
             sb.AppendLine(string.Create(inv,
                 $"excluded {r.DeadForeground} style pair(s): template has no Foreground consumer (no ContentPresenter/TextBlock/... — the Foreground setter is never rendered)"));
         }
+        if (r.DisabledExempt > 0)
+            sb.AppendLine(string.Create(inv,
+                $"exempted {r.DisabledExempt} disabled-state pair(s) (IsEnabled=False; WCAG 1.4.3 does not require contrast for disabled controls)"));
         foreach (var e in r.ParseErrors)
             sb.AppendLine($"!! parse failed: {e}"); // 檔案不能從報告裡靜默消失
         if (r.Suppressed > 0)

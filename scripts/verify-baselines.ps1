@@ -1,7 +1,9 @@
-﻿# M2 驗收：C# 版在四個真實專案上必須重現 M0 基準線的數字（語意比對，不比位元組）。
+﻿# M2 驗收（持續有效）：C# 版在四個真實專案上必須重現原型基準線的數字。
+# 期望值直接從 prototype/baseline-*.txt 解析 —— 基準線更新時本腳本自動跟上，
+# 不會出現「腳本裡的硬編數字」與基準線各說各話的第二真相源。
 #
-# 期望值抽自 prototype/baseline-*.txt（2026-07-30，死 setter 過濾之後）。
-# 「新實作必須重現這些數字，否則就是移植過程掉了東西。」
+# 比對項目：檔案數／配對數／無法解析／跳過／死 setter 排除／停用態豁免／
+# 各分級數／「破」的每一筆 file:line。
 #
 # 用法：powershell -ExecutionPolicy Bypass -File .\scripts\verify-baselines.ps1
 
@@ -9,83 +11,70 @@ $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
 $cli = Join-Path $repo 'src\XamlContrast.Cli'
 
-$expected = @{
-    kindling = @{
-        Root = 'D:\應用程式\Kindling\Kindling.WPF'
-        files = 15; pairs = 134; unresolved = 0; skipped = 2; deadForeground = 0
-        ok = 130; fail = 1; warn = 0; decorative = 3
-        paletteMode = 'csharp'; exit = 1
-        failLines = @('TimelineView.xaml:368')
+$projects = @{
+    kindling  = 'D:\應用程式\Kindling\Kindling.WPF'
+    quillnest = 'D:\應用程式\QuillNest\QuillNest'
+    celflow   = 'D:\應用程式\CelFlow\frontend\CelFlow.WPF'
+    cornea    = 'D:\應用程式\Cornea'
+}
+
+function Parse-Baseline([string]$path) {
+    $t = Get-Content $path -Raw
+    $e = @{ files=0; pairs=0; unresolved=0; skipped=0; deadfg=0; disabled=0
+            ok=0; fail=0; warn=0; decorative=0; failLines=@() }
+    if ($t -match '檔案 (\d+) 個｜解析出 (\d+) 組') { $e.files=[int]$Matches[1]; $e.pairs=[int]$Matches[2] }
+    if ($t -match '無法解析（[^）]*）: (\d+) 處｜跳過（[^）]*）: (\d+) 處') { $e.unresolved=[int]$Matches[1]; $e.skipped=[int]$Matches[2] }
+    if ($t -match '已排除 (\d+) 組 Style 配對') { $e.deadfg=[int]$Matches[1] }
+    if ($t -match '已豁免 (\d+) 組停用態配對') { $e.disabled=[int]$Matches[1] }
+    if ($t -match '(?m)^\s+OK\s+(\d+) 組') { $e.ok=[int]$Matches[1] }
+    if ($t -match '(?m)^\s+破\s+(\d+) 組') { $e.fail=[int]$Matches[1] }
+    if ($t -match '(?m)^\s+偏低\s+(\d+) 組') { $e.warn=[int]$Matches[1] }
+    if ($t -match '(?m)^\s+裝飾\s+(\d+) 組') { $e.decorative=[int]$Matches[1] }
+    # 「破」區塊的每一筆 file:line
+    if ($t -match '(?s)===== 破 [^\r\n]*=====\r?\n(.*?)(\r?\n\r?\n|$)') {
+        $e.failLines = @([regex]::Matches($Matches[1], '(?m)^(\S+\.xaml:\d+)') | ForEach-Object { $_.Groups[1].Value })
     }
-    quillnest = @{
-        Root = 'D:\應用程式\QuillNest\QuillNest'
-        files = 30; pairs = 702; unresolved = 55; skipped = 9; deadForeground = 4
-        ok = 696; fail = 2; warn = 0; decorative = 4
-        paletteMode = 'pair'; exit = 1
-        failLines = @('ProjectView.xaml:326', 'AppLabelManagerDialog.xaml:240')
-    }
-    celflow = @{
-        Root = 'D:\應用程式\CelFlow\frontend\CelFlow.WPF'
-        files = 22; pairs = 308; unresolved = 4; skipped = 15; deadForeground = 0
-        ok = 283; fail = 3; warn = 2; decorative = 20
-        paletteMode = 'single'; exit = 1
-        failLines = @('CrashRecoveryDialog.xaml:18', 'TimelineView.xaml:542', 'AiPersonalizationView.xaml:109')
-    }
-    cornea = @{
-        Root = 'D:\應用程式\Cornea'
-        files = 5; pairs = 0; unresolved = 1; skipped = 2; deadForeground = 0
-        ok = 0; fail = 0; warn = 0; decorative = 0
-        paletteMode = 'none'
-        # 0 組配對 → exit 1 是 4.5 輸出合約的預設（原型時代是 exit 0＋警告）
-        exit = 1
-        failLines = @()
-    }
+    return $e
 }
 
 $anyFail = $false
 foreach ($name in @('kindling', 'quillnest', 'celflow', 'cornea')) {
-    $e = $expected[$name]
+    $e = Parse-Baseline (Join-Path $repo "prototype\baseline-$name.txt")
     $json = Join-Path $env:TEMP "xamlcontrast-verify-$name.json"
-    dotnet run --project $cli -c Release -- $e.Root --json $json *> $null
+    dotnet run --project $cli -c Release -- $projects[$name] --json $json *> $null
     $exit = $LASTEXITCODE
     $r = Get-Content $json -Raw | ConvertFrom-Json
     $s = $r.summary
 
+    # 退出碼合約：破>0 → 1；配對 0 → 1（空掃綠燈）；否則 0
+    $expExit = if ($e.fail -gt 0 -or $e.pairs -eq 0) { 1 } else { 0 }
+
     $checks = [ordered]@{
-        files = @($e.files, $s.files)
-        pairs = @($e.pairs, $s.pairs)
-        unresolved = @($e.unresolved, $s.unresolved)
-        skipped = @($e.skipped, $s.skipped)
-        deadForeground = @($e.deadForeground, $s.deadForeground)
-        ok = @($e.ok, $s.counts.ok)
-        fail = @($e.fail, $s.counts.fail)
-        warn = @($e.warn, $s.counts.warn)
-        decorative = @($e.decorative, $s.counts.decorative)
-        paletteMode = @($e.paletteMode, $s.paletteMode)
-        exitCode = @($e.exit, $exit)
+        files = @($e.files, $s.files);            pairs = @($e.pairs, $s.pairs)
+        unresolved = @($e.unresolved, $s.unresolved); skipped = @($e.skipped, $s.skipped)
+        deadForeground = @($e.deadfg, $s.deadForeground)
+        disabledExempt = @($e.disabled, $s.disabledExempt)
+        ok = @($e.ok, $s.counts.ok);              fail = @($e.fail, $s.counts.fail)
+        warn = @($e.warn, $s.counts.warn);        decorative = @($e.decorative, $s.counts.decorative)
+        exitCode = @($expExit, $exit)
     }
     $bad = @()
     foreach ($k in $checks.Keys) {
-        $exp = $checks[$k][0]; $got = $checks[$k][1]
-        if ("$exp" -ne "$got") { $bad += "$k 期望 $exp 實得 $got" }
+        if ("$($checks[$k][0])" -ne "$($checks[$k][1])") { $bad += "$k 期望 $($checks[$k][0]) 實得 $($checks[$k][1])" }
     }
     $gotFails = @($r.findings | Where-Object category -eq 'fail' | ForEach-Object { "$($_.file):$($_.line)" })
-    foreach ($fl in $e.failLines) {
-        if ($fl -notin $gotFails) { $bad += "缺少 fail: $fl" }
-    }
-    foreach ($gf in $gotFails) {
-        if ($gf -notin $e.failLines) { $bad += "多出 fail: $gf" }
-    }
+    foreach ($fl in $e.failLines) { if ($fl -notin $gotFails) { $bad += "缺少 fail: $fl" } }
+    foreach ($gf in $gotFails) { if ($gf -notin $e.failLines) { $bad += "多出 fail: $gf" } }
 
     if ($bad.Count -gt 0) {
         $anyFail = $true
         Write-Host "[$name] 不一致：" -ForegroundColor Red
         $bad | ForEach-Object { Write-Host "    $_" -ForegroundColor Red }
     } else {
-        Write-Host "[$name] 與基準線一致（$($s.pairs) 組配對，fail $($s.counts.fail)）" -ForegroundColor Green
+        Write-Host "[$name] 一致（$($s.pairs) 組配對，fail $($s.counts.fail)，豁免 $($s.disabledExempt)）" -ForegroundColor Green
     }
 }
 
 if ($anyFail) { Write-Host "驗收失敗" -ForegroundColor Red; exit 1 }
-Write-Host "M2 驗收通過：四個專案的數字全部與 M0 基準線一致" -ForegroundColor Green
+Write-Host "驗收通過：四個專案的數字全部與原型基準線一致" -ForegroundColor Green
 exit 0

@@ -45,6 +45,8 @@ public sealed class AuditResult
     public required int Skipped { get; init; }
     /// <summary>死 setter 過濾排除的 Style 配對數（過濾不靜默）</summary>
     public required int DeadForeground { get; init; }
+    /// <summary>停用態豁免數（IsEnabled=False 觸發；WCAG 1.4.3 豁免，放行憑據是條文不是啟發法）</summary>
+    public required int DisabledExempt { get; init; }
     /// <summary>XAML 解析失敗的檔案（檔名: 錯誤）。解析失敗不能讓檔案靜默消失。</summary>
     public required List<string> ParseErrors { get; init; }
     /// <summary>ignore 註解壓掉的數量 —— 壓掉不進 findings，但一定要計數</summary>

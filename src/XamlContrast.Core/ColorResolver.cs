@@ -17,13 +17,17 @@ public enum ColorKind
     Other,
 }
 
+/// <summary>Alpha 種類帶深淺各自的 A/RGB：字面 #AARRGGBB 深淺同值；
+/// 半透明「色票」（palette 鍵的值是 8 碼）深淺各帶自己的 alpha。</summary>
 public sealed record Resolved(
     ColorKind Kind,
     string? Dark = null,
     string? Light = null,
     string? Key = null,
     double Alpha = 0,
-    string? Rgb = null);
+    string? Rgb = null,
+    double AlphaLight = 0,
+    string? RgbLight = null);
 
 /// <summary>把 XAML 屬性值解析成顏色（或「工具知道自己不知道」的標記）。</summary>
 public static partial class ColorResolver
@@ -60,10 +64,11 @@ public static partial class ColorResolver
         }
         if (Rgb8().IsMatch(v))
         {
+            // 半透明：要跟底下的顏色合成，交給呼叫端處理（字面值深淺同值）
             var h = v.TrimStart('#');
-            return new Resolved(ColorKind.Alpha,
-                Alpha: Convert.ToInt32(h[..2], 16) / 255.0,
-                Rgb: "#" + h[2..].ToUpperInvariant());
+            var a = Convert.ToInt32(h[..2], 16) / 255.0;
+            var rgb = "#" + h[2..].ToUpperInvariant();
+            return new Resolved(ColorKind.Alpha, Alpha: a, Rgb: rgb, AlphaLight: a, RgbLight: rgb);
         }
         if (Named.TryGetValue(v, out var hex))
             return new Resolved(ColorKind.Hard, hex, hex);
@@ -73,7 +78,21 @@ public static partial class ColorResolver
         {
             var key = m.Groups["k"].Value;
             if (palette.Entries.TryGetValue(key, out var e))
+            {
+                if (e.Dark.Length == 9)
+                {
+                    // #AARRGGBB 的「半透明色票」（如 CelFlow 的 BlueOverlay/Scrim）：
+                    // 之前只有字面 8 碼會走合成，色票鍵的 8 碼值被 Luminance 剝掉 alpha
+                    // 當『不透明色』用 —— InfoL 疊 16% 藍被算成疊純藍的假「破 2.68」。
+                    // 深淺各帶自己的 alpha。
+                    return new Resolved(ColorKind.Alpha, Key: key,
+                        Alpha: Convert.ToInt32(e.Dark.Substring(1, 2), 16) / 255.0,
+                        Rgb: "#" + e.Dark[3..],
+                        AlphaLight: Convert.ToInt32(e.Light.Substring(1, 2), 16) / 255.0,
+                        RgbLight: "#" + e.Light[3..]);
+                }
                 return new Resolved(ColorKind.Soft, e.Dark, e.Light, Key: key);
+            }
             return new Resolved(ColorKind.UnknownKey, Key: key);
         }
 
