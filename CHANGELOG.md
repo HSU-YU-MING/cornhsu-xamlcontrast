@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-31
+
 ### Added
 - `--sarif <path>`: SARIF 2.1.0 output for GitHub code scanning (fail/warn only —
   ok/decorative would be noise in the Security tab; degradation counters remain in
