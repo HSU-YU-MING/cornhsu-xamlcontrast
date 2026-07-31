@@ -118,7 +118,10 @@ public sealed partial class Auditor
         foreach (var f in files)
         {
             XDocument doc;
-            var name = Path.GetFileName(f);
+            // 報告用 repo 相對路徑（正斜線）：只給檔名的話，MVVM 專案的同名檔
+            // （ItemView.xaml）無法定位，baseline 的鍵還會跨資料夾互相污染。
+            // 正斜線讓 baseline 跨 OS 可攜（Windows 本機寫、Linux CI 讀）。
+            var name = Path.GetRelativePath(root, f).Replace('\\', '/');
             try { doc = XDocument.Load(f, LoadOptions.SetLineInfo); }
             catch (Exception ex)
             {
@@ -169,6 +172,10 @@ public sealed partial class Auditor
 
         // 元素套用的 Style（具名引用或 <X.Style> 行內）：底色與觸發態的另一個來源
         var chain = _styles.GetElementChain(el, _curFile);
+
+        // 逐狀態路徑的 alpha 合成要用「更新前」的祖先背景 —— 下面的 bg 更新塊會把
+        // 半透明底先合成一次，逐狀態再合成就是疊兩層
+        var ancestorBg = bg;
 
         var localBgRaw = el.Attribute("Background")?.Value;
         var bgVal = localBgRaw
@@ -250,11 +257,11 @@ public sealed partial class Auditor
                     if (rb.Kind == ColorKind.Transparent) bgObj = bg;
                     else if (rb.Kind == ColorKind.Alpha)
                     {
-                        bgObj = bg is { Dark: not null, Light: not null }
+                        bgObj = ancestorBg is { Dark: not null, Light: not null }
                             ? new Resolved(ColorKind.Hard,
-                                Dark: Wcag.Composite(rb.Rgb!, rb.Alpha, bg.Dark),
-                                Light: Wcag.Composite(rb.RgbLight!, rb.AlphaLight, bg.Light),
-                                Key: $"{bgV} over {(bg.Key is not null ? "{" + bg.Key + "}" : bg.Dark)}")
+                                Dark: Wcag.Composite(rb.Rgb!, rb.Alpha, ancestorBg.Dark),
+                                Light: Wcag.Composite(rb.RgbLight!, rb.AlphaLight, ancestorBg.Light),
+                                Key: $"{bgV} over {(ancestorBg.Key is not null ? "{" + ancestorBg.Key + "}" : ancestorBg.Dark)}")
                             : null;
                     }
                     else if (rb.Kind is ColorKind.Other or ColorKind.UnknownKey) { _unresolved++; continue; }

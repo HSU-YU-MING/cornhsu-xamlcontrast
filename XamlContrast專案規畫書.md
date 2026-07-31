@@ -300,8 +300,13 @@ ratio-dark/ratio-light/threshold/category/symmetry、退出碼政策
 照第 4.6 節：baseline/ratchet（只擋新增與惡化）、`xamlcontrast-ignore` 註解
 （理由必填、計入 suppressed）。這是既有專案唯一的導入路徑。
 
-### M5 — GitHub Action
+### M5 — GitHub Action（本地骨架 ✅ 2026-07-31；開 repo＋push＋NuGet 發佈待使用者）
 `action.yml`，照 Parity 的形狀。0.x 期間 README 要明寫 pin 到確切版本。
+
+**治理決定（2026-07-31）**：M5 發佈後**凍結原型** —— PS 腳本退役為歷史規格，
+新規則改成 C# 先行（測試齊備），基準線由 C# 版產生。
+否則每條規則要寫兩遍，原型會長成第二個要永久維護的產品。
+在那之前維持雙實作互證（verify-baselines.ps1）。
 加 GitHub annotations（`::error file=…,line=…`）讓破的配對直接標在 PR 的行上；
 SARIF 視需求後補。解析不依賴 WPF runtime（純 `System.Xml.Linq`），
 CLI 與 Action 都能跑 `ubuntu-latest` —— 這是實質賣點，README 要明寫。
@@ -446,6 +451,9 @@ Parity 的 README 明寫：`@v0.9.7  # 0.x 時 pin 到確切版本；1.0 後改�
 - [ ] 測試涵蓋十一條解析規則＋八個「謊報健康」回歸形狀
 - [ ] baseline 模式與 ignore 註解至少在一個既有專案上實際用過
 - [ ] 至少一個非自己的專案用過並回報
+- [ ] **重新辯論預設 gate**：目前 warn（3.0~4.5，低於 AA）預設放行 ——
+      合規視角很難辯護，傾向 1.0 改成預設 `--fail-on warn`、
+      導入友善的職責交給 baseline 機制（2026-07-31 工程師視角檢視記錄）
 
 **起始版本 0.1.0。**
 

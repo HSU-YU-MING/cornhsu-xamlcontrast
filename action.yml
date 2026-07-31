@@ -62,7 +62,7 @@ runs:
         echo "exit=$?" >> "$GITHUB_OUTPUT"
 
     # 破的配對直接標在 PR 的行上（::error 註記吃 workspace 相對路徑；
-    # findings 的 file 目前是檔名，先用 root 前綴近似，0.x 會改成相對路徑）
+    # findings 的 file 是「root 相對、正斜線」路徑，前綴 root 即為 workspace 路徑）
     - name: Annotate failing pairs
       if: ${{ always() }}
       shell: bash

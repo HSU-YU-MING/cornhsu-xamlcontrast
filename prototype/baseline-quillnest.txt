@@ -18,15 +18,15 @@
   『深色壞／淺色壞』代表設計意圖沒跨主題保住。兩者都要處理，只是解法不同。
 
 ===== 破 （7 組）=====
-NoteEditorWindow.xaml:704          RadioButton⊕Style[行內]/觸發 字=White                      底={CardBackgroundBrush} 深= 16.67:1 淺=     1:1  [淺色壞] 需 4.5
-TodoView.xaml:262                  TextBlock⊕Style[行內]/基礎 字=White                      底={CardBackgroundBrush} 深= 16.67:1 淺=     1:1  [淺色壞] 需 4.5 11px
-NoteEditorWindow.xaml:673          RadioButton⊕Style[行內]/觸發 字=White                      底={CardBackgroundBrush} 深= 16.67:1 淺=     1:1  [淺色壞] 需 4.5
-CalendarView.xaml:234              Button⊕Style[行內]/觸發  字=White                      底={SurfaceBrush}     深= 16.67:1 淺=     1:1  [淺色壞] 需 4.5
-NoteEditorWindow.xaml:641          RadioButton⊕Style[行內]/觸發 字=White                      底={CardBackgroundBrush} 深= 16.67:1 淺=     1:1  [淺色壞] 需 4.5
-TodoView.xaml:115                  TextBlock⊕Style[行內]/基礎 字=#2E7D32                    底={#88000000 疊於 {CardBackgroundBrush}} 深=  3.76:1 淺=  1.14:1  [淺色壞] 需 4.5 12px
-TodoView.xaml:262                  TextBlock⊕Style[行內]/觸發 字=#333333                    底={CardBackgroundBrush} 深=  1.32:1 淺= 12.63:1  [深色壞] 需 4.5 11px
+Views/NoteEditorWindow.xaml:704    RadioButton⊕Style[行內]/觸發 字=White                      底={CardBackgroundBrush} 深= 16.67:1 淺=     1:1  [淺色壞] 需 4.5
+Views/TodoView.xaml:262            TextBlock⊕Style[行內]/基礎 字=White                      底={CardBackgroundBrush} 深= 16.67:1 淺=     1:1  [淺色壞] 需 4.5 11px
+Views/NoteEditorWindow.xaml:673    RadioButton⊕Style[行內]/觸發 字=White                      底={CardBackgroundBrush} 深= 16.67:1 淺=     1:1  [淺色壞] 需 4.5
+Views/CalendarView.xaml:234        Button⊕Style[行內]/觸發  字=White                      底={SurfaceBrush}     深= 16.67:1 淺=     1:1  [淺色壞] 需 4.5
+Views/NoteEditorWindow.xaml:641    RadioButton⊕Style[行內]/觸發 字=White                      底={CardBackgroundBrush} 深= 16.67:1 淺=     1:1  [淺色壞] 需 4.5
+Views/TodoView.xaml:115            TextBlock⊕Style[行內]/基礎 字=#2E7D32                    底={#88000000 疊於 {CardBackgroundBrush}} 深=  3.76:1 淺=  1.14:1  [淺色壞] 需 4.5 12px
+Views/TodoView.xaml:262            TextBlock⊕Style[行內]/觸發 字=#333333                    底={CardBackgroundBrush} 深=  1.32:1 淺= 12.63:1  [深色壞] 需 4.5 11px
 
 ===== 偏低 （1 組）=====
-CalendarView.xaml:783              TextBlock⊕Style[行內]/觸發 字={DynamicResource SuccessBrush} 底={InfoBadgeBackgroundBrush} 深=  4.19:1 淺=  4.49:1  [兩邊皆低] 需 4.5 11px
+Views/CalendarView.xaml:783        TextBlock⊕Style[行內]/觸發 字={DynamicResource SuccessBrush} 底={InfoBadgeBackgroundBrush} 深=  4.19:1 淺=  4.49:1  [兩邊皆低] 需 4.5 11px
 
 退出碼 1：有 7 組低於門檻的 2/3（另有 1 組偏低）

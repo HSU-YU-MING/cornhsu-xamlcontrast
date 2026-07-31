@@ -27,3 +27,8 @@ First public release.
   suppressed pairs counted)
 - Validated against four shipped WPF products; numbers reproduced by two independent
   implementations (PowerShell prototype = spec, .NET port)
+- Findings report root-relative, forward-slash file paths (duplicate file names no
+  longer collide; baselines are portable across OSes)
+- `--baseline` / `--write-baseline` default to `xamlcontrast-baseline.json`;
+  a malformed baseline exits 2 with a helpful message instead of a stack trace
+- `--version`; JSON carries `schemaVersion`

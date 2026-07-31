@@ -621,6 +621,10 @@ function Walk($el, $bg, $file, $op = 1.0) {
     # 元素套用的 Style（具名引用或 <X.Style> 行內）：底色與觸發態的另一個來源
     $chain = Get-ElementStyleChain $el
 
+    # 逐狀態路徑的 alpha 合成要用「更新前」的祖先背景 —— 下面的 bg 更新塊會把
+    # 半透明底先合成一次，逐狀態再合成就是疊兩層（2026-07-31 回頭檢視抓到的）
+    $ancestorBg = $bg
+
     $localBgRaw = $el.Attribute('Background')
     $bgVal = $null
     if ($localBgRaw) { $bgVal = $localBgRaw.Value }
@@ -693,11 +697,11 @@ function Walk($el, $bg, $file, $op = 1.0) {
                 if (-not $rb) { continue }
                 if ($rb.Kind -eq 'transparent') { $bgObj = $bg }
                 elseif ($rb.Kind -eq 'alpha') {
-                    if ($bg -and $bg.Dark -and $bg.Light) {
+                    if ($ancestorBg -and $ancestorBg.Dark -and $ancestorBg.Light) {
                         $bgObj = @{ Kind='hard'
-                                    Key ="$bgV 疊於 $(if($bg.Key){'{'+$bg.Key+'}'}else{$bg.Dark})"
-                                    Dark =(Composite $rb.RGB  $rb.A  $bg.Dark)
-                                    Light=(Composite $rb.RGBL $rb.AL $bg.Light) }
+                                    Key ="$bgV 疊於 $(if($ancestorBg.Key){'{'+$ancestorBg.Key+'}'}else{$ancestorBg.Dark})"
+                                    Dark =(Composite $rb.RGB  $rb.A  $ancestorBg.Dark)
+                                    Light=(Composite $rb.RGBL $rb.AL $ancestorBg.Light) }
                     }
                 }
                 elseif ($rb.Kind -in @('other','unknownkey')) { $script:stats.unresolved++; continue }
@@ -931,8 +935,11 @@ foreach ($f in $files) {
     } catch { Write-Warning "解析失敗：$($f.Name) — $_"; continue }
 
     $script:curFile = $f.FullName   # 具名 Style 查找的「同檔優先」範圍
-    Walk $doc.Root $null $f.Name
-    WalkStyles $doc $f.Name
+    # 報告用 repo 相對路徑（正斜線）：只給檔名的話，MVVM 專案的同名檔（ItemView.xaml）
+    # 無法定位，baseline 的鍵還會跨資料夾互相污染。正斜線讓 baseline 跨 OS 可攜。
+    $rel = $f.FullName.Substring($Root.Length).TrimStart('\','/').Replace('\','/')
+    Walk $doc.Root $null $rel
+    WalkStyles $doc $rel
 }
 
 # ── 報告 ──

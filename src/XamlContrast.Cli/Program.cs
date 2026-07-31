@@ -32,12 +32,13 @@ for (var i = 0; i < args.Length; i++)
             jsonPath = args[++i];
             break;
         case "--baseline":
-            if (i + 1 >= args.Length) { Console.Error.WriteLine("--baseline takes a file path"); return 2; }
-            baselinePath = args[++i];
+            // 路徑可省略 —— 預設檔名慣例 xamlcontrast-baseline.json
+            baselinePath = i + 1 < args.Length && !args[i + 1].StartsWith('-')
+                ? args[++i] : "xamlcontrast-baseline.json";
             break;
         case "--write-baseline":
-            if (i + 1 >= args.Length) { Console.Error.WriteLine("--write-baseline takes a file path"); return 2; }
-            writeBaselinePath = args[++i];
+            writeBaselinePath = i + 1 < args.Length && !args[i + 1].StartsWith('-')
+                ? args[++i] : "xamlcontrast-baseline.json";
             break;
         case "-h" or "--help":
             PrintUsage();
@@ -97,7 +98,15 @@ if (baselinePath is not null)
         Console.Error.WriteLine($"baseline not found: {baselinePath}");
         return 2;
     }
-    var cmp = Baseline.Compare(result, File.ReadAllText(baselinePath));
+    Baseline.ComparisonResult cmp;
+    try { cmp = Baseline.Compare(result, File.ReadAllText(baselinePath)); }
+    catch (Exception ex)
+    {
+        // 壞掉的 baseline 要有好訊息，不是裸拋堆疊
+        Console.Error.WriteLine($"baseline is not valid ({baselinePath}): {ex.Message}");
+        Console.Error.WriteLine("regenerate it with --write-baseline");
+        return 2;
+    }
     Console.WriteLine($"baseline: known debt {cmp.KnownDebt}, paid off {cmp.PaidDebt} (debt may only shrink)");
     foreach (var f in cmp.NewFailures)
         Console.WriteLine($"  NEW failure: {f.File}:{f.Line} {f.Element} fg={f.Fg} bg={f.Bg}");
@@ -147,8 +156,9 @@ static void PrintUsage()
           --json <path>            write machine-readable report (summary + findings)
           --fail-on warn           also fail the run when pairs are below AA but above 2/3
           --strict-palette         fail the run when palette detection degrades
-          --baseline <path>        ratchet mode: only fail on NEW or WORSENED failures
-          --write-baseline <path>  freeze current failures as known debt (run once, commit the file)
+          --baseline [path]        ratchet mode: only fail on NEW or WORSENED failures
+                                   (default path: xamlcontrast-baseline.json)
+          --write-baseline [path]  freeze current failures as known debt (run once, commit the file)
           --show-ok                list passing pairs, grouped
         """);
 }

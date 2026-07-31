@@ -17,36 +17,36 @@
   『深色壞／淺色壞』代表設計意圖沒跨主題保住。兩者都要處理，只是解法不同。
 
 ===== 破 （23 組）=====
-TimelineView.xaml:412              Button⊕Style[CellDeleteBtn]/基礎 字=#FFFFFF                    底={Bg1}              深=  17.4:1 淺=  1.11:1  [淺色壞] 需 4.5
-ProjectWallView.xaml:152           Button⊕Style[CardEditButton]/觸發 字=#FFFFFF                    底={Bg1}              深=  17.4:1 淺=  1.11:1  [淺色壞] 需 4.5
-TimelineView.xaml:117              Button⊕Style[DangerBtnNarrow]/觸發 字={DynamicResource DangerFg} 底={PurpleD}          深=  5.09:1 淺=  1.22:1  [淺色壞] 需 4.5 12px
-ClipLibraryView.xaml:137           Button⊕Style[DangerBtn]/觸發 字={DynamicResource DangerFg} 底={PurpleD}          深=  5.09:1 淺=  1.22:1  [淺色壞] 需 4.5 11px
-ProjectWallView.xaml:156           Button⊕Style[CardDeleteButton]/觸發 字=#FFD0D0                    底={Bg1}              深= 12.59:1 淺=  1.25:1  [淺色壞] 需 4.5
-TimelineView.xaml:250              Button⊕Style[→IconBtn]/觸發 字={DynamicResource Green}    底={PurpleD}          深=  2.56:1 淺=  1.27:1  [兩邊皆低] 需 4.5 10px
-TimelineView.xaml:83               Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
-TextInputDialog.xaml:20            Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
-TimelineView.xaml:139              Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 13px
-WorkspaceView.xaml:113             Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 11px
-TimelineView.xaml:125              Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
-ExportSettingsDialog.xaml:222      Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
-GenerateDialog.xaml:242            Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
-ApiKeyDialog.xaml:59               Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
-ClipLibraryView.xaml:40            Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 11px
-RegenerateWorkspaceWindow.xaml:316 Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
-RegenerateWorkspaceWindow.xaml:203 Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
-RegenerateWorkspaceWindow.xaml:466 Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
-TimelineView.xaml:274              Button⊕Style[→IconBtn]/觸發 字=#7D9AC8                    底={Bg4}              深=  4.09:1 淺=  2.15:1  [淺色壞] 需 4.5 10px
-TimelineView.xaml:274              Button⊕Style[→IconBtn]/基礎 字=#7D9AC8                    底={Bg3}              深=  4.74:1 淺=  2.36:1  [淺色壞] 需 4.5 10px
-TimelineView.xaml:274              Button⊕Style[→IconBtn]/觸發 字=#7D9AC8                    底={PurpleD}          深=  2.42:1 淺=  2.42:1  [兩邊皆低] 需 4.5 10px
-TimelineView.xaml:368              TextBlock            字=#9A9A9A                    底={Bg1}              深=  6.19:1 淺=  2.54:1  [淺色壞] 需 4.5 9px
-RegenerateWorkspaceWindow.xaml:135 TextBlock⊕Style[行內]/觸發 字={DynamicResource PurpleD}  底={Bg0}              深=  2.73:1 淺=  5.76:1  [深色壞] 需 4.5 10px
+Views/TimelineView.xaml:412        Button⊕Style[CellDeleteBtn]/基礎 字=#FFFFFF                    底={Bg1}              深=  17.4:1 淺=  1.11:1  [淺色壞] 需 4.5
+Views/ProjectWallView.xaml:152     Button⊕Style[CardEditButton]/觸發 字=#FFFFFF                    底={Bg1}              深=  17.4:1 淺=  1.11:1  [淺色壞] 需 4.5
+Views/TimelineView.xaml:117        Button⊕Style[DangerBtnNarrow]/觸發 字={DynamicResource DangerFg} 底={PurpleD}          深=  5.09:1 淺=  1.22:1  [淺色壞] 需 4.5 12px
+Views/ClipLibraryView.xaml:137     Button⊕Style[DangerBtn]/觸發 字={DynamicResource DangerFg} 底={PurpleD}          深=  5.09:1 淺=  1.22:1  [淺色壞] 需 4.5 11px
+Views/ProjectWallView.xaml:156     Button⊕Style[CardDeleteButton]/觸發 字=#FFD0D0                    底={Bg1}              深= 12.59:1 淺=  1.25:1  [淺色壞] 需 4.5
+Views/TimelineView.xaml:250        Button⊕Style[→IconBtn]/觸發 字={DynamicResource Green}    底={PurpleD}          深=  2.56:1 淺=  1.27:1  [兩邊皆低] 需 4.5 10px
+Views/TimelineView.xaml:83         Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
+Views/TextInputDialog.xaml:20      Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
+Views/TimelineView.xaml:139        Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 13px
+Views/WorkspaceView.xaml:113       Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 11px
+Views/TimelineView.xaml:125        Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
+Views/ExportSettingsDialog.xaml:222 Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
+Views/GenerateDialog.xaml:242      Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
+Views/ApiKeyDialog.xaml:59         Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
+Views/ClipLibraryView.xaml:40      Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 11px
+Views/RegenerateWorkspaceWindow.xaml:316 Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
+Views/RegenerateWorkspaceWindow.xaml:203 Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
+Views/RegenerateWorkspaceWindow.xaml:466 Button⊕Style[AccentBtn]/觸發 字=White                      底={Bg4}              深= 11.73:1 淺=  1.33:1  [淺色壞] 需 4.5 12px
+Views/TimelineView.xaml:274        Button⊕Style[→IconBtn]/觸發 字=#7D9AC8                    底={Bg4}              深=  4.09:1 淺=  2.15:1  [淺色壞] 需 4.5 10px
+Views/TimelineView.xaml:274        Button⊕Style[→IconBtn]/基礎 字=#7D9AC8                    底={Bg3}              深=  4.74:1 淺=  2.36:1  [淺色壞] 需 4.5 10px
+Views/TimelineView.xaml:274        Button⊕Style[→IconBtn]/觸發 字=#7D9AC8                    底={PurpleD}          深=  2.42:1 淺=  2.42:1  [兩邊皆低] 需 4.5 10px
+Views/TimelineView.xaml:368        TextBlock            字=#9A9A9A                    底={Bg1}              深=  6.19:1 淺=  2.54:1  [淺色壞] 需 4.5 9px
+Views/RegenerateWorkspaceWindow.xaml:135 TextBlock⊕Style[行內]/觸發 字={DynamicResource PurpleD}  底={Bg0}              深=  2.73:1 淺=  5.76:1  [深色壞] 需 4.5 10px
 
 ===== 偏低 （6 組）=====
-TimelineView.xaml:250              Button⊕Style[→IconBtn]/觸發 字={DynamicResource Red}      底={Bg3}              深=  3.45:1 淺=  4.66:1  [兩邊皆低] 需 4.5 10px
-TimelineView.xaml:274              Button⊕Style[→IconBtn]/觸發 字={DynamicResource Red}      底={Bg3}              深=  3.45:1 淺=  4.66:1  [兩邊皆低] 需 4.5 10px
-TimelineView.xaml:250              Button⊕Style[→IconBtn]/觸發 字={DynamicResource Green}    底={Bg4}              深=  4.34:1 淺=  4.08:1  [兩邊皆低] 需 4.5 10px
-TimelineView.xaml:117              Button⊕Style[DangerBtnNarrow]/觸發 字={DynamicResource DangerFg} 底={Bg4}              深=  8.61:1 淺=  4.25:1  [淺色壞] 需 4.5 12px
-ClipLibraryView.xaml:137           Button⊕Style[DangerBtn]/觸發 字={DynamicResource DangerFg} 底={Bg4}              深=  8.61:1 淺=  4.25:1  [淺色壞] 需 4.5 11px
-TimelineView.xaml:250              Button⊕Style[→IconBtn]/基礎 字={DynamicResource Green}    底={Bg3}              深=  5.02:1 淺=  4.48:1  [兩邊皆低] 需 4.5 10px
+Views/TimelineView.xaml:250        Button⊕Style[→IconBtn]/觸發 字={DynamicResource Red}      底={Bg3}              深=  3.45:1 淺=  4.66:1  [兩邊皆低] 需 4.5 10px
+Views/TimelineView.xaml:274        Button⊕Style[→IconBtn]/觸發 字={DynamicResource Red}      底={Bg3}              深=  3.45:1 淺=  4.66:1  [兩邊皆低] 需 4.5 10px
+Views/TimelineView.xaml:250        Button⊕Style[→IconBtn]/觸發 字={DynamicResource Green}    底={Bg4}              深=  4.34:1 淺=  4.08:1  [兩邊皆低] 需 4.5 10px
+Views/TimelineView.xaml:117        Button⊕Style[DangerBtnNarrow]/觸發 字={DynamicResource DangerFg} 底={Bg4}              深=  8.61:1 淺=  4.25:1  [淺色壞] 需 4.5 12px
+Views/ClipLibraryView.xaml:137     Button⊕Style[DangerBtn]/觸發 字={DynamicResource DangerFg} 底={Bg4}              深=  8.61:1 淺=  4.25:1  [淺色壞] 需 4.5 11px
+Views/TimelineView.xaml:250        Button⊕Style[→IconBtn]/基礎 字={DynamicResource Green}    底={Bg3}              深=  5.02:1 淺=  4.48:1  [兩邊皆低] 需 4.5 10px
 
 退出碼 1：有 23 組低於門檻的 2/3（另有 6 組偏低）
