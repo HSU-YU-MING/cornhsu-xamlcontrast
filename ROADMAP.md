@@ -32,3 +32,15 @@
 - WinUI 3 / Uno / Avalonia（解析邏輯大致共用，差在色盤慣例與內建樣式 ——
   比純 WPF 大得多的市場）
 - 隱含樣式解析
+
+## 與 Parity 的交會點（構想，尚未排程）
+
+- **Figma 色票當色盤來源**：Parity 已會從 Figma 抽真實數值 —— 色盤偵測加一個
+  `figma` 模式，就能在**設計稿階段**稽核對比（程式碼還沒寫就先攔）；
+  同時「實作色盤 vs Figma 色票」的漂移也有了對照組
+- **執行期抽驗盲區**：本工具的已知盲區（sibling 背景、TargetName、Binding 色）
+  恰好全是「只有執行期看得到」的 —— 把 unresolved／假警報類 findings 匯出成
+  目標清單，用 Parity 式的取樣 harness 對跑起來的 App 抽驗像素，
+  靜態全量＋執行期抽點互補
+- **合約對齊**：baseline／退出碼／action 慣例已照 Parity 形狀，
+  維持同一套心智模型，讓同時導入兩者的團隊只學一次

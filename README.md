@@ -39,6 +39,31 @@ MainWindow.xaml:6   Style[HoverBtn]/trigger  fg=#9A9A9A                   bg={Su
 exit 1: 3 pair(s) below threshold x 2/3 (0 warn)
 ```
 
+## Why run it while developing
+
+- **Seconds instead of eyeballing.** Without it, checking contrast means launching the
+  app, flipping both themes, and judging every screen by eye — on your monitor, at your
+  brightness. With it: one command before commit, whole project, every text-on-background pair.
+- **It guards the theme you're not looking at.** You tune a color in dark mode and never
+  notice light mode just dropped to 1.1:1. Every pair is computed for both themes;
+  the symmetry column tells you which side broke.
+- **It checks states manual testing can't reach.** Hover, pressed, trigger states,
+  what a `BasedOn` chain actually resolves to — all 23 real issues found in one
+  validation project were named-Style trigger states the authors never knew existed.
+- **It pushes you toward a healthy palette.** Hardcoded colors don't follow themes and
+  light up in the report — one validation project went from 572 hardcoded colors to 0.
+  The baseline's recorded ratios also catch palette drift (same key, darker value).
+- **It turns taste arguments into numbers.** "Is this readable?" is endless;
+  "2.54:1, needs 4.5" is a decision. In one real fix the intuitive direction
+  (darken the scrim) was mathematically wrong — the numbers settled it.
+- **It moves the cost to the PR.** The expensive path is ship → user report / compliance
+  audit → sweep the whole app. The cheap path is a red check with inline annotations
+  on the lines you just touched — and `--write-baseline` lets legacy projects go green
+  on day one, blocking only new debt.
+
+In short: it makes contrast a first-class check, same rank as unit tests —
+run on every change, red when broken, pointing at the exact line.
+
 Two independent dimensions per finding:
 
 - **grade** (absolute contrast): `fail` < threshold×2/3, `warn` in between, `ok`, `decorative`
@@ -162,6 +187,14 @@ Honest list — see the [blind-spot table](XamlContrast專案規畫書.md) for d
 - Sibling-element backgrounds; text over images; implicit styles
 - `Binding` / `TemplateBinding` colors are reported as *unresolved*, never guessed —
   guessing would trade honest uncertainty for false confidence
+
+## See also
+
+[**Parity**](https://github.com/HSU-YU-MING/cornhsu-parity) — sibling project, same
+author, same philosophy (numeric checks that gate CI). Parity answers *"does the
+implementation match the design?"* (Figma vs rendered values); XamlContrast answers
+*"can people actually read it?"* One guards fidelity, the other guards legibility —
+they meet in the same PR checks list.
 
 ## License
 
