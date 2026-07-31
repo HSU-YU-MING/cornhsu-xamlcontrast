@@ -1,0 +1,26 @@
+﻿自動偵測：單一主題色盤 Styles\DarkTheme.xaml（48 個色票）
+檔案 22 個｜解析出 308 組『文字色 × 生效背景色』配對
+無法解析（背景在樹上找不到／來自 Binding）: 4 處｜跳過（半透明、漸層等）: 15 處
+
+偵測到單一主題色盤：對稱欄位不適用，只看絕對對比
+  OK         283 組
+  破          3 組
+  偏低         2 組
+  裝飾         20 組
+
+  低於 AA 的 5 組，依成因細分：
+    單一主題專案         5 組
+
+  『兩邊皆低』代表色票本身就不夠亮，換主題救不了；
+  『深色壞／淺色壞』代表設計意圖沒跨主題保住。兩者都要處理，只是解法不同。
+
+===== 破 （3 組）=====
+CrashRecoveryDialog.xaml:18        Style[DarkBtn]/觸發    字={DynamicResource Fg2}      底={Bg3}              深=  2.16:1 淺=  2.16:1  [單一主題專案] 需 4.5 12px
+TimelineView.xaml:542              TextBlock            字={DynamicResource InfoL}    底={BlueOverlay}      深=  2.68:1 淺=  2.68:1  [單一主題專案] 需 4.5 11px
+AiPersonalizationView.xaml:109     Style[ResetPrimaryBtn]/觸發 字=White                      底={Warn}             深=  2.73:1 淺=  2.73:1  [單一主題專案] 需 4.5 12px
+
+===== 偏低 （2 組）=====
+FinetuneManagerView.xaml:76        Button               字={DynamicResource RedL}     底={Bg2}              深=  4.44:1 淺=  4.44:1  [單一主題專案] 需 4.5 11px
+AiPanelView.xaml:421               Style[Button]/觸發     字=White                      底={RefMarker}        深=  4.49:1 淺=  4.49:1  [單一主題專案] 需 4.5
+
+退出碼 1：有 3 組低於門檻的 2/3（另有 2 組偏低）

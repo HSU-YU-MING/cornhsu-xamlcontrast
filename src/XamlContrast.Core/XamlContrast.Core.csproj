@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>XamlContrast.Core</RootNamespace>
+    <!-- 解析引擎:純 System.Xml.Linq,不依賴 WPF runtime —— Linux CI 也能跑 -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="XamlContrast.Tests" />
+  </ItemGroup>
+
+</Project>

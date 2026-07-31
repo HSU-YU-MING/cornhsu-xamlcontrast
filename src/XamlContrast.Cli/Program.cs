@@ -1,0 +1,101 @@
+using XamlContrast.Core;
+
+// XamlContrast CLI — 靜態 XAML 對比度稽核，退出碼給 CI 當守門員。
+//
+// 退出碼政策（規劃書 4.5）：
+//   fail > 0                    → 1
+//   --fail-on warn 且 warn > 0  → 1
+//   配對數 0                    → 1（不可設定 —— 空掃綠燈就是謊報健康）
+//   --strict-palette 且色盤退化 → 1
+
+var showOk = false;
+var failOnWarn = false;
+var strictPalette = false;
+string? jsonPath = null;
+string? root = null;
+
+for (var i = 0; i < args.Length; i++)
+{
+    switch (args[i])
+    {
+        case "--show-ok": showOk = true; break;
+        case "--strict-palette": strictPalette = true; break;
+        case "--fail-on":
+            if (i + 1 >= args.Length || args[i + 1] is not ("warn" or "fail"))
+            { Console.Error.WriteLine("--fail-on takes 'warn' or 'fail'"); return 2; }
+            failOnWarn = args[++i] == "warn";
+            break;
+        case "--json":
+            if (i + 1 >= args.Length) { Console.Error.WriteLine("--json takes a file path"); return 2; }
+            jsonPath = args[++i];
+            break;
+        case "-h" or "--help":
+            PrintUsage();
+            return 0;
+        default:
+            if (root is null && !args[i].StartsWith('-')) { root = args[i]; break; }
+            Console.Error.WriteLine($"unknown argument: {args[i]}");
+            return 2;
+    }
+}
+
+if (root is null) { PrintUsage(); return 2; }
+if (!Directory.Exists(root))
+{
+    Console.Error.WriteLine($"root not found: {root}");
+    return 2;
+}
+
+var detection = PaletteDetector.Detect(root);
+var result = Auditor.Run(root, detection);
+
+Console.Write(Report.ToConsole(result, showOk));
+
+if (jsonPath is not null)
+{
+    File.WriteAllText(jsonPath, Report.ToJson(result));
+    Console.WriteLine($"json written: {jsonPath}");
+}
+
+var fail = result.CountOf(Category.Fail);
+var warn = result.CountOf(Category.Warn);
+
+if (result.Pairs == 0)
+{
+    // 0 組配對時「達標」無意義 —— 沒有任何可稽核的項目。空掃綠燈就是謊報健康。
+    Console.WriteLine("exit 1: resolved 0 pairs — nothing was audited, this result does not mean the project passes");
+    return 1;
+}
+if (fail > 0)
+{
+    Console.WriteLine($"exit 1: {fail} pair(s) below threshold x 2/3 ({warn} warn)");
+    return 1;
+}
+if (failOnWarn && warn > 0)
+{
+    Console.WriteLine($"exit 1: {warn} pair(s) below AA (--fail-on warn)");
+    return 1;
+}
+if (strictPalette && detection.IsDegraded)
+{
+    Console.WriteLine("exit 1: palette detection failed and --strict-palette is set");
+    return 1;
+}
+if (warn > 0) Console.WriteLine($"exit 0: no fail, but {warn} pair(s) below AA");
+else Console.WriteLine("exit 0: all pairs meet AA");
+return 0;
+
+static void PrintUsage()
+{
+    Console.WriteLine("""
+        XamlContrast — static WCAG contrast audit for XAML source
+
+        usage: xamlcontrast <project-root> [options]
+
+        options:
+          --json <path>      write machine-readable report (summary + findings)
+          --fail-on warn     also fail the run when pairs are below AA but above 2/3
+          --strict-palette   fail the run when palette detection degrades
+          --show-ok          list passing pairs, grouped
+        """);
+}

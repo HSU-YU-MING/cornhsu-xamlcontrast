@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/XamlContrast.Cli/XamlContrast.Cli.csproj" />
+    <Project Path="src/XamlContrast.Core/XamlContrast.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/XamlContrast.Tests/XamlContrast.Tests.csproj" />
+  </Folder>
+</Solution>

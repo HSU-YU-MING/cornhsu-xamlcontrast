@@ -1,0 +1,38 @@
+<Project>
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <!-- NuGet audit 警告(相依套件已知弱點通報)不升級為錯誤 -->
+    <WarningsNotAsErrors>NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
+  </PropertyGroup>
+
+  <!-- 套件中繼資料:只套用到 packable 專案(src/ 底下、IsPackable 未關的) -->
+  <PropertyGroup Condition="'$(IsPackable)' != 'false'">
+    <Authors>許彧銘 (Cornhsu)</Authors>
+    <Company>Cornhsu</Company>
+    <Copyright>Copyright © 許彧銘</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/HSU-YU-MING/cornhsu-xamlcontrast</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/HSU-YU-MING/cornhsu-xamlcontrast</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>xaml;wpf;accessibility;a11y;contrast;wcag;static-analysis;ci;dotnet-tool</PackageTags>
+
+    <!-- 可除錯性:讓使用者能 step-in 進原始碼 -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- 可重現建置 -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsPackable)' != 'false'">
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" Condition="Exists('$(MSBuildThisFileDirectory)README.md')" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+</Project>
