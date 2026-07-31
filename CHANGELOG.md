@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-31
+
 ### Added
 - `xamlcontrast.config.json` is now actually loaded (schema: docs/config-schema.md):
   forced palette modes (`pair`/`csharp`/`single`/`none`), threshold and classification
