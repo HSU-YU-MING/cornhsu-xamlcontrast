@@ -2,6 +2,10 @@
 
 **Static WCAG contrast audit for XAML source. No app launch, whole-project scan, CI-ready exit codes.**
 
+[![NuGet](https://img.shields.io/nuget/v/Cornhsu.XamlContrast)](https://www.nuget.org/packages/Cornhsu.XamlContrast)
+[![CI](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/actions/workflows/ci.yml/badge.svg)](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/actions)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 [繁體中文](README.zh-Hant.md)
 
 Every existing desktop contrast checker is runtime + manual + one-element-at-a-time
@@ -15,7 +19,8 @@ dotnet tool install -g Cornhsu.XamlContrast
 xamlcontrast path/to/your/wpf/project
 ```
 
-> 0.x: pin exact versions (`--version 0.1.0`). Interfaces freeze at 1.0.
+> Requires the **.NET 10 runtime** (the analysis itself is pure XML — runs on Linux CI too).
+> 0.x: pin exact versions (`--version 0.2.0`). Interfaces freeze at 1.0.
 
 ## What it looks like
 
@@ -96,7 +101,8 @@ XamlContrast scans your project and figures out where the palette lives:
 3. **Single theme** — one resource dictionary, both columns get the same value
 4. **Nothing found** — falls back to hardcoded colors only, and **says so loudly**
 
-Wrong guess? Override with `xamlcontrast.config.json` ([schema](docs/config-schema.md)).
+Wrong guess? Override with `xamlcontrast.config.json` —
+[schema](docs/config-schema.md) (zh-Hant; the JSON example at the top is self-explanatory).
 
 ## CI
 
@@ -181,7 +187,8 @@ How that trust was earned — the highlights, with the full story in the
 
 ## Known limitations
 
-Honest list — see the [blind-spot table](XamlContrast專案規畫書.md) for details:
+Honest list — full blind-spot table with per-case evidence in the
+[planning doc](XamlContrast專案規畫書.md) (zh-Hant):
 
 - `TargetName` setters aimed at **inner** template parts (root-targeted ones are resolved)
 - Cross-element correlated triggers (same condition flips fg on one element, bg on another) — false alarms
