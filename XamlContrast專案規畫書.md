@@ -291,7 +291,7 @@ suppressed / counts）、findings 欄位含 file/line/element/fg/bg/
 ratio-dark/ratio-light/threshold/category/symmetry、退出碼政策
 （`--fail-on warn`、配對數 0 即 exit 1、`--strict-palette`）、輸出全英文。
 
-### M4 — 導入模式（baseline + ignore）
+### M4 — 導入模式（baseline + ignore）✅ 2026-07-31 完成（--baseline／--write-baseline、ignore 理由必填＋計數；鍵不含行號防漂移、記錄比值防色盤漂移型惡化；41 測試全過）
 照第 4.6 節：baseline/ratchet（只擋新增與惡化）、`xamlcontrast-ignore` 註解
 （理由必填、計入 suppressed）。這是既有專案唯一的導入路徑。
 

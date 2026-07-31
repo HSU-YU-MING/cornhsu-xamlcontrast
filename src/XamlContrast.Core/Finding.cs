@@ -47,8 +47,10 @@ public sealed class AuditResult
     public required int DeadForeground { get; init; }
     /// <summary>XAML 解析失敗的檔案（檔名: 錯誤）。解析失敗不能讓檔案靜默消失。</summary>
     public required List<string> ParseErrors { get; init; }
-    /// <summary>ignore 註解壓掉的數量（M4；先佔位讓 summary 欄位齊全）</summary>
+    /// <summary>ignore 註解壓掉的數量 —— 壓掉不進 findings，但一定要計數</summary>
     public int Suppressed { get; init; }
+    /// <summary>沒附理由的 ignore（無效，不壓）—— 要警告</summary>
+    public required List<string> InvalidIgnores { get; init; }
 
     public int CountOf(Category c) => Findings.Count(f => f.Category == c);
 }

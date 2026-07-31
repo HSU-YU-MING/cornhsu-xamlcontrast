@@ -69,7 +69,33 @@ public sealed partial class Auditor
     private readonly Palette _pal;
     private readonly List<Finding> _findings = new();
     private readonly List<string> _parseErrors = new();
-    private int _pairs, _unresolved, _skipped, _deadFg;
+    private readonly List<string> _invalidIgnores = new();
+    private int _pairs, _unresolved, _skipped, _deadFg, _suppressed;
+
+    [GeneratedRegex(@"^\s*xamlcontrast-ignore(?:\s*:\s*(?<reason>.*\S))?\s*$")]
+    private static partial Regex IgnoreComment();
+
+    /// <summary>
+    /// ignore 註解（規劃書 4.6）：&lt;!-- xamlcontrast-ignore: 理由 --&gt; 管下一個元素（含子樹）。
+    /// 理由必填 —— 沒理由的 ignore 視為無效並警告；被壓掉的計入 suppressed。
+    /// 否則 ignore 就是新開的一條靜默退化通道。
+    /// </summary>
+    private bool IsSuppressedByComment(XElement el, string file)
+    {
+        // 往前找最近的非空白節點；只有「緊鄰的前一個註解」才算數
+        var prev = el.PreviousNode;
+        while (prev is XText t && string.IsNullOrWhiteSpace(t.Value)) prev = prev.PreviousNode;
+        if (prev is not XComment c) return false;
+        var m = IgnoreComment().Match(c.Value);
+        if (!m.Success) return false;
+        if (!m.Groups["reason"].Success)
+        {
+            var line = c is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
+            _invalidIgnores.Add($"{file}:{line}: xamlcontrast-ignore without a reason is invalid (not suppressed)");
+            return false;
+        }
+        return true;
+    }
 
     /// <summary>XAML 數值屬性一律以 InvariantCulture 解析 ——
     /// 否則德語系等 locale 的 CI 上 Opacity="0.5" 會靜默解析失敗。</summary>
@@ -98,7 +124,7 @@ public sealed partial class Auditor
             }
             if (doc.Root is not null)
             {
-                auditor.Walk(doc.Root, null, name, 1.0);
+                auditor.Walk(doc.Root, null, name, 1.0, suppressed: false);
                 auditor.WalkStyles(doc, name);
             }
         }
@@ -113,6 +139,8 @@ public sealed partial class Auditor
             Skipped = auditor._skipped,
             DeadForeground = auditor._deadFg,
             ParseErrors = auditor._parseErrors,
+            Suppressed = auditor._suppressed,
+            InvalidIgnores = auditor._invalidIgnores,
         };
         Grader.Grade(result);
         return result;
@@ -126,8 +154,9 @@ public sealed partial class Auditor
     //   （繼承 Fg0 #EEEEEE），但有 Opacity="0.3"，螢幕上取樣到的是 #535353（2.45:1）。
     //   工具當時只看 Foreground 的色票值，回報「Fg0 = 16.28 ✓」—— 完全漏掉。
     //   Opacity 是繼「Foreground 色票」「背景 alpha」之後第三種讓文字變暗的方式。
-    private void Walk(XElement el, Resolved? bg, string file, double op)
+    private void Walk(XElement el, Resolved? bg, string file, double op, bool suppressed)
     {
+        if (!suppressed && IsSuppressedByComment(el, file)) suppressed = true;
         var opRaw = el.Attribute("Opacity")?.Value;
         // Opacity 也可能是 Binding；只處理字面數值，其餘維持原值
         if (opRaw is not null && ParseDouble(opRaw, out var opVal)) op *= opVal;
@@ -183,6 +212,9 @@ public sealed partial class Auditor
 
             _pairs++;
 
+            // ignore 壓掉的不進 findings，但一定要計數 —— 靜默退化等於謊報
+            if (suppressed) { _suppressed++; continue; }
+
             var line = el is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
 
             // ── 這是文字還是裝飾？WCAG 的 4.5:1 只管文字 ──
@@ -233,7 +265,7 @@ public sealed partial class Auditor
         {
             // Style / Setter / Trigger 這些不是視覺樹，個別處理（WalkStyles），這裡跳過
             if (StyleishEls.Contains(child.Name.LocalName)) continue;
-            Walk(child, bg, file, op);
+            Walk(child, bg, file, op, suppressed);
         }
     }
 
@@ -242,6 +274,7 @@ public sealed partial class Auditor
     {
         foreach (var style in doc.Descendants().Where(e => e.Name.LocalName == "Style"))
         {
+            var styleSuppressed = IsSuppressedByComment(style, file);
             var setters = new Dictionary<string, string>();
             foreach (var s in style.Elements().Where(e => e.Name.LocalName == "Setter"))
             {
@@ -325,6 +358,7 @@ public sealed partial class Auditor
                 var need = !isText ? 0.0 : isLarge ? 3.0 : 4.5;
 
                 _pairs++;
+                if (styleSuppressed) { _suppressed++; continue; }
                 _findings.Add(new Finding
                 {
                     File = file,

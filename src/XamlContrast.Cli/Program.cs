@@ -12,6 +12,8 @@ var showOk = false;
 var failOnWarn = false;
 var strictPalette = false;
 string? jsonPath = null;
+string? baselinePath = null;
+string? writeBaselinePath = null;
 string? root = null;
 
 for (var i = 0; i < args.Length; i++)
@@ -28,6 +30,14 @@ for (var i = 0; i < args.Length; i++)
         case "--json":
             if (i + 1 >= args.Length) { Console.Error.WriteLine("--json takes a file path"); return 2; }
             jsonPath = args[++i];
+            break;
+        case "--baseline":
+            if (i + 1 >= args.Length) { Console.Error.WriteLine("--baseline takes a file path"); return 2; }
+            baselinePath = args[++i];
+            break;
+        case "--write-baseline":
+            if (i + 1 >= args.Length) { Console.Error.WriteLine("--write-baseline takes a file path"); return 2; }
+            writeBaselinePath = args[++i];
             break;
         case "-h" or "--help":
             PrintUsage();
@@ -66,6 +76,42 @@ if (result.Pairs == 0)
     Console.WriteLine("exit 1: resolved 0 pairs — nothing was audited, this result does not mean the project passes");
     return 1;
 }
+
+if (writeBaselinePath is not null)
+{
+    // 導入模式第一步：把現況凍成已知債清單（存進 repo）。之後只擋新增與惡化。
+    File.WriteAllText(writeBaselinePath, Baseline.Write(result));
+    Console.WriteLine($"baseline written: {writeBaselinePath} ({fail} known failure pair(s))");
+    return 0;
+}
+
+if (baselinePath is not null)
+{
+    if (!File.Exists(baselinePath))
+    {
+        Console.Error.WriteLine($"baseline not found: {baselinePath}");
+        return 2;
+    }
+    var cmp = Baseline.Compare(result, File.ReadAllText(baselinePath));
+    Console.WriteLine($"baseline: known debt {cmp.KnownDebt}, paid off {cmp.PaidDebt} (debt may only shrink)");
+    foreach (var f in cmp.NewFailures)
+        Console.WriteLine($"  NEW failure: {f.File}:{f.Line} {f.Element} fg={f.Fg} bg={f.Bg}");
+    foreach (var e in cmp.WorsenedFailures)
+        Console.WriteLine($"  WORSENED: {e.File} {e.Element} fg={e.Fg} bg={e.Bg} (now {e.Count} occurrence(s))");
+    if (!cmp.Passes)
+    {
+        Console.WriteLine($"exit 1: {cmp.NewFailures.Count} new / {cmp.WorsenedFailures.Count} worsened failure(s) vs baseline");
+        return 1;
+    }
+    if (failOnWarn && warn > 0)
+    {
+        Console.WriteLine($"exit 1: {warn} pair(s) below AA (--fail-on warn)");
+        return 1;
+    }
+    Console.WriteLine("exit 0: no new or worsened failures vs baseline");
+    return 0;
+}
+
 if (fail > 0)
 {
     Console.WriteLine($"exit 1: {fail} pair(s) below threshold x 2/3 ({warn} warn)");
@@ -93,9 +139,11 @@ static void PrintUsage()
         usage: xamlcontrast <project-root> [options]
 
         options:
-          --json <path>      write machine-readable report (summary + findings)
-          --fail-on warn     also fail the run when pairs are below AA but above 2/3
-          --strict-palette   fail the run when palette detection degrades
-          --show-ok          list passing pairs, grouped
+          --json <path>            write machine-readable report (summary + findings)
+          --fail-on warn           also fail the run when pairs are below AA but above 2/3
+          --strict-palette         fail the run when palette detection degrades
+          --baseline <path>        ratchet mode: only fail on NEW or WORSENED failures
+          --write-baseline <path>  freeze current failures as known debt (run once, commit the file)
+          --show-ok                list passing pairs, grouped
         """);
 }

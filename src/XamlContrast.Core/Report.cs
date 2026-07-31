@@ -61,6 +61,7 @@ public static class Report
                 parseErrors = r.ParseErrors.Count,
                 parseErrorFiles = r.ParseErrors.Count > 0 ? r.ParseErrors : null,
                 suppressed = r.Suppressed,
+                invalidIgnores = r.InvalidIgnores.Count > 0 ? r.InvalidIgnores : null,
                 counts = new
                 {
                     fail = r.CountOf(Category.Fail),
@@ -110,6 +111,10 @@ public static class Report
         }
         foreach (var e in r.ParseErrors)
             sb.AppendLine($"!! parse failed: {e}"); // 檔案不能從報告裡靜默消失
+        if (r.Suppressed > 0)
+            sb.AppendLine(string.Create(inv, $"suppressed {r.Suppressed} pair(s) via xamlcontrast-ignore comments"));
+        foreach (var w in r.InvalidIgnores)
+            sb.AppendLine($"!! {w}"); // 沒理由的 ignore 是無效的，且要讓人看見
         sb.AppendLine();
 
         if (r.Detection.Palette.Count > 0 && r.Detection.Palette.IsSingleTheme)
