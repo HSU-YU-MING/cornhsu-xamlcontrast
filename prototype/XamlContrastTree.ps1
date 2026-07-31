@@ -14,9 +14,23 @@
 #     （ContentPresenter/ContentControl/TextBlock/AccessText/Label 皆無、
 #     也沒有 TemplateBinding Foreground）→ Style 層 Foreground 是死 setter，
 #     整組排除並計數回報（QuillNest DataGridCheckBoxStyle 誤報案例）
+#   - 元素套用的具名／行內 Style（Style="{StaticResource X}"、<X.Style> BasedOn）：
+#     跨檔案索引具名 Style，解析 BasedOn 鏈＋Style/模板觸發器，
+#     元素的字色配上 Style 來源的底色逐狀態檢（2026-07-31 CelFlow 實證：
+#     刪除鈕字 RedL 實際疊的是 DarkBtn 的 Bg3、hover Bg4，舊版樹走訪看不到
+#     Style 的底色而誤落到祖先卡片 Bg2 低估實況；CrashRecoveryDialog「忽略」鈕
+#     Fg1 疊 Border0/Border1 則整組漏掉）
+#   - IsEnabled=False 的觸發態＝停用態：WCAG 1.4.3 豁免，計數回報、不評分
+#     （CelFlow CrashRecoveryDialog 停用態 Fg2 疊 Bg3 是刻意設計，
+#     曾被報成「破 2.16」的假警報）
+#   - 半透明「色票」（值為 #AARRGGBB 的 palette 鍵）同樣疊底合成：
+#     之前只有字面 8 碼會合成，色票鍵被 Lum() 剝掉 alpha 當不透明色
+#     （CelFlow 實證：InfoL 疊 BlueOverlay 被算成疊純藍的假「破 2.68」）
 #
 # 明確不處理（會標成「無法解析」而不是猜）：
 #   - 只有單邊 Setter 的 Style（套用位置由型別決定，不在樹上）
+#   - 隱含樣式（只有 TargetType、無 x:Key 的全域 Style）——要模擬 WPF 的
+#     隱含樣式查找，且會把「繼承的 Foreground」整個拉進來，雜訊量級不同，留給 .NET 版
 #   - TemplateBinding / Binding 來的顏色
 #   - 屬性元素語法 <Border.Background><LinearGradientBrush .../></Border.Background>
 
@@ -353,9 +367,12 @@ function Resolve([string]$v) {
     if ($v -eq 'Transparent') { return @{ Kind='transparent' } }
     if ($v -match '^#[0-9A-Fa-f]{6}$') { return @{ Dark=$v.ToUpper(); Light=$v.ToUpper(); Kind='hard' } }
     if ($v -match '^#[0-9A-Fa-f]{8}$') {
-        # 半透明：要跟底下的顏色合成，交給呼叫端處理（帶 A 與 RGB 出去）
+        # 半透明：要跟底下的顏色合成，交給呼叫端處理（帶 A 與 RGB 出去；
+        # 字面值深淺同值，AL/RGBL 就是 A/RGB 的複本）
         $h = $v.TrimStart('#')
-        return @{ Kind='alpha'; A = ([Convert]::ToInt32($h.Substring(0,2),16) / 255.0); RGB = '#' + $h.Substring(2).ToUpper() }
+        $a = [Convert]::ToInt32($h.Substring(0,2),16) / 255.0
+        $rgb = '#' + $h.Substring(2).ToUpper()
+        return @{ Kind='alpha'; A=$a; RGB=$rgb; AL=$a; RGBL=$rgb }
     }
     if ($named.ContainsKey($v.ToLower())) {
         $h = $named[$v.ToLower()]; return @{ Dark=$h; Light=$h; Kind='hard' }
@@ -364,6 +381,17 @@ function Resolve([string]$v) {
         $k = $Matches['k']
         if ($pal.ContainsKey($k)) {
             $parts = $pal[$k].Split(',')
+            if ($parts[0].Length -eq 9) {
+                # #AARRGGBB 的「半透明色票」（如 CelFlow 的 BlueOverlay/Scrim）：
+                # 2026-07-31 之前只有字面 8 碼會走合成，色票鍵的 8 碼值被 Lum()
+                # 剝掉 alpha 當『不透明色』用 —— CelFlow 實證：InfoL 疊 BlueOverlay
+                # （16% 藍）被算成 InfoL 疊純藍 2.68 的假「破」。深淺各帶自己的 alpha。
+                return @{ Kind='alpha'; Key=$k
+                          A   =([Convert]::ToInt32($parts[0].Substring(1,2),16)/255.0)
+                          RGB ='#'+$parts[0].Substring(3)
+                          AL  =([Convert]::ToInt32($parts[1].Substring(1,2),16)/255.0)
+                          RGBL='#'+$parts[1].Substring(3) }
+            }
             return @{ Dark=$parts[0]; Light=$parts[1]; Kind='soft'; Key=$k }
         }
         return @{ Kind='unknownkey'; Key=$k }
@@ -372,7 +400,7 @@ function Resolve([string]$v) {
 }
 
 $findings = @()
-$stats = @{ pairs=0; unresolved=0; skipped=0; deadfg=0 }
+$stats = @{ pairs=0; unresolved=0; skipped=0; deadfg=0; disabled=0 }
 
 # ── 文字／裝飾分類表（Walk 與 WalkStyles 共用）──
 # Rectangle 當分隔線、ProgressBar 當進度條、Ellipse 當圓點，都是裝飾元素，
@@ -385,6 +413,182 @@ $textEls = @('TextBlock','Run','Label','AccessText','TextBox','PasswordBox',
 #   然後用 4.5 去要求一條進度條。先排除，再看元素型別。
 $nonTextEls = @('ProgressBar','Rectangle','Ellipse','Path','Polygon','Polyline',
                 'Line','Border','Separator','Slider','Thumb','Track','ScrollBar')
+
+# ── 具名 Style 索引與解析（2026-07-31，修「元素自身底色來自具名 Style」盲區）──
+#
+# 範圍界定：
+#   - 只解析「具名引用」與「行內 Style」；隱含樣式不套用（見檔頭「明確不處理」）。
+#   - BasedOn 鏈逐層合併；衍生 Style 自帶 Template 時不繼承基底的模板觸發器
+#     （WPF 換掉整個模板，基底模板的觸發器就不存在了）。
+#   - 模板觸發器只收「無 TargetName 的 Setter」（套回模板宿主本身）；
+#     有 TargetName 的要解析模板內部樹，不做。
+#   - 同條件的觸發器跨節點合併（style trigger 蓋 template trigger、衍生蓋基底），
+#     否則「style trigger 設字色＋template trigger 設底色」的同一個狀態
+#     會被拆成兩個各缺一半的幻影組合。
+
+function Test-DisabledTrigger($t) {
+    # IsEnabled=False 觸發 = 停用態。WCAG 1.4.3 明文豁免停用中的控制項。
+    if ($t.Name.LocalName -eq 'Trigger') {
+        $p = $t.Attribute('Property'); $v = $t.Attribute('Value')
+        return [bool]($p -and $v -and $p.Value -match '(^|\.)IsEnabled$' -and $v.Value -eq 'False')
+    }
+    if ($t.Name.LocalName -eq 'DataTrigger') {
+        $b = $t.Attribute('Binding'); $v = $t.Attribute('Value')
+        return [bool]($b -and $v -and $b.Value -match 'IsEnabled' -and $v.Value -eq 'False')
+    }
+    return $false
+}
+
+$script:styleIdSeq = 0
+function New-StyleRecord($style, [string]$file) {
+    $script:styleIdSeq++
+    $setters = @{}
+    foreach ($s in $style.Elements() | Where-Object { $_.Name.LocalName -eq 'Setter' }) {
+        $p = $s.Attribute('Property'); $v = $s.Attribute('Value')
+        if ($p -and $v) { $setters[$p.Value] = $v.Value }
+    }
+    $hasTmpl = [bool]($style.Descendants() |
+        Where-Object { $_.Name.LocalName -eq 'ControlTemplate' } | Select-Object -First 1)
+    $states = @()
+    foreach ($t in $style.Descendants() | Where-Object { $_.Name.LocalName -in @('Trigger','DataTrigger') }) {
+        $ts = @{}
+        foreach ($s in $t.Elements() | Where-Object { $_.Name.LocalName -eq 'Setter' }) {
+            $p = $s.Attribute('Property'); $v = $s.Attribute('Value')
+            if ($p -and $v -and -not $s.Attribute('TargetName')) { $ts[$p.Value] = $v.Value }
+        }
+        if ($ts.Count -eq 0) { continue }
+        $inTmpl = $false; $anc = $t.Parent
+        while ($anc -and -not [object]::ReferenceEquals($anc, $style)) {
+            if ($anc.Name.LocalName -eq 'ControlTemplate') { $inTmpl = $true; break }
+            $anc = $anc.Parent
+        }
+        # 條件簽名：同條件的狀態之後要跨節點合併
+        $cond =
+            if ($t.Name.LocalName -eq 'Trigger') {
+                "P:$($t.Attribute('Property').Value)=$($t.Attribute('Value').Value)"
+            } elseif ($t.Attribute('Binding') -and $t.Attribute('Value')) {
+                "B:$($t.Attribute('Binding').Value)=$($t.Attribute('Value').Value)"
+            } else { $null }
+        $states += ,@{ Disabled = (Test-DisabledTrigger $t); FromTemplate = $inTmpl
+                       Set = $ts; Cond = $cond }
+    }
+    $keyAttr = $style.Attribute('{http://schemas.microsoft.com/winfx/2006/xaml}Key')
+    $boKey = $null
+    $bo = $style.Attribute('BasedOn')
+    if ($bo -and $bo.Value -match '^\{StaticResource\s+(?<k>[\w\.]+)\}$') { $boKey = $Matches['k'] }
+    return [pscustomobject]@{
+        Id = $script:styleIdSeq; File = $file
+        Key = if ($keyAttr) { $keyAttr.Value } else { $null }
+        BasedOn = $boKey; Setters = $setters; States = $states; HasTemplate = $hasTmpl
+    }
+}
+
+# 索引所有檔案的具名 Style —— 含色盤／主題字典（全域樣式就住在那裡；
+# 「排除出 UI 掃描」不等於「排除出索引」）。查找時同檔優先於全域，
+# 模擬 WPF 的資源查找順序（CelFlow 的 CrashRecoveryDialog 有自己的 DarkBtn，
+# 與 DarkTheme.xaml 的全域 DarkBtn 同名不同值）。
+$styleIndexByFile = @{}
+$styleIndexGlobal = @{}
+foreach ($sf in Get-ChildItem $Root -Filter '*.xaml' -Recurse |
+         Where-Object { $_.FullName -notmatch '\\(obj|bin)\\' }) {
+    try { $sdoc = [System.Xml.Linq.XDocument]::Load($sf.FullName) } catch { continue }
+    $isGlobal = $sdoc.Root.Name.LocalName -in @('ResourceDictionary','Application')
+    foreach ($style in $sdoc.Descendants() | Where-Object { $_.Name.LocalName -eq 'Style' }) {
+        $rec = New-StyleRecord $style $sf.FullName
+        if (-not $rec.Key) { continue }
+        if (-not $styleIndexByFile.ContainsKey($sf.FullName)) { $styleIndexByFile[$sf.FullName] = @{} }
+        $styleIndexByFile[$sf.FullName][$rec.Key] = $rec
+        if ($isGlobal -and -not $styleIndexGlobal.ContainsKey($rec.Key)) { $styleIndexGlobal[$rec.Key] = $rec }
+    }
+}
+
+function Find-StyleRecord([string]$key, [string]$file) {
+    if ($styleIndexByFile.ContainsKey($file) -and $styleIndexByFile[$file].ContainsKey($key)) {
+        return $styleIndexByFile[$file][$key]
+    }
+    if ($styleIndexGlobal.ContainsKey($key)) { return $styleIndexGlobal[$key] }
+    return $null
+}
+
+function Merge-StyleChain($rec, $seen) {
+    # 把 BasedOn 鏈揉平：Props = 各屬性最後生效的 Setter（帶來源 Style Id），
+    # States = 鏈上所有觸發器狀態（Set 逐屬性帶來源，供「同節點配對跳過」判斷）。
+    $props = @{}; $states = @()
+    if ($rec.BasedOn -and $seen.Add($rec.BasedOn)) {
+        $base = Find-StyleRecord $rec.BasedOn $rec.File
+        if ($base) {
+            $m = Merge-StyleChain $base $seen
+            foreach ($k in $m.Props.Keys) { $props[$k] = $m.Props[$k] }
+            foreach ($s in $m.States) {
+                if ($s.FromTemplate -and $rec.HasTemplate) { continue }   # 模板被換掉
+                $states += ,$s
+            }
+        }
+    }
+    foreach ($p in $rec.Setters.Keys) { $props[$p] = @{ V = $rec.Setters[$p]; Src = $rec.Id } }
+    foreach ($s in $rec.States) {
+        $srcMap = @{}; foreach ($k in $s.Set.Keys) { $srcMap[$k] = $rec.Id }
+        $states += ,@{ name='觸發'; Disabled=$s.Disabled; FromTemplate=$s.FromTemplate
+                       Set=$s.Set; SetSrc=$srcMap; Cond=$s.Cond }
+    }
+    return @{ Props = $props; States = $states }
+}
+
+function Merge-SameConditionStates($states) {
+    # 同條件觸發器合併：WPF 優先序是 style trigger > template trigger、
+    # 衍生（後到）> 基底（先到）。合併時 template 不蓋 style 已設的屬性。
+    $byCond = [ordered]@{}
+    $anon = 0
+    foreach ($s in $states) {
+        $c = if ($s.Cond) { $s.Cond } else { $anon++; "anon:$anon" }
+        if (-not $byCond.Contains($c)) {
+            $set = @{}; $src = @{}
+            foreach ($k in $s.Set.Keys) { $set[$k] = $s.Set[$k]; $src[$k] = $s.SetSrc[$k] }
+            $byCond[$c] = @{ name=$s.name; Disabled=$s.Disabled; FromTemplate=$s.FromTemplate
+                             Set=$set; SetSrc=$src }
+        } else {
+            $t = $byCond[$c]
+            if ($s.FromTemplate -and -not $t.FromTemplate) {
+                # template 觸發只補 style 觸發沒設的屬性
+                foreach ($k in $s.Set.Keys) {
+                    if (-not $t.Set.ContainsKey($k)) { $t.Set[$k] = $s.Set[$k]; $t.SetSrc[$k] = $s.SetSrc[$k] }
+                }
+            } else {
+                foreach ($k in $s.Set.Keys) { $t.Set[$k] = $s.Set[$k]; $t.SetSrc[$k] = $s.SetSrc[$k] }
+                $t.FromTemplate = $t.FromTemplate -and $s.FromTemplate
+            }
+            $t.Disabled = $t.Disabled -or $s.Disabled
+        }
+    }
+    return @($byCond.Values)
+}
+
+function Get-ElementStyleChain($el) {
+    $sAttr = $el.Attribute('Style')
+    if ($sAttr) {
+        if ($sAttr.Value -notmatch '^\{(Dynamic|Static)Resource\s+(?<k>[\w\.]+)\}$') { return $null }
+        $k = $Matches['k']
+        $rec = Find-StyleRecord $k $script:curFile
+        if (-not $rec) { return $null }
+        $seen = New-Object 'System.Collections.Generic.HashSet[string]'
+        [void]$seen.Add($k)
+        $m = Merge-StyleChain $rec $seen
+        $m['States'] = Merge-SameConditionStates $m.States
+        $m['Label'] = "Style[$k]"
+        return $m
+    }
+    $propEl = $el.Elements() |
+        Where-Object { $_.Name.LocalName -eq ($el.Name.LocalName + '.Style') } | Select-Object -First 1
+    if (-not $propEl) { return $null }
+    $styleEl = $propEl.Elements() | Where-Object { $_.Name.LocalName -eq 'Style' } | Select-Object -First 1
+    if (-not $styleEl) { return $null }
+    $rec = New-StyleRecord $styleEl $script:curFile
+    $seen = New-Object 'System.Collections.Generic.HashSet[string]'
+    $m = Merge-StyleChain $rec $seen
+    $m['States'] = Merge-SameConditionStates $m.States
+    $m['Label'] = if ($rec.BasedOn) { "Style[→$($rec.BasedOn)]" } else { 'Style[行內]' }
+    return $m
+}
 
 $files = Get-ChildItem $Root -Filter '*.xaml' -Recurse |
          Where-Object { $_.FullName -notmatch '\\(obj|bin)\\' }
@@ -414,18 +618,24 @@ function Walk($el, $bg, $file, $op = 1.0) {
         if ([double]::TryParse($opRaw.Value, [ref]$v)) { $op = $op * $v }
     }
 
+    # 元素套用的 Style（具名引用或 <X.Style> 行內）：底色與觸發態的另一個來源
+    $chain = Get-ElementStyleChain $el
+
     $localBgRaw = $el.Attribute('Background')
-    if ($localBgRaw) {
-        $r = Resolve $localBgRaw.Value
+    $bgVal = $null
+    if ($localBgRaw) { $bgVal = $localBgRaw.Value }
+    elseif ($chain -and $chain.Props.ContainsKey('Background')) { $bgVal = $chain.Props['Background'].V }
+    if ($bgVal) {
+        $r = Resolve $bgVal
         if ($r) {
             if ($r.Kind -eq 'alpha') {
                 # 半透明遮罩：疊在目前生效的背景上算出實際顏色（WPF 以 sRGB 混合）
                 if ($bg -and $bg.Dark -and $bg.Light) {
                     $bg = @{
                         Kind  = 'hard'
-                        Key   = "$($localBgRaw.Value) 疊於 $(if($bg.Key){'{'+$bg.Key+'}'}else{$bg.Dark})"
-                        Dark  = Composite $r.RGB $r.A $bg.Dark
-                        Light = Composite $r.RGB $r.A $bg.Light
+                        Key   = "$bgVal 疊於 $(if($bg.Key){'{'+$bg.Key+'}'}else{$bg.Dark})"
+                        Dark  = Composite $r.RGB  $r.A  $bg.Dark
+                        Light = Composite $r.RGBL $r.AL $bg.Light
                     }
                 }
                 # 找不到底色就維持原本的（無法判定，後面會計入 unresolved）
@@ -441,7 +651,109 @@ function Walk($el, $bg, $file, $op = 1.0) {
         }
     }
 
+    # ── 元素 × Style 鏈的逐狀態檢查（具名 Style 底色盲區，2026-07-31）──
+    # CelFlow 實證：刪除鈕 Foreground=RedL 配 BasedOn=DarkBtn，DarkBtn 的底是
+    # Bg3、hover Bg4 —— 舊版看不到 Style 的底色，誤落到祖先卡片的 Bg2（4.44），
+    # 低估實況（Bg3 3.89 / Bg4 3.36）；「忽略」鈕（Fg1 疊 Border0/Border1）整組漏掉。
+    $handledFg = $false
+    if ($chain) {
+        $handledFg = $true   # Foreground 一律由這裡接手，避免與下面的舊路徑重複輸出
+        $localFgRaw = $el.Attribute('Foreground')
+        $emitted = @{}
+        $allStates = @(@{ name='基礎'; Set=@{}; SetSrc=@{}; Disabled=$false }) + @($chain.States)
+        foreach ($st in $allStates) {
+            # WPF 優先序：元素屬性 > Style 觸發 > Style Setter
+            $fgV = $null; $fgSrc = $null
+            if ($localFgRaw) { $fgV = $localFgRaw.Value; $fgSrc = 'local' }
+            elseif ($st.Set.ContainsKey('Foreground')) { $fgV = $st.Set['Foreground']; $fgSrc = $st.SetSrc['Foreground'] }
+            elseif ($chain.Props.ContainsKey('Foreground')) {
+                $fgV = $chain.Props['Foreground'].V; $fgSrc = $chain.Props['Foreground'].Src
+            }
+            if (-not $fgV) { continue }
+
+            $bgV = $null; $bgSrc = $null
+            if ($localBgRaw) { $bgV = $localBgRaw.Value; $bgSrc = 'local' }
+            elseif ($st.Set.ContainsKey('Background')) { $bgV = $st.Set['Background']; $bgSrc = $st.SetSrc['Background'] }
+            elseif ($chain.Props.ContainsKey('Background')) {
+                $bgV = $chain.Props['Background'].V; $bgSrc = $chain.Props['Background'].Src
+            }
+
+            # 字與底都出自同一個 Style 節點 → WalkStyles 在定義處已檢過，不重複
+            if ($fgSrc -and $bgSrc -and $fgSrc -ne 'local' -and $bgSrc -ne 'local' -and $fgSrc -eq $bgSrc) { continue }
+            # 停用態：WCAG 1.4.3 豁免，計數回報、不評分
+            if ($st.Disabled) { $script:stats.disabled++; continue }
+
+            $fg = Resolve $fgV
+            if (-not $fg) { continue }
+            if ($fg.Kind -in @('other','alpha','transparent','unknownkey')) { $script:stats.skipped++; continue }
+
+            $bgObj = $null
+            if ($bgV) {
+                $rb = Resolve $bgV
+                if (-not $rb) { continue }
+                if ($rb.Kind -eq 'transparent') { $bgObj = $bg }
+                elseif ($rb.Kind -eq 'alpha') {
+                    if ($bg -and $bg.Dark -and $bg.Light) {
+                        $bgObj = @{ Kind='hard'
+                                    Key ="$bgV 疊於 $(if($bg.Key){'{'+$bg.Key+'}'}else{$bg.Dark})"
+                                    Dark =(Composite $rb.RGB  $rb.A  $bg.Dark)
+                                    Light=(Composite $rb.RGBL $rb.AL $bg.Light) }
+                    }
+                }
+                elseif ($rb.Kind -in @('other','unknownkey')) { $script:stats.unresolved++; continue }
+                else { $bgObj = $rb }
+            } else { $bgObj = $bg }   # Style 鏈沒設底 → 退回祖先背景
+            if (-not $bgObj) { $script:stats.unresolved++; continue }
+            if ($bgObj.Kind -in @('other','alpha','unknownkey')) { $script:stats.unresolved++; continue }
+            if ($op -lt 0.01) { $script:stats.skipped++; continue }
+
+            # 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複
+            $comboKey = "$($fg.Dark)|$($bgObj.Dark)"
+            if ($emitted.ContainsKey($comboKey)) { continue }
+            $emitted[$comboKey] = $true
+
+            $isText = if ($el.Name.LocalName -in $nonTextEls) { $false } else { $true }
+            $fs = 0.0; $fsRaw = $el.Attribute('FontSize')
+            if ($fsRaw) { [double]::TryParse($fsRaw.Value, [ref]$fs) | Out-Null }
+            elseif ($st.Set.ContainsKey('FontSize')) { [double]::TryParse($st.Set['FontSize'], [ref]$fs) | Out-Null }
+            elseif ($chain.Props.ContainsKey('FontSize')) { [double]::TryParse($chain.Props['FontSize'].V, [ref]$fs) | Out-Null }
+            $fwRaw = $el.Attribute('FontWeight')
+            $fwV = if ($fwRaw) { $fwRaw.Value }
+                   elseif ($chain.Props.ContainsKey('FontWeight')) { $chain.Props['FontWeight'].V } else { $null }
+            $bold = $fwV -and ($fwV -match 'Bold|Black|Heavy|SemiBold')
+            $pt = $fs * 0.75
+            $isLarge = ($pt -ge 18) -or ($bold -and $pt -ge 14)
+            $need = if (-not $isText) { 0.0 } elseif ($isLarge) { 3.0 } else { 4.5 }
+
+            $fgD = $fg.Dark; $fgL = $fg.Light
+            if ($op -lt 0.999) {
+                $fgD = Composite $fg.Dark  $op $bgObj.Dark
+                $fgL = Composite $fg.Light $op $bgObj.Light
+            }
+
+            $line = 0
+            $li = [System.Xml.IXmlLineInfo]$el
+            if ($li.HasLineInfo()) { $line = $li.LineNumber }
+            $script:stats.pairs++
+            $script:findings += [pscustomobject]@{
+                File   = $file
+                Line   = $line
+                Elem   = "$($el.Name.LocalName)⊕$($chain.Label)/$($st.name)"
+                Fg     = if ($op -lt 0.999) { "$fgV ×$([Math]::Round($op,2))" } else { $fgV }
+                Bg     = if ($bgObj.Key) { '{'+$bgObj.Key+'}' } else { $bgObj.Dark }
+                Mixed  = ($fg.Kind -ne $bgObj.Kind)
+                CDark  = Con $fgD $bgObj.Dark
+                CLight = Con $fgL $bgObj.Light
+                IsText = $isText
+                Need   = $need
+                Size   = if ($fs -gt 0) { "$([int]$fs)px" } else { '' }
+                Large  = $isLarge
+            }
+        }
+    }
+
     foreach ($attr in @('Foreground','Fill')) {
+        if ($attr -eq 'Foreground' -and $handledFg) { continue }
         $fgRaw = $el.Attribute($attr)
         if (-not $fgRaw) { continue }
         $fg = Resolve $fgRaw.Value
@@ -528,7 +840,7 @@ function WalkStyles($doc, $file) {
                 $p = $s.Attribute('Property'); $v = $s.Attribute('Value')
                 if ($p -and $v) { $ts[$p.Value] = $v.Value }
             }
-            if ($ts.Count -gt 0) { $trigSetters += ,$ts }
+            if ($ts.Count -gt 0) { $trigSetters += ,@{ Set=$ts; Disabled=(Test-DisabledTrigger $t) } }
         }
 
         # ── 誤報過濾：模板沒有 Foreground 消費者 → Style 層 Foreground 是死 setter ──
@@ -563,17 +875,19 @@ function WalkStyles($doc, $file) {
         if ($sli.HasLineInfo()) { $line = $sli.LineNumber }
 
         # 基礎 + 每個觸發器狀態各檢一次
-        $states = @(@{ name='基礎'; set=$setters })
+        $states = @(@{ name='基礎'; set=$setters; disabled=$false })
         foreach ($ts in $trigSetters) {
             $merged = @{}; $setters.Keys | ForEach-Object { $merged[$_] = $setters[$_] }
-            $ts.Keys | ForEach-Object { $merged[$_] = $ts[$_] }
-            $states += @{ name='觸發'; set=$merged }
+            $ts.Set.Keys | ForEach-Object { $merged[$_] = $ts.Set[$_] }
+            $states += @{ name='觸發'; set=$merged; disabled=$ts.Disabled }
         }
 
         foreach ($st in $states) {
             $fgv = $st.set['Foreground']; $bgv = $st.set['Background']
             if (-not $fgv -or -not $bgv) { continue }
             if ($fgDead) { $script:stats.deadfg++; continue }
+            # 停用態（IsEnabled=False 觸發）：WCAG 1.4.3 豁免，計數回報、不評分
+            if ($st.disabled) { $script:stats.disabled++; continue }
             $fg = Resolve $fgv; $bg = Resolve $bgv
             if (-not $fg -or -not $bg) { continue }
             if ($fg.Kind -in @('other','alpha','transparent','unknownkey')) { continue }
@@ -616,6 +930,7 @@ foreach ($f in $files) {
         $doc = [System.Xml.Linq.XDocument]::Load($f.FullName, [System.Xml.Linq.LoadOptions]::SetLineInfo)
     } catch { Write-Warning "解析失敗：$($f.Name) — $_"; continue }
 
+    $script:curFile = $f.FullName   # 具名 Style 查找的「同檔優先」範圍
     Walk $doc.Root $null $f.Name
     WalkStyles $doc $f.Name
 }
@@ -626,6 +941,9 @@ foreach ($f in $files) {
 if ($stats.deadfg -gt 0) {
     # 過濾不靜默：被判定為死 setter 的配對要讓使用者知道有幾組、憑什麼被排除
     Write-Host "已排除 $($stats.deadfg) 組 Style 配對：模板無 Foreground 消費者（無 ContentPresenter/TextBlock 等，Foreground 不會被渲染）" -ForegroundColor DarkGray
+}
+if ($stats.disabled -gt 0) {
+    Write-Host "已豁免 $($stats.disabled) 組停用態配對（IsEnabled=False 觸發；WCAG 1.4.3 不要求停用控制項的文字對比）" -ForegroundColor DarkGray
 }
 ""
 
