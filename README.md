@@ -103,6 +103,7 @@ Wrong guess? Override with `xamlcontrast.config.json` ([schema](docs/config-sche
 ```bash
 xamlcontrast src/MyApp --json report.json          # exit 1 on any fail
 xamlcontrast src/MyApp --fail-on warn              # strict: everything must meet AA
+xamlcontrast src/MyApp --sarif audit.sarif         # GitHub code scanning format
 ```
 
 Exit codes: `1` on failure, `1` when **zero pairs resolved** (an empty scan is not a pass),

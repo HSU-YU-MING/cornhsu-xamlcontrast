@@ -29,6 +29,10 @@ inputs:
     description: '把 report.json 當 artifact 上傳'
     required: false
     default: 'true'
+  sarif:
+    description: '上傳 SARIF 到 GitHub code scanning（需 security-events: write 權限與 GitHub Advanced Security／公開 repo）'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -55,6 +59,7 @@ runs:
       run: |
         set +e
         args=("${{ inputs.root }}" --json "$RUNNER_TEMP/xamlcontrast-report.json")
+        [ "${{ inputs.sarif }}" = "true" ] && args+=(--sarif "$RUNNER_TEMP/xamlcontrast.sarif")
         [ "${{ inputs.fail-on }}" = "warn" ] && args+=(--fail-on warn)
         [ "${{ inputs.strict-palette }}" = "true" ] && args+=(--strict-palette)
         [ -n "${{ inputs.baseline }}" ] && args+=(--baseline "${{ inputs.baseline }}")
@@ -74,6 +79,25 @@ runs:
           | select(.category == "fail" or .category == "warn")
           | "::\(if .category == "fail" then "error" else "warning" end) file=\($root)/\(.file),line=\(.line)::contrast \(.ratioDark):1 dark / \(.ratioLight):1 light (need \(.threshold)) — fg=\(.fg) bg=\(.bg) [\(.symmetry)]"
         ' "$report" || true
+
+    # SARIF 的路徑是 root 相對 —— 先補上 root 前綴變成 repo 相對，code scanning 才對得上檔案
+    - name: Upload SARIF to code scanning
+      if: ${{ always() && inputs.sarif == 'true' }}
+      continue-on-error: true   # 無 Advanced Security 的私有 repo 會 403，不該紅掉整個 job
+      shell: bash
+      run: |
+        f="$RUNNER_TEMP/xamlcontrast.sarif"
+        [ -f "$f" ] || exit 0
+        jq --arg root "${{ inputs.root }}" \
+          '(.runs[].results[].locations[].physicalLocation.artifactLocation.uri) |= ($root + "/" + .)' \
+          "$f" > "$RUNNER_TEMP/xamlcontrast.repo.sarif"
+        mv "$RUNNER_TEMP/xamlcontrast.repo.sarif" "$f"
+    - name: Upload SARIF
+      if: ${{ always() && inputs.sarif == 'true' }}
+      continue-on-error: true
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ runner.temp }}/xamlcontrast.sarif
 
     - name: Upload report
       if: ${{ always() && inputs.upload-report == 'true' }}

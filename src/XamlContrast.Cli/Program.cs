@@ -12,6 +12,7 @@ var showOk = false;
 var failOnWarn = false;
 var strictPalette = false;
 string? jsonPath = null;
+string? sarifPath = null;
 string? baselinePath = null;
 string? writeBaselinePath = null;
 string? root = null;
@@ -30,6 +31,10 @@ for (var i = 0; i < args.Length; i++)
         case "--json":
             if (i + 1 >= args.Length) { Console.Error.WriteLine("--json takes a file path"); return 2; }
             jsonPath = args[++i];
+            break;
+        case "--sarif":
+            if (i + 1 >= args.Length) { Console.Error.WriteLine("--sarif takes a file path"); return 2; }
+            sarifPath = args[++i];
             break;
         case "--baseline":
             // 路徑可省略 —— 預設檔名慣例 xamlcontrast-baseline.json
@@ -88,6 +93,15 @@ if (jsonPath is not null)
 {
     File.WriteAllText(jsonPath, Report.ToJson(result));
     Console.WriteLine($"json written: {jsonPath}");
+}
+
+if (sarifPath is not null)
+{
+    var ver = typeof(Program).Assembly
+        .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+        is [System.Reflection.AssemblyInformationalVersionAttribute va, ..] ? va.InformationalVersion.Split('+')[0] : "0.0.0";
+    File.WriteAllText(sarifPath, Report.ToSarif(result, ver));
+    Console.WriteLine($"sarif written: {sarifPath}");
 }
 
 var fail = result.CountOf(Category.Fail);
@@ -171,6 +185,7 @@ static void PrintUsage()
 
         options:
           --json <path>            write machine-readable report (summary + findings)
+          --sarif <path>           write SARIF 2.1.0 (GitHub code scanning; fail/warn only)
           --fail-on warn           also fail the run when pairs are below AA but above 2/3
           --strict-palette         fail the run when palette detection degrades
           --baseline [path]        ratchet mode: only fail on NEW or WORSENED failures

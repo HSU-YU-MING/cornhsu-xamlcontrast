@@ -101,6 +101,70 @@ public static class Report
     }
 
     /// <summary>
+    /// SARIF 2.1.0（GitHub code scanning 消費）。只輸出 fail/warn ——
+    /// ok/decorative 灌進 Security tab 是噪音；退化計數器不屬於 SARIF 的語彙，
+    /// machine-readable 的退化資訊仍以 --json 的 summary 為準。
+    /// </summary>
+    public static string ToSarif(AuditResult r, string toolVersion)
+    {
+        var results = r.Findings
+            .Where(f => f.Category is Category.Fail or Category.Warn)
+            .Select(f => new
+            {
+                ruleId = "wcag-contrast",
+                level = f.Category == Category.Fail ? "error" : "warning",
+                message = new
+                {
+                    text = $"Contrast {f.RatioDark}:1 dark / {f.RatioLight}:1 light — needs {f.Need}:1 " +
+                           $"(fg={f.Fg}, bg={f.Bg}, {SymmetryLabel(f.Symmetry)}, {f.Element})",
+                },
+                locations = new[]
+                {
+                    new
+                    {
+                        physicalLocation = new
+                        {
+                            artifactLocation = new { uri = f.File }, // root 相對、正斜線
+                            region = new { startLine = Math.Max(f.Line, 1) },
+                        },
+                    },
+                },
+            });
+
+        var payload = new
+        {
+            version = "2.1.0",
+            runs = new[]
+            {
+                new
+                {
+                    tool = new
+                    {
+                        driver = new
+                        {
+                            name = "XamlContrast",
+                            version = toolVersion,
+                            informationUri = "https://github.com/HSU-YU-MING/cornhsu-xamlcontrast",
+                            rules = new[]
+                            {
+                                new
+                                {
+                                    id = "wcag-contrast",
+                                    name = "WcagContrast",
+                                    shortDescription = new { text = "Text contrast below WCAG 2.x AA" },
+                                    helpUri = "https://github.com/HSU-YU-MING/cornhsu-xamlcontrast#readme",
+                                },
+                            },
+                        },
+                    },
+                    results,
+                },
+            },
+        };
+        return JsonSerializer.Serialize(payload, JsonOpts);
+    }
+
+    /// <summary>
     /// 主控台報告。逐段對應原型的輸出（那是規格），但文案改英文（M3 合約）。
     /// </summary>
     public static string ToConsole(AuditResult r, bool showOk = false)

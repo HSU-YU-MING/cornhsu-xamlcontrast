@@ -5,6 +5,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+### Added
+- `--sarif <path>`: SARIF 2.1.0 output for GitHub code scanning (fail/warn only —
+  ok/decorative would be noise in the Security tab; degradation counters remain in
+  `--json`'s summary). Action input `sarif: true` uploads it (needs
+  `security-events: write`).
+
 ## [0.2.0] - 2026-07-31
 
 ### Added

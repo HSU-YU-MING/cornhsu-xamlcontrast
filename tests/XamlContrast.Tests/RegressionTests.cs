@@ -174,6 +174,30 @@ public class RegressionTests
         Assert.Contains("\"parseErrors\": 1", Report.ToJson(r));
     }
 
+    // SARIF：只輸出 fail/warn（ok/decorative 灌進 code scanning 是噪音），
+    // level 對應 error/warning，路徑是 root 相對正斜線
+    [Fact]
+    public void SarifCarriesOnlyFailAndWarnWithLevels()
+    {
+        using var fx = new Fixture();
+        fx.File("Views/Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <TextBlock Foreground="#EEEEEE" Text="fail"/>
+              <TextBlock Foreground="#8A8A8A" Text="warn ~3.4"/>
+              <TextBlock Foreground="#111111" Text="ok"/>
+              <Rectangle Fill="#F5F5F5"/>
+            </Grid>
+            """);
+        var sarif = Report.ToSarif(fx.Run(), "9.9.9");
+        Assert.Contains("\"version\": \"2.1.0\"", sarif);
+        Assert.Contains("\"level\": \"error\"", sarif);
+        Assert.Contains("\"level\": \"warning\"", sarif);
+        Assert.Contains("\"uri\": \"Views/Main.xaml\"", sarif);
+        // ok 與裝飾不進 SARIF —— 數 results 的個數
+        var doc = System.Text.Json.JsonDocument.Parse(sarif);
+        Assert.Equal(2, doc.RootElement.GetProperty("runs")[0].GetProperty("results").GetArrayLength());
+    }
+
     // 4.5 輸出合約：退化要機器可讀 —— summary 區塊要有 paletteSource / unresolved / skipped
     [Fact]
     public void JsonSummaryCarriesDegradationCounters()
