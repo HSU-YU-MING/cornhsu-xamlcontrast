@@ -20,7 +20,7 @@ xamlcontrast path/to/your/wpf/project
 ```
 
 > Requires the **.NET 10 runtime** (the analysis itself is pure XML — runs on Linux CI too).
-> 0.x: pin exact versions (`--version 0.2.0`). Interfaces freeze at 1.0.
+> 0.x: pin exact versions (`--version 0.4.0`). Interfaces freeze at 1.0.
 
 ## What it looks like
 
@@ -141,7 +141,7 @@ Suppressed pairs are counted in `summary.suppressed`; nothing disappears silentl
 ### GitHub Action
 
 ```yaml
-- uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.1.0   # 0.x: pin exact version
+- uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.4.0   # 0.x: pin exact version
   with:
     root: src/MyApp
 ```

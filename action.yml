@@ -7,30 +7,34 @@ branding:
 
 inputs:
   root:
-    description: '要掃的專案根目錄（含 XAML）'
+    description: 'Root directory of the project to scan (the one containing your XAML)'
     required: true
+  working-directory:
+    description: 'Directory to run in (`root` is resolved relative to it)'
+    required: false
+    default: '.'
   version:
-    description: 'Cornhsu.XamlContrast 工具版本（省略 = 最新；0.x 期間建議 pin）'
+    description: 'Cornhsu.XamlContrast tool version (omit for latest; pinning is recommended while 0.x)'
     required: false
     default: ''
   fail-on:
-    description: 'fail（預設）或 warn（偏低也擋——AA 全過）'
+    description: 'fail (default), or warn to also gate on near-threshold pairs (i.e. require a clean AA pass)'
     required: false
     default: 'fail'
   baseline:
-    description: 'baseline 檔路徑（ratchet 模式：只擋新增/惡化；檔案需 commit 進 repo）'
+    description: 'Path to a baseline file (ratchet mode: only gate on new or worsened pairs; the file must be committed to the repo)'
     required: false
     default: ''
   strict-palette:
-    description: '色盤偵測退化（退回只算寫死色碼）時直接失敗'
+    description: 'Fail outright when palette detection degrades (falls back to hard-coded colors only)'
     required: false
     default: 'false'
   upload-report:
-    description: '把 report.json 當 artifact 上傳'
+    description: 'Upload report.json as an artifact'
     required: false
     default: 'true'
   sarif:
-    description: '上傳 SARIF 到 GitHub code scanning（需 security-events: write 權限與 GitHub Advanced Security／公開 repo）'
+    description: 'Upload SARIF to GitHub code scanning (requires security-events: write, plus GitHub Advanced Security or a public repo)'
     required: false
     default: 'false'
 
@@ -56,6 +60,7 @@ runs:
     - name: Run audit
       id: audit
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       run: |
         set +e
         args=("${{ inputs.root }}" --json "$RUNNER_TEMP/xamlcontrast-report.json")
@@ -67,20 +72,22 @@ runs:
         echo "exit=$?" >> "$GITHUB_OUTPUT"
 
     # 破的配對直接標在 PR 的行上（::error 註記吃 workspace 相對路徑；
-    # findings 的 file 是「root 相對、正斜線」路徑，前綴 root 即為 workspace 路徑）
+    # findings 的 file 是「root 相對、正斜線」路徑，前綴 working-directory + root 即為
+    # workspace 路徑。前綴組完要把 "./" 與重複的 "/" 收乾淨，否則 GitHub 對不上檔案。）
     - name: Annotate failing pairs
       if: ${{ always() }}
       shell: bash
       run: |
         report="$RUNNER_TEMP/xamlcontrast-report.json"
         [ -f "$report" ] || exit 0
-        jq -r --arg root "${{ inputs.root }}" '
+        prefix=$(echo "${{ inputs.working-directory }}/${{ inputs.root }}" | sed 's|^\./||; s|//*|/|g; s|/$||')
+        jq -r --arg root "$prefix" '
           .findings[]
           | select(.category == "fail" or .category == "warn")
           | "::\(if .category == "fail" then "error" else "warning" end) file=\($root)/\(.file),line=\(.line)::contrast \(.ratioDark):1 dark / \(.ratioLight):1 light (need \(.threshold)) — fg=\(.fg) bg=\(.bg) [\(.symmetry)]"
         ' "$report" || true
 
-    # SARIF 的路徑是 root 相對 —— 先補上 root 前綴變成 repo 相對，code scanning 才對得上檔案
+    # SARIF 的路徑是 root 相對 —— 先補上前綴變成 repo 相對，code scanning 才對得上檔案
     - name: Upload SARIF to code scanning
       if: ${{ always() && inputs.sarif == 'true' }}
       continue-on-error: true   # 無 Advanced Security 的私有 repo 會 403，不該紅掉整個 job
@@ -88,7 +95,8 @@ runs:
       run: |
         f="$RUNNER_TEMP/xamlcontrast.sarif"
         [ -f "$f" ] || exit 0
-        jq --arg root "${{ inputs.root }}" \
+        prefix=$(echo "${{ inputs.working-directory }}/${{ inputs.root }}" | sed 's|^\./||; s|//*|/|g; s|/$||')
+        jq --arg root "$prefix" \
           '(.runs[].results[].locations[].physicalLocation.artifactLocation.uri) |= ($root + "/" + .)' \
           "$f" > "$RUNNER_TEMP/xamlcontrast.repo.sarif"
         mv "$RUNNER_TEMP/xamlcontrast.repo.sarif" "$f"

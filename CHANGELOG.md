@@ -5,6 +5,32 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-07
+
+### Added
+- `working-directory` action input, matching the sibling Parity action. `root` is resolved
+  relative to it, and both the inline `::error` annotations and the SARIF paths are prefixed
+  accordingly (with `./` and duplicate slashes normalized away, or GitHub fails to match the file).
+- `.editorconfig` (single source of truth for formatting) and `.github/dependabot.yml`
+  (nuget + github-actions).
+- CI gained a `dotnet format` check, a three-OS build/test matrix, and a
+  pack → `dotnet tool install` → run smoke test. The matrix matters here because the audience
+  is WPF developers, whose machines and CI are overwhelmingly Windows — "Linux also works"
+  is a selling point, not a reason to skip the primary platform.
+
+### Changed
+- **All eight `action.yml` input descriptions are now English.** The action's own `description`
+  was already English, so the Marketplace listing was half-translated: an English summary
+  above a list of Chinese parameter docs.
+
+### Fixed
+- **Stale version references in the docs.** The README pinning example said `--version 0.2.0`
+  and the zh-Hant one said `0.1.0` (two different stale values), while the GitHub Action example
+  still pinned `@v0.1.0` — three versions behind. All now say 0.4.0.
+- **The parsing-rule count disagreed with itself across four places.** README (en) said thirteen,
+  README (zh-Hant) said thirteen in one paragraph and twelve in another, ROADMAP said eleven,
+  and Parity's ROADMAP cited twelve. The code has a rule 13; everything now says thirteen.
+
 ## [0.3.0] - 2026-07-31
 
 ### Added

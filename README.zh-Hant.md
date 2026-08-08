@@ -13,7 +13,8 @@ dotnet tool install -g Cornhsu.XamlContrast
 xamlcontrast 你的專案路徑
 ```
 
-> 0.x 期間請 pin 確切版本（`--version 0.1.0`）；1.0 後介面凍結。
+> 需要 **.NET 10 執行環境**（解析本身是純 XML —— Linux CI 也跑得動）。
+> 0.x 期間請 pin 確切版本（`--version 0.4.0`）；1.0 後介面凍結。
 
 ## 開發時它幫你什麼
 
@@ -90,7 +91,7 @@ xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # CI 裡
 - **兩套獨立實作互證**：PowerShell 原型（規格）與 .NET 版在四個驗證專案上
   數字完全一致 —— 精確到每筆 fail 的 `file:line` 與退出碼，
   `scripts/verify-baselines.ps1` 隨時可重跑。
-- **十二條解析規則沒有一條是在白板上設計的** —— 每條都來自真實的假警報或漏報實查，
+- **十三條解析規則沒有一條是在白板上設計的** —— 每條都來自真實的假警報或漏報實查，
   第 12 條（模板根背景）甚至是在驗收工具自己促成的修正時挖出來的。
 - **開發期間工具自己出過八次「看起來健康但錯」的報告，每一次都變成回歸測試。**
   用血寫成的第一原則：**稽核工具最大的風險不是漏報，是謊報健康。**

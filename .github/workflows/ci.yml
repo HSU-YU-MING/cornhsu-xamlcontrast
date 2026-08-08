@@ -6,6 +6,59 @@ on:
   pull_request:
 
 jobs:
+  # 排版守門（對齊 PolyMigrate 的 CI 形狀）。風格規則見 .editorconfig。
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet format XamlContrast.slnx --verify-no-changes
+
+  # 使用者是 WPF 開發者 —— 他們的機器與 CI 幾乎都在 Windows。
+  # 「Linux 也跑得動」是賣點（下面的 build-test 證明），但不能因此漏掉主力平台。
+  test-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet test XamlContrast.slnx -c Release
+
+  # 打包 + 真的把工具裝起來跑一次:`dotnet pack` 綠不等於 `dotnet tool install` 之後跑得動。
+  pack-smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Pack
+        run: dotnet pack src/XamlContrast.Cli/XamlContrast.Cli.csproj -c Release -p:Version=0.0.0-ci -o nupkg
+      - name: Install the packed tool and run it
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet tool install --global --add-source ./nupkg --version 0.0.0-ci Cornhsu.XamlContrast
+          export PATH="$HOME/.dotnet/tools:$PATH"
+          xamlcontrast --help > /dev/null
+          echo "✓ 打包出來的工具在 ${{ matrix.os }} 上裝得起來也跑得動"
+      - uses: actions/upload-artifact@v7
+        if: matrix.os == 'ubuntu-latest'
+        with:
+          name: nupkg
+          path: nupkg/*.nupkg
+
   build-test:
     name: Build + Test + demo 自我把關
     runs-on: ubuntu-latest   # 解析不依賴 WPF runtime —— Linux 可跑是賣點，CI 就用它證明

@@ -141,62 +141,66 @@ public static partial class PaletteDetector
         switch (config?.Palette.Mode)
         {
             case "pair":
-            {
-                var dFile = RequireFile(root, config.Palette.DarkFile!, "darkFile");
-                var lFile = RequireFile(root, config.Palette.LightFile!, "lightFile");
-                var d = ParseXamlPalette(dFile);
-                var l = ParseXamlPalette(lFile);
-                var pal = new Palette();
-                foreach (var (k, v) in d)
-                    if (l.TryGetValue(k, out var lv)) pal.Entries[k] = (v, lv);
-                return new PaletteDetection
                 {
-                    Palette = pal, Mode = PaletteMode.Pair,
-                    ExcludedFiles = new HashSet<string>([dFile, lFile], StringComparer.OrdinalIgnoreCase),
-                    Description = $"config-forced theme pair: {config.Palette.DarkFile} + {config.Palette.LightFile} ({pal.Count} keys)",
-                };
-            }
-            case "csharp":
-            {
-                var cFile = RequireFile(root, config.Palette.CsharpFile!, "csharpFile");
-                Regex pattern;
-                try
-                {
-                    pattern = config.Palette.CsharpPattern is null
-                        ? CsTuple()
-                        : new Regex(config.Palette.CsharpPattern);
+                    var dFile = RequireFile(root, config.Palette.DarkFile!, "darkFile");
+                    var lFile = RequireFile(root, config.Palette.LightFile!, "lightFile");
+                    var d = ParseXamlPalette(dFile);
+                    var l = ParseXamlPalette(lFile);
+                    var pal = new Palette();
+                    foreach (var (k, v) in d)
+                        if (l.TryGetValue(k, out var lv)) pal.Entries[k] = (v, lv);
+                    return new PaletteDetection
+                    {
+                        Palette = pal,
+                        Mode = PaletteMode.Pair,
+                        ExcludedFiles = new HashSet<string>([dFile, lFile], StringComparer.OrdinalIgnoreCase),
+                        Description = $"config-forced theme pair: {config.Palette.DarkFile} + {config.Palette.LightFile} ({pal.Count} keys)",
+                    };
                 }
-                catch (ArgumentException ex) { throw new ConfigException($"palette.csharpPattern is not a valid regex: {ex.Message}"); }
-                var pal = ParseCsPalette(cFile, pattern);
-                var excl = XamlCandidates(root)
-                    .Where(c => c.Brushes.Count > 0 &&
-                                (double)c.Brushes.Keys.Count(pal.Entries.ContainsKey) / c.Brushes.Count >= 0.5)
-                    .Select(c => c.File);
-                return new PaletteDetection
+            case "csharp":
                 {
-                    Palette = pal, Mode = PaletteMode.CSharp,
-                    ExcludedFiles = new HashSet<string>(excl, StringComparer.OrdinalIgnoreCase),
-                    Description = $"config-forced C# source: {config.Palette.CsharpFile} ({pal.Count} keys)",
-                };
-            }
+                    var cFile = RequireFile(root, config.Palette.CsharpFile!, "csharpFile");
+                    Regex pattern;
+                    try
+                    {
+                        pattern = config.Palette.CsharpPattern is null
+                            ? CsTuple()
+                            : new Regex(config.Palette.CsharpPattern);
+                    }
+                    catch (ArgumentException ex) { throw new ConfigException($"palette.csharpPattern is not a valid regex: {ex.Message}"); }
+                    var pal = ParseCsPalette(cFile, pattern);
+                    var excl = XamlCandidates(root)
+                        .Where(c => c.Brushes.Count > 0 &&
+                                    (double)c.Brushes.Keys.Count(pal.Entries.ContainsKey) / c.Brushes.Count >= 0.5)
+                        .Select(c => c.File);
+                    return new PaletteDetection
+                    {
+                        Palette = pal,
+                        Mode = PaletteMode.CSharp,
+                        ExcludedFiles = new HashSet<string>(excl, StringComparer.OrdinalIgnoreCase),
+                        Description = $"config-forced C# source: {config.Palette.CsharpFile} ({pal.Count} keys)",
+                    };
+                }
             case "single":
-            {
-                var sFile = RequireFile(root, config.Palette.DarkFile!, "darkFile");
-                var brushes = ParseXamlPalette(sFile);
-                var pal = new Palette();
-                foreach (var (k, v) in brushes) pal.Entries[k] = (v, v);
-                return new PaletteDetection
                 {
-                    Palette = pal, Mode = PaletteMode.Single,
-                    ExcludedFiles = new HashSet<string>([sFile], StringComparer.OrdinalIgnoreCase),
-                    Description = $"config-forced single-theme palette: {config.Palette.DarkFile} ({pal.Count} keys)",
-                };
-            }
+                    var sFile = RequireFile(root, config.Palette.DarkFile!, "darkFile");
+                    var brushes = ParseXamlPalette(sFile);
+                    var pal = new Palette();
+                    foreach (var (k, v) in brushes) pal.Entries[k] = (v, v);
+                    return new PaletteDetection
+                    {
+                        Palette = pal,
+                        Mode = PaletteMode.Single,
+                        ExcludedFiles = new HashSet<string>([sFile], StringComparer.OrdinalIgnoreCase),
+                        Description = $"config-forced single-theme palette: {config.Palette.DarkFile} ({pal.Count} keys)",
+                    };
+                }
             case "none":
                 // 明選 none = 使用者的決定，不算退化（不觸發 --strict-palette）
                 return new PaletteDetection
                 {
-                    Palette = new Palette(), Mode = PaletteMode.None,
+                    Palette = new Palette(),
+                    Mode = PaletteMode.None,
                     ExcludedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase),
                     Description = "config-forced: no palette — auditing hardcoded colors only",
                 };
@@ -208,14 +212,14 @@ public static partial class PaletteDetector
         // 1) 深淺配對：dark 檔 × light 檔，brush 鍵集重疊 ≥ 50%
         (XamlCandidate D, XamlCandidate L, List<string> Common)? bestPair = null;
         foreach (var d in xaml.Where(c => c.HintDark && !c.HintLight))
-        foreach (var l in xaml.Where(c => c.HintLight && !c.HintDark))
-        {
-            var common = d.Brushes.Keys.Where(l.Brushes.ContainsKey).ToList();
-            var minCount = Math.Min(d.Brushes.Count, l.Brushes.Count);
-            if (minCount > 0 && (double)common.Count / minCount >= 0.5 &&
-                (bestPair is null || common.Count > bestPair.Value.Common.Count))
-                bestPair = (d, l, common);
-        }
+            foreach (var l in xaml.Where(c => c.HintLight && !c.HintDark))
+            {
+                var common = d.Brushes.Keys.Where(l.Brushes.ContainsKey).ToList();
+                var minCount = Math.Min(d.Brushes.Count, l.Brushes.Count);
+                if (minCount > 0 && (double)common.Count / minCount >= 0.5 &&
+                    (bestPair is null || common.Count > bestPair.Value.Common.Count))
+                    bestPair = (d, l, common);
+            }
         if (bestPair is { } p)
         {
             var pal = new Palette();
