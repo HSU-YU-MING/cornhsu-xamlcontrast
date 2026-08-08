@@ -14,7 +14,7 @@ xamlcontrast 你的專案路徑
 ```
 
 > 需要 **.NET 10 執行環境**（解析本身是純 XML —— Linux CI 也跑得動）。
-> 0.x 期間請 pin 確切版本（`--version 0.4.0`）；1.0 後介面凍結。
+> 0.x 期間請 pin 確切版本（`--version 0.5.0`）；1.0 後介面凍結。
 
 ## 實際跑起來長這樣
 
@@ -103,7 +103,7 @@ xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # CI 裡
 ### GitHub Action
 
 ```yaml
-- uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.4.0   # 0.x 期間 pin 確切版本
+- uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.5.0   # 0.x 期間 pin 確切版本
   with:
     root: src/MyApp
 ```

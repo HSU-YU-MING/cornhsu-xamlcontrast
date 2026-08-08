@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-08
+
 ### Added
 - `--md <path>`: a Markdown audit report, and the GitHub Action now posts it as a **PR comment**
   that updates in place instead of piling up (new `comment` input, on by default). Until now the
