@@ -20,7 +20,7 @@ xamlcontrast path/to/your/wpf/project
 ```
 
 > Requires the **.NET 10 runtime** (the analysis itself is pure XML — runs on Linux CI too).
-> 0.x: pin exact versions (`--version 0.5.0`). Interfaces freeze at 1.0.
+> 0.x: pin exact versions (`--version 0.5.1`). Interfaces freeze at 1.0.
 
 ## What it looks like
 
@@ -142,10 +142,27 @@ Suppressed pairs are counted in `summary.suppressed`; nothing disappears silentl
 ### GitHub Action
 
 ```yaml
-- uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.5.0   # 0.x: pin exact version
-  with:
-    root: src/MyApp
+# .github/workflows/contrast.yml (in your project)
+name: Contrast
+on: [pull_request]
+jobs:
+  xamlcontrast:
+    runs-on: ubuntu-latest        # the analysis is pure XML — no Windows needed
+    permissions:
+      contents: read
+      pull-requests: write        # lets the action post the audit report as a PR comment
+      # security-events: write    # only if you also pass `sarif: true`
+    steps:
+      - uses: actions/checkout@v4
+      - uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.5.1   # 0.x: pin exact version
+        with:
+          root: src/MyApp
 ```
+
+> **`pull-requests: write` is what makes the PR comment work.** Without it that step gets a 403.
+> It is deliberately `continue-on-error`, so the run still gates correctly and you only lose the
+> comment — but the failure is quiet, so it is worth getting right the first time.
+> (Forked PRs get a read-only token regardless; that case is expected and not a misconfiguration.)
 
 Failing pairs show up as inline annotations on the PR, and the audit report is posted as a
 PR comment that updates in place instead of piling up. Alongside the findings table, the comment

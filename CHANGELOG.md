@@ -5,6 +5,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-08-08
+
+### Fixed
+- The README's GitHub Action example is now a complete, copy-pastable workflow including the
+  `permissions:` block. The previous minimal example omitted `pull-requests: write`, so anyone
+  copying it would have the PR comment step 403 — and because that step is deliberately
+  `continue-on-error` (a forked PR always gets a read-only token, which is expected rather than
+  a misconfiguration), the failure is quiet: the gate still works, the comment just never appears.
+  Documentation only; no behaviour change.
+- The `comment` action input description now states the permission requirement.
+- The Chinese README's CI command list was missing `--sarif` and `--md`.
+
 ## [0.5.0] - 2026-08-08
 
 ### Added

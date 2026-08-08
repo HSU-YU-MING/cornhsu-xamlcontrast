@@ -10,7 +10,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>xamlcontrast</ToolCommandName>
     <PackageId>Cornhsu.XamlContrast</PackageId>
-    <Version>0.5.0</Version>
+    <Version>0.5.1</Version>
     <Description>XamlContrast — static WCAG contrast audit for XAML source. Scans the whole project without launching the app and fails CI when text falls below AA.</Description>
   </PropertyGroup>
 
