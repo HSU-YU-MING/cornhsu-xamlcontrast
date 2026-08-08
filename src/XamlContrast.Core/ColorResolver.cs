@@ -34,11 +34,19 @@ public static partial class ColorResolver
 {
     private static readonly Dictionary<string, string> Named = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["white"] = "#FFFFFF", ["black"] = "#000000", ["gray"] = "#808080",
-        ["darkgray"] = "#A9A9A9", ["lightgray"] = "#D3D3D3",
-        ["red"] = "#FF0000", ["green"] = "#008000", ["blue"] = "#0000FF",
-        ["orange"] = "#FFA500", ["yellow"] = "#FFFF00",
-        ["silver"] = "#C0C0C0", ["whitesmoke"] = "#F5F5F5", ["gainsboro"] = "#DCDCDC",
+        ["white"] = "#FFFFFF",
+        ["black"] = "#000000",
+        ["gray"] = "#808080",
+        ["darkgray"] = "#A9A9A9",
+        ["lightgray"] = "#D3D3D3",
+        ["red"] = "#FF0000",
+        ["green"] = "#008000",
+        ["blue"] = "#0000FF",
+        ["orange"] = "#FFA500",
+        ["yellow"] = "#FFFF00",
+        ["silver"] = "#C0C0C0",
+        ["whitesmoke"] = "#F5F5F5",
+        ["gainsboro"] = "#DCDCDC",
         ["dimgray"] = "#696969",
     };
 
