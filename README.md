@@ -110,6 +110,7 @@ Wrong guess? Override with `xamlcontrast.config.json` —
 xamlcontrast src/MyApp --json report.json          # exit 1 on any fail
 xamlcontrast src/MyApp --fail-on warn              # strict: everything must meet AA
 xamlcontrast src/MyApp --sarif audit.sarif         # GitHub code scanning format
+xamlcontrast src/MyApp --md report.md              # Markdown report (for a PR comment)
 ```
 
 Exit codes: `1` on failure, `1` when **zero pairs resolved** (an empty scan is not a pass),
@@ -146,7 +147,14 @@ Suppressed pairs are counted in `summary.suppressed`; nothing disappears silentl
     root: src/MyApp
 ```
 
-Failing pairs show up as inline annotations on the PR.
+Failing pairs show up as inline annotations on the PR, and the audit report is posted as a
+PR comment that updates in place instead of piling up. Alongside the findings table, the comment
+lists what was **not** evaluated — exemptions, suppressions, parse failures, degraded palette
+detection — because the real risk with an audit tool is not missing a finding, it is falsely
+reporting health.
+
+Inputs: `root` (required), `working-directory`, `version`, `fail-on`, `baseline`,
+`strict-palette`, `comment` (turn off the PR comment), `upload-report`, `sarif`.
 
 ## JSON output
 
@@ -154,6 +162,9 @@ Failing pairs show up as inline annotations on the PR.
 `summary` block carrying every degradation counter — `paletteSource`, `unresolved`,
 `skipped`, `suppressed`, `parseErrors`, `disabledExempt`. If the tool couldn't see
 something, that fact is machine-readable. Consumers should check `schemaVersion`.
+
+`--md report.md` writes the human-readable Markdown version — this is what the Action posts as a
+PR comment, and you can use it directly too.
 
 ## Validated against real products
 

@@ -13,6 +13,7 @@ var failOnWarn = false;
 var strictPalette = false;
 string? jsonPath = null;
 string? sarifPath = null;
+string? mdPath = null;
 string? baselinePath = null;
 string? writeBaselinePath = null;
 string? root = null;
@@ -35,6 +36,10 @@ for (var i = 0; i < args.Length; i++)
         case "--sarif":
             if (i + 1 >= args.Length) { Console.Error.WriteLine("--sarif takes a file path"); return 2; }
             sarifPath = args[++i];
+            break;
+        case "--md":
+            if (i + 1 >= args.Length) { Console.Error.WriteLine("--md takes a file path"); return 2; }
+            mdPath = args[++i];
             break;
         case "--baseline":
             // 路徑可省略 —— 預設檔名慣例 xamlcontrast-baseline.json
@@ -107,45 +112,74 @@ if (sarifPath is not null)
 var fail = result.CountOf(Category.Fail);
 var warn = result.CountOf(Category.Warn);
 
-if (result.Pairs == 0)
+// 退出碼的判定抽成區域函式,因為 --md 的報告要標明 PASS/FAIL —— 得先知道結論才能寫檔。
+// 判定邏輯與各分支的輸出一字未改,只是包了一層。
+var exitCode = DecideExit();
+
+if (mdPath is not null)
 {
-    // 0 組配對時「達標」無意義 —— 沒有任何可稽核的項目。空掃綠燈就是謊報健康。
-    Console.WriteLine("exit 1: resolved 0 pairs — nothing was audited, this result does not mean the project passes");
-    return 1;
+    File.WriteAllText(mdPath, Report.ToMarkdown(result, exitCode));
+    Console.WriteLine($"markdown written: {mdPath}");
 }
 
-if (writeBaselinePath is not null)
-{
-    // 導入模式第一步：把現況凍成已知債清單（存進 repo）。之後只擋新增與惡化。
-    File.WriteAllText(writeBaselinePath, Baseline.Write(result));
-    Console.WriteLine($"baseline written: {writeBaselinePath} ({fail} known failure pair(s))");
-    return 0;
-}
+return exitCode;
 
-if (baselinePath is not null)
+int DecideExit()
 {
-    if (!File.Exists(baselinePath))
+
+    if (result.Pairs == 0)
     {
-        Console.Error.WriteLine($"baseline not found: {baselinePath}");
-        return 2;
+        // 0 組配對時「達標」無意義 —— 沒有任何可稽核的項目。空掃綠燈就是謊報健康。
+        Console.WriteLine("exit 1: resolved 0 pairs — nothing was audited, this result does not mean the project passes");
+        return 1;
     }
-    Baseline.ComparisonResult cmp;
-    try { cmp = Baseline.Compare(result, File.ReadAllText(baselinePath)); }
-    catch (Exception ex)
+
+    if (writeBaselinePath is not null)
     {
-        // 壞掉的 baseline 要有好訊息，不是裸拋堆疊
-        Console.Error.WriteLine($"baseline is not valid ({baselinePath}): {ex.Message}");
-        Console.Error.WriteLine("regenerate it with --write-baseline");
-        return 2;
+        // 導入模式第一步：把現況凍成已知債清單（存進 repo）。之後只擋新增與惡化。
+        File.WriteAllText(writeBaselinePath, Baseline.Write(result));
+        Console.WriteLine($"baseline written: {writeBaselinePath} ({fail} known failure pair(s))");
+        return 0;
     }
-    Console.WriteLine($"baseline: known debt {cmp.KnownDebt}, paid off {cmp.PaidDebt} (debt may only shrink)");
-    foreach (var f in cmp.NewFailures)
-        Console.WriteLine($"  NEW failure: {f.File}:{f.Line} {f.Element} fg={f.Fg} bg={f.Bg}");
-    foreach (var e in cmp.WorsenedFailures)
-        Console.WriteLine($"  WORSENED: {e.File} {e.Element} fg={e.Fg} bg={e.Bg} (now {e.Count} occurrence(s))");
-    if (!cmp.Passes)
+
+    if (baselinePath is not null)
     {
-        Console.WriteLine($"exit 1: {cmp.NewFailures.Count} new / {cmp.WorsenedFailures.Count} worsened failure(s) vs baseline");
+        if (!File.Exists(baselinePath))
+        {
+            Console.Error.WriteLine($"baseline not found: {baselinePath}");
+            return 2;
+        }
+        Baseline.ComparisonResult cmp;
+        try { cmp = Baseline.Compare(result, File.ReadAllText(baselinePath)); }
+        catch (Exception ex)
+        {
+            // 壞掉的 baseline 要有好訊息，不是裸拋堆疊
+            Console.Error.WriteLine($"baseline is not valid ({baselinePath}): {ex.Message}");
+            Console.Error.WriteLine("regenerate it with --write-baseline");
+            return 2;
+        }
+        Console.WriteLine($"baseline: known debt {cmp.KnownDebt}, paid off {cmp.PaidDebt} (debt may only shrink)");
+        foreach (var f in cmp.NewFailures)
+            Console.WriteLine($"  NEW failure: {f.File}:{f.Line} {f.Element} fg={f.Fg} bg={f.Bg}");
+        foreach (var e in cmp.WorsenedFailures)
+            Console.WriteLine($"  WORSENED: {e.File} {e.Element} fg={e.Fg} bg={e.Bg} (now {e.Count} occurrence(s))");
+        if (!cmp.Passes)
+        {
+            Console.WriteLine($"exit 1: {cmp.NewFailures.Count} new / {cmp.WorsenedFailures.Count} worsened failure(s) vs baseline");
+            return 1;
+        }
+        if (failOnWarn && warn > 0)
+        {
+            Console.WriteLine($"exit 1: {warn} pair(s) below AA (--fail-on warn)");
+            return 1;
+        }
+        Console.WriteLine("exit 0: no new or worsened failures vs baseline");
+        return 0;
+    }
+
+    if (fail > 0)
+    {
+        Console.WriteLine($"exit 1: {fail} pair(s) below threshold x 2/3 ({warn} warn)");
         return 1;
     }
     if (failOnWarn && warn > 0)
@@ -153,28 +187,16 @@ if (baselinePath is not null)
         Console.WriteLine($"exit 1: {warn} pair(s) below AA (--fail-on warn)");
         return 1;
     }
-    Console.WriteLine("exit 0: no new or worsened failures vs baseline");
+    if (strictPalette && detection.IsDegraded)
+    {
+        Console.WriteLine("exit 1: palette detection failed and --strict-palette is set");
+        return 1;
+    }
+    if (warn > 0) Console.WriteLine($"exit 0: no fail, but {warn} pair(s) below AA");
+    else Console.WriteLine("exit 0: all pairs meet AA");
     return 0;
-}
 
-if (fail > 0)
-{
-    Console.WriteLine($"exit 1: {fail} pair(s) below threshold x 2/3 ({warn} warn)");
-    return 1;
-}
-if (failOnWarn && warn > 0)
-{
-    Console.WriteLine($"exit 1: {warn} pair(s) below AA (--fail-on warn)");
-    return 1;
-}
-if (strictPalette && detection.IsDegraded)
-{
-    Console.WriteLine("exit 1: palette detection failed and --strict-palette is set");
-    return 1;
-}
-if (warn > 0) Console.WriteLine($"exit 0: no fail, but {warn} pair(s) below AA");
-else Console.WriteLine("exit 0: all pairs meet AA");
-return 0;
+}   // DecideExit
 
 static void PrintUsage()
 {
@@ -186,6 +208,7 @@ static void PrintUsage()
         options:
           --json <path>            write machine-readable report (summary + findings)
           --sarif <path>           write SARIF 2.1.0 (GitHub code scanning; fail/warn only)
+          --md <path>              write a Markdown report (suitable for a PR comment)
           --fail-on warn           also fail the run when pairs are below AA but above 2/3
           --strict-palette         fail the run when palette detection degrades
           --baseline [path]        ratchet mode: only fail on NEW or WORSENED failures

@@ -16,6 +16,30 @@ xamlcontrast 你的專案路徑
 > 需要 **.NET 10 執行環境**（解析本身是純 XML —— Linux CI 也跑得動）。
 > 0.x 期間請 pin 確切版本（`--version 0.4.0`）；1.0 後介面凍結。
 
+## 實際跑起來長這樣
+
+對 [`samples/demo`](samples/demo)（刻意做壞的示範）跑一次：
+
+```
+palette: auto-detected theme pair: Themes\DarkTheme.xaml + Themes\LightTheme.xaml (6 keys)
+files 1 | text-on-background pairs 8
+exempted 1 disabled-state pair(s) (IsEnabled=False; WCAG 1.4.3 ...)
+suppressed 1 pair(s) via xamlcontrast-ignore comments
+
+  ok          3
+  fail        3
+  decorative  1
+
+===== fail (3) =====
+MainWindow.xaml:30  TextBlock                fg=White                     bg={Surface}  dark=16.67:1 light=   1:1  [light-fails] need 4.5 12px
+MainWindow.xaml:26  TextBlock                fg={DynamicResource DimText} bg={Bg}       dark= 2.11:1 light= 1.6:1  [both-low]    need 4.5 12px
+MainWindow.xaml:6   Style[HoverBtn]/trigger  fg=#9A9A9A                   bg={Surface}  dark= 5.92:1 light=2.81:1  [light-fails] need 4.5
+
+exit 1: 3 pair(s) below threshold x 2/3 (0 warn)
+```
+
+工具的輸出是英文（跨語言使用者共用同一份 CI log）；這份說明文件是中文。
+
 ## 開發時它幫你什麼
 
 - **秒級取代目測**：不用開 App、切兩個主題逐畫面用眼睛判斷 —— commit 前一行指令掃完全專案。
@@ -75,6 +99,30 @@ xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # CI 裡
 <!-- xamlcontrast-ignore: 浮水印，刻意低對比 -->
 <TextBlock Opacity="0.4" Text="草稿" ... />
 ```
+
+### GitHub Action
+
+```yaml
+- uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.4.0   # 0.x 期間 pin 確切版本
+  with:
+    root: src/MyApp
+```
+
+破的配對會**直接標在 PR 的那一行**，同時把稽核報告貼成一則 PR 留言（同一則反覆更新，不洗版）。
+留言裡除了落差表，也會列出「沒被評估到的東西」——豁免、壓掉、解析失敗、色盤偵測退化，
+因為這個工具最大的風險不是漏報，是謊報健康。
+
+輸入：`root`（必填）、`working-directory`、`version`、`fail-on`、`baseline`、
+`strict-palette`、`comment`（關掉 PR 留言）、`upload-report`、`sarif`。
+
+## JSON 輸出
+
+`--json report.json` 產出兩層報告：`findings`（每組配對一筆）加一個 `summary` 區塊，
+裡面有**全部的退化計數** —— `paletteSource`、`unresolved`、`skipped`、`suppressed`、
+`parseErrors`、`disabledExempt`。工具沒看到的東西，都是機器可讀的。
+消費端請檢查 `schemaVersion`。
+
+`--md report.md` 則產出給人讀的 Markdown（Action 用它貼 PR 留言，也可以自己拿去用）。
 
 ## 實戰成績
 

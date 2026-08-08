@@ -29,6 +29,10 @@ inputs:
     description: 'Fail outright when palette detection degrades (falls back to hard-coded colors only)'
     required: false
     default: 'false'
+  comment:
+    description: 'Post/update the audit report as a PR comment (requires pull-requests: write)'
+    required: false
+    default: 'true'
   upload-report:
     description: 'Upload report.json as an artifact'
     required: false
@@ -64,12 +68,44 @@ runs:
       run: |
         set +e
         args=("${{ inputs.root }}" --json "$RUNNER_TEMP/xamlcontrast-report.json")
+        args+=(--md "$RUNNER_TEMP/xamlcontrast-report.md")
         [ "${{ inputs.sarif }}" = "true" ] && args+=(--sarif "$RUNNER_TEMP/xamlcontrast.sarif")
         [ "${{ inputs.fail-on }}" = "warn" ] && args+=(--fail-on warn)
         [ "${{ inputs.strict-palette }}" = "true" ] && args+=(--strict-palette)
         [ -n "${{ inputs.baseline }}" ] && args+=(--baseline "${{ inputs.baseline }}")
         xamlcontrast "${args[@]}"
         echo "exit=$?" >> "$GITHUB_OUTPUT"
+
+    # 把稽核報告貼成 PR 留言（同一則反覆更新，不洗版）。
+    # 行內註記只標在出問題的那一行，PR 上沒有總覽 —— reviewer 看不到「總共破幾組、
+    # 色盤有沒有偵測失敗、有幾組被豁免或壓掉」。退化計數必須出現在人會看的那份報告裡。
+    # continue-on-error：fork PR 的 GITHUB_TOKEN 唯讀，貼留言會 403 —— 那是預期的，
+    # 不該讓整個 job 紅在這步（gate 仍在最後一步照常擋）。
+    - name: Comment report on PR
+      if: ${{ github.event_name == 'pull_request' && inputs.comment == 'true' }}
+      continue-on-error: true
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        report="$RUNNER_TEMP/xamlcontrast-report.md"
+        out="$RUNNER_TEMP/xamlcontrast-comment.md"
+        [ -f "$report" ] || { echo "no report to post"; exit 0; }
+        marker='<!-- xamlcontrast-report -->'
+        # GitHub 留言上限 ~65536 字，超過就截斷並附提示（完整內容在 artifact）
+        if [ "$(wc -c < "$report")" -gt 60000 ]; then
+          { echo "$marker"; head -c 60000 "$report"; printf '\n\n<sub>⚠️ Report truncated because it exceeds the comment size limit — see the xamlcontrast-report artifact on this workflow run for the full version.</sub>\n'; } > "$out"
+        else
+          { echo "$marker"; cat "$report"; } > "$out"
+        fi
+        pr=${{ github.event.pull_request.number }}
+        existing=$(gh api "repos/$GITHUB_REPOSITORY/issues/$pr/comments" \
+          --jq 'map(select(.body | startswith("<!-- xamlcontrast-report -->"))) | .[0].id // empty')
+        if [ -n "$existing" ]; then
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing" -F body=@"$out" >/dev/null
+        else
+          gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$pr/comments" -F body=@"$out" >/dev/null
+        fi
 
     # 破的配對直接標在 PR 的行上（::error 註記吃 workspace 相對路徑；
     # findings 的 file 是「root 相對、正斜線」路徑，前綴 working-directory + root 即為
@@ -112,7 +148,9 @@ runs:
       uses: actions/upload-artifact@v7
       with:
         name: xamlcontrast-report
-        path: ${{ runner.temp }}/xamlcontrast-report.json
+        path: |
+          ${{ runner.temp }}/xamlcontrast-report.json
+          ${{ runner.temp }}/xamlcontrast-report.md
         if-no-files-found: ignore
 
     # 報告與註記都出去了，現在才依 gate 結論決定 job 成敗
