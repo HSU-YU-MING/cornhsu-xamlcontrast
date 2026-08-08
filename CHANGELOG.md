@@ -5,6 +5,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+### Added
+- `--md <path>`: a Markdown audit report, and the GitHub Action now posts it as a **PR comment**
+  that updates in place instead of piling up (new `comment` input, on by default). Until now the
+  Action only produced inline `::error` annotations, which mark the offending line but give the
+  reviewer no overview — no "how many failed in total", no "did palette detection degrade", no
+  "how many were exempted or suppressed". The comment leads with the verdict and, crucially, ends
+  with everything that was **not** evaluated: an audit tool's real risk is not a missed finding,
+  it is falsely reporting health. The sibling project Parity has posted PR comments since 0.2.0;
+  this closes that gap.
+- Chinese README caught up with the English one (117 → 165 lines). It was missing the sample
+  output, the GitHub Action section, and the JSON/Markdown output reference — the other three
+  sibling repos keep both languages within ~15% of each other, only this one had halved.
+
 ## [0.4.0] - 2026-08-07
 
 ### Added
