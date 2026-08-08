@@ -14,7 +14,7 @@ xamlcontrast 你的專案路徑
 ```
 
 > 需要 **.NET 10 執行環境**（解析本身是純 XML —— Linux CI 也跑得動）。
-> 0.x 期間請 pin 確切版本（`--version 0.5.0`）；1.0 後介面凍結。
+> 0.x 期間請 pin 確切版本（`--version 0.5.1`）；1.0 後介面凍結。
 
 ## 實際跑起來長這樣
 
@@ -81,6 +81,8 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
 ```bash
 xamlcontrast src/MyApp --json report.json    # 有 fail 就 exit 1
 xamlcontrast src/MyApp --fail-on warn        # 嚴格模式：全部要過 AA
+xamlcontrast src/MyApp --sarif audit.sarif   # GitHub code scanning 格式
+xamlcontrast src/MyApp --md report.md        # Markdown 報告（可貼 PR 留言）
 ```
 
 退出碼：失敗 `1`、**解析出 0 組配對也是 `1`**（空掃不是通過）、用法錯誤 `2`、其餘 `0`。
@@ -103,10 +105,27 @@ xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # CI 裡
 ### GitHub Action
 
 ```yaml
-- uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.5.0   # 0.x 期間 pin 確切版本
-  with:
-    root: src/MyApp
+# .github/workflows/contrast.yml（你的專案）
+name: Contrast
+on: [pull_request]
+jobs:
+  xamlcontrast:
+    runs-on: ubuntu-latest        # 解析是純 XML，不需要 Windows
+    permissions:
+      contents: read
+      pull-requests: write        # 讓 action 把稽核報告貼成 PR 留言
+      # security-events: write    # 只有在同時開 `sarif: true` 時才需要
+    steps:
+      - uses: actions/checkout@v4
+      - uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.5.1   # 0.x 期間 pin 確切版本
+        with:
+          root: src/MyApp
 ```
+
+> **`pull-requests: write` 是 PR 留言能不能貼的關鍵。** 沒有它那一步會 403。
+> 那步刻意設了 `continue-on-error`，所以把關照常運作、只是留言不見了 ——
+> 但失敗是安靜的，所以值得一次設對。
+> （fork 來的 PR 拿到的 token 一律唯讀，那是預期行為，不是設定錯誤。）
 
 破的配對會**直接標在 PR 的那一行**，同時把稽核報告貼成一則 PR 留言（同一則反覆更新，不洗版）。
 留言裡除了落差表，也會列出「沒被評估到的東西」——豁免、壓掉、解析失敗、色盤偵測退化，

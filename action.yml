@@ -30,7 +30,7 @@ inputs:
     required: false
     default: 'false'
   comment:
-    description: 'Post/update the audit report as a PR comment (requires pull-requests: write)'
+    description: 'Post/update the audit report as a PR comment. Requires `permissions: pull-requests: write` on the job — without it the step 403s (it is continue-on-error, so the gate still works but the comment is silently lost).'
     required: false
     default: 'true'
   upload-report:
