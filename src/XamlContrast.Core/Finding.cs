@@ -55,6 +55,10 @@ public enum UnresolvedReason
     UnknownPaletteKey,
     /// <summary>背景是半透明但底下沒有可疊的顏色 —— 合成不出實際色值。</summary>
     TranslucentUncomposited,
+    /// <summary>Style 把 Foreground 與 Background 設成同一個 brush —— Material 系的
+    /// 模板不透明度慣用手法（模板把背景以 10~12% Opacity 畫成暈染，字用全濃度）。
+    /// 字面上是 1:1，執行期不是；模板的 Opacity 動畫靜態看不到 —— 不猜。</summary>
+    SameBrushPair,
 }
 
 /// <summary>一筆無法解析的配對「在哪裡、為什麼、卡在哪個值」。

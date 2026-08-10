@@ -574,6 +574,13 @@ public sealed partial class Auditor
                 }
                 if (fg.Kind is ColorKind.Alpha or ColorKind.Transparent ||
                     bgr.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
+                // 同一個 brush 同時當字色與底色 —— Material 系的模板不透明度慣用手法：
+                // 模板把 Background 以 10~12% Opacity 畫成暈染（VisualState 動畫），字全濃度。
+                // 字面上 1:1、執行期不是；Opacity 藏在模板動畫裡，靜態看不到 —— 不猜，
+                // 歸 unresolved 而不是報一筆必然假的 fail（MaterialDesign 抽驗實證，
+                // NavigationPrimaryListBoxItem 等三處全是這形狀）。
+                if (fg.Key is not null && fg.Key == bgr.Key)
+                { Unres(UnresolvedReason.SameBrushPair, file, line, fg.Key); continue; }
 
                 // ⚠ v0.1 的第 5 號 bug（規劃書 8.2）：這裡曾漏了 Need，而分級把
                 //   「沒有 Need」當裝飾 → 所有 Style 配對被靜默歸為裝飾、完全不受檢。

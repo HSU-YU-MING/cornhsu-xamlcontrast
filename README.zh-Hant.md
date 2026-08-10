@@ -153,6 +153,7 @@ jobs:
 | `bound-or-gradient` | 顏色來自 `{Binding}` / `{TemplateBinding}` / 漸層 —— 執行期才知道 |
 | `unknown-palette-key` | 資源鍵不在偵測到的色盤裡 —— 打字錯誤,或色盤偵測漏了某個檔 |
 | `translucent-uncomposited` | 半透明背景但底下沒有可疊的顏色 |
+| `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
 
 `summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 1** ——
 只掃到一小部分的「通過」不算通過,這是「0 組配對即 exit 1」那條不可設定規則的推廣。

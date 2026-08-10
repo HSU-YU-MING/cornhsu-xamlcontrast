@@ -19,6 +19,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   analysis, not a configuration problem.
 
 ### Fixed
+- **Same-brush style pairs are unresolved, not failures.** MaterialDesign's navigation items
+  set `Foreground` *and* `Background` to `MaterialDesign.Brush.Primary` — deliberately: the
+  template paints the background borders at 0.1–0.12 opacity via VisualState animations, so at
+  runtime it's full-strength text over a 12% tint, not 1:1. The style-pair audit's premise
+  (the Background setter is the backdrop) doesn't hold when the template composites it, and
+  the opacity lives in animation storyboards static analysis cannot see — so per the "don't
+  guess" rule these pairs are now classified `same-brush-pair` under `unresolved`, naming the
+  brush, instead of producing guaranteed-false 1:1 failures. Six such pairs in
+  MaterialDesignInXaml (28 → 22 fails); identical-literal pairs (`#333` on `#333`) still fail,
+  as those are far more likely genuine.
 - **Derived control names now classify by suffix.** The text/decorative element lists matched
   by exact name only, so `MetroProgressBar` (MahApps) missed the `ProgressBar` entry in the
   decorative list and its `Foreground` — the progress fill, not text — was held to 4.5:1.

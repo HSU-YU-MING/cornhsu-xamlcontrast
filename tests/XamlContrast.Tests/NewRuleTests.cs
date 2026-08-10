@@ -376,6 +376,40 @@ public class NewRuleTests
         Assert.Equal(21.0, f.RatioDark);
     }
 
+    [Fact] // 同 brush 配對 = 模板不透明度慣用手法(MaterialDesign 實證):字面 1:1、
+           // 執行期是「全濃度字疊 12% 暈染」。模板的 Opacity 動畫靜態看不到 —— 不猜,
+           // 歸 unresolved 而不是報必然假的 fail
+    public void SameBrushStylePairIsUnresolvedNotFail()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Primary" Color="#673AB7"/>
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Grid.Resources>
+                <Style x:Key="NavItem" TargetType="ListBoxItem">
+                  <Setter Property="Background" Value="{DynamicResource Primary}"/>
+                  <Setter Property="Foreground" Value="{DynamicResource Primary}"/>
+                </Style>
+                <Style x:Key="Real" TargetType="Button">
+                  <Setter Property="Background" Value="{DynamicResource Bg}"/>
+                  <Setter Property="Foreground" Value="{DynamicResource Fg}"/>
+                </Style>
+              </Grid.Resources>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Single(r.Findings);                                      // 只有 Real 那組受檢
+        Assert.Equal(1, r.UnresolvedBy[UnresolvedReason.SameBrushPair]);
+        var site = Assert.Single(r.UnresolvedSites, s => s.Reason == UnresolvedReason.SameBrushPair);
+        Assert.Equal("Primary", site.Value);                            // 點名是哪個 brush
+    }
+
     [Fact] // 衍生命名的控制項要收斂到基底分類:MetroProgressBar 的 Foreground 是
            // 進度條填色不是文字 —— 全名相等對不上,被當文字用 4.5 要求(MahApps 實證)
     public void DerivedControlNamesClassifyBySuffix()

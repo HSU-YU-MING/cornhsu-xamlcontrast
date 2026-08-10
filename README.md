@@ -201,6 +201,7 @@ doesn't tell you whether anything can be done about it:
 | `bound-or-gradient` | the colour comes from `{Binding}` / `{TemplateBinding}` / a gradient — only knowable at runtime |
 | `unknown-palette-key` | the resource key isn't in the detected palette — a typo, or palette detection missed a file |
 | `translucent-uncomposited` | a translucent background with nothing underneath to composite against |
+| `same-brush-pair` | a style sets `Foreground` and `Background` to the *same* brush — the Material template-opacity idiom (the template paints the background at 10–12% opacity as a tint); literally 1:1, not at runtime, and the opacity animation is invisible statically |
 
 `summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
 (default 50%) fails**, because a pass over a fraction of the project is not a pass — the same
