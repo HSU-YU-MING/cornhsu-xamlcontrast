@@ -376,6 +376,26 @@ public class NewRuleTests
         Assert.Equal(21.0, f.RatioDark);
     }
 
+    [Fact] // 衍生命名的控制項要收斂到基底分類:MetroProgressBar 的 Foreground 是
+           // 進度條填色不是文字 —— 全名相等對不上,被當文字用 4.5 要求(MahApps 實證)
+    public void DerivedControlNamesClassifyBySuffix()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <MetroProgressBar Foreground="#EEEEEE" Background="#DDDDDD"/>
+              <ExtendedTextBlock Foreground="#EEEEEE" Text="衍生的文字控制項還是文字"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var bar = Assert.Single(r.Findings, f => f.Element.Contains("MetroProgressBar"));
+        Assert.False(bar.IsText);                  // 進度條 → 裝飾,不設限
+        Assert.Equal(Category.Decorative, bar.Category);
+        var text = Assert.Single(r.Findings, f => f.Element.Contains("ExtendedTextBlock"));
+        Assert.True(text.IsText);                  // 文字 → 4.5,低對比要報
+        Assert.Equal(Category.Fail, text.Category);
+    }
+
     [Fact] // unknown key 要點名 —— 每一個都是死引用、打字錯誤、或偵測漏掉的色盤檔
     public void UnknownPaletteKeysAreNamedInReports()
     {

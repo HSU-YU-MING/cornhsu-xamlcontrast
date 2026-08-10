@@ -19,6 +19,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   analysis, not a configuration problem.
 
 ### Fixed
+- **Derived control names now classify by suffix.** The text/decorative element lists matched
+  by exact name only, so `MetroProgressBar` (MahApps) missed the `ProgressBar` entry in the
+  decorative list and its `Foreground` — the progress fill, not text — was held to 4.5:1.
+  Found by hand-verifying sampled findings: MahApps' single reported fail was exactly this.
+  Names now fall back to longest-suffix matching against both lists (`MetroProgressBar` →
+  `ProgressBar`, `ExtendedTextBlock` → `TextBlock`); exact matches still win.
 - **Three false-report mechanisms in the merged palette, caught by hand-verifying findings on
   the public-project scans** (the merged palette shipped earlier in this same release; none of
   this is in any published version):

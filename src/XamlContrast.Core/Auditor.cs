@@ -129,6 +129,21 @@ public sealed partial class Auditor
     private double NeedFor(bool isText, bool isLarge) =>
         !isText ? 0.0 : isLarge ? _cfg.Thresholds.LargeText : _cfg.Thresholds.NormalText;
 
+    /// <summary>元素是否屬非文字（裝飾）類。⚠ 全名相等不夠 —— WPF 生態滿地都是
+    /// 衍生命名的控制項：MahApps 的 MetroProgressBar 對不上排除清單裡的 ProgressBar，
+    /// 進度條填色被當文字用 4.5 要求（八專案抽驗實證，MahApps 唯一一筆 fail 就是它）。
+    /// 改成「後綴比對」：MetroProgressBar／HandyControl 的 WaveProgressBar 都收斂到
+    /// ProgressBar。文字清單同理（ExtendedRadioButton → RadioButton）。
+    /// 兩邊都中時取「最長的後綴」—— 名字愈長愈具體。</summary>
+    private bool IsNonTextElement(string localName)
+    {
+        if (_nonTextEls.Contains(localName)) return true;
+        if (_textEls.Contains(localName)) return false;
+        var nt = _nonTextEls.Where(localName.EndsWith).OrderByDescending(n => n.Length).FirstOrDefault();
+        var tx = _textEls.Where(localName.EndsWith).OrderByDescending(n => n.Length).FirstOrDefault();
+        return nt is not null && (tx is null || nt.Length > tx.Length);
+    }
+
     public static AuditResult Run(string root, PaletteDetection detection, ToolConfig? config = null)
     {
         var auditor = new Auditor(detection.Palette, config ?? new ToolConfig());
@@ -344,7 +359,7 @@ public sealed partial class Auditor
                 // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複
                 if (!emitted.Add($"{fgR.Dark}|{bgObj.Dark}")) continue;
 
-                var isTextC = !_nonTextEls.Contains(el.Name.LocalName);
+                var isTextC = !IsNonTextElement(el.Name.LocalName);
                 var fsC = 0.0;
                 var fsRawC = el.Attribute("FontSize")?.Value;
                 if (fsRawC is not null) ParseDouble(fsRawC, out fsC);
@@ -412,8 +427,8 @@ public sealed partial class Auditor
 
             // ── 這是文字還是裝飾？WCAG 的 4.5:1 只管文字 ──
             var localName = el.Name.LocalName;
-            var isText = !_nonTextEls.Contains(localName) &&
-                         (_textEls.Contains(localName) || attrName == "Foreground");
+            var isText = !IsNonTextElement(localName) &&
+                         (_textEls.Contains(localName) || localName.EndsWith("TextBlock") || attrName == "Foreground");
 
             // ── WCAG 大字級豁免：≥18pt 或 ≥14pt 粗體只需 3:1 ──
             // ⚠ WPF 的 FontSize 是「裝置獨立像素」(1/96 吋) 不是 point (1/72 吋)，
@@ -564,7 +579,7 @@ public sealed partial class Auditor
                 //   「沒有 Need」當裝飾 → 所有 Style 配對被靜默歸為裝飾、完全不受檢。
                 //   分類沿用排除清單：TargetType 是非文字控制項才免檢；
                 //   不確定（匿名、沒 TargetType）就當文字報出來 —— 不替使用者放過。
-                var isText = ttName is null || !_nonTextEls.Contains(ttName);
+                var isText = ttName is null || !IsNonTextElement(ttName);
                 var fs = 0.0;
                 if (set.TryGetValue("FontSize", out var fsv)) ParseDouble(fsv, out fs);
                 var bold = set.TryGetValue("FontWeight", out var fwv) && IsBold(fwv);
