@@ -121,7 +121,7 @@ DataGridCheckBoxStyle 誤報實查、九～十一條來自 CelFlow 觸發態實�
 第十三條是**原型凍結後第一條 C# 先行的規則**，驗證鏈自此改為 C# 快照回歸
 —— `baselines/*.json`＋`verify-baselines.ps1 -Update`）。
 
-**十四～十六條來自 2026-08-10 的外部專案實查**（MahApps.Metro、ScreenToGif、
+**十四～十七條來自 2026-08-10 的外部專案實查**（MahApps.Metro、ScreenToGif、
 Playnite、Flow.Launcher、HandyControl、MaterialDesignInXamlToolkit、wpfui、ILSpy
 八個公開 WPF 專案，1909 個 XAML 檔）。第十四條由自家程式碼審視發現；
 十五、十六條在四個受測專案上**代價為零**，在外部專案上一個讓 ScreenToGif 的
@@ -541,7 +541,7 @@ Parity 的 README 明寫：`@v0.9.7  # 0.x 時 pin 到確切版本；1.0 後改�
 1.0 的條件（照 Parity 的「1.0 介面凍結審查」）：
 - [ ] 色盤自動偵測在四個專案上零設定可用
 - [ ] CLI 參數與 JSON schema（**含 summary 區塊**）不再預期變動
-- [ ] 測試涵蓋十六條解析規則＋八個「謊報健康」回歸形狀
+- [ ] 測試涵蓋十七條解析規則＋八個「謊報健康」回歸形狀
 - [ ] baseline 模式與 ignore 註解至少在一個既有專案上實際用過
 - [ ] 至少一個非自己的專案用過並回報
 - [ ] **重新辯論預設 gate**：目前 warn（3.0~4.5，低於 AA）預設放行 ——

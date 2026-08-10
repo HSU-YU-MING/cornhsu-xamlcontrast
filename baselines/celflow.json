@@ -13,11 +13,12 @@
       "failFactor": 0.67
     },
     "files": 22,
-    "pairs": 368,
-    "coverage": 89.5,
-    "unresolved": 43,
+    "pairs": 363,
+    "coverage": 88.1,
+    "unresolved": 49,
     "unresolvedBy": {
-      "bound-or-gradient": 41,
+      "bound-or-gradient": 39,
+      "over-sibling-content": 8,
       "no-ancestor-background": 2
     },
     "skipped": 4,
@@ -28,8 +29,8 @@
     "counts": {
       "fail": 0,
       "warn": 0,
-      "ok": 349,
-      "decorative": 19
+      "ok": 346,
+      "decorative": 17
     }
   },
   "unresolved": [
@@ -92,6 +93,24 @@
       "line": 94,
       "reason": "no-ancestor-background",
       "value": "{DynamicResource OnionNext}"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 289,
+      "reason": "over-sibling-content",
+      "value": "White"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 380,
+      "reason": "over-sibling-content",
+      "value": "{DynamicResource RefMarker}"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 436,
+      "reason": "over-sibling-content",
+      "value": "{DynamicResource Blue}"
     },
     {
       "file": "Views/CanvasView.xaml",
@@ -186,13 +205,13 @@
     {
       "file": "Views/TimelineView.xaml",
       "line": 385,
-      "reason": "bound-or-gradient",
+      "reason": "over-sibling-content",
       "value": "{DynamicResource Purple}"
     },
     {
       "file": "Views/TimelineView.xaml",
       "line": 430,
-      "reason": "bound-or-gradient",
+      "reason": "over-sibling-content",
       "value": "{DynamicResource Yellow}"
     },
     {
@@ -290,6 +309,24 @@
       "line": 199,
       "reason": "bound-or-gradient",
       "value": "#888"
+    },
+    {
+      "file": "Views/VideoImportDialog.xaml",
+      "line": 89,
+      "reason": "over-sibling-content",
+      "value": "{DynamicResource FgLabel}"
+    },
+    {
+      "file": "Views/VideoImportDialog.xaml",
+      "line": 89,
+      "reason": "over-sibling-content",
+      "value": "{DynamicResource FgLabel}"
+    },
+    {
+      "file": "Views/VideoImportDialog.xaml",
+      "line": 109,
+      "reason": "over-sibling-content",
+      "value": "{DynamicResource Fg1}"
     }
   ],
   "findings": [
@@ -2290,46 +2327,6 @@
       "category": "ok",
       "isText": true,
       "fontSize": "12px",
-      "largeText": false
-    },
-    {
-      "file": "Views/CanvasView.xaml",
-      "line": 289,
-      "element": "TextBlock",
-      "fg": "White",
-      "bg": "{Bg0}",
-      "ratioDark": 18.88,
-      "ratioLight": 18.88,
-      "threshold": 4.5,
-      "category": "ok",
-      "isText": true,
-      "fontSize": "9px",
-      "largeText": false
-    },
-    {
-      "file": "Views/CanvasView.xaml",
-      "line": 380,
-      "element": "Ellipse",
-      "fg": "{DynamicResource RefMarker}",
-      "bg": "{Bg0}",
-      "ratioDark": 4.2,
-      "ratioLight": 4.2,
-      "threshold": 0,
-      "category": "decorative",
-      "isText": false,
-      "largeText": false
-    },
-    {
-      "file": "Views/CanvasView.xaml",
-      "line": 436,
-      "element": "Ellipse",
-      "fg": "{DynamicResource Blue}",
-      "bg": "{Bg0}",
-      "ratioDark": 5.25,
-      "ratioLight": 5.25,
-      "threshold": 0,
-      "category": "decorative",
-      "isText": false,
       "largeText": false
     },
     {
@@ -5277,34 +5274,6 @@
       "category": "ok",
       "isText": true,
       "fontSize": "12px",
-      "largeText": false
-    },
-    {
-      "file": "Views/VideoImportDialog.xaml",
-      "line": 89,
-      "element": "TextBlock\u2295Style[inline]/base",
-      "fg": "{DynamicResource FgLabel}",
-      "bg": "{Bg2}",
-      "ratioDark": 4.5,
-      "ratioLight": 4.5,
-      "threshold": 4.5,
-      "category": "ok",
-      "isText": true,
-      "fontSize": "11px",
-      "largeText": false
-    },
-    {
-      "file": "Views/VideoImportDialog.xaml",
-      "line": 109,
-      "element": "TextBlock",
-      "fg": "{DynamicResource Fg1}",
-      "bg": "{{DynamicResource Scrim} over {Bg2}}",
-      "ratioDark": 6.98,
-      "ratioLight": 6.98,
-      "threshold": 4.5,
-      "category": "ok",
-      "isText": true,
-      "fontSize": "11px",
       "largeText": false
     },
     {

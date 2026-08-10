@@ -9,7 +9,7 @@ namespace XamlContrast.Core;
 /// XAML 樹解析式對比度稽核。對每個有文字色的元素，沿父節點往上找
 /// 「最近一個真正生效的背景色」，再把兩邊的資源鍵各自代入深淺兩套值算 WCAG 對比。
 ///
-/// 處理的情況（十六條解析規則，一條都不能少 —— 全部是真實專案踩出來的；
+/// 處理的情況（十七條解析規則，一條都不能少 —— 全部是真實專案踩出來的；
 /// 完整清單見規劃書 4.1。下面列的是樹走訪這一層的主幹）：
 ///   1. 元素屬性上的 Background / Foreground（含祖先繼承）
 ///   2. Background="Transparent" 視為穿透，繼續往上找
@@ -229,6 +229,7 @@ public sealed partial class Auditor
         {
             ColorKind.UnknownKey => UnresolvedReason.UnknownPaletteKey,
             ColorKind.Alpha => UnresolvedReason.TranslucentUncomposited,
+            ColorKind.SiblingContent => UnresolvedReason.OverSiblingContent,
             _ => UnresolvedReason.BoundOrGradient,
         }, file, line, r.Kind == ColorKind.UnknownKey && r.Key is not null ? r.Key : raw);
 
@@ -357,7 +358,7 @@ public sealed partial class Auditor
                 }
                 else bgObj = bg; // Style 鏈沒設底 → 退回祖先背景
                 if (bgObj is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgV); continue; }
-                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey) { Unres(bgObj, file, LineOf(el), bgV ?? fgV); continue; }
+                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bgObj, file, LineOf(el), bgV ?? fgV); continue; }
                 if (op < 0.01) { _skipped++; continue; }
 
                 // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複
@@ -416,7 +417,7 @@ public sealed partial class Auditor
             if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey) { Unres(fg, file, LineOf(el), fgRaw); continue; }
             if (fg.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
             if (bg is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgRaw); continue; }
-            if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey) { Unres(bg, file, LineOf(el), bg.Key ?? fgRaw); continue; }
+            if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bg, file, LineOf(el), bg.Key ?? fgRaw); continue; }
 
             // Opacity 0 = 元素當下完全隱形。XAML 裡寫 Opacity="0" 幾乎都是淡入動畫的
             // 初始狀態，穩態是 1。對「看不見的東西」算對比沒有意義，跳過而不是報 1:1。
@@ -473,12 +474,68 @@ public sealed partial class Auditor
             });
         }
 
+        // ── 規則 17:重疊容器內的兄弟背景 ──
+        // Grid 同格子(Canvas/自訂 *Panel 全域)裡,文件順序在前的兄弟畫在下面。
+        // 兩半,對應原型檔頭記載的「sibling 背景」盲區:
+        //   (a) 兄弟是佔滿格子的純色底(Border/Rectangle 之類)→ 它才是文字真正的
+        //       背板,不是祖先 —— 之前這形狀整批 no-ancestor-background 或誤配祖先
+        //   (b) 兄弟是內容元素(Image 等)→ 底是一張圖,靜態不可知 —— 之前誤配祖先
+        //       報假警報(HandyControl Carousel:白字疊照片被配 RegionBrush,light=1)
+        // 防呆:有明確尺寸或非 Stretch 對齊的兄弟不算背板(強調色條 Width="4" 之類)。
+        var overlap = IsOverlapContainer(el.Name.LocalName);
+        Dictionary<(int Row, int Col), Resolved>? cellBg = overlap ? new() : null;
         foreach (var child in el.Elements())
         {
             // Style / Setter / Trigger 這些不是視覺樹，個別處理（WalkStyles），這裡跳過
             if (StyleishEls.Contains(child.Name.LocalName)) continue;
-            Walk(child, bg, file, op, suppressed);
+            var childBg = bg;
+            (int, int) cell = default;
+            if (overlap)
+            {
+                cell = CellOf(child, el.Name.LocalName == "Grid");
+                if (cellBg!.TryGetValue(cell, out var sb)) childBg = sb;
+            }
+            Walk(child, childBg, file, op, suppressed);
+            if (overlap && SiblingBackdrop(child) is { } backdrop) cellBg![cell] = backdrop;
         }
+    }
+
+    /// <summary>子元素會彼此重疊的容器。StackPanel 系的會排開,不算。</summary>
+    private static bool IsOverlapContainer(string name)
+    {
+        if (name is "StackPanel" or "DockPanel" or "WrapPanel" or "UniformGrid"
+            or "VirtualizingStackPanel" or "ToolBarPanel" or "TabPanel") return false;
+        return name is "Grid" or "Canvas" ||
+               (name.EndsWith("Panel") && !name.EndsWith("StackPanel"));
+    }
+
+    private static (int, int) CellOf(XElement child, bool isGrid)
+    {
+        if (!isGrid) return default; // Canvas/自訂 Panel:全部視為同一層
+        int P(string attr) => int.TryParse(child.Attribute(attr)?.Value, out var v) ? v : 0;
+        return (P("Grid.Row"), P("Grid.Column"));
+    }
+
+    /// <summary>這個兄弟元素會不會成為「後面同格子兄弟」的背板。
+    /// 回傳 null = 不影響(既非佔滿格子的底、也非內容元素)。</summary>
+    private Resolved? SiblingBackdrop(XElement child)
+    {
+        var name = child.Name.LocalName;
+        // (b) 內容元素:底變成一張圖,不可知
+        if (name is "Image" or "MediaElement" || name.EndsWith("Image"))
+            return new Resolved(ColorKind.SiblingContent);
+
+        // (a) 純色背板候選:要佔滿格子 —— 有明確尺寸或非 Stretch 對齊的不算
+        static bool Stretchy(XElement e, string attr)
+            => e.Attribute(attr)?.Value is null or "Stretch";
+        if (child.Attribute("Width") is not null || child.Attribute("Height") is not null ||
+            !Stretchy(child, "HorizontalAlignment") || !Stretchy(child, "VerticalAlignment"))
+            return null;
+        var raw = name == "Rectangle" ? child.Attribute("Fill")?.Value : child.Attribute("Background")?.Value;
+        if (raw is null) return null;
+        var r = ColorResolver.Resolve(raw, _pal);
+        // 只收確定的純色(Hard/Soft);半透明/漸層/Binding 維持原判定,不越權
+        return r is { Kind: ColorKind.Hard or ColorKind.Soft } ? r : null;
     }
 
     // Style 裡成對的 Setter（Background + Foreground 同時存在）

@@ -59,6 +59,9 @@ public enum UnresolvedReason
     /// 模板不透明度慣用手法（模板把背景以 10~12% Opacity 畫成暈染，字用全濃度）。
     /// 字面上是 1:1，執行期不是；模板的 Opacity 動畫靜態看不到 —— 不猜。</summary>
     SameBrushPair,
+    /// <summary>文字墊在同格子的兄弟「內容」元素上（Image 等）—— 實際背景是圖片，
+    /// 靜態不可知；配祖先背景會產生假警報。</summary>
+    OverSiblingContent,
 }
 
 /// <summary>一筆無法解析的配對「在哪裡、為什麼、卡在哪個值」。

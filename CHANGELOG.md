@@ -19,6 +19,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   analysis, not a configuration problem.
 
 ### Added
+- **Rule 17: sibling backdrops in overlapping containers.** In a Grid cell (or Canvas /
+  custom `*Panel`), earlier siblings paint beneath later ones. Two halves, closing the
+  "sibling backgrounds" blind spot the prototype header has documented from day one:
+  *(a)* a full-cell solid sibling (a `Border`/`Rectangle` with no explicit size and stretch
+  alignment) **is** the text's real backdrop — previously these pairs were mispaired with an
+  ancestor or lost to `no-ancestor-background`; *(b)* a sibling `Image`/media element means
+  the backdrop is a picture, statically unknowable — now honestly `over-sibling-content`
+  instead of a fabricated ratio against the ancestor (HandyControl's carousel: white text
+  over a photo was reported light=1 against `RegionBrush`). Accent bars (`Width="4"`,
+  non-stretch alignment) are excluded from backdrop candidacy.
+
+  Re-freezing the validation baselines surfaced something worth recording: **Kindling's
+  single long-standing fail — carried in the baselines since v0.1.0 — was a false positive
+  of exactly this shape.** The "空" label sits on a sibling `<Border Background="Black"/>`
+  (the source comment even says "covers the thumbnail"); grey-on-black is 7.46:1, passing.
+  The rule also surfaced one genuinely marginal new warn (missing-asset label, light theme
+  4.32:1) and honestly reclassified eight CelFlow canvas overlays as `over-sibling-content`.
 - **Application-level resource scoping.** When a repo contains two or more `<Application>`
   roots (ScreenToGif ships a second Translator app; Playnite has Desktop and Fullscreen),
   each App.xaml's directory becomes a scope: files in an app resolve against *its subtree ∪

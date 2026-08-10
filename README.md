@@ -86,7 +86,7 @@ of intent — it's just bad twice. Everything below AA gets reported; a human de
 ## Why the hard part isn't the WCAG formula
 
 The formula is 20 lines. The value is in resolving **what color the text actually sits on** —
-sixteen parsing rules, every one of them discovered by auditing real shipped products:
+seventeen parsing rules, every one of them discovered by auditing real shipped products:
 
 transparent passthrough · alpha compositing · opacity accumulation down the tree ·
 ControlTemplate subtrees · Style setter pairing · trigger states · dead-setter filtering ·
@@ -94,9 +94,10 @@ named/inline Style resolution with BasedOn chains · per-state trigger merging �
 disabled-state exemption (WCAG 1.4.3) · translucent palette keys ·
 template-root backgrounds · root-targeted trigger setters ·
 `MultiTrigger` combined-condition states · `#FFRRGGBB` is opaque, not translucent ·
-implicit-style background on the document root
+implicit-style background on the document root ·
+sibling backdrops in overlapping containers
 
-The first thirteen came from four shipped WPF apps. The last three came from scanning eight
+The first thirteen came from four shipped WPF apps. The last four came from scanning eight
 public WPF projects (1909 XAML files) in August 2026 — and two of them cost **nothing** on the
 original four, because all four are same-author and share a house style. A blind spot's severity
 can't be measured on a sample that never triggers it.
@@ -202,6 +203,7 @@ doesn't tell you whether anything can be done about it:
 | `unknown-palette-key` | the resource key isn't in the detected palette — a typo, or palette detection missed a file |
 | `translucent-uncomposited` | a translucent background with nothing underneath to composite against |
 | `same-brush-pair` | a style sets `Foreground` and `Background` to the *same* brush — the Material template-opacity idiom (the template paints the background at 10–12% opacity as a tint); literally 1:1, not at runtime, and the opacity animation is invisible statically |
+| `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio |
 
 `summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
 (default 50%) fails**, because a pass over a fraction of the project is not a pass — the same
@@ -262,7 +264,10 @@ Honest list — full blind-spot table with per-case evidence in the
 
 - `TargetName` setters aimed at **inner** template parts (root-targeted ones are resolved)
 - Cross-element correlated triggers (same condition flips fg on one element, bg on another) — false alarms
-- Sibling-element backgrounds; text over images; implicit styles
+- Sibling backdrops are resolved for full-cell solid siblings in overlapping containers, and
+  text over a sibling `Image` is honestly `over-sibling-content` — but partial-coverage
+  siblings and images nested inside a backdrop element are still invisible
+- Implicit styles (beyond the document root's background)
 - `Binding` / `TemplateBinding` colors are reported as *unresolved*, never guessed —
   guessing would trade honest uncertainty for false confidence
 

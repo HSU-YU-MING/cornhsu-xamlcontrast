@@ -37,6 +37,7 @@ public static class Report
         UnresolvedReason.BoundOrGradient => "bound-or-gradient",
         UnresolvedReason.UnknownPaletteKey => "unknown-palette-key",
         UnresolvedReason.SameBrushPair => "same-brush-pair",
+        UnresolvedReason.OverSiblingContent => "over-sibling-content",
         _ => "translucent-uncomposited",
     };
 

@@ -13,22 +13,32 @@
       "failFactor": 0.67
     },
     "files": 15,
-    "pairs": 169,
-    "coverage": 100,
-    "unresolved": 0,
-    "unresolvedBy": {},
+    "pairs": 168,
+    "coverage": 99.4,
+    "unresolved": 1,
+    "unresolvedBy": {
+      "over-sibling-content": 1
+    },
     "skipped": 3,
     "deadForeground": 0,
     "disabledExempt": 2,
     "parseErrors": 0,
     "suppressed": 0,
     "counts": {
-      "fail": 1,
-      "warn": 0,
-      "ok": 165,
+      "fail": 0,
+      "warn": 1,
+      "ok": 164,
       "decorative": 3
     }
   },
+  "unresolved": [
+    {
+      "file": "Views/RegenerateWorkspaceWindow.xaml",
+      "line": 333,
+      "reason": "over-sibling-content",
+      "value": "{DynamicResource Fg1}"
+    }
+  ],
   "findings": [
     {
       "file": "Views/ApiKeyDialog.xaml",
@@ -969,9 +979,9 @@
       "line": 34,
       "element": "TextBlock",
       "fg": "White",
-      "bg": "{#CC000000 over {Bg0}}",
-      "ratioDark": 20.62,
-      "ratioLight": 13.39,
+      "bg": "{#CC000000 over #000000}",
+      "ratioDark": 21,
+      "ratioLight": 21,
       "threshold": 4.5,
       "category": "ok",
       "isText": true,
@@ -1355,20 +1365,6 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 333,
-      "element": "TextBlock",
-      "fg": "{DynamicResource Fg1}",
-      "bg": "{BgDeep}",
-      "ratioDark": 7.43,
-      "ratioLight": 6.9,
-      "threshold": 4.5,
-      "category": "ok",
-      "isText": true,
-      "fontSize": "11px",
-      "largeText": false
-    },
-    {
-      "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 350,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
@@ -1635,11 +1631,12 @@
       "line": 61,
       "element": "TextBlock",
       "fg": "{DynamicResource Amber}",
-      "bg": "{Bg2}",
-      "ratioDark": 9.4,
-      "ratioLight": 5.07,
+      "bg": "{Bg3}",
+      "ratioDark": 8.23,
+      "ratioLight": 4.32,
       "threshold": 4.5,
-      "category": "ok",
+      "category": "warn",
+      "symmetry": "light-fails",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -2097,12 +2094,11 @@
       "line": 379,
       "element": "TextBlock",
       "fg": "#9A9A9A",
-      "bg": "{Bg1}",
-      "ratioDark": 6.19,
-      "ratioLight": 2.54,
+      "bg": "#000000",
+      "ratioDark": 7.46,
+      "ratioLight": 7.46,
       "threshold": 4.5,
-      "category": "fail",
-      "symmetry": "light-fails",
+      "category": "ok",
       "isText": true,
       "fontSize": "9px",
       "largeText": false

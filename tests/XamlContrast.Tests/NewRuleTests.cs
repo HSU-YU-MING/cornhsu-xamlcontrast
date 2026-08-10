@@ -376,6 +376,59 @@ public class NewRuleTests
         Assert.Equal(21.0, f.RatioDark);
     }
 
+    [Fact] // 規則 17(b):文字墊在同格子的 Image 上 —— 底是一張圖,靜態不可知。
+           // 之前誤配祖先背景報假警報(HandyControl Carousel:白字疊照片,light=1 假 fail)
+    public void TextOverSiblingImageIsUnresolvedNotPairedWithAncestor()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Image Source="photo.jpg"/>
+              <TextBlock Foreground="#FFFFFF" Text="疊在照片上的白字"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);   // 之前:白配白 1:1 假 fail
+        Assert.Equal(1, r.UnresolvedBy[UnresolvedReason.OverSiblingContent]);
+    }
+
+    [Fact] // 規則 17(a):同格子前面的兄弟是佔滿格子的純色底 → 它才是真正的背板
+    public void SiblingSolidBackdropIsUsedInsteadOfAncestor()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Border Background="#000000"/>
+              <TextBlock Foreground="#FFFFFF" Text="Border 墊底的白字"/>
+              <TextBlock Grid.Row="1" Foreground="#111111" Text="不同格子,照配祖先"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var over = Assert.Single(r.Findings, f => f.Fg == "#FFFFFF");
+        Assert.Equal("#000000", over.Bg);       // 兄弟 Border 的黑,不是祖先的白
+        Assert.Equal(21.0, over.RatioDark);
+        var other = Assert.Single(r.Findings, f => f.Fg == "#111111");
+        Assert.Equal("#FFFFFF", other.Bg);      // Row 不同 → 不受影響,配祖先
+    }
+
+    [Fact] // 規則 17 防呆:有明確尺寸/非 Stretch 對齊的兄弟(強調色條)不是背板;
+           // 排在文字「後面」的兄弟畫在上面,也不是背板
+    public void AccentBarAndLaterSiblingsAreNotBackdrops()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#000000">
+              <Border Background="#FF0000" Width="4" HorizontalAlignment="Left"/>
+              <TextBlock Foreground="#FFFFFF" Text="強調色條不是我的底"/>
+              <Border Background="#EEEEEE"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings);
+        Assert.Equal("#000000", f.Bg);   // 不是紅色條,也不是排在後面的淺色 Border
+        Assert.Equal(21.0, f.RatioDark);
+    }
+
     [Fact] // 同 brush 配對 = 模板不透明度慣用手法(MaterialDesign 實證):字面 1:1、
            // 執行期是「全濃度字疊 12% 暈染」。模板的 Opacity 動畫靜態看不到 —— 不猜,
            // 歸 unresolved 而不是報必然假的 fail

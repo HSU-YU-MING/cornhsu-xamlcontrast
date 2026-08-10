@@ -15,6 +15,10 @@ public enum ColorKind
     UnknownKey,
     /// <summary>TemplateBinding / Binding / 漸層等 —— 執行期才知道，標為無法解析而不猜</summary>
     Other,
+    /// <summary>底下墊的是同格子的兄弟「內容」元素（Image 等）—— 實際背景是一張圖，
+    /// 靜態不可知。配祖先背景會報假警報（HandyControl Carousel 實證：白字疊照片,
+    /// 被配上 RegionBrush 報 light=1 的假 fail）。不猜。</summary>
+    SiblingContent,
 }
 
 /// <summary>Alpha 種類帶深淺各自的 A/RGB：字面 #AARRGGBB 深淺同值；
