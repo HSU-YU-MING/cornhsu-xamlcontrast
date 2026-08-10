@@ -426,17 +426,6 @@ $nonTextEls = @('ProgressBar','Rectangle','Ellipse','Path','Polygon','Polyline',
 #     否則「style trigger 設字色＋template trigger 設底色」的同一個狀態
 #     會被拆成兩個各缺一半的幻影組合。
 
-# WCAG 大字級的「粗體」指 weight ≥ 700：Bold(700)、ExtraBold/UltraBold(800)、
-# Black/Heavy(900)、ExtraBlack/UltraBlack(950)、數字 700–999。
-# SemiBold/DemiBold 是 600，不算 —— 舊版子字串匹配（'Bold' 命中 'SemiBold'）
-# 把 600 也放寬到 3:1，會漏掉 3.0~4.5 之間真正不合格的文字。錨定整字匹配。
-$script:boldWeightRx = '^\s*(Bold|ExtraBold|UltraBold|Black|ExtraBlack|UltraBlack|Heavy|[7-9]\d{2})\s*$'
-
-# 觸發器種類（含 Multi 組合條件）—— 觸發器收集處共用這一份清單。
-# MultiTrigger 曾是黑洞：Walk 的跳過清單認得它、收集處不認得，
-# 組合條件狀態（hover＋選取之類）整批沒被檢查，也沒有任何計數提示。
-$script:triggerEls = @('Trigger','DataTrigger','MultiTrigger','MultiDataTrigger')
-
 function Test-DisabledTrigger($t) {
     # IsEnabled=False 觸發 = 停用態。WCAG 1.4.3 明文豁免停用中的控制項。
     if ($t.Name.LocalName -eq 'Trigger') {
@@ -446,16 +435,6 @@ function Test-DisabledTrigger($t) {
     if ($t.Name.LocalName -eq 'DataTrigger') {
         $b = $t.Attribute('Binding'); $v = $t.Attribute('Value')
         return [bool]($b -and $v -and $b.Value -match 'IsEnabled' -and $v.Value -eq 'False')
-    }
-    if ($t.Name.LocalName -in @('MultiTrigger','MultiDataTrigger')) {
-        # 條件是 AND：任一條 IsEnabled=False，整個狀態就只在停用時成立
-        foreach ($c in $t.Descendants() | Where-Object { $_.Name.LocalName -eq 'Condition' }) {
-            $v = $c.Attribute('Value')
-            if (-not $v -or $v.Value -ne 'False') { continue }
-            $p = $c.Attribute('Property'); $b = $c.Attribute('Binding')
-            if (($p -and $p.Value -match '(^|\.)IsEnabled$') -or ($b -and $b.Value -match 'IsEnabled')) { return $true }
-        }
-        return $false
     }
     return $false
 }
@@ -484,7 +463,7 @@ function New-StyleRecord($style, [string]$file) {
         }
     }
     $states = @()
-    foreach ($t in $style.Descendants() | Where-Object { $_.Name.LocalName -in $script:triggerEls }) {
+    foreach ($t in $style.Descendants() | Where-Object { $_.Name.LocalName -in @('Trigger','DataTrigger') }) {
         $ts = @{}
         foreach ($s in $t.Elements() | Where-Object { $_.Name.LocalName -eq 'Setter' }) {
             $p = $s.Attribute('Property'); $v = $s.Attribute('Value')
@@ -496,18 +475,12 @@ function New-StyleRecord($style, [string]$file) {
             if ($anc.Name.LocalName -eq 'ControlTemplate') { $inTmpl = $true; break }
             $anc = $anc.Parent
         }
-        # 條件簽名：同條件的狀態之後要跨節點合併；Multi(Data)Trigger 逐條列出以 & 串接（AND）
+        # 條件簽名：同條件的狀態之後要跨節點合併
         $cond =
             if ($t.Name.LocalName -eq 'Trigger') {
                 "P:$($t.Attribute('Property').Value)=$($t.Attribute('Value').Value)"
-            } elseif ($t.Name.LocalName -eq 'DataTrigger' -and $t.Attribute('Binding') -and $t.Attribute('Value')) {
+            } elseif ($t.Attribute('Binding') -and $t.Attribute('Value')) {
                 "B:$($t.Attribute('Binding').Value)=$($t.Attribute('Value').Value)"
-            } elseif ($t.Name.LocalName -in @('MultiTrigger','MultiDataTrigger')) {
-                $parts = foreach ($c in $t.Descendants() | Where-Object { $_.Name.LocalName -eq 'Condition' }) {
-                    if ($c.Attribute('Property')) { "P:$($c.Attribute('Property').Value)=$($c.Attribute('Value').Value)" }
-                    else { "B:$($c.Attribute('Binding').Value)=$($c.Attribute('Value').Value)" }
-                }
-                if ($parts) { $parts -join '&' } else { $null }
             } else { $null }
         $states += ,@{ Disabled = (Test-DisabledTrigger $t); FromTemplate = $inTmpl
                        Set = $ts; Cond = $cond }
@@ -739,10 +712,7 @@ function Walk($el, $bg, $file, $op = 1.0) {
 
             $fg = Resolve $fgV
             if (-not $fg) { continue }
-            # 字色是 Binding／漸層／未知鍵 = 看不懂 → unresolved（之前全塞 skipped，
-            # 把盲區藏進「合法豁免」桶）；透明字才是合法跳過
-            if ($fg.Kind -in @('other','unknownkey')) { $script:stats.unresolved++; continue }
-            if ($fg.Kind -in @('alpha','transparent')) { $script:stats.skipped++; continue }
+            if ($fg.Kind -in @('other','alpha','transparent','unknownkey')) { $script:stats.skipped++; continue }
 
             $bgObj = $null
             if ($bgV) {
@@ -777,7 +747,7 @@ function Walk($el, $bg, $file, $op = 1.0) {
             $fwRaw = $el.Attribute('FontWeight')
             $fwV = if ($fwRaw) { $fwRaw.Value }
                    elseif ($chain.Props.ContainsKey('FontWeight')) { $chain.Props['FontWeight'].V } else { $null }
-            $bold = $fwV -and ($fwV -match $script:boldWeightRx)
+            $bold = $fwV -and ($fwV -match 'Bold|Black|Heavy|SemiBold')
             $pt = $fs * 0.75
             $isLarge = ($pt -ge 18) -or ($bold -and $pt -ge 14)
             $need = if (-not $isText) { 0.0 } elseif ($isLarge) { 3.0 } else { 4.5 }
@@ -815,9 +785,7 @@ function Walk($el, $bg, $file, $op = 1.0) {
         if (-not $fgRaw) { continue }
         $fg = Resolve $fgRaw.Value
         if (-not $fg) { continue }
-        # 同上：看不懂 → unresolved；透明 → skipped（與背景側同一套分桶標準）
-        if ($fg.Kind -in @('other','unknownkey')) { $script:stats.unresolved++; continue }
-        if ($fg.Kind -in @('alpha','transparent')) { $script:stats.skipped++; continue }
+        if ($fg.Kind -in @('other','alpha','transparent','unknownkey')) { $script:stats.skipped++; continue }
         if (-not $bg) { $script:stats.unresolved++; continue }
         if ($bg.Kind -in @('other','alpha','unknownkey')) { $script:stats.unresolved++; continue }
 
@@ -847,7 +815,7 @@ function Walk($el, $bg, $file, $op = 1.0) {
         $fs = 0.0; $fsRaw = $el.Attribute('FontSize')
         if ($fsRaw) { [double]::TryParse($fsRaw.Value, [ref]$fs) | Out-Null }
         $fw = $el.Attribute('FontWeight')
-        $bold = $fw -and ($fw.Value -match $script:boldWeightRx)
+        $bold = $fw -and ($fw.Value -match 'Bold|Black|Heavy|SemiBold')
         $pt = $fs * 0.75
         $isLarge = ($pt -ge 18) -or ($bold -and $pt -ge 14)
         $need = if (-not $isText) { 0.0 } elseif ($isLarge) { 3.0 } else { 4.5 }
@@ -878,7 +846,7 @@ function Walk($el, $bg, $file, $op = 1.0) {
 
     foreach ($child in $el.Elements()) {
         # Style / Setter / Trigger 這些不是視覺樹，個別處理（見下），這裡跳過
-        if ($child.Name.LocalName -in @('Style','Setter','Trigger','DataTrigger','MultiTrigger','MultiDataTrigger')) { continue }
+        if ($child.Name.LocalName -in @('Style','Setter','Trigger','DataTrigger','MultiTrigger')) { continue }
         Walk $child $bg $file $op
     }
 }
@@ -893,7 +861,7 @@ function WalkStyles($doc, $file) {
         }
         # 觸發器裡的 Setter 也算進來（它們覆蓋同一個 Style 的基礎值）
         $trigSetters = @()
-        foreach ($t in $style.Descendants() | Where-Object { $_.Name.LocalName -in $script:triggerEls }) {
+        foreach ($t in $style.Descendants() | Where-Object { $_.Name.LocalName -in @('Trigger','DataTrigger') }) {
             $ts = @{}
             foreach ($s in $t.Elements() | Where-Object { $_.Name.LocalName -eq 'Setter' }) {
                 $p = $s.Attribute('Property'); $v = $s.Attribute('Value')
@@ -949,10 +917,8 @@ function WalkStyles($doc, $file) {
             if ($st.disabled) { $script:stats.disabled++; continue }
             $fg = Resolve $fgv; $bg = Resolve $bgv
             if (-not $fg -or -not $bg) { continue }
-            # 之前這裡是裸 continue —— 配對從報告徹底消失，連計數都沒有（靜默退化等於謊報）。
-            # 任一側看不懂 → unresolved；任一側透明/半透明 → skipped
-            if ($fg.Kind -in @('other','unknownkey') -or $bg.Kind -in @('other','unknownkey')) { $script:stats.unresolved++; continue }
-            if ($fg.Kind -in @('alpha','transparent') -or $bg.Kind -in @('alpha','transparent')) { $script:stats.skipped++; continue }
+            if ($fg.Kind -in @('other','alpha','transparent','unknownkey')) { continue }
+            if ($bg.Kind -in @('other','alpha','transparent','unknownkey')) { continue }
 
             # ⚠ v0.1 的第 5 號 bug（規劃書 8.2）：這裡漏了 Need 欄位，而分級用
             #   $r.Need -le 0 判裝飾，PS 裡 $null -le 0 為 True →
@@ -962,7 +928,7 @@ function WalkStyles($doc, $file) {
             $isText = -not ($ttName -and ($ttName -in $nonTextEls))
             $fs = 0.0
             if ($st.set['FontSize']) { [double]::TryParse($st.set['FontSize'], [ref]$fs) | Out-Null }
-            $bold = $st.set['FontWeight'] -and ($st.set['FontWeight'] -match $script:boldWeightRx)
+            $bold = $st.set['FontWeight'] -and ($st.set['FontWeight'] -match 'Bold|Black|Heavy|SemiBold')
             $pt = $fs * 0.75   # WPF FontSize 是 DIP，換 point 要 ×0.75（規劃書 4.3）
             $isLarge = ($pt -ge 18) -or ($bold -and $pt -ge 14)
             $need = if (-not $isText) { 0.0 } elseif ($isLarge) { 3.0 } else { 4.5 }
@@ -1001,7 +967,7 @@ foreach ($f in $files) {
 
 # ── 報告 ──
 "檔案 $($files.Count) 個｜解析出 $($stats.pairs) 組『文字色 × 生效背景色』配對"
-"無法解析（顏色來自 Binding／漸層／色盤查無此鍵）: $($stats.unresolved) 處｜跳過（半透明、隱形）: $($stats.skipped) 處"
+"無法解析（背景在樹上找不到／來自 Binding）: $($stats.unresolved) 處｜跳過（半透明、漸層等）: $($stats.skipped) 處"
 if ($stats.deadfg -gt 0) {
     # 過濾不靜默：被判定為死 setter 的配對要讓使用者知道有幾組、憑什麼被排除
     Write-Host "已排除 $($stats.deadfg) 組 Style 配對：模板無 Foreground 消費者（無 ContentPresenter/TextBlock 等，Foreground 不會被渲染）" -ForegroundColor DarkGray

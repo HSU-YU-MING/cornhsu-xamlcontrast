@@ -26,9 +26,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 - **Style pairs with an unresolvable side are now counted.** They were dropped with a bare
   `continue` — absent from findings *and* from every degradation counter, which violates the
   project's own "silent degradation is lying" rule. Report labels updated to match the
-  sharpened bucket meanings. The PowerShell prototype carried all four of these defects
-  identically (the ported code inherited them), and was fixed in lockstep — a concrete
-  reminder that two implementations agreeing proves consistency, not correctness.
+  sharpened bucket meanings.
+
+  The frozen PowerShell prototype carries all four defects identically — the .NET port
+  inherited them from it — a concrete reminder that two implementations agreeing proves
+  consistency, not correctness. It stays frozen regardless (governance decision, M5): it is a
+  historical spec, not a verification source, and `prototype/baseline-*.txt` goes on recording
+  v0.1.0 behaviour. Verification is C# snapshot regression via `scripts/verify-baselines.ps1`.
 
 ## [0.5.1] - 2026-08-08
 
