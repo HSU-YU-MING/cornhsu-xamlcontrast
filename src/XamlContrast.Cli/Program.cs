@@ -9,6 +9,7 @@ using XamlContrast.Core;
 //   --strict-palette 且色盤退化 → 1
 
 var showOk = false;
+var showUnresolved = false;
 var failOnWarn = false;
 var strictPalette = false;
 double? minCoverage = null;   // null = 用 config／內建預設
@@ -24,6 +25,7 @@ for (var i = 0; i < args.Length; i++)
     switch (args[i])
     {
         case "--show-ok": showOk = true; break;
+        case "--show-unresolved": showUnresolved = true; break;
         case "--strict-palette": strictPalette = true; break;
         case "--min-coverage":
             if (i + 1 >= args.Length ||
@@ -105,6 +107,8 @@ var minCov = minCoverage ?? config.MinCoverage;
 var result = Auditor.Run(root, detection, config);
 
 Console.Write(Report.ToConsole(result, showOk));
+if (showUnresolved && result.UnresolvedSites.Count > 0)
+    Console.Write(Report.UnresolvedList(result));
 
 if (jsonPath is not null && !TryWrite(jsonPath, Report.ToJson(result), "json")) return 2;
 
@@ -263,5 +267,7 @@ static void PrintUsage()
                                    (default path: xamlcontrast-baseline.json)
           --write-baseline [path]  freeze current failures as known debt (run once, commit the file)
           --show-ok                list passing pairs, grouped
+          --show-unresolved        list every pair the tool could NOT resolve, with
+                                   file:line, reason and the offending value/key
         """);
 }

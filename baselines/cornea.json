@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "summary": {
     "paletteSource": "none",
     "paletteMode": "none",
@@ -31,5 +31,13 @@
       "decorative": 0
     }
   },
+  "unresolved": [
+    {
+      "file": "Capture/SelectionOverlayWindow.xaml",
+      "line": 33,
+      "reason": "no-ancestor-background",
+      "value": "White"
+    }
+  ],
   "findings": []
 }

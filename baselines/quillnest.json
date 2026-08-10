@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "summary": {
     "paletteSource": "project",
     "paletteMode": "pair",
@@ -32,6 +32,236 @@
       "decorative": 6
     }
   },
+  "unresolved": [
+    {
+      "file": "Views/AppLabelManagerDialog.xaml",
+      "line": 217,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ColorHex}"
+    },
+    {
+      "file": "Views/NotesView.xaml",
+      "line": 321,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ColorHex}"
+    },
+    {
+      "file": "Views/NotesView.xaml",
+      "line": 417,
+      "reason": "bound-or-gradient",
+      "value": "White"
+    },
+    {
+      "file": "Views/NotesView.xaml",
+      "line": 426,
+      "reason": "bound-or-gradient",
+      "value": "White"
+    },
+    {
+      "file": "Views/NotesView.xaml",
+      "line": 443,
+      "reason": "bound-or-gradient",
+      "value": "White"
+    },
+    {
+      "file": "Views/NotesView.xaml",
+      "line": 445,
+      "reason": "bound-or-gradient",
+      "value": "White"
+    },
+    {
+      "file": "Views/ProjectView.xaml",
+      "line": 114,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource TextPrimaryBrush}"
+    },
+    {
+      "file": "Views/ProjectView.xaml",
+      "line": 305,
+      "reason": "bound-or-gradient",
+      "value": "White"
+    },
+    {
+      "file": "Views/ProjectView.xaml",
+      "line": 611,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource TextSecondaryBrush}"
+    },
+    {
+      "file": "Views/ProjectView.xaml",
+      "line": 611,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource TextSecondaryBrush}"
+    },
+    {
+      "file": "Views/ProjectView.xaml",
+      "line": 630,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource TextSecondaryBrush}"
+    },
+    {
+      "file": "Views/ProjectView.xaml",
+      "line": 630,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource TextSecondaryBrush}"
+    },
+    {
+      "file": "Views/SetupWizardWindow.xaml",
+      "line": 456,
+      "reason": "bound-or-gradient",
+      "value": "#666"
+    },
+    {
+      "file": "Views/SetupWizardWindow.xaml",
+      "line": 489,
+      "reason": "bound-or-gradient",
+      "value": "#CCC"
+    },
+    {
+      "file": "Views/StickyNotesView.xaml",
+      "line": 381,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ColorHex, Converter={StaticResource HexColorToBrushConverter}}"
+    },
+    {
+      "file": "Views/StickyNotesView.xaml",
+      "line": 429,
+      "reason": "bound-or-gradient",
+      "value": "White"
+    },
+    {
+      "file": "Views/StickyNoteWindow.xaml",
+      "line": 164,
+      "reason": "bound-or-gradient",
+      "value": "White"
+    },
+    {
+      "file": "Views/StickyNoteWindow.xaml",
+      "line": 176,
+      "reason": "bound-or-gradient",
+      "value": "White"
+    },
+    {
+      "file": "Views/StickyNoteWindow.xaml",
+      "line": 316,
+      "reason": "bound-or-gradient",
+      "value": "#333"
+    },
+    {
+      "file": "Views/StickyNoteWindow.xaml",
+      "line": 45,
+      "reason": "bound-or-gradient",
+      "value": "#333"
+    },
+    {
+      "file": "Views/StickyNoteWindow.xaml",
+      "line": 45,
+      "reason": "bound-or-gradient",
+      "value": "#333"
+    },
+    {
+      "file": "Views/ToastNotification.xaml",
+      "line": 27,
+      "reason": "no-ancestor-background",
+      "value": "White"
+    },
+    {
+      "file": "Views/ToastNotification.xaml",
+      "line": 30,
+      "reason": "no-ancestor-background",
+      "value": "#AAAAAA"
+    },
+    {
+      "file": "Views/ToastNotification.xaml",
+      "line": 38,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource BorderBrush}"
+    },
+    {
+      "file": "Views/TodoView.xaml",
+      "line": 82,
+      "reason": "bound-or-gradient",
+      "value": "{Binding StatusColorHex, Converter={StaticResource HexColorToBrushConverter}}"
+    },
+    {
+      "file": "Views/TodoView.xaml",
+      "line": 288,
+      "reason": "bound-or-gradient",
+      "value": "White"
+    },
+    {
+      "file": "Views/TodoView.xaml",
+      "line": 302,
+      "reason": "bound-or-gradient",
+      "value": "{Binding DueDate, Converter={StaticResource DueDateDisplayConverter}, ConverterParameter=color}"
+    },
+    {
+      "file": "Views/TodoView.xaml",
+      "line": 399,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource TextPrimaryBrush}"
+    },
+    {
+      "file": "Views/TodoView.xaml",
+      "line": 578,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource TextSecondaryBrush}"
+    },
+    {
+      "file": "Views/TodoView.xaml",
+      "line": 602,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource SuccessBrush}"
+    },
+    {
+      "file": "Views/TodoView.xaml",
+      "line": 776,
+      "reason": "no-ancestor-background",
+      "value": "#FF6B6B"
+    },
+    {
+      "file": "Views/TodoView.xaml",
+      "line": 791,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource TextSecondaryBrush}"
+    },
+    {
+      "file": "Views/TodoView.xaml",
+      "line": 850,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource TextSecondaryBrush}"
+    },
+    {
+      "file": "Views/TodoView.xaml",
+      "line": 853,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource TextSecondaryBrush}"
+    },
+    {
+      "file": "Views/TutorialCalloutWindow.xaml",
+      "line": 16,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource SurfaceBrush}"
+    },
+    {
+      "file": "Views/WorkloadDashboardView.xaml",
+      "line": 289,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource TextPrimaryBrush}"
+    },
+    {
+      "file": "Views/WorkloadDashboardView.xaml",
+      "line": 302,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource TextSecondaryBrush}"
+    },
+    {
+      "file": "Views/WorkloadEntryDialog.xaml",
+      "line": 473,
+      "reason": "bound-or-gradient",
+      "value": "White"
+    }
+  ],
   "findings": [
     {
       "file": "MainWindow.xaml",

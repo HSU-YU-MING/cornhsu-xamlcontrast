@@ -376,6 +376,33 @@ public class NewRuleTests
         Assert.Equal(21.0, f.RatioDark);
     }
 
+    [Fact] // unknown key 要點名 —— 每一個都是死引用、打字錯誤、或偵測漏掉的色盤檔
+    public void UnknownPaletteKeysAreNamedInReports()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#000000"/>
+              <SolidColorBrush x:Key="Fg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Accent" Color="#42A5F5"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Fgg}" Text="打錯字"/>
+              <TextBlock Foreground="{DynamicResource Fgg}" Text="又一處"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var site = r.UnresolvedSites.Where(s => s.Reason == UnresolvedReason.UnknownPaletteKey).ToList();
+        Assert.Equal(2, site.Count);
+        Assert.All(site, s => Assert.Equal("Fgg", s.Value));           // 記的是鍵名,不是原始字串
+        Assert.All(site, s => Assert.True(s.Line > 0));                // 有行號可跳
+        Assert.Contains("unknown palette keys (top): Fgg x2", Report.ToConsole(r));
+        Assert.Contains("\"Fgg\": 2", Report.ToJson(r));               // summary.unknownKeys
+        Assert.Contains("unknown-palette-key", Report.UnresolvedList(r));
+    }
+
     [Fact] // unresolved 要分類 —— 只給總數的話，使用者看不出哪些可補救、哪些是硬邊界
     public void UnresolvedIsBrokenDownByReason()
     {

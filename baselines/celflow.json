@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "summary": {
     "paletteSource": "project",
     "paletteMode": "single",
@@ -32,6 +32,266 @@
       "decorative": 19
     }
   },
+  "unresolved": [
+    {
+      "file": "Views/AiModelPanel.xaml",
+      "line": 34,
+      "reason": "bound-or-gradient",
+      "value": "#AAA"
+    },
+    {
+      "file": "Views/AiModelPanel.xaml",
+      "line": 47,
+      "reason": "bound-or-gradient",
+      "value": "#888"
+    },
+    {
+      "file": "Views/AiModelPanel.xaml",
+      "line": 56,
+      "reason": "bound-or-gradient",
+      "value": "#888"
+    },
+    {
+      "file": "Views/AiModelPanel.xaml",
+      "line": 63,
+      "reason": "bound-or-gradient",
+      "value": "#CCC"
+    },
+    {
+      "file": "Views/AiModelPanel.xaml",
+      "line": 81,
+      "reason": "bound-or-gradient",
+      "value": "#666"
+    },
+    {
+      "file": "Views/AiModelPanel.xaml",
+      "line": 84,
+      "reason": "bound-or-gradient",
+      "value": "#888"
+    },
+    {
+      "file": "Views/AiPersonalizationView.xaml",
+      "line": 159,
+      "reason": "bound-or-gradient",
+      "value": "{Binding StatusColorHex}"
+    },
+    {
+      "file": "Views/AiPersonalizationView.xaml",
+      "line": 166,
+      "reason": "bound-or-gradient",
+      "value": "#888"
+    },
+    {
+      "file": "Views/BezierEditorView.xaml",
+      "line": 87,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource OnionPrev}"
+    },
+    {
+      "file": "Views/BezierEditorView.xaml",
+      "line": 94,
+      "reason": "no-ancestor-background",
+      "value": "{DynamicResource OnionNext}"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 481,
+      "reason": "bound-or-gradient",
+      "value": "{Binding FlipHorizontal, Converter={StaticResource BoolToActiveBrush}}"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 481,
+      "reason": "bound-or-gradient",
+      "value": "{Binding FlipHorizontal, Converter={StaticResource BoolToActiveBrush}}"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 481,
+      "reason": "bound-or-gradient",
+      "value": "{Binding FlipHorizontal, Converter={StaticResource BoolToActiveBrush}}"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 485,
+      "reason": "bound-or-gradient",
+      "value": "{Binding OnionSkinEnabled, Converter={StaticResource BoolToActiveBrush}}"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 485,
+      "reason": "bound-or-gradient",
+      "value": "{Binding OnionSkinEnabled, Converter={StaticResource BoolToActiveBrush}}"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 485,
+      "reason": "bound-or-gradient",
+      "value": "{Binding OnionSkinEnabled, Converter={StaticResource BoolToActiveBrush}}"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 525,
+      "reason": "bound-or-gradient",
+      "value": "{Binding DataContext.IsQuickFlipping, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToActiveBrush}}"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 525,
+      "reason": "bound-or-gradient",
+      "value": "{Binding DataContext.IsQuickFlipping, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToActiveBrush}}"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 525,
+      "reason": "bound-or-gradient",
+      "value": "{Binding DataContext.IsQuickFlipping, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToActiveBrush}}"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 551,
+      "reason": "bound-or-gradient",
+      "value": "#888"
+    },
+    {
+      "file": "Views/CanvasView.xaml",
+      "line": 581,
+      "reason": "bound-or-gradient",
+      "value": "#888"
+    },
+    {
+      "file": "Views/CrashRecoveryDialog.xaml",
+      "line": 81,
+      "reason": "bound-or-gradient",
+      "value": "#888"
+    },
+    {
+      "file": "Views/CrashRecoveryDialog.xaml",
+      "line": 86,
+      "reason": "bound-or-gradient",
+      "value": "#888"
+    },
+    {
+      "file": "Views/FinetuneManagerView.xaml",
+      "line": 319,
+      "reason": "bound-or-gradient",
+      "value": "#555"
+    },
+    {
+      "file": "Views/MultiGapPlanDialog.xaml",
+      "line": 84,
+      "reason": "bound-or-gradient",
+      "value": "{Binding AccentColor}"
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 385,
+      "reason": "bound-or-gradient",
+      "value": "{DynamicResource Purple}"
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 430,
+      "reason": "bound-or-gradient",
+      "value": "{DynamicResource Yellow}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 145,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Pen}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 145,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Pen}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 145,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Pen}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 150,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Eraser}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 150,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Eraser}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 150,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Eraser}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 156,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Lasso}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 156,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Lasso}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 156,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Lasso}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 162,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Eyedropper}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 162,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Eyedropper}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 162,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Eyedropper}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 167,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Pan}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 167,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Pan}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 167,
+      "reason": "bound-or-gradient",
+      "value": "{Binding ActiveTool, Converter={StaticResource ActiveToolConverter}, ConverterParameter=Pan}"
+    },
+    {
+      "file": "Views/ToolbarView.xaml",
+      "line": 199,
+      "reason": "bound-or-gradient",
+      "value": "#888"
+    }
+  ],
   "findings": [
     {
       "file": "Views/AboutWindow.xaml",

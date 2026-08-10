@@ -42,6 +42,26 @@ public static class Report
     private static IEnumerable<KeyValuePair<UnresolvedReason, int>> Reasons(AuditResult r)
         => r.UnresolvedBy.Where(kv => kv.Value > 0).OrderByDescending(kv => kv.Value);
 
+    private static IEnumerable<KeyValuePair<string, int>> TopUnknownKeys(AuditResult r, int take = 5)
+        => r.UnresolvedSites.Where(s => s.Reason == UnresolvedReason.UnknownPaletteKey)
+            .GroupBy(s => s.Value)
+            .Select(g => new KeyValuePair<string, int>(g.Key, g.Count()))
+            .OrderByDescending(kv => kv.Value).ThenBy(kv => kv.Key, StringComparer.Ordinal)
+            .Take(take);
+
+    /// <summary>--show-unresolved：逐筆列出無法解析的位置。分開一個區塊而不是混進
+    /// findings —— 它們不是「問題」,是「工具沒看到的地方」,混在一起會稀釋兩者。</summary>
+    public static string UnresolvedList(AuditResult r)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine();
+        sb.AppendLine($"===== unresolved ({r.UnresolvedSites.Count}) =====");
+        foreach (var s in r.UnresolvedSites
+                     .OrderBy(s => s.Reason).ThenBy(s => s.File, StringComparer.Ordinal).ThenBy(s => s.Line))
+            sb.AppendLine($"{s.File + ":" + s.Line,-42} {ReasonLabel(s.Reason),-26} {s.Value}");
+        return sb.ToString();
+    }
+
     private static string ModeLabel(PaletteMode m) => m switch
     {
         PaletteMode.Pair => "pair",
@@ -64,7 +84,8 @@ public static class Report
             // 2：ok/decorative 的 findings 不再輸出 symmetry（該維度只在沒過的配對上有意義）
             // 3：summary 新增 unresolvedBy（unresolved 的原因細目）
             // 4：summary 新增 coverage（解析成功的配對佔看到的比例）
-            schemaVersion = 4,
+            // 5：summary 新增 unknownKeys；頂層新增 unresolved 陣列（逐筆位置）
+            schemaVersion = 5,
             summary = new
             {
                 paletteSource = r.Detection.Mode == PaletteMode.None ? "none" : "project",
@@ -88,6 +109,12 @@ public static class Report
                 // 細目讓「漏了多少」變成「該修哪裡」—— 只有總數的話，
                 // 使用者看不出其中絕大多數可能是同一個可補救的原因
                 unresolvedBy = Reasons(r).ToDictionary(kv => ReasonLabel(kv.Key), kv => kv.Value),
+                // 每個 unknown key 都是死引用、打字錯誤、或偵測漏掉的色盤檔 —— 全量點名
+                unknownKeys = r.UnresolvedSites.Any(s => s.Reason == UnresolvedReason.UnknownPaletteKey)
+                    ? r.UnresolvedSites.Where(s => s.Reason == UnresolvedReason.UnknownPaletteKey)
+                        .GroupBy(s => s.Value).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.Ordinal)
+                        .ToDictionary(g => g.Key, g => g.Count())
+                    : null,
                 skipped = r.Skipped,
                 deadForeground = r.DeadForeground,
                 disabledExempt = r.DisabledExempt,
@@ -103,6 +130,14 @@ public static class Report
                     decorative = r.CountOf(Category.Decorative),
                 },
             },
+            // 逐筆的「工具沒看到的地方」—— 與 findings 分開:它們不是問題,是盲區地圖
+            unresolved = r.UnresolvedSites.Count == 0 ? null : r.UnresolvedSites.Select(s => new
+            {
+                file = s.File,
+                line = s.Line,
+                reason = ReasonLabel(s.Reason),
+                value = s.Value,
+            }),
             findings = r.Findings.Select(f => new
             {
                 file = f.File,
@@ -212,10 +247,19 @@ public static class Report
         sb.AppendLine(string.Create(inv,
             $"unresolved (colour bound at runtime / gradient / key not in palette): {r.Unresolved} | skipped (translucent, invisible): {r.Skipped}"));
         if (r.Unresolved > 0)
+        {
             // 細目才是可行動的部分：no-ancestor-background 佔大宗代表「宣告根背景就會回來」，
             // bound-or-gradient 佔大宗代表那是靜態分析的硬邊界，沒得救
             sb.AppendLine("  unresolved by reason: " +
                 string.Join(", ", Reasons(r).Select(kv => string.Create(inv, $"{ReasonLabel(kv.Key)} {kv.Value}"))));
+            // unknown-key 點名 —— 每一個都是死引用、打字錯誤、或色盤偵測漏了某個檔。
+            // 這對開發者是免費的 lint,可能比對比度本身更常派上用場
+            var unknown = TopUnknownKeys(r).ToList();
+            if (unknown.Count > 0)
+                sb.AppendLine("  unknown palette keys (top): " +
+                    string.Join(", ", unknown.Select(kv => string.Create(inv, $"{kv.Key} x{kv.Value}"))) +
+                    " — dead reference, typo, or a palette file detection missed");
+        }
         if (r.DeadForeground > 0)
         {
             // 過濾不靜默：被判定為死 setter 的配對要讓使用者知道有幾組、憑什麼被排除

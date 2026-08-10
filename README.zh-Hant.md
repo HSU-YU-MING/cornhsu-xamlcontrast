@@ -158,6 +158,18 @@ jobs:
 只掃到一小部分的「通過」不算通過,這是「0 組配對即 exit 1」那條不可設定規則的推廣。
 要關掉用 `--min-coverage 0`。
 
+每一筆無法解析的配對都有位置可查:`--show-unresolved` 逐筆列出
+`file:line · 原因 · 卡住的值`,JSON 頂層的 `unresolved` 陣列帶同一份清單。
+unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)——
+每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。
+
+**依專案型態設定預期。** 應用程式型專案通常解析得很好(四個驗證專案 89~100%);
+**控制項函式庫天生解析率低** —— 它們的顏色走 `{TemplateBinding}` / `{Binding}`,
+執行期才存在,這是靜態分析的硬邊界(報成 `bound-or-gradient`),不是能用設定修好的
+問題。公開專案實測:應用程式 26~57%,控制項函式庫(MahApps、MaterialDesign、
+HandyControl)5~19%。稽核函式庫請預期要用 `--min-coverage 0`,並把解析出的部分
+當抽樣看待。
+
 `--md report.md` 則產出給人讀的 Markdown（Action 用它貼 PR 留言，也可以自己拿去用）。
 
 ## 實戰成績

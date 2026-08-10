@@ -207,6 +207,20 @@ doesn't tell you whether anything can be done about it:
 principle as the non-configurable zero-pairs rule, which it generalises. Use
 `--min-coverage 0` to opt out.
 
+Every unresolved pair is listed with its location: `--show-unresolved` prints
+`file:line · reason · offending value`, and the JSON carries the same list in a top-level
+`unresolved` array. Unknown keys are additionally named with counts (`summary.unknownKeys`,
+and the top ones on the console) — each one is a dead resource reference, a typo, or a palette
+file detection missed, which makes this a free lint even before any contrast math.
+
+**Set expectations by project type.** Application projects typically resolve well
+(the four validation apps run at 89–100%). **Control libraries resolve poorly by nature** —
+their colours flow through `{TemplateBinding}` and `{Binding}`, which only exist at runtime;
+that is a hard boundary of static analysis, reported as `bound-or-gradient`, not a bug to fix
+with configuration. Measured on public projects: applications 26–57%, control libraries
+(MahApps.Metro, MaterialDesignInXaml, HandyControl) 5–19%. If you're auditing a control
+library, expect to lean on `--min-coverage 0` and treat the resolved subset as a sample.
+
 `--md report.md` writes the human-readable Markdown version — this is what the Action posts as a
 PR comment, and you can use it directly too.
 

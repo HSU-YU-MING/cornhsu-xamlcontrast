@@ -5,6 +5,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+### Added
+- **Every unresolved pair now carries its location.** `--show-unresolved` lists
+  `file:line · reason · offending value` for each one, and the JSON gains a top-level
+  `unresolved` array (schemaVersion 5). The reason breakdown said *why* coverage was lost but
+  not *where* — "57 pairs have no ancestor background" is a diagnosis without an address.
+- **Unknown palette keys are named, with counts** (`summary.unknownKeys`, top ones on the
+  console). Each is a dead resource reference, a typo, or a palette file detection missed —
+  a free lint that may fire more often than the contrast math itself.
+- **README sets coverage expectations by project type**: applications resolve well (validation
+  apps 89–100%, public apps 26–57%); control libraries are inherently low (5–19%) because
+  their colours flow through `{TemplateBinding}`/`{Binding}` — a hard boundary of static
+  analysis, not a configuration problem.
+
 ### Fixed
 - **Three false-report mechanisms in the merged palette, caught by hand-verifying findings on
   the public-project scans** (the merged palette shipped earlier in this same release; none of

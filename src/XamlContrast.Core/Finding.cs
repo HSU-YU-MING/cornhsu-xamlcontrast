@@ -57,6 +57,11 @@ public enum UnresolvedReason
     TranslucentUncomposited,
 }
 
+/// <summary>一筆無法解析的配對「在哪裡、為什麼、卡在哪個值」。
+/// 只有原因分類還不夠 —— 使用者知道「57 組找不到底色」,但不知道在哪幾個檔;
+/// unknown-key 更是只要點名鍵就是免費的死引用/打字錯誤偵測器。</summary>
+public sealed record UnresolvedSite(UnresolvedReason Reason, string File, int Line, string Value);
+
 public sealed class AuditResult
 {
     public required PaletteDetection Detection { get; init; }
@@ -66,6 +71,8 @@ public sealed class AuditResult
     public required int Unresolved { get; init; }
     /// <summary>unresolved 的原因細目（總和 = Unresolved）—— 讓「漏了多少」變成「該修哪裡」。</summary>
     public required Dictionary<UnresolvedReason, int> UnresolvedBy { get; init; }
+    /// <summary>逐筆的無法解析位置（file:line＋卡住的值）。</summary>
+    public required List<UnresolvedSite> UnresolvedSites { get; init; }
     public required int Skipped { get; init; }
     /// <summary>死 setter 過濾排除的 Style 配對數（過濾不靜默）</summary>
     public required int DeadForeground { get; init; }
