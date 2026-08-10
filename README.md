@@ -86,13 +86,20 @@ of intent — it's just bad twice. Everything below AA gets reported; a human de
 ## Why the hard part isn't the WCAG formula
 
 The formula is 20 lines. The value is in resolving **what color the text actually sits on** —
-thirteen parsing rules, each one discovered by auditing real shipped products:
+sixteen parsing rules, every one of them discovered by auditing real shipped products:
 
 transparent passthrough · alpha compositing · opacity accumulation down the tree ·
 ControlTemplate subtrees · Style setter pairing · trigger states · dead-setter filtering ·
 named/inline Style resolution with BasedOn chains · per-state trigger merging ·
 disabled-state exemption (WCAG 1.4.3) · translucent palette keys ·
-template-root backgrounds · root-targeted trigger setters
+template-root backgrounds · root-targeted trigger setters ·
+`MultiTrigger` combined-condition states · `#FFRRGGBB` is opaque, not translucent ·
+implicit-style background on the document root
+
+The first thirteen came from four shipped WPF apps. The last three came from scanning eight
+public WPF projects (1909 XAML files) in August 2026 — and two of them cost **nothing** on the
+original four, because all four are same-author and share a house style. A blind spot's severity
+can't be measured on a sample that never triggers it.
 
 Any implementation that just copies the formula misses all of them.
 
