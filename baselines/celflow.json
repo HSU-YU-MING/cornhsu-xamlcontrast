@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "summary": {
     "paletteSource": "project",
     "paletteMode": "single",
@@ -38,7 +38,6 @@
       "ratioLight": 15,
       "threshold": 3,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "24px",
       "largeText": true
@@ -53,7 +52,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -68,7 +66,6 @@
       "ratioLight": 10.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -83,7 +80,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -98,7 +94,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -113,7 +108,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -128,7 +122,6 @@
       "ratioLight": 8.05,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "14px",
       "largeText": false
@@ -143,7 +136,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -158,7 +150,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -173,7 +164,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -188,7 +178,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -203,7 +192,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -218,7 +206,6 @@
       "ratioLight": 17.4,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -233,7 +220,6 @@
       "ratioLight": 4.63,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -248,7 +234,6 @@
       "ratioLight": 8.2,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -263,7 +248,6 @@
       "ratioLight": 6.78,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -278,7 +262,6 @@
       "ratioLight": 6.78,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -293,7 +276,6 @@
       "ratioLight": 1.31,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -307,7 +289,6 @@
       "ratioLight": 6.78,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -322,7 +303,6 @@
       "ratioLight": 5.14,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -337,7 +317,6 @@
       "ratioLight": 17.74,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -352,7 +331,6 @@
       "ratioLight": 17.74,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -366,7 +344,6 @@
       "ratioLight": 5.14,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -381,7 +358,6 @@
       "ratioLight": 6.78,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -396,7 +372,6 @@
       "ratioLight": 4.72,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -411,7 +386,6 @@
       "ratioLight": 6.78,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -426,7 +400,6 @@
       "ratioLight": 5.14,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -441,7 +414,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -456,7 +428,6 @@
       "ratioLight": 5.54,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -471,7 +442,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -486,7 +456,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -501,7 +470,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -516,7 +484,6 @@
       "ratioLight": 17.4,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -531,7 +498,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -546,7 +512,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -561,7 +526,6 @@
       "ratioLight": 5.97,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -576,7 +540,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -591,7 +554,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -606,7 +568,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -621,7 +582,6 @@
       "ratioLight": 13.58,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -636,7 +596,6 @@
       "ratioLight": 7.22,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -651,7 +610,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -666,7 +624,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -681,7 +638,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -695,7 +651,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -709,7 +664,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -723,7 +677,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -737,7 +690,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -751,7 +703,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -765,7 +716,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -779,7 +729,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -793,7 +742,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -807,7 +755,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -821,7 +768,6 @@
       "ratioLight": 5.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -835,7 +781,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -849,7 +794,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -863,7 +807,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -877,7 +820,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -891,7 +833,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -905,7 +846,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -919,7 +859,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -933,7 +872,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -947,7 +885,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -961,7 +898,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -975,7 +911,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -989,7 +924,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1003,7 +937,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1017,7 +950,6 @@
       "ratioLight": 8.05,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "14px",
       "largeText": false
@@ -1032,7 +964,6 @@
       "ratioLight": 9.67,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1047,7 +978,6 @@
       "ratioLight": 4.5,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -1062,7 +992,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1077,7 +1006,6 @@
       "ratioLight": 10.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1092,7 +1020,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1107,7 +1034,6 @@
       "ratioLight": 7.03,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1122,7 +1048,6 @@
       "ratioLight": 4.88,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1137,7 +1062,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1152,7 +1076,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1167,7 +1090,6 @@
       "ratioLight": 6.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1182,7 +1104,6 @@
       "ratioLight": 6.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1197,7 +1118,6 @@
       "ratioLight": 5.19,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1212,7 +1132,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1227,7 +1146,6 @@
       "ratioLight": 5.25,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1242,7 +1160,6 @@
       "ratioLight": 4.81,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1257,7 +1174,6 @@
       "ratioLight": 8.05,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "14px",
       "largeText": false
@@ -1272,7 +1188,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1287,7 +1202,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1302,7 +1216,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1317,7 +1230,6 @@
       "ratioLight": 5.47,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1332,7 +1244,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -1347,7 +1258,6 @@
       "ratioLight": 8.05,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -1362,7 +1272,6 @@
       "ratioLight": 6.44,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -1377,7 +1286,6 @@
       "ratioLight": 6.86,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -1392,7 +1300,6 @@
       "ratioLight": 6.38,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -1407,7 +1314,6 @@
       "ratioLight": 10.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1422,7 +1328,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -1437,7 +1342,6 @@
       "ratioLight": 7.18,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1452,7 +1356,6 @@
       "ratioLight": 5.94,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1467,7 +1370,6 @@
       "ratioLight": 4.5,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -1482,7 +1384,6 @@
       "ratioLight": 9.67,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1497,7 +1398,6 @@
       "ratioLight": 4.5,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -1512,7 +1412,6 @@
       "ratioLight": 5.94,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1527,7 +1426,6 @@
       "ratioLight": 9.67,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1541,7 +1439,6 @@
       "ratioLight": 4.5,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1556,7 +1453,6 @@
       "ratioLight": 11.76,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1570,7 +1466,6 @@
       "ratioLight": 4.5,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1585,7 +1480,6 @@
       "ratioLight": 5.94,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1600,7 +1494,6 @@
       "ratioLight": 5.94,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1615,7 +1508,6 @@
       "ratioLight": 5.94,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1630,7 +1522,6 @@
       "ratioLight": 4.5,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -1645,7 +1536,6 @@
       "ratioLight": 7.18,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1660,7 +1550,6 @@
       "ratioLight": 5.94,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1675,7 +1564,6 @@
       "ratioLight": 4.5,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1689,7 +1577,6 @@
       "ratioLight": 5.94,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1703,7 +1590,6 @@
       "ratioLight": 8.73,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -1717,7 +1603,6 @@
       "ratioLight": 5.94,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1732,7 +1617,6 @@
       "ratioLight": 9.67,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1746,7 +1630,6 @@
       "ratioLight": 7.18,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1761,7 +1644,6 @@
       "ratioLight": 2.73,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -1775,7 +1657,6 @@
       "ratioLight": 7.18,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -1790,7 +1671,6 @@
       "ratioLight": 9.67,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -1805,7 +1685,6 @@
       "ratioLight": 4.5,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -1820,7 +1699,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1835,7 +1713,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -1850,7 +1727,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1864,7 +1740,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1878,7 +1753,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1892,7 +1766,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1906,7 +1779,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1920,7 +1792,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1934,7 +1805,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1948,7 +1818,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1962,7 +1831,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1976,7 +1844,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -1990,7 +1857,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2004,7 +1870,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2018,7 +1883,6 @@
       "ratioLight": 5.97,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -2033,7 +1897,6 @@
       "ratioLight": 5.97,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -2048,7 +1911,6 @@
       "ratioLight": 5.97,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -2063,7 +1925,6 @@
       "ratioLight": 5.97,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -2078,7 +1939,6 @@
       "ratioLight": 8.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -2093,7 +1953,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2108,7 +1967,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -2123,7 +1981,6 @@
       "ratioLight": 6.38,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -2138,7 +1995,6 @@
       "ratioLight": 6.86,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2153,7 +2009,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -2168,7 +2023,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -2183,7 +2037,6 @@
       "ratioLight": 18.88,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -2198,7 +2051,6 @@
       "ratioLight": 4.2,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -2212,7 +2064,6 @@
       "ratioLight": 5.25,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -2226,7 +2077,6 @@
       "ratioLight": 5.19,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -2241,7 +2091,6 @@
       "ratioLight": 5.19,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -2256,7 +2105,6 @@
       "ratioLight": 8.46,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -2271,7 +2119,6 @@
       "ratioLight": 5.19,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -2286,7 +2133,6 @@
       "ratioLight": 8.46,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -2301,7 +2147,6 @@
       "ratioLight": 5.47,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2316,7 +2161,6 @@
       "ratioLight": 5.47,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2331,7 +2175,6 @@
       "ratioLight": 10.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2346,7 +2189,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -2361,7 +2203,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -2376,7 +2217,6 @@
       "ratioLight": 13.18,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2390,7 +2230,6 @@
       "ratioLight": 13.18,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "14px",
       "largeText": false
@@ -2405,7 +2244,6 @@
       "ratioLight": 13.18,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2419,7 +2257,6 @@
       "ratioLight": 10.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2433,7 +2270,6 @@
       "ratioLight": 6.38,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2448,7 +2284,6 @@
       "ratioLight": 7.08,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -2463,7 +2298,6 @@
       "ratioLight": 4.64,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -2478,7 +2312,6 @@
       "ratioLight": 8.62,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -2493,7 +2326,6 @@
       "ratioLight": 5.65,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -2508,7 +2340,6 @@
       "ratioLight": 5.23,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2522,7 +2353,6 @@
       "ratioLight": 5.23,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2536,7 +2366,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2551,7 +2380,6 @@
       "ratioLight": 10.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2565,7 +2393,6 @@
       "ratioLight": 10.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2579,7 +2406,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2594,7 +2420,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2609,7 +2434,6 @@
       "ratioLight": 10.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2623,7 +2447,6 @@
       "ratioLight": 10.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2637,7 +2460,6 @@
       "ratioLight": 11.76,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2651,7 +2473,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2666,7 +2487,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2681,7 +2501,6 @@
       "ratioLight": 10.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2695,7 +2514,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -2710,7 +2528,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -2725,7 +2542,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2739,7 +2555,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2753,7 +2568,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2767,7 +2581,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2781,7 +2594,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2795,7 +2607,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -2809,7 +2620,6 @@
       "ratioLight": 8.05,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "14px",
       "largeText": false
@@ -2824,7 +2634,6 @@
       "ratioLight": 6.99,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -2839,7 +2648,6 @@
       "ratioLight": 8.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -2854,7 +2662,6 @@
       "ratioLight": 4.8,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -2869,7 +2676,6 @@
       "ratioLight": 5.47,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -2884,7 +2690,6 @@
       "ratioLight": 8.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2899,7 +2704,6 @@
       "ratioLight": 5.47,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2914,7 +2718,6 @@
       "ratioLight": 5.47,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -2929,7 +2732,6 @@
       "ratioLight": 5.36,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2944,7 +2746,6 @@
       "ratioLight": 4.62,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2959,7 +2760,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -2974,7 +2774,6 @@
       "ratioLight": 8.05,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "14px",
       "largeText": false
@@ -2989,7 +2788,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3004,7 +2802,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3019,7 +2816,6 @@
       "ratioLight": 15.52,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -3034,7 +2830,6 @@
       "ratioLight": 5.1,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -3049,7 +2844,6 @@
       "ratioLight": 4.5,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3064,7 +2858,6 @@
       "ratioLight": 4.5,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -3079,7 +2872,6 @@
       "ratioLight": 5.36,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3094,7 +2886,6 @@
       "ratioLight": 4.62,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3109,7 +2900,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3124,7 +2914,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3139,7 +2928,6 @@
       "ratioLight": 13.58,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3154,7 +2942,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3169,7 +2956,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3184,7 +2970,6 @@
       "ratioLight": 17.4,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -3198,7 +2983,6 @@
       "ratioLight": 8.05,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -3212,7 +2996,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -3227,7 +3010,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3242,7 +3024,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3257,7 +3038,6 @@
       "ratioLight": 4.63,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3272,7 +3052,6 @@
       "ratioLight": 4.63,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3287,7 +3066,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3302,7 +3080,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3317,7 +3094,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -3331,7 +3107,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -3345,7 +3120,6 @@
       "ratioLight": 8.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -3360,7 +3134,6 @@
       "ratioLight": 7.22,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3375,7 +3148,6 @@
       "ratioLight": 7.22,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3390,7 +3162,6 @@
       "ratioLight": 7.22,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3405,7 +3176,6 @@
       "ratioLight": 7.22,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3420,7 +3190,6 @@
       "ratioLight": 7.22,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3435,7 +3204,6 @@
       "ratioLight": 7.22,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3450,7 +3218,6 @@
       "ratioLight": 8.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3465,7 +3232,6 @@
       "ratioLight": 6.7,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -3480,7 +3246,6 @@
       "ratioLight": 5.47,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -3495,7 +3260,6 @@
       "ratioLight": 7.22,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -3509,7 +3273,6 @@
       "ratioLight": 6.28,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -3523,7 +3286,6 @@
       "ratioLight": 6.7,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3538,7 +3300,6 @@
       "ratioLight": 7.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3553,7 +3314,6 @@
       "ratioLight": 5.63,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3568,7 +3328,6 @@
       "ratioLight": 5.63,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3583,7 +3342,6 @@
       "ratioLight": 8.99,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3598,7 +3356,6 @@
       "ratioLight": 15,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "16px",
       "largeText": false
@@ -3613,7 +3370,6 @@
       "ratioLight": 13.18,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "14px",
       "largeText": false
@@ -3628,7 +3384,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3643,7 +3398,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3658,7 +3412,6 @@
       "ratioLight": 10.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -3673,7 +3426,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3688,7 +3440,6 @@
       "ratioLight": 1.28,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -3702,7 +3453,6 @@
       "ratioLight": 5.54,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3717,7 +3467,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3732,7 +3481,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3747,7 +3495,6 @@
       "ratioLight": 6.86,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -3761,7 +3508,6 @@
       "ratioLight": 13.58,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3776,7 +3522,6 @@
       "ratioLight": 6.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3791,7 +3536,6 @@
       "ratioLight": 8.46,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3806,7 +3550,6 @@
       "ratioLight": 6.86,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -3820,7 +3563,6 @@
       "ratioLight": 13.58,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3835,7 +3577,6 @@
       "ratioLight": 6.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3850,7 +3591,6 @@
       "ratioLight": 8.46,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3865,7 +3605,6 @@
       "ratioLight": 6.86,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -3879,7 +3618,6 @@
       "ratioLight": 13.58,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3894,7 +3632,6 @@
       "ratioLight": 6.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3909,7 +3646,6 @@
       "ratioLight": 8.46,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3924,7 +3660,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3939,7 +3674,6 @@
       "ratioLight": 6.86,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -3953,7 +3687,6 @@
       "ratioLight": 13.58,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3968,7 +3701,6 @@
       "ratioLight": 6.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -3983,7 +3715,6 @@
       "ratioLight": 8.46,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -3998,7 +3729,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4013,7 +3743,6 @@
       "ratioLight": 13.58,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "16px",
       "largeText": false
@@ -4028,7 +3757,6 @@
       "ratioLight": 17.4,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -4043,7 +3771,6 @@
       "ratioLight": 13.58,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "16px",
       "largeText": false
@@ -4058,7 +3785,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -4073,7 +3799,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4088,7 +3813,6 @@
       "ratioLight": 5.54,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -4103,7 +3827,6 @@
       "ratioLight": 10.29,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -4117,7 +3840,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -4131,7 +3853,6 @@
       "ratioLight": 8.46,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -4145,7 +3866,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -4159,7 +3879,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -4173,7 +3892,6 @@
       "ratioLight": 8.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -4188,7 +3906,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4203,7 +3920,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -4218,7 +3934,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -4233,7 +3948,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -4248,7 +3962,6 @@
       "ratioLight": 6.86,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4263,7 +3976,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -4278,7 +3990,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -4293,7 +4004,6 @@
       "ratioLight": 8.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -4308,7 +4018,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4323,7 +4032,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -4338,7 +4046,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -4353,7 +4060,6 @@
       "ratioLight": 15,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "16px",
       "largeText": false
@@ -4368,7 +4074,6 @@
       "ratioLight": 13.18,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "14px",
       "largeText": false
@@ -4383,7 +4088,6 @@
       "ratioLight": 5.94,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -4398,7 +4102,6 @@
       "ratioLight": 5.94,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -4413,7 +4116,6 @@
       "ratioLight": 7.03,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -4428,7 +4130,6 @@
       "ratioLight": 8.46,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -4442,7 +4143,6 @@
       "ratioLight": 5.54,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -4457,7 +4157,6 @@
       "ratioLight": 10.29,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -4471,7 +4170,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -4485,7 +4183,6 @@
       "ratioLight": 13.18,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "largeText": false
     },
@@ -4499,7 +4196,6 @@
       "ratioLight": 13.18,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "14px",
       "largeText": false
@@ -4514,7 +4210,6 @@
       "ratioLight": 10.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -4529,7 +4224,6 @@
       "ratioLight": 3.61,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -4543,7 +4237,6 @@
       "ratioLight": 9.76,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4558,7 +4251,6 @@
       "ratioLight": 16.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4573,7 +4265,6 @@
       "ratioLight": 16.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4588,7 +4279,6 @@
       "ratioLight": 16.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "14px",
       "largeText": false
@@ -4603,7 +4293,6 @@
       "ratioLight": 16.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4618,7 +4307,6 @@
       "ratioLight": 16.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4633,7 +4321,6 @@
       "ratioLight": 5.17,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -4648,7 +4335,6 @@
       "ratioLight": 5.63,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -4663,7 +4349,6 @@
       "ratioLight": 5.63,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -4678,7 +4363,6 @@
       "ratioLight": 5.63,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4693,7 +4377,6 @@
       "ratioLight": 5.63,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4708,7 +4391,6 @@
       "ratioLight": 5.63,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4723,7 +4405,6 @@
       "ratioLight": 5.47,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4738,7 +4419,6 @@
       "ratioLight": 5.47,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -4753,7 +4433,6 @@
       "ratioLight": 7.22,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4768,7 +4447,6 @@
       "ratioLight": 7.19,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4783,7 +4461,6 @@
       "ratioLight": 16.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -4798,7 +4475,6 @@
       "ratioLight": 16.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4813,7 +4489,6 @@
       "ratioLight": 5.47,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4828,7 +4503,6 @@
       "ratioLight": 16.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4843,7 +4517,6 @@
       "ratioLight": 16.28,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4858,7 +4531,6 @@
       "ratioLight": 5.47,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4873,7 +4545,6 @@
       "ratioLight": 5.47,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -4888,7 +4559,6 @@
       "ratioLight": 6.99,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -4903,7 +4573,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -4918,7 +4587,6 @@
       "ratioLight": 6.77,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -4933,7 +4601,6 @@
       "ratioLight": 4.42,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -4947,7 +4614,6 @@
       "ratioLight": 4.42,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -4961,7 +4627,6 @@
       "ratioLight": 2.35,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -4975,7 +4640,6 @@
       "ratioLight": 10.57,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -4990,7 +4654,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -5005,7 +4668,6 @@
       "ratioLight": 1.53,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -5019,7 +4681,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -5034,7 +4695,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -5049,7 +4709,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -5064,7 +4723,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -5079,7 +4737,6 @@
       "ratioLight": 1.28,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -5093,7 +4750,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -5108,7 +4764,6 @@
       "ratioLight": 5.19,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -5123,7 +4778,6 @@
       "ratioLight": 13.58,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -5137,7 +4791,6 @@
       "ratioLight": 1.19,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -5151,7 +4804,6 @@
       "ratioLight": 5.19,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -5166,7 +4818,6 @@
       "ratioLight": 1.19,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -5180,7 +4831,6 @@
       "ratioLight": 5.19,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -5195,7 +4845,6 @@
       "ratioLight": 1.19,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -5209,7 +4858,6 @@
       "ratioLight": 5.19,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -5224,7 +4872,6 @@
       "ratioLight": 5.19,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -5239,7 +4886,6 @@
       "ratioLight": 1.19,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -5253,7 +4899,6 @@
       "ratioLight": 10.84,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -5268,7 +4913,6 @@
       "ratioLight": 1.28,
       "threshold": 0,
       "category": "decorative",
-      "symmetry": "single-theme",
       "isText": false,
       "largeText": false
     },
@@ -5282,7 +4926,6 @@
       "ratioLight": 5.04,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "9px",
       "largeText": false
@@ -5297,7 +4940,6 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "10px",
       "largeText": false
@@ -5312,7 +4954,6 @@
       "ratioLight": 8.46,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -5327,7 +4968,6 @@
       "ratioLight": 7.08,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -5342,7 +4982,6 @@
       "ratioLight": 8.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
       "largeText": false
@@ -5357,7 +4996,6 @@
       "ratioLight": 5.02,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -5372,7 +5010,6 @@
       "ratioLight": 7.03,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -5387,7 +5024,6 @@
       "ratioLight": 4.5,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -5402,7 +5038,6 @@
       "ratioLight": 6.98,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -5417,7 +5052,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "11px",
       "largeText": false
@@ -5432,7 +5066,6 @@
       "ratioLight": 11.73,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
@@ -5447,7 +5080,6 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
-      "symmetry": "single-theme",
       "isText": true,
       "fontSize": "12px",
       "largeText": false
