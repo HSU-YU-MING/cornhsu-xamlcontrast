@@ -32,6 +32,11 @@ public sealed record Resolved(
 /// <summary>把 XAML 屬性值解析成顏色（或「工具知道自己不知道」的標記）。</summary>
 public static partial class ColorResolver
 {
+    /// <summary>供色盤偵測共用：具名色 → 色碼（認不得回傳 null）。
+    /// HandyControl 的 ColorsDark.xaml 寫 &lt;Color&gt;White&lt;/Color&gt; —— 只認 #hex 會讓
+    /// 該鍵的深色值缺失、退回淺色值，深字疊深底報出 1.17:1 的假 fail。</summary>
+    internal static string? NamedHex(string name) => Named.GetValueOrDefault(name);
+
     private static readonly Dictionary<string, string> Named = new(StringComparer.OrdinalIgnoreCase)
     {
         ["white"] = "#FFFFFF",

@@ -116,6 +116,98 @@ public class PaletteDetectorTests
         Assert.Equal(3, d.ExcludedFiles.Count); // 三個字典都不是畫面
     }
 
+    [Fact] // ScreenToGif 形狀：Dark/Light 兩檔各自「字面值」brush(不經 Color 引用)。
+           // 合併式色盤第一版把字面值一律當深淺同值收,Dark 檔字典序在前 → 深色值
+           // 佔據兩欄、淺色檔整份被忽略,456 筆 findings 全部 dark==light —— 淺色欄是編造的。
+    public void LiteralBrushThemePairKeepsPerThemeValues()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Colors/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Panel.Background" Color="#FF202020"/>
+              <SolidColorBrush x:Key="Element.Foreground" Color="#FFEEEEEE"/>
+              <SolidColorBrush x:Key="Element.Accent" Color="#FF42A5F5"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Colors/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Panel.Background" Color="#FFFFFFFF"/>
+              <SolidColorBrush x:Key="Element.Foreground" Color="#FF212121"/>
+              <SolidColorBrush x:Key="Element.Accent" Color="#FF2196F3"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(PaletteMode.Pair, d.Mode);
+        Assert.False(d.Palette.IsSingleTheme);
+        Assert.Equal(("#FF202020", "#FFFFFFFF"), d.Palette.Entries["Panel.Background"]);
+        Assert.Equal(("#FFEEEEEE", "#FF212121"), d.Palette.Entries["Element.Foreground"]);
+    }
+
+    [Fact] // Translator 形狀:repo 裡有第二個 App,自帶同鍵不同值的中性色盤檔,
+           // 且路徑字典序排在主題檔前面。中性檔只能補洞、不能搶主題檔的值;衝突要明講。
+    public void NeutralFileSortingFirstDoesNotStealThemedValues()
+    {
+        using var fx = new Fixture();
+        // "Extra" < "Themes" 字典序 —— 第一版照檔案順序 TryAdd 會讓它搶走兩側
+        fx.File("Extra/SubApp/Colors.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Panel.Background" Color="#FFFFFFFF"/>
+              <SolidColorBrush x:Key="SubApp.Only" Color="#FF123456"/>
+              <SolidColorBrush x:Key="SubApp.Two" Color="#FF654321"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Panel.Background" Color="#FF202020"/>
+              <SolidColorBrush x:Key="Element.Foreground" Color="#FFE8E8E8"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Panel.Background" Color="#FFF5F5F5"/>
+              <SolidColorBrush x:Key="Element.Foreground" Color="#FF212121"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        // 主題檔的值必須贏 —— 深色側是 #202020,不是子 App 的白
+        Assert.Equal(("#FF202020", "#FFF5F5F5"), d.Palette.Entries["Panel.Background"]);
+        Assert.True(d.Palette.Entries.ContainsKey("SubApp.Only")); // 中性檔補洞仍有效
+        // 同鍵不同值的衝突不可默默取其一 —— 要在偵測描述裡明講(規劃書 4.2)
+        Assert.Contains("conflicting values", d.Description);
+        Assert.Contains("Panel.Background", d.Description);
+    }
+
+    [Fact] // HandyControl 深色檔寫 <Color>White</Color>(具名色)。只認 #hex 會讓深色值
+           // 缺失、跨側退回淺色值 —— 深字疊深底,報 1.17:1 的假 fail(實際 White 疊深底 ~13.8 合格)
+    public void NamedColoursInPaletteDefinitionsAreResolved()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Colors.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="PrimaryTextColor">#212121</Color>
+              <Color x:Key="RegionColor">#EEEEEE</Color>
+              <Color x:Key="AccentColor">#2196F3</Color>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/ColorsDark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="PrimaryTextColor">White</Color>
+              <Color x:Key="RegionColor">#2D2D30</Color>
+              <Color x:Key="AccentColor">#42A5F5</Color>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Theme.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="PrimaryTextBrush" Color="{DynamicResource PrimaryTextColor}"/>
+              <SolidColorBrush x:Key="RegionBrush" Color="{DynamicResource RegionColor}"/>
+              <SolidColorBrush x:Key="AccentBrush" Color="{DynamicResource AccentColor}"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        // 深色值是 White=#FFFFFF,不是退回淺色的 #212121
+        Assert.Equal(("#FFFFFF", "#212121"), d.Palette.Entries["PrimaryTextBrush"]);
+    }
+
     [Fact] // 測試素材不是色盤 —— ILSpy 實證：偵測器挑中反編譯測試的假資料檔當色盤
     public void FixtureDirectoriesAreNotPaletteCandidates()
     {

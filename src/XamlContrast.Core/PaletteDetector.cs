@@ -37,7 +37,8 @@ public static partial class PaletteDetector
     //   HandyControl 寫 <SolidColorBrush o:Freeze="True" x:Key="X" Color="..."/>（x:Key 不在第一個），
     //   MahApps 的 <Color x:Key="..."> 與色值分屬不同行。兩者都會整份漏掉。
     //   改成「先抓元素、再從屬性字串裡取值」，順序與換行都不影響。
-    [GeneratedRegex("""<Color\b(?<attrs>[^>]*)>\s*(?<v>#[0-9A-Fa-f]{3,8})\s*</Color>""")]
+    // 內容除了 #hex 也可能是具名色（White／Black…）—— HandyControl 的深色檔就這樣寫
+    [GeneratedRegex("""<Color\b(?<attrs>[^>]*)>\s*(?<v>#?\w+)\s*</Color>""")]
     private static partial Regex ColorElement();
 
     [GeneratedRegex("""<SolidColorBrush\b(?<attrs>[^>]*?)/?>""")]
@@ -94,8 +95,10 @@ public static partial class PaletteDetector
         foreach (Match m in ColorElement().Matches(text))
         {
             var key = Attr(KeyAttr(), m.Groups["attrs"].Value);
+            if (key is null) continue;
             var v = m.Groups["v"].Value;
-            if (key is not null && IsValidHex(v)) colors[key] = v.ToUpperInvariant();
+            if (v.StartsWith('#')) { if (IsValidHex(v)) colors[key] = v.ToUpperInvariant(); }
+            else if (ColorResolver.NamedHex(v) is { } hex) colors[key] = hex;
         }
         return colors;
     }
@@ -128,6 +131,7 @@ public static partial class PaletteDetector
             {
                 if (IsValidHex(val)) brushes[key] = val.ToUpperInvariant();
             }
+            else if (ColorResolver.NamedHex(val) is { } hex) brushes[key] = hex;
             else
             {
                 var rm = ResourceRefValue().Match(val);
@@ -212,53 +216,92 @@ public static partial class PaletteDetector
     ///   2. darkColors = 中性 ∪ dark（dark 覆蓋）；lightColors = 中性 ∪ light
     ///      只有 dark 提示而無 light 時，中性即淺色 —— HandyControl 的形狀
     ///      （預設檔 Colors.xaml 不帶 light 字樣，只有深色變體被標記）
-    ///   3. 所有 brush 字典的鍵，各自對兩組 Color 解析出深淺值
+    ///   3. brush 字典**同樣分三組**：字面值 brush 住在 dark 檔就只提供深色值、
+    ///      住在 light 檔就只提供淺色值、中性檔兩邊都給；引用型 brush 對兩張
+    ///      Color 表各解一次。最後同鍵跨組合併、缺的一側退回另一側。
+    ///      ⚠ 第 3 點是修過的：第一版把字面值 brush 一律當「深淺同值」收，
+    ///      Dark.xaml 字典序排在 Light.xaml 前 → 深色值佔據兩欄、淺色檔整份被忽略。
+    ///      ScreenToGif 實測 456 筆 findings 全部 dark==light —— 淺色欄整欄是編造的。
+    ///      QuillNest 抓不到這個回歸：它的配對走 Color 引用（第 2 點的路），
+    ///      字面值配對（ScreenToGif 的形狀）在四個受測專案裡一個都沒有。
     /// 鍵衝突一律「先出現的贏」，檔案順序固定（字典序），結果可重現。
     /// </summary>
-    internal static (Palette Pal, bool IsPair, HashSet<string> Files)? MergedXamlPalette(string root)
+    internal static (Palette Pal, bool IsPair, HashSet<string> Files, SortedSet<string> Conflicts)? MergedXamlPalette(string root)
     {
-        var colorFiles = new List<(string File, string Rel, Dictionary<string, string> Colors, bool D, bool L)>();
-        var brushFiles = new List<(string File, string Rel, Dictionary<string, string> Lit, Dictionary<string, string> Ref)>();
+        var colorFiles = new List<(string File, Dictionary<string, string> Colors, bool D, bool L)>();
+        var brushFiles = new List<(string File, Dictionary<string, string> Lit, Dictionary<string, string> Ref, bool D, bool L)>();
 
         foreach (var f in EnumerateFiles(root, "*.xaml"))
         {
             var rel = Path.GetRelativePath(root, f);
             if (LooksLikeFixture(rel)) continue;
             var n = rel.ToLowerInvariant();
+            var isDark = n.Contains("dark");
+            var isLight = n.Contains("light");
 
             var colors = ParseColorDefs(f);
-            if (colors.Count > 0)
-                colorFiles.Add((f, rel, colors, n.Contains("dark"), n.Contains("light")));
+            if (colors.Count > 0) colorFiles.Add((f, colors, isDark, isLight));
 
             var (lit, refs) = ParseBrushDefs(f);
-            if (lit.Count + refs.Count > 0) brushFiles.Add((f, rel, lit, refs));
+            if (lit.Count + refs.Count > 0) brushFiles.Add((f, lit, refs, isDark, isLight));
         }
         if (colorFiles.Count == 0 && brushFiles.Count == 0) return null;
 
-        var anyDark = colorFiles.Any(c => c.D && !c.L);
-        var anyLight = colorFiles.Any(c => c.L && !c.D);
+        // ── Color 表：主題檔先進（各佔自己那側），中性檔補洞、兩側都給 ──
         var darkColors = new Dictionary<string, string>();
         var lightColors = new Dictionary<string, string>();
-        // 中性檔先鋪底；有 dark 提示但沒有 light 提示時，中性檔就是淺色主題
-        foreach (var c in colorFiles.Where(c => !(c.D && !c.L) && !(c.L && !c.D)))
-            foreach (var (k, v) in c.Colors) { darkColors.TryAdd(k, v); lightColors.TryAdd(k, v); }
+        var colorConflicts = new SortedSet<string>(StringComparer.Ordinal);
         foreach (var c in colorFiles.Where(c => c.D && !c.L))
-            foreach (var (k, v) in c.Colors) darkColors[k] = v;
+            foreach (var (k, v) in c.Colors) Put(darkColors, k, v, colorConflicts);
         foreach (var c in colorFiles.Where(c => c.L && !c.D))
-            foreach (var (k, v) in c.Colors) lightColors[k] = v;
+            foreach (var (k, v) in c.Colors) Put(lightColors, k, v, colorConflicts);
+        foreach (var c in colorFiles.Where(c => !(c.D ^ c.L)))
+            foreach (var (k, v) in c.Colors) { Put(darkColors, k, v, colorConflicts); Put(lightColors, k, v, colorConflicts); }
+
+        // ── Brush 表：同樣依主題分側，且**主題檔先進、中性檔只補洞** ──
+        // ⚠ 第一版照檔案順序 TryAdd（Color 表是三段式、brush 表卻忘了）。
+        //   ScreenToGif 實證：repo 裡有第二個 App（Other/Translator，自帶淺色的
+        //   Panel.Background、檔名中性），Other/ 字典序排在 ScreenToGif/ 前 →
+        //   中性檔搶走主題檔的值，深色欄拿到白底，報出 1.23:1 的假 fail
+        //   （實際 ~13:1 合格）。這同時是規劃書 4.2「資源作用域」簡化的實例 ——
+        //   同鍵衝突要明講，見下面的 conflicts。
+        var darkB = new Dictionary<string, string>();
+        var lightB = new Dictionary<string, string>();
+        var darkR = new Dictionary<string, string>();
+        var lightR = new Dictionary<string, string>();
+        var conflicts = new SortedSet<string>(StringComparer.Ordinal);
+
+        static void Put(Dictionary<string, string> map, string k, string v, SortedSet<string> conflicts)
+        {
+            if (map.TryGetValue(k, out var existing)) { if (existing != v) conflicts.Add(k); }
+            else map[k] = v;
+        }
+        foreach (var b in brushFiles.Where(b => b.D && !b.L))
+        {
+            foreach (var (k, v) in b.Lit) Put(darkB, k, v, conflicts);
+            foreach (var (k, c) in b.Ref) Put(darkR, k, c, conflicts);
+        }
+        foreach (var b in brushFiles.Where(b => b.L && !b.D))
+        {
+            foreach (var (k, v) in b.Lit) Put(lightB, k, v, conflicts);
+            foreach (var (k, c) in b.Ref) Put(lightR, k, c, conflicts);
+        }
+        foreach (var b in brushFiles.Where(b => !(b.D ^ b.L)))
+        {
+            foreach (var (k, v) in b.Lit) { Put(darkB, k, v, conflicts); Put(lightB, k, v, conflicts); }
+            foreach (var (k, c) in b.Ref) { Put(darkR, k, c, conflicts); Put(lightR, k, c, conflicts); }
+        }
 
         var pal = new Palette();
-        foreach (var b in brushFiles)
+        foreach (var k in darkB.Keys.Concat(lightB.Keys).Concat(darkR.Keys).Concat(lightR.Keys).Distinct())
         {
-            foreach (var (k, v) in b.Lit) pal.Entries.TryAdd(k, (v, v));
-            foreach (var (k, c) in b.Ref)
-            {
-                var hasD = darkColors.TryGetValue(c, out var dv);
-                var hasL = lightColors.TryGetValue(c, out var lv);
-                if (hasD && hasL) pal.Entries.TryAdd(k, (dv!, lv!));
-                else if (hasD) pal.Entries.TryAdd(k, (dv!, dv!));
-                else if (hasL) pal.Entries.TryAdd(k, (lv!, lv!));
-            }
+            // 每側：字面值優先，其次引用解析（引用對自己那側的 Color 表解）
+            var d = darkB.GetValueOrDefault(k)
+                    ?? (darkR.TryGetValue(k, out var dc) ? darkColors.GetValueOrDefault(dc) : null);
+            var l = lightB.GetValueOrDefault(k)
+                    ?? (lightR.TryGetValue(k, out var lc) ? lightColors.GetValueOrDefault(lc) : null);
+            if (d is null && l is null) continue;
+            pal.Entries.TryAdd(k, (d ?? l!, l ?? d!)); // 缺的一側退回另一側
         }
         // 沒有任何 brush 字典 → 直接把 Color 鍵當色票（有些專案就這樣用）
         if (pal.Count == 0)
@@ -266,11 +309,22 @@ public static partial class PaletteDetector
                 pal.Entries.TryAdd(k, (v, lightColors.GetValueOrDefault(k, v)));
 
         if (pal.Count < 3) return null;
+        var anyDark = colorFiles.Any(c => c.D && !c.L) || brushFiles.Any(b => b.D && !b.L);
+        var anyLight = colorFiles.Any(c => c.L && !c.D) || brushFiles.Any(b => b.L && !b.D);
         var files = new HashSet<string>(
             colorFiles.Select(c => c.File).Concat(brushFiles.Select(b => b.File)),
             StringComparer.OrdinalIgnoreCase);
-        return (pal, anyDark && anyLight || !pal.IsSingleTheme, files);
+        conflicts.UnionWith(colorConflicts);
+        return (pal, anyDark && anyLight || !pal.IsSingleTheme, files, conflicts);
     }
+
+    /// <summary>同鍵不同值的衝突要明講（規劃書 4.2：「不可默默取其一」）——
+    /// 這通常代表 repo 裡有多個 App／子專案各自的色盤（ScreenToGif 的 Translator 形狀），
+    /// 共用鍵名的配對可能配到錯的那套值。</summary>
+    private static string ConflictNote(SortedSet<string> conflicts)
+        => conflicts.Count == 0 ? "" :
+           $"; !! {conflicts.Count} key(s) defined with conflicting values (resource scoping not modelled" +
+           $" — first themed definition wins): {string.Join(", ", conflicts.Take(5))}{(conflicts.Count > 5 ? ", …" : "")}";
 
     /// <summary>單一檔案的 brush 定義，分成「字面色值」與「引用其他 Color 鍵」兩類。</summary>
     internal static (Dictionary<string, string> Literal, Dictionary<string, string> Ref) ParseBrushDefs(string file)
@@ -286,6 +340,7 @@ public static partial class PaletteDetector
             var val = Attr(ColorAttr(), attrs);
             if (key is null || val is null) continue;
             if (val.StartsWith('#')) { if (IsValidHex(val)) lit[key] = val.ToUpperInvariant(); }
+            else if (ColorResolver.NamedHex(val) is { } hex) lit[key] = hex; // Color="White" 也是合法寫法
             else
             {
                 var rm = ResourceRefValue().Match(val);
@@ -422,7 +477,8 @@ public static partial class PaletteDetector
                 Palette = mp.Pal,
                 Mode = PaletteMode.Pair,
                 ExcludedFiles = mp.Files,
-                Description = $"merged colour dictionaries: {mp.Files.Count} file(s), {mp.Pal.Count} keys (dark + light)",
+                Description = $"merged colour dictionaries: {mp.Files.Count} file(s), {mp.Pal.Count} keys (dark + light)"
+                              + ConflictNote(mp.Conflicts),
             };
 
         // 1) 深淺配對：dark 檔 × light 檔，brush 鍵集重疊 ≥ 50%
@@ -477,7 +533,8 @@ public static partial class PaletteDetector
                 Palette = ms.Pal,
                 Mode = PaletteMode.Single,
                 ExcludedFiles = ms.Files,
-                Description = $"merged colour dictionaries: {ms.Files.Count} file(s), {ms.Pal.Count} keys (single theme)",
+                Description = $"merged colour dictionaries: {ms.Files.Count} file(s), {ms.Pal.Count} keys (single theme)"
+                              + ConflictNote(ms.Conflicts),
             };
 
         // 3) 單一 XAML 色盤檔：深淺同值（單一主題專案）

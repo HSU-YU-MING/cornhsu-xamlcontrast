@@ -5,6 +5,33 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+### Fixed
+- **Three false-report mechanisms in the merged palette, caught by hand-verifying findings on
+  the public-project scans** (the merged palette shipped earlier in this same release; none of
+  this is in any published version):
+  1. *Fabricated light column.* Literal-value brushes were treated as theme-neutral, so in a
+     `Dark.xaml`/`Light.xaml` literal pair the dark file (sorting first) filled **both** theme
+     columns and the light file was ignored entirely — all 456 ScreenToGif findings came out
+     with `ratioDark == ratioLight`. QuillNest couldn't catch this: its pair goes through
+     `Color` references, which took the correct path; the literal-brush pair shape doesn't
+     exist in the four validation projects.
+  2. *Neutral files stealing themed values.* Brush maps were filled in file order (the colour
+     maps correctly went themed-first — same file, two standards). ScreenToGif's repo contains
+     a second app (`Other/Translator`) whose neutral-named light palette sorts before the main
+     app's `Dark.xaml`, so the dark column got a white background: `Element.Foreground` on
+     `Panel.Background` reported **1.23:1 fail** where the real value is **13.3:1 ok**.
+     Brush merging is now themed-first/neutral-fills-holes, and same-key conflicting
+     definitions are named in the palette description (the resource-scoping warning the plan
+     has required since §4.2) instead of being silently resolved.
+  3. *Named colours in palette definitions.* `<Color x:Key="…">White</Color>` (HandyControl's
+     dark theme) parsed as nothing — the key's dark value went missing and fell back to the
+     light value, pairing dark-on-dark: **1.17:1 fail** where the real value is **13.9:1 ok**.
+     Named colours now resolve through the same table the usage side already had.
+
+  Effect on the scans: ScreenToGif fails 254 → 65, HandyControl 248 → 21 — roughly **416
+  fabricated failures gone** while coverage held at 19.4%. A tool that floods a first-time
+  user with hundreds of confident false fails gets uninstalled, not fixed.
+
 ### Changed
 - **Palette detection now merges every colour dictionary in the project instead of picking one
   file.** "Pick the file with the most brushes" was a heuristic grown on four validation projects
