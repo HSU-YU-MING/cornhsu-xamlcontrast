@@ -3,7 +3,7 @@
   "summary": {
     "paletteSource": "project",
     "paletteMode": "single",
-    "paletteDetail": "auto-detected single-theme palette: Styles\\DarkTheme.xaml (50 keys)",
+    "paletteDetail": "merged colour dictionaries: 1 file(s), 50 keys (single theme)",
     "paletteKeys": 50,
     "singleTheme": true,
     "configLoaded": false,

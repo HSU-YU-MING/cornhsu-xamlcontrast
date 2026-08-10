@@ -80,6 +80,66 @@ public class PaletteDetectorTests
         Assert.Equal(("#111111", "#111111"), d.Palette.Entries["Bg"]); // 深淺同值
     }
 
+    [Fact] // HandyControl 形狀：brush 名稱與主題無關、顏色值分主題，兩者在不同檔案，
+           // 而且用 DynamicResource 跨檔引用。舊版（只挑一個檔＋只認同檔 StaticResource）完全找不到色盤。
+    public void BrushesInOneFileReferencingColoursInThemeFilesAreMerged()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Colors/Colors.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="PrimaryTextColor">#212121</Color>
+              <Color x:Key="BackgroundColor">#FAFAFA</Color>
+              <Color x:Key="AccentColor">#2196F3</Color>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Colors/ColorsDark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="PrimaryTextColor">#EEEEEE</Color>
+              <Color x:Key="BackgroundColor">#111111</Color>
+              <Color x:Key="AccentColor">#42A5F5</Color>
+            </ResourceDictionary>
+            """);
+        // ⚠ o:Freeze 排在 x:Key 前面 —— 舊正則假設 x:Key 緊接標籤名，整份會漏掉
+        fx.File("Themes/Theme.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush o:Freeze="True" x:Key="PrimaryTextBrush" Color="{DynamicResource PrimaryTextColor}"/>
+              <SolidColorBrush o:Freeze="True" x:Key="BackgroundBrush" Color="{DynamicResource BackgroundColor}"/>
+              <SolidColorBrush o:Freeze="True" x:Key="AccentBrush" Color="{DynamicResource AccentColor}"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(PaletteMode.Pair, d.Mode);
+        Assert.False(d.Palette.IsSingleTheme);
+        // 深色來自 ColorsDark.xaml，淺色來自沒有 light 字樣的預設 Colors.xaml
+        Assert.Equal(("#111111", "#FAFAFA"), d.Palette.Entries["BackgroundBrush"]);
+        Assert.Equal(("#EEEEEE", "#212121"), d.Palette.Entries["PrimaryTextBrush"]);
+        Assert.Equal(3, d.ExcludedFiles.Count); // 三個字典都不是畫面
+    }
+
+    [Fact] // 測試素材不是色盤 —— ILSpy 實證：偵測器挑中反編譯測試的假資料檔當色盤
+    public void FixtureDirectoriesAreNotPaletteCandidates()
+    {
+        using var fx = new Fixture();
+        fx.File("Tests/Cases/Decompiled.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Junk1" Color="#010101"/>
+              <SolidColorBrush x:Key="Junk2" Color="#020202"/>
+              <SolidColorBrush x:Key="Junk3" Color="#030303"/>
+              <SolidColorBrush x:Key="Junk4" Color="#040404"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/App.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Accent" Color="#42A5F5"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.True(d.Palette.Entries.ContainsKey("Bg"));
+        Assert.False(d.Palette.Entries.ContainsKey("Junk1")); // 測試目錄不進色盤
+    }
+
     [Fact] // 帶點的色票鍵（Panel.Background）是 WPF 最普遍的命名慣例。
            // 定義端用 \w+（不含點）、使用端用 [\w.]+（含點）—— 兩邊標準不一致，
            // 於是「看得到有人在用，卻找不到定義」。ScreenToGif 實測：93 個色票認出 0 個。

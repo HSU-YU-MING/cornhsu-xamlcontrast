@@ -32,14 +32,27 @@ public sealed class PaletteDetection
 /// </summary>
 public static partial class PaletteDetector
 {
-    [GeneratedRegex("""<Color x:Key="(?<k>[\w.]+)">(?<v>#[0-9A-Fa-f]{6,8})</Color>""")]
-    private static partial Regex ColorDef();
+    // ── 色彩定義的解析 ──
+    // ⚠ 舊版三條正則假設「屬性順序固定、且寫在同一行」，兩個假設在外部專案上都不成立：
+    //   HandyControl 寫 <SolidColorBrush o:Freeze="True" x:Key="X" Color="..."/>（x:Key 不在第一個），
+    //   MahApps 的 <Color x:Key="..."> 與色值分屬不同行。兩者都會整份漏掉。
+    //   改成「先抓元素、再從屬性字串裡取值」，順序與換行都不影響。
+    [GeneratedRegex("""<Color\b(?<attrs>[^>]*)>\s*(?<v>#[0-9A-Fa-f]{3,8})\s*</Color>""")]
+    private static partial Regex ColorElement();
 
-    [GeneratedRegex("""<SolidColorBrush x:Key="(?<k>[\w.]+)"\s+Color="(?<v>#[0-9A-Fa-f]{6,8})["]""")]
-    private static partial Regex BrushLiteral();
+    [GeneratedRegex("""<SolidColorBrush\b(?<attrs>[^>]*?)/?>""")]
+    private static partial Regex BrushElement();
 
-    [GeneratedRegex("""<SolidColorBrush x:Key="(?<k>[\w.]+)"\s+Color="\{StaticResource (?<c>[\w.]+)\}""")]
-    private static partial Regex BrushRef();
+    [GeneratedRegex("""\bx:Key\s*=\s*"(?<k>[^"]+)"\s*""")]
+    private static partial Regex KeyAttr();
+
+    [GeneratedRegex("""\bColor\s*=\s*"(?<v>[^"]+)"\s*""")]
+    private static partial Regex ColorAttr();
+
+    /// <summary>色票值引用另一個 Color 資源。⚠ 舊版只認 StaticResource ——
+    /// HandyControl 全用 DynamicResource 跨檔引用，色盤偵測因此完全失敗。</summary>
+    [GeneratedRegex("""^\{(?:Static|Dynamic)Resource\s+(?<c>[\w.]+)\}$""")]
+    private static partial Regex ResourceRefValue();
 
     /// <summary>C# 真相源：("Key", "#深色", "#淺色") 三元組。
     /// ⚠「第一個是深、第二個是淺」是假設（Kindling 如此）；之後改由 config 指定。</summary>
@@ -66,38 +79,112 @@ public static partial class PaletteDetector
             .Where(f => !f.Replace('/', '\\').Contains("\\obj\\") && !f.Replace('/', '\\').Contains("\\bin\\"))
             .OrderBy(f => f, StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>解析單一 XAML 檔的 brush 定義（字面值＋同檔 Color 引用）。
-    /// 自動偵測與 config 強制模式共用。</summary>
-    internal static Dictionary<string, string> ParseXamlPalette(string file)
+    private static string? Attr(Regex re, string attrs)
+    {
+        var m = re.Match(attrs);
+        return m.Success ? m.Groups[1].Value : null;
+    }
+
+    /// <summary>單一檔案裡的 &lt;Color x:Key&gt; 定義（供跨檔解析 brush 引用）。</summary>
+    internal static Dictionary<string, string> ParseColorDefs(string file)
     {
         var colors = new Dictionary<string, string>();
+        string text;
+        try { text = File.ReadAllText(file); } catch { return colors; }
+        foreach (Match m in ColorElement().Matches(text))
+        {
+            var key = Attr(KeyAttr(), m.Groups["attrs"].Value);
+            var v = m.Groups["v"].Value;
+            if (key is not null && IsValidHex(v)) colors[key] = v.ToUpperInvariant();
+        }
+        return colors;
+    }
+
+    /// <summary>
+    /// 解析單一 XAML 檔的 brush 定義。
+    ///
+    /// <paramref name="globalColors"/> 是「全專案的 &lt;Color&gt; 定義」——
+    /// ⚠ 舊版只在**同一個檔案內**解析 brush 對 Color 的引用，但把 Color 與 Brush
+    /// 分成兩個字典是 WPF 生態的常見組織方式（HandyControl：Theme.xaml 放 Brush、
+    /// 引用另一個檔的 Color，結果 8 個色彩定義檔一個都認不出來，色盤偵測完全失敗）。
+    /// 同檔優先於全域，模擬 WPF 的資源查找順序。
+    /// </summary>
+    internal static Dictionary<string, string> ParseXamlPalette(
+        string file, IReadOnlyDictionary<string, string>? globalColors = null)
+    {
         var brushes = new Dictionary<string, string>();
         var refs = new Dictionary<string, string>();
-        foreach (var line in File.ReadLines(file))
+        var colors = ParseColorDefs(file);
+
+        string text;
+        try { text = File.ReadAllText(file); } catch { return brushes; }
+        foreach (Match m in BrushElement().Matches(text))
         {
-            Match m;
-            if ((m = ColorDef().Match(line)).Success)
+            var attrs = m.Groups["attrs"].Value;
+            var key = Attr(KeyAttr(), attrs);
+            var val = Attr(ColorAttr(), attrs);
+            if (key is null || val is null) continue;
+            if (val.StartsWith('#'))
             {
-                if (IsValidHex(m.Groups["v"].Value)) colors[m.Groups["k"].Value] = m.Groups["v"].Value.ToUpperInvariant();
+                if (IsValidHex(val)) brushes[key] = val.ToUpperInvariant();
             }
-            else if ((m = BrushLiteral().Match(line)).Success)
+            else
             {
-                if (IsValidHex(m.Groups["v"].Value)) brushes[m.Groups["k"].Value] = m.Groups["v"].Value.ToUpperInvariant();
+                var rm = ResourceRefValue().Match(val);
+                if (rm.Success) refs[key] = rm.Groups["c"].Value;
             }
-            else if ((m = BrushRef().Match(line)).Success) refs[m.Groups["k"].Value] = m.Groups["c"].Value;
         }
-        // brush 引用同檔的 Color 定義 → 解成實際色值
+
+        // brush 引用 Color 定義 → 解成實際色值。同檔優先，其次全專案。
         foreach (var (k, c) in refs)
+        {
             if (colors.TryGetValue(c, out var v)) brushes[k] = v;
+            else if (globalColors is not null && globalColors.TryGetValue(c, out var gv)) brushes[k] = gv;
+        }
+        // 純 <Color> 字典（整份沒有任何 SolidColorBrush）才把 Color 鍵當色票。
+        // ⚠ 不能無條件加：Color 鍵通常是 brush 的中介值（BgColor → Bg），
+        //   一起灌進色盤會讓鍵數虛胖，還會影響「挑哪個檔當色盤」的判斷。
+        if (brushes.Count == 0)
+            foreach (var (k, v) in colors) brushes[k] = v;
         return brushes;
+    }
+
+    /// <summary>
+    /// 測試素材／範例不是專案的色盤。⚠ ILSpy 實證：偵測器挑中的「色盤」是
+    /// <c>ILSpy.BamlDecompiler.Tests.Windows\Cases\…</c> —— 一個反編譯測試的假資料檔。
+    /// 只影響「能不能當色盤候選」，不影響這些檔案本身要不要被稽核。
+    /// </summary>
+    private static bool LooksLikeFixture(string rel)
+    {
+        var n = rel.Replace('\\', '/').ToLowerInvariant();
+        return n.Contains("/test") || n.StartsWith("test") ||
+               n.Contains("/sample") || n.StartsWith("sample") ||
+               n.Contains("/demo") || n.StartsWith("demo") ||
+               n.Contains("/example") || n.StartsWith("example") ||
+               n.Contains("/fixture") || n.Contains("/mock");
+    }
+
+    /// <summary>全專案的 &lt;Color x:Key&gt; 索引 —— 讓 brush 能引用別的檔案裡的 Color。</summary>
+    internal static Dictionary<string, string> GlobalColors(string root)
+    {
+        var all = new Dictionary<string, string>();
+        foreach (var f in EnumerateFiles(root, "*.xaml"))
+        {
+            if (LooksLikeFixture(Path.GetRelativePath(root, f))) continue;
+            foreach (var (k, v) in ParseColorDefs(f)) all.TryAdd(k, v);
+        }
+        return all;
     }
 
     internal static List<XamlCandidate> XamlCandidates(string root)
     {
         var cands = new List<XamlCandidate>();
+        var globalColors = GlobalColors(root);
         foreach (var f in EnumerateFiles(root, "*.xaml"))
         {
-            var brushes = ParseXamlPalette(f);
+            var relPath = Path.GetRelativePath(root, f);
+            if (LooksLikeFixture(relPath)) continue;
+            var brushes = ParseXamlPalette(f, globalColors);
             if (brushes.Count < 3) continue;
 
             // ⚠ 提示只看「專案內的相對路徑」。看完整路徑的話，專案放在
@@ -107,6 +194,105 @@ public static partial class PaletteDetector
             cands.Add(new XamlCandidate(f, rel, brushes, n.Contains("dark"), n.Contains("light")));
         }
         return cands;
+    }
+
+    /// <summary>
+    /// 合併式色盤：把整個專案的色彩字典當成一份色盤，而不是挑其中一個檔。
+    ///
+    /// ⚠ 「挑一個檔」是四個受測專案養出來的啟發法（它們的色票剛好集中在單一檔案），
+    /// 在外部專案上普遍失效 —— 八個公開專案實測：
+    ///   HandyControl  色彩定義分散在 8 個檔，brush 名稱與主題無關、顏色值分主題，
+    ///                 兩者還在不同檔案（Themes/Theme.xaml 的 brush 引用
+    ///                 Colors/ColorsDark.xaml 的 Color）→ 舊版完全找不到色盤
+    ///   MaterialDesign 154 個檔含色彩定義，舊版只抓到 1 個（34 鍵）
+    ///   MahApps       挑中建置期樣板檔 Theme.Template.xaml（值是 {{佔位符}}）
+    ///
+    /// 模型（貼近 WPF 的合併字典語意）：
+    ///   1. 色彩字典依檔名提示分成 dark／light／中性三組
+    ///   2. darkColors = 中性 ∪ dark（dark 覆蓋）；lightColors = 中性 ∪ light
+    ///      只有 dark 提示而無 light 時，中性即淺色 —— HandyControl 的形狀
+    ///      （預設檔 Colors.xaml 不帶 light 字樣，只有深色變體被標記）
+    ///   3. 所有 brush 字典的鍵，各自對兩組 Color 解析出深淺值
+    /// 鍵衝突一律「先出現的贏」，檔案順序固定（字典序），結果可重現。
+    /// </summary>
+    internal static (Palette Pal, bool IsPair, HashSet<string> Files)? MergedXamlPalette(string root)
+    {
+        var colorFiles = new List<(string File, string Rel, Dictionary<string, string> Colors, bool D, bool L)>();
+        var brushFiles = new List<(string File, string Rel, Dictionary<string, string> Lit, Dictionary<string, string> Ref)>();
+
+        foreach (var f in EnumerateFiles(root, "*.xaml"))
+        {
+            var rel = Path.GetRelativePath(root, f);
+            if (LooksLikeFixture(rel)) continue;
+            var n = rel.ToLowerInvariant();
+
+            var colors = ParseColorDefs(f);
+            if (colors.Count > 0)
+                colorFiles.Add((f, rel, colors, n.Contains("dark"), n.Contains("light")));
+
+            var (lit, refs) = ParseBrushDefs(f);
+            if (lit.Count + refs.Count > 0) brushFiles.Add((f, rel, lit, refs));
+        }
+        if (colorFiles.Count == 0 && brushFiles.Count == 0) return null;
+
+        var anyDark = colorFiles.Any(c => c.D && !c.L);
+        var anyLight = colorFiles.Any(c => c.L && !c.D);
+        var darkColors = new Dictionary<string, string>();
+        var lightColors = new Dictionary<string, string>();
+        // 中性檔先鋪底；有 dark 提示但沒有 light 提示時，中性檔就是淺色主題
+        foreach (var c in colorFiles.Where(c => !(c.D && !c.L) && !(c.L && !c.D)))
+            foreach (var (k, v) in c.Colors) { darkColors.TryAdd(k, v); lightColors.TryAdd(k, v); }
+        foreach (var c in colorFiles.Where(c => c.D && !c.L))
+            foreach (var (k, v) in c.Colors) darkColors[k] = v;
+        foreach (var c in colorFiles.Where(c => c.L && !c.D))
+            foreach (var (k, v) in c.Colors) lightColors[k] = v;
+
+        var pal = new Palette();
+        foreach (var b in brushFiles)
+        {
+            foreach (var (k, v) in b.Lit) pal.Entries.TryAdd(k, (v, v));
+            foreach (var (k, c) in b.Ref)
+            {
+                var hasD = darkColors.TryGetValue(c, out var dv);
+                var hasL = lightColors.TryGetValue(c, out var lv);
+                if (hasD && hasL) pal.Entries.TryAdd(k, (dv!, lv!));
+                else if (hasD) pal.Entries.TryAdd(k, (dv!, dv!));
+                else if (hasL) pal.Entries.TryAdd(k, (lv!, lv!));
+            }
+        }
+        // 沒有任何 brush 字典 → 直接把 Color 鍵當色票（有些專案就這樣用）
+        if (pal.Count == 0)
+            foreach (var (k, v) in darkColors)
+                pal.Entries.TryAdd(k, (v, lightColors.GetValueOrDefault(k, v)));
+
+        if (pal.Count < 3) return null;
+        var files = new HashSet<string>(
+            colorFiles.Select(c => c.File).Concat(brushFiles.Select(b => b.File)),
+            StringComparer.OrdinalIgnoreCase);
+        return (pal, anyDark && anyLight || !pal.IsSingleTheme, files);
+    }
+
+    /// <summary>單一檔案的 brush 定義，分成「字面色值」與「引用其他 Color 鍵」兩類。</summary>
+    internal static (Dictionary<string, string> Literal, Dictionary<string, string> Ref) ParseBrushDefs(string file)
+    {
+        var lit = new Dictionary<string, string>();
+        var refs = new Dictionary<string, string>();
+        string text;
+        try { text = File.ReadAllText(file); } catch { return (lit, refs); }
+        foreach (Match m in BrushElement().Matches(text))
+        {
+            var attrs = m.Groups["attrs"].Value;
+            var key = Attr(KeyAttr(), attrs);
+            var val = Attr(ColorAttr(), attrs);
+            if (key is null || val is null) continue;
+            if (val.StartsWith('#')) { if (IsValidHex(val)) lit[key] = val.ToUpperInvariant(); }
+            else
+            {
+                var rm = ResourceRefValue().Match(val);
+                if (rm.Success) refs[key] = rm.Groups["c"].Value;
+            }
+        }
+        return (lit, refs);
     }
 
     internal static List<CsCandidate> CsCandidates(string root)
@@ -227,6 +413,17 @@ public static partial class PaletteDetector
 
         var xaml = XamlCandidates(root);
         var cs = CsCandidates(root);
+        var merged = MergedXamlPalette(root);
+
+        // 0) 合併式色盤且深淺兩套值俱全 —— 優先於任何「挑單一檔」的路徑
+        if (merged is { IsPair: true } mp)
+            return new PaletteDetection
+            {
+                Palette = mp.Pal,
+                Mode = PaletteMode.Pair,
+                ExcludedFiles = mp.Files,
+                Description = $"merged colour dictionaries: {mp.Files.Count} file(s), {mp.Pal.Count} keys (dark + light)",
+            };
 
         // 1) 深淺配對：dark 檔 × light 檔，brush 鍵集重疊 ≥ 50%
         (XamlCandidate D, XamlCandidate L, List<string> Common)? bestPair = null;
@@ -272,6 +469,16 @@ public static partial class PaletteDetector
                 Description = $"auto-detected C# source of truth: {best.Rel} ({pal.Count} keys; assuming tuple = key, dark, light)",
             };
         }
+
+        // 2.5) 合併式色盤（單一主題）—— 仍優於「挑一個檔」，鍵集是所有字典的聯集
+        if (merged is { } ms && ms.Pal.Count > 0)
+            return new PaletteDetection
+            {
+                Palette = ms.Pal,
+                Mode = PaletteMode.Single,
+                ExcludedFiles = ms.Files,
+                Description = $"merged colour dictionaries: {ms.Files.Count} file(s), {ms.Pal.Count} keys (single theme)",
+            };
 
         // 3) 單一 XAML 色盤檔：深淺同值（單一主題專案）
         if (xaml.Count > 0)

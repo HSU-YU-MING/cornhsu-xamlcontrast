@@ -5,6 +5,36 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+### Changed
+- **Palette detection now merges every colour dictionary in the project instead of picking one
+  file.** "Pick the file with the most brushes" was a heuristic grown on four validation projects
+  that happen to keep their swatches in a single file; it degrades badly everywhere else. Scanning
+  eight public WPF projects: HandyControl spreads colours over 8 files with theme-neutral brush
+  names in one file referencing theme-specific `<Color>`s in another (and via `DynamicResource`),
+  and detection found **no palette at all**; MaterialDesignInXamlToolkit has 154 files carrying
+  colour definitions and only 1 was used; MahApps picked `Theme.Template.xaml`, a build-time
+  template whose values are `{{placeholders}}`. The new model follows WPF's merged-dictionary
+  semantics: colour dictionaries are grouped into dark / light / neutral by path hint, the dark
+  and light colour maps are built as neutral-then-override, and every brush key across every
+  dictionary resolves against both. A dark-hinted file with no light-hinted counterpart makes the
+  neutral files the light theme — HandyControl's shape, where only the dark variant is marked and
+  the default `Colors.xaml` carries no `light` in its name. Key conflicts resolve first-wins over
+  a fixed (lexicographic) file order, so results are reproducible.
+
+  Coverage across the eight public projects went from **9.6% to 19.2%**, with no project losing
+  ground: Playnite +32.7, HandyControl +14.7, wpfui +14.4, MaterialDesign +3.1, MahApps +1.3.
+- **The brush and colour parsers no longer assume attribute order or single-line elements.**
+  `<SolidColorBrush o:Freeze="True" x:Key="…" …>` (HandyControl) and a `<Color x:Key="…">` whose
+  value sits on the next line (MahApps) were both invisible. The parser now matches the element
+  and reads attributes out of it. This also recovered 2 keys and 6 real pairs in QuillNest, one
+  of the original validation projects — the same defect was costing coverage at home, unnoticed.
+- **`DynamicResource` is accepted wherever `StaticResource` was**, and brush→colour references
+  now resolve across files (same file first, then project-wide), matching WPF lookup order.
+- **Test, sample, demo, example, fixture and mock directories are excluded from palette
+  candidacy.** ILSpy's detected "palette" was a decompiler test fixture under
+  `ILSpy.BamlDecompiler.Tests.Windows\Cases\`. Those files are still audited; they just no longer
+  get to define the project's colours.
+
 ### Added
 - **A coverage floor: `--min-coverage <0-100>` / `minCoverage`, default 50.** The run now fails
   when fewer than N% of the colour pairs it saw could actually be resolved, and `summary.coverage`

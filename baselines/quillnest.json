@@ -3,8 +3,8 @@
   "summary": {
     "paletteSource": "project",
     "paletteMode": "pair",
-    "paletteDetail": "auto-detected theme pair: Resources\\DarkTheme.xaml \u002B Resources\\LightTheme.xaml (32 keys)",
-    "paletteKeys": 32,
+    "paletteDetail": "merged colour dictionaries: 2 file(s), 34 keys (dark \u002B light)",
+    "paletteKeys": 34,
     "singleTheme": false,
     "configLoaded": false,
     "thresholds": {
@@ -13,13 +13,12 @@
       "failFactor": 0.67
     },
     "files": 30,
-    "pairs": 836,
-    "coverage": 95,
-    "unresolved": 44,
+    "pairs": 842,
+    "coverage": 95.7,
+    "unresolved": 38,
     "unresolvedBy": {
       "bound-or-gradient": 20,
-      "no-ancestor-background": 18,
-      "unknown-palette-key": 6
+      "no-ancestor-background": 18
     },
     "skipped": 51,
     "deadForeground": 4,
@@ -29,7 +28,7 @@
     "counts": {
       "fail": 3,
       "warn": 1,
-      "ok": 826,
+      "ok": 832,
       "decorative": 6
     }
   },
@@ -865,6 +864,20 @@
     },
     {
       "file": "Views/CalendarView.xaml",
+      "line": 625,
+      "element": "TextBlock",
+      "fg": "{DynamicResource WarningBrush}",
+      "bg": "{WarningBackgroundBrush}",
+      "ratioDark": 6.17,
+      "ratioLight": 4.79,
+      "threshold": 4.5,
+      "category": "ok",
+      "isText": true,
+      "fontSize": "10px",
+      "largeText": false
+    },
+    {
+      "file": "Views/CalendarView.xaml",
       "line": 636,
       "element": "TextBlock",
       "fg": "{DynamicResource TextPrimaryBrush}",
@@ -1477,6 +1490,20 @@
       "isText": true,
       "fontSize": "20px",
       "largeText": true
+    },
+    {
+      "file": "Views/EventTodoEditDialog.xaml",
+      "line": 239,
+      "element": "TextBlock",
+      "fg": "{DynamicResource WarningBrush}",
+      "bg": "{WarningBackgroundBrush}",
+      "ratioDark": 6.17,
+      "ratioLight": 4.79,
+      "threshold": 4.5,
+      "category": "ok",
+      "isText": true,
+      "fontSize": "12px",
+      "largeText": false
     },
     {
       "file": "Views/EventTodoEditDialog.xaml",
@@ -2633,6 +2660,20 @@
       "category": "ok",
       "isText": true,
       "fontSize": "13px",
+      "largeText": false
+    },
+    {
+      "file": "Views/NoteEditorWindow.xaml",
+      "line": 413,
+      "element": "TextBlock",
+      "fg": "{DynamicResource WarningBrush}",
+      "bg": "{WarningBackgroundBrush}",
+      "ratioDark": 6.17,
+      "ratioLight": 4.79,
+      "threshold": 4.5,
+      "category": "ok",
+      "isText": true,
+      "fontSize": "12px",
       "largeText": false
     },
     {
@@ -3891,6 +3932,20 @@
     },
     {
       "file": "Views/ProjectRelationDialog.xaml",
+      "line": 128,
+      "element": "TextBlock",
+      "fg": "{DynamicResource WarningBrush}",
+      "bg": "{WarningBackgroundBrush}",
+      "ratioDark": 6.17,
+      "ratioLight": 4.79,
+      "threshold": 4.5,
+      "category": "ok",
+      "isText": true,
+      "fontSize": "12px",
+      "largeText": false
+    },
+    {
+      "file": "Views/ProjectRelationDialog.xaml",
       "line": 170,
       "element": "TextBlock",
       "fg": "{DynamicResource TextSecondaryBrush}",
@@ -4237,6 +4292,20 @@
       "category": "ok",
       "isText": true,
       "fontSize": "11px",
+      "largeText": false
+    },
+    {
+      "file": "Views/ProjectReviewDialog.xaml",
+      "line": 52,
+      "element": "TextBlock",
+      "fg": "{DynamicResource WarningBrush}",
+      "bg": "{WarningBackgroundBrush}",
+      "ratioDark": 6.17,
+      "ratioLight": 4.79,
+      "threshold": 4.5,
+      "category": "ok",
+      "isText": true,
+      "fontSize": "12px",
       "largeText": false
     },
     {
@@ -6456,6 +6525,20 @@
       "category": "ok",
       "isText": true,
       "fontSize": "15px",
+      "largeText": false
+    },
+    {
+      "file": "Views/SetupWizardWindow.xaml",
+      "line": 390,
+      "element": "TextBlock",
+      "fg": "{DynamicResource WarningBrush}",
+      "bg": "{WarningBackgroundBrush}",
+      "ratioDark": 6.17,
+      "ratioLight": 4.79,
+      "threshold": 4.5,
+      "category": "ok",
+      "isText": true,
+      "fontSize": "13px",
       "largeText": false
     },
     {
