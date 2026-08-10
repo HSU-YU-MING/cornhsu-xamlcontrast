@@ -172,6 +172,18 @@ unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)—
 HandyControl)5~19%。稽核函式庫請預期要用 `--min-coverage 0`,並把解析出的部分
 當抽樣看待。
 
+**建立在主題函式庫上的 App**(MahApps、HandyControl、MaterialDesign…)是可修的特例:
+視窗底色的**鍵**在你 repo 的主題檔裡,但把它連到視窗的隱含樣式住在 NuGet 套件裡,
+靜態分析看不到。在 `xamlcontrast.config.json` 宣告一次:
+
+```json
+{ "rootBackground": "MahApps.Brushes.Window.Background" }
+```
+
+實測(NETworkManager,MahApps 系 App、154 個 XAML):一行設定,覆蓋率 **8.8% → 87.2%**,
+浮出 284 筆先前完全看不到的淺色主題真實問題。鍵不在偵測到的色盤裡是設定錯誤(exit 2),
+不會靜默沒作用。
+
 `--md report.md` 則產出給人讀的 Markdown（Action 用它貼 PR 留言，也可以自己拿去用）。
 
 ## 實戰成績

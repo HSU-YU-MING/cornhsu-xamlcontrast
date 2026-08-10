@@ -97,6 +97,18 @@ catch (ConfigException ex)
     return 2;
 }
 
+// rootBackground 寫錯是設定錯誤,不是靜默忽略 —— 設了一個不存在的鍵,
+// 使用者以為地板鋪好了,實際上覆蓋率一點都沒回來(謊報健康的親戚)
+if (config.RootBackground is not null)
+{
+    var rb = ColorResolver.Resolve(Auditor.NormalizeRootBackground(config.RootBackground), detection.Palette);
+    if (rb is null || rb.Kind is ColorKind.UnknownKey or ColorKind.Other)
+    {
+        Console.Error.WriteLine($"config error: rootBackground '{config.RootBackground}' is not a colour or a key in the detected palette ({detection.Palette.Count} keys)");
+        return 2;
+    }
+}
+
 // 優先序：CLI 旗標 > config > 內建預設（旗標只能加嚴，不能替 config 鬆綁）
 failOnWarn = failOnWarn || config.FailOn == "warn";
 strictPalette = strictPalette || config.StrictPalette;

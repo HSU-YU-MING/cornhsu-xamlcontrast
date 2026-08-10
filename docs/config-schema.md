@@ -76,6 +76,7 @@ WCAG 2.x AA。`failFactor` 是「破」的分界（門檻 × 2/3）：
 | `failOn` | `"fail"` | `"warn"` = 偏低也擋（法遵場景 AA 全過） |
 | `strictPalette` | `false` | `true` = 色盤偵測失敗（退回寫死色碼模式）直接 exit 1 |
 | `minCoverage` | `50` | 解析成功的配對低於此百分比即 exit 1 —— 只解析到一小部分的「通過」沒有意義。設 `0` 關閉 |
+| `rootBackground` | — | 文件根元素的預設背景:色票鍵(`"MahApps.Brushes.Window.Background"`)或色碼(`"#FF202020"`)。給**主題函式庫的使用者**:視窗底色鍵在 repo 的主題檔裡,但「視窗 → 那個鍵」的隱含樣式住在 NuGet 套件裡,工具看不到。鍵不在偵測到的色盤裡 → exit 2。實測:NETworkManager 一行設定,覆蓋率 8.8% → 87.2% |
 
 配對數為 0 時 exit 1 是**不可設定的預設** —— 空掃綠燈就是謊報健康。
 `minCoverage` 是同一條原則的推廣:那條線原本是二元的,而八個公開專案實測有三個

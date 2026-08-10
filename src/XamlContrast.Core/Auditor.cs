@@ -130,6 +130,16 @@ public sealed partial class Auditor
     private double NeedFor(bool isText, bool isLarge) =>
         !isText ? 0.0 : isLarge ? _cfg.Thresholds.LargeText : _cfg.Thresholds.NormalText;
 
+    /// <summary>config 的 rootBackground 正規化成 ColorResolver 認得的值：
+    /// 色碼／具名色／markup 原樣通過，裸鍵名包成 {DynamicResource X}。</summary>
+    public static string? NormalizeRootBackground(string? raw)
+        => raw is null ? null :
+           raw.StartsWith('#') || raw.StartsWith('{') ? raw :
+           ColorResolver.NamedHex(raw) is not null ? raw :
+           "{DynamicResource " + raw + "}";
+
+    private string? NormalizedRootBackground => NormalizeRootBackground(_cfg.RootBackground);
+
     /// <summary>元素是否屬非文字（裝飾）類。⚠ 全名相等不夠 —— WPF 生態滿地都是
     /// 衍生命名的控制項：MahApps 的 MetroProgressBar 對不上排除清單裡的 ProgressBar，
     /// 進度條填色被當文字用 4.5 要求（八專案抽驗實證，MahApps 唯一一筆 fail 就是它）。
@@ -253,7 +263,11 @@ public sealed partial class Auditor
                     ?? chain?.TemplateRootBg // 模板根的背景管到內容
                                              // 「地板」：根元素沒寫 Background 時，查該型別的隱含樣式（僅此一格，
                                              // 不是完整的隱含樣式解析 —— 理由見 StyleIndex.ImplicitRootBackground）
-                    ?? (el.Parent is null ? _styles.ImplicitRootBackground(el.Name.LocalName, _curFile) : null);
+                    ?? (el.Parent is null ? _styles.ImplicitRootBackground(el.Name.LocalName, _curFile) : null)
+                    // 最後一層地板：config 的 rootBackground —— 主題函式庫使用者的逃生口
+                    // （視窗底色鍵在 repo、把它連到視窗的隱含樣式在 NuGet 套件裡:
+                    //   工具看不到、使用者知道。使用者宣告的就是事實）
+                    ?? (el.Parent is null ? NormalizedRootBackground : null);
         if (bgVal is not null)
         {
             var r = ColorResolver.Resolve(bgVal, _pal);

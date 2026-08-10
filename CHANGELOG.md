@@ -19,6 +19,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   analysis, not a configuration problem.
 
 ### Added
+- **`rootBackground` config — the escape hatch for theme-library apps.** Scanning three
+  *new* public projects surfaced the largest shape yet: apps built on MahApps/HandyControl/
+  MaterialDesign keep their window-background *key* in their own theme files (dark and light
+  both), but the implicit style connecting it to their windows lives inside the NuGet
+  package — invisible to static analysis, so every view lost its floor
+  (NETworkManager: 726 `no-ancestor-background` sites across 100 files; QuickLook: 269).
+  The tool must not guess; the user knows. One config line declares it:
+  `{ "rootBackground": "MahApps.Brushes.Window.Background" }` — a palette key or a literal
+  colour. Measured effect on NETworkManager: coverage **8.8% → 87.2%**, surfacing 284
+  genuine light-theme failures (hand-verified: Gray5 `#B9B9B9` on white = 1.96:1, Gray3
+  `#9D9D9D` = 2.71:1 — exact to the digit). A key missing from the detected palette is a
+  config error (exit 2), never a silent no-op.
 - **Rule 17: sibling backdrops in overlapping containers.** In a Grid cell (or Canvas /
   custom `*Panel`), earlier siblings paint beneath later ones. Two halves, closing the
   "sibling backgrounds" blind spot the prototype header has documented from day one:

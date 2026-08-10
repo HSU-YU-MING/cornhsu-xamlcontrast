@@ -224,6 +224,20 @@ with configuration. Measured on public projects: applications 26–57%, control 
 (MahApps.Metro, MaterialDesignInXaml, HandyControl) 5–19%. If you're auditing a control
 library, expect to lean on `--min-coverage 0` and treat the resolved subset as a sample.
 
+**Apps built on a theme library** (MahApps, HandyControl, MaterialDesign…) are a special,
+fixable case: your window background *key* lives in your repo's theme files, but the implicit
+style that connects it to your windows lives inside the NuGet package, invisible to static
+analysis. Declare it once in `xamlcontrast.config.json`:
+
+```json
+{ "rootBackground": "MahApps.Brushes.Window.Background" }
+```
+
+Measured on NETworkManager (a MahApps app, 154 XAML files): coverage went from **8.8% to
+87.2%** with that one line — surfacing 284 genuine light-theme failures the tool was
+previously blind to. A key not present in the detected palette is a config error (exit 2),
+never a silent no-op.
+
 `--md report.md` writes the human-readable Markdown version — this is what the Action posts as a
 PR comment, and you can use it directly too.
 
