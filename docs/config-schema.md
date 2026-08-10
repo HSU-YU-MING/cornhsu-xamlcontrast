@@ -78,6 +78,16 @@ WCAG 2.x AA。`failFactor` 是「破」的分界（門檻 × 2/3）：
 
 配對數為 0 時 exit 1 是**不可設定的預設** —— 空掃綠燈就是謊報健康。
 
+`strictPalette` 在**所有模式**下都生效，包含 `--baseline` 與 `--write-baseline`
+（0.6 修正前它排在退出碼判定的最尾端，兩個 baseline 分支都會提早 return 而跳過它）。
+這個組合特別要緊：色盤壞掉時色票配對全變 `unresolved`、從 findings 消失，
+ratchet 會把「不見了」讀成「還清了」而放行 —— 弄壞主題檔看起來像修好了所有問題。
+`--write-baseline` 同理會拒絕凍結一份用退化色盤算出來的基準線。
+
+色票值只接受 `#RRGGBB` 與 `#AARRGGBB`。七位數之類的打字錯誤不會進色盤
+（以前會被截前六位默默採用，算出一個看起來很篤定的錯比值）；
+用到該鍵的地方改走 `summary.unresolved` 喊出來。
+
 ### ignore
 
 `requireReason`（預設 `true`）：`<!-- xamlcontrast-ignore: 理由 -->` 沒理由視為無效並警告。

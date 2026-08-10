@@ -94,19 +94,14 @@ var result = Auditor.Run(root, detection, config);
 
 Console.Write(Report.ToConsole(result, showOk));
 
-if (jsonPath is not null)
-{
-    File.WriteAllText(jsonPath, Report.ToJson(result));
-    Console.WriteLine($"json written: {jsonPath}");
-}
+if (jsonPath is not null && !TryWrite(jsonPath, Report.ToJson(result), "json")) return 2;
 
 if (sarifPath is not null)
 {
     var ver = typeof(Program).Assembly
         .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
         is [System.Reflection.AssemblyInformationalVersionAttribute va, ..] ? va.InformationalVersion.Split('+')[0] : "0.0.0";
-    File.WriteAllText(sarifPath, Report.ToSarif(result, ver));
-    Console.WriteLine($"sarif written: {sarifPath}");
+    if (!TryWrite(sarifPath, Report.ToSarif(result, ver), "sarif")) return 2;
 }
 
 var fail = result.CountOf(Category.Fail);
@@ -116,13 +111,28 @@ var warn = result.CountOf(Category.Warn);
 // 判定邏輯與各分支的輸出一字未改,只是包了一層。
 var exitCode = DecideExit();
 
-if (mdPath is not null)
-{
-    File.WriteAllText(mdPath, Report.ToMarkdown(result, exitCode));
-    Console.WriteLine($"markdown written: {mdPath}");
-}
+if (mdPath is not null && !TryWrite(mdPath, Report.ToMarkdown(result, exitCode), "markdown")) return 2;
 
 return exitCode;
+
+// 輸出寫檔失敗要落在 0/1/2 的退出碼契約內，並給人話 —— 之前是裸 File.WriteAllText，
+// `--json out/report.json` 而 out/ 不存在就噴 .NET 堆疊、exit 127（未處理例外的退出碼，
+// 契約外的值）。baseline 讀取失敗早就有友善訊息了，輸出端不該是另一套標準。
+// 不代建目錄：輸出路徑寫錯時，安靜地生一個目錄比報錯更難查。
+static bool TryWrite(string path, string content, string label, string suffix = "")
+{
+    try
+    {
+        File.WriteAllText(path, content);
+        Console.WriteLine($"{label} written: {path}{suffix}");
+        return true;
+    }
+    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException or ArgumentException)
+    {
+        Console.Error.WriteLine($"cannot write {label} to {path}: {ex.Message}");
+        return false;
+    }
+}
 
 int DecideExit()
 {
@@ -134,11 +144,24 @@ int DecideExit()
         return 1;
     }
 
+    // ⚠ 色盤退化在「所有模式」下都算失敗。這個檢查原本擺在函式最尾端，而
+    //   --baseline / --write-baseline 兩個分支都會直接 return，於是永遠走不到 ——
+    //   偏偏 --baseline 正是 README 推薦給既有專案的導入路徑，等於守門員在最常見
+    //   的組合下靜默失效。實測過的失效鏈：主題檔被搬走 → 色盤偵測退化 → 色票配對
+    //   全變 unresolved → 從 findings 消失 → ratchet 判成「已還債」→ 綠燈，而且
+    //   還印出「paid off N」報告你把債還清了。弄壞主題檔看起來像修好了所有問題。
+    //   放在 Pairs==0 之後、模式分支之前：兩道「這份結果不可信」的保險並排。
+    if (strictPalette && detection.IsDegraded)
+    {
+        Console.WriteLine("exit 1: palette detection failed and --strict-palette is set");
+        return 1;
+    }
+
     if (writeBaselinePath is not null)
     {
         // 導入模式第一步：把現況凍成已知債清單（存進 repo）。之後只擋新增與惡化。
-        File.WriteAllText(writeBaselinePath, Baseline.Write(result));
-        Console.WriteLine($"baseline written: {writeBaselinePath} ({fail} known failure pair(s))");
+        if (!TryWrite(writeBaselinePath, Baseline.Write(result), "baseline",
+                      $" ({fail} known failure pair(s))")) return 2;
         return 0;
     }
 
@@ -185,11 +208,6 @@ int DecideExit()
     if (failOnWarn && warn > 0)
     {
         Console.WriteLine($"exit 1: {warn} pair(s) below AA (--fail-on warn)");
-        return 1;
-    }
-    if (strictPalette && detection.IsDegraded)
-    {
-        Console.WriteLine("exit 1: palette detection failed and --strict-palette is set");
         return 1;
     }
     if (warn > 0) Console.WriteLine($"exit 0: no fail, but {warn} pair(s) below AA");

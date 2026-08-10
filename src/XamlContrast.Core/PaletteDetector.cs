@@ -51,6 +51,16 @@ public static partial class PaletteDetector
 
     internal sealed record CsCandidate(string File, string Rel, Dictionary<string, (string Dark, string Light)> Pal);
 
+    /// <summary>
+    /// 色票值只有 #RRGGBB 與 #AARRGGBB 兩種長度有意義（含 '#' 是 7 或 9）。
+    /// ⚠ 上面幾條正則寫的是 {6,8}，七位數的打字錯誤（#FF0000A）也會被吃下來，
+    /// 而 <see cref="Wcag.Luminance"/> 只讀前六位 —— 等於收下一個畸形色碼、
+    /// 默默猜它的前半段，然後回報一個看起來很篤定的對比值。
+    /// 與「看不懂就要喊」的原則相反，所以長度不對就不收進色盤；
+    /// 用到該鍵的地方自然變成 UnknownKey，走既有的 unresolved 計數喊出來。
+    /// </summary>
+    private static bool IsValidHex(string v) => v.Length is 7 or 9;
+
     internal static IEnumerable<string> EnumerateFiles(string root, string pattern)
         => Directory.EnumerateFiles(root, pattern, SearchOption.AllDirectories)
             .Where(f => !f.Replace('/', '\\').Contains("\\obj\\") && !f.Replace('/', '\\').Contains("\\bin\\"))
@@ -66,8 +76,14 @@ public static partial class PaletteDetector
         foreach (var line in File.ReadLines(file))
         {
             Match m;
-            if ((m = ColorDef().Match(line)).Success) colors[m.Groups["k"].Value] = m.Groups["v"].Value.ToUpperInvariant();
-            else if ((m = BrushLiteral().Match(line)).Success) brushes[m.Groups["k"].Value] = m.Groups["v"].Value.ToUpperInvariant();
+            if ((m = ColorDef().Match(line)).Success)
+            {
+                if (IsValidHex(m.Groups["v"].Value)) colors[m.Groups["k"].Value] = m.Groups["v"].Value.ToUpperInvariant();
+            }
+            else if ((m = BrushLiteral().Match(line)).Success)
+            {
+                if (IsValidHex(m.Groups["v"].Value)) brushes[m.Groups["k"].Value] = m.Groups["v"].Value.ToUpperInvariant();
+            }
             else if ((m = BrushRef().Match(line)).Success) refs[m.Groups["k"].Value] = m.Groups["c"].Value;
         }
         // brush 引用同檔的 Color 定義 → 解成實際色值
@@ -102,7 +118,7 @@ public static partial class PaletteDetector
             foreach (var line in File.ReadLines(f))
             {
                 var m = CsTuple().Match(line);
-                if (m.Success)
+                if (m.Success && IsValidHex(m.Groups["d"].Value) && IsValidHex(m.Groups["l"].Value))
                     map[m.Groups["k"].Value] =
                         (m.Groups["d"].Value.ToUpperInvariant(), m.Groups["l"].Value.ToUpperInvariant());
             }
@@ -119,10 +135,13 @@ public static partial class PaletteDetector
         foreach (var line in File.ReadLines(file))
         {
             var m = pattern.Match(line);
-            if (m.Success)
-                pal.Entries[m.Groups["key"].Success ? m.Groups["key"].Value : m.Groups["k"].Value] =
-                    ((m.Groups["dark"].Success ? m.Groups["dark"] : m.Groups["d"]).Value.ToUpperInvariant(),
-                     (m.Groups["light"].Success ? m.Groups["light"] : m.Groups["l"]).Value.ToUpperInvariant());
+            if (!m.Success) continue;
+            var dark = (m.Groups["dark"].Success ? m.Groups["dark"] : m.Groups["d"]).Value;
+            var light = (m.Groups["light"].Success ? m.Groups["light"] : m.Groups["l"]).Value;
+            // 使用者自訂的 csharpPattern 也走同一道長度驗證 —— 畸形值一律不收
+            if (!IsValidHex(dark) || !IsValidHex(light)) continue;
+            pal.Entries[m.Groups["key"].Success ? m.Groups["key"].Value : m.Groups["k"].Value] =
+                (dark.ToUpperInvariant(), light.ToUpperInvariant());
         }
         return pal;
     }

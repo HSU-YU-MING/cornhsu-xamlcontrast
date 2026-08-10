@@ -11,6 +11,31 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   off `symmetry` should treat absence as "not applicable" — see Fixed below for why.
 
 ### Fixed
+- **`--strict-palette` was silently inert in baseline mode.** The check sat at the very end of
+  the exit-code decision, but the `--baseline` and `--write-baseline` branches return before
+  reaching it — and `--baseline` is the adoption path the README recommends for existing
+  projects, so the guard was dead in its most common pairing. The failure chain is worse than
+  a missed flag: move the theme files, palette detection degrades, every palette-keyed pair
+  becomes `unresolved`, those pairs vanish from `findings`, and the ratchet reads their absence
+  as debt repaid. The run prints `known debt 0, paid off 2` and exits 0 — breaking your theme
+  file looks exactly like fixing every contrast problem in the project. The check now sits
+  immediately after the zero-pairs guard, before any mode branch, so both "this result is not
+  trustworthy" rails apply everywhere. `--write-baseline` now also refuses to freeze a baseline
+  computed from a degraded palette.
+- **Malformed palette colours are no longer accepted and silently misread.** The palette
+  regexes match `#[0-9A-Fa-f]{6,8}`, which also accepts a seven-digit typo like `#FF0000A`;
+  `Wcag.Luminance` then reads the first six digits and discards the rest, producing a
+  confident, wrong contrast ratio with no warning anywhere. Only 6- and 8-digit values are
+  meaningful, so anything else is now kept out of the palette — uses of that key resolve to
+  `UnknownKey` and surface through the existing `unresolved` counter instead. Applies to
+  XAML `<Color>`/`<SolidColorBrush>` definitions, the C# tuple source, and user-supplied
+  `palette.csharpPattern`.
+- **Report write failures now exit 2 with a message instead of a stack trace.** `--json
+  out/report.json` with no `out/` directory threw an unhandled `DirectoryNotFoundException`,
+  printing a .NET stack trace and exiting 127 — a value outside the documented 0/1/2 contract.
+  A malformed baseline has produced a friendly message since 0.4.0; the output side now
+  matches. Directories are still not created implicitly: quietly inventing a directory for a
+  mistyped path is harder to debug than an error.
 - **Symmetry is no longer classified for passing pairs.** Every finding was assigned a
   symmetry, so a pristine 21:1 pair (gap < 1.5) came out as `both-low` — a label whose
   documented meaning is "the palette itself is too weak, switching theme won't save it".

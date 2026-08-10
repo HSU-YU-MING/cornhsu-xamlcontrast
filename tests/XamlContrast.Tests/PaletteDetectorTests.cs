@@ -80,6 +80,49 @@ public class PaletteDetectorTests
         Assert.Equal(("#111111", "#111111"), d.Palette.Entries["Bg"]); // 深淺同值
     }
 
+    [Fact] // 色票值只有 #RRGGBB / #AARRGGBB 兩種長度有意義；正則的 {6,8} 會吃下七位數的打字錯誤
+    public void MalformedHexIsNotAcceptedIntoPalette()
+    {
+        using var fx = new Fixture();
+        // 正則是 {6,8}，七位數的打字錯誤也會過；Wcag.Luminance 只讀前六位 ——
+        // 收下畸形值再默默猜前半段，等於給出一個看起來很篤定的錯答案
+        fx.File("Themes/DarkTheme.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Typo" Color="#FF0000A"/>
+              <SolidColorBrush x:Key="Good" Color="#FF0000"/>
+              <SolidColorBrush x:Key="Alpha" Color="#80FF0000"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.True(d.Palette.Entries.ContainsKey("Good"));   // 6 位數
+        Assert.True(d.Palette.Entries.ContainsKey("Alpha"));  // 8 位數（半透明色票）
+        Assert.False(d.Palette.Entries.ContainsKey("Typo"));  // 7 位數 —— 不收
+    }
+
+    [Fact] // 畸形色票的使用處要走 unresolved 喊出來，不是靜默算出一個錯的比值
+    public void UsageOfMalformedPaletteKeyCountsAsUnresolved()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/DarkTheme.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Typo" Color="#FF0000A"/>
+              <SolidColorBrush x:Key="Good" Color="#222222"/>
+              <SolidColorBrush x:Key="Spare" Color="#333333"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Typo}" Text="打錯的色票"/>
+              <TextBlock Foreground="{DynamicResource Good}" Text="正常"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(1, r.Unresolved);      // 打錯的那個：喊出來
+        Assert.Single(r.Findings);          // 只有正常的那筆進報告
+    }
+
     [Fact] // Cornea 形狀：什麼都沒有 → 退化，要喊
     public void NothingFoundIsDegradedLoudly()
     {
