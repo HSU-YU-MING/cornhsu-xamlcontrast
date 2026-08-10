@@ -5,6 +5,31 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+### Fixed
+- **SemiBold no longer qualifies for the WCAG large-text exemption.** The bold check was a
+  substring match (`Bold` matches `SemiBold`), so 14pt+ SemiBold(600) text was graded against
+  3:1 instead of 4.5:1 — text with a ratio between 3.0 and 4.5 passed when it should have
+  failed. WCAG's "bold" means weight ≥ 700; the check is now an anchored whole-word match
+  (Bold/ExtraBold/UltraBold/Black/ExtraBlack/UltraBlack/Heavy, or numeric 700–999). This can
+  surface new failures in existing projects — they were always failures, just unreported.
+- **`MultiTrigger` / `MultiDataTrigger` states are now audited.** They were on the "not part
+  of the visual tree" skip list but absent from every trigger-collection site, so combined-
+  condition states (hover + selected and the like) were silently unchecked — with no counter
+  hinting at the gap. Conditions are AND-ed: a state whose conditions include
+  `IsEnabled=False` counts as disabled (WCAG 1.4.3 exemption), same as a plain trigger.
+- **Unresolvable foregrounds now count as `unresolved`, not `skipped`.** A foreground bound
+  at runtime (`{Binding}`), a gradient, or a key missing from the palette went into the
+  `skipped` bucket — whose label reads "translucent, invisible", i.e. *legitimately exempt* —
+  hiding half the tool's blind spot inside a bucket that claims there is nothing to see.
+  The background side already classified these as `unresolved`; both sides now share one rule:
+  can't-resolve → `unresolved`, translucent/invisible → `skipped`.
+- **Style pairs with an unresolvable side are now counted.** They were dropped with a bare
+  `continue` — absent from findings *and* from every degradation counter, which violates the
+  project's own "silent degradation is lying" rule. Report labels updated to match the
+  sharpened bucket meanings. The PowerShell prototype carried all four of these defects
+  identically (the ported code inherited them), and was fixed in lockstep — a concrete
+  reminder that two implementations agreeing proves consistency, not correctness.
+
 ## [0.5.1] - 2026-08-08
 
 ### Fixed

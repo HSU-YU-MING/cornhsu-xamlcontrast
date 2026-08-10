@@ -227,4 +227,119 @@ public class NewRuleTests
         var f = Assert.Single(r.Findings); // 只有 WalkStyles 那筆，元素端跳過
         Assert.StartsWith("Style[", f.Element);
     }
+
+    [Fact] // 字色看不懂 → unresolved，不是 skipped —— 之前塞錯桶，盲區被藏進「合法豁免」
+    public void UnresolvableForegroundCountsAsUnresolvedNotSkipped()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#000000">
+              <TextBlock Foreground="{Binding Accent}" Text="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Equal(1, r.Unresolved);
+        Assert.Equal(0, r.Skipped);
+    }
+
+    [Fact] // Style 配對看不懂時要計數 —— 之前是裸 continue，從報告徹底消失（靜默退化等於謊報）
+    public void UnresolvableStylePairIsCountedNotSilentlyDropped()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Grid.Resources>
+                <Style x:Key="Bound" TargetType="Button">
+                  <Setter Property="Background" Value="#000000"/>
+                  <Setter Property="Foreground" Value="{Binding A}"/>
+                </Style>
+                <Style x:Key="SeeThrough" TargetType="Button">
+                  <Setter Property="Background" Value="Transparent"/>
+                  <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Style>
+              </Grid.Resources>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Equal(1, r.Unresolved); // Binding 字色 = 看不懂
+        Assert.Equal(1, r.Skipped);    // Transparent 底 = 合法跳過
+    }
+
+    [Fact] // MultiTrigger 曾是黑洞：跳過清單認得它、收集處不認得，組合條件狀態整批沒被檢查
+    public void MultiTriggerStateIsAudited()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Grid.Resources>
+                <Style x:Key="S" TargetType="Button">
+                  <Setter Property="Background" Value="#000000"/>
+                  <Setter Property="Foreground" Value="#FFFFFF"/>
+                  <Style.Triggers>
+                    <MultiTrigger>
+                      <MultiTrigger.Conditions>
+                        <Condition Property="IsMouseOver" Value="True"/>
+                        <Condition Property="IsPressed" Value="True"/>
+                      </MultiTrigger.Conditions>
+                      <Setter Property="Foreground" Value="#404040"/>
+                    </MultiTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Grid.Resources>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(2, r.Findings.Count); // 基礎 + MultiTrigger 觸發態
+        var trigger = Assert.Single(r.Findings, f => f.Element == "Style[S]/trigger");
+        Assert.Equal(Wcag.Contrast("#404040", "#000000"), trigger.RatioDark);
+    }
+
+    [Fact] // MultiTrigger 條件含 IsEnabled=False → 整個狀態只在停用時成立，WCAG 1.4.3 豁免
+    public void MultiTriggerWithDisabledConditionIsExempted()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Grid.Resources>
+                <Style x:Key="S" TargetType="Button">
+                  <Setter Property="Background" Value="#000000"/>
+                  <Setter Property="Foreground" Value="#FFFFFF"/>
+                  <Style.Triggers>
+                    <MultiTrigger>
+                      <MultiTrigger.Conditions>
+                        <Condition Property="IsEnabled" Value="False"/>
+                        <Condition Property="IsMouseOver" Value="True"/>
+                      </MultiTrigger.Conditions>
+                      <Setter Property="Foreground" Value="#303030"/>
+                    </MultiTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Grid.Resources>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(1, r.DisabledExempt);
+        Assert.Single(r.Findings); // 只剩基礎態
+    }
+
+    [Fact] // WCAG 大字級的「粗體」是 weight ≥ 700：SemiBold(600) 不算 —— 舊版子字串匹配誤放寬到 3:1
+    public void SemiBoldIsNotBoldForLargeTextExemption()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#000000">
+              <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="#FFFFFF" Text="15pt 600 不是大字級"/>
+              <TextBlock FontSize="19" FontWeight="Bold" Foreground="#FFFFFF" Text="14.25pt 700 是大字級"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var semi = Assert.Single(r.Findings, f => f.Size == "20px");
+        Assert.False(semi.Large);      // 600 不到粗體門檻，維持 4.5
+        Assert.Equal(4.5, semi.Need);
+        var bold = Assert.Single(r.Findings, f => f.Size == "19px");
+        Assert.True(bold.Large);       // 700 才算，14.25pt 粗體 → 3.0
+        Assert.Equal(3.0, bold.Need);
+    }
 }

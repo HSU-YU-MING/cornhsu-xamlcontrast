@@ -48,7 +48,7 @@ public sealed partial class Auditor
 
     private static readonly HashSet<string> StyleishEls = new()
     {
-        "Style", "Setter", "Trigger", "DataTrigger", "MultiTrigger",
+        "Style", "Setter", "Trigger", "DataTrigger", "MultiTrigger", "MultiDataTrigger",
     };
 
     /// <summary>模板裡會渲染 Foreground 的元素。⚠ 不能只看 ContentPresenter：
@@ -65,6 +65,15 @@ public sealed partial class Auditor
 
     [GeneratedRegex(@"TemplateBinding\s+Foreground")]
     private static partial Regex TemplateBindingFg();
+
+    // WCAG 大字級的「粗體」指 weight ≥ 700：Bold(700)、ExtraBold/UltraBold(800)、
+    // Black/Heavy(900)、ExtraBlack/UltraBlack(950)、數字 700–999。
+    // SemiBold/DemiBold 是 600，不算 —— 舊版子字串匹配（"Bold" 命中 "SemiBold"）
+    // 把 600 也放寬到 3:1，會漏掉 3.0~4.5 之間真正不合格的文字。錨定整字匹配。
+    [GeneratedRegex(@"^\s*(?:Bold|ExtraBold|UltraBold|Black|ExtraBlack|UltraBlack|Heavy|[7-9]\d{2})\s*$")]
+    private static partial Regex BoldWeight();
+
+    private static bool IsBold(string? fw) => fw is not null && BoldWeight().IsMatch(fw);
 
     private readonly Palette _pal;
     private readonly ToolConfig _cfg;
@@ -273,8 +282,10 @@ public sealed partial class Auditor
 
                 var fgR = ColorResolver.Resolve(fgV, _pal);
                 if (fgR is null) continue;
-                if (fgR.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.Transparent or ColorKind.UnknownKey)
-                { _skipped++; continue; }
+                // 字色是 Binding／漸層／未知鍵 = 工具看不懂 → unresolved（盲區要誠實計數，
+                // 之前全塞 skipped，把盲區藏進「合法豁免」桶）；透明字才是合法跳過
+                if (fgR.Kind is ColorKind.Other or ColorKind.UnknownKey) { _unresolved++; continue; }
+                if (fgR.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
 
                 Resolved? bgObj;
                 if (bgV is not null)
@@ -310,7 +321,7 @@ public sealed partial class Auditor
                 else if (chain.Props.TryGetValue("FontSize", out var pfs)) ParseDouble(pfs.V, out fsC);
                 var fwV = el.Attribute("FontWeight")?.Value
                           ?? (chain.Props.TryGetValue("FontWeight", out var pfw) ? pfw.V : null);
-                var boldC = fwV is not null && Regex.IsMatch(fwV, "Bold|Black|Heavy|SemiBold");
+                var boldC = IsBold(fwV);
                 var ptC = fsC * 0.75;
                 var isLargeC = ptC >= 18 || (boldC && ptC >= 14);
                 var needC = NeedFor(isTextC, isLargeC);
@@ -351,8 +362,9 @@ public sealed partial class Auditor
             if (fgRaw is null) continue;
             var fg = ColorResolver.Resolve(fgRaw, _pal);
             if (fg is null) continue;
-            if (fg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.Transparent or ColorKind.UnknownKey)
-            { _skipped++; continue; }
+            // 同上：看不懂 → unresolved；透明 → skipped（與背景側同一套分桶標準）
+            if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey) { _unresolved++; continue; }
+            if (fg.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
             if (bg is null) { _unresolved++; continue; }
             if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey)
             { _unresolved++; continue; }
@@ -381,7 +393,7 @@ public sealed partial class Auditor
             var fsRaw = el.Attribute("FontSize")?.Value;
             if (fsRaw is not null) ParseDouble(fsRaw, out fs);
             var fw = el.Attribute("FontWeight")?.Value;
-            var bold = fw is not null && Regex.IsMatch(fw, "Bold|Black|Heavy|SemiBold");
+            var bold = IsBold(fw);
             var pt = fs * 0.75;
             var isLarge = pt >= 18 || (bold && pt >= 14);
             var need = NeedFor(isText, isLarge);
@@ -445,7 +457,7 @@ public sealed partial class Auditor
 
             // 觸發器裡的 Setter 也算進來（它們覆蓋同一個 Style 的基礎值）
             var trigSetters = new List<(Dictionary<string, string> Set, bool Disabled)>();
-            foreach (var t in style.Descendants().Where(e => e.Name.LocalName is "Trigger" or "DataTrigger"))
+            foreach (var t in style.Descendants().Where(StyleIndex.IsTriggerElement))
             {
                 var ts = new Dictionary<string, string>();
                 foreach (var s in t.Elements().Where(e => e.Name.LocalName == "Setter"))
@@ -506,8 +518,13 @@ public sealed partial class Auditor
                 var fg = ColorResolver.Resolve(fgv, _pal);
                 var bgr = ColorResolver.Resolve(bgv, _pal);
                 if (fg is null || bgr is null) continue;
-                if (fg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.Transparent or ColorKind.UnknownKey) continue;
-                if (bgr.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.Transparent or ColorKind.UnknownKey) continue;
+                // 之前這裡是裸 continue —— 配對從報告徹底消失，連計數都沒有，
+                // 違反「靜默退化等於謊報」（同檔 ignore 註解那段的規矩）。
+                // 任一側看不懂 → unresolved；任一側透明/半透明 → skipped
+                if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey ||
+                    bgr.Kind is ColorKind.Other or ColorKind.UnknownKey) { _unresolved++; continue; }
+                if (fg.Kind is ColorKind.Alpha or ColorKind.Transparent ||
+                    bgr.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
 
                 // ⚠ v0.1 的第 5 號 bug（規劃書 8.2）：這裡曾漏了 Need，而分級把
                 //   「沒有 Need」當裝飾 → 所有 Style 配對被靜默歸為裝飾、完全不受檢。
@@ -516,8 +533,7 @@ public sealed partial class Auditor
                 var isText = ttName is null || !_nonTextEls.Contains(ttName);
                 var fs = 0.0;
                 if (set.TryGetValue("FontSize", out var fsv)) ParseDouble(fsv, out fs);
-                var bold = set.TryGetValue("FontWeight", out var fwv) &&
-                           Regex.IsMatch(fwv, "Bold|Black|Heavy|SemiBold");
+                var bold = set.TryGetValue("FontWeight", out var fwv) && IsBold(fwv);
                 var pt = fs * 0.75; // WPF FontSize 是 DIP，換 point 要 ×0.75（規劃書 4.3）
                 var isLarge = pt >= 18 || (bold && pt >= 14);
                 var need = NeedFor(isText, isLarge);

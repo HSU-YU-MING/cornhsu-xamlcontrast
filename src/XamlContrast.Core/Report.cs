@@ -185,7 +185,7 @@ public static class Report
         sb.AppendLine(string.Create(inv,
             $"files {r.FileCount} | text-on-background pairs {r.Pairs}"));
         sb.AppendLine(string.Create(inv,
-            $"unresolved (background not in tree / bound at runtime): {r.Unresolved} | skipped (translucent, gradients, invisible): {r.Skipped}"));
+            $"unresolved (colour bound at runtime / gradient / key not in palette): {r.Unresolved} | skipped (translucent, invisible): {r.Skipped}"));
         if (r.DeadForeground > 0)
         {
             // 過濾不靜默：被判定為死 setter 的配對要讓使用者知道有幾組、憑什麼被排除
@@ -331,8 +331,8 @@ public static class Report
 
         // 「放過的東西」一律計數並列出 —— 豁免、排除、壓掉、解析失敗都是本工具沒看的地方。
         var notes = new List<string>();
-        if (r.Unresolved > 0) notes.Add(string.Create(inv, $"{r.Unresolved} unresolved (background not in tree / bound at runtime)"));
-        if (r.Skipped > 0) notes.Add(string.Create(inv, $"{r.Skipped} skipped (translucent, gradients, invisible)"));
+        if (r.Unresolved > 0) notes.Add(string.Create(inv, $"{r.Unresolved} unresolved (colour bound at runtime / gradient / key not in palette)"));
+        if (r.Skipped > 0) notes.Add(string.Create(inv, $"{r.Skipped} skipped (translucent, invisible)"));
         if (r.DeadForeground > 0) notes.Add(string.Create(inv, $"{r.DeadForeground} excluded (dead Foreground setter)"));
         if (r.DisabledExempt > 0) notes.Add(string.Create(inv, $"{r.DisabledExempt} exempted (IsEnabled=False; WCAG 1.4.3)"));
         if (r.Suppressed > 0) notes.Add(string.Create(inv, $"{r.Suppressed} suppressed via xamlcontrast-ignore"));

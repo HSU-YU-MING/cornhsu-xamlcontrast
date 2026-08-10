@@ -66,7 +66,8 @@ internal sealed partial class StyleIndex
     private readonly Dictionary<string, Record> _global = new();
     private int _seq;
 
-    /// <summary>IsEnabled=False 觸發 = 停用態。WCAG 1.4.3 明文豁免停用中的控制項。</summary>
+    /// <summary>IsEnabled=False 觸發 = 停用態。WCAG 1.4.3 明文豁免停用中的控制項。
+    /// Multi(Data)Trigger 的條件是 AND：任一條是 IsEnabled=False，整個狀態就只在停用時成立。</summary>
     internal static bool IsDisabledTrigger(XElement t)
     {
         if (t.Name.LocalName == "Trigger")
@@ -81,7 +82,38 @@ internal sealed partial class StyleIndex
             var v = t.Attribute("Value")?.Value;
             return b is not null && v == "False" && b.Contains("IsEnabled");
         }
+        if (t.Name.LocalName is "MultiTrigger" or "MultiDataTrigger")
+            return ConditionsOf(t).Any(c =>
+                c.Attribute("Value")?.Value == "False" &&
+                (c.Attribute("Property")?.Value is { } p && IsEnabledProp().IsMatch(p) ||
+                 c.Attribute("Binding")?.Value is { } b && b.Contains("IsEnabled")));
         return false;
+    }
+
+    private static IEnumerable<XElement> ConditionsOf(XElement t)
+        => t.Descendants().Where(e => e.Name.LocalName == "Condition");
+
+    /// <summary>觸發器種類（含 Multi 組合條件）—— 觸發器收集處共用這一份清單，
+    /// 加新種類只改這裡。MultiTrigger 曾是黑洞：跳過清單認得它、收集處不認得，
+    /// 組合條件狀態（hover＋選取之類）整批沒被檢查，也沒有任何計數提示。</summary>
+    internal static bool IsTriggerElement(XElement e)
+        => e.Name.LocalName is "Trigger" or "DataTrigger" or "MultiTrigger" or "MultiDataTrigger";
+
+    /// <summary>條件簽名 —— 同條件的觸發器狀態要跨節點合併。
+    /// Multi(Data)Trigger 逐條列出以 &amp; 串接（條件是 AND）。</summary>
+    private static string? CondSignature(XElement t)
+    {
+        if (t.Name.LocalName == "Trigger")
+            return $"P:{t.Attribute("Property")?.Value}={t.Attribute("Value")?.Value}";
+        if (t.Name.LocalName == "DataTrigger")
+            return t.Attribute("Binding") is { } b && t.Attribute("Value") is { } v
+                ? $"B:{b.Value}={v.Value}" : null;
+        var parts = ConditionsOf(t)
+            .Select(c => c.Attribute("Property") is { } p
+                ? $"P:{p.Value}={c.Attribute("Value")?.Value}"
+                : $"B:{c.Attribute("Binding")?.Value}={c.Attribute("Value")?.Value}")
+            .ToList();
+        return parts.Count > 0 ? string.Join("&", parts) : null;
     }
 
     internal Record CreateRecord(XElement style, string file)
@@ -103,7 +135,7 @@ internal sealed partial class StyleIndex
         // 選取態換底，共六筆假警報全是這形狀）。指向內部元素的 TargetName 仍不做。
         var rootName = tmplRoot?.Attribute(XName.Get("Name", "http://schemas.microsoft.com/winfx/2006/xaml"))?.Value
                        ?? tmplRoot?.Attribute("Name")?.Value;
-        foreach (var t in style.Descendants().Where(e => e.Name.LocalName is "Trigger" or "DataTrigger"))
+        foreach (var t in style.Descendants().Where(IsTriggerElement))
         {
             var set = new Dictionary<string, string>();
             var rootTargeted = new HashSet<string>();
@@ -122,11 +154,7 @@ internal sealed partial class StyleIndex
             for (var anc = t.Parent; anc is not null && !ReferenceEquals(anc, style); anc = anc.Parent)
                 if (anc.Name.LocalName == "ControlTemplate") { inTmpl = true; break; }
             // 條件簽名：同條件的狀態之後要跨節點合併
-            var cond = t.Name.LocalName == "Trigger"
-                ? $"P:{t.Attribute("Property")?.Value}={t.Attribute("Value")?.Value}"
-                : t.Attribute("Binding") is { } b && t.Attribute("Value") is { } v2
-                    ? $"B:{b.Value}={v2.Value}"
-                    : null;
+            var cond = CondSignature(t);
             rec.States.Add(new State
             {
                 Disabled = IsDisabledTrigger(t),
