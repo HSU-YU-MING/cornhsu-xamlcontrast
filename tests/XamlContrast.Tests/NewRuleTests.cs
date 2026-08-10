@@ -324,6 +324,29 @@ public class NewRuleTests
         Assert.Single(r.Findings); // 只剩基礎態
     }
 
+    [Fact] // 對稱維度只在沒過的配對上有意義：21:1 的合格配對被標 both-low（＝色票太弱）是胡說。
+           // 人看的報告只印 fail/warn 所以看不到，錯的標籤全流進 JSON 給下游吃。
+    public void SymmetryIsNotClassifiedForPassingPairs()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#000000">
+              <TextBlock Foreground="#FFFFFF" Text="21:1，完美合格"/>
+              <TextBlock Foreground="#111111" Text="1.1:1，破"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var ok = Assert.Single(r.Findings, f => f.Category == Category.Ok);
+        Assert.Equal(Symmetry.NotApplicable, ok.Symmetry); // 舊版會標 BothLow
+        var bad = Assert.Single(r.Findings, f => f.Category == Category.Fail);
+        Assert.NotEqual(Symmetry.NotApplicable, bad.Symmetry); // 沒過的照分類
+
+        var json = Report.ToJson(r);
+        Assert.Contains("\"schemaVersion\": 2", json);
+        // 合格那筆整個沒有 symmetry 欄位 —— 給錯值不如不給
+        Assert.Equal(1, json.Split("\"symmetry\"").Length - 1);
+    }
+
     [Fact] // WCAG 大字級的「粗體」是 weight ≥ 700：SemiBold(600) 不算 —— 舊版子字串匹配誤放寬到 3:1
     public void SemiBoldIsNotBoldForLargeTextExemption()
     {

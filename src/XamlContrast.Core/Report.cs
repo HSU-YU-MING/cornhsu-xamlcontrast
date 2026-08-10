@@ -25,7 +25,8 @@ public static class Report
         Symmetry.BothLow => "both-low",
         Symmetry.DarkFails => "dark-fails",
         Symmetry.LightFails => "light-fails",
-        _ => "single-theme",
+        Symmetry.SingleTheme => "single-theme",
+        _ => "n/a",
     };
 
     private static string ModeLabel(PaletteMode m) => m switch
@@ -47,7 +48,8 @@ public static class Report
         var payload = new
         {
             // JSON 消費端要能偵測格式演進 —— 0.x 期間欄位可能變動，變動時遞增
-            schemaVersion = 1,
+            // 2：ok/decorative 的 findings 不再輸出 symmetry（該維度只在沒過的配對上有意義）
+            schemaVersion = 2,
             summary = new
             {
                 paletteSource = r.Detection.Mode == PaletteMode.None ? "none" : "project",
@@ -91,7 +93,9 @@ public static class Report
                 ratioLight = f.RatioLight,
                 threshold = f.Need,
                 category = CategoryLabel(f.Category),
-                symmetry = SymmetryLabel(f.Symmetry),
+                // 合格的配對沒有「換主題救不救得回來」可言 —— 欄位整個省略（null 不輸出），
+                // 比給一個看起來像分類結果的錯值安全
+                symmetry = f.Symmetry == Symmetry.NotApplicable ? null : SymmetryLabel(f.Symmetry),
                 isText = f.IsText,
                 fontSize = f.Size.Length > 0 ? f.Size : null,
                 largeText = f.Large,

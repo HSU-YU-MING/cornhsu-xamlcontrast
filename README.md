@@ -75,6 +75,11 @@ Two independent dimensions per finding:
 - **symmetry** (across themes): `both-low` = the palette itself is too weak;
   `dark-fails` / `light-fails` = the design intent didn't survive the other theme
 
+Symmetry only answers "would switching theme rescue this?", so it is carried **only by
+`fail` and `warn` findings** — the JSON omits the field entirely on `ok` and `decorative`
+ones (as of `schemaVersion` 2). A passing pair has no problem to rescue, and labelling a
+21:1 pair `both-low` — "the palette is too weak" — would be nonsense.
+
 Symmetry is **never** used to hide a finding. "Both themes are equally bad" is not evidence
 of intent — it's just bad twice. Everything below AA gets reported; a human decides.
 

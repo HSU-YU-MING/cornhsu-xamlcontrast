@@ -7,8 +7,13 @@ public enum Category { Ok, Warn, Fail, Decorative }
 /// 對稱（跨主題）。⚠ 對稱不是意圖的證據 —— 兩邊一樣糟就只是兩邊都糟。
 /// 舊版把「兩主題都低」判成『刻意低對比』並藏起來，吃掉了 Kindling 52 組、
 /// CelFlow 96 組真實問題（規劃書 4.4／8.1）。
+///
+/// ⚠ 這個維度只在「沒過」的配對上有意義：BothLow 的語意是「色票本身不夠亮，
+/// 換主題救不了」，套在 21:1 的合格配對上是胡說。ok/decorative 一律 NotApplicable，
+/// JSON 直接不輸出該欄位 —— 人看的報告本來就只印 fail/warn，錯的標籤只會流到
+/// 吃 JSON 的下游手上。
 /// </summary>
-public enum Symmetry { BothLow, DarkFails, LightFails, SingleTheme }
+public enum Symmetry { BothLow, DarkFails, LightFails, SingleTheme, NotApplicable }
 
 public sealed class Finding
 {

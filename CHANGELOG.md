@@ -5,7 +5,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+### Changed
+- **`schemaVersion` is now 2.** `ok` and `decorative` findings no longer carry a `symmetry`
+  field in `--json` output; it is omitted rather than set to a placeholder. Consumers keying
+  off `symmetry` should treat absence as "not applicable" — see Fixed below for why.
+
 ### Fixed
+- **Symmetry is no longer classified for passing pairs.** Every finding was assigned a
+  symmetry, so a pristine 21:1 pair (gap < 1.5) came out as `both-low` — a label whose
+  documented meaning is "the palette itself is too weak, switching theme won't save it".
+  The dimension only answers "would switching theme rescue this?", which is meaningless
+  where there is nothing to rescue. Console and Markdown reports print symmetry only for
+  `fail`/`warn`, so this was invisible to humans and leaked exclusively into `--json` —
+  every downstream consumer read a confident, wrong classification on the majority of rows.
+- **`paid off` in the baseline summary now counts occurrences, matching `known debt`.**
+  `KnownDebt` sums per-key occurrence counts while `PaidDebt` counted distinct keys, so
+  clearing one key that covered 5 occurrences reported "known debt 0, paid off 1". The two
+  numbers are printed side by side on one line, in what reads as the same unit; during
+  adoption — exactly when visible progress matters most — the ratchet under-reported it.
 - **SemiBold no longer qualifies for the WCAG large-text exemption.** The bold check was a
   substring match (`Bold` matches `SemiBold`), so 14pt+ SemiBold(600) text was graded against
   3:1 instead of 4.5:1 — text with a ratio between 3.0 and 4.5 passed when it should have

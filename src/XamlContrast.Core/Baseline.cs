@@ -91,7 +91,10 @@ public static class Baseline
             }
         }
 
-        var paid = known.Keys.Count(k => !current.ContainsKey(k));
+        // ⚠ 單位要跟 knownDebt 一致：knownDebt 累加的是 count（處數），
+        //   這裡若數 key 的個數，同鍵 5 處一次修完只顯示「還了 1」——
+        //   進度看起來比實際少，導入期最需要看到進展的時候反而低報。
+        var paid = known.Where(kv => !current.ContainsKey(kv.Key)).Sum(kv => kv.Value.Count);
         return new ComparisonResult
         {
             NewFailures = newFailures,

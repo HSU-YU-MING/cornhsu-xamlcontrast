@@ -59,6 +59,10 @@ exit 1: 3 pair(s) below threshold x 2/3 (0 warn)
 - **對稱**（跨主題）：`both-low`＝色票本身不夠，換主題救不了；
   `dark-fails`／`light-fails`＝設計意圖沒跨主題保住
 
+對稱只回答「換個主題救不救得回來」，所以**只有 `fail` 與 `warn` 帶這個維度** ——
+`ok` 與 `decorative` 在 JSON 裡整個不輸出這個欄位（`schemaVersion` 2 起）。
+合格的配對沒有問題要救，把 21:1 標成 `both-low`（＝色票太弱）是胡說。
+
 對稱**永遠不會**被拿來藏結果 ——「兩邊一樣糟」不是刻意的證據，只是糟兩次。
 低於 AA 的一律報出來，由人判斷。
 
