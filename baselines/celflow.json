@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "summary": {
     "paletteSource": "project",
     "paletteMode": "single",
@@ -14,6 +14,7 @@
     },
     "files": 22,
     "pairs": 368,
+    "coverage": 89.5,
     "unresolved": 43,
     "unresolvedBy": {
       "bound-or-gradient": 41,

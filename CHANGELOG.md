@@ -6,6 +6,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 ## [Unreleased]
 
 ### Added
+- **A coverage floor: `--min-coverage <0-100>` / `minCoverage`, default 50.** The run now fails
+  when fewer than N% of the colour pairs it saw could actually be resolved, and `summary.coverage`
+  reports the figure. The zero-pairs guard ("an empty scan is not a pass") was binary, and that
+  line turned out not to hold: scanning eight public WPF projects found three that exited **0**
+  at 0.2%, 1.7% and 10.2% coverage. HandyControl has 342 XAML files, resolved 7 pairs out of
+  2922, and printed `exit 0: all pairs meet AA`. "Barely looked at anything" and "looked at
+  everything and it's fine" were indistinguishable in the exit code — the same lie the zero-pairs
+  rule exists to prevent, one step up. Sits beside `--strict-palette`, before the mode branches,
+  so it applies in `--baseline` mode too. `--min-coverage 0` is the escape hatch; the zero-pairs
+  guard stays non-configurable underneath it. The four validation projects run at 89–100% and
+  are unaffected.
 - **`unresolved` now comes with a reason breakdown**, in the console, the Markdown report and
   `summary.unresolvedBy`: `no-ancestor-background`, `bound-or-gradient`, `unknown-palette-key`,
   `translucent-uncomposited`. A total on its own says how much was missed but not whether

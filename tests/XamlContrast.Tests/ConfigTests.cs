@@ -41,6 +41,38 @@ public class ConfigTests
         Assert.Contains("config-forced", det.Description);
     }
 
+    [Fact] // 覆蓋率 = 解析成功 / 看到的總數 —— 「這份結果代不代表專案」的關鍵數字
+    public void CoverageReflectsResolvedShareOfPairsSeen()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#000000">
+              <TextBlock Foreground="#FFFFFF" Text="解析得出"/>
+              <Grid Background="{Binding X}">
+                <TextBlock Foreground="#FFFFFF" Text="解析不出 1"/>
+              </Grid>
+              <Grid Background="{Binding Y}">
+                <TextBlock Foreground="#FFFFFF" Text="解析不出 2"/>
+              </Grid>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(1, r.Pairs);
+        Assert.Equal(2, r.Unresolved);
+        Assert.Equal(1.0 / 3, r.Coverage, 3);
+        Assert.Contains("coverage 33.3%", Report.ToConsole(r));
+        Assert.Contains("\"coverage\": 33.3", Report.ToJson(r));
+    }
+
+    [Fact] // minCoverage 要驗證範圍 —— config 寫錯要有欄位級訊息，不能靜默忽略
+    public void MinCoverageOutOfRangeIsRejected()
+    {
+        using var fx = new Fixture();
+        fx.File("xamlcontrast.config.json", """{ "minCoverage": 150 }""");
+        var ex = Assert.Throws<ConfigException>(() => ToolConfig.Load(fx.Root));
+        Assert.Contains("minCoverage", ex.Message);
+    }
+
     [Fact] // 明選 none 是使用者的決定，不算退化（不觸發 --strict-palette）
     public void ForcedNoneIsNotDegraded()
     {

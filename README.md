@@ -195,6 +195,11 @@ doesn't tell you whether anything can be done about it:
 | `unknown-palette-key` | the resource key isn't in the detected palette — a typo, or palette detection missed a file |
 | `translucent-uncomposited` | a translucent background with nothing underneath to composite against |
 
+`summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
+(default 50%) fails**, because a pass over a fraction of the project is not a pass — the same
+principle as the non-configurable zero-pairs rule, which it generalises. Use
+`--min-coverage 0` to opt out.
+
 `--md report.md` writes the human-readable Markdown version — this is what the Action posts as a
 PR comment, and you can use it directly too.
 

@@ -18,6 +18,11 @@ public sealed class ToolConfig
     public ClassificationSection Classification { get; init; } = new();
     public string FailOn { get; init; } = "fail";
     public bool StrictPalette { get; init; }
+
+    /// <summary>覆蓋率下限（百分比）。低於此值視為「這份結果不足以代表專案」而 exit 1。
+    /// 預設 50 —— 解析不到一半就給過，那個「過」沒有意義。設 0 可完全關閉
+    /// （0 組配對的保險仍在，那條不可設定）。</summary>
+    public double MinCoverage { get; init; } = 50;
     public IgnoreSection Ignore { get; init; } = new();
 
     /// <summary>載入來源路徑；null = 沒有 config 檔（純預設值）</summary>
@@ -88,6 +93,8 @@ public sealed class ToolConfig
         if (cfg.Thresholds.NormalText <= 1 || cfg.Thresholds.LargeText <= 1 ||
             cfg.Thresholds.FailFactor is <= 0 or > 1)
             throw new ConfigException("thresholds out of range (contrast ratios > 1, failFactor in (0,1])");
+        if (cfg.MinCoverage is < 0 or > 100)
+            throw new ConfigException($"minCoverage must be between 0 and 100, got {cfg.MinCoverage}");
 
         cfg.SourcePath = path;
         return cfg;

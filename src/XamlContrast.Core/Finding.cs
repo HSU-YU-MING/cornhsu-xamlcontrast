@@ -81,4 +81,14 @@ public sealed class AuditResult
     public ToolConfig Config { get; init; } = new();
 
     public int CountOf(Category c) => Findings.Count(f => f.Category == c);
+
+    /// <summary>
+    /// 覆蓋率：解析成功的配對佔「看到的配對總數」的比例（0~1）。
+    ///
+    /// 「0 組配對就 exit 1」一直是不可設定的預設，理由是「空掃綠燈就是謊報健康」。
+    /// 但那條線是二元的 —— 八個公開專案實測發現三個在 0.2% / 1.7% / 10.2% 的
+    /// 覆蓋率下照樣亮綠燈（HandyControl 342 個檔只看懂 7 組，然後說「通過」）。
+    /// 「幾乎什麼都沒看」和「看過了都沒問題」在退出碼上分不出來，等於同一種謊報。
+    /// </summary>
+    public double Coverage => Pairs + Unresolved == 0 ? 0 : (double)Pairs / (Pairs + Unresolved);
 }

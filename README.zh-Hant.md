@@ -154,6 +154,10 @@ jobs:
 | `unknown-palette-key` | 資源鍵不在偵測到的色盤裡 —— 打字錯誤,或色盤偵測漏了某個檔 |
 | `translucent-uncomposited` | 半透明背景但底下沒有可疊的顏色 |
 
+`summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 1** ——
+只掃到一小部分的「通過」不算通過,這是「0 組配對即 exit 1」那條不可設定規則的推廣。
+要關掉用 `--min-coverage 0`。
+
 `--md report.md` 則產出給人讀的 Markdown（Action 用它貼 PR 留言，也可以自己拿去用）。
 
 ## 實戰成績

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "summary": {
     "paletteSource": "project",
     "paletteMode": "csharp",
@@ -14,6 +14,7 @@
     },
     "files": 15,
     "pairs": 169,
+    "coverage": 100,
     "unresolved": 0,
     "unresolvedBy": {},
     "skipped": 3,

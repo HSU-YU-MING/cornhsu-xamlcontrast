@@ -75,8 +75,13 @@ WCAG 2.x AA。`failFactor` 是「破」的分界（門檻 × 2/3）：
 |---|---|---|
 | `failOn` | `"fail"` | `"warn"` = 偏低也擋（法遵場景 AA 全過） |
 | `strictPalette` | `false` | `true` = 色盤偵測失敗（退回寫死色碼模式）直接 exit 1 |
+| `minCoverage` | `50` | 解析成功的配對低於此百分比即 exit 1 —— 只解析到一小部分的「通過」沒有意義。設 `0` 關閉 |
 
 配對數為 0 時 exit 1 是**不可設定的預設** —— 空掃綠燈就是謊報健康。
+`minCoverage` 是同一條原則的推廣:那條線原本是二元的,而八個公開專案實測有三個
+在 0.2% / 1.7% / 10.2% 的覆蓋率下照樣亮綠燈(HandyControl 342 個檔只解析出 7 組,
+然後印「all pairs meet AA」)。「幾乎什麼都沒看」與「看過了都沒問題」在退出碼上
+分不出來,是同一種謊報。與 `strictPalette` 一樣在**所有模式**下生效,含 `--baseline`。
 
 `strictPalette` 在**所有模式**下都生效，包含 `--baseline` 與 `--write-baseline`
 （0.6 修正前它排在退出碼判定的最尾端，兩個 baseline 分支都會提早 return 而跳過它）。

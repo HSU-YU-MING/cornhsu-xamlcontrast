@@ -11,6 +11,7 @@ using XamlContrast.Core;
 var showOk = false;
 var failOnWarn = false;
 var strictPalette = false;
+double? minCoverage = null;   // null = 用 config／內建預設
 string? jsonPath = null;
 string? sarifPath = null;
 string? mdPath = null;
@@ -24,6 +25,14 @@ for (var i = 0; i < args.Length; i++)
     {
         case "--show-ok": showOk = true; break;
         case "--strict-palette": strictPalette = true; break;
+        case "--min-coverage":
+            if (i + 1 >= args.Length ||
+                !double.TryParse(args[i + 1], System.Globalization.NumberStyles.Float,
+                                 System.Globalization.CultureInfo.InvariantCulture, out var mc) ||
+                mc is < 0 or > 100)
+            { Console.Error.WriteLine("--min-coverage takes a number between 0 and 100"); return 2; }
+            minCoverage = mc; i++;
+            break;
         case "--fail-on":
             if (i + 1 >= args.Length || args[i + 1] is not ("warn" or "fail"))
             { Console.Error.WriteLine("--fail-on takes 'warn' or 'fail'"); return 2; }
@@ -89,6 +98,9 @@ catch (ConfigException ex)
 // 優先序：CLI 旗標 > config > 內建預設（旗標只能加嚴，不能替 config 鬆綁）
 failOnWarn = failOnWarn || config.FailOn == "warn";
 strictPalette = strictPalette || config.StrictPalette;
+// ⚠ 覆蓋率下限是唯一「旗標可以放寬 config」的項目：它擋的是「工具看不見你的專案」，
+//    不是稽核標準。使用者明確傳 --min-coverage 0 表示「我知道，先讓我跑」是合理的逃生口。
+var minCov = minCoverage ?? config.MinCoverage;
 
 var result = Auditor.Run(root, detection, config);
 
@@ -154,6 +166,21 @@ int DecideExit()
     if (strictPalette && detection.IsDegraded)
     {
         Console.WriteLine("exit 1: palette detection failed and --strict-palette is set");
+        return 1;
+    }
+
+    // ⚠ 覆蓋率下限 —— 「0 組配對就擋」的自然推廣。二元的那條線擋不住實際發生的情況：
+    //   八個公開專案裡有三個在 0.2% / 1.7% / 10.2% 的覆蓋率下亮綠燈（HandyControl
+    //   342 個檔只解析出 7 組，然後印「all pairs meet AA」）。「幾乎什麼都沒看」
+    //   與「看過了都沒問題」在退出碼上分不出來，是同一種謊報健康。
+    //   與 --strict-palette 並排放在模式分支之前，baseline 模式一樣適用。
+    if (result.Coverage * 100 < minCov)
+    {
+        Console.WriteLine(string.Create(System.Globalization.CultureInfo.InvariantCulture,
+            $"exit 1: only {result.Coverage * 100:F1}% of colour pairs could be resolved " +
+            $"({result.Pairs} of {result.Pairs + result.Unresolved}), below the {minCov:F0}% floor — " +
+            $"this result does not represent the project. See the unresolved breakdown above; " +
+            $"pass --min-coverage 0 to proceed anyway."));
         return 1;
     }
 
@@ -229,6 +256,9 @@ static void PrintUsage()
           --md <path>              write a Markdown report (suitable for a PR comment)
           --fail-on warn           also fail the run when pairs are below AA but above 2/3
           --strict-palette         fail the run when palette detection degrades
+          --min-coverage <0-100>   fail when fewer than N% of colour pairs could be
+                                   resolved (default 50; a pass over a fraction of the
+                                   project is not a pass). 0 disables.
           --baseline [path]        ratchet mode: only fail on NEW or WORSENED failures
                                    (default path: xamlcontrast-baseline.json)
           --write-baseline [path]  freeze current failures as known debt (run once, commit the file)
