@@ -14,8 +14,8 @@
     },
     "files": 22,
     "pairs": 368,
-    "unresolved": 29,
-    "skipped": 18,
+    "unresolved": 43,
+    "skipped": 4,
     "deadForeground": 0,
     "disabledExempt": 21,
     "parseErrors": 0,
@@ -4550,7 +4550,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 72,
+      "line": 78,
       "element": "Button\u2295Style[IconBtn]/base",
       "fg": "{StaticResource Fg0}",
       "bg": "{Bg0}",
@@ -4565,7 +4565,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 74,
+      "line": 80,
       "element": "Button\u2295Style[IconBtn]/base",
       "fg": "{StaticResource Fg0}",
       "bg": "{Bg0}",
@@ -4580,7 +4580,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 76,
+      "line": 82,
       "element": "Button\u2295Style[IconBtn]/base",
       "fg": "{StaticResource Fg0}",
       "bg": "{Bg0}",
@@ -4595,7 +4595,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 91,
+      "line": 97,
       "element": "Button\u2295Style[IconBtn]/base",
       "fg": "{StaticResource Fg0}",
       "bg": "{Bg0}",
@@ -4610,7 +4610,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 93,
+      "line": 99,
       "element": "Button\u2295Style[IconBtn]/base",
       "fg": "{StaticResource Fg0}",
       "bg": "{Bg0}",
@@ -4625,7 +4625,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 101,
+      "line": 107,
       "element": "TextBlock",
       "fg": "{DynamicResource Purple}",
       "bg": "{BgDeep}",
@@ -4640,7 +4640,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 103,
+      "line": 109,
       "element": "TextBlock",
       "fg": "{DynamicResource FgLabel}",
       "bg": "{BgDeep}",
@@ -4655,7 +4655,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 105,
+      "line": 111,
       "element": "TextBox",
       "fg": "{DynamicResource FgLabel}",
       "bg": "{BgDeep}",
@@ -4666,36 +4666,6 @@
       "symmetry": "single-theme",
       "isText": true,
       "fontSize": "13px",
-      "largeText": false
-    },
-    {
-      "file": "Views/TimelineView.xaml",
-      "line": 117,
-      "element": "TextBlock",
-      "fg": "{DynamicResource FgLabel}",
-      "bg": "{BgDeep}",
-      "ratioDark": 5.63,
-      "ratioLight": 5.63,
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": "single-theme",
-      "isText": true,
-      "fontSize": "11px",
-      "largeText": false
-    },
-    {
-      "file": "Views/TimelineView.xaml",
-      "line": 121,
-      "element": "TextBlock",
-      "fg": "{DynamicResource FgLabel}",
-      "bg": "{BgDeep}",
-      "ratioDark": 5.63,
-      "ratioLight": 5.63,
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": "single-theme",
-      "isText": true,
-      "fontSize": "11px",
       "largeText": false
     },
     {
@@ -4715,7 +4685,37 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 132,
+      "line": 127,
+      "element": "TextBlock",
+      "fg": "{DynamicResource FgLabel}",
+      "bg": "{BgDeep}",
+      "ratioDark": 5.63,
+      "ratioLight": 5.63,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": "single-theme",
+      "isText": true,
+      "fontSize": "11px",
+      "largeText": false
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 129,
+      "element": "TextBlock",
+      "fg": "{DynamicResource FgLabel}",
+      "bg": "{BgDeep}",
+      "ratioDark": 5.63,
+      "ratioLight": 5.63,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": "single-theme",
+      "isText": true,
+      "fontSize": "11px",
+      "largeText": false
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 138,
       "element": "TextBlock",
       "fg": "{DynamicResource FgLabel}",
       "bg": "{Bg0}",
@@ -4730,7 +4730,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 141,
+      "line": 147,
       "element": "TextBlock",
       "fg": "{DynamicResource FgLabel}",
       "bg": "{Bg0}",
@@ -4745,7 +4745,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 148,
+      "line": 154,
       "element": "CheckBox",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -4760,7 +4760,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 159,
+      "line": 165,
       "element": "TextBlock",
       "fg": "{DynamicResource Green}",
       "bg": "{BgDeep}",
@@ -4775,7 +4775,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 164,
+      "line": 170,
       "element": "Button\u2295Style[IconBtn]/base",
       "fg": "{StaticResource Fg0}",
       "bg": "{Bg0}",
@@ -4790,7 +4790,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 169,
+      "line": 175,
       "element": "Button\u2295Style[\u2192IconBtn]/base",
       "fg": "{StaticResource Fg0}",
       "bg": "{Bg0}",
@@ -4805,7 +4805,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 190,
+      "line": 196,
       "element": "TextBlock",
       "fg": "{DynamicResource FgLabel}",
       "bg": "{Bg0}",
@@ -4820,7 +4820,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 191,
+      "line": 197,
       "element": "Button\u2295Style[IconBtn]/base",
       "fg": "{StaticResource Fg0}",
       "bg": "{Bg0}",
@@ -4835,7 +4835,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 199,
+      "line": 205,
       "element": "Button\u2295Style[IconBtn]/base",
       "fg": "{StaticResource Fg0}",
       "bg": "{Bg0}",
@@ -4850,7 +4850,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 202,
+      "line": 208,
       "element": "TextBlock",
       "fg": "{DynamicResource FgLabel}",
       "bg": "{Bg0}",
@@ -4865,7 +4865,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 221,
+      "line": 227,
       "element": "TextBlock",
       "fg": "{DynamicResource FgLabel}",
       "bg": "{Bg0}",
@@ -4880,7 +4880,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 225,
+      "line": 231,
       "element": "TextBlock",
       "fg": "{DynamicResource Green}",
       "bg": "{Bg0}",
@@ -4895,7 +4895,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 270,
+      "line": 276,
       "element": "TextBlock",
       "fg": "{DynamicResource FgLabel}",
       "bg": "{Bg1}",
@@ -4910,7 +4910,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 477,
+      "line": 483,
       "element": "TextBlock\u2295Style[inline]/base",
       "fg": "{DynamicResource Green}",
       "bg": "{GreenBg}",
@@ -4925,7 +4925,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 521,
+      "line": 527,
       "element": "Polygon",
       "fg": "{DynamicResource Red}",
       "bg": "{Bg1}",
@@ -4939,7 +4939,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 523,
+      "line": 529,
       "element": "Rectangle",
       "fg": "{DynamicResource Red}",
       "bg": "{Bg1}",
@@ -4953,7 +4953,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 530,
+      "line": 536,
       "element": "Rectangle",
       "fg": "{DynamicResource Blue} \u00D70.55",
       "bg": "{Bg1}",
@@ -4967,7 +4967,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 542,
+      "line": 548,
       "element": "TextBlock",
       "fg": "{DynamicResource InfoL}",
       "bg": "{{DynamicResource BlueOverlay} over {Bg1}}",
