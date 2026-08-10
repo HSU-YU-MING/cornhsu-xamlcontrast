@@ -76,7 +76,8 @@ public sealed partial class Auditor
 
     private static bool IsBold(string? fw) => fw is not null && BoldWeight().IsMatch(fw);
 
-    private readonly Palette _pal;
+    // 非 readonly:多 App repo 時每個檔案切到它所屬作用域的色盤(PaletteFor)
+    private Palette _pal;
     private readonly ToolConfig _cfg;
     private readonly HashSet<string> _textEls;
     private readonly HashSet<string> _nonTextEls;
@@ -170,6 +171,9 @@ public sealed partial class Auditor
             if (doc.Root is not null)
             {
                 auditor._curFile = f;
+                // 多 App repo:這個檔案屬於哪個 App,就用哪個 App 的色盤
+                // (單 App 或無作用域資訊時 PaletteFor 回傳全域色盤,行為不變)
+                auditor._pal = detection.PaletteFor(f);
                 auditor.Walk(doc.Root, null, name, 1.0, suppressed: false);
                 auditor.WalkStyles(doc, name);
             }

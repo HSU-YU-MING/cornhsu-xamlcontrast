@@ -4,10 +4,44 @@ namespace XamlContrast.Core;
 
 public enum PaletteMode { Pair, CSharp, Single, None }
 
+/// <summary>一個應用程式作用域：RootDir 是 App.xaml 所在目錄（"" = 共用區），
+/// Palette 是「該目錄子樹 ∪ 共用區」合併出來的色盤。</summary>
+public sealed record PaletteScope(string RootDir, Palette Palette);
+
 public sealed class PaletteDetection
 {
     public required Palette Palette { get; init; }
     public required PaletteMode Mode { get; init; }
+
+    /// <summary>
+    /// 應用程式層作用域（repo 裡有 ≥2 個 &lt;Application&gt; 根元素時才有值）。
+    ///
+    /// ⚠ 沒有它的代價（八專案抽驗實證的假警報第 2 類）：ScreenToGif 的 repo 裡
+    /// 有第二個 App（Other/Translator），Playnite 有 Desktop 與 Fullscreen 兩套 ——
+    /// 鍵名相同、值不同，單一全域色盤會把 A App 的字配上 B App 的底
+    /// （Desktop 的 TextBrushDark 疊到 Fullscreen 的 ControlBackground 值）。
+    /// App.xaml 就是現成的作用域邊界：各 App 用「自己子樹 ∪ 共用區」的色盤，
+    /// 共用區（不屬於任何 App 目錄的檔案，通常是函式庫本體）只用共用區自己的。
+    /// 單 App 的 repo 完全走原路徑，行為不變。完整的詞法作用域（元素層
+    /// Resources、合併順序）仍不做 —— 這裡只切「不同應用程式」這一刀。
+    /// </summary>
+    public List<PaletteScope>? Scopes { get; init; }
+
+    /// <summary>檔案該用哪個色盤：最深的包含它的 App 目錄；都不包含 → 共用區；
+    /// 沒有作用域資訊 → 全域色盤。</summary>
+    public Palette PaletteFor(string fullPath)
+    {
+        if (Scopes is null) return Palette;
+        fullPath = Path.GetFullPath(fullPath); // 分隔線正規化(見 ApplicationScopeRoots 的教訓)
+        PaletteScope? best = null;
+        foreach (var s in Scopes)
+            if (s.RootDir.Length > 0 &&
+                fullPath.StartsWith(s.RootDir + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) &&
+                (best is null || s.RootDir.Length > best.RootDir.Length))
+                best = s;
+        best ??= Scopes.FirstOrDefault(s => s.RootDir.Length == 0);
+        return best?.Palette ?? Palette;
+    }
     /// <summary>被認定為色盤檔的 XAML（不進 UI 掃描 —— 色盤定義檔不是畫面）。</summary>
     public required HashSet<string> ExcludedFiles { get; init; }
     /// <summary>偵測結果的人話描述，一律印出來（偵測結果不靜默）。</summary>
@@ -226,7 +260,30 @@ public static partial class PaletteDetector
     ///      字面值配對（ScreenToGif 的形狀）在四個受測專案裡一個都沒有。
     /// 鍵衝突一律「先出現的贏」，檔案順序固定（字典序），結果可重現。
     /// </summary>
-    internal static (Palette Pal, bool IsPair, HashSet<string> Files, SortedSet<string> Conflicts)? MergedXamlPalette(string root)
+    /// <summary>找出所有 &lt;Application&gt; 根元素的檔案所在目錄（App.xaml = 作用域邊界）。</summary>
+    internal static List<string> ApplicationScopeRoots(string root)
+    {
+        var dirs = new List<string>();
+        foreach (var f in EnumerateFiles(root, "*.xaml"))
+        {
+            if (LooksLikeFixture(Path.GetRelativePath(root, f))) continue;
+            try
+            {
+                using var r = System.Xml.XmlReader.Create(f);
+                r.MoveToContent();
+                // ⚠ 一律 GetFullPath 正規化:GetDirectoryName 會把分隔線轉成反斜線,
+                //   但 EnumerateFiles 的結果沿用呼叫端傳入的 root 寫法(可能是正斜線)。
+                //   混用的話 StartsWith 永遠不成立 → 每個檔都被當共用區 → 作用域
+                //   **靜默**退化成全域色盤 —— 探針實測抓到的,正是本專案最忌諱的形狀。
+                if (r.LocalName == "Application") dirs.Add(Path.GetDirectoryName(Path.GetFullPath(f))!);
+            }
+            catch { /* 解析失敗的檔案由稽核端負責喊,這裡跳過 */ }
+        }
+        return dirs.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+    }
+
+    internal static (Palette Pal, bool IsPair, HashSet<string> Files, SortedSet<string> Conflicts)? MergedXamlPalette(
+        string root, Func<string, bool>? include = null)
     {
         var colorFiles = new List<(string File, Dictionary<string, string> Colors, bool D, bool L)>();
         var brushFiles = new List<(string File, Dictionary<string, string> Lit, Dictionary<string, string> Ref, bool D, bool L)>();
@@ -235,6 +292,7 @@ public static partial class PaletteDetector
         {
             var rel = Path.GetRelativePath(root, f);
             if (LooksLikeFixture(rel)) continue;
+            if (include is not null && !include(f)) continue;
             var n = rel.ToLowerInvariant();
             var isDark = n.Contains("dark");
             var isLight = n.Contains("light");
@@ -470,6 +528,32 @@ public static partial class PaletteDetector
         var cs = CsCandidates(root);
         var merged = MergedXamlPalette(root);
 
+        // ── 應用程式層作用域：≥2 個 App.xaml 才啟動;單 App repo 行為完全不變 ──
+        var scopeDirs = ApplicationScopeRoots(root);
+        List<PaletteScope>? scopes = null;
+        if (scopeDirs.Count >= 2 && merged is not null)
+        {
+            bool UnderAny(string f)
+            {
+                var full = Path.GetFullPath(f); // 分隔線正規化,理由同 ApplicationScopeRoots
+                return scopeDirs.Any(d => full.StartsWith(d + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
+            }
+            scopes = new List<PaletteScope>();
+            foreach (var d in scopeDirs)
+            {
+                // 各 App 看得到:自己子樹 ∪ 共用區(函式庫本體之類,不屬於任何 App 目錄)
+                var m = MergedXamlPalette(root, f =>
+                    Path.GetFullPath(f).StartsWith(d + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) || !UnderAny(f));
+                if (m is { } sm && sm.Pal.Count > 0) scopes.Add(new PaletteScope(d, sm.Pal));
+            }
+            var shared = MergedXamlPalette(root, f => !UnderAny(f));
+            if (shared is { } sh && sh.Pal.Count > 0) scopes.Add(new PaletteScope("", sh.Pal));
+            if (scopes.Count == 0) scopes = null;
+        }
+        var scopeNote = scopes is null ? "" :
+            $"; {scopes.Count(s => s.RootDir.Length > 0)} application scope(s) resolved separately" +
+            (scopes.Any(s => s.RootDir.Length == 0) ? " + shared" : "");
+
         // 0) 合併式色盤且深淺兩套值俱全 —— 優先於任何「挑單一檔」的路徑
         if (merged is { IsPair: true } mp)
             return new PaletteDetection
@@ -477,8 +561,9 @@ public static partial class PaletteDetector
                 Palette = mp.Pal,
                 Mode = PaletteMode.Pair,
                 ExcludedFiles = mp.Files,
+                Scopes = scopes,
                 Description = $"merged colour dictionaries: {mp.Files.Count} file(s), {mp.Pal.Count} keys (dark + light)"
-                              + ConflictNote(mp.Conflicts),
+                              + scopeNote + ConflictNote(mp.Conflicts),
             };
 
         // 1) 深淺配對：dark 檔 × light 檔，brush 鍵集重疊 ≥ 50%
@@ -533,8 +618,9 @@ public static partial class PaletteDetector
                 Palette = ms.Pal,
                 Mode = PaletteMode.Single,
                 ExcludedFiles = ms.Files,
+                Scopes = scopes,
                 Description = $"merged colour dictionaries: {ms.Files.Count} file(s), {ms.Pal.Count} keys (single theme)"
-                              + ConflictNote(ms.Conflicts),
+                              + scopeNote + ConflictNote(ms.Conflicts),
             };
 
         // 3) 單一 XAML 色盤檔：深淺同值（單一主題專案）

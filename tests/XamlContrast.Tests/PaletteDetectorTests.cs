@@ -80,6 +80,55 @@ public class PaletteDetectorTests
         Assert.Equal(("#111111", "#111111"), d.Palette.Entries["Bg"]); // 深淺同值
     }
 
+    [Fact] // 應用程式層作用域:repo 裡有兩個 App、鍵名相同值不同(ScreenToGif Translator /
+           // Playnite Desktop+Fullscreen 形狀)。單一全域色盤會把 A App 的字配上 B App 的底。
+    public void MultiAppRepoResolvesEachAppAgainstItsOwnPalette()
+    {
+        using var fx = new Fixture();
+        fx.File("MainApp/App.xaml", """
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="A.App"/>
+            """);
+        fx.File("MainApp/Theme.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Accent" Color="#42A5F5"/>
+            </ResourceDictionary>
+            """);
+        fx.File("MainApp/Main.xaml", """
+            <Window Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Fg}" Text="深色 App"/>
+            </Window>
+            """);
+        fx.File("Tools/SubApp/App.xaml", """
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="B.App"/>
+            """);
+        // 同鍵不同值 —— 淺色的第二個 App
+        fx.File("Tools/SubApp/Theme.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FAFAFA"/>
+              <SolidColorBrush x:Key="Fg" Color="#212121"/>
+              <SolidColorBrush x:Key="Accent" Color="#2196F3"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Tools/SubApp/Main.xaml", """
+            <Window Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Fg}" Text="淺色 App"/>
+            </Window>
+            """);
+        // ⚠ 刻意用正斜線 root —— CLI 實際就這樣傳。GetDirectoryName 會把作用域目錄
+        //   正規化成反斜線,混用時 StartsWith 永遠不成立,作用域曾因此靜默退化成全域
+        var fwd = fx.Root.Replace(Path.DirectorySeparatorChar, '/');
+        var r = Auditor.Run(fwd, PaletteDetector.Detect(fwd));
+        Assert.Equal(2, r.Findings.Count);
+        var dark = Assert.Single(r.Findings, f => f.File.StartsWith("MainApp"));
+        var light = Assert.Single(r.Findings, f => f.File.StartsWith("Tools"));
+        // 各用各的值:#EEEEEE 疊 #111111 與 #212121 疊 #FAFAFA 都是高對比 ——
+        // 混用作用域的話其中一筆會變成淺字疊淺底的假 fail
+        Assert.True(dark.RatioDark > 10, $"MainApp ratio={dark.RatioDark}");
+        Assert.True(light.RatioDark > 10, $"SubApp ratio={light.RatioDark}");
+    }
+
     [Fact] // HandyControl 形狀：brush 名稱與主題無關、顏色值分主題，兩者在不同檔案，
            // 而且用 DynamicResource 跨檔引用。舊版（只挑一個檔＋只認同檔 StaticResource）完全找不到色盤。
     public void BrushesInOneFileReferencingColoursInThemeFilesAreMerged()

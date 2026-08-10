@@ -18,6 +18,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   their colours flow through `{TemplateBinding}`/`{Binding}` — a hard boundary of static
   analysis, not a configuration problem.
 
+### Added
+- **Application-level resource scoping.** When a repo contains two or more `<Application>`
+  roots (ScreenToGif ships a second Translator app; Playnite has Desktop and Fullscreen),
+  each App.xaml's directory becomes a scope: files in an app resolve against *its subtree ∪
+  the shared area*, and shared files (typically the library itself) against the shared area
+  only. Without this, identical key names with different per-app values cross-contaminate —
+  Translator's `#FF003399` heading was paired with the *main* app's dark
+  `Panel.Background.Level4` and reported **1.2:1 fail** where its own palette gives
+  **10.4:1 ok**. Single-app repos take the exact same path as before. Element-level
+  `Resources` and merge order remain out of scope — the multi-app cut is where the observed
+  false positives actually came from.
+
+  Implementation note, recorded because it is the project's least favourite shape: the first
+  build of this feature was **silently inert** — scope directories were normalised to
+  backslashes by `GetDirectoryName` while enumerated file paths kept the caller's
+  forward-slash root, so `StartsWith` never matched, every file fell into the shared area,
+  and every scope quietly received the global palette. No error anywhere; found only by
+  probing the three scopes and seeing three identical palettes. Path comparisons now
+  normalise via `GetFullPath`, and the regression test runs with a forward-slash root.
+
 ### Fixed
 - **Same-brush style pairs are unresolved, not failures.** MaterialDesign's navigation items
   set `Foreground` *and* `Background` to `MaterialDesign.Brush.Primary` — deliberately: the
