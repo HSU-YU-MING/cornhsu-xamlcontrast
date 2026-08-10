@@ -64,7 +64,14 @@ internal sealed partial class StyleIndex
 
     private readonly Dictionary<string, Dictionary<string, Record>> _byFile = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Record> _global = new();
+    /// <summary>隱含樣式（只有 TargetType、無 x:Key）依型別名索引。
+    /// ⚠ 範圍刻意極窄：只給「檔案根元素的背景」用，見 <see cref="ImplicitRootBackground"/>。</summary>
+    private readonly Dictionary<string, Dictionary<string, Record>> _implicitByFile = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Record> _implicitGlobal = new(StringComparer.Ordinal);
     private int _seq;
+
+    [GeneratedRegex(@"(?<t>\w+)\s*\}?\s*$")]
+    private static partial Regex TargetTypeName();
 
     /// <summary>IsEnabled=False 觸發 = 停用態。WCAG 1.4.3 明文豁免停用中的控制項。
     /// Multi(Data)Trigger 的條件是 AND：任一條是 IsEnabled=False，整個狀態就只在停用時成立。</summary>
@@ -193,7 +200,20 @@ internal sealed partial class StyleIndex
             foreach (var style in doc.Descendants().Where(e => e.Name.LocalName == "Style"))
             {
                 var rec = idx.CreateRecord(style, f);
-                if (rec.Key is null) continue;
+                if (rec.Key is null)
+                {
+                    // 隱含樣式：無 x:Key、有 TargetType，自動套用到該型別的每個實例
+                    var tt = style.Attribute("TargetType")?.Value;
+                    if (tt is null) continue;
+                    var m = TargetTypeName().Match(tt);
+                    if (!m.Success) continue;
+                    var typeName = m.Groups["t"].Value;
+                    if (!idx._implicitByFile.TryGetValue(f, out var imap))
+                        idx._implicitByFile[f] = imap = new Dictionary<string, Record>(StringComparer.Ordinal);
+                    imap[typeName] = rec;
+                    if (isGlobal && !idx._implicitGlobal.ContainsKey(typeName)) idx._implicitGlobal[typeName] = rec;
+                    continue;
+                }
                 if (!idx._byFile.TryGetValue(f, out var map))
                     idx._byFile[f] = map = new Dictionary<string, Record>();
                 map[rec.Key] = rec;
@@ -291,6 +311,33 @@ internal sealed partial class StyleIndex
             t.Disabled = t.Disabled || s.Disabled;
         }
         return order.Select(c => byCond[c]).ToList();
+    }
+
+    /// <summary>
+    /// 檔案根元素的隱含樣式背景 —— 「地板」。
+    ///
+    /// 為什麼只做根元素、不做完整的隱含樣式解析：
+    ///   完整支援要模擬 WPF 的資源查找（合併字典、Application/Window/元素三層作用域、
+    ///   跨組件 pack:// URI），而且 Foreground 是繼承屬性，一旦每個元素都能從隱含樣式
+    ///   拿到值，配對數會爆量、假警報跟著來 —— 那是另一個量級的工程（見 ROADMAP）。
+    ///
+    /// 但外部專案實測指出，覆蓋率的損失幾乎全來自一個很窄的形狀：
+    /// 根容器不寫 Background，靠隱含的 &lt;Style TargetType="Window"&gt; 給底，
+    /// 於是樹走訪走到頂還是空的，整個檔案的文字全部無底可配。
+    /// ScreenToGif：38 個根元素只有 6 個寫了 Background，1295/1373 的 unresolved
+    /// 都是「祖先鏈上找不到背景」。四個受測專案則有 71~86% 的根元素直接寫了背景，
+    /// 所以這個盲區在它們身上的代價是零 —— 同一個盲區、兩個數量級的差別。
+    ///
+    /// 只補「根元素」這一格：一個檔案最多影響一個值，不碰繼承語意，
+    /// 拿到大部分的覆蓋率而不引入完整解析的雜訊風險。
+    /// </summary>
+    public string? ImplicitRootBackground(string typeName, string file)
+    {
+        var rec = (_implicitByFile.TryGetValue(file, out var map) && map.TryGetValue(typeName, out var r))
+            ? r : _implicitGlobal.GetValueOrDefault(typeName);
+        if (rec is null) return null;
+        var merged = MergeChain(rec, new HashSet<string>(), $"Style[implicit {typeName}]");
+        return merged.Props.TryGetValue("Background", out var v) ? v.V : merged.TemplateRootBg;
     }
 
     /// <summary>元素套用的 Style（Style="{StaticResource X}" 或 &lt;X.Style&gt; 行內）。</summary>

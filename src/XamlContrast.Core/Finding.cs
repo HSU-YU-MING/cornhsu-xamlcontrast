@@ -40,6 +40,23 @@ public sealed class Finding
     public double Worst => Math.Min(RatioDark, RatioLight);
 }
 
+/// <summary>
+/// 無法解析的原因。總數告訴你「漏了多少」，但沒告訴你「能不能補救」——
+/// 一個無法行動的計數器只誠實了一半。外部專案實測：ScreenToGif 的 1373 組 unresolved
+/// 有 1295 組是同一個原因（根容器沒宣告背景），而使用者從總數上完全看不出這件事。
+/// </summary>
+public enum UnresolvedReason
+{
+    /// <summary>祖先鏈上沒有任何一層宣告背景色 —— 通常是根容器靠隱含樣式給底。可補救。</summary>
+    NoAncestorBackground,
+    /// <summary>顏色來自 Binding / TemplateBinding / 漸層 —— 執行期才知道。靜態分析的硬邊界。</summary>
+    BoundOrGradient,
+    /// <summary>資源鍵不在偵測到的色盤裡 —— 打字錯誤，或色盤偵測漏了某個檔。可補救。</summary>
+    UnknownPaletteKey,
+    /// <summary>背景是半透明但底下沒有可疊的顏色 —— 合成不出實際色值。</summary>
+    TranslucentUncomposited,
+}
+
 public sealed class AuditResult
 {
     public required PaletteDetection Detection { get; init; }
@@ -47,6 +64,8 @@ public sealed class AuditResult
     public required List<Finding> Findings { get; init; }
     public required int Pairs { get; init; }
     public required int Unresolved { get; init; }
+    /// <summary>unresolved 的原因細目（總和 = Unresolved）—— 讓「漏了多少」變成「該修哪裡」。</summary>
+    public required Dictionary<UnresolvedReason, int> UnresolvedBy { get; init; }
     public required int Skipped { get; init; }
     /// <summary>死 setter 過濾排除的 Style 配對數（過濾不靜默）</summary>
     public required int DeadForeground { get; init; }

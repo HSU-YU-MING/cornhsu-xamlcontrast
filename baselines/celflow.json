@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "summary": {
     "paletteSource": "project",
     "paletteMode": "single",
@@ -15,6 +15,10 @@
     "files": 22,
     "pairs": 368,
     "unresolved": 43,
+    "unresolvedBy": {
+      "bound-or-gradient": 41,
+      "no-ancestor-background": 2
+    },
     "skipped": 4,
     "deadForeground": 0,
     "disabledExempt": 21,

@@ -5,8 +5,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+### Added
+- **`unresolved` now comes with a reason breakdown**, in the console, the Markdown report and
+  `summary.unresolvedBy`: `no-ancestor-background`, `bound-or-gradient`, `unknown-palette-key`,
+  `translucent-uncomposited`. A total on its own says how much was missed but not whether
+  anything can be done about it — and the split is wildly uneven in practice, so the total
+  alone is close to useless for deciding. On ScreenToGif, 1295 of 1373 fell into a single
+  bucket; a user staring at "1373" had no way to see that.
+- **The document root element now picks up a `Background` from an implicit style**
+  (`<Style TargetType="{x:Type Window}">` with no `x:Key`). This is deliberately *only* the
+  root element — the "floor" the tree walk lands on — and not general implicit-style
+  resolution, which would mean modelling WPF's full resource lookup and would pull inherited
+  `Foreground` into every element. Projects that set `Background` directly on their root
+  (the four validation projects do, 71–86% of the time) are unaffected; projects that rely on
+  an app-level implicit style previously lost every pair in the file.
+
 ### Changed
-- **`schemaVersion` is now 2.** `ok` and `decorative` findings no longer carry a `symmetry`
+- **`schemaVersion` is now 3** (was 2): `summary.unresolvedBy` added.
+- **`schemaVersion` 2 (earlier in this release).** `ok` and `decorative` findings no longer carry a `symmetry`
   field in `--json` output; it is omitted rather than set to a placeholder. Consumers keying
   off `symmetry` should treat absence as "not applicable" — see Fixed below for why.
 

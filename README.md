@@ -185,6 +185,16 @@ Inputs: `root` (required), `working-directory`, `version`, `fail-on`, `baseline`
 `skipped`, `suppressed`, `parseErrors`, `disabledExempt`. If the tool couldn't see
 something, that fact is machine-readable. Consumers should check `schemaVersion`.
 
+`unresolved` is broken down by cause in `summary.unresolvedBy`, because the total on its own
+doesn't tell you whether anything can be done about it:
+
+| reason | meaning |
+|---|---|
+| `no-ancestor-background` | nothing up the tree declares a background — often a root container relying on an app-level implicit style, or vector artwork in a resource dictionary |
+| `bound-or-gradient` | the colour comes from `{Binding}` / `{TemplateBinding}` / a gradient — only knowable at runtime |
+| `unknown-palette-key` | the resource key isn't in the detected palette — a typo, or palette detection missed a file |
+| `translucent-uncomposited` | a translucent background with nothing underneath to composite against |
+
 `--md report.md` writes the human-readable Markdown version — this is what the Action posts as a
 PR comment, and you can use it directly too.
 

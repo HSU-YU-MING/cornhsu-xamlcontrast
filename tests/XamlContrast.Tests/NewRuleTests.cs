@@ -324,6 +324,78 @@ public class NewRuleTests
         Assert.Single(r.Findings); // 只剩基礎態
     }
 
+    [Fact] // 「地板」：根容器不寫 Background、靠隱含樣式給底時，整個檔案的文字都無底可配。
+           // ScreenToGif 實測 1295/1373 的 unresolved 是這個形狀（38 個根元素只有 6 個寫了背景）。
+    public void ImplicitStyleGivesRootItsBackground()
+    {
+        using var fx = new Fixture();
+        fx.File("App.xaml", """
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Application.Resources>
+                <Style TargetType="{x:Type Window}">
+                  <Setter Property="Background" Value="#111111"/>
+                </Style>
+              </Application.Resources>
+            </Application>
+            """);
+        fx.File("Main.xaml", """
+            <Window>
+              <TextBlock Foreground="#FFFFFF" Text="底色來自隱含樣式"/>
+            </Window>
+            """);
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings);
+        Assert.Equal("#111111", f.Bg);
+        Assert.Equal(0, r.Unresolved);
+    }
+
+    [Fact] // 界線要守住：隱含樣式只補「根元素」一格，不是完整的隱含樣式解析。
+           // 非根元素照舊沿樹往上找 —— 否則 Foreground 的繼承語意會把配對數炸開。
+    public void ImplicitStyleIsNotAppliedToNonRootElements()
+    {
+        using var fx = new Fixture();
+        fx.File("App.xaml", """
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Application.Resources>
+                <Style TargetType="{x:Type Border}">
+                  <Setter Property="Background" Value="#FFFFFF"/>
+                </Style>
+              </Application.Resources>
+            </Application>
+            """);
+        fx.File("Main.xaml", """
+            <Window Background="#000000">
+              <Border>
+                <TextBlock Foreground="#FFFFFF" Text="不該套到中間的 Border"/>
+              </Border>
+            </Window>
+            """);
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings);
+        Assert.Equal("#000000", f.Bg);   // 沿樹找到 Window 的黑，不是 Border 隱含樣式的白
+        Assert.Equal(21.0, f.RatioDark);
+    }
+
+    [Fact] // unresolved 要分類 —— 只給總數的話，使用者看不出哪些可補救、哪些是硬邊界
+    public void UnresolvedIsBrokenDownByReason()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid>
+              <TextBlock Foreground="#FFFFFF" Text="祖先鏈上沒有背景"/>
+              <Grid Background="{Binding UserColour}">
+                <TextBlock Foreground="#FFFFFF" Text="底色綁執行期"/>
+              </Grid>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(2, r.Unresolved);
+        Assert.Equal(1, r.UnresolvedBy[UnresolvedReason.NoAncestorBackground]); // 可補救
+        Assert.Equal(1, r.UnresolvedBy[UnresolvedReason.BoundOrGradient]);      // 硬邊界
+        Assert.Equal(r.Unresolved, r.UnresolvedBy.Values.Sum());                // 細目要湊得回總數
+        Assert.Contains("no-ancestor-background 1", Report.ToConsole(r));
+    }
+
     [Fact] // #FFRRGGBB 的 alpha=255 是「完全不透明」，不是半透明 —— 那是 Blend／VS 的
            // 預設輸出格式，WPF 生態最常見的寫法。當半透明會讓字色整批落進 skipped。
            // ScreenToGif 實測：97 個色票有 79 個長這樣，覆蓋率因此掉到 1%。
@@ -399,7 +471,6 @@ public class NewRuleTests
         Assert.NotEqual(Symmetry.NotApplicable, bad.Symmetry); // 沒過的照分類
 
         var json = Report.ToJson(r);
-        Assert.Contains("\"schemaVersion\": 2", json);
         // 合格那筆整個沒有 symmetry 欄位 —— 給錯值不如不給
         Assert.Equal(1, json.Split("\"symmetry\"").Length - 1);
     }

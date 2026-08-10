@@ -166,6 +166,7 @@ public sealed partial class Auditor
             Findings = auditor._findings,
             Pairs = auditor._pairs,
             Unresolved = auditor._unresolved,
+            UnresolvedBy = auditor._unresolvedBy,
             Skipped = auditor._skipped,
             DeadForeground = auditor._deadFg,
             DisabledExempt = auditor._disabled,
@@ -186,6 +187,23 @@ public sealed partial class Auditor
     //   （繼承 Fg0 #EEEEEE），但有 Opacity="0.3"，螢幕上取樣到的是 #535353（2.45:1）。
     //   工具當時只看 Foreground 的色票值，回報「Fg0 = 16.28 ✓」—— 完全漏掉。
     //   Opacity 是繼「Foreground 色票」「背景 alpha」之後第三種讓文字變暗的方式。
+    private readonly Dictionary<UnresolvedReason, int> _unresolvedBy = new();
+
+    /// <summary>無法解析要連「為什麼」一起記 —— 只給總數的話，使用者看不出
+    /// 那 1373 組裡有 1295 組是同一個可補救的原因。</summary>
+    private void Unres(UnresolvedReason why)
+    {
+        _unresolved++;
+        _unresolvedBy[why] = _unresolvedBy.GetValueOrDefault(why) + 1;
+    }
+
+    private void Unres(ColorKind kind) => Unres(kind switch
+    {
+        ColorKind.UnknownKey => UnresolvedReason.UnknownPaletteKey,
+        ColorKind.Alpha => UnresolvedReason.TranslucentUncomposited,
+        _ => UnresolvedReason.BoundOrGradient,
+    });
+
     private void Walk(XElement el, Resolved? bg, string file, double op, bool suppressed)
     {
         if (!suppressed && IsSuppressedByComment(el, file)) suppressed = true;
@@ -203,7 +221,10 @@ public sealed partial class Auditor
         var localBgRaw = el.Attribute("Background")?.Value;
         var bgVal = localBgRaw
                     ?? (chain is not null && chain.Props.TryGetValue("Background", out var chainBg) ? chainBg.V : null)
-                    ?? chain?.TemplateRootBg; // 模板根的背景管到內容
+                    ?? chain?.TemplateRootBg // 模板根的背景管到內容
+                    // 「地板」：根元素沒寫 Background 時，查該型別的隱含樣式（僅此一格，
+                    // 不是完整的隱含樣式解析 —— 理由見 StyleIndex.ImplicitRootBackground）
+                    ?? (el.Parent is null ? _styles.ImplicitRootBackground(el.Name.LocalName, _curFile) : null);
         if (bgVal is not null)
         {
             var r = ColorResolver.Resolve(bgVal, _pal);
@@ -284,7 +305,8 @@ public sealed partial class Auditor
                 if (fgR is null) continue;
                 // 字色是 Binding／漸層／未知鍵 = 工具看不懂 → unresolved（盲區要誠實計數，
                 // 之前全塞 skipped，把盲區藏進「合法豁免」桶）；透明字才是合法跳過
-                if (fgR.Kind is ColorKind.Other or ColorKind.UnknownKey) { _unresolved++; continue; }
+                if (fgR.Kind is ColorKind.Other or ColorKind.UnknownKey)
+                { Unres(fgR.Kind); continue; }
                 if (fgR.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
 
                 Resolved? bgObj;
@@ -302,12 +324,12 @@ public sealed partial class Auditor
                                 Key: $"{bgV} over {(ancestorBg.Key is not null ? "{" + ancestorBg.Key + "}" : ancestorBg.Dark)}")
                             : null;
                     }
-                    else if (rb.Kind is ColorKind.Other or ColorKind.UnknownKey) { _unresolved++; continue; }
+                    else if (rb.Kind is ColorKind.Other or ColorKind.UnknownKey) { Unres(rb.Kind); continue; }
                     else bgObj = rb;
                 }
                 else bgObj = bg; // Style 鏈沒設底 → 退回祖先背景
-                if (bgObj is null) { _unresolved++; continue; }
-                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey) { _unresolved++; continue; }
+                if (bgObj is null) { Unres(UnresolvedReason.NoAncestorBackground); continue; }
+                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey) { Unres(bgObj.Kind); continue; }
                 if (op < 0.01) { _skipped++; continue; }
 
                 // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複
@@ -363,11 +385,10 @@ public sealed partial class Auditor
             var fg = ColorResolver.Resolve(fgRaw, _pal);
             if (fg is null) continue;
             // 同上：看不懂 → unresolved；透明 → skipped（與背景側同一套分桶標準）
-            if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey) { _unresolved++; continue; }
+            if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey) { Unres(fg.Kind); continue; }
             if (fg.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
-            if (bg is null) { _unresolved++; continue; }
-            if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey)
-            { _unresolved++; continue; }
+            if (bg is null) { Unres(UnresolvedReason.NoAncestorBackground); continue; }
+            if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey) { Unres(bg.Kind); continue; }
 
             // Opacity 0 = 元素當下完全隱形。XAML 裡寫 Opacity="0" 幾乎都是淡入動畫的
             // 初始狀態，穩態是 1。對「看不見的東西」算對比沒有意義，跳過而不是報 1:1。
@@ -522,7 +543,8 @@ public sealed partial class Auditor
                 // 違反「靜默退化等於謊報」（同檔 ignore 註解那段的規矩）。
                 // 任一側看不懂 → unresolved；任一側透明/半透明 → skipped
                 if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey ||
-                    bgr.Kind is ColorKind.Other or ColorKind.UnknownKey) { _unresolved++; continue; }
+                    bgr.Kind is ColorKind.Other or ColorKind.UnknownKey)
+                { Unres(fg.Kind is ColorKind.Other or ColorKind.UnknownKey ? fg.Kind : bgr.Kind); continue; }
                 if (fg.Kind is ColorKind.Alpha or ColorKind.Transparent ||
                     bgr.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
 

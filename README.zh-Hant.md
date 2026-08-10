@@ -145,6 +145,15 @@ jobs:
 `parseErrors`、`disabledExempt`。工具沒看到的東西，都是機器可讀的。
 消費端請檢查 `schemaVersion`。
 
+`unresolved` 在 `summary.unresolvedBy` 裡有原因細目 —— 光看總數看不出「補不補得回來」:
+
+| 原因 | 意思 |
+|---|---|
+| `no-ancestor-background` | 祖先鏈上沒有任何一層宣告背景。常見於根容器靠 App 層隱含樣式給底,或資源字典裡的向量圖 |
+| `bound-or-gradient` | 顏色來自 `{Binding}` / `{TemplateBinding}` / 漸層 —— 執行期才知道 |
+| `unknown-palette-key` | 資源鍵不在偵測到的色盤裡 —— 打字錯誤,或色盤偵測漏了某個檔 |
+| `translucent-uncomposited` | 半透明背景但底下沒有可疊的顏色 |
+
 `--md report.md` 則產出給人讀的 Markdown（Action 用它貼 PR 留言，也可以自己拿去用）。
 
 ## 實戰成績

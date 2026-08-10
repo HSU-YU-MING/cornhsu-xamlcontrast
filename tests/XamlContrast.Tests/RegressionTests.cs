@@ -213,5 +213,8 @@ public class RegressionTests
         Assert.Contains("\"paletteSource\": \"none\"", json);
         Assert.Contains("\"unresolved\": 1", json);
         Assert.Contains("\"pairs\": 0", json);
+        // 退化計數要能行動：光知道「漏了 1 組」不夠，要知道是哪一類漏
+        Assert.Contains("\"unresolvedBy\"", json);
+        Assert.Contains("\"bound-or-gradient\": 1", json);
     }
 }

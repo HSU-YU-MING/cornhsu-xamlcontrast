@@ -29,6 +29,19 @@ public static class Report
         _ => "n/a",
     };
 
+    /// <summary>unresolved 原因的對外名稱。「可補救 / 硬邊界」的區分是這個欄位的重點：
+    /// 使用者要知道的不是「漏了 1373 組」，是「其中 1295 組只要宣告根背景就會回來」。</summary>
+    public static string ReasonLabel(UnresolvedReason r) => r switch
+    {
+        UnresolvedReason.NoAncestorBackground => "no-ancestor-background",
+        UnresolvedReason.BoundOrGradient => "bound-or-gradient",
+        UnresolvedReason.UnknownPaletteKey => "unknown-palette-key",
+        _ => "translucent-uncomposited",
+    };
+
+    private static IEnumerable<KeyValuePair<UnresolvedReason, int>> Reasons(AuditResult r)
+        => r.UnresolvedBy.Where(kv => kv.Value > 0).OrderByDescending(kv => kv.Value);
+
     private static string ModeLabel(PaletteMode m) => m switch
     {
         PaletteMode.Pair => "pair",
@@ -49,7 +62,8 @@ public static class Report
         {
             // JSON 消費端要能偵測格式演進 —— 0.x 期間欄位可能變動，變動時遞增
             // 2：ok/decorative 的 findings 不再輸出 symmetry（該維度只在沒過的配對上有意義）
-            schemaVersion = 2,
+            // 3：summary 新增 unresolvedBy（unresolved 的原因細目）
+            schemaVersion = 3,
             summary = new
             {
                 paletteSource = r.Detection.Mode == PaletteMode.None ? "none" : "project",
@@ -67,6 +81,9 @@ public static class Report
                 files = r.FileCount,
                 pairs = r.Pairs,
                 unresolved = r.Unresolved,
+                // 細目讓「漏了多少」變成「該修哪裡」—— 只有總數的話，
+                // 使用者看不出其中絕大多數可能是同一個可補救的原因
+                unresolvedBy = Reasons(r).ToDictionary(kv => ReasonLabel(kv.Key), kv => kv.Value),
                 skipped = r.Skipped,
                 deadForeground = r.DeadForeground,
                 disabledExempt = r.DisabledExempt,
@@ -190,6 +207,11 @@ public static class Report
             $"files {r.FileCount} | text-on-background pairs {r.Pairs}"));
         sb.AppendLine(string.Create(inv,
             $"unresolved (colour bound at runtime / gradient / key not in palette): {r.Unresolved} | skipped (translucent, invisible): {r.Skipped}"));
+        if (r.Unresolved > 0)
+            // 細目才是可行動的部分：no-ancestor-background 佔大宗代表「宣告根背景就會回來」，
+            // bound-or-gradient 佔大宗代表那是靜態分析的硬邊界，沒得救
+            sb.AppendLine("  unresolved by reason: " +
+                string.Join(", ", Reasons(r).Select(kv => string.Create(inv, $"{ReasonLabel(kv.Key)} {kv.Value}"))));
         if (r.DeadForeground > 0)
         {
             // 過濾不靜默：被判定為死 setter 的配對要讓使用者知道有幾組、憑什麼被排除
@@ -335,7 +357,8 @@ public static class Report
 
         // 「放過的東西」一律計數並列出 —— 豁免、排除、壓掉、解析失敗都是本工具沒看的地方。
         var notes = new List<string>();
-        if (r.Unresolved > 0) notes.Add(string.Create(inv, $"{r.Unresolved} unresolved (colour bound at runtime / gradient / key not in palette)"));
+        if (r.Unresolved > 0)
+            notes.Add(string.Create(inv, $"{r.Unresolved} unresolved ({string.Join(", ", Reasons(r).Select(kv => string.Create(inv, $"{ReasonLabel(kv.Key)} {kv.Value}")))})"));
         if (r.Skipped > 0) notes.Add(string.Create(inv, $"{r.Skipped} skipped (translucent, invisible)"));
         if (r.DeadForeground > 0) notes.Add(string.Create(inv, $"{r.DeadForeground} excluded (dead Foreground setter)"));
         if (r.DisabledExempt > 0) notes.Add(string.Create(inv, $"{r.DisabledExempt} exempted (IsEnabled=False; WCAG 1.4.3)"));
