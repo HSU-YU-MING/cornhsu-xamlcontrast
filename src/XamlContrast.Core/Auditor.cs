@@ -246,8 +246,8 @@ public sealed partial class Auditor
         var bgVal = localBgRaw
                     ?? (chain is not null && chain.Props.TryGetValue("Background", out var chainBg) ? chainBg.V : null)
                     ?? chain?.TemplateRootBg // 模板根的背景管到內容
-                    // 「地板」：根元素沒寫 Background 時，查該型別的隱含樣式（僅此一格，
-                    // 不是完整的隱含樣式解析 —— 理由見 StyleIndex.ImplicitRootBackground）
+                                             // 「地板」：根元素沒寫 Background 時，查該型別的隱含樣式（僅此一格，
+                                             // 不是完整的隱含樣式解析 —— 理由見 StyleIndex.ImplicitRootBackground）
                     ?? (el.Parent is null ? _styles.ImplicitRootBackground(el.Name.LocalName, _curFile) : null);
         if (bgVal is not null)
         {
