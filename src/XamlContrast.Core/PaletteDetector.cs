@@ -32,13 +32,13 @@ public sealed class PaletteDetection
 /// </summary>
 public static partial class PaletteDetector
 {
-    [GeneratedRegex("""<Color x:Key="(?<k>\w+)">(?<v>#[0-9A-Fa-f]{6,8})</Color>""")]
+    [GeneratedRegex("""<Color x:Key="(?<k>[\w.]+)">(?<v>#[0-9A-Fa-f]{6,8})</Color>""")]
     private static partial Regex ColorDef();
 
-    [GeneratedRegex("""<SolidColorBrush x:Key="(?<k>\w+)"\s+Color="(?<v>#[0-9A-Fa-f]{6,8})["]""")]
+    [GeneratedRegex("""<SolidColorBrush x:Key="(?<k>[\w.]+)"\s+Color="(?<v>#[0-9A-Fa-f]{6,8})["]""")]
     private static partial Regex BrushLiteral();
 
-    [GeneratedRegex("""<SolidColorBrush x:Key="(?<k>\w+)"\s+Color="\{StaticResource (?<c>\w+)\}""")]
+    [GeneratedRegex("""<SolidColorBrush x:Key="(?<k>[\w.]+)"\s+Color="\{StaticResource (?<c>[\w.]+)\}""")]
     private static partial Regex BrushRef();
 
     /// <summary>C# 真相源：("Key", "#深色", "#淺色") 三元組。

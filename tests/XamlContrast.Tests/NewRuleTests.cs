@@ -324,6 +324,63 @@ public class NewRuleTests
         Assert.Single(r.Findings); // 只剩基礎態
     }
 
+    [Fact] // #FFRRGGBB 的 alpha=255 是「完全不透明」，不是半透明 —— 那是 Blend／VS 的
+           // 預設輸出格式，WPF 生態最常見的寫法。當半透明會讓字色整批落進 skipped。
+           // ScreenToGif 實測：97 個色票有 79 個長這樣，覆蓋率因此掉到 1%。
+    public void FullyOpaqueEightDigitHexIsNotTreatedAsTranslucent()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FF000000">
+              <TextBlock Foreground="#FFFFFFFF" Text="不透明的白配不透明的黑"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings);
+        Assert.Equal(21.0, f.RatioDark);   // 等同 #FFFFFF 配 #000000
+        Assert.Equal(0, r.Skipped);        // 不該被當半透明跳過
+        Assert.Equal(0, r.Unresolved);
+    }
+
+    [Fact] // 真半透明（alpha < FF）維持疊底合成，不能被上面那條一起放行
+    public void GenuinelyTranslucentEightDigitHexStillComposites()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#000000">
+              <Grid Background="#80FFFFFF">
+                <TextBlock Foreground="#FFFFFF" Text="白底 50% 疊黑"/>
+              </Grid>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings);
+        var effective = Wcag.Composite("#FFFFFF", 0x80 / 255.0, "#000000");
+        Assert.Equal(Wcag.Contrast("#FFFFFF", effective), f.RatioDark);
+    }
+
+    [Fact] // 半透明「色票」同理：#FF 開頭的色票鍵是不透明色，不是疊層
+    public void OpaquePaletteKeyWithFfPrefixIsNotComposited()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Panel.Bg" Color="#FF000000"/>
+              <SolidColorBrush x:Key="Panel.Fg" Color="#FFFFFFFF"/>
+              <SolidColorBrush x:Key="Spare" Color="#FF808080"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Main.xaml", """
+            <Grid Background="{DynamicResource Panel.Bg}">
+              <TextBlock Foreground="{DynamicResource Panel.Fg}" Text="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings);
+        Assert.Equal(21.0, f.RatioDark);
+        Assert.Equal(0, r.Skipped);
+    }
+
     [Fact] // 對稱維度只在沒過的配對上有意義：21:1 的合格配對被標 both-low（＝色票太弱）是胡說。
            // 人看的報告只印 fail/warn 所以看不到，錯的標籤全流進 JSON 給下游吃。
     public void SymmetryIsNotClassifiedForPassingPairs()

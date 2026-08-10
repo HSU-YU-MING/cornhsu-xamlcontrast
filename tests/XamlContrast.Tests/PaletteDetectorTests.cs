@@ -80,6 +80,26 @@ public class PaletteDetectorTests
         Assert.Equal(("#111111", "#111111"), d.Palette.Entries["Bg"]); // 深淺同值
     }
 
+    [Fact] // 帶點的色票鍵（Panel.Background）是 WPF 最普遍的命名慣例。
+           // 定義端用 \w+（不含點）、使用端用 [\w.]+（含點）—— 兩邊標準不一致，
+           // 於是「看得到有人在用，卻找不到定義」。ScreenToGif 實測：93 個色票認出 0 個。
+    public void DottedPaletteKeysAreDetected()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="Panel.Background.Color">#202020</Color>
+              <SolidColorBrush x:Key="Panel.Background" Color="{StaticResource Panel.Background.Color}"/>
+              <SolidColorBrush x:Key="Element.Text.Hover" Color="#FAFAFA"/>
+              <SolidColorBrush x:Key="Element.Text" Color="#303030"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal("#202020", d.Palette.Entries["Panel.Background"].Dark);  // 經由帶點的 Color 鍵解出
+        Assert.Equal("#FAFAFA", d.Palette.Entries["Element.Text.Hover"].Dark); // 多層點
+        Assert.Equal("#303030", d.Palette.Entries["Element.Text"].Dark);
+    }
+
     [Fact] // 色票值只有 #RRGGBB / #AARRGGBB 兩種長度有意義；正則的 {6,8} 會吃下七位數的打字錯誤
     public void MalformedHexIsNotAcceptedIntoPalette()
     {

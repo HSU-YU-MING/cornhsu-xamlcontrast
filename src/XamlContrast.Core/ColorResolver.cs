@@ -72,10 +72,17 @@ public static partial class ColorResolver
         }
         if (Rgb8().IsMatch(v))
         {
-            // 半透明：要跟底下的顏色合成，交給呼叫端處理（字面值深淺同值）
             var h = v.TrimStart('#');
-            var a = Convert.ToInt32(h[..2], 16) / 255.0;
             var rgb = "#" + h[2..].ToUpperInvariant();
+            // ⚠ #FFRRGGBB 的 alpha=255 是「完全不透明」，不是半透明 —— 這是 Blend／VS
+            //   設計工具的預設輸出格式，也是 WPF 生態最常見的寫法。把它當半透明會讓
+            //   字色整批落進 skipped（外部專案實測：ScreenToGif 的 97 個色票有 79 個
+            //   是 #FFRRGGBB，覆蓋率因此掉到 1%）。四個受測專案剛好都手寫六位數，
+            //   所以這個洞一直沒現形 —— 樣本同源的代價。
+            if (h[..2].Equals("FF", StringComparison.OrdinalIgnoreCase))
+                return new Resolved(ColorKind.Hard, rgb, rgb);
+            // 真半透明：要跟底下的顏色合成，交給呼叫端處理（字面值深淺同值）
+            var a = Convert.ToInt32(h[..2], 16) / 255.0;
             return new Resolved(ColorKind.Alpha, Alpha: a, Rgb: rgb, AlphaLight: a, RgbLight: rgb);
         }
         if (Named.TryGetValue(v, out var hex))
@@ -87,6 +94,15 @@ public static partial class ColorResolver
             var key = m.Groups["k"].Value;
             if (palette.Entries.TryGetValue(key, out var e))
             {
+                // 色票鍵的值同理：#FF... 是不透明色票，不是半透明疊層
+                var darkOpaque = e.Dark.Length != 9 || e.Dark.Substring(1, 2).Equals("FF", StringComparison.OrdinalIgnoreCase);
+                var lightOpaque = e.Light.Length != 9 || e.Light.Substring(1, 2).Equals("FF", StringComparison.OrdinalIgnoreCase);
+                if (darkOpaque && lightOpaque)
+                {
+                    var d = e.Dark.Length == 9 ? "#" + e.Dark[3..] : e.Dark;
+                    var l = e.Light.Length == 9 ? "#" + e.Light[3..] : e.Light;
+                    return new Resolved(ColorKind.Soft, d, l, Key: key);
+                }
                 if (e.Dark.Length == 9)
                 {
                     // #AARRGGBB 的「半透明色票」（如 CelFlow 的 BlueOverlay/Scrim）：

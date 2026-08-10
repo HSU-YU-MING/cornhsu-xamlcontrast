@@ -11,6 +11,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   off `symmetry` should treat absence as "not applicable" — see Fixed below for why.
 
 ### Fixed
+- **Dotted palette keys (`Panel.Background`) were invisible to palette detection.** The
+  definition-side regexes matched keys with `\w+`, which excludes `.`, while the usage-side
+  resolver accepts `[\w.]+` — so the tool could see a key being *referenced* but could never
+  find where it was *defined*. Dotted keys are the dominant naming convention in the WPF
+  ecosystem. Measured on ScreenToGif: its dark theme declares 93 brushes and the detector
+  recognised 0 of them, which cascaded into picking an unrelated 3-key DataGrid style file as
+  "the palette" and resolving 0 auditable pairs across 120 XAML files.
+- **`#FFRRGGBB` was treated as translucent.** An alpha of `FF` is 255 — fully opaque — but
+  every 8-digit literal was classified as `Alpha`, and an `Alpha` foreground goes to `skipped`.
+  This is the default output format of Blend and the Visual Studio designer, so any project
+  whose colours came from a designer rather than by hand had its foregrounds skipped wholesale.
+  Measured on ScreenToGif: 79 of its 97 palette values are `#FF`-prefixed. Genuinely
+  translucent values (`alpha < FF`) still composite over the resolved background as before.
+
+  Together these two took ScreenToGif from **0 auditable pairs to 406** (53 fail, 24 warn) and
+  MahApps.Metro from 17 to 67 — MahApps having previously exited **0** while resolving 4% of
+  its pairs. Neither defect could surface on the four validation projects: all four are
+  same-author and hand-write short-form `#RRGGBB` with undotted keys (QuillNest 32/32 six-digit,
+  CelFlow 47/51), so the designer-generated convention was never once exercised. The four
+  snapshots are byte-identical after the fix.
 - **`--strict-palette` was silently inert in baseline mode.** The check sat at the very end of
   the exit-code decision, but the `--baseline` and `--write-baseline` branches return before
   reaching it — and `--baseline` is the adoption path the README recommends for existing
