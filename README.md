@@ -282,6 +282,10 @@ Honest list — full blind-spot table with per-case evidence in the
   text over a sibling `Image` is honestly `over-sibling-content` — but partial-coverage
   siblings and images nested inside a backdrop element are still invisible
 - Implicit styles (beyond the document root's background)
+- `VisualStateManager` colour animations (`ColorAnimation` in state storyboards) are not
+  audited **and not yet counted** — a Blend-era styling dialect (measured: dozens of sites
+  in kaxaml/snoop-class projects, zero in modern ones). A counter is planned; until then
+  this line is the disclosure.
 - `Binding` / `TemplateBinding` colors are reported as *unresolved*, never guessed —
   guessing would trade honest uncertainty for false confidence
 

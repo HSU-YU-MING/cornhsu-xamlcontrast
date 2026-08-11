@@ -217,6 +217,9 @@ TargetName 指向模板**內部**元素（指向根的已解析）、跨元素�
 文字疊兄弟 Image 誠實歸 `over-sibling-content` —— 但部分覆蓋的兄弟、
 藏在背板元素**裡面**的圖片仍看不到;Binding 來的顏色標「無法解析」而不猜 ——
 猜了就是拿誠實的不確定去換錯誤的信心。
+另:`VisualStateManager` 的顏色動畫(狀態 storyboard 裡的 `ColorAnimation`)不稽核
+**且尚未計數** —— Blend 時代的樣式方言(實測:kaxaml/snoop 這類老專案有數十處,
+現代專案為零)。計數器排入下版;在那之前,這一行就是揭露。
 
 ## 另見
 
