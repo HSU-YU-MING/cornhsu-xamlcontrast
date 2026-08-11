@@ -41,6 +41,64 @@ public class ConfigTests
         Assert.Contains("config-forced", det.Description);
     }
 
+    [Fact] // 覆蓋率 = 解析成功 / 看到的總數 —— 「這份結果代不代表專案」的關鍵數字
+    public void CoverageReflectsResolvedShareOfPairsSeen()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#000000">
+              <TextBlock Foreground="#FFFFFF" Text="解析得出"/>
+              <Grid Background="{Binding X}">
+                <TextBlock Foreground="#FFFFFF" Text="解析不出 1"/>
+              </Grid>
+              <Grid Background="{Binding Y}">
+                <TextBlock Foreground="#FFFFFF" Text="解析不出 2"/>
+              </Grid>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(1, r.Pairs);
+        Assert.Equal(2, r.Unresolved);
+        Assert.Equal(1.0 / 3, r.Coverage, 3);
+        Assert.Contains("coverage 33.3%", Report.ToConsole(r));
+        Assert.Contains("\"coverage\": 33.3", Report.ToJson(r));
+    }
+
+    [Fact] // rootBackground:主題函式庫使用者的逃生口 —— 視窗底色鍵在 repo、
+           // 連到視窗的隱含樣式在 NuGet 套件裡(NETworkManager 726 筆 no-ancestor 的形狀)
+    public void ConfigRootBackgroundProvidesTheFloor()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Light.Accent1.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Lib.Window.Background" Color="#FFFFFFFF"/>
+              <SolidColorBrush x:Key="Lib.Gray3" Color="#FF9D9D9D"/>
+              <SolidColorBrush x:Key="Lib.Accent" Color="#FF2196F3"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/SomeView.xaml", """
+            <UserControl>
+              <TextBlock Foreground="{DynamicResource Lib.Gray3}" Text="次要文字"/>
+            </UserControl>
+            """);
+        fx.File("xamlcontrast.config.json", """{ "rootBackground": "Lib.Window.Background" }""");
+        var cfg = ToolConfig.Load(fx.Root);
+        var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
+        var f = Assert.Single(r.Findings);
+        Assert.Equal("{Lib.Window.Background}", f.Bg);   // 地板來自 config 宣告
+        Assert.Equal(Category.Fail, f.Category);         // 灰疊白 2.7:1,真實問題浮出
+        Assert.Equal(0, r.UnresolvedBy.GetValueOrDefault(UnresolvedReason.NoAncestorBackground));
+    }
+
+    [Fact] // minCoverage 要驗證範圍 —— config 寫錯要有欄位級訊息，不能靜默忽略
+    public void MinCoverageOutOfRangeIsRejected()
+    {
+        using var fx = new Fixture();
+        fx.File("xamlcontrast.config.json", """{ "minCoverage": 150 }""");
+        var ex = Assert.Throws<ConfigException>(() => ToolConfig.Load(fx.Root));
+        Assert.Contains("minCoverage", ex.Message);
+    }
+
     [Fact] // 明選 none 是使用者的決定，不算退化（不觸發 --strict-palette）
     public void ForcedNoneIsNotDegraded()
     {

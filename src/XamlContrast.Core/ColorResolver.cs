@@ -15,6 +15,10 @@ public enum ColorKind
     UnknownKey,
     /// <summary>TemplateBinding / Binding / 漸層等 —— 執行期才知道，標為無法解析而不猜</summary>
     Other,
+    /// <summary>底下墊的是同格子的兄弟「內容」元素（Image 等）—— 實際背景是一張圖，
+    /// 靜態不可知。配祖先背景會報假警報（HandyControl Carousel 實證：白字疊照片,
+    /// 被配上 RegionBrush 報 light=1 的假 fail）。不猜。</summary>
+    SiblingContent,
 }
 
 /// <summary>Alpha 種類帶深淺各自的 A/RGB：字面 #AARRGGBB 深淺同值；
@@ -32,6 +36,11 @@ public sealed record Resolved(
 /// <summary>把 XAML 屬性值解析成顏色（或「工具知道自己不知道」的標記）。</summary>
 public static partial class ColorResolver
 {
+    /// <summary>供色盤偵測共用：具名色 → 色碼（認不得回傳 null）。
+    /// HandyControl 的 ColorsDark.xaml 寫 &lt;Color&gt;White&lt;/Color&gt; —— 只認 #hex 會讓
+    /// 該鍵的深色值缺失、退回淺色值，深字疊深底報出 1.17:1 的假 fail。</summary>
+    internal static string? NamedHex(string name) => Named.GetValueOrDefault(name);
+
     private static readonly Dictionary<string, string> Named = new(StringComparer.OrdinalIgnoreCase)
     {
         ["white"] = "#FFFFFF",
@@ -72,10 +81,17 @@ public static partial class ColorResolver
         }
         if (Rgb8().IsMatch(v))
         {
-            // 半透明：要跟底下的顏色合成，交給呼叫端處理（字面值深淺同值）
             var h = v.TrimStart('#');
-            var a = Convert.ToInt32(h[..2], 16) / 255.0;
             var rgb = "#" + h[2..].ToUpperInvariant();
+            // ⚠ #FFRRGGBB 的 alpha=255 是「完全不透明」，不是半透明 —— 這是 Blend／VS
+            //   設計工具的預設輸出格式，也是 WPF 生態最常見的寫法。把它當半透明會讓
+            //   字色整批落進 skipped（外部專案實測：ScreenToGif 的 97 個色票有 79 個
+            //   是 #FFRRGGBB，覆蓋率因此掉到 1%）。四個受測專案剛好都手寫六位數，
+            //   所以這個洞一直沒現形 —— 樣本同源的代價。
+            if (h[..2].Equals("FF", StringComparison.OrdinalIgnoreCase))
+                return new Resolved(ColorKind.Hard, rgb, rgb);
+            // 真半透明：要跟底下的顏色合成，交給呼叫端處理（字面值深淺同值）
+            var a = Convert.ToInt32(h[..2], 16) / 255.0;
             return new Resolved(ColorKind.Alpha, Alpha: a, Rgb: rgb, AlphaLight: a, RgbLight: rgb);
         }
         if (Named.TryGetValue(v, out var hex))
@@ -87,6 +103,15 @@ public static partial class ColorResolver
             var key = m.Groups["k"].Value;
             if (palette.Entries.TryGetValue(key, out var e))
             {
+                // 色票鍵的值同理：#FF... 是不透明色票，不是半透明疊層
+                var darkOpaque = e.Dark.Length != 9 || e.Dark.Substring(1, 2).Equals("FF", StringComparison.OrdinalIgnoreCase);
+                var lightOpaque = e.Light.Length != 9 || e.Light.Substring(1, 2).Equals("FF", StringComparison.OrdinalIgnoreCase);
+                if (darkOpaque && lightOpaque)
+                {
+                    var d = e.Dark.Length == 9 ? "#" + e.Dark[3..] : e.Dark;
+                    var l = e.Light.Length == 9 ? "#" + e.Light[3..] : e.Light;
+                    return new Resolved(ColorKind.Soft, d, l, Key: key);
+                }
                 if (e.Dark.Length == 9)
                 {
                     // #AARRGGBB 的「半透明色票」（如 CelFlow 的 BlueOverlay/Scrim）：

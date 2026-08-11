@@ -2,7 +2,8 @@ using XamlContrast.Core;
 
 namespace XamlContrast.Tests;
 
-/// <summary>八條解析規則各一個最小案例（規劃書 4.1）。抄公式的實作會全部漏掉它們。</summary>
+/// <summary>樹走訪那一層的解析規則各一個最小案例（規劃書 4.1，共十六條；
+/// 樣式與外部專案實查出來的幾條在 NewRuleTests）。抄公式的實作會全部漏掉它們。</summary>
 public class ParseRuleTests
 {
     [Fact] // 規則 1：祖先繼承

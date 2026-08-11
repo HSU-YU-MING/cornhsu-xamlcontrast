@@ -75,8 +75,24 @@ WCAG 2.x AA。`failFactor` 是「破」的分界（門檻 × 2/3）：
 |---|---|---|
 | `failOn` | `"fail"` | `"warn"` = 偏低也擋（法遵場景 AA 全過） |
 | `strictPalette` | `false` | `true` = 色盤偵測失敗（退回寫死色碼模式）直接 exit 1 |
+| `minCoverage` | `50` | 解析成功的配對低於此百分比即 exit 1 —— 只解析到一小部分的「通過」沒有意義。設 `0` 關閉 |
+| `rootBackground` | — | 文件根元素的預設背景:色票鍵(`"MahApps.Brushes.Window.Background"`)或色碼(`"#FF202020"`)。給**主題函式庫的使用者**:視窗底色鍵在 repo 的主題檔裡,但「視窗 → 那個鍵」的隱含樣式住在 NuGet 套件裡,工具看不到。鍵不在偵測到的色盤裡 → exit 2。實測:NETworkManager 一行設定,覆蓋率 8.8% → 87.2% |
 
 配對數為 0 時 exit 1 是**不可設定的預設** —— 空掃綠燈就是謊報健康。
+`minCoverage` 是同一條原則的推廣:那條線原本是二元的,而八個公開專案實測有三個
+在 0.2% / 1.7% / 10.2% 的覆蓋率下照樣亮綠燈(HandyControl 342 個檔只解析出 7 組,
+然後印「all pairs meet AA」)。「幾乎什麼都沒看」與「看過了都沒問題」在退出碼上
+分不出來,是同一種謊報。與 `strictPalette` 一樣在**所有模式**下生效,含 `--baseline`。
+
+`strictPalette` 在**所有模式**下都生效，包含 `--baseline` 與 `--write-baseline`
+（0.6 修正前它排在退出碼判定的最尾端，兩個 baseline 分支都會提早 return 而跳過它）。
+這個組合特別要緊：色盤壞掉時色票配對全變 `unresolved`、從 findings 消失，
+ratchet 會把「不見了」讀成「還清了」而放行 —— 弄壞主題檔看起來像修好了所有問題。
+`--write-baseline` 同理會拒絕凍結一份用退化色盤算出來的基準線。
+
+色票值只接受 `#RRGGBB` 與 `#AARRGGBB`。七位數之類的打字錯誤不會進色盤
+（以前會被截前六位默默採用，算出一個看起來很篤定的錯比值）；
+用到該鍵的地方改走 `summary.unresolved` 喊出來。
 
 ### ignore
 

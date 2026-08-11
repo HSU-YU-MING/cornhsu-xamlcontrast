@@ -59,12 +59,16 @@ exit 1: 3 pair(s) below threshold x 2/3 (0 warn)
 - **對稱**（跨主題）：`both-low`＝色票本身不夠，換主題救不了；
   `dark-fails`／`light-fails`＝設計意圖沒跨主題保住
 
+對稱只回答「換個主題救不救得回來」，所以**只有 `fail` 與 `warn` 帶這個維度** ——
+`ok` 與 `decorative` 在 JSON 裡整個不輸出這個欄位（`schemaVersion` 2 起）。
+合格的配對沒有問題要救，把 21:1 標成 `both-low`（＝色票太弱）是胡說。
+
 對稱**永遠不會**被拿來藏結果 ——「兩邊一樣糟」不是刻意的證據，只是糟兩次。
 低於 AA 的一律報出來，由人判斷。
 
 ## 難的不是 WCAG 公式
 
-公式只有 20 行。價值在「這段文字實際疊在什麼顏色上」的**十三條解析規則**，
+公式只有 20 行。價值在「這段文字實際疊在什麼顏色上」的**十七條解析規則**，
 每一條都是在正式發行的產品上踩出來的：Transparent 穿透、alpha 合成、Opacity 沿樹累乘、
 ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、具名／行內 Style
 （含 BasedOn 鏈）、同條件觸發器合併、停用態豁免（WCAG 1.4.3）、半透明色票、
@@ -141,6 +145,45 @@ jobs:
 `parseErrors`、`disabledExempt`。工具沒看到的東西，都是機器可讀的。
 消費端請檢查 `schemaVersion`。
 
+`unresolved` 在 `summary.unresolvedBy` 裡有原因細目 —— 光看總數看不出「補不補得回來」:
+
+| 原因 | 意思 |
+|---|---|
+| `no-ancestor-background` | 祖先鏈上沒有任何一層宣告背景。常見於根容器靠 App 層隱含樣式給底,或資源字典裡的向量圖 |
+| `bound-or-gradient` | 顏色來自 `{Binding}` / `{TemplateBinding}` / 漸層 —— 執行期才知道 |
+| `unknown-palette-key` | 資源鍵不在偵測到的色盤裡 —— 打字錯誤,或色盤偵測漏了某個檔 |
+| `translucent-uncomposited` | 半透明背景但底下沒有可疊的顏色 |
+| `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
+| `over-sibling-content` | 文字墊在同格子的兄弟 `Image`/媒體元素上 —— 真正的底是一張圖,靜態不可知;硬配祖先背景等於編造比值 |
+
+`summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 1** ——
+只掃到一小部分的「通過」不算通過,這是「0 組配對即 exit 1」那條不可設定規則的推廣。
+要關掉用 `--min-coverage 0`。
+
+每一筆無法解析的配對都有位置可查:`--show-unresolved` 逐筆列出
+`file:line · 原因 · 卡住的值`,JSON 頂層的 `unresolved` 陣列帶同一份清單。
+unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)——
+每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。
+
+**依專案型態設定預期。** 應用程式型專案通常解析得很好(四個驗證專案 89~100%);
+**控制項函式庫天生解析率低** —— 它們的顏色走 `{TemplateBinding}` / `{Binding}`,
+執行期才存在,這是靜態分析的硬邊界(報成 `bound-or-gradient`),不是能用設定修好的
+問題。公開專案實測:應用程式 26~57%,控制項函式庫(MahApps、MaterialDesign、
+HandyControl)5~19%。稽核函式庫請預期要用 `--min-coverage 0`,並把解析出的部分
+當抽樣看待。
+
+**建立在主題函式庫上的 App**(MahApps、HandyControl、MaterialDesign…)是可修的特例:
+視窗底色的**鍵**在你 repo 的主題檔裡,但把它連到視窗的隱含樣式住在 NuGet 套件裡,
+靜態分析看不到。在 `xamlcontrast.config.json` 宣告一次:
+
+```json
+{ "rootBackground": "MahApps.Brushes.Window.Background" }
+```
+
+實測(NETworkManager,MahApps 系 App、154 個 XAML):一行設定,覆蓋率 **8.8% → 87.2%**,
+浮出 284 筆先前完全看不到的淺色主題真實問題。鍵不在偵測到的色盤裡是設定錯誤(exit 2),
+不會靜默沒作用。
+
 `--md report.md` 則產出給人讀的 Markdown（Action 用它貼 PR 留言，也可以自己拿去用）。
 
 ## 實戰成績
@@ -158,7 +201,8 @@ jobs:
 - **兩套獨立實作互證**：PowerShell 原型（規格）與 .NET 版在四個驗證專案上
   數字完全一致 —— 精確到每筆 fail 的 `file:line` 與退出碼，
   `scripts/verify-baselines.ps1` 隨時可重跑。
-- **十三條解析規則沒有一條是在白板上設計的** —— 每條都來自真實的假警報或漏報實查，
+- **十七條解析規則沒有一條是在白板上設計的** —— 每條都來自真實的假警報或漏報實查
+  (前十三條來自四個上線產品,後四條來自八個公開 WPF 專案、1909 個 XAML 檔的批次掃描),
   第 12 條（模板根背景）甚至是在驗收工具自己促成的修正時挖出來的。
 - **開發期間工具自己出過八次「看起來健康但錯」的報告，每一次都變成回歸測試。**
   用血寫成的第一原則：**稽核工具最大的風險不是漏報，是謊報健康。**
@@ -169,8 +213,13 @@ jobs:
 ## 已知限制
 
 TargetName 指向模板**內部**元素（指向根的已解析）、跨元素同條件觸發器、
-sibling 背景、圖片上的文字、隱含樣式；Binding 來的顏色標「無法解析」而不猜 ——
+隱含樣式（根元素背景以外）;sibling 背景已解析「佔滿格子的純色兄弟」,
+文字疊兄弟 Image 誠實歸 `over-sibling-content` —— 但部分覆蓋的兄弟、
+藏在背板元素**裡面**的圖片仍看不到;Binding 來的顏色標「無法解析」而不猜 ——
 猜了就是拿誠實的不確定去換錯誤的信心。
+另:`VisualStateManager` 的顏色動畫(狀態 storyboard 裡的 `ColorAnimation`)不稽核
+**且尚未計數** —— Blend 時代的樣式方言(實測:kaxaml/snoop 這類老專案有數十處,
+現代專案為零)。計數器排入下版;在那之前,這一行就是揭露。
 
 ## 另見
 

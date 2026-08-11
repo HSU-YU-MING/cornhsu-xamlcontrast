@@ -33,7 +33,11 @@ public static class Grader
                 worst < f.Need * result.Config.Thresholds.FailFactor ? Category.Fail :
                 Category.Warn;
 
+            // 對稱只在「沒過」的配對上有意義 —— 問的是「這個問題換主題救不救得回來」。
+            // 合格的配對沒有問題要救，硬分類會給出 21:1 卻標 both-low（＝色票太弱）
+            // 這種自相矛盾的輸出。人看的報告只印 fail/warn 所以看不到，但 JSON 全印。
             f.Symmetry =
+                f.Category is not (Category.Fail or Category.Warn) ? Symmetry.NotApplicable :
                 singleTheme ? Symmetry.SingleTheme :
                 f.Gap < 1.5 ? Symmetry.BothLow :
                 f.RatioLight < f.RatioDark ? Symmetry.LightFails :

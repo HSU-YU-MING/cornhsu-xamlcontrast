@@ -75,19 +75,32 @@ Two independent dimensions per finding:
 - **symmetry** (across themes): `both-low` = the palette itself is too weak;
   `dark-fails` / `light-fails` = the design intent didn't survive the other theme
 
+Symmetry only answers "would switching theme rescue this?", so it is carried **only by
+`fail` and `warn` findings** — the JSON omits the field entirely on `ok` and `decorative`
+ones (as of `schemaVersion` 2). A passing pair has no problem to rescue, and labelling a
+21:1 pair `both-low` — "the palette is too weak" — would be nonsense.
+
 Symmetry is **never** used to hide a finding. "Both themes are equally bad" is not evidence
 of intent — it's just bad twice. Everything below AA gets reported; a human decides.
 
 ## Why the hard part isn't the WCAG formula
 
 The formula is 20 lines. The value is in resolving **what color the text actually sits on** —
-thirteen parsing rules, each one discovered by auditing real shipped products:
+seventeen parsing rules, every one of them discovered by auditing real shipped products:
 
 transparent passthrough · alpha compositing · opacity accumulation down the tree ·
 ControlTemplate subtrees · Style setter pairing · trigger states · dead-setter filtering ·
 named/inline Style resolution with BasedOn chains · per-state trigger merging ·
 disabled-state exemption (WCAG 1.4.3) · translucent palette keys ·
-template-root backgrounds · root-targeted trigger setters
+template-root backgrounds · root-targeted trigger setters ·
+`MultiTrigger` combined-condition states · `#FFRRGGBB` is opaque, not translucent ·
+implicit-style background on the document root ·
+sibling backdrops in overlapping containers
+
+The first thirteen came from four shipped WPF apps. The last four came from scanning eight
+public WPF projects (1909 XAML files) in August 2026 — and two of them cost **nothing** on the
+original four, because all four are same-author and share a house style. A blind spot's severity
+can't be measured on a sample that never triggers it.
 
 Any implementation that just copies the formula misses all of them.
 
@@ -180,6 +193,51 @@ Inputs: `root` (required), `working-directory`, `version`, `fail-on`, `baseline`
 `skipped`, `suppressed`, `parseErrors`, `disabledExempt`. If the tool couldn't see
 something, that fact is machine-readable. Consumers should check `schemaVersion`.
 
+`unresolved` is broken down by cause in `summary.unresolvedBy`, because the total on its own
+doesn't tell you whether anything can be done about it:
+
+| reason | meaning |
+|---|---|
+| `no-ancestor-background` | nothing up the tree declares a background — often a root container relying on an app-level implicit style, or vector artwork in a resource dictionary |
+| `bound-or-gradient` | the colour comes from `{Binding}` / `{TemplateBinding}` / a gradient — only knowable at runtime |
+| `unknown-palette-key` | the resource key isn't in the detected palette — a typo, or palette detection missed a file |
+| `translucent-uncomposited` | a translucent background with nothing underneath to composite against |
+| `same-brush-pair` | a style sets `Foreground` and `Background` to the *same* brush — the Material template-opacity idiom (the template paints the background at 10–12% opacity as a tint); literally 1:1, not at runtime, and the opacity animation is invisible statically |
+| `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio |
+
+`summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
+(default 50%) fails**, because a pass over a fraction of the project is not a pass — the same
+principle as the non-configurable zero-pairs rule, which it generalises. Use
+`--min-coverage 0` to opt out.
+
+Every unresolved pair is listed with its location: `--show-unresolved` prints
+`file:line · reason · offending value`, and the JSON carries the same list in a top-level
+`unresolved` array. Unknown keys are additionally named with counts (`summary.unknownKeys`,
+and the top ones on the console) — each one is a dead resource reference, a typo, or a palette
+file detection missed, which makes this a free lint even before any contrast math.
+
+**Set expectations by project type.** Application projects typically resolve well
+(the four validation apps run at 89–100%). **Control libraries resolve poorly by nature** —
+their colours flow through `{TemplateBinding}` and `{Binding}`, which only exist at runtime;
+that is a hard boundary of static analysis, reported as `bound-or-gradient`, not a bug to fix
+with configuration. Measured on public projects: applications 26–57%, control libraries
+(MahApps.Metro, MaterialDesignInXaml, HandyControl) 5–19%. If you're auditing a control
+library, expect to lean on `--min-coverage 0` and treat the resolved subset as a sample.
+
+**Apps built on a theme library** (MahApps, HandyControl, MaterialDesign…) are a special,
+fixable case: your window background *key* lives in your repo's theme files, but the implicit
+style that connects it to your windows lives inside the NuGet package, invisible to static
+analysis. Declare it once in `xamlcontrast.config.json`:
+
+```json
+{ "rootBackground": "MahApps.Brushes.Window.Background" }
+```
+
+Measured on NETworkManager (a MahApps app, 154 XAML files): coverage went from **8.8% to
+87.2%** with that one line — surfacing 284 genuine light-theme failures the tool was
+previously blind to. A key not present in the detected palette is a config error (exit 2),
+never a silent no-op.
+
 `--md report.md` writes the human-readable Markdown version — this is what the Action posts as a
 PR comment, and you can use it directly too.
 
@@ -220,7 +278,14 @@ Honest list — full blind-spot table with per-case evidence in the
 
 - `TargetName` setters aimed at **inner** template parts (root-targeted ones are resolved)
 - Cross-element correlated triggers (same condition flips fg on one element, bg on another) — false alarms
-- Sibling-element backgrounds; text over images; implicit styles
+- Sibling backdrops are resolved for full-cell solid siblings in overlapping containers, and
+  text over a sibling `Image` is honestly `over-sibling-content` — but partial-coverage
+  siblings and images nested inside a backdrop element are still invisible
+- Implicit styles (beyond the document root's background)
+- `VisualStateManager` colour animations (`ColorAnimation` in state storyboards) are not
+  audited **and not yet counted** — a Blend-era styling dialect (measured: dozens of sites
+  in kaxaml/snoop-class projects, zero in modern ones). A counter is planned; until then
+  this line is the disclosure.
 - `Binding` / `TemplateBinding` colors are reported as *unresolved*, never guessed —
   guessing would trade honest uncertainty for false confidence
 

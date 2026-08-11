@@ -64,9 +64,17 @@ internal sealed partial class StyleIndex
 
     private readonly Dictionary<string, Dictionary<string, Record>> _byFile = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Record> _global = new();
+    /// <summary>隱含樣式（只有 TargetType、無 x:Key）依型別名索引。
+    /// ⚠ 範圍刻意極窄：只給「檔案根元素的背景」用，見 <see cref="ImplicitRootBackground"/>。</summary>
+    private readonly Dictionary<string, Dictionary<string, Record>> _implicitByFile = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Record> _implicitGlobal = new(StringComparer.Ordinal);
     private int _seq;
 
-    /// <summary>IsEnabled=False 觸發 = 停用態。WCAG 1.4.3 明文豁免停用中的控制項。</summary>
+    [GeneratedRegex(@"(?<t>\w+)\s*\}?\s*$")]
+    private static partial Regex TargetTypeName();
+
+    /// <summary>IsEnabled=False 觸發 = 停用態。WCAG 1.4.3 明文豁免停用中的控制項。
+    /// Multi(Data)Trigger 的條件是 AND：任一條是 IsEnabled=False，整個狀態就只在停用時成立。</summary>
     internal static bool IsDisabledTrigger(XElement t)
     {
         if (t.Name.LocalName == "Trigger")
@@ -81,7 +89,38 @@ internal sealed partial class StyleIndex
             var v = t.Attribute("Value")?.Value;
             return b is not null && v == "False" && b.Contains("IsEnabled");
         }
+        if (t.Name.LocalName is "MultiTrigger" or "MultiDataTrigger")
+            return ConditionsOf(t).Any(c =>
+                c.Attribute("Value")?.Value == "False" &&
+                (c.Attribute("Property")?.Value is { } p && IsEnabledProp().IsMatch(p) ||
+                 c.Attribute("Binding")?.Value is { } b && b.Contains("IsEnabled")));
         return false;
+    }
+
+    private static IEnumerable<XElement> ConditionsOf(XElement t)
+        => t.Descendants().Where(e => e.Name.LocalName == "Condition");
+
+    /// <summary>觸發器種類（含 Multi 組合條件）—— 觸發器收集處共用這一份清單，
+    /// 加新種類只改這裡。MultiTrigger 曾是黑洞：跳過清單認得它、收集處不認得，
+    /// 組合條件狀態（hover＋選取之類）整批沒被檢查，也沒有任何計數提示。</summary>
+    internal static bool IsTriggerElement(XElement e)
+        => e.Name.LocalName is "Trigger" or "DataTrigger" or "MultiTrigger" or "MultiDataTrigger";
+
+    /// <summary>條件簽名 —— 同條件的觸發器狀態要跨節點合併。
+    /// Multi(Data)Trigger 逐條列出以 &amp; 串接（條件是 AND）。</summary>
+    private static string? CondSignature(XElement t)
+    {
+        if (t.Name.LocalName == "Trigger")
+            return $"P:{t.Attribute("Property")?.Value}={t.Attribute("Value")?.Value}";
+        if (t.Name.LocalName == "DataTrigger")
+            return t.Attribute("Binding") is { } b && t.Attribute("Value") is { } v
+                ? $"B:{b.Value}={v.Value}" : null;
+        var parts = ConditionsOf(t)
+            .Select(c => c.Attribute("Property") is { } p
+                ? $"P:{p.Value}={c.Attribute("Value")?.Value}"
+                : $"B:{c.Attribute("Binding")?.Value}={c.Attribute("Value")?.Value}")
+            .ToList();
+        return parts.Count > 0 ? string.Join("&", parts) : null;
     }
 
     internal Record CreateRecord(XElement style, string file)
@@ -103,7 +142,7 @@ internal sealed partial class StyleIndex
         // 選取態換底，共六筆假警報全是這形狀）。指向內部元素的 TargetName 仍不做。
         var rootName = tmplRoot?.Attribute(XName.Get("Name", "http://schemas.microsoft.com/winfx/2006/xaml"))?.Value
                        ?? tmplRoot?.Attribute("Name")?.Value;
-        foreach (var t in style.Descendants().Where(e => e.Name.LocalName is "Trigger" or "DataTrigger"))
+        foreach (var t in style.Descendants().Where(IsTriggerElement))
         {
             var set = new Dictionary<string, string>();
             var rootTargeted = new HashSet<string>();
@@ -122,11 +161,7 @@ internal sealed partial class StyleIndex
             for (var anc = t.Parent; anc is not null && !ReferenceEquals(anc, style); anc = anc.Parent)
                 if (anc.Name.LocalName == "ControlTemplate") { inTmpl = true; break; }
             // 條件簽名：同條件的狀態之後要跨節點合併
-            var cond = t.Name.LocalName == "Trigger"
-                ? $"P:{t.Attribute("Property")?.Value}={t.Attribute("Value")?.Value}"
-                : t.Attribute("Binding") is { } b && t.Attribute("Value") is { } v2
-                    ? $"B:{b.Value}={v2.Value}"
-                    : null;
+            var cond = CondSignature(t);
             rec.States.Add(new State
             {
                 Disabled = IsDisabledTrigger(t),
@@ -165,7 +200,20 @@ internal sealed partial class StyleIndex
             foreach (var style in doc.Descendants().Where(e => e.Name.LocalName == "Style"))
             {
                 var rec = idx.CreateRecord(style, f);
-                if (rec.Key is null) continue;
+                if (rec.Key is null)
+                {
+                    // 隱含樣式：無 x:Key、有 TargetType，自動套用到該型別的每個實例
+                    var tt = style.Attribute("TargetType")?.Value;
+                    if (tt is null) continue;
+                    var m = TargetTypeName().Match(tt);
+                    if (!m.Success) continue;
+                    var typeName = m.Groups["t"].Value;
+                    if (!idx._implicitByFile.TryGetValue(f, out var imap))
+                        idx._implicitByFile[f] = imap = new Dictionary<string, Record>(StringComparer.Ordinal);
+                    imap[typeName] = rec;
+                    if (isGlobal && !idx._implicitGlobal.ContainsKey(typeName)) idx._implicitGlobal[typeName] = rec;
+                    continue;
+                }
                 if (!idx._byFile.TryGetValue(f, out var map))
                     idx._byFile[f] = map = new Dictionary<string, Record>();
                 map[rec.Key] = rec;
@@ -263,6 +311,33 @@ internal sealed partial class StyleIndex
             t.Disabled = t.Disabled || s.Disabled;
         }
         return order.Select(c => byCond[c]).ToList();
+    }
+
+    /// <summary>
+    /// 檔案根元素的隱含樣式背景 —— 「地板」。
+    ///
+    /// 為什麼只做根元素、不做完整的隱含樣式解析：
+    ///   完整支援要模擬 WPF 的資源查找（合併字典、Application/Window/元素三層作用域、
+    ///   跨組件 pack:// URI），而且 Foreground 是繼承屬性，一旦每個元素都能從隱含樣式
+    ///   拿到值，配對數會爆量、假警報跟著來 —— 那是另一個量級的工程（見 ROADMAP）。
+    ///
+    /// 但外部專案實測指出，覆蓋率的損失幾乎全來自一個很窄的形狀：
+    /// 根容器不寫 Background，靠隱含的 &lt;Style TargetType="Window"&gt; 給底，
+    /// 於是樹走訪走到頂還是空的，整個檔案的文字全部無底可配。
+    /// ScreenToGif：38 個根元素只有 6 個寫了 Background，1295/1373 的 unresolved
+    /// 都是「祖先鏈上找不到背景」。四個受測專案則有 71~86% 的根元素直接寫了背景，
+    /// 所以這個盲區在它們身上的代價是零 —— 同一個盲區、兩個數量級的差別。
+    ///
+    /// 只補「根元素」這一格：一個檔案最多影響一個值，不碰繼承語意，
+    /// 拿到大部分的覆蓋率而不引入完整解析的雜訊風險。
+    /// </summary>
+    public string? ImplicitRootBackground(string typeName, string file)
+    {
+        var rec = (_implicitByFile.TryGetValue(file, out var map) && map.TryGetValue(typeName, out var r))
+            ? r : _implicitGlobal.GetValueOrDefault(typeName);
+        if (rec is null) return null;
+        var merged = MergeChain(rec, new HashSet<string>(), $"Style[implicit {typeName}]");
+        return merged.Props.TryGetValue("Background", out var v) ? v.V : merged.TemplateRootBg;
     }
 
     /// <summary>元素套用的 Style（Style="{StaticResource X}" 或 &lt;X.Style&gt; 行內）。</summary>

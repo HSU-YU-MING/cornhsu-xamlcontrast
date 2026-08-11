@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 5,
   "summary": {
     "paletteSource": "none",
     "paletteMode": "none",
@@ -14,7 +14,11 @@
     },
     "files": 5,
     "pairs": 0,
+    "coverage": 0,
     "unresolved": 1,
+    "unresolvedBy": {
+      "no-ancestor-background": 1
+    },
     "skipped": 2,
     "deadForeground": 0,
     "disabledExempt": 0,
@@ -27,5 +31,13 @@
       "decorative": 0
     }
   },
+  "unresolved": [
+    {
+      "file": "Capture/SelectionOverlayWindow.xaml",
+      "line": 33,
+      "reason": "no-ancestor-background",
+      "value": "White"
+    }
+  ],
   "findings": []
 }

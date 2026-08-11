@@ -18,6 +18,24 @@ public sealed class ToolConfig
     public ClassificationSection Classification { get; init; } = new();
     public string FailOn { get; init; } = "fail";
     public bool StrictPalette { get; init; }
+
+    /// <summary>覆蓋率下限（百分比）。低於此值視為「這份結果不足以代表專案」而 exit 1。
+    /// 預設 50 —— 解析不到一半就給過，那個「過」沒有意義。設 0 可完全關閉
+    /// （0 組配對的保險仍在，那條不可設定）。</summary>
+    public double MinCoverage { get; init; } = 50;
+
+    /// <summary>
+    /// 文件根元素的預設背景 —— 色票鍵（"MahApps.Brushes.Window.Background"）或
+    /// 字面色碼（"#FF202020"）。只在根元素自己、Style 鏈、隱含樣式都沒給背景時生效。
+    ///
+    /// 為誰而設（三個新公開專案實查出的最大共同形狀）：**主題函式庫的使用者**。
+    /// NETworkManager 的 726 筆、QuickLook 的 269 筆 no-ancestor-background 全是
+    /// 同一回事 —— 視窗底色鍵就在 repo 的主題檔裡（深淺兩套俱全），但把
+    /// 「MetroWindow → 那個鍵」連起來的隱含樣式住在 MahApps 的 NuGet 套件裡。
+    /// 工具不猜（憲法）；使用者宣告的就是事實 —— 這正是 config 的角色。
+    /// 鍵不在偵測到的色盤裡時是設定錯誤（exit 2），不是靜默忽略。
+    /// </summary>
+    public string? RootBackground { get; init; }
     public IgnoreSection Ignore { get; init; } = new();
 
     /// <summary>載入來源路徑；null = 沒有 config 檔（純預設值）</summary>
@@ -88,6 +106,8 @@ public sealed class ToolConfig
         if (cfg.Thresholds.NormalText <= 1 || cfg.Thresholds.LargeText <= 1 ||
             cfg.Thresholds.FailFactor is <= 0 or > 1)
             throw new ConfigException("thresholds out of range (contrast ratios > 1, failFactor in (0,1])");
+        if (cfg.MinCoverage is < 0 or > 100)
+            throw new ConfigException($"minCoverage must be between 0 and 100, got {cfg.MinCoverage}");
 
         cfg.SourcePath = path;
         return cfg;

@@ -127,6 +127,25 @@ public class IgnoreAndBaselineTests
         Assert.Equal(1, cmp.PaidDebt);
     }
 
+    [Fact] // paid off 的單位要跟 known debt 一致（處數，不是鍵數）——
+           // 同鍵 3 處一次修完只顯示「還了 1」會低報進度
+    public void PaidDebtCountsOccurrencesNotKeys()
+    {
+        var before = RunWith(
+            """<TextBlock Foreground="#EEEEEE" Text="a"/>""",
+            """<TextBlock Foreground="#EEEEEE" Text="b"/>""",
+            """<TextBlock Foreground="#EEEEEE" Text="c"/>""");
+        var baseline = Baseline.Write(before);
+        // 同一組字底配對 3 處 —— 鍵只有一個，債是 3
+        Assert.Equal(3, Baseline.Compare(before, baseline).KnownDebt);
+
+        var fixedUp = RunWith("""<TextBlock Foreground="#111111" Text="全修好了"/>""");
+        var cmp = Baseline.Compare(fixedUp, baseline);
+        Assert.True(cmp.Passes);
+        Assert.Equal(0, cmp.KnownDebt);
+        Assert.Equal(3, cmp.PaidDebt); // 舊版數鍵 → 1，跟 KnownDebt 的 3 對不上
+    }
+
     [Fact] // 色盤漂移：鍵不變（{DynamicResource Fg}）但色盤值調暗 → 比值惡化要擋
     public void PaletteDriftWorseningIsCaught()
     {

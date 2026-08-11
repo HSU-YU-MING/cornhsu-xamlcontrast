@@ -4,7 +4,7 @@ namespace XamlContrast.Core;
 
 /// <summary>
 /// WCAG 2.x 對比度數學。公式只有 20 行 —— 這個工具的價值不在這裡，
-/// 在「這段文字實際疊在什麼顏色上」（<see cref="Auditor"/> 的八條解析規則）。
+/// 在「這段文字實際疊在什麼顏色上」（<see cref="Auditor"/> 的十七條解析規則）。
 /// </summary>
 public static class Wcag
 {

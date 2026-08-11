@@ -7,8 +7,13 @@ public enum Category { Ok, Warn, Fail, Decorative }
 /// 對稱（跨主題）。⚠ 對稱不是意圖的證據 —— 兩邊一樣糟就只是兩邊都糟。
 /// 舊版把「兩主題都低」判成『刻意低對比』並藏起來，吃掉了 Kindling 52 組、
 /// CelFlow 96 組真實問題（規劃書 4.4／8.1）。
+///
+/// ⚠ 這個維度只在「沒過」的配對上有意義：BothLow 的語意是「色票本身不夠亮，
+/// 換主題救不了」，套在 21:1 的合格配對上是胡說。ok/decorative 一律 NotApplicable，
+/// JSON 直接不輸出該欄位 —— 人看的報告本來就只印 fail/warn，錯的標籤只會流到
+/// 吃 JSON 的下游手上。
 /// </summary>
-public enum Symmetry { BothLow, DarkFails, LightFails, SingleTheme }
+public enum Symmetry { BothLow, DarkFails, LightFails, SingleTheme, NotApplicable }
 
 public sealed class Finding
 {
@@ -35,6 +40,35 @@ public sealed class Finding
     public double Worst => Math.Min(RatioDark, RatioLight);
 }
 
+/// <summary>
+/// 無法解析的原因。總數告訴你「漏了多少」，但沒告訴你「能不能補救」——
+/// 一個無法行動的計數器只誠實了一半。外部專案實測：ScreenToGif 的 1373 組 unresolved
+/// 有 1295 組是同一個原因（根容器沒宣告背景），而使用者從總數上完全看不出這件事。
+/// </summary>
+public enum UnresolvedReason
+{
+    /// <summary>祖先鏈上沒有任何一層宣告背景色 —— 通常是根容器靠隱含樣式給底。可補救。</summary>
+    NoAncestorBackground,
+    /// <summary>顏色來自 Binding / TemplateBinding / 漸層 —— 執行期才知道。靜態分析的硬邊界。</summary>
+    BoundOrGradient,
+    /// <summary>資源鍵不在偵測到的色盤裡 —— 打字錯誤，或色盤偵測漏了某個檔。可補救。</summary>
+    UnknownPaletteKey,
+    /// <summary>背景是半透明但底下沒有可疊的顏色 —— 合成不出實際色值。</summary>
+    TranslucentUncomposited,
+    /// <summary>Style 把 Foreground 與 Background 設成同一個 brush —— Material 系的
+    /// 模板不透明度慣用手法（模板把背景以 10~12% Opacity 畫成暈染，字用全濃度）。
+    /// 字面上是 1:1，執行期不是；模板的 Opacity 動畫靜態看不到 —— 不猜。</summary>
+    SameBrushPair,
+    /// <summary>文字墊在同格子的兄弟「內容」元素上（Image 等）—— 實際背景是圖片，
+    /// 靜態不可知；配祖先背景會產生假警報。</summary>
+    OverSiblingContent,
+}
+
+/// <summary>一筆無法解析的配對「在哪裡、為什麼、卡在哪個值」。
+/// 只有原因分類還不夠 —— 使用者知道「57 組找不到底色」,但不知道在哪幾個檔;
+/// unknown-key 更是只要點名鍵就是免費的死引用/打字錯誤偵測器。</summary>
+public sealed record UnresolvedSite(UnresolvedReason Reason, string File, int Line, string Value);
+
 public sealed class AuditResult
 {
     public required PaletteDetection Detection { get; init; }
@@ -42,6 +76,10 @@ public sealed class AuditResult
     public required List<Finding> Findings { get; init; }
     public required int Pairs { get; init; }
     public required int Unresolved { get; init; }
+    /// <summary>unresolved 的原因細目（總和 = Unresolved）—— 讓「漏了多少」變成「該修哪裡」。</summary>
+    public required Dictionary<UnresolvedReason, int> UnresolvedBy { get; init; }
+    /// <summary>逐筆的無法解析位置（file:line＋卡住的值）。</summary>
+    public required List<UnresolvedSite> UnresolvedSites { get; init; }
     public required int Skipped { get; init; }
     /// <summary>死 setter 過濾排除的 Style 配對數（過濾不靜默）</summary>
     public required int DeadForeground { get; init; }
@@ -57,4 +95,14 @@ public sealed class AuditResult
     public ToolConfig Config { get; init; } = new();
 
     public int CountOf(Category c) => Findings.Count(f => f.Category == c);
+
+    /// <summary>
+    /// 覆蓋率：解析成功的配對佔「看到的配對總數」的比例（0~1）。
+    ///
+    /// 「0 組配對就 exit 1」一直是不可設定的預設，理由是「空掃綠燈就是謊報健康」。
+    /// 但那條線是二元的 —— 八個公開專案實測發現三個在 0.2% / 1.7% / 10.2% 的
+    /// 覆蓋率下照樣亮綠燈（HandyControl 342 個檔只看懂 7 組，然後說「通過」）。
+    /// 「幾乎什麼都沒看」和「看過了都沒問題」在退出碼上分不出來，等於同一種謊報。
+    /// </summary>
+    public double Coverage => Pairs + Unresolved == 0 ? 0 : (double)Pairs / (Pairs + Unresolved);
 }

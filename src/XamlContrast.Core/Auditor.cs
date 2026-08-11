@@ -9,7 +9,8 @@ namespace XamlContrast.Core;
 /// XAML 樹解析式對比度稽核。對每個有文字色的元素，沿父節點往上找
 /// 「最近一個真正生效的背景色」，再把兩邊的資源鍵各自代入深淺兩套值算 WCAG 對比。
 ///
-/// 處理的情況（八條解析規則，一條都不能少 —— 全部是真實專案踩出來的）：
+/// 處理的情況（十七條解析規則，一條都不能少 —— 全部是真實專案踩出來的；
+/// 完整清單見規劃書 4.1。下面列的是樹走訪這一層的主幹）：
 ///   1. 元素屬性上的 Background / Foreground（含祖先繼承）
 ///   2. Background="Transparent" 視為穿透，繼續往上找
 ///   3. 背景是半透明 ARGB → 與下層合成
@@ -48,7 +49,7 @@ public sealed partial class Auditor
 
     private static readonly HashSet<string> StyleishEls = new()
     {
-        "Style", "Setter", "Trigger", "DataTrigger", "MultiTrigger",
+        "Style", "Setter", "Trigger", "DataTrigger", "MultiTrigger", "MultiDataTrigger",
     };
 
     /// <summary>模板裡會渲染 Foreground 的元素。⚠ 不能只看 ContentPresenter：
@@ -66,7 +67,17 @@ public sealed partial class Auditor
     [GeneratedRegex(@"TemplateBinding\s+Foreground")]
     private static partial Regex TemplateBindingFg();
 
-    private readonly Palette _pal;
+    // WCAG 大字級的「粗體」指 weight ≥ 700：Bold(700)、ExtraBold/UltraBold(800)、
+    // Black/Heavy(900)、ExtraBlack/UltraBlack(950)、數字 700–999。
+    // SemiBold/DemiBold 是 600，不算 —— 舊版子字串匹配（"Bold" 命中 "SemiBold"）
+    // 把 600 也放寬到 3:1，會漏掉 3.0~4.5 之間真正不合格的文字。錨定整字匹配。
+    [GeneratedRegex(@"^\s*(?:Bold|ExtraBold|UltraBold|Black|ExtraBlack|UltraBlack|Heavy|[7-9]\d{2})\s*$")]
+    private static partial Regex BoldWeight();
+
+    private static bool IsBold(string? fw) => fw is not null && BoldWeight().IsMatch(fw);
+
+    // 非 readonly:多 App repo 時每個檔案切到它所屬作用域的色盤(PaletteFor)
+    private Palette _pal;
     private readonly ToolConfig _cfg;
     private readonly HashSet<string> _textEls;
     private readonly HashSet<string> _nonTextEls;
@@ -119,6 +130,31 @@ public sealed partial class Auditor
     private double NeedFor(bool isText, bool isLarge) =>
         !isText ? 0.0 : isLarge ? _cfg.Thresholds.LargeText : _cfg.Thresholds.NormalText;
 
+    /// <summary>config 的 rootBackground 正規化成 ColorResolver 認得的值：
+    /// 色碼／具名色／markup 原樣通過，裸鍵名包成 {DynamicResource X}。</summary>
+    public static string? NormalizeRootBackground(string? raw)
+        => raw is null ? null :
+           raw.StartsWith('#') || raw.StartsWith('{') ? raw :
+           ColorResolver.NamedHex(raw) is not null ? raw :
+           "{DynamicResource " + raw + "}";
+
+    private string? NormalizedRootBackground => NormalizeRootBackground(_cfg.RootBackground);
+
+    /// <summary>元素是否屬非文字（裝飾）類。⚠ 全名相等不夠 —— WPF 生態滿地都是
+    /// 衍生命名的控制項：MahApps 的 MetroProgressBar 對不上排除清單裡的 ProgressBar，
+    /// 進度條填色被當文字用 4.5 要求（八專案抽驗實證，MahApps 唯一一筆 fail 就是它）。
+    /// 改成「後綴比對」：MetroProgressBar／HandyControl 的 WaveProgressBar 都收斂到
+    /// ProgressBar。文字清單同理（ExtendedRadioButton → RadioButton）。
+    /// 兩邊都中時取「最長的後綴」—— 名字愈長愈具體。</summary>
+    private bool IsNonTextElement(string localName)
+    {
+        if (_nonTextEls.Contains(localName)) return true;
+        if (_textEls.Contains(localName)) return false;
+        var nt = _nonTextEls.Where(localName.EndsWith).OrderByDescending(n => n.Length).FirstOrDefault();
+        var tx = _textEls.Where(localName.EndsWith).OrderByDescending(n => n.Length).FirstOrDefault();
+        return nt is not null && (tx is null || nt.Length > tx.Length);
+    }
+
     public static AuditResult Run(string root, PaletteDetection detection, ToolConfig? config = null)
     {
         var auditor = new Auditor(detection.Palette, config ?? new ToolConfig());
@@ -145,6 +181,9 @@ public sealed partial class Auditor
             if (doc.Root is not null)
             {
                 auditor._curFile = f;
+                // 多 App repo:這個檔案屬於哪個 App,就用哪個 App 的色盤
+                // (單 App 或無作用域資訊時 PaletteFor 回傳全域色盤,行為不變)
+                auditor._pal = detection.PaletteFor(f);
                 auditor.Walk(doc.Root, null, name, 1.0, suppressed: false);
                 auditor.WalkStyles(doc, name);
             }
@@ -157,6 +196,8 @@ public sealed partial class Auditor
             Findings = auditor._findings,
             Pairs = auditor._pairs,
             Unresolved = auditor._unresolved,
+            UnresolvedBy = auditor._unresolvedBy,
+            UnresolvedSites = auditor._unresolvedSites,
             Skipped = auditor._skipped,
             DeadForeground = auditor._deadFg,
             DisabledExempt = auditor._disabled,
@@ -177,6 +218,31 @@ public sealed partial class Auditor
     //   （繼承 Fg0 #EEEEEE），但有 Opacity="0.3"，螢幕上取樣到的是 #535353（2.45:1）。
     //   工具當時只看 Foreground 的色票值，回報「Fg0 = 16.28 ✓」—— 完全漏掉。
     //   Opacity 是繼「Foreground 色票」「背景 alpha」之後第三種讓文字變暗的方式。
+    private readonly Dictionary<UnresolvedReason, int> _unresolvedBy = new();
+    private readonly List<UnresolvedSite> _unresolvedSites = new();
+
+    private static int LineOf(XElement el) => el is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
+
+    /// <summary>無法解析要連「為什麼、在哪裡、卡在哪個值」一起記 —— 只給總數的話，
+    /// 使用者看不出 1373 組裡有 1295 組是同一個可補救的原因,更不知道去哪個檔修;
+    /// unknown-key 點名鍵名之後,還是免費的死引用／打字錯誤偵測器。</summary>
+    private void Unres(UnresolvedReason why, string file, int line, string value)
+    {
+        _unresolved++;
+        _unresolvedBy[why] = _unresolvedBy.GetValueOrDefault(why) + 1;
+        _unresolvedSites.Add(new UnresolvedSite(why, file, line, value));
+    }
+
+    /// <summary>依解析結果分類;UnknownKey 以「鍵名」當 value,其餘用原始屬性值。</summary>
+    private void Unres(Resolved r, string file, int line, string raw)
+        => Unres(r.Kind switch
+        {
+            ColorKind.UnknownKey => UnresolvedReason.UnknownPaletteKey,
+            ColorKind.Alpha => UnresolvedReason.TranslucentUncomposited,
+            ColorKind.SiblingContent => UnresolvedReason.OverSiblingContent,
+            _ => UnresolvedReason.BoundOrGradient,
+        }, file, line, r.Kind == ColorKind.UnknownKey && r.Key is not null ? r.Key : raw);
+
     private void Walk(XElement el, Resolved? bg, string file, double op, bool suppressed)
     {
         if (!suppressed && IsSuppressedByComment(el, file)) suppressed = true;
@@ -194,7 +260,14 @@ public sealed partial class Auditor
         var localBgRaw = el.Attribute("Background")?.Value;
         var bgVal = localBgRaw
                     ?? (chain is not null && chain.Props.TryGetValue("Background", out var chainBg) ? chainBg.V : null)
-                    ?? chain?.TemplateRootBg; // 模板根的背景管到內容
+                    ?? chain?.TemplateRootBg // 模板根的背景管到內容
+                                             // 「地板」：根元素沒寫 Background 時，查該型別的隱含樣式（僅此一格，
+                                             // 不是完整的隱含樣式解析 —— 理由見 StyleIndex.ImplicitRootBackground）
+                    ?? (el.Parent is null ? _styles.ImplicitRootBackground(el.Name.LocalName, _curFile) : null)
+                    // 最後一層地板：config 的 rootBackground —— 主題函式庫使用者的逃生口
+                    // （視窗底色鍵在 repo、把它連到視窗的隱含樣式在 NuGet 套件裡:
+                    //   工具看不到、使用者知道。使用者宣告的就是事實）
+                    ?? (el.Parent is null ? NormalizedRootBackground : null);
         if (bgVal is not null)
         {
             var r = ColorResolver.Resolve(bgVal, _pal);
@@ -273,8 +346,11 @@ public sealed partial class Auditor
 
                 var fgR = ColorResolver.Resolve(fgV, _pal);
                 if (fgR is null) continue;
-                if (fgR.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.Transparent or ColorKind.UnknownKey)
-                { _skipped++; continue; }
+                // 字色是 Binding／漸層／未知鍵 = 工具看不懂 → unresolved（盲區要誠實計數，
+                // 之前全塞 skipped，把盲區藏進「合法豁免」桶）；透明字才是合法跳過
+                if (fgR.Kind is ColorKind.Other or ColorKind.UnknownKey)
+                { Unres(fgR, file, LineOf(el), fgV); continue; }
+                if (fgR.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
 
                 Resolved? bgObj;
                 if (bgV is not null)
@@ -291,18 +367,18 @@ public sealed partial class Auditor
                                 Key: $"{bgV} over {(ancestorBg.Key is not null ? "{" + ancestorBg.Key + "}" : ancestorBg.Dark)}")
                             : null;
                     }
-                    else if (rb.Kind is ColorKind.Other or ColorKind.UnknownKey) { _unresolved++; continue; }
+                    else if (rb.Kind is ColorKind.Other or ColorKind.UnknownKey) { Unres(rb, file, LineOf(el), bgV!); continue; }
                     else bgObj = rb;
                 }
                 else bgObj = bg; // Style 鏈沒設底 → 退回祖先背景
-                if (bgObj is null) { _unresolved++; continue; }
-                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey) { _unresolved++; continue; }
+                if (bgObj is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgV); continue; }
+                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bgObj, file, LineOf(el), bgV ?? fgV); continue; }
                 if (op < 0.01) { _skipped++; continue; }
 
                 // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複
                 if (!emitted.Add($"{fgR.Dark}|{bgObj.Dark}")) continue;
 
-                var isTextC = !_nonTextEls.Contains(el.Name.LocalName);
+                var isTextC = !IsNonTextElement(el.Name.LocalName);
                 var fsC = 0.0;
                 var fsRawC = el.Attribute("FontSize")?.Value;
                 if (fsRawC is not null) ParseDouble(fsRawC, out fsC);
@@ -310,7 +386,7 @@ public sealed partial class Auditor
                 else if (chain.Props.TryGetValue("FontSize", out var pfs)) ParseDouble(pfs.V, out fsC);
                 var fwV = el.Attribute("FontWeight")?.Value
                           ?? (chain.Props.TryGetValue("FontWeight", out var pfw) ? pfw.V : null);
-                var boldC = fwV is not null && Regex.IsMatch(fwV, "Bold|Black|Heavy|SemiBold");
+                var boldC = IsBold(fwV);
                 var ptC = fsC * 0.75;
                 var isLargeC = ptC >= 18 || (boldC && ptC >= 14);
                 var needC = NeedFor(isTextC, isLargeC);
@@ -351,11 +427,11 @@ public sealed partial class Auditor
             if (fgRaw is null) continue;
             var fg = ColorResolver.Resolve(fgRaw, _pal);
             if (fg is null) continue;
-            if (fg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.Transparent or ColorKind.UnknownKey)
-            { _skipped++; continue; }
-            if (bg is null) { _unresolved++; continue; }
-            if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey)
-            { _unresolved++; continue; }
+            // 同上：看不懂 → unresolved；透明 → skipped（與背景側同一套分桶標準）
+            if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey) { Unres(fg, file, LineOf(el), fgRaw); continue; }
+            if (fg.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
+            if (bg is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgRaw); continue; }
+            if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bg, file, LineOf(el), bg.Key ?? fgRaw); continue; }
 
             // Opacity 0 = 元素當下完全隱形。XAML 裡寫 Opacity="0" 幾乎都是淡入動畫的
             // 初始狀態，穩態是 1。對「看不見的東西」算對比沒有意義，跳過而不是報 1:1。
@@ -370,8 +446,8 @@ public sealed partial class Auditor
 
             // ── 這是文字還是裝飾？WCAG 的 4.5:1 只管文字 ──
             var localName = el.Name.LocalName;
-            var isText = !_nonTextEls.Contains(localName) &&
-                         (_textEls.Contains(localName) || attrName == "Foreground");
+            var isText = !IsNonTextElement(localName) &&
+                         (_textEls.Contains(localName) || localName.EndsWith("TextBlock") || attrName == "Foreground");
 
             // ── WCAG 大字級豁免：≥18pt 或 ≥14pt 粗體只需 3:1 ──
             // ⚠ WPF 的 FontSize 是「裝置獨立像素」(1/96 吋) 不是 point (1/72 吋)，
@@ -381,7 +457,7 @@ public sealed partial class Auditor
             var fsRaw = el.Attribute("FontSize")?.Value;
             if (fsRaw is not null) ParseDouble(fsRaw, out fs);
             var fw = el.Attribute("FontWeight")?.Value;
-            var bold = fw is not null && Regex.IsMatch(fw, "Bold|Black|Heavy|SemiBold");
+            var bold = IsBold(fw);
             var pt = fs * 0.75;
             var isLarge = pt >= 18 || (bold && pt >= 14);
             var need = NeedFor(isText, isLarge);
@@ -412,12 +488,68 @@ public sealed partial class Auditor
             });
         }
 
+        // ── 規則 17:重疊容器內的兄弟背景 ──
+        // Grid 同格子(Canvas/自訂 *Panel 全域)裡,文件順序在前的兄弟畫在下面。
+        // 兩半,對應原型檔頭記載的「sibling 背景」盲區:
+        //   (a) 兄弟是佔滿格子的純色底(Border/Rectangle 之類)→ 它才是文字真正的
+        //       背板,不是祖先 —— 之前這形狀整批 no-ancestor-background 或誤配祖先
+        //   (b) 兄弟是內容元素(Image 等)→ 底是一張圖,靜態不可知 —— 之前誤配祖先
+        //       報假警報(HandyControl Carousel:白字疊照片被配 RegionBrush,light=1)
+        // 防呆:有明確尺寸或非 Stretch 對齊的兄弟不算背板(強調色條 Width="4" 之類)。
+        var overlap = IsOverlapContainer(el.Name.LocalName);
+        Dictionary<(int Row, int Col), Resolved>? cellBg = overlap ? new() : null;
         foreach (var child in el.Elements())
         {
             // Style / Setter / Trigger 這些不是視覺樹，個別處理（WalkStyles），這裡跳過
             if (StyleishEls.Contains(child.Name.LocalName)) continue;
-            Walk(child, bg, file, op, suppressed);
+            var childBg = bg;
+            (int, int) cell = default;
+            if (overlap)
+            {
+                cell = CellOf(child, el.Name.LocalName == "Grid");
+                if (cellBg!.TryGetValue(cell, out var sb)) childBg = sb;
+            }
+            Walk(child, childBg, file, op, suppressed);
+            if (overlap && SiblingBackdrop(child) is { } backdrop) cellBg![cell] = backdrop;
         }
+    }
+
+    /// <summary>子元素會彼此重疊的容器。StackPanel 系的會排開,不算。</summary>
+    private static bool IsOverlapContainer(string name)
+    {
+        if (name is "StackPanel" or "DockPanel" or "WrapPanel" or "UniformGrid"
+            or "VirtualizingStackPanel" or "ToolBarPanel" or "TabPanel") return false;
+        return name is "Grid" or "Canvas" ||
+               (name.EndsWith("Panel") && !name.EndsWith("StackPanel"));
+    }
+
+    private static (int, int) CellOf(XElement child, bool isGrid)
+    {
+        if (!isGrid) return default; // Canvas/自訂 Panel:全部視為同一層
+        int P(string attr) => int.TryParse(child.Attribute(attr)?.Value, out var v) ? v : 0;
+        return (P("Grid.Row"), P("Grid.Column"));
+    }
+
+    /// <summary>這個兄弟元素會不會成為「後面同格子兄弟」的背板。
+    /// 回傳 null = 不影響(既非佔滿格子的底、也非內容元素)。</summary>
+    private Resolved? SiblingBackdrop(XElement child)
+    {
+        var name = child.Name.LocalName;
+        // (b) 內容元素:底變成一張圖,不可知
+        if (name is "Image" or "MediaElement" || name.EndsWith("Image"))
+            return new Resolved(ColorKind.SiblingContent);
+
+        // (a) 純色背板候選:要佔滿格子 —— 有明確尺寸或非 Stretch 對齊的不算
+        static bool Stretchy(XElement e, string attr)
+            => e.Attribute(attr)?.Value is null or "Stretch";
+        if (child.Attribute("Width") is not null || child.Attribute("Height") is not null ||
+            !Stretchy(child, "HorizontalAlignment") || !Stretchy(child, "VerticalAlignment"))
+            return null;
+        var raw = name == "Rectangle" ? child.Attribute("Fill")?.Value : child.Attribute("Background")?.Value;
+        if (raw is null) return null;
+        var r = ColorResolver.Resolve(raw, _pal);
+        // 只收確定的純色(Hard/Soft);半透明/漸層/Binding 維持原判定,不越權
+        return r is { Kind: ColorKind.Hard or ColorKind.Soft } ? r : null;
     }
 
     // Style 裡成對的 Setter（Background + Foreground 同時存在）
@@ -445,7 +577,7 @@ public sealed partial class Auditor
 
             // 觸發器裡的 Setter 也算進來（它們覆蓋同一個 Style 的基礎值）
             var trigSetters = new List<(Dictionary<string, string> Set, bool Disabled)>();
-            foreach (var t in style.Descendants().Where(e => e.Name.LocalName is "Trigger" or "DataTrigger"))
+            foreach (var t in style.Descendants().Where(StyleIndex.IsTriggerElement))
             {
                 var ts = new Dictionary<string, string>();
                 foreach (var s in t.Elements().Where(e => e.Name.LocalName == "Setter"))
@@ -506,18 +638,33 @@ public sealed partial class Auditor
                 var fg = ColorResolver.Resolve(fgv, _pal);
                 var bgr = ColorResolver.Resolve(bgv, _pal);
                 if (fg is null || bgr is null) continue;
-                if (fg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.Transparent or ColorKind.UnknownKey) continue;
-                if (bgr.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.Transparent or ColorKind.UnknownKey) continue;
+                // 之前這裡是裸 continue —— 配對從報告徹底消失，連計數都沒有，
+                // 違反「靜默退化等於謊報」（同檔 ignore 註解那段的規矩）。
+                // 任一側看不懂 → unresolved；任一側透明/半透明 → skipped
+                if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey ||
+                    bgr.Kind is ColorKind.Other or ColorKind.UnknownKey)
+                {
+                    var (bad, raw) = fg.Kind is ColorKind.Other or ColorKind.UnknownKey ? (fg, fgv) : (bgr, bgv);
+                    Unres(bad, file, line, raw); continue;
+                }
+                if (fg.Kind is ColorKind.Alpha or ColorKind.Transparent ||
+                    bgr.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
+                // 同一個 brush 同時當字色與底色 —— Material 系的模板不透明度慣用手法：
+                // 模板把 Background 以 10~12% Opacity 畫成暈染（VisualState 動畫），字全濃度。
+                // 字面上 1:1、執行期不是；Opacity 藏在模板動畫裡，靜態看不到 —— 不猜，
+                // 歸 unresolved 而不是報一筆必然假的 fail（MaterialDesign 抽驗實證，
+                // NavigationPrimaryListBoxItem 等三處全是這形狀）。
+                if (fg.Key is not null && fg.Key == bgr.Key)
+                { Unres(UnresolvedReason.SameBrushPair, file, line, fg.Key); continue; }
 
                 // ⚠ v0.1 的第 5 號 bug（規劃書 8.2）：這裡曾漏了 Need，而分級把
                 //   「沒有 Need」當裝飾 → 所有 Style 配對被靜默歸為裝飾、完全不受檢。
                 //   分類沿用排除清單：TargetType 是非文字控制項才免檢；
                 //   不確定（匿名、沒 TargetType）就當文字報出來 —— 不替使用者放過。
-                var isText = ttName is null || !_nonTextEls.Contains(ttName);
+                var isText = ttName is null || !IsNonTextElement(ttName);
                 var fs = 0.0;
                 if (set.TryGetValue("FontSize", out var fsv)) ParseDouble(fsv, out fs);
-                var bold = set.TryGetValue("FontWeight", out var fwv) &&
-                           Regex.IsMatch(fwv, "Bold|Black|Heavy|SemiBold");
+                var bold = set.TryGetValue("FontWeight", out var fwv) && IsBold(fwv);
                 var pt = fs * 0.75; // WPF FontSize 是 DIP，換 point 要 ×0.75（規劃書 4.3）
                 var isLarge = pt >= 18 || (bold && pt >= 14);
                 var need = NeedFor(isText, isLarge);

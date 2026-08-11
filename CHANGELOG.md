@@ -5,6 +5,259 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+### Added
+- **Every unresolved pair now carries its location.** `--show-unresolved` lists
+  `file:line · reason · offending value` for each one, and the JSON gains a top-level
+  `unresolved` array (schemaVersion 5). The reason breakdown said *why* coverage was lost but
+  not *where* — "57 pairs have no ancestor background" is a diagnosis without an address.
+- **Unknown palette keys are named, with counts** (`summary.unknownKeys`, top ones on the
+  console). Each is a dead resource reference, a typo, or a palette file detection missed —
+  a free lint that may fire more often than the contrast math itself.
+- **README sets coverage expectations by project type**: applications resolve well (validation
+  apps 89–100%, public apps 26–57%); control libraries are inherently low (5–19%) because
+  their colours flow through `{TemplateBinding}`/`{Binding}` — a hard boundary of static
+  analysis, not a configuration problem.
+
+### Added
+- **`rootBackground` config — the escape hatch for theme-library apps.** Scanning three
+  *new* public projects surfaced the largest shape yet: apps built on MahApps/HandyControl/
+  MaterialDesign keep their window-background *key* in their own theme files (dark and light
+  both), but the implicit style connecting it to their windows lives inside the NuGet
+  package — invisible to static analysis, so every view lost its floor
+  (NETworkManager: 726 `no-ancestor-background` sites across 100 files; QuickLook: 269).
+  The tool must not guess; the user knows. One config line declares it:
+  `{ "rootBackground": "MahApps.Brushes.Window.Background" }` — a palette key or a literal
+  colour. Measured effect on NETworkManager: coverage **8.8% → 87.2%**, surfacing 284
+  genuine light-theme failures (hand-verified: Gray5 `#B9B9B9` on white = 1.96:1, Gray3
+  `#9D9D9D` = 2.71:1 — exact to the digit). A key missing from the detected palette is a
+  config error (exit 2), never a silent no-op.
+- **Rule 17: sibling backdrops in overlapping containers.** In a Grid cell (or Canvas /
+  custom `*Panel`), earlier siblings paint beneath later ones. Two halves, closing the
+  "sibling backgrounds" blind spot the prototype header has documented from day one:
+  *(a)* a full-cell solid sibling (a `Border`/`Rectangle` with no explicit size and stretch
+  alignment) **is** the text's real backdrop — previously these pairs were mispaired with an
+  ancestor or lost to `no-ancestor-background`; *(b)* a sibling `Image`/media element means
+  the backdrop is a picture, statically unknowable — now honestly `over-sibling-content`
+  instead of a fabricated ratio against the ancestor (HandyControl's carousel: white text
+  over a photo was reported light=1 against `RegionBrush`). Accent bars (`Width="4"`,
+  non-stretch alignment) are excluded from backdrop candidacy.
+
+  Re-freezing the validation baselines surfaced something worth recording: **Kindling's
+  single long-standing fail — carried in the baselines since v0.1.0 — was a false positive
+  of exactly this shape.** The "空" label sits on a sibling `<Border Background="Black"/>`
+  (the source comment even says "covers the thumbnail"); grey-on-black is 7.46:1, passing.
+  The rule also surfaced one genuinely marginal new warn (missing-asset label, light theme
+  4.32:1) and honestly reclassified eight CelFlow canvas overlays as `over-sibling-content`.
+- **Application-level resource scoping.** When a repo contains two or more `<Application>`
+  roots (ScreenToGif ships a second Translator app; Playnite has Desktop and Fullscreen),
+  each App.xaml's directory becomes a scope: files in an app resolve against *its subtree ∪
+  the shared area*, and shared files (typically the library itself) against the shared area
+  only. Without this, identical key names with different per-app values cross-contaminate —
+  Translator's `#FF003399` heading was paired with the *main* app's dark
+  `Panel.Background.Level4` and reported **1.2:1 fail** where its own palette gives
+  **10.4:1 ok**. Single-app repos take the exact same path as before. Element-level
+  `Resources` and merge order remain out of scope — the multi-app cut is where the observed
+  false positives actually came from.
+
+  Implementation note, recorded because it is the project's least favourite shape: the first
+  build of this feature was **silently inert** — scope directories were normalised to
+  backslashes by `GetDirectoryName` while enumerated file paths kept the caller's
+  forward-slash root, so `StartsWith` never matched, every file fell into the shared area,
+  and every scope quietly received the global palette. No error anywhere; found only by
+  probing the three scopes and seeing three identical palettes. Path comparisons now
+  normalise via `GetFullPath`, and the regression test runs with a forward-slash root.
+
+### Fixed
+- **Same-brush style pairs are unresolved, not failures.** MaterialDesign's navigation items
+  set `Foreground` *and* `Background` to `MaterialDesign.Brush.Primary` — deliberately: the
+  template paints the background borders at 0.1–0.12 opacity via VisualState animations, so at
+  runtime it's full-strength text over a 12% tint, not 1:1. The style-pair audit's premise
+  (the Background setter is the backdrop) doesn't hold when the template composites it, and
+  the opacity lives in animation storyboards static analysis cannot see — so per the "don't
+  guess" rule these pairs are now classified `same-brush-pair` under `unresolved`, naming the
+  brush, instead of producing guaranteed-false 1:1 failures. Six such pairs in
+  MaterialDesignInXaml (28 → 22 fails); identical-literal pairs (`#333` on `#333`) still fail,
+  as those are far more likely genuine.
+- **Derived control names now classify by suffix.** The text/decorative element lists matched
+  by exact name only, so `MetroProgressBar` (MahApps) missed the `ProgressBar` entry in the
+  decorative list and its `Foreground` — the progress fill, not text — was held to 4.5:1.
+  Found by hand-verifying sampled findings: MahApps' single reported fail was exactly this.
+  Names now fall back to longest-suffix matching against both lists (`MetroProgressBar` →
+  `ProgressBar`, `ExtendedTextBlock` → `TextBlock`); exact matches still win.
+- **Three false-report mechanisms in the merged palette, caught by hand-verifying findings on
+  the public-project scans** (the merged palette shipped earlier in this same release; none of
+  this is in any published version):
+  1. *Fabricated light column.* Literal-value brushes were treated as theme-neutral, so in a
+     `Dark.xaml`/`Light.xaml` literal pair the dark file (sorting first) filled **both** theme
+     columns and the light file was ignored entirely — all 456 ScreenToGif findings came out
+     with `ratioDark == ratioLight`. QuillNest couldn't catch this: its pair goes through
+     `Color` references, which took the correct path; the literal-brush pair shape doesn't
+     exist in the four validation projects.
+  2. *Neutral files stealing themed values.* Brush maps were filled in file order (the colour
+     maps correctly went themed-first — same file, two standards). ScreenToGif's repo contains
+     a second app (`Other/Translator`) whose neutral-named light palette sorts before the main
+     app's `Dark.xaml`, so the dark column got a white background: `Element.Foreground` on
+     `Panel.Background` reported **1.23:1 fail** where the real value is **13.3:1 ok**.
+     Brush merging is now themed-first/neutral-fills-holes, and same-key conflicting
+     definitions are named in the palette description (the resource-scoping warning the plan
+     has required since §4.2) instead of being silently resolved.
+  3. *Named colours in palette definitions.* `<Color x:Key="…">White</Color>` (HandyControl's
+     dark theme) parsed as nothing — the key's dark value went missing and fell back to the
+     light value, pairing dark-on-dark: **1.17:1 fail** where the real value is **13.9:1 ok**.
+     Named colours now resolve through the same table the usage side already had.
+
+  Effect on the scans: ScreenToGif fails 254 → 65, HandyControl 248 → 21 — roughly **416
+  fabricated failures gone** while coverage held at 19.4%. A tool that floods a first-time
+  user with hundreds of confident false fails gets uninstalled, not fixed.
+
+### Changed
+- **Palette detection now merges every colour dictionary in the project instead of picking one
+  file.** "Pick the file with the most brushes" was a heuristic grown on four validation projects
+  that happen to keep their swatches in a single file; it degrades badly everywhere else. Scanning
+  eight public WPF projects: HandyControl spreads colours over 8 files with theme-neutral brush
+  names in one file referencing theme-specific `<Color>`s in another (and via `DynamicResource`),
+  and detection found **no palette at all**; MaterialDesignInXamlToolkit has 154 files carrying
+  colour definitions and only 1 was used; MahApps picked `Theme.Template.xaml`, a build-time
+  template whose values are `{{placeholders}}`. The new model follows WPF's merged-dictionary
+  semantics: colour dictionaries are grouped into dark / light / neutral by path hint, the dark
+  and light colour maps are built as neutral-then-override, and every brush key across every
+  dictionary resolves against both. A dark-hinted file with no light-hinted counterpart makes the
+  neutral files the light theme — HandyControl's shape, where only the dark variant is marked and
+  the default `Colors.xaml` carries no `light` in its name. Key conflicts resolve first-wins over
+  a fixed (lexicographic) file order, so results are reproducible.
+
+  Coverage across the eight public projects went from **9.6% to 19.2%**, with no project losing
+  ground: Playnite +32.7, HandyControl +14.7, wpfui +14.4, MaterialDesign +3.1, MahApps +1.3.
+- **The brush and colour parsers no longer assume attribute order or single-line elements.**
+  `<SolidColorBrush o:Freeze="True" x:Key="…" …>` (HandyControl) and a `<Color x:Key="…">` whose
+  value sits on the next line (MahApps) were both invisible. The parser now matches the element
+  and reads attributes out of it. This also recovered 2 keys and 6 real pairs in QuillNest, one
+  of the original validation projects — the same defect was costing coverage at home, unnoticed.
+- **`DynamicResource` is accepted wherever `StaticResource` was**, and brush→colour references
+  now resolve across files (same file first, then project-wide), matching WPF lookup order.
+- **Test, sample, demo, example, fixture and mock directories are excluded from palette
+  candidacy.** ILSpy's detected "palette" was a decompiler test fixture under
+  `ILSpy.BamlDecompiler.Tests.Windows\Cases\`. Those files are still audited; they just no longer
+  get to define the project's colours.
+
+### Added
+- **A coverage floor: `--min-coverage <0-100>` / `minCoverage`, default 50.** The run now fails
+  when fewer than N% of the colour pairs it saw could actually be resolved, and `summary.coverage`
+  reports the figure. The zero-pairs guard ("an empty scan is not a pass") was binary, and that
+  line turned out not to hold: scanning eight public WPF projects found three that exited **0**
+  at 0.2%, 1.7% and 10.2% coverage. HandyControl has 342 XAML files, resolved 7 pairs out of
+  2922, and printed `exit 0: all pairs meet AA`. "Barely looked at anything" and "looked at
+  everything and it's fine" were indistinguishable in the exit code — the same lie the zero-pairs
+  rule exists to prevent, one step up. Sits beside `--strict-palette`, before the mode branches,
+  so it applies in `--baseline` mode too. `--min-coverage 0` is the escape hatch; the zero-pairs
+  guard stays non-configurable underneath it. The four validation projects run at 89–100% and
+  are unaffected.
+- **`unresolved` now comes with a reason breakdown**, in the console, the Markdown report and
+  `summary.unresolvedBy`: `no-ancestor-background`, `bound-or-gradient`, `unknown-palette-key`,
+  `translucent-uncomposited`. A total on its own says how much was missed but not whether
+  anything can be done about it — and the split is wildly uneven in practice, so the total
+  alone is close to useless for deciding. On ScreenToGif, 1295 of 1373 fell into a single
+  bucket; a user staring at "1373" had no way to see that.
+- **The document root element now picks up a `Background` from an implicit style**
+  (`<Style TargetType="{x:Type Window}">` with no `x:Key`). This is deliberately *only* the
+  root element — the "floor" the tree walk lands on — and not general implicit-style
+  resolution, which would mean modelling WPF's full resource lookup and would pull inherited
+  `Foreground` into every element. Projects that set `Background` directly on their root
+  (the four validation projects do, 71–86% of the time) are unaffected; projects that rely on
+  an app-level implicit style previously lost every pair in the file.
+
+### Changed
+- **`schemaVersion` is now 3** (was 2): `summary.unresolvedBy` added.
+- **`schemaVersion` 2 (earlier in this release).** `ok` and `decorative` findings no longer carry a `symmetry`
+  field in `--json` output; it is omitted rather than set to a placeholder. Consumers keying
+  off `symmetry` should treat absence as "not applicable" — see Fixed below for why.
+
+### Fixed
+- **Dotted palette keys (`Panel.Background`) were invisible to palette detection.** The
+  definition-side regexes matched keys with `\w+`, which excludes `.`, while the usage-side
+  resolver accepts `[\w.]+` — so the tool could see a key being *referenced* but could never
+  find where it was *defined*. Dotted keys are the dominant naming convention in the WPF
+  ecosystem. Measured on ScreenToGif: its dark theme declares 93 brushes and the detector
+  recognised 0 of them, which cascaded into picking an unrelated 3-key DataGrid style file as
+  "the palette" and resolving 0 auditable pairs across 120 XAML files.
+- **`#FFRRGGBB` was treated as translucent.** An alpha of `FF` is 255 — fully opaque — but
+  every 8-digit literal was classified as `Alpha`, and an `Alpha` foreground goes to `skipped`.
+  This is the default output format of Blend and the Visual Studio designer, so any project
+  whose colours came from a designer rather than by hand had its foregrounds skipped wholesale.
+  Measured on ScreenToGif: 79 of its 97 palette values are `#FF`-prefixed. Genuinely
+  translucent values (`alpha < FF`) still composite over the resolved background as before.
+
+  Together these two took ScreenToGif from **0 auditable pairs to 406** (53 fail, 24 warn) and
+  MahApps.Metro from 17 to 67 — MahApps having previously exited **0** while resolving 4% of
+  its pairs. Neither defect could surface on the four validation projects: all four are
+  same-author and hand-write short-form `#RRGGBB` with undotted keys (QuillNest 32/32 six-digit,
+  CelFlow 47/51), so the designer-generated convention was never once exercised. The four
+  snapshots are byte-identical after the fix.
+- **`--strict-palette` was silently inert in baseline mode.** The check sat at the very end of
+  the exit-code decision, but the `--baseline` and `--write-baseline` branches return before
+  reaching it — and `--baseline` is the adoption path the README recommends for existing
+  projects, so the guard was dead in its most common pairing. The failure chain is worse than
+  a missed flag: move the theme files, palette detection degrades, every palette-keyed pair
+  becomes `unresolved`, those pairs vanish from `findings`, and the ratchet reads their absence
+  as debt repaid. The run prints `known debt 0, paid off 2` and exits 0 — breaking your theme
+  file looks exactly like fixing every contrast problem in the project. The check now sits
+  immediately after the zero-pairs guard, before any mode branch, so both "this result is not
+  trustworthy" rails apply everywhere. `--write-baseline` now also refuses to freeze a baseline
+  computed from a degraded palette.
+- **Malformed palette colours are no longer accepted and silently misread.** The palette
+  regexes match `#[0-9A-Fa-f]{6,8}`, which also accepts a seven-digit typo like `#FF0000A`;
+  `Wcag.Luminance` then reads the first six digits and discards the rest, producing a
+  confident, wrong contrast ratio with no warning anywhere. Only 6- and 8-digit values are
+  meaningful, so anything else is now kept out of the palette — uses of that key resolve to
+  `UnknownKey` and surface through the existing `unresolved` counter instead. Applies to
+  XAML `<Color>`/`<SolidColorBrush>` definitions, the C# tuple source, and user-supplied
+  `palette.csharpPattern`.
+- **Report write failures now exit 2 with a message instead of a stack trace.** `--json
+  out/report.json` with no `out/` directory threw an unhandled `DirectoryNotFoundException`,
+  printing a .NET stack trace and exiting 127 — a value outside the documented 0/1/2 contract.
+  A malformed baseline has produced a friendly message since 0.4.0; the output side now
+  matches. Directories are still not created implicitly: quietly inventing a directory for a
+  mistyped path is harder to debug than an error.
+- **Symmetry is no longer classified for passing pairs.** Every finding was assigned a
+  symmetry, so a pristine 21:1 pair (gap < 1.5) came out as `both-low` — a label whose
+  documented meaning is "the palette itself is too weak, switching theme won't save it".
+  The dimension only answers "would switching theme rescue this?", which is meaningless
+  where there is nothing to rescue. Console and Markdown reports print symmetry only for
+  `fail`/`warn`, so this was invisible to humans and leaked exclusively into `--json` —
+  every downstream consumer read a confident, wrong classification on the majority of rows.
+- **`paid off` in the baseline summary now counts occurrences, matching `known debt`.**
+  `KnownDebt` sums per-key occurrence counts while `PaidDebt` counted distinct keys, so
+  clearing one key that covered 5 occurrences reported "known debt 0, paid off 1". The two
+  numbers are printed side by side on one line, in what reads as the same unit; during
+  adoption — exactly when visible progress matters most — the ratchet under-reported it.
+- **SemiBold no longer qualifies for the WCAG large-text exemption.** The bold check was a
+  substring match (`Bold` matches `SemiBold`), so 14pt+ SemiBold(600) text was graded against
+  3:1 instead of 4.5:1 — text with a ratio between 3.0 and 4.5 passed when it should have
+  failed. WCAG's "bold" means weight ≥ 700; the check is now an anchored whole-word match
+  (Bold/ExtraBold/UltraBold/Black/ExtraBlack/UltraBlack/Heavy, or numeric 700–999). This can
+  surface new failures in existing projects — they were always failures, just unreported.
+- **`MultiTrigger` / `MultiDataTrigger` states are now audited.** They were on the "not part
+  of the visual tree" skip list but absent from every trigger-collection site, so combined-
+  condition states (hover + selected and the like) were silently unchecked — with no counter
+  hinting at the gap. Conditions are AND-ed: a state whose conditions include
+  `IsEnabled=False` counts as disabled (WCAG 1.4.3 exemption), same as a plain trigger.
+- **Unresolvable foregrounds now count as `unresolved`, not `skipped`.** A foreground bound
+  at runtime (`{Binding}`), a gradient, or a key missing from the palette went into the
+  `skipped` bucket — whose label reads "translucent, invisible", i.e. *legitimately exempt* —
+  hiding half the tool's blind spot inside a bucket that claims there is nothing to see.
+  The background side already classified these as `unresolved`; both sides now share one rule:
+  can't-resolve → `unresolved`, translucent/invisible → `skipped`.
+- **Style pairs with an unresolvable side are now counted.** They were dropped with a bare
+  `continue` — absent from findings *and* from every degradation counter, which violates the
+  project's own "silent degradation is lying" rule. Report labels updated to match the
+  sharpened bucket meanings.
+
+  The frozen PowerShell prototype carries all four defects identically — the .NET port
+  inherited them from it — a concrete reminder that two implementations agreeing proves
+  consistency, not correctness. It stays frozen regardless (governance decision, M5): it is a
+  historical spec, not a verification source, and `prototype/baseline-*.txt` goes on recording
+  v0.1.0 behaviour. Verification is C# snapshot regression via `scripts/verify-baselines.ps1`.
+
 ## [0.5.1] - 2026-08-08
 
 ### Fixed
