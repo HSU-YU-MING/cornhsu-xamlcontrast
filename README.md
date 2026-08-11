@@ -20,7 +20,7 @@ xamlcontrast path/to/your/wpf/project
 ```
 
 > Requires the **.NET 10 runtime** (the analysis itself is pure XML — runs on Linux CI too).
-> 0.x: pin exact versions (`--version 0.5.1`). Interfaces freeze at 1.0.
+> 0.x: pin exact versions (`--version 0.6.0`). Interfaces freeze at 1.0.
 
 ## What it looks like
 
@@ -167,7 +167,7 @@ jobs:
       # security-events: write    # only if you also pass `sarif: true`
     steps:
       - uses: actions/checkout@v4
-      - uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.5.1   # 0.x: pin exact version
+      - uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.6.0   # 0.x: pin exact version
         with:
           root: src/MyApp
 ```

@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-08-10
+
 ### Added
 - **Every unresolved pair now carries its location.** `--show-unresolved` lists
   `file:line · reason · offending value` for each one, and the JSON gains a top-level
