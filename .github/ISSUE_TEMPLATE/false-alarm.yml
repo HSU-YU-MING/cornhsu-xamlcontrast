@@ -1,0 +1,92 @@
+name: False alarm — it reported a failure that isn't real
+description: The tool says text fails contrast, but in the running app it doesn't.
+labels: ["false-alarm"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the most valuable report this project receives. A tool people stop believing
+        is a tool people turn off — a false alarm is a more serious defect here than a miss.
+
+        Write in English or 中文, whichever is easier.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `xamlcontrast --version`
+      placeholder: "0.6.1"
+    validations:
+      required: true
+
+  - type: textarea
+    id: finding
+    attributes:
+      label: The finding line, exactly as printed
+      description: >
+        Copy the whole line from the `===== fail =====` (or `warn`) section. It carries both
+        colours, both ratios and the symmetry verdict — that alone often shows where the
+        logic went wrong.
+      render: text
+      placeholder: |
+        MainWindow.xaml:26  TextBlock  fg={DynamicResource DimText}  bg={Bg}  dark= 2.11:1 light= 1.6:1  [both-low] need 4.5 12px
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: The smallest XAML that reproduces it
+      description: >
+        Strip everything unrelated. If you can't share the source, rename the resource keys
+        and change the hex values — the *shape* is what matters, not your real palette.
+        Include the relevant Style / ControlTemplate / theme dictionary entries.
+      render: xml
+    validations:
+      required: true
+
+  - type: textarea
+    id: reality
+    attributes:
+      label: What the background actually is
+      description: >
+        What colour does that text really sit on when the app runs, and where does it come
+        from? (a sibling element, a Style setter, an implicit style, a template part, a
+        runtime binding…) A screenshot of the running app helps if you have one.
+    validations:
+      required: true
+
+  - type: input
+    id: palette
+    attributes:
+      label: The palette line
+      description: The first line of the report — it names which detection path ran.
+      placeholder: "palette: merged colour dictionaries: 4 file(s), 32 keys (dark + light)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: known
+    attributes:
+      label: Does this match a documented blind spot?
+      description: >
+        See [Known limitations](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast#known-limitations).
+        If it does, the report is still welcome — it tells me the gap hurts in practice —
+        we just skip the diagnosis. Pick "Not sure" freely; working this out is my job.
+      options:
+        - "Not sure"
+        - "No — this looks like something new"
+        - "Text over a sibling image, or a partially-covering sibling"
+        - "VisualStateManager colour animation changes the colour"
+        - "Two elements flipped by the same trigger condition (fg on one, bg on the other)"
+        - "A TargetName setter aimed at an inner template part"
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Your xamlcontrast.config.json, if you have one
+      render: json
+    validations:
+      required: false

@@ -1,0 +1,53 @@
+name: Bug — it crashed, hung, or behaved wrongly
+description: Anything that isn't about the contrast verdicts themselves — crashes, wrong exit codes, broken flags, CI/Action problems.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For wrong verdicts use the false-alarm or miss templates instead — those need
+        different information.
+
+        Write in English or 中文, whichever is easier.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `xamlcontrast --version`, or the Action ref you pinned
+      placeholder: "0.6.1"
+    validations:
+      required: true
+
+  - type: input
+    id: command
+    attributes:
+      label: The exact command
+      placeholder: "xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json --sarif audit.sarif"
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: The full output
+      description: Everything it printed, including any stack trace. Don't trim it to the part that looks relevant.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: OS and .NET version
+      description: Output of `dotnet --version`, plus your OS. If it happened in CI, say which runner.
+      placeholder: "Windows 11 / .NET 10.0.100 — also fails on ubuntu-latest in Actions"
+    validations:
+      required: true

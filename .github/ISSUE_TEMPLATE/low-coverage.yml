@@ -1,0 +1,95 @@
+name: Coverage collapsed — it resolved almost nothing
+description: The run failed the coverage floor, or resolved so little that the result says nothing about your project.
+labels: ["coverage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Two very different things look identical from the outside here, and the breakdown
+        below is what separates them:
+
+        - **Fixable** — `no-ancestor-background` dominates. Common in apps built on a theme
+          library (MahApps, HandyControl, MaterialDesign): your window background *key* is in
+          your repo, but the implicit style connecting it to your windows lives inside the
+          NuGet package. One config line usually fixes it, and the tool now says so when it
+          happens.
+        - **A hard boundary** — `bound-or-gradient` dominates. Those colours only exist at
+          runtime. Control libraries resolve at 5–19% for exactly this reason and no
+          configuration changes that.
+
+        Either way the report is useful to me. Write in English or 中文.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `xamlcontrast --version`
+      placeholder: "0.6.1"
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: The top of the report
+      description: >
+        Everything from the `palette:` line down to the `unresolved by reason:` breakdown.
+        The breakdown is the important part — the total on its own can't tell us which of
+        the two cases above you're in.
+      render: text
+      placeholder: |
+        palette: merged colour dictionaries: 12 file(s), 84 keys (dark + light)
+        files 154 | text-on-background pairs 96 | coverage 8.8% of pairs seen
+        unresolved (colour bound at runtime / gradient / key not in palette): 994 | skipped: 3
+          unresolved by reason: no-ancestor-background 726, bound-or-gradient 210, unknown-palette-key 58
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of project is this?
+      options:
+        - "Application"
+        - "Application built on a theme library (MahApps, HandyControl, MaterialDesign…)"
+        - "Control library"
+        - "Mixed / not sure"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tried
+    attributes:
+      label: Have you tried rootBackground?
+      description: >
+        `{ "rootBackground": "Your.Window.Background.Key" }` in `xamlcontrast.config.json`.
+        Measured on NETworkManager it took coverage from 8.8% to 87.2%.
+      options:
+        - "Not yet"
+        - "Yes — it helped, but coverage is still too low"
+        - "Yes — no change"
+        - "Yes — it errored (exit 2)"
+        - "Doesn't apply, my unresolved pairs aren't no-ancestor-background"
+    validations:
+      required: true
+
+  - type: textarea
+    id: sample
+    attributes:
+      label: A few lines from --show-unresolved
+      description: >
+        Run `xamlcontrast <root> --show-unresolved` and paste five or ten representative
+        lines. Each is `file:line · reason · the value that stopped it`.
+      render: text
+    validations:
+      required: false
+
+  - type: input
+    id: repo
+    attributes:
+      label: Is the project public?
+      description: >
+        A link lets me reproduce exactly, which is worth a lot. Leave blank if it's private —
+        the breakdown above is still enough to work with.
+    validations:
+      required: false

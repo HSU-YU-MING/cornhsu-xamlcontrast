@@ -310,6 +310,21 @@ Honest list — full blind-spot table with per-case evidence in the
 - `Binding` / `TemplateBinding` colors are reported as *unresolved*, never guessed —
   guessing would trade honest uncertainty for false confidence
 
+## Ran it on your project? I want to hear about it
+
+Every one of the seventeen rules exists because a real codebase proved one was missing.
+That method has a built-in weakness, and it bit this project: the first four validation
+projects share one author and one house style, so two whole classes of bug cost *nothing*
+on them and only surfaced when eight unrelated public projects were scanned.
+
+**Your project is a sample I don't have.** The most valuable report is a false alarm —
+somewhere it claims text fails and it doesn't. A tool people stop believing gets turned off,
+so that is a more serious defect here than a miss.
+
+[Open an issue](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/issues/new/choose) —
+the templates ask for exactly what's needed to reproduce, English or 中文.
+[CONTRIBUTING.md](CONTRIBUTING.md) has the details, including what a pull request needs.
+
 ## See also
 
 [**Parity**](https://github.com/HSU-YU-MING/cornhsu-parity) — sibling project, same
