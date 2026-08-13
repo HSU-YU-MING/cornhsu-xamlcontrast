@@ -6,3 +6,6 @@ TestResults/
 artifacts/
 *.nupkg
 *.snupkg
+
+# 論文構想的私人筆記 —— 不是這個工具的產出，刻意留在版控外
+docs/論文相關/
