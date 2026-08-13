@@ -10,7 +10,13 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>xamlcontrast</ToolCommandName>
     <PackageId>Cornhsu.XamlContrast</PackageId>
-    <Version>0.5.1</Version>
+
+    <!-- 版本號的唯一真相源是 git tag：release.yml 在 pack 時用 Version 屬性覆寫這一格。
+         這裡刻意放一個不可能被誤認成正式版的值。這一格曾經寫死 0.5.1 而沒跟著
+         v0.6.0 一起跳,於是從原始碼 build 出來的執行檔自稱 0.5.1,連它蓋在 JSON
+         報告上的 toolVersion 也是錯的。整格刪掉會退回 MSBuild 預設的 1.0.0,
+         那更糟:專案刻意留在 0.x 直到介面凍結,自稱 1.0.0 等於宣告介面已凍結。 -->
+    <Version>0.0.0-dev</Version>
     <Description>XamlContrast — static WCAG contrast audit for XAML source. Scans the whole project without launching the app and fails CI when text falls below AA.</Description>
   </PropertyGroup>
 
