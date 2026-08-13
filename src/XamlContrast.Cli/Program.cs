@@ -197,6 +197,9 @@ int DecideExit()
             $"({result.Pairs} of {result.Pairs + result.Unresolved}), below the {minCov:F0}% floor — " +
             $"this result does not represent the project. See the unresolved breakdown above; " +
             $"pass --min-coverage 0 to proceed anyway."));
+
+        // 求救指引（文字與觸發條件見 Report.CoverageHint）—— 使用者在這裡最可能放棄
+        if (Report.CoverageHint(result) is { } hint) Console.WriteLine(hint);
         return 1;
     }
 

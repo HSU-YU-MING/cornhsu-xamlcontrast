@@ -96,6 +96,13 @@ jobs:
             || { echo "✗ demo 報告計數與預期不符"; jq .summary "$RUNNER_TEMP/demo-report.json"; exit 1; }
           echo "✓ demo 報告計數正確"
 
+      # README 的示範輸出是手貼的，而它是新使用者看到的第一個東西。0.5 換掉色盤那行、
+      # 0.6 加了覆蓋率那行之後，那段整整漂了兩個版本沒人發現 —— 示範對不上實際，
+      # 是「謊報健康」的文件版。這一步讓它不可能再靜默漂走。
+      - name: README 示範輸出與實際一致
+        shell: pwsh
+        run: ./scripts/verify-readme-sample.ps1
+
       - name: Upload demo report
         if: always()
         uses: actions/upload-artifact@v7

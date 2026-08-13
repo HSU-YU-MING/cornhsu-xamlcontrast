@@ -5,6 +5,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+### Added
+- **The `rootBackground` escape hatch is now offered at the moment people hit the wall.**
+  0.6.0 shipped the fix but documented it in the README only — and a theme-library user
+  following the README's first command lands on the coverage-floor exit code (NETworkManager
+  measured 8.8%) *before* ever reading that far. Nobody goes back to the README after being
+  rejected; they conclude the tool doesn't support their project and close it. When the run
+  fails the coverage floor **and** `no-ancestor-background` is at least half the unresolved
+  pairs, the exit message now carries the config line itself. Deliberately silent when
+  `bound-or-gradient` dominates (`rootBackground` cannot help there — pointing at it would
+  burn the user's one attempt and bury the real conclusion) and when `rootBackground` is
+  already declared (repeating it reads as "your config didn't take effect").
+
+### Fixed
+- **README's sample output no longer lies.** The showcase block still showed the pre-0.5
+  palette line and was missing the coverage row — the first thing a new user sees did not
+  match what they get. Now verbatim from an actual `samples/demo` run.
+- **README's palette-detection list was missing the path that fires most often.** It listed
+  four shapes; the tool tries six, and merged-dictionary detection (added in 0.5, and what
+  `samples/demo` itself hits) was not among them. All six are now documented in tried-order,
+  with the mode each reports as.
+- **zh-Hant README claimed seventeen parsing rules and listed thirteen** — the four rules
+  found in the August public-project sweep were never added to the translated list.
+- **The sample output can no longer drift silently.** `scripts/verify-readme-sample.ps1`
+  runs `samples/demo` and diffs the result against the fenced block in both READMEs
+  (whitespace-normalised, so trimming columns for the page is fine but a changed, missing
+  or extra line is red); CI runs it on every push. It had drifted for two releases before
+  anyone noticed — the documentation form of the failure mode this whole project exists to
+  prevent. `-Update` re-pastes from a live run.
+
 ## [0.6.0] - 2026-08-10
 
 ### Added
