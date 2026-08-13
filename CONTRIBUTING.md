@@ -29,6 +29,12 @@ Use the [issue templates](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/is
 — they ask for exactly what I need to reproduce, which saves both of us three rounds of
 questions. **Write in English or 中文, whichever is easier for you.**
 
+**One exception: security.** If you found something an attacker could use — the XML parser
+resolving an external entity, a crafted file reaching outside the scanned root, content
+escaping its encoding in a SARIF or Markdown report — report it privately instead.
+See [SECURITY.md](SECURITY.md). A wrong contrast verdict is not that, however badly it
+behaves; those belong in the open.
+
 ### Before you open one
 
 Check [Known limitations](README.md#known-limitations). Some gaps are deliberate and
