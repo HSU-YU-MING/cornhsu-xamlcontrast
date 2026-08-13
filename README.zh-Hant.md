@@ -21,22 +21,32 @@ xamlcontrast 你的專案路徑
 對 [`samples/demo`](samples/demo)（刻意做壞的示範）跑一次：
 
 ```
-palette: auto-detected theme pair: Themes\DarkTheme.xaml + Themes\LightTheme.xaml (6 keys)
-files 1 | text-on-background pairs 8
-exempted 1 disabled-state pair(s) (IsEnabled=False; WCAG 1.4.3 ...)
+palette: merged colour dictionaries: 2 file(s), 6 keys (dark + light)
+files 1 | text-on-background pairs 8 | coverage 100.0% of pairs seen
+unresolved (colour bound at runtime / gradient / key not in palette): 0 | skipped (translucent, invisible): 0
+exempted 1 disabled-state pair(s) (IsEnabled=False; WCAG 1.4.3 does not require contrast for disabled controls)
 suppressed 1 pair(s) via xamlcontrast-ignore comments
 
   ok          3
   fail        3
   decorative  1
 
+  below AA: 3, by cause:
+    light-fails   2
+    both-low      1
+
+  both-low = the palette itself is too weak, switching theme won't save it;
+  dark-fails / light-fails = the design intent didn't survive the other theme.
+
 ===== fail (3) =====
-MainWindow.xaml:30  TextBlock                fg=White                     bg={Surface}  dark=16.67:1 light=   1:1  [light-fails] need 4.5 12px
-MainWindow.xaml:26  TextBlock                fg={DynamicResource DimText} bg={Bg}       dark= 2.11:1 light= 1.6:1  [both-low]    need 4.5 12px
-MainWindow.xaml:6   Style[HoverBtn]/trigger  fg=#9A9A9A                   bg={Surface}  dark= 5.92:1 light=2.81:1  [light-fails] need 4.5
+MainWindow.xaml:30  TextBlock                fg=White                      bg={Surface}  dark= 16.67:1 light=     1:1  [light-fails] need 4.5 12px
+MainWindow.xaml:26  TextBlock                fg={DynamicResource DimText}  bg={Bg}       dark=  2.11:1 light=   1.6:1  [both-low] need 4.5 12px
+MainWindow.xaml:6   Style[HoverBtn]/trigger  fg=#9A9A9A                    bg={Surface}  dark=  5.92:1 light=  2.81:1  [light-fails] need 4.5
 
 exit 1: 3 pair(s) below threshold x 2/3 (0 warn)
 ```
+
+（欄寬有收窄以配合頁面，其餘逐字照實際輸出。）
 
 工具的輸出是英文（跨語言使用者共用同一份 CI log）；這份說明文件是中文。
 
@@ -69,16 +79,34 @@ exit 1: 3 pair(s) below threshold x 2/3 (0 warn)
 ## 難的不是 WCAG 公式
 
 公式只有 20 行。價值在「這段文字實際疊在什麼顏色上」的**十七條解析規則**，
-每一條都是在正式發行的產品上踩出來的：Transparent 穿透、alpha 合成、Opacity 沿樹累乘、
+每一條都是在真實出貨的產品上踩出來的：Transparent 穿透、alpha 合成、Opacity 沿樹累乘、
 ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、具名／行內 Style
 （含 BasedOn 鏈）、同條件觸發器合併、停用態豁免（WCAG 1.4.3）、半透明色票、
-模板根背景、指向模板根的觸發 Setter。
+模板根背景、指向模板根的觸發 Setter、`MultiTrigger` 複合條件狀態、
+`#FFRRGGBB` 是不透明而非半透明、文件根的隱含樣式背景、重疊容器中的兄弟背板。
+
+前十三條來自四個已出貨的 WPF App；後四條來自 2026 年 8 月掃描八個公開 WPF 專案
+（1909 個 XAML 檔）——其中兩條在原本那四個專案上**完全測不到代價**，因為四個都是同一
+作者、共用同一套寫法。**盲區的嚴重程度，量不出來的樣本等於沒量。**
 
 ## 零設定色盤偵測
 
-自動判斷色盤在哪：主題配對（Dark+Light 兩檔）→ C# 真相源（三元組陣列，
-**提供兩套主題的來源優先於只有一套的**）→ 單一主題字典 → 都沒有就退回只算寫死色碼
-並**大聲講**。猜錯可用 `xamlcontrast.config.json` 指定（[schema](docs/config-schema.md)）。
+自動判斷色盤在哪，依序嘗試，實際命中哪一條會印在報告第一行：
+
+1. **合併字典・深淺俱全** —— 專案裡所有 `ResourceDictionary` 併成一份色盤，且每個鍵
+   深淺兩套值都有。排在最前面，因為真實專案的色票常拆散在多個字典裡，「挑單一檔」會漏
+2. **主題配對** —— 一個 Dark 檔 × 一個 Light 檔，鍵集重疊 ≥ 50%
+3. **C# 真相源** —— 三元組陣列，**提供兩套主題的來源優先於只有一套的**
+4. **合併字典・單一主題** —— 同 (1) 的聯集，但每個鍵只有一套值
+5. **單一主題檔** —— 一份字典，深淺兩欄同值
+6. **都沒有** —— 退回只算寫死色碼，並**大聲講**
+
+(1)(2) 都回報成 `pair` 模式，(4)(5) 都是 `single`。repo 裡有兩個以上 `App.xaml` 時，
+各應用程式子樹會再各自對自己的色盤解析一次。
+
+猜錯可用 `xamlcontrast.config.json` 指定（[schema](docs/config-schema.md)）。
+若你的 App 建在主題函式庫上（MahApps、HandyControl、MaterialDesign⋯），通常色盤找得到、
+但**視窗底色找不到** —— 用 `rootBackground` 一行宣告即可，工具在覆蓋率不足時會主動提示。
 
 ## 進 CI
 

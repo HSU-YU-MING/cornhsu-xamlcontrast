@@ -184,4 +184,61 @@ public class ConfigTests
         var ex = Assert.Throws<ConfigException>(() => PaletteDetector.Detect(fx.Root, ToolConfig.Load(fx.Root)));
         Assert.Contains("Missing.xaml", ex.Message);
     }
+
+    // ── 覆蓋率求救指引 ────────────────────────────────────────────────────
+    // 主題函式庫使用者撞上覆蓋率下限時，逃生口要出現在他眼前。這幾條測的是
+    // 「該印時印、不該印時不印」—— 錯誤方向的提示（叫人去設一個救不了他的東西）
+    // 比沒有提示更糟，會讓人以為試過了、沒用。
+
+    /// <summary>沒有祖先背景佔多數 → 印，且要點出那一行 config</summary>
+    [Fact]
+    public void CoverageHintOfferedWhenRootBackgroundWouldHelp()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <TextBlock Foreground="#EEEEEE" Text="沒有任何祖先宣告背景 1"/>
+              <TextBlock Foreground="#DDDDDD" Text="沒有任何祖先宣告背景 2"/>
+            </Window>
+            """);
+        var hint = Report.CoverageHint(fx.Run());
+        Assert.NotNull(hint);
+        Assert.Contains("rootBackground", hint);
+        Assert.Contains("no-ancestor-background", hint);
+    }
+
+    /// <summary>硬邊界（Binding／漸層）佔多數 → 不印。rootBackground 救不了執行期的值，
+    /// 叫人去設等於浪費他一次嘗試，還會讓真正的結論（這是靜態分析的極限）被蓋掉。</summary>
+    [Fact]
+    public void CoverageHintSuppressedWhenBoundColoursDominate()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#000000" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Grid Background="{Binding A}"><TextBlock Foreground="#FFFFFF" Text="1"/></Grid>
+              <Grid Background="{Binding B}"><TextBlock Foreground="#FFFFFF" Text="2"/></Grid>
+              <Grid Background="{Binding C}"><TextBlock Foreground="#FFFFFF" Text="3"/></Grid>
+            </Grid>
+            """);
+        Assert.Null(Report.CoverageHint(fx.Run()));
+    }
+
+    /// <summary>已經設了 rootBackground 還是不夠 → 不印。重複叫他設一次已經設過的東西，
+    /// 會讓人以為設定沒生效。</summary>
+    [Fact]
+    public void CoverageHintNotRepeatedOnceRootBackgroundIsDeclared()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/DarkTheme.xaml", SmallDict);
+        fx.File("Themes/LightTheme.xaml", SmallDict.Replace("#111111", "#FAFAFA").Replace("#EEEEEE", "#1B1B1B"));
+        fx.File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <TextBlock Foreground="{DynamicResource Nope}" Text="未知鍵"/>
+            </Window>
+            """);
+        fx.File(ToolConfig.FileName, """{ "rootBackground": "Bg" }""");
+        var cfg = ToolConfig.Load(fx.Root);
+        var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
+        Assert.Null(Report.CoverageHint(r));
+    }
 }

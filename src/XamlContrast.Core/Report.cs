@@ -51,6 +51,34 @@ public static class Report
             .OrderByDescending(kv => kv.Value).ThenBy(kv => kv.Key, StringComparer.Ordinal)
             .Take(take);
 
+    /// <summary>覆蓋率不足而失敗時附的求救指引;沒有可行動的建議時回 null。
+    ///
+    /// 為什麼印在退出訊息旁而不是只寫在 README:主題函式庫的使用者(MahApps 等)照
+    /// README 的第一條指令跑,就是撞在這個退出碼上(NETworkManager 實測 8.8%)。
+    /// 解法只有一行 config,但它住在 README 深處 —— 而使用者不會回頭讀 README,
+    /// 他會把工具判定成「不支援我的專案」然後關掉。求救訊號要出現在人求救的那一刻。
+    ///
+    /// 只在 no-ancestor-background 過半時印,否則是雜訊:bound-or-gradient 佔大宗
+    /// 代表那是靜態分析的硬邊界,rootBackground 救不了(見 ROADMAP 的 Roslyn 決策)。
+    /// 已經設了 rootBackground 還不夠的人不需要再被叫去設一次。</summary>
+    public static string? CoverageHint(AuditResult r)
+    {
+        if (r.Config.RootBackground is not null || r.Unresolved == 0) return null;
+        var noBg = r.UnresolvedBy.GetValueOrDefault(UnresolvedReason.NoAncestorBackground);
+        if (noBg * 2 < r.Unresolved) return null;
+
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var sb = new StringBuilder();
+        sb.AppendLine(string.Create(inv,
+            $"  hint: {noBg} of them are 'no-ancestor-background' — typical of an app built on a theme"));
+        sb.AppendLine("        library (MahApps, HandyControl, MaterialDesign...), where the implicit style that");
+        sb.AppendLine("        paints your windows lives inside the NuGet package, invisible to static analysis.");
+        sb.AppendLine("        Declare your window background key once in xamlcontrast.config.json:");
+        sb.AppendLine("""          { "rootBackground": "MahApps.Brushes.Window.Background" }""");
+        sb.Append("        Use a key from your own theme files. Measured on NETworkManager: 8.8% -> 87.2%.");
+        return sb.ToString();
+    }
+
     /// <summary>--show-unresolved：逐筆列出無法解析的位置。分開一個區塊而不是混進
     /// findings —— 它們不是「問題」,是「工具沒看到的地方」,混在一起會稀釋兩者。</summary>
     public static string UnresolvedList(AuditResult r)

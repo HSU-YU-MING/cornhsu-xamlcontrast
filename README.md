@@ -27,22 +27,32 @@ xamlcontrast path/to/your/wpf/project
 Run against [`samples/demo`](samples/demo) (intentionally broken):
 
 ```
-palette: auto-detected theme pair: Themes\DarkTheme.xaml + Themes\LightTheme.xaml (6 keys)
-files 1 | text-on-background pairs 8
-exempted 1 disabled-state pair(s) (IsEnabled=False; WCAG 1.4.3 ...)
+palette: merged colour dictionaries: 2 file(s), 6 keys (dark + light)
+files 1 | text-on-background pairs 8 | coverage 100.0% of pairs seen
+unresolved (colour bound at runtime / gradient / key not in palette): 0 | skipped (translucent, invisible): 0
+exempted 1 disabled-state pair(s) (IsEnabled=False; WCAG 1.4.3 does not require contrast for disabled controls)
 suppressed 1 pair(s) via xamlcontrast-ignore comments
 
   ok          3
   fail        3
   decorative  1
 
+  below AA: 3, by cause:
+    light-fails   2
+    both-low      1
+
+  both-low = the palette itself is too weak, switching theme won't save it;
+  dark-fails / light-fails = the design intent didn't survive the other theme.
+
 ===== fail (3) =====
-MainWindow.xaml:30  TextBlock                fg=White                     bg={Surface}  dark=16.67:1 light=   1:1  [light-fails] need 4.5 12px
-MainWindow.xaml:26  TextBlock                fg={DynamicResource DimText} bg={Bg}       dark= 2.11:1 light= 1.6:1  [both-low]    need 4.5 12px
-MainWindow.xaml:6   Style[HoverBtn]/trigger  fg=#9A9A9A                   bg={Surface}  dark= 5.92:1 light=2.81:1  [light-fails] need 4.5
+MainWindow.xaml:30  TextBlock                fg=White                      bg={Surface}  dark= 16.67:1 light=     1:1  [light-fails] need 4.5 12px
+MainWindow.xaml:26  TextBlock                fg={DynamicResource DimText}  bg={Bg}       dark=  2.11:1 light=   1.6:1  [both-low] need 4.5 12px
+MainWindow.xaml:6   Style[HoverBtn]/trigger  fg=#9A9A9A                    bg={Surface}  dark=  5.92:1 light=  2.81:1  [light-fails] need 4.5
 
 exit 1: 3 pair(s) below threshold x 2/3 (0 warn)
 ```
+
+(Column widths trimmed to fit the page; everything else is verbatim.)
 
 ## Why run it while developing
 
@@ -106,16 +116,27 @@ Any implementation that just copies the formula misses all of them.
 
 ## Zero-config palette detection
 
-XamlContrast scans your project and figures out where the palette lives:
+XamlContrast scans your project and figures out where the palette lives. The paths are
+tried in this order, and the one that ran is always named on the first line of the report:
 
-1. **Theme pair** — `DarkTheme.xaml` + `LightTheme.xaml` with overlapping keys
-2. **C# source of truth** — `("Key", "#dark", "#light")` tuple arrays
+1. **Merged dictionaries, both themes** — every `ResourceDictionary` in the project read as
+   one palette, and each key ends up with a dark *and* a light value. Tried first because
+   it beats picking a single file: real projects split a palette across several dictionaries.
+2. **Theme pair** — one `DarkTheme.xaml` × one `LightTheme.xaml`, keys overlapping ≥ 50%
+3. **C# source of truth** — `("Key", "#dark", "#light")` tuple arrays
    (beats a single-theme XAML copy: a source that provides both themes wins)
-3. **Single theme** — one resource dictionary, both columns get the same value
-4. **Nothing found** — falls back to hardcoded colors only, and **says so loudly**
+4. **Merged dictionaries, single theme** — same union as (1), but only one value per key
+5. **Single theme file** — one resource dictionary, both columns get the same value
+6. **Nothing found** — falls back to hardcoded colors only, and **says so loudly**
+
+(1) and (2) both report as palette mode `pair`; (4) and (5) as `single`. In a repo with two or
+more `App.xaml` files, each application subtree is additionally resolved against its own palette.
 
 Wrong guess? Override with `xamlcontrast.config.json` —
 [schema](docs/config-schema.md) (zh-Hant; the JSON example at the top is self-explanatory).
+If your app is built on a theme library (MahApps, HandyControl, MaterialDesign…), the palette
+is usually found fine but the window background isn't — see
+[`rootBackground`](#json-output) below; the tool tells you this when it happens.
 
 ## CI
 

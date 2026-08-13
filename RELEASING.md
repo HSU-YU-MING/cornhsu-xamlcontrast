@@ -3,6 +3,8 @@
 ## 流程
 
 1. 確認 `CHANGELOG.md` 的版本段落完整、`scripts/verify-baselines.ps1` 綠燈
+   （改過 console 輸出的話，`scripts/verify-readme-sample.ps1` 也要綠 ——
+   CI 會擋，但發版前先看一眼比較快；不一致就跑 `-Update` 重貼）
 2. 推 tag：
 
 ```bash
