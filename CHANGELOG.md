@@ -5,6 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-08-12
+
 ### Added
 - **The `rootBackground` escape hatch is now offered at the moment people hit the wall.**
   0.6.0 shipped the fix but documented it in the README only — and a theme-library user
@@ -33,6 +35,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   or extra line is red); CI runs it on every push. It had drifted for two releases before
   anyone noticed — the documentation form of the failure mode this whole project exists to
   prevent. `-Update` re-pastes from a live run.
+- **The version number now has exactly one source: the git tag.** The CLI csproj still
+  hardcoded `0.5.1` after v0.6.0 shipped. Packages published from CI were correct (the
+  release workflow overrides the version from the tag), but anything built from source
+  reported the stale number — including the `toolVersion` it stamps on JSON reports. The
+  field is now `0.0.0-dev`: unmistakably not a release, and nothing to keep in sync.
+  (Deleting it outright would fall back to MSBuild's `1.0.0` default — worse, since the
+  project deliberately stays on 0.x until its interfaces freeze.) `RELEASING.md` now
+  states the rule, because the drift came from someone bumping the field by hand.
 
 ## [0.6.0] - 2026-08-10
 
