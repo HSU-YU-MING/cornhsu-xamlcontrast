@@ -1,0 +1,11 @@
+# 空白 issue 保持開啟:上面四張表單不可能涵蓋所有情況,而「沒有適合的表單」
+# 是人放棄開 issue 最常見的理由 —— 這個專案現在最缺的就是外部回報,
+# 不該為了收件格式整齊而把人擋在門外。
+blank_issues_enabled: true
+contact_links:
+  - name: Known limitations — check here first
+    url: https://github.com/HSU-YU-MING/cornhsu-xamlcontrast#known-limitations
+    about: Some gaps are deliberate and documented. Reports about them are still welcome — it just saves us the diagnosis.
+  - name: How to write a report I can reproduce
+    url: https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/CONTRIBUTING.md
+    about: What to include, what gets merged, and why real-world evidence matters more than pull requests here.

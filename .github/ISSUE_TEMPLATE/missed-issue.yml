@@ -1,0 +1,66 @@
+name: Miss — unreadable text it said nothing about
+description: Text that genuinely fails contrast, and the tool didn't report it.
+labels: ["miss"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: run with `--show-unresolved`. If the pair appears there, the tool
+        *knew* it couldn't see it — that's honest uncertainty, not a miss, and the
+        "coverage collapsed" template fits better. A miss is when the pair is simply absent.
+
+        Write in English or 中文, whichever is easier.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `xamlcontrast --version`
+      placeholder: "0.6.1"
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: The XAML with the unreadable text
+      description: >
+        As small as you can make it while still reproducing. Include the theme dictionary
+        entries for the colours involved. Renaming keys and changing hex values is fine.
+      render: xml
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should have been reported
+      description: >
+        Which foreground on which background, and the ratio if you have measured it.
+        Say which theme is affected — dark, light, or both.
+      placeholder: |
+        The status label (#8A8A8A) sits on the card background (#F2F2F2) in the light theme,
+        about 2.6:1. Dark theme is fine.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What the tool did instead
+      description: >
+        Did the pair not appear at all? Get graded `ok` with the wrong background? Get
+        counted as exempt, suppressed or decorative? Paste the relevant part of the output,
+        including the summary counters at the top.
+      render: text
+    validations:
+      required: true
+
+  - type: input
+    id: palette
+    attributes:
+      label: The palette line
+      description: The first line of the report — a miss is often really a palette-detection problem.
+      placeholder: "palette: auto-detected theme pair: Themes/DarkTheme.xaml + Themes/LightTheme.xaml (28 keys)"
+    validations:
+      required: true
