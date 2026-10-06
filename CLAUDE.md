@@ -173,6 +173,9 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   `-Encoding UTF8`（Windows PowerShell 預設用系統 ANSI 讀，中文版 README 會整份變亂碼）；
   寫回去用 `UTF8Encoding($false)` 明確無 BOM（`Set-Content -Encoding utf8` 在
   Windows PowerShell 會塞 BOM、pwsh 不會，同一支腳本兩邊跑會讓 README 無謂地變動）。
+- **先 build、再用 `--no-build` 跑示範**（2026-10-06）。直接 `dotnet run` 會順便 restore，
+  NuGet 的漏洞警告（NU19xx）就跟著 `2>&1` 混進「實際輸出」。這樣只要有新 CVE 公布，
+  跟它毫無關係的 PR 也會紅燈；而失敗訊息叫人跑 `-Update`，照做的話，警告會連同路徑一起被貼進 README。
 - `dotnet format` 是 CI 第一關。**送 PR 前跑一次 `dotnet format XamlContrast.slnx`**，
   不然會為了縮排來回一趟。
 

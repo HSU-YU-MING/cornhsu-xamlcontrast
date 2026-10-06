@@ -29,8 +29,18 @@ $targets = @(
 )
 
 # ── 實跑一次，拿到權威輸出 ──────────────────────────────────────────────
-# demo 是刻意做壞的，exit 1 才是正確行為；這裡只取 stdout，不看退出碼
-$actual = & dotnet run --project $cli -c Release -- $demo 2>&1 | ForEach-Object { "$_" }
+# 先 build、再 --no-build 跑：只讓工具自己印的東西進比對。直接 dotnet run 會順便
+# restore／build，建置訊息跟著 2>&1 混進來 —— 2026-10-01 一個新公布的 CVE 讓 restore
+# 印出 NU1902 警告，CI 就為一個無關的 PR 紅燈，失敗訊息還叫人跑 -Update，
+# 照做會把警告連同 runner 路徑貼進 README。
+$build = & dotnet build $cli -c Release -nologo -v q 2>&1
+if ($LASTEXITCODE -ne 0) {
+    $build | ForEach-Object { Write-Host "$_" }
+    Write-Host "dotnet build 失敗 —— 先修好建置再比對示範輸出" -ForegroundColor Red
+    exit 1
+}
+# demo 是刻意做壞的，exit 1 才是正確行為；這裡只取輸出，不看退出碼
+$actual = & dotnet run --project $cli -c Release --no-build -- $demo 2>&1 | ForEach-Object { "$_" }
 if (-not $actual -or $actual.Count -lt 5) {
     Write-Host "跑不出示範輸出 —— 先確認 dotnet build 過得去" -ForegroundColor Red
     exit 1
