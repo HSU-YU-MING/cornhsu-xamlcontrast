@@ -501,6 +501,7 @@ public sealed partial class Auditor
         //   (b) 兄弟是內容元素(Image 等)→ 底是一張圖,靜態不可知 —— 之前誤配祖先
         //       報假警報(HandyControl Carousel:白字疊照片被配 RegionBrush,light=1)
         // 防呆:有明確尺寸或非 Stretch 對齊的兄弟不算背板(強調色條 Width="4" 之類)。
+        //   Canvas 只套 (b):它不把子元素撐滿,(a) 的「佔滿格子」前提不成立。
         var overlap = IsOverlapContainer(el.Name.LocalName);
         Dictionary<(int Row, int Col), Resolved>? cellBg = overlap ? new() : null;
         foreach (var child in el.Elements())
@@ -517,7 +518,7 @@ public sealed partial class Auditor
                 if (cellBg!.TryGetValue(cell, out var sb)) childBg = sb;
             }
             Walk(child, childBg, file, op, suppressed);
-            if (overlap && SiblingBackdrop(child) is { } backdrop) cellBg![cell] = backdrop;
+            if (overlap && SiblingBackdrop(child, stretches: el.Name.LocalName != "Canvas") is { } backdrop) cellBg![cell] = backdrop;
         }
     }
 
@@ -539,7 +540,7 @@ public sealed partial class Auditor
 
     /// <summary>這個兄弟元素會不會成為「後面同格子兄弟」的背板。
     /// 回傳 null = 不影響(既非佔滿格子的底、也非內容元素)。</summary>
-    private Resolved? SiblingBackdrop(XElement child)
+    private Resolved? SiblingBackdrop(XElement child, bool stretches)
     {
         var name = child.Name.LocalName;
         // (b) 內容元素:底變成一張圖,不可知
@@ -547,6 +548,10 @@ public sealed partial class Auditor
             return new Resolved(ColorKind.SiblingContent);
 
         // (a) 純色背板候選:要佔滿格子 —— 有明確尺寸或非 Stretch 對齊的不算
+        // ⚠ Canvas 不套 Stretch:沒內容、沒尺寸的 Border 在 Canvas 裡實際是 0×0。舊版照樣套 17(a),
+        //   把一塊不存在的背板捏造出來(白字疊祖先白底 1:1,報成 21:1 合格)。有尺寸的也不行 ——
+        //   Canvas.Left/Top 與文字範圍靜態不可知,它在不在字底下判定不了(同 Grid 裡的強調色條)。
+        if (!stretches) return null;
         static bool Stretchy(XElement e, string attr)
             => e.Attribute(attr)?.Value is null or "Stretch";
         if (child.Attribute("Width") is not null || child.Attribute("Height") is not null ||
