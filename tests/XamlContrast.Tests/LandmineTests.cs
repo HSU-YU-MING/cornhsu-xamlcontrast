@@ -14,7 +14,9 @@ namespace XamlContrast.Tests;
 ///                                  全部字重與另外兩條路徑：這裡
 ///   色票只收長度 7／9               brush 字面值：PaletteDetectorTests.MalformedHexIsNotAcceptedIntoPalette；
 ///                                  &lt;Color&gt; 元素、C# 三元組：這裡；強制 single／csharp：ConfigTests
-///   GetFullPath 正規化               PaletteDetectorTests.MultiAppRepo…（正斜線 root）；共用區退路：這裡
+///   GetFullPath 正規化               App 內畫面檔配自己的色盤（正斜線 root、精確比值）與共用區退路：這裡
+///                                  （PaletteDetectorTests.MultiAppRepo… 也用正斜線 root，但只斷言 &gt; 10，
+///                                  作用域退化成全域時兩個 App 拿到同一套自洽的色盤照樣 &gt; 10，守不住）
 ///   dark/light 提示只看相對路徑      合併式色盤那條路：這裡（PaletteDetectorTests 那條走不到合併路徑的差異）；
 ///                                  挑檔退路（XamlCandidates）：PaletteDetectorTests.ThemePairFallbackWhenTheMergedPaletteIsTooSmall
 ///   三段式合併（brush 表與 Color 表） 字面值 brush：PaletteDetectorTests.NeutralFileSortingFirst…；
@@ -373,12 +375,12 @@ public class LandmineTests
         Assert.Equal(expected, Assert.Single(r.Findings).Category);
     }
 
-    // ── 多 App repo 的作用域：不屬於任何 App 目錄的檔案用「共用區」色盤，看不到 App 自己的鍵 ──
+    // ── 多 App repo 的作用域（一律 Path.GetFullPath 正規化分隔線）──
 
-    [Fact]
-    public void FileOutsideEveryAppUsesTheSharedPalette()
+    /// <summary>兩個 App、同名鍵不同值（深色 App × 淺色 App）。</summary>
+    private static Fixture TwoApps()
     {
-        using var fx = new Fixture();
+        var fx = new Fixture();
         fx.File("MainApp/App.xaml", """<Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="A.App"/>""");
         fx.File("MainApp/Theme.xaml", """
             <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -395,6 +397,40 @@ public class LandmineTests
               <SolidColorBrush x:Key="Accent" Color="#2196F3"/>
             </ResourceDictionary>
             """);
+        return fx;
+    }
+
+    [Fact] // 正斜線 root（CLI 實際這樣傳）：App 目錄裡的畫面檔要配到「自己那個 App」的色盤。
+           // GetDirectoryName 給的作用域目錄是反斜線，列舉出的檔案路徑沿用 root 的正斜線 ——
+           // 少了 GetFullPath，StartsWith 永遠不成立，作用域靜默退化成全域色盤。兩套色盤各自都是
+           // 高對比，退化後照樣「看起來很健康」，所以這裡斷言精確比值：退化時至少一邊會拿到另一個 App 的值
+    public void ForwardSlashRootResolvesEachAppFileAgainstItsOwnPalette()
+    {
+        using var fx = TwoApps();
+        fx.File("MainApp/Main.xaml", """
+            <Window Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Fg}" Text="深色 App"/>
+            </Window>
+            """);
+        fx.File("Tools/SubApp/Main.xaml", """
+            <Window Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Fg}" Text="淺色 App"/>
+            </Window>
+            """);
+        var fwd = fx.Root.Replace(Path.DirectorySeparatorChar, '/');
+        Assert.Contains('/', fwd); // 前提：root 真的是正斜線寫法
+        var det = PaletteDetector.Detect(fwd);
+        Assert.Contains("2 application scope(s) resolved separately", det.Description);
+        var r = Auditor.Run(fwd, det);
+        Assert.Equal(Wcag.Contrast("#EEEEEE", "#111111"), Assert.Single(r.Findings, f => f.File == "MainApp/Main.xaml").RatioDark);
+        Assert.Equal(Wcag.Contrast("#212121", "#FAFAFA"), Assert.Single(r.Findings, f => f.File == "Tools/SubApp/Main.xaml").RatioDark);
+    }
+
+    [Fact] // 共用區退路：不屬於任何 App 目錄的檔案用「共用區」色盤，看不到 App 自己的鍵。
+           // （畫面檔在共用區，有沒有 GetFullPath 都落到共用區 —— 正規化那條地雷由上一條守）
+    public void FileOutsideEveryAppUsesTheSharedPalette()
+    {
+        using var fx = TwoApps();
         fx.File("Shared/Lib.xaml", """
             <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
               <SolidColorBrush x:Key="Lib.Bg" Color="#000000"/>
@@ -408,7 +444,7 @@ public class LandmineTests
               <TextBlock Foreground="{DynamicResource Fg}" Text="an app's key — not visible from the shared area"/>
             </UserControl>
             """);
-        var fwd = fx.Root.Replace(Path.DirectorySeparatorChar, '/'); // CLI 實際這樣傳（見 GetFullPath 那條地雷）
+        var fwd = fx.Root.Replace(Path.DirectorySeparatorChar, '/'); // 照 CLI 的傳法
         var r = Auditor.Run(fwd, PaletteDetector.Detect(fwd));
         var shared = Assert.Single(r.Findings, f => f.File == "Shared/Control.xaml");
         Assert.Equal(21.0, shared.RatioDark);

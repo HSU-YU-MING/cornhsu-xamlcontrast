@@ -79,7 +79,9 @@ public class CliExitDecisionTests
         Assert.DoesNotContain("hint:", r.Out);
     }
 
-    [Theory] // --min-coverage 的邊界：恰等於下限算通過（< 而非 <=）；InvariantCulture 解析、接受指數記法；0 = 關閉
+    [Theory] // --min-coverage 的邊界：恰等於下限算通過（< 而非 <=）；接受指數記法；0 = 關閉。
+             // （程式用 InvariantCulture 解析，但這裡驗不到：zh-TW／en-US 下 CurrentCulture 解析 "25"、"2.5e1"
+             //  的結果相同，而 Windows 上無法替子行程指定 culture）
     [InlineData("25", 0)]
     [InlineData("2.5e1", 0)]
     [InlineData("0", 0)]

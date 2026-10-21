@@ -230,6 +230,36 @@ public class JsonReportContractTests
         Assert.Equal(1, s.GetProperty("invalidIgnores").GetArrayLength());
     }
 
+    [Fact] // summary.coverage 四捨五入到小數一位：1 / 3 → 33.3，不是 33.333…
+           // （Everything() 的比值剛好除得盡，上一條的恆等式驗不到四捨五入本身）
+    public void CoverageIsRoundedToOneDecimal()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid Background="#000000">
+              <TextBlock Foreground="#FFFFFF" Text="resolved"/>
+              <Grid Background="{Binding X}"><TextBlock Foreground="#FFFFFF" Text="unresolved 1"/></Grid>
+              <Grid Background="{Binding Y}"><TextBlock Foreground="#FFFFFF" Text="unresolved 2"/></Grid>
+            </Grid>
+            """);
+        var s = JsonOf(fx).GetProperty("summary");
+        Assert.Equal(1, s.GetProperty("pairs").GetInt32());
+        Assert.Equal(2, s.GetProperty("unresolved").GetInt32());
+        Assert.Equal(33.3, s.GetProperty("coverage").GetDouble());
+    }
+
+    [Fact] // unresolved[].value：unknown-palette-key 那幾筆放的是鍵名，依發現順序 —— 這是把未知鍵
+           // 對回行號的唯一管道（summary.unknownKeys 只有計數）。其他原因的 value 語意尚待決定
+           // （公開介面盤點 4.3、4.7 第 10 點：背景側卡住時現在放的是前景值），所以只釘這一種
+    public void UnresolvedSitesNameTheUnknownKeyAtEachLocation()
+    {
+        using var fx = Everything();
+        var sites = JsonOf(fx).GetProperty("unresolved").EnumerateArray()
+            .Where(x => x.GetProperty("reason").GetString() == "unknown-palette-key")
+            .Select(x => $"{x.GetProperty("file").GetString()}:{x.GetProperty("line").GetInt32()} {x.GetProperty("value").GetString()}")
+            .ToArray();
+        Assert.Equal(["Main.xaml:26 Zed", "Main.xaml:27 Zed", "Main.xaml:28 Beta", "Main.xaml:29 Alpha"], sites);
+    }
+
     [Fact] // summary 的描述欄位要說實話：這份結果是哪個色盤、哪份 config、哪套門檻跑出來的。
            // 形狀測試只驗型別 —— 值寫反了（singleTheme、configLoaded）形狀照樣對，讀報告的人卻被誤導
     public void SummaryDescribesThePaletteConfigAndThresholdsOfTheRun()

@@ -127,11 +127,12 @@ public class BaselineFormatTests
         Assert.Equal(0, cmp.PaidDebt);
     }
 
-    // ── 缺欄時的現況（寬鬆：補預設值 0）。公開介面盤點 9.3 建議 1.0 前改成報錯 ——
-    //    改的時候這兩條要跟著翻成「期望例外」，那是刻意的格式收緊，不是回歸 ──
+    // ── 缺欄時的現況（寬鬆：補預設值 0）。KnownLimitation —— 釘的是現況，不是正確答案。
+    //    公開介面盤點 9.3 建議 1.0 前改成報錯；改的時候這兩條要跟著翻成「期望例外」，
+    //    那是刻意的格式收緊，不是回歸 ──
 
     [Fact] // 缺 worst → 0：色盤漂移檢查靜默失效（比值再差也不會 < 0 − 0.01）
-    public void MissingWorstCurrentlyDisablesTheDriftCheck()
+    public void KnownLimitation_MissingWorstDisablesTheDriftCheck()
     {
         var r = Run(("Main.xaml", OnWhite(FailText)));
         var f = r.Findings.Single();
@@ -140,7 +141,7 @@ public class BaselineFormatTests
     }
 
     [Fact] // 缺 count → 0：每一處都算惡化（吵，但方向是安全的）
-    public void MissingCountCurrentlyFlagsEveryOccurrenceAsWorsened()
+    public void KnownLimitation_MissingCountFlagsEveryOccurrenceAsWorsened()
     {
         var r = Run(("Main.xaml", OnWhite(FailText)));
         var f = r.Findings.Single();

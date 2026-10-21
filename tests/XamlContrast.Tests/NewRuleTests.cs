@@ -79,7 +79,15 @@ public class NewRuleTests
     }
 
     [Theory] // 停用態豁免的範圍要窄：只有「IsEnabled 為 False」才放行（Trigger 的 Property 可帶型別前綴；
-             // DataTrigger 看 Binding 裡的 IsEnabled）。範圍一放寬，真實的觸發態問題就會被當成豁免藏起來
+             // DataTrigger 看 Binding 裡的 IsEnabled）。範圍一放寬，真實的觸發態問題就會被當成豁免藏起來。
+             // ⚠ 整字比對只有 Trigger 的 Property 有列在守（IsEnabledByLicense、ParentIsEnabled 兩列）。
+             //   DataTrigger 與 MultiDataTrigger 的 Binding 目前是子字串比對（StyleIndex.IsDisabledTrigger 的
+             //   b.Contains("IsEnabled")）：{Binding IsEnabledByLicense}、Converter={StaticResource IsEnabledConverter}
+             //   都會被當成停用態豁免 —— 這是待修的產品問題，刻意不加會紅的列（不把 bug 釘成規格）。
+             //   修好時補這幾列（期望 exempted=false）：
+             //     <DataTrigger Binding="{Binding IsEnabledByLicense}" Value="False">
+             //     <DataTrigger Binding="{Binding ViewModel.CanSave, Converter={StaticResource IsEnabledConverter}}" Value="False">
+             //     MultiDataTrigger 的 <Condition Binding="{Binding IsEnabledByLicense}" Value="False"/>
     [InlineData("""<Trigger Property="IsEnabled" Value="False">""", "Trigger", true)]
     [InlineData("""<Trigger Property="UIElement.IsEnabled" Value="False">""", "Trigger", true)]
     [InlineData("""<DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="False">""", "DataTrigger", true)]

@@ -23,6 +23,7 @@ public class ConfigTests
         Assert.Null(cfg.SourcePath);
         Assert.Equal("auto", cfg.Palette.Mode);
         Assert.True(cfg.Thresholds.IsDefault);
+        Assert.Equal(50, cfg.MinCoverage); // 覆蓋率下限的預設值（README、--help 都寫 50%）
     }
 
     [Fact] // 強制配對模式：檔名不含 dark/light 提示、自動偵測抓不到 → config 指定就吃得到
@@ -173,6 +174,7 @@ public class ConfigTests
     [InlineData("""{ "failOn": null }""", "failOn must be fail|warn, got ''")]
     [InlineData("""{ "thresholds": { "normalText": 1 } }""", "thresholds out of range")]
     [InlineData("""{ "thresholds": { "largeText": 0.5 } }""", "thresholds out of range")]
+    [InlineData("""{ "thresholds": { "largeText": 1 } }""", "thresholds out of range")]     // 恰為 1 也拒（> 1 才合法）
     [InlineData("""{ "thresholds": { "failFactor": 0 } }""", "thresholds out of range")]
     [InlineData("""{ "thresholds": { "failFactor": 1.01 } }""", "thresholds out of range")]
     [InlineData("""{ "minCoverage": -0.1 }""", "minCoverage must be between 0 and 100")]
@@ -269,24 +271,24 @@ public class ConfigTests
         Assert.NotNull(ToolConfig.Load(fx.Root).SourcePath);
     }
 
-    [Fact] // 現況是寬鬆的：屬性名不分大小寫、允許註解與尾逗號、未知屬性（含拼錯）靜默忽略。
-           // 公開介面盤點 8.3：收緊任何一項都會讓原本能跑的設定檔 exit 2 —— 是破壞性變更，
-           // 改的時候這條會紅，提醒你那要走 0.x minor + CHANGELOG
-    public void ParsingIsLenientAboutNamesCommentsAndUnknownProperties()
+    [Fact] // 刻意的寬鬆：屬性名不分大小寫、允許 // 與 /* */ 註解、允許尾逗號（公開介面盤點 8.1）。
+           // 收緊任何一項都會讓原本能跑的設定檔 exit 2 —— 是破壞性變更，改的時候這條會紅，
+           // 提醒你那要走 0.x minor + CHANGELOG。
+           // ⚠ 「未知屬性（含拼錯）靜默忽略」刻意不在這裡斷言：那跟 Config.Load 自己寫的原則
+           //   （寫錯卻被靜默忽略 = 謊報健康的親戚）相反，是待修的產品問題（盤點 8.3 第 1 點），不是規格
+    public void ParsingAcceptsAnyCaseCommentsAndTrailingCommas()
     {
         using var fx = new Fixture();
         fx.File(ToolConfig.FileName, """
             {
               // 行註解
-              "FAILON": "warn",
-              "minCoverge": 99,   /* 拼錯 → 忽略，不報錯 */
+              "FAILON": "warn",   /* 區塊註解 */
               "Thresholds": { "NormalText": 7, },
             }
             """);
         var cfg = ToolConfig.Load(fx.Root);
         Assert.Equal("warn", cfg.FailOn);
         Assert.Equal(7.0, cfg.Thresholds.NormalText);
-        Assert.Equal(50, cfg.MinCoverage); // 拼錯的那格沒有生效
     }
 
     // ── 強制色盤模式：csharp／single ──────────────────────────────────────
