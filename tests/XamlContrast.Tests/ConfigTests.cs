@@ -42,6 +42,27 @@ public class ConfigTests
         Assert.Contains("config-forced", det.Description);
     }
 
+    [Theory] // config 強制 pair／single 指定的色盤檔，只有 root 是正規化後的絕對路徑時才會被排除：RequireFile 回傳
+             // GetFullPath，稽核端卻拿 EnumerateFiles(root) 的原樣路徑去比 —— 同一個專案的結果跟著 root 的寫法變
+             // （Action 一律傳相對路徑，所以一定中）。這裡用「root/sub/..」讓 EnumerateFiles 的結果帶著 ..
+    [InlineData("""{ "palette": { "mode": "pair", "darkFile": "Colors/A.xaml", "lightFile": "Colors/B.xaml" } }""", 2)]
+    [InlineData("""{ "palette": { "mode": "single", "darkFile": "Colors/A.xaml" } }""", 1)]
+    public void ForcedPaletteFilesAreExcludedWhateverTheRootSpelling(string config, int excluded)
+    {
+        using var fx = new Fixture();
+        fx.File("Colors/A.xaml", SmallDict);
+        fx.File("Colors/B.xaml", SmallDict.Replace("#111111", "#FAFAFA").Replace("#EEEEEE", "#1B1B1B"));
+        fx.File("sub/keep.txt", "");
+        fx.File("Main.xaml", """<Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>""");
+        fx.File(ToolConfig.FileName, config);
+
+        var spelled = Path.Combine(fx.Root, "sub", "..");
+        var cfg = ToolConfig.Load(spelled);
+        var r = Auditor.Run(spelled, PaletteDetector.Detect(spelled, cfg), cfg);
+        Assert.Equal(excluded, r.Detection.ExcludedFiles.Count);
+        Assert.Equal(3 - excluded, r.FileCount); // 只剩畫面檔（single 模式的 B.xaml 不是色盤，照常稽核）
+    }
+
     [Fact] // 覆蓋率 = 解析成功 / 看到的總數 —— 「這份結果代不代表專案」的關鍵數字
     public void CoverageReflectsResolvedShareOfPairsSeen()
     {

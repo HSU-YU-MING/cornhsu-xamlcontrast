@@ -163,14 +163,19 @@ public sealed partial class Auditor
         auditor._styles = StyleIndex.Build(root);
         auditor._parseErrors.AddRange(detection.ReadErrors); // 偵測時讀不到的檔（被鎖住的 .cs 之類）一樣要喊
         var all = PaletteDetector.EnumerateFiles(root, "*.xaml").ToList();
-        var files = all.Where(f => !detection.ExcludedFiles.Contains(f)).ToList();
+        // ⚠ 兩邊都 GetFullPath 再比：config 強制模式的色盤檔是 GetFullPath 過的，EnumerateFiles 卻沿用 root 的
+        //   原寫法（相對路徑、正斜線、sub/..）—— 不正規化的話排除只在 root 剛好是正規化絕對路徑時成立，
+        //   同一個專案的結果跟著 root 的寫法變（Action 一律傳相對路徑）
+        var excluded = new HashSet<string>(detection.ExcludedFiles.Select(Path.GetFullPath), StringComparer.OrdinalIgnoreCase);
+        bool IsPaletteFile(string f) => excluded.Contains(Path.GetFullPath(f));
+        var files = all.Where(f => !IsPaletteFile(f)).ToList();
 
         // 色盤檔不是畫面（不走樹、不算進 files），但裡面的 Style 一樣要在定義處檢查：
         // 鏈路徑看到「字與底出自同一個 Style 節點」就略過、交給 WalkStyles —— 主題字典裡的
         // 按鈕 Style 若沒有人走 WalkStyles，那組配對就不在 findings、也不在任何計數器裡。
         foreach (var f in all)
         {
-            var paletteFile = detection.ExcludedFiles.Contains(f);
+            var paletteFile = IsPaletteFile(f);
             XDocument doc;
             // 報告用 repo 相對路徑（正斜線）：只給檔名的話，MVVM 專案的同名檔
             // （ItemView.xaml）無法定位，baseline 的鍵還會跨資料夾互相污染。
