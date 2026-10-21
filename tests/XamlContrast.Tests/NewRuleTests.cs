@@ -156,6 +156,46 @@ public class NewRuleTests
         Assert.NotEqual(Wcag.Contrast("#EEEEEE", "#378ADD"), f.RatioDark); // 不是純藍
     }
 
+    [Theory] // 只有一個主題是半透明的色票（合併式色盤裡只有一個主題用半透明遮罩，是實際會出現的形狀）。
+             // 舊版只看深色那側的長度決定走不走 alpha：深色半透明時把 7 碼的淺色值切成 "#E0E0" → 算對比時
+             // ArgumentOutOfRangeException、整支崩潰（退出碼跳出契約）；淺色半透明時 alpha 被剝掉、
+             // 當成不透明黑 → ratioLight 報 1.3（實際約 3.91）。兩側各帶自己的 alpha（7 碼那側 alpha = 1）
+    [InlineData("#80000000", "#E0E0E0")]
+    [InlineData("#202020", "#80000000")]
+    [InlineData("#FF202020", "#80000000")]
+    public void TranslucentOnOneSideOnlyCompositesEachSideOnItsOwn(string darkScrim, string lightScrim)
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/DarkTheme.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#121212"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Scrim" Color="{darkScrim}"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/LightTheme.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FAFAFA"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Scrim" Color="{lightScrim}"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}">
+              <Border Background="{DynamicResource Scrim}">
+                <TextBlock Foreground="{DynamicResource Fg}" Text="x"/>
+              </Border>
+            </Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+
+        static string Effective(string scrim, string under) => scrim.Length == 9 && !scrim.StartsWith("#FF")
+            ? Wcag.Composite("#" + scrim[3..], Convert.ToInt32(scrim[1..3], 16) / 255.0, under)
+            : "#" + scrim[^6..];
+        Assert.Equal(Wcag.Contrast("#EEEEEE", Effective(darkScrim, "#121212")), f.RatioDark);
+        Assert.Equal(Wcag.Contrast("#1B1B1B", Effective(lightScrim, "#FAFAFA")), f.RatioLight);
+    }
+
     [Fact] // 規則 12：模板根元素自帶背景 —— Style 層沒 Background setter 時的真正底色
     public void TemplateRootBackgroundIsUsedNotAncestor()
     {

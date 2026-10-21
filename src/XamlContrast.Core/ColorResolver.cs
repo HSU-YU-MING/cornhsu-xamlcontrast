@@ -80,6 +80,12 @@ public static partial class ColorResolver
         return "#" + na.ToString("X2", System.Globalization.CultureInfo.InvariantCulture) + rgb.ToUpperInvariant();
     }
 
+    /// <summary>色票值 → (alpha, #RRGGBB)。7 碼是不透明（alpha = 1）。</summary>
+    private static (double Alpha, string Rgb) SplitAlpha(string hex)
+        => hex.Length == 9
+            ? (Convert.ToInt32(hex.Substring(1, 2), 16) / 255.0, "#" + hex[3..])
+            : (1.0, hex);
+
     [GeneratedRegex(@"^#[0-9A-Fa-f]{6}$")]
     private static partial Regex Rgb6();
 
@@ -133,19 +139,17 @@ public static partial class ColorResolver
                     var l = e.Light.Length == 9 ? "#" + e.Light[3..] : e.Light;
                     return new Resolved(ColorKind.Soft, d, l, Key: key);
                 }
-                if (e.Dark.Length == 9)
-                {
-                    // #AARRGGBB 的「半透明色票」（如 CelFlow 的 BlueOverlay/Scrim）：
-                    // 之前只有字面 8 碼會走合成，色票鍵的 8 碼值被 Luminance 剝掉 alpha
-                    // 當『不透明色』用 —— InfoL 疊 16% 藍被算成疊純藍的假「破 2.68」。
-                    // 深淺各帶自己的 alpha。
-                    return new Resolved(ColorKind.Alpha, Key: key,
-                        Alpha: Convert.ToInt32(e.Dark.Substring(1, 2), 16) / 255.0,
-                        Rgb: "#" + e.Dark[3..],
-                        AlphaLight: Convert.ToInt32(e.Light.Substring(1, 2), 16) / 255.0,
-                        RgbLight: "#" + e.Light[3..]);
-                }
-                return new Resolved(ColorKind.Soft, e.Dark, e.Light, Key: key);
+                // #AARRGGBB 的「半透明色票」（如 CelFlow 的 BlueOverlay/Scrim）：
+                // 之前只有字面 8 碼會走合成，色票鍵的 8 碼值被 Luminance 剝掉 alpha
+                // 當『不透明色』用 —— InfoL 疊 16% 藍被算成疊純藍的假「破 2.68」。
+                // 深淺各帶自己的 alpha。
+                // ⚠ 任一側半透明就整個走 alpha，兩側各自拆（7 碼那側 alpha = 1）。舊版只看深色那側的長度：
+                //   深色半透明、淺色 7 碼 → 把 "#E0E0E0" 切成 "#E0E0"，算對比時 ArgumentOutOfRangeException、
+                //   整支崩潰；淺色半透明、深色 7 碼 → 回傳帶 9 碼淺色值的 Soft，alpha 被剝掉當不透明色，
+                //   比值是編出來的（實際 3.91 報 1.3）。合併式色盤裡只有一個主題用半透明遮罩是實際會出現的形狀
+                var (ad, rd) = SplitAlpha(e.Dark);
+                var (al, rl) = SplitAlpha(e.Light);
+                return new Resolved(ColorKind.Alpha, Key: key, Alpha: ad, Rgb: rd, AlphaLight: al, RgbLight: rl);
             }
             return new Resolved(ColorKind.UnknownKey, Key: key);
         }
