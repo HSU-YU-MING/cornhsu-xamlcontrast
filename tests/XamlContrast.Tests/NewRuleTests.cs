@@ -558,10 +558,10 @@ public class NewRuleTests
         Assert.Equal(21.0, f.RatioDark);
     }
 
-    [Theory] // 規則 17 只在子元素會重疊的容器裡成立:Grid/Canvas/自訂 *Panel 是疊層,
-             // StackPanel 系與各種排開的 Panel 不是 —— 在那裡把前一個兄弟當背板,就是把旁邊的方塊當成字的底
+    [Theory] // 規則 17(a) 只在子元素會重疊、而且背板會被撐滿的容器裡成立:Grid/自訂 *Panel 是疊層,
+             // StackPanel 系與各種排開的 Panel 不是 —— 在那裡把前一個兄弟當背板,就是把旁邊的方塊當成字的底。
+             // Canvas 刻意不在這裡:見下一條 CanvasSiblingImageMakesTheBackdropUnknowable
     [InlineData("Grid", true)]
-    [InlineData("Canvas", true)]
     [InlineData("LayeredPanel", true)]           // 自訂 Panel:保守視為疊層
     [InlineData("StackPanel", false)]
     [InlineData("VirtualizingStackPanel", false)]
@@ -586,12 +586,34 @@ public class NewRuleTests
         Assert.Equal(overlaps ? "#000000" : "#FFFFFF", f.Bg);
     }
 
+    [Fact] // Canvas 的子元素一律疊在 (0,0),所以它是重疊容器 —— 用規則 17(b) 觀察:圖片墊底的字底不可知。
+           // ⚠ 刻意不用 17(a) 的 <Border Background=.../> 驗 Canvas:Canvas 只給子元素它自己要求的大小,
+           // 對齊在 Canvas 裡不起作用,沒內容、沒 Width/Height 的 Border 實際是 0×0、畫面上看不到,
+           // 字真正疊在祖先底上。產品目前在 Canvas 裡也套 17(a)(把那個 0×0 Border 當背板,白字配祖先白底
+           // 卻報 21:1 合格)—— 這是已回報的漏報,不是規格,所以這裡不拿它當期望值
+    public void CanvasSiblingImageMakesTheBackdropUnknowable()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Canvas>
+                <Image Source="a.png"/>
+                <TextBlock Foreground="#FFFFFF" Text="x"/>
+              </Canvas>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);   // 不是白配白 1:1(那是把 Canvas 當成排開的容器、配祖先)
+        Assert.Equal(UnresolvedReason.OverSiblingContent, Assert.Single(r.UnresolvedSites).Reason);
+    }
+
     [Theory] // 規則 17 的背板判定:只收「佔滿同一格、確定的純色」;內容元素(圖片/影片)讓底變成不可知
     [InlineData("""<Rectangle Fill="#000000"/>""", "#000000")]                                         // Rectangle 的底是 Fill
     [InlineData("""<Border Background="#000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>""", "#000000")]
     [InlineData("""<Border Background="#000000" Height="20"/>""", "#FFFFFF")]                          // 有明確尺寸 = 不是佔滿
+    [InlineData("""<Border Background="#000000" Width="20"/>""", "#FFFFFF")]                           // 寬、高各自單獨就足以排除
     [InlineData("""<Border Background="#000000" VerticalAlignment="Top"/>""", "#FFFFFF")]              // 非 Stretch = 不是佔滿
-    [InlineData("""<Border Background="#80000000"/>""", "#FFFFFF")]                                    // 半透明不越權,維持原判定
+    [InlineData("""<Border Background="#000000" HorizontalAlignment="Left"/>""", "#FFFFFF")]           // 水平、垂直各自單獨就足以排除
     [InlineData("""<Border Grid.Column="1" Background="#000000"/>""", "#FFFFFF")]                      // 不同欄 = 不同格
     [InlineData("""<MediaElement Source="intro.mp4"/>""", null)]                                     // 影片上的字
     [InlineData("""<CachedImage Source="a.png"/>""", null)]                                          // 衍生命名的 *Image
@@ -612,6 +634,23 @@ public class NewRuleTests
             Assert.Equal(UnresolvedReason.OverSiblingContent, Assert.Single(r.UnresolvedSites).Reason);
         }
         else Assert.Equal(expectedBg, Assert.Single(text).Bg);
+    }
+
+    [Fact] // KnownLimitation —— 釘的是現況,不是正確答案。已知盲區(規畫書 §7「看不到 sibling 元素的背景」;
+           // 規則 17 只補了不透明的那一半):半透明的兄弟背板目前不合成,字改配祖先底。同樣的顏色寫成
+           // 巢狀(Border 包 TextBlock)會合成並照實評分,寫成兄弟就不會。修這個盲區(合成,或至少改報
+           // unresolved)時,這條要跟著改,不要為了讓它維持綠燈而把修正退回去
+    public void KnownLimitation_TranslucentSiblingBackdropIsNotComposited()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Border Background="#80000000"/>
+              <TextBlock Foreground="#FFFFFF" Text="x"/>
+            </Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+        Assert.Equal("#FFFFFF", f.Bg);   // 現況:配到祖先的白,不是「50% 黑疊白」
     }
 
     [Fact] // 同 brush 配對 = 模板不透明度慣用手法(MaterialDesign 實證):字面 1:1、
