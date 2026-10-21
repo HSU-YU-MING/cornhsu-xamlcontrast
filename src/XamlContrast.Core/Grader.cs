@@ -8,7 +8,7 @@ namespace XamlContrast.Core;
 ///   但對稱不是意圖的證據 —— 兩邊一樣糟就只是兩邊都糟。
 ///   「這是不是刻意的裝飾」只有看它在畫什麼才知道，工具不猜 —— 一律報出來由人判斷。
 ///
-///   等級（絕對對比）：fail &lt; 門檻×2/3 ／ warn 其間 ／ ok ≥ 門檻 ／ decorative 不設限
+///   等級（絕對對比）：fail &lt; 門檻×failFactor（預設 0.67）／ warn 其間 ／ ok ≥ 門檻 ／ decorative 不設限
 ///   對稱（跨主題）  ：single-theme ／ both-low（色票本身不夠，換主題救不了）
 ///                     dark-fails / light-fails（設計意圖沒跨主題保住）
 /// </summary>

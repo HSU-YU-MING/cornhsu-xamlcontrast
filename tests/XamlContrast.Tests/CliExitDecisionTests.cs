@@ -21,7 +21,20 @@ public class CliExitDecisionTests
         using var bad = CliProjects.Failing();
         var r1 = Cli.Run(bad.Root);
         Assert.True(r1.Exit == 1, r1.ToString());
-        Assert.Contains("exit 1: 1 pair(s) below threshold x 2/3 (0 warn)", r1.Out);
+        Assert.Contains("exit 1: 1 pair(s) below threshold x 0.67 (0 warn)", r1.Out);
+    }
+
+    [Fact] // 結論行印實際生效的 failFactor：舊版寫死「x 2/3」—— 改了 thresholds.failFactor（0.9）之後 console 同時印
+           // "fail-factor 0.9" 與 "below threshold x 2/3"；預設值本身也是 0.67 不是 2/3（3.00～3.01 會被判成 fail）
+    public void ExitLineNamesTheFailFactorActuallyInEffect()
+    {
+        using var fx = CliProjects.Failing();
+        fx.File("xamlcontrast.config.json", """{ "thresholds": { "failFactor": 0.9 } }""");
+        var r = Cli.Run(fx.Root);
+        Assert.True(r.Exit == 1, r.ToString());
+        Assert.Contains("exit 1: 1 pair(s) below threshold x 0.9 (0 warn)", r.Out);
+        Assert.DoesNotContain("2/3", r.Out);
+        Assert.DoesNotContain("2/3", Cli.Run("--help").Out); // help 不寫死係數
     }
 
     [Fact] // 0 組配對不可設定 —— 空掃綠燈就是謊報健康

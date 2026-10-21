@@ -276,7 +276,10 @@ int DecideExit()
 
     if (fail > 0)
     {
-        Console.WriteLine($"exit 1: {fail} pair(s) below threshold x 2/3 ({warn} warn)");
+        // 係數印實際生效的 failFactor（config 可改）—— 舊版寫死「x 2/3」，改了 failFactor 之後
+        // console 同時印 "fail-factor 0.9" 與 "x 2/3"；預設值本身也是 0.67 不是 2/3
+        Console.WriteLine(string.Create(System.Globalization.CultureInfo.InvariantCulture,
+            $"exit 1: {fail} pair(s) below threshold x {config.Thresholds.FailFactor} ({warn} warn)"));
         return 1;
     }
     if (failOnWarn && warn > 0)
@@ -301,7 +304,8 @@ static void PrintUsage()
           --json <path>            write machine-readable report (summary + findings)
           --sarif <path>           write SARIF 2.1.0 (GitHub code scanning; fail/warn only)
           --md <path>              write a Markdown report (suitable for a PR comment)
-          --fail-on warn           also fail the run when pairs are below AA but above 2/3
+          --fail-on warn           also fail the run on 'warn' pairs (below AA, above the
+                                   fail line = threshold x fail-factor, default 0.67)
           --strict-palette         fail the run when palette detection degrades
           --min-coverage <0-100>   fail when fewer than N% of colour pairs could be
                                    resolved (default 50; a pass over a fraction of the

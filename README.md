@@ -49,7 +49,7 @@ MainWindow.xaml:30  TextBlock                fg=White                      bg={S
 MainWindow.xaml:26  TextBlock                fg={DynamicResource DimText}  bg={Bg}       dark=  2.11:1 light=   1.6:1  [both-low] need 4.5 12px
 MainWindow.xaml:6   Style[HoverBtn]/trigger  fg=#9A9A9A                    bg={Surface}  dark=  5.92:1 light=  2.81:1  [light-fails] need 4.5
 
-exit 1: 3 pair(s) below threshold x 2/3 (0 warn)
+exit 1: 3 pair(s) below threshold x 0.67 (0 warn)
 ```
 
 (Column widths trimmed to fit the page; everything else is verbatim.)
