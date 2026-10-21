@@ -65,23 +65,26 @@ public class CliArgumentTests
         Assert.Contains("--min-coverage takes a number between 0 and 100", r.Err);
     }
 
-    [Fact] // 沒給 root → usage + exit 2（不是 0：什麼都沒稽核）
-    public void MissingRootPrintsUsageAndExitsTwo()
+    [Fact] // 沒給 root → usage + exit 2（不是 0：什麼都沒稽核）。用法錯誤的 usage 印到 stderr ——
+           // 舊版印到 stdout，CI 抓 stdout 當報告的人拿到的是一段說明文字；--help 才印到 stdout
+    public void MissingRootPrintsUsageToStderrAndExitsTwo()
     {
         var r = Cli.Run();
         Assert.True(r.Exit == 2, r.ToString());
-        Assert.Contains("usage: xamlcontrast <project-root> [options]", r.Out);
+        Assert.Contains("usage: xamlcontrast <project-root> [options]", r.Err);
+        Assert.DoesNotContain("usage:", r.Out);
     }
 
     [Fact] // --baseline 的路徑可省略：下一個字不以 - 開頭就被當成 baseline 路徑 ——
            // 所以 `--baseline <root>` 會把 root 吃掉、root 落空 → usage + exit 2。
-           // 這是現況（公開介面盤點 2.3/2.6 建議 1.0 前改），改了形狀這條要跟著改。
+           // 形狀本身是待決定的介面變更（決策檔）；在那之前至少說出發生了什麼（舊版 stderr 沒有任何說明）
     public void BaselineFlagSwallowsTheFollowingPositional()
     {
         using var fx = CliProjects.Passing();
         var r = Cli.Run("--baseline", fx.Root);
         Assert.True(r.Exit == 2, r.ToString());
-        Assert.Contains("usage: xamlcontrast", r.Out);
+        Assert.Contains("usage: xamlcontrast", r.Err);
+        Assert.Contains($"--baseline took '{fx.Root}' as the baseline file", r.Err);
     }
 
     [Theory] // -h／--help 掃到就結束、exit 0；旗標由左到右一次掃過，錯誤旗標在前就先 exit 2
@@ -98,8 +101,11 @@ public class CliArgumentTests
             Assert.Contains("usage: xamlcontrast <project-root> [options]", r.Out);
             // help 要列出每一個旗標 —— 凍結面（CLI 旗標）的對外說明
             foreach (var flag in new[] { "--json", "--sarif", "--md", "--fail-on", "--strict-palette",
-                                         "--min-coverage", "--baseline", "--write-baseline", "--show-ok", "--show-unresolved" })
+                                         "--min-coverage", "--baseline", "--write-baseline", "--show-ok", "--show-unresolved",
+                                         "--version", "-h, --help" })
                 Assert.Contains(flag, r.Out);
+            // --fail-on 吃 fail 與 warn 兩個值 —— 舊版只寫 "--fail-on warn"，讓人以為 fail 不是合法值
+            Assert.Contains("--fail-on <fail|warn>", r.Out);
         }
     }
 

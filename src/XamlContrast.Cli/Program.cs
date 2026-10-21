@@ -64,7 +64,7 @@ for (var i = 0; i < args.Length; i++)
                 ? args[++i] : "xamlcontrast-baseline.json";
             break;
         case "-h" or "--help":
-            PrintUsage();
+            PrintUsage(Console.Out);
             return 0;
         case "--version":
             Console.WriteLine(typeof(Program).Assembly
@@ -78,7 +78,16 @@ for (var i = 0; i < args.Length; i++)
     }
 }
 
-if (root is null) { PrintUsage(); return 2; }
+if (root is null)
+{
+    PrintUsage(Console.Error);
+    // `--baseline src/MyApp`：可省略的路徑把 root 吃掉了 —— 舊版只印 usage，看不出發生了什麼
+    foreach (var (flag, taken) in new[] { ("--baseline", baselinePath), ("--write-baseline", writeBaselinePath) })
+        if (taken is not null && Directory.Exists(taken))
+            Console.Error.WriteLine($"note: {flag} took '{taken}' as the baseline file — " +
+                                    $"put <project-root> first, or give {flag} an explicit file path");
+    return 2;
+}
 if (!Directory.Exists(root))
 {
     Console.Error.WriteLine($"root not found: {root}");
@@ -293,9 +302,10 @@ int DecideExit()
 
 }   // DecideExit
 
-static void PrintUsage()
+// --help → stdout、exit 0；用法錯誤 → stderr、exit 2（舊版兩者都印到 stdout）
+static void PrintUsage(TextWriter w)
 {
-    Console.WriteLine("""
+    w.WriteLine("""
         XamlContrast — static WCAG contrast audit for XAML source
 
         usage: xamlcontrast <project-root> [options]
@@ -304,8 +314,9 @@ static void PrintUsage()
           --json <path>            write machine-readable report (summary + findings)
           --sarif <path>           write SARIF 2.1.0 (GitHub code scanning; fail/warn only)
           --md <path>              write a Markdown report (suitable for a PR comment)
-          --fail-on warn           also fail the run on 'warn' pairs (below AA, above the
-                                   fail line = threshold x fail-factor, default 0.67)
+          --fail-on <fail|warn>    fail (default): exit 1 on 'fail' pairs; warn: also on 'warn'
+                                   pairs (below AA, above the fail line = threshold x
+                                   fail-factor, default 0.67). Can only tighten the config
           --strict-palette         fail the run when palette detection degrades
           --min-coverage <0-100>   fail when fewer than N% of colour pairs could be
                                    resolved (default 50; a pass over a fraction of the
@@ -316,5 +327,9 @@ static void PrintUsage()
           --show-ok                list passing pairs, grouped
           --show-unresolved        list every pair the tool could NOT resolve, with
                                    file:line, reason and the offending value/key
+          --version                print the tool version
+          -h, --help               print this help
+
+        exit codes: 0 pass, 1 fail (or the result cannot be trusted), 2 usage or config error
         """);
 }
