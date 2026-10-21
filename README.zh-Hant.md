@@ -103,6 +103,8 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
 
 (1)(2) 都回報成 `pair` 模式，(4)(5) 都是 `single`。repo 裡有兩個以上 `<Application>`
 根元素（通常是 `App.xaml`）時，合併字典的 (1)(4) 會讓各應用程式子樹再各自對自己的色盤解析一次。
+掃描根目錄以下的路徑中，有資料夾或檔名以 `test`、`sample`、`demo`、`example` 開頭
+（或在第二層以下以 `fixture`／`mock` 開頭）的 XAML，不會被當成色盤字典或應用程式根元素 —— 但照樣受稽核。
 
 猜錯可用 `xamlcontrast.config.json` 指定（[schema](docs/config-schema.md)）。
 若你的 App 建在主題函式庫上（MahApps、HandyControl、MaterialDesign⋯），通常色盤找得到、
@@ -179,6 +181,9 @@ jobs:
 `skipped`、`deadForeground`、`disabledExempt`、`suppressed`、`parseErrors`，
 有內容時另有 `unknownKeys`、`parseErrorFiles`、`invalidIgnores`。工具沒看到的東西，都是機器可讀的。
 消費端請檢查 `schemaVersion`。
+每筆 finding 帶 `file`、`line`、`element`、`fg`、`bg`、`ratioDark`、`ratioLight`、`threshold`、
+`category`、`isText`、`largeText`，`fail`／`warn` 另帶 `symmetry`、有設字級時另帶 `fontSize`；
+被壓掉的配對只計入 `summary`，不列出。
 
 `unresolved` 在 `summary.unresolvedBy` 裡有原因細目 —— 光看總數看不出「補不補得回來」:
 
@@ -197,7 +202,7 @@ jobs:
 設 `"minCoverage": 0`)。
 
 每一筆無法解析的配對都有位置可查:`--show-unresolved` 逐筆列出
-`file:line · 原因 · 卡住的值`,JSON 頂層的 `unresolved` 陣列帶同一份清單。
+`file:line · 原因 · 卡住的值`,JSON 頂層的 `unresolved` 陣列帶同一份清單(`file`、`line`、`reason`、`value`)。
 unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)——
 每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。
 

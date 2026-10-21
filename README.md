@@ -131,7 +131,10 @@ tried in this order, and the one that ran is always named on the first line of t
 
 (1) and (2) both report as palette mode `pair`; (4) and (5) as `single`. In a repo with two or
 more `<Application>` roots (typically `App.xaml`), the merged paths (1) and (4) additionally
-resolve each application subtree against its own palette.
+resolve each application subtree against its own palette. XAML whose path below the scanned root
+has a folder or file name starting with `test`, `sample`, `demo` or `example` (or, below the top
+level, `fixture` / `mock`) is never taken as a palette dictionary or an application root — it is
+still audited.
 
 Wrong guess? Override with `xamlcontrast.config.json` —
 [schema](docs/config-schema.md) (zh-Hant; the JSON example at the top is self-explanatory).
@@ -219,6 +222,9 @@ Inputs: `root` (required), `working-directory`, `version`, `fail-on`, `baseline`
 (with `unresolvedBy`), `skipped`, `deadForeground`, `disabledExempt`, `suppressed`, `parseErrors`,
 plus `unknownKeys`, `parseErrorFiles` and `invalidIgnores` when non-empty. If the tool couldn't see
 something, that fact is machine-readable. Consumers should check `schemaVersion`.
+Each finding carries `file`, `line`, `element`, `fg`, `bg`, `ratioDark`, `ratioLight`, `threshold`,
+`category`, `isText` and `largeText`, plus `symmetry` (fail/warn only) and `fontSize` (when one is
+set); suppressed pairs are counted in `summary`, not listed.
 
 `unresolved` is broken down by cause in `summary.unresolvedBy`, because the total on its own
 doesn't tell you whether anything can be done about it:
@@ -240,9 +246,10 @@ in `xamlcontrast.config.json` instead).
 
 Every unresolved pair is listed with its location: `--show-unresolved` prints
 `file:line · reason · offending value`, and the JSON carries the same list in a top-level
-`unresolved` array. Unknown keys are additionally named with counts (`summary.unknownKeys`,
-and the top ones on the console) — each one is a dead resource reference, a typo, or a palette
-file detection missed, which makes this a free lint even before any contrast math.
+`unresolved` array (`file`, `line`, `reason`, `value`). Unknown keys are additionally named
+with counts (`summary.unknownKeys`, and the top ones on the console) — each one is a dead
+resource reference, a typo, or a palette file detection missed, which makes this a free lint
+even before any contrast math.
 
 **Set expectations by project type.** Application projects typically resolve well
 (three of the four validation apps run at 88–99%; the fourth has almost no text to pair).
