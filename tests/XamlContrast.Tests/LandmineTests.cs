@@ -249,6 +249,48 @@ public class LandmineTests
         Assert.True(Assert.Single(r.Findings, f => f.Element == "Button⊕Style[Card]/base").Large);          // Style 鏈
     }
 
+    // ── 輸出端同一條規矩：寫進 baseline 鍵、SARIF、錯誤訊息的數字一律 InvariantCulture ──
+    //    舊版 fg 的「×0.5」跟著 CurrentCulture 走（$"{fg} ×{Math.Round(op, 2)}"）：逗號小數點的機器寫出
+    //    "#000000 ×0,5"，fg 是 baseline 鍵的一部分 —— 在那種機器寫的 baseline 拿到 invariant 的 CI 上，
+    //    帶 Opacity 的既有債全部變成 NEW 加 paid off、CI 紅燈。SARIF 訊息與 config 錯誤訊息同理
+
+    [Fact]
+    public void OutputNumbersAreInvariantUnderACommaDecimalCulture()
+    {
+        var comma = (CultureInfo)CultureInfo.InvariantCulture.Clone();
+        comma.NumberFormat.NumberDecimalSeparator = ",";
+        comma.NumberFormat.NumberGroupSeparator = ".";
+
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Card" TargetType="Button"><Setter Property="Background" Value="#FFFFFF"/></Style>
+              </Grid.Resources>
+              <TextBlock Opacity="0.5" Foreground="#EEEEEE" Text="tree walk"/>
+              <Button Style="{StaticResource Card}" Opacity="0.5" Foreground="#EEEEEE" Content="style chain"/>
+            </Grid>
+            """);
+        using var bad = new Fixture();
+        bad.File(ToolConfig.FileName, """{ "minCoverage": 150.5 }""");
+
+        var prev = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = comma;
+            Assert.Equal("0,5", 0.5.ToString(CultureInfo.CurrentCulture)); // 前提：這個 culture 真的會寫出逗號
+            var r = fx.Run();
+            Assert.Equal(["#EEEEEE ×0.5", "#EEEEEE ×0.5"], r.Findings.Select(f => f.Fg));
+            Assert.Contains("\"#EEEEEE \\u00D70.5\"", Baseline.Write(r)); // baseline 鍵
+            var sarif = Report.ToSarif(r, "0.0.0");
+            Assert.Contains("needs 4.5:1", sarif);
+            Assert.DoesNotContain("4,5", sarif);
+            var ex = Assert.Throws<ConfigException>(() => ToolConfig.Load(bad.Root));
+            Assert.Contains("got 150.5", ex.Message);
+        }
+        finally { CultureInfo.CurrentCulture = prev; }
+    }
+
     // ── 色票值只收長度 7（#RRGGBB）或 9（#AARRGGBB）：七位數的打字錯誤不能被默默猜前半段 ──
 
     [Fact] // <Color> 元素那條解析路徑（ParseColorDefs）

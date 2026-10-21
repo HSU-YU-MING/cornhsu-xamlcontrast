@@ -205,8 +205,10 @@ public static class Report
                 level = f.Category == Category.Fail ? "error" : "warning",
                 message = new
                 {
-                    text = $"Contrast {f.RatioDark}:1 dark / {f.RatioLight}:1 light — needs {f.Need}:1 " +
-                           $"(fg={f.Fg}, bg={f.Bg}, {SymmetryLabel(f.Symmetry)}, {f.Element})",
+                    // InvariantCulture：console 與 Markdown 早就是，這裡漏了 —— de-DE 下會印 "1,92:1 … needs 4,5:1"
+                    text = string.Create(CultureInfo.InvariantCulture,
+                        $"Contrast {f.RatioDark}:1 dark / {f.RatioLight}:1 light — needs {f.Need}:1 " +
+                        $"(fg={f.Fg}, bg={f.Bg}, {SymmetryLabel(f.Symmetry)}, {f.Element})"),
                 },
                 locations = new[]
                 {

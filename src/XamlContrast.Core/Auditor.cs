@@ -119,6 +119,11 @@ public sealed partial class Auditor
     private static bool ParseDouble(string s, out double value)
         => double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
 
+    /// <summary>findings 的 fg 附上累乘的 Opacity（"#FFFFFF ×0.5"）。⚠ 一樣要 InvariantCulture：
+    /// fg 是 baseline 鍵的一部分，逗號小數點的機器寫出 "×0,5"，換一台機器比對就全部變成 NEW。</summary>
+    private static string WithOpacityNote(string fg, double op)
+        => string.Create(CultureInfo.InvariantCulture, $"{fg} ×{Math.Round(op, 2)}");
+
     private Auditor(Palette palette, ToolConfig cfg)
     {
         _pal = palette;
@@ -417,7 +422,7 @@ public sealed partial class Auditor
                     File = file,
                     Line = lineC,
                     Element = $"{el.Name.LocalName}⊕{chain.Label}/{(st.Cond is null && st.Set.Count == 0 ? "base" : "trigger")}",
-                    Fg = op < 0.999 ? $"{fgV} ×{Math.Round(op, 2)}" : fgV,
+                    Fg = op < 0.999 ? WithOpacityNote(fgV, op) : fgV,
                     Bg = bgObj.Key is not null ? "{" + bgObj.Key + "}" : bgObj.Dark!,
                     Mixed = fgR.Kind != bgObj.Kind,
                     RatioDark = Wcag.Contrast(fgDC, bgObj.Dark!),
@@ -486,7 +491,7 @@ public sealed partial class Auditor
                 File = file,
                 Line = line,
                 Element = localName,
-                Fg = op < 0.999 ? $"{fgRaw} ×{Math.Round(op, 2)}" : fgRaw,
+                Fg = op < 0.999 ? WithOpacityNote(fgRaw, op) : fgRaw,
                 Bg = bg.Key is not null ? "{" + bg.Key + "}" : bg.Dark!,
                 Mixed = fg.Kind != bg.Kind,
                 RatioDark = Wcag.Contrast(fgD, bg.Dark!),

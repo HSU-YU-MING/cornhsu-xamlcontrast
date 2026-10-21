@@ -129,7 +129,7 @@ public sealed class ToolConfig
             cfg.Thresholds.FailFactor is <= 0 or > 1)
             throw new ConfigException("thresholds out of range (contrast ratios > 1, failFactor in (0,1])");
         if (cfg.MinCoverage is < 0 or > 100)
-            throw new ConfigException($"minCoverage must be between 0 and 100, got {cfg.MinCoverage}");
+            throw new ConfigException($"minCoverage must be between 0 and 100, got {cfg.MinCoverage.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
 
         cfg.SourcePath = path;
         cfg.UnknownProperties = FindUnknown(text);
