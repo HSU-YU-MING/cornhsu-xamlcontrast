@@ -79,9 +79,12 @@ public class ActionContractTests
     [InlineData("app", "src//MyApp", "app/src/MyApp/Views/Main.xaml")] // 重複斜線
     [InlineData("./app/", "src", "app/src/Views/Main.xaml")]        // 開頭 ./ + 接縫處的雙斜線
     [InlineData("a//b", "c//d", "a/b/c/d/Views/Main.xaml")]         // 不只收第一處
-    // ⚠ 尚未處理（action.yml 的缺口，已回報；這裡刻意不加一列會紅的測試）：root 是 "."（XAML 就在
-    // repo 頂層）時前綴是 "./." → sed 只收成 "."，接上 finding 變 "./Views/Main.xaml"，正是上面說的
-    // 「./ 沒收乾淨」形狀；"src/." 也原樣保留。修 sed 時把這兩種補成列（期望 "Views/Main.xaml"、"src/Views/Main.xaml"）
+    // root 是 "."（XAML 就在 repo 頂層，常見寫法）：舊版 sed 把 "./." 只收成 "."，接上 finding 變成
+    // "./Views/Main.xaml"，正是上面說的「./ 沒收乾淨」形狀；"src/." 原樣保留；"./" + "./src" 甚至收成 "/./src"
+    [InlineData(".", ".", "Views/Main.xaml")]
+    [InlineData(".", "src/.", "src/Views/Main.xaml")]
+    [InlineData("./", "./src", "src/Views/Main.xaml")]
+    [InlineData(".", "./app/./src", "app/src/Views/Main.xaml")]
     public void ActionPrefixesFindingPathsIntoWorkspacePaths(string workingDirectory, string root, string expected)
     {
         // 兩個步驟（Annotate failing pairs、Upload SARIF to code scanning）的前綴算法必須一字不差
@@ -91,12 +94,15 @@ public class ActionContractTests
         var (echo, sed) = Assert.Single(prefixLines.Distinct());
         Assert.Equal("${{ inputs.working-directory }}/${{ inputs.root }}", echo);
 
-        // 前綴之後接 "/" + finding 的 file —— 註記的 jq 與 SARIF 改寫的 jq 都是這樣接
-        Assert.Contains("file=\\($root)/\\(.file)", ActionYml);
-        Assert.Contains("($root + \"/\" + .)", ActionYml);
+        // 前綴非空才補 "/"（root 就是 workspace 頂層時前綴是空的，不能接出 "/Views/Main.xaml"），
+        // 之後直接接 finding 的 file —— 註記的 jq 與 SARIF 改寫的 jq 都是這樣接
+        Assert.Equal(2, Regex.Matches(ActionYml, @"if \[ -n ""\$prefix"" \]; then prefix=""\$prefix/""; fi").Count);
+        Assert.Contains("file=\\($root)\\(.file)", ActionYml);
+        Assert.Contains("($root + .)", ActionYml);
 
         var prefix = Sed(sed, $"{workingDirectory}/{root}");
-        Assert.Equal(expected, $"{prefix}/Views/Main.xaml");
+        if (prefix.Length > 0) prefix += "/";
+        Assert.Equal(expected, $"{prefix}Views/Main.xaml");
     }
 
     /// <summary>只支援 action.yml 實際用到的子集：以 ; 串接的 s|BRE|替換|旗標。

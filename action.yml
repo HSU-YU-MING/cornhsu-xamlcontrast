@@ -109,18 +109,21 @@ runs:
 
     # 破的配對直接標在 PR 的行上（::error 註記吃 workspace 相對路徑；
     # findings 的 file 是「root 相對、正斜線」路徑，前綴 working-directory + root 即為
-    # workspace 路徑。前綴組完要把 "./" 與重複的 "/" 收乾淨，否則 GitHub 對不上檔案。）
+    # workspace 路徑。前綴組完要把 "./"、"/./"、重複的 "/" 收乾淨，否則 GitHub 對不上檔案 ——
+    # root 是 "."（XAML 在 repo 頂層）時前綴是空的，不能接出 "./Views/…" 或 "/Views/…"；
+    # sed 先在頭尾補 "/" 讓每個 "." 段都夾在兩個 "/" 之間，再逐段剔除。）
     - name: Annotate failing pairs
       if: ${{ always() }}
       shell: bash
       run: |
         report="$RUNNER_TEMP/xamlcontrast-report.json"
         [ -f "$report" ] || exit 0
-        prefix=$(echo "${{ inputs.working-directory }}/${{ inputs.root }}" | sed 's|^\./||; s|//*|/|g; s|/$||')
+        prefix=$(echo "${{ inputs.working-directory }}/${{ inputs.root }}" | sed 's|^|/|; s|$|/|; s|//*|/|g; s|/\./|/|g; s|/\./|/|g; s|/\./|/|g; s|^/||; s|/$||')
+        if [ -n "$prefix" ]; then prefix="$prefix/"; fi
         jq -r --arg root "$prefix" '
           .findings[]
           | select(.category == "fail" or .category == "warn")
-          | "::\(if .category == "fail" then "error" else "warning" end) file=\($root)/\(.file),line=\(.line)::contrast \(.ratioDark):1 dark / \(.ratioLight):1 light (need \(.threshold)) — fg=\(.fg) bg=\(.bg) [\(.symmetry)]"
+          | "::\(if .category == "fail" then "error" else "warning" end) file=\($root)\(.file),line=\(.line)::contrast \(.ratioDark):1 dark / \(.ratioLight):1 light (need \(.threshold)) — fg=\(.fg) bg=\(.bg) [\(.symmetry)]"
         ' "$report" || true
 
     # SARIF 的路徑是 root 相對 —— 先補上前綴變成 repo 相對，code scanning 才對得上檔案
@@ -131,9 +134,10 @@ runs:
       run: |
         f="$RUNNER_TEMP/xamlcontrast.sarif"
         [ -f "$f" ] || exit 0
-        prefix=$(echo "${{ inputs.working-directory }}/${{ inputs.root }}" | sed 's|^\./||; s|//*|/|g; s|/$||')
+        prefix=$(echo "${{ inputs.working-directory }}/${{ inputs.root }}" | sed 's|^|/|; s|$|/|; s|//*|/|g; s|/\./|/|g; s|/\./|/|g; s|/\./|/|g; s|^/||; s|/$||')
+        if [ -n "$prefix" ]; then prefix="$prefix/"; fi
         jq --arg root "$prefix" \
-          '(.runs[].results[].locations[].physicalLocation.artifactLocation.uri) |= ($root + "/" + .)' \
+          '(.runs[].results[].locations[].physicalLocation.artifactLocation.uri) |= ($root + .)' \
           "$f" > "$RUNNER_TEMP/xamlcontrast.repo.sarif"
         mv "$RUNNER_TEMP/xamlcontrast.repo.sarif" "$f"
     - name: Upload SARIF
