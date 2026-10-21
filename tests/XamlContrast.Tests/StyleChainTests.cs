@@ -213,4 +213,126 @@ public class StyleChainTests
         Assert.Equal("#FFFFFF", hover.Fg);   // style trigger 的字色，不是 template trigger 的 #222222
         Assert.Equal("#000000", hover.Bg);   // 底由 template trigger 補上
     }
+
+    // ── 鏈路徑上「評不了」的每一種情況都要落進對的桶：樹走訪那邊有的計數紀律，這條路一樣要有 ──
+    //    之前 Style 配對評不了是裸 continue，配對從報告徹底消失、連計數都沒有（NewRuleTests 那條的教訓）
+
+    [Theory]
+    [InlineData("""<Button Style="{StaticResource Pad}" Foreground="#FFFFFF" Content="x"/>""", "Transparent", "no-ancestor-background")]
+    [InlineData("""<Button Style="{StaticResource Pad}" Background="#80FFFFFF" Foreground="#000000" Content="半透明底、底下沒東西"/>""", "Transparent", "no-ancestor-background")]
+    [InlineData("""<Button Style="{StaticResource Pad}" Foreground="#FFFFFF" Content="祖先底綁執行期"/>""", "{Binding WindowBg}", "bound-or-gradient")]
+    [InlineData("""<Button Style="{StaticResource Pad}" Background="{Binding Fill}" Foreground="#FFFFFF" Content="自己的底綁執行期"/>""", "#000000", "bound-or-gradient")]
+    [InlineData("""<Button Style="{StaticResource Pad}" Background="{DynamicResource Nope}" Foreground="#FFFFFF" Content="底是死引用"/>""", "#000000", "unknown-palette-key")]
+    [InlineData("""<Image Source="a.png"/><Button Style="{StaticResource Pad}" Foreground="#FFFFFF" Content="疊在兄弟圖片上"/>""", "#000000", "over-sibling-content")]
+    [InlineData("""<Button Style="{StaticResource Pad}" Opacity="0" Foreground="#FFFFFF" Content="淡入動畫的初始態"/>""", "#000000", "skipped")]
+    [InlineData("""<Button Style="{StaticResource Pad}" Foreground="Transparent" Content="透明字"/>""", "#000000", "skipped")]
+    [InlineData("""<Button Style="{StaticResource Pad}" Foreground="#80FFFFFF" Content="半透明字"/>""", "#000000", "skipped")]
+    public void ChainPairsThatCannotBeGradedAreCountedInTheirBucket(string body, string background, string bucket)
+    {
+        var r = RunMain(body, background);
+        Assert.Empty(r.Findings);
+        Assert.Equal(0, r.Pairs);
+        if (bucket == "skipped")
+        {
+            Assert.Equal(1, r.Skipped);
+            Assert.Equal(0, r.Unresolved);
+        }
+        else
+        {
+            Assert.Equal(0, r.Skipped);
+            Assert.Equal(bucket, Report.ReasonLabel(Assert.Single(r.UnresolvedSites).Reason));
+        }
+    }
+
+    [Theory] // Style 引用解不到（打錯鍵、{x:Null}）→ 沒有鏈可走，元素回到樹走訪照常稽核 ——
+             // 不能因為「有寫 Style 屬性」就把 Foreground 交給一條不存在的鏈、整組消失
+    [InlineData("""Style="{StaticResource Missing}" """)]
+    [InlineData("""Style="{x:Null}" """)]
+    public void UnresolvableStyleReferenceFallsBackToTheTreeWalk(string style)
+    {
+        var r = RunMain($"""<Button {style} Foreground="#FFFFFF" Content="x"/>""");
+        var f = Assert.Single(r.Findings);
+        Assert.Equal("Button", f.Element);
+        Assert.Equal("#000000", f.Bg);
+    }
+
+    [Fact] // ignore 註解壓得住「套了 Style 的元素」—— 鏈路徑接手 Foreground 之後，壓抑與計數也要跟著接手
+    public void IgnoreCommentSuppressesAStyledElementAndCounts()
+    {
+        var r = RunMain("""
+            <!-- xamlcontrast-ignore: 品牌色按鈕，設計確認過 -->
+            <Button Style="{StaticResource Dark}" Foreground="#111111" Content="被壓掉"/>
+            <Button Style="{StaticResource Dark}" Foreground="#222222" Content="照報"/>
+            """);
+        Assert.Equal(2, r.Pairs);
+        Assert.Equal(1, r.Suppressed);
+        var f = Assert.Single(r.Findings);
+        Assert.Equal("#222222", f.Fg);
+        Assert.Equal(Category.Fail, f.Category);
+    }
+
+    [Fact] // 停用態豁免在鏈路徑也成立（元素自帶字色、Style 的 IsEnabled=False 觸發換底），而且要計數；
+           // 豁免範圍不能順便吃掉其他觸發態 —— hover 照常評分
+    public void DisabledTriggerOnTheChainIsExemptedAndCounted()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#000000">
+              <Grid.Resources>
+                <Style x:Key="Btn" TargetType="Button">
+                  <Setter Property="Background" Value="#000000"/>
+                  <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                      <Setter Property="Background" Value="#FFFFFF"/>
+                    </Trigger>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter Property="Background" Value="#EEEEEE"/>
+                    </Trigger>
+                  </Style.Triggers>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Btn}" Foreground="#FFFFFF" Content="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(1, r.DisabledExempt);
+        Assert.Equal(2, r.Findings.Count);                                 // 基礎態 + hover
+        Assert.DoesNotContain(r.Findings, f => f.Bg == "#FFFFFF");         // 停用態不評分（白字白底）
+        var hover = Assert.Single(r.Findings, f => f.Element == "Button⊕Style[Btn]/trigger");
+        Assert.Equal("#EEEEEE", hover.Bg);
+        Assert.Equal(Category.Fail, hover.Category);
+    }
+
+    [Fact] // BasedOn 成環（A↔B、自己指自己）與指到不存在的鍵：照樣解析，不能無窮遞迴 ——
+           // 那會是 StackOverflow，整支程式崩潰、連退出碼契約都守不住
+    public void BasedOnCyclesAndMissingBasesDoNotRecurseForever()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="A" TargetType="Button" BasedOn="{StaticResource B}">
+                  <Setter Property="Background" Value="#000000"/>
+                </Style>
+                <Style x:Key="B" TargetType="Button" BasedOn="{StaticResource A}">
+                  <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Style>
+                <Style x:Key="Self" TargetType="Button" BasedOn="{StaticResource Self}">
+                  <Setter Property="Background" Value="#000000"/>
+                </Style>
+                <Style x:Key="Orphan" TargetType="Button" BasedOn="{StaticResource Missing}">
+                  <Setter Property="Background" Value="#000000"/>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource A}" Content="字色來自環的另一端"/>
+              <Button Style="{StaticResource Self}" Foreground="#FFFFFF" Content="自己指自己"/>
+              <Button Style="{StaticResource Orphan}" Foreground="#FFFFFF" Content="基底不存在"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(
+            ["Button⊕Style[A]/base", "Button⊕Style[Self]/base", "Button⊕Style[Orphan]/base"],
+            r.Findings.Select(f => f.Element));
+        Assert.All(r.Findings, f => Assert.Equal(21.0, f.RatioDark)); // 白字黑底：底來自 Style，不是祖先的白
+    }
 }

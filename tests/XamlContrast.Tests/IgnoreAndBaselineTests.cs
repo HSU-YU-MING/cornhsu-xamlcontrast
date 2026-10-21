@@ -64,6 +64,49 @@ public class IgnoreAndBaselineTests
         Assert.Empty(r.Findings);
     }
 
+    [Fact] // 「下一個元素」含整個子樹：容器上的 ignore 壓掉裡面每一組，每一組都計數；容器之後的兄弟不受影響
+    public void IgnoreCoversTheWholeSubtreeAndCountsEachPair()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <!-- xamlcontrast-ignore: 浮水印區塊，刻意低對比 -->
+              <Border>
+                <TextBlock Foreground="#EEEEEE" Text="直接子元素"/>
+                <StackPanel><TextBlock Foreground="#DDDDDD" Text="孫元素"/></StackPanel>
+              </Border>
+              <TextBlock Foreground="#CCCCCC" Text="區塊之後的兄弟，要報"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(3, r.Pairs);
+        Assert.Equal(2, r.Suppressed);
+        Assert.Equal("#CCCCCC", Assert.Single(r.Findings).Fg);
+    }
+
+    [Theory] // 只有「緊鄰的前一個節點」是 ignore 註解才算數；一般註解、提到關鍵字的註解、
+             // 中間隔了別的註解或元素，都不能壓 —— 範圍一放寬，ignore 就是新的靜默退化通道
+    [InlineData("<!-- 一般註解 -->", false)]
+    [InlineData("<!-- TODO: xamlcontrast-ignore: 之後再說 -->", false)] // 錨定在註解開頭，不是子字串
+    [InlineData("<!-- xamlcontrast-ignore: 浮水印 -->\n<!-- 另一個註解 -->", false)]
+    [InlineData("<!-- xamlcontrast-ignore: 浮水印 -->\n<Border/>", false)]  // 被上面的 Border 用掉了
+    [InlineData("<!-- xamlcontrast-ignore:浮水印 -->", true)]              // 冒號後不必空白
+    [InlineData("<!--   xamlcontrast-ignore :  浮水印  -->", true)]        // 前後與冒號兩側的空白都容忍
+    public void OnlyAnAdjacentIgnoreCommentSuppresses(string before, bool suppressed)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              {before}
+              {LowContrastText}
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(suppressed ? 1 : 0, r.Suppressed);
+        Assert.Equal(suppressed ? 0 : 1, r.Findings.Count);
+        Assert.Empty(r.InvalidIgnores); // 這幾種都不是「沒附理由的 ignore」
+    }
+
     // ── baseline ratchet：承認既有債、只擋新增與惡化 ──
 
     private static AuditResult RunWith(params string[] extraTextBlocks)

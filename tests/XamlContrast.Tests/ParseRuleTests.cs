@@ -88,6 +88,26 @@ public class ParseRuleTests
         Assert.Equal(1, r.Skipped);
     }
 
+    [Theory] // 透明／半透明的字色（裝飾元素的 Fill 同理）是合法跳過 —— 但要計數，不是從報告消失；
+             // 也不能塞進 unresolved（那是「工具看不懂」的桶，這裡工具看得懂）
+    [InlineData("""<TextBlock Foreground="Transparent" Text="x"/>""")]
+    [InlineData("""<TextBlock Foreground="#80FFFFFF" Text="x"/>""")]
+    [InlineData("""<Rectangle Fill="Transparent"/>""")]
+    public void TransparentOrTranslucentForegroundIsSkippedAndCounted(string element)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#000000">
+              {element}
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Equal(0, r.Pairs);
+        Assert.Equal(1, r.Skipped);
+        Assert.Equal(0, r.Unresolved);
+    }
+
     [Fact] // 規則 5：ControlTemplate 自成子樹（模板根的背景管到模板內的文字）
     public void ControlTemplateRootGovernsItsSubtree()
     {

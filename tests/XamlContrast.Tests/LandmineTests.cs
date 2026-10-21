@@ -15,7 +15,8 @@ namespace XamlContrast.Tests;
 ///   色票只收長度 7／9               brush 字面值：PaletteDetectorTests.MalformedHexIsNotAcceptedIntoPalette；
 ///                                  &lt;Color&gt; 元素、C# 三元組：這裡；強制 single／csharp：ConfigTests
 ///   GetFullPath 正規化               PaletteDetectorTests.MultiAppRepo…（正斜線 root）；共用區退路：這裡
-///   dark/light 提示只看相對路徑      合併式色盤那條路：這裡（PaletteDetectorTests 那條走不到合併路徑的差異）
+///   dark/light 提示只看相對路徑      合併式色盤那條路：這裡（PaletteDetectorTests 那條走不到合併路徑的差異）；
+///                                  挑檔退路（XamlCandidates）：PaletteDetectorTests.ThemePairFallbackWhenTheMergedPaletteIsTooSmall
 ///   三段式合併（brush 表與 Color 表） 字面值 brush：PaletteDetectorTests.NeutralFileSortingFirst…；
 ///                                  Color 表：PaletteDetectorTests.BrushesInOneFile…；引用型 brush 表：這裡
 ///   分類後綴比對取最長               單邊命中：NewRuleTests.DerivedControlNamesClassifyBySuffix；兩邊都中：這裡
@@ -56,6 +57,47 @@ public class LandmineTests
         var fromStyle = Assert.Single(r.Findings, f => f.Element == "Button⊕Style[BigCard]/base");
         Assert.True(fromStyle.Large);
         Assert.Equal("24px", fromStyle.Size);
+    }
+
+    [Fact] // Style 鏈逐狀態路徑的第三個 FontSize 來源：觸發器（hover 放大字）—— 一樣要換算
+    public void FontSizeSetByATriggerStateIsConvertedToo()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Grow24" TargetType="Button">
+                  <Setter Property="Background" Value="#000000"/>
+                  <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter Property="Background" Value="#333333"/>
+                      <Setter Property="FontSize" Value="24"/>
+                    </Trigger>
+                  </Style.Triggers>
+                </Style>
+                <Style x:Key="Grow18" TargetType="Button">
+                  <Setter Property="Background" Value="#000000"/>
+                  <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter Property="Background" Value="#333333"/>
+                      <Setter Property="FontSize" Value="18"/>
+                    </Trigger>
+                  </Style.Triggers>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Grow24}" Foreground="#FFFFFF" Content="hover 24px"/>
+              <Button Style="{StaticResource Grow18}" Foreground="#FFFFFF" Content="hover 18px"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var big = Assert.Single(r.Findings, f => f.Element == "Button⊕Style[Grow24]/trigger");
+        Assert.Equal("24px", big.Size);
+        Assert.True(big.Large);                                                  // 18pt
+        var small = Assert.Single(r.Findings, f => f.Element == "Button⊕Style[Grow18]/trigger");
+        Assert.Equal("18px", small.Size);
+        Assert.False(small.Large);                                               // 13.5pt
+        Assert.Equal(4.5, small.Need);
+        Assert.False(Assert.Single(r.Findings, f => f.Element == "Button⊕Style[Grow24]/base").Large); // 基礎態沒放大
     }
 
     [Fact] // WalkStyles（Style 定義處）：Setter 的 FontSize／FontWeight 一樣換算、一樣錨定
