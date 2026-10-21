@@ -14,7 +14,8 @@
 
 - [x] `xamlcontrast.config.json` 實際載入 —— 2026-07-31：強制色盤模式（pair/csharp/
       single/none）、門檻與分類覆寫（非預設會標明）、failOn/strictPalette、
-      requireReason；寫錯 exit 2 給欄位級訊息
+      requireReason；寫錯 exit 2 給欄位級訊息（null 區段／元素、讀不到的檔 2026-10 補齊；
+      不認得的屬性名目前只點名警告，要不要改成 exit 2 待決定）
 - [x] findings 的 `file` 改成 root 相對路徑（正斜線，跨 OS baseline 可攜）——
       2026-07-31，同名檔不再互撞
 - [x] TargetName 模板 Setter 的解析（指向模板根）—— 2026-07-31 規則 13，

@@ -3,9 +3,10 @@
 > **狀態（2026-07-31）：已實作** —— CLI 自動從專案根目錄載入本檔；
 > 值不合法（不是合法 JSON、型別錯、列舉值錯、範圍外、強制模式缺檔）會 exit 2，並指出出錯的欄位或區段
 > （設定檔被靜默忽略等於使用者以為改了稽核標準而其實沒有）。
-> ⚠ 目前有兩個例外：**拼錯的屬性名會被靜默忽略**（例：`"minCoverge": 99` 不報錯，下限仍是預設 50）；
-> 區段、陣列或陣列元素給 `null` 可能讓 CLI 以未處理例外結束，而不是 exit 2（例：`"palette": null` 一定會；
-> 完整清單見 [公開介面盤點](公開介面盤點.md) 3.3 節，未知屬性見 8.1／8.3 節）。修正前請對照本文確認欄位名沒有拼錯。
+> 區段、陣列或陣列元素給 `null`、元素名清單裡有空字串、檔案讀不到，也一樣 exit 2 並點名欄位。
+> ⚠ 例外：**工具不認得的屬性名（含拼錯，例：`"minCoverge": 99`）目前不報錯** —— 那一格不生效
+> （下限仍是預設 50），但 console 與 Markdown 報告會逐一點名（`!! config: unknown property 'minCoverge' ignored`），
+> 不再靜默。要不要直接改成 exit 2 是待決定的介面變更（會拒絕現在讀得進去的設定檔）。`$schema` 一律放行。
 > 優先序：CLI 旗標 > config > 內建預設
 > （`failOn`／`strictPalette` 的旗標只能加嚴，見文末「CLI 對應」）。
 > 非預設門檻會在輸出中標明（`!! non-default thresholds`）。
@@ -60,8 +61,8 @@
 目前的凍結快照裡 QuillNest 走 (1)、CelFlow 走 (4)：
 
 1. **合併字典・深淺俱全**：專案裡所有定義了具 `x:Key` 的 `Color`／`SolidColorBrush` 的 XAML 併成一份色盤，每個鍵深淺兩套值都有（`pair`）。
-   通常就是各個 `ResourceDictionary`；⚠ 但目前**視窗只要在 `Window.Resources` 之類放了一個具 key 的區域 brush 也會被算進來**，
-   於是它被當成色盤檔、整檔不受稽核（見清單下方「被認定為色盤來源」那段；已知問題）
+   通常就是各個 `ResourceDictionary`；視窗在 `Window.Resources` 之類放的區域 brush 也會併進色盤，
+   但那個視窗照樣受稽核（見清單下方「被認定為色盤來源」那段）
 2. **配對**：dark 檔 × light 檔、brush 鍵集重疊 ≥ 50%（QuillNest 形狀；`pair`）
 3. **C# 三元組**：深淺都有的來源，**優先於只有一套值的單一 XAML**（Kindling 形狀——
    它的 `Themes\DarkTheme.xaml` 有 33 個 brush 但只有深色值，真相源是 C# 陣列；
@@ -70,9 +71,14 @@
 5. **單一主題**：唯一的色盤檔，深淺同值（CelFlow 形狀；`single`）
 6. **無色盤**：退回只算寫死色碼，**大聲喊**（Cornea 形狀；`none`）
 
-被認定為色盤來源（或其靜態複本）的 XAML 檔不進 UI 掃描。
-反過來，路徑（相對掃描根目錄）中有資料夾或檔名以 `test`／`sample`／`demo`／`example` 開頭
-（第二層以下另含 `fixture`／`mock`）的 XAML 不當色盤候選、也不算應用程式根元素，但照樣受稽核。
+被認定為色盤來源（或其靜態複本）、**而且根元素是 `ResourceDictionary`** 的 XAML 檔不進 UI 掃描
+（不走樹、不算進 `summary.files`），但裡面的 Style 仍在定義處受稽核；畫面檔（`Window`、`UserControl`、
+`Application`…）就算提供了色票也照樣稽核。
+反過來，路徑（相對掃描根目錄）中有以 `test`／`sample`／`demo`／`example` 開頭的詞
+（第二層以下另含 `fixture`／`mock`；詞依 `.` `-` `_` 與大小寫轉換切開，`MyApp.Tests`、`UnitTests` 都算）的
+檔案不當色盤候選（XAML 字典與 C# 三元組檔都一樣）、也不算應用程式根元素，但其中的 XAML 照樣受稽核。
+多 App 的 repo 裡，不屬於任何 App 的檔案只用共用區自己的字典；只有某個 App 定義的鍵在那裡是
+`unknown-palette-key`（值取決於執行期的宿主，不猜）。
 
 ### thresholds
 
@@ -111,16 +117,18 @@ WCAG 2.x AA。`failFactor` 是「破」的分界（門檻 × `failFactor`，預�
 ratchet 會把「不見了」讀成「還清了」而放行 —— 弄壞主題檔看起來像修好了所有問題。
 `--write-baseline` 同理會拒絕凍結一份用退化色盤算出來的基準線。
 
-色票值只接受 `#RRGGBB` 與 `#AARRGGBB`。七位數之類的打字錯誤不會進色盤
-（以前會被截前六位默默採用，算出一個看起來很篤定的錯比值）；
-用到該鍵的地方改走 `summary.unresolved` 喊出來。
+色票值接受 WPF 的色彩字面值：`#RGB`、`#ARGB`、`#RRGGBB`、`#AARRGGBB` 與具名色（`Navy`、`Teal`…，不分大小寫）；
+`SolidColorBrush` 的 `Opacity` 會折進 alpha。七位數之類的打字錯誤、非十六進位字元、讀不懂的 `Opacity`
+不會進色盤（以前會被截前六位默默採用，算出一個看起來很篤定的錯比值）；
+用到該鍵的地方改走 `summary.unresolved` 喊出來。合併式色盤裡，某個主題的值讀不懂時**整個鍵剔除**
+（不拿另一個主題的值補上），偵測描述那行會點名（`!! N key(s) dropped — …`）。註解掉的定義不算數。
 
 ### ignore
 
 `requireReason`（預設 `true`）：理由必填。完全沒寫理由的 `<!-- xamlcontrast-ignore -->`
 視為無效並警告（不壓，記入 `summary.invalidIgnores`）；設成 `false` 時它也生效。
-⚠ 標記要一字不差：寫錯的變體（大小寫不同、冒號後沒有理由、理由換到第二行）目前整段認不出來 ——
-不壓，**也不警告**，配對照報（[公開介面盤點](公開介面盤點.md) 10.2）。
+標記要一字不差（小寫、有冒號、理由在同一行）：寫錯的變體（大小寫不同、冒號後沒有理由、漏冒號、
+理由換到第二行）不壓，同樣記入 `summary.invalidIgnores` 並警告，配對照報。
 被壓掉的項目計入 `summary.suppressed`。
 
 ## CLI 對應

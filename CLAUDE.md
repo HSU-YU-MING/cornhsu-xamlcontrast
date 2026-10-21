@@ -136,9 +136,15 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   CI 上 `Opacity="0.5"` 會靜默解析失敗。
 - **`BoldWeight()` 是錨定的整字匹配。** 舊版用子字串（`"Bold"` 命中 `"SemiBold"`），
   把 600 也放寬到 3:1，會漏掉 3.0~4.5 之間真正不合格的文字。SemiBold/DemiBold 是 600，不算粗體。
-- **色票值只收長度 7（`#RRGGBB`）或 9（`#AARRGGBB`）**（`PaletteDetector.IsValidHex`）。
-  正則寫的是 `{6,8}`，七位數的打字錯誤會被吃下來，而 `Wcag.Luminance` 只讀前六位——
-  等於默默猜前半段再回報一個很篤定的對比值。長度不對就不收，讓它走 UnknownKey 的計數喊出來。
+- **色碼一律經 `ColorResolver.NormalizeHex` 正規化成 7（`#RRGGBB`）或 9（`#AARRGGBB`）碼**：
+  WPF 的 `#RGB`／`#ARGB` 逐位展開，其他長度、非十六進位字元不收（`#GGGGGG` 收下之後
+  `Wcag.Luminance` 的 `Convert.ToInt32` 會直接崩潰）。正則寫的是 `{6,8}`／`\w+`，七位數的打字錯誤會被吃下來，
+  而 `Wcag.Luminance` 只讀前六位——等於默默猜前半段再回報一個很篤定的對比值。讀不懂就不收，讓它走
+  UnknownKey 的計數喊出來。具名色表是 WPF 的 140 色（由 `KnownColor` 的網頁色產生，排除系統色與 RebeccaPurple）。
+- **合併式色盤裡「讀不懂」≠「沒定義」**：某一側有定義但值讀不懂（打字錯誤、`Color="{Binding}"`、
+  讀不懂的 `Opacity`），不能走「缺的一側退回另一側」—— 那會拿另一個主題的值編出比值。
+  `PaletteDetector.InvalidValue` 佔住那一側，整個鍵剔除並在偵測描述點名。
+- **色盤檔的正則掃描前先剔除 `<!-- -->`**（`ReadXamlWithoutComments`）：註解掉的舊定義會蓋掉現役值。
 
 ### 色盤偵測
 
@@ -153,6 +159,12 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   另一版把字面值 brush 一律當「深淺同值」收，`Dark.xaml` 排在 `Light.xaml` 前 →
   **456 筆 findings 全部 dark==light，淺色欄整欄是編造的**。
   ⚠ 這兩個回歸四個驗證專案都抓不到（它們的配對走 Color 引用那條路）。動這塊要加測試。
+- **「當色盤來源」與「排除出 UI 掃描」是兩件事**（`PaletteDetector.IsResourceDictionaryFile`）：
+  畫面檔的區域 brush 照樣進色盤，但只有根元素是 `ResourceDictionary` 的檔才不走樹；
+  而且色盤檔裡的 Style 一樣跑 `WalkStyles`——元素端的鏈路徑看到「字與底同源」就略過、交給定義處，
+  定義處沒人走的話那組配對就從報告與所有計數器消失。比對排除清單時兩邊都 `GetFullPath`。
+- **多 App 作用域**：外層 App 的子樹要扣掉內層 App 的目錄；不屬於任何 App 的檔案沒有共用區色盤時
+  用空色盤，不是退回全域（全域是各 App 合併，等於借用某個 App 的值）。
 - **元素分類用「後綴比對」不是全名相等**（`Auditor.IsNonTextElement`）：MahApps 的
   `MetroProgressBar` 對不上 `ProgressBar`，進度條填色會被當文字用 4.5 要求。
   兩邊都中時取最長的後綴（名字愈長愈具體）。
@@ -184,6 +196,11 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - **`baselines/celflow.json` 目前是紅的**（2026-08-26 實跑：`pairs` 期望 363 實得 353、
   `ok` 期望 346 實得 336，`fail` 仍是 0）。**不是 XamlContrast 的回歸**——`src/` 最後一次
   變動是 2026-08-12，而 CelFlow.WPF 有四個 XAML 檔在 2026-08-18 被改過。
+  2026-08-28 CelFlow 改名 ZeroCel，腳本已改指 `D:\應用程式\ZeroCel\frontend\ZeroCel.WPF`
+  （快照名稱沿用 `celflow.json`）；之前路徑消失時腳本在 Windows PowerShell 5.1 下整支中斷、
+  cornea 沒比對到，現在找不到專案會紅字點名並繼續。2026-10-22 的產品 bug 修正（fix/product-bugs）
+  又刻意改變了三個專案的計數，四份快照的差異與解釋記在那條分支的 CHANGELOG 與回報裡，
+  確認後由維護者決定是否 `-Update`。
   這暴露了 `verify-baselines.ps1` 的結構性弱點：**受測對象是四個活在 repo 外、會自己演化的
   專案**，紅燈分不出「工具行為變了」與「被稽核的 App 改了」。目前只能靠人工看 diff 判斷。
   修法有兩條（都還沒做）：把四個專案的 XAML 快照複製進 repo 當固定素材，

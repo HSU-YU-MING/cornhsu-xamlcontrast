@@ -5,6 +5,92 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+A sweep of 33 product bugs found in a source review (2026-10-22). The JSON shape is unchanged
+(`schemaVersion` stays 5), and so are the CLI flags and the Action inputs. Several fixes **move
+counts on real projects** — more pairs found, problems that used to be hidden now reported, some
+confident-but-wrong ratios now honestly `unresolved` — so a `--baseline` may show NEW or paid-off
+entries after upgrading; re-run `--write-baseline` once you have reviewed them.
+
+### Fixed — findings that silently disappeared or were graded against the wrong colour
+- **A screen with one local brush is no longer dropped from the audit.** Merged-dictionary detection
+  treated any XAML with a keyed `SolidColorBrush`/`Color` as a palette file and excluded it whole —
+  a `UserControl.Resources` brush or an `App.xaml` with `Application.Resources` colours made the
+  file vanish (`files` short, no message). Local brushes still feed the palette, but only files whose
+  root is a `ResourceDictionary` are left out of the screen audit.
+- **Styles defined in theme dictionaries are audited.** The element path skips a pair whose
+  foreground and background come from the same style, expecting the definition-site check to cover
+  it — but palette files never got that check, so a 1.2:1 button style in `Themes/Dark.xaml` was in
+  no finding and no counter. Palette files now get the style check (they still don't count as screens).
+- **Property-element syntax is read.** `<Border.Background>` / `<TextBlock.Foreground>` /
+  `<Setter.Value>` were ignored: a gradient background was graded against the ancestor (confident
+  wrong `ok`), and a property-element foreground vanished from every counter. Solid brushes are
+  resolved (with `Opacity`); gradients, image brushes and resource-plus-opacity count as
+  `bound-or-gradient`.
+- **`SolidColorBrush Opacity` in the palette is honoured.** A 20%-white hint brush on black (~1.66:1)
+  was graded as opaque white (21:1).
+- **A value one theme can't read is no longer filled from the other theme.** In merged dictionaries a
+  typo like `#EEEEEEE`, a bound colour or an unreadable `Opacity` on one side made the tool borrow the
+  other theme's value and report a fabricated ratio. The key is now dropped (uses count as
+  `unknown-palette-key`) and named on the palette line (`!! N key(s) dropped — …`). Hex values with
+  non-hex digits (`#GGGGGG`) are rejected too — they used to crash the audit.
+- **Commented-out definitions are no longer part of the palette** (XAML `<!-- -->`, and C# tuple lines
+  starting with `//`); an old value in a comment used to override the live one.
+- **Test projects can't hijack the palette.** C# tuple detection now skips test/sample paths like the
+  XAML side does (`[InlineData("Bg", "#..", "#..")]` matched the tuple format and produced 1:1 false
+  fails while making detection look healthy), and the path rule now matches words — `MyApp.Tests`,
+  `UnitTests`, `Foo_IntegrationTests` — not just segments starting with `test`.
+- **`DataTrigger` disabled-state exemption is no longer a substring match.** `{Binding IsEnabledByLicense}`
+  or a converter named `IsEnabledConverter` counted as WCAG 1.4.3 "disabled". The binding's path must
+  now end in `IsEnabled`, point at the element itself, its templated parent or an ancestor, and have no
+  converter; a view-model `IsEnabled` (no `RelativeSource`) is graded normally.
+- **A palette key translucent in only one theme** crashed the audit (dark side translucent) or had its
+  alpha stripped (light side translucent, 3.91:1 reported as 1.3:1). Each side now carries its own alpha.
+- **Rule 17 no longer invents backdrops in a `Canvas`** (nothing stretches there; an empty `Border` is
+  0×0), and **translucent / bound / gradient full-cell siblings** are composited or reported as
+  unresolved instead of letting the text fall through to the ancestor's colour.
+- **Definition-site style checks merge same-condition triggers and follow `BasedOn`**, like the element
+  path already did — no more phantom "hover foreground × base background" fails.
+- **Nested applications' dictionaries no longer leak into the outer application's scope**, and files
+  outside every application no longer borrow an application's palette when the shared area has none
+  (an app-only key is `unknown-palette-key` there — its value depends on the host).
+- **Short colour literals and the full WPF named-colour table** (`#AAA`, `#8000`, `Navy`, `Teal`, …) are
+  resolved instead of being filed under `bound-or-gradient`.
+- **`bin`/`obj` exclusion looks only below the scanned root, whole segments, any case** — a project that
+  itself lives under a `bin` directory scanned 0 files; `Bin\` build output was scanned on Windows.
+- **Config-forced palette files are excluded whatever the root spelling** (relative, forward-slash,
+  `sub/..`); previously only an absolute normalised root worked, which the Action never passes.
+
+### Fixed — exit-code contract and guard rails
+- `--json`/`--sarif`/`--md` no longer swallow the next flag as a file name (`--json --strict-palette`
+  wrote a file called `--strict-palette` and silently disabled the guard). A value starting with `-` is
+  a usage error (exit 2); write `./-name` if you really mean such a file.
+- `--min-coverage NaN` is rejected (exit 2) — NaN compared false everywhere and switched the floor off.
+- A `null` config section, array or array element, an empty element name in `classification`, a NUL in a
+  configured path, or an unreadable config file now exits 2 with the field named, instead of an
+  unhandled .NET exception outside the 0/1/2 contract.
+- A locked/unreadable `*.cs` file no longer crashes the run: it is skipped and listed as a parse error.
+- Numbers written into baseline keys (`fg ×0.5`), SARIF messages and config errors use the invariant
+  culture; on comma-decimal machines baselines no longer change keys.
+
+### Changed
+- Misspelled or unknown config properties are named in the console and the Markdown report
+  (`!! config: unknown property 'strictPallete' ignored`). They are still not an error — whether they
+  should exit 2 is an open interface decision.
+- A baseline whose entries lack `count` or `worst` is read with a warning naming what is no longer
+  checked (missing `worst` silently disabled palette-drift detection). The top-level `entries` key is now
+  case-insensitive like the entry fields.
+- Misspelled `xamlcontrast-ignore` markers (wrong case, empty or missing reason, missing colon, reason on
+  a second line) still don't suppress anything, but are now listed in `summary.invalidIgnores`.
+- `unresolved[].value` / `--show-unresolved` name the **background** value when the background is what
+  couldn't be resolved (it used to repeat the foreground value).
+- The exit-1 line prints the fail factor in effect (`below threshold x 0.67`) instead of a hard-coded
+  `2/3`; `--help` lists `--version`, `-h, --help` and `--fail-on <fail|warn>`; a usage error prints the
+  usage to stderr, with a note when `--baseline`/`--write-baseline` consumed the project root.
+- The zero-pairs exit also prints the `rootBackground` hint when it applies.
+- Action: the annotation/SARIF path prefix is normalised correctly for `root: .` and `/./` segments.
+- `scripts/verify-baselines.ps1` follows the CelFlow → ZeroCel rename and keeps going (with a red line)
+  when a validation project is missing, instead of aborting under Windows PowerShell 5.1.
+
 ## [0.6.1] - 2026-08-12
 
 ### Added

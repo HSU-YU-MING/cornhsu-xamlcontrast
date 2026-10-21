@@ -122,9 +122,10 @@ tried in this order, and the one that ran is always named on the first line of t
 1. **Merged dictionaries, both themes** — every XAML file that defines keyed `Color` /
    `SolidColorBrush` resources is read into one palette, and each key ends up with a dark *and*
    a light value. Tried first because it beats picking a single file: real projects split a
-   palette across several dictionaries. Normally those files are your resource dictionaries —
-   but today a window with even one keyed brush in `Window.Resources` counts too, and is then
-   left out of the audit (a known issue).
+   palette across several dictionaries. A window's local brushes (`Window.Resources`,
+   `Application.Resources`) feed the palette too, but only files whose root is a
+   `ResourceDictionary` are left out of the screen audit — and the styles inside those
+   dictionaries are still audited where they are defined.
 2. **Theme pair** — one `DarkTheme.xaml` × one `LightTheme.xaml`, keys overlapping ≥ 50%
 3. **C# source of truth** — `("Key", "#dark", "#light")` tuple arrays
    (beats a single-theme XAML copy: a source that provides both themes wins)
@@ -134,13 +135,18 @@ tried in this order, and the one that ran is always named on the first line of t
 
 (1) and (2) both report as palette mode `pair`; (4) and (5) as `single`. In a repo with two or
 more `<Application>` roots (typically `App.xaml`), the merged paths (1) and (4) additionally
-resolve each application subtree against its own palette. XAML whose path below the scanned root
-has a folder or file name starting with `test`, `sample`, `demo` or `example` (or, below the top
-level, `fixture` / `mock`) is never taken as a palette dictionary or an application root — it is
-still audited.
+resolve each application subtree against its own palette; files outside every application use only
+the shared area's own dictionaries (a key that only an application defines is reported as
+`unknown-palette-key` there — its value depends on the host app). A path below the scanned root
+containing a word that starts with `test`, `sample`, `demo` or `example` (or, below the top level,
+`fixture` / `mock`) — words split on `.` `-` `_` and case changes, so `MyApp.Tests` and `UnitTests`
+count — is never taken as a palette source (XAML dictionary or C# tuple file) or an application
+root; its XAML is still audited.
 
 Wrong guess? Override with `xamlcontrast.config.json` —
 [schema](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/docs/config-schema.md) (zh-Hant; the JSON example at the top is self-explanatory).
+A property name the tool doesn't know (a typo such as `strictPallete`) is named in the report
+(`!! config: unknown property …`) rather than silently ignored.
 If your app is built on a theme library (MahApps, HandyControl, MaterialDesign…), the palette
 is usually found fine but the window background isn't — see
 [`rootBackground`](#json-output) below; the tool tells you this when it happens.
@@ -171,7 +177,8 @@ xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # in CI
 ```
 
 Baseline keys contain no line numbers (lines drift) but do record the worst ratio
-(so palette drift — same key, darker value — still gets caught).
+(so palette drift — same key, darker value — still gets caught). A hand-edited baseline whose
+entries lack `count` or `worst` is still read, with a warning that names what is no longer checked.
 
 ### Suppressing intentional low contrast
 
@@ -181,10 +188,11 @@ Baseline keys contain no line numbers (lines drift) but do record the worst rati
 ```
 
 The reason is **required** — a bare `<!-- xamlcontrast-ignore -->` is invalid and warned about
-(the pair is still reported). The marker has to be exact: a misspelled one (wrong case, a colon
-with nothing after it, a reason that wraps onto a second line) is currently not recognised and
-**not warned about either** — the pair is still reported, but nothing tells you the comment had
-no effect. Suppressed pairs are counted in `summary.suppressed`; nothing disappears silently.
+(the pair is still reported). The marker has to be exact — lowercase, a colon, the reason on the
+same line. A misspelled one (wrong case, a colon with nothing after it, a missing colon, a reason
+that wraps onto a second line) does not suppress anything and is warned about the same way
+(`summary.invalidIgnores`). Suppressed pairs are counted in `summary.suppressed`; nothing
+disappears silently.
 
 ### GitHub Action
 
@@ -238,7 +246,7 @@ doesn't tell you whether anything can be done about it:
 | reason | meaning |
 |---|---|
 | `no-ancestor-background` | nothing up the tree declares a background — often a root container relying on an app-level implicit style, or vector artwork in a resource dictionary |
-| `bound-or-gradient` | the colour comes from `{Binding}` / `{TemplateBinding}` / a gradient — only knowable at runtime. Also the catch-all for colour literals the tool doesn't parse yet: short `#RGB` / `#ARGB`, and named colours outside a small built-in table (e.g. `Navy`) |
+| `bound-or-gradient` | the colour comes from `{Binding}` / `{TemplateBinding}` / a gradient or image brush — only knowable at runtime. Also anything else the tool can't read as a colour (every WPF colour literal — `#RGB`, `#ARGB`, `#RRGGBB`, `#AARRGGBB`, the named colours — is read) |
 | `unknown-palette-key` | the resource key isn't in the detected palette — a typo, or palette detection missed a file |
 | `translucent-uncomposited` | a translucent background with nothing underneath to composite against |
 | `same-brush-pair` | a style sets `Foreground` and `Background` to the *same* brush — the Material template-opacity idiom (the template paints the background at 10–12% opacity as a tint); literally 1:1, not at runtime, and the opacity animation is invisible statically |
@@ -251,8 +259,8 @@ principle as the non-configurable zero-pairs rule, which it generalises. Use
 in `xamlcontrast.config.json` instead).
 
 Every unresolved pair is listed with its location: `--show-unresolved` prints
-`file:line · reason · the value it got stuck on` (for a background-side failure this is currently
-the foreground value), and the JSON carries the same list in a top-level
+`file:line · reason · the value it got stuck on` (the background's value when the background is
+what couldn't be resolved), and the JSON carries the same list in a top-level
 `unresolved` array (`file`, `line`, `reason`, `value`). Unknown keys are additionally named
 with counts (`summary.unknownKeys`, and the top ones on the console) — each one is a dead
 resource reference, a typo, or a palette file detection missed, which makes this a free lint
@@ -327,9 +335,11 @@ Honest list — full blind-spot table with per-case evidence in the
 
 - `TargetName` setters aimed at **inner** template parts (root-targeted ones are resolved)
 - Cross-element correlated triggers (same condition flips fg on one element, bg on another) — false alarms
-- Sibling backdrops are resolved for full-cell solid siblings in overlapping containers, and
+- Sibling backdrops are resolved for full-cell siblings in overlapping containers (solid ones
+  directly, translucent ones composited, bound or gradient ones reported as unresolved), and
   text over a sibling `Image` is honestly `over-sibling-content` — but partial-coverage
-  siblings and images nested inside a backdrop element are still invisible
+  siblings (including anything in a `Canvas`, where nothing stretches) and images nested
+  inside a backdrop element are still invisible
 - Implicit styles (beyond the document root's background)
 - `VisualStateManager` colour animations (`ColorAnimation` in state storyboards) are not
   audited **and not yet counted** — a Blend-era styling dialect (measured: dozens of sites

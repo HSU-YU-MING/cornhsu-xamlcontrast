@@ -95,8 +95,9 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
 
 1. **合併字典・深淺俱全** —— 專案裡所有定義了具 key 的 `Color`／`SolidColorBrush` 的 XAML
    併成一份色盤，且每個鍵深淺兩套值都有。排在最前面，因為真實專案的色票常拆散在多個字典裡，
-   「挑單一檔」會漏。通常這些檔就是各個資源字典 —— 但目前視窗只要在 `Window.Resources`
-   放了一個具 key 的 brush 也會被算進來，並因此被排除在稽核外（已知問題）
+   「挑單一檔」會漏。視窗自己的區域 brush（`Window.Resources`、`Application.Resources`）
+   也會併進色盤，但只有根元素是 `ResourceDictionary` 的檔才排除在畫面稽核之外 ——
+   而且這些字典裡的 Style 仍在定義處受稽核
 2. **主題配對** —— 一個 Dark 檔 × 一個 Light 檔，鍵集重疊 ≥ 50%
 3. **C# 真相源** —— 三元組陣列，**提供兩套主題的來源優先於只有一套的**
 4. **合併字典・單一主題** —— 同 (1) 的聯集，但每個鍵只有一套值
@@ -104,11 +105,15 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
 6. **都沒有** —— 退回只算寫死色碼，並**大聲講**
 
 (1)(2) 都回報成 `pair` 模式，(4)(5) 都是 `single`。repo 裡有兩個以上 `<Application>`
-根元素（通常是 `App.xaml`）時，合併字典的 (1)(4) 會讓各應用程式子樹再各自對自己的色盤解析一次。
-掃描根目錄以下的路徑中，有資料夾或檔名以 `test`、`sample`、`demo`、`example` 開頭
-（或在第二層以下以 `fixture`／`mock` 開頭）的 XAML，不會被當成色盤字典或應用程式根元素 —— 但照樣受稽核。
+根元素（通常是 `App.xaml`）時，合併字典的 (1)(4) 會讓各應用程式子樹再各自對自己的色盤解析一次；
+不屬於任何應用程式的檔案只用共用區自己的字典（只有某個 App 定義的鍵在那裡記為 `unknown-palette-key` ——
+它的值取決於執行期的宿主 App）。
+掃描根目錄以下的路徑中，含有以 `test`、`sample`、`demo`、`example` 開頭的詞（或在第二層以下以
+`fixture`／`mock` 開頭）的 —— 詞依 `.` `-` `_` 與大小寫轉換切開，所以 `MyApp.Tests`、`UnitTests` 都算 ——
+不會被當成色盤來源（XAML 字典或 C# 三元組檔）或應用程式根元素；其中的 XAML 照樣受稽核。
 
 猜錯可用 `xamlcontrast.config.json` 指定（[schema](docs/config-schema.md)）。
+工具不認得的屬性名（例如拼錯的 `strictPallete`）會在報告裡點名（`!! config: unknown property …`），不會被靜默忽略。
 若你的 App 建在主題函式庫上（MahApps、HandyControl、MaterialDesign⋯），通常色盤找得到、
 但**視窗底色找不到** —— 用 `rootBackground` 一行宣告即可，工具在覆蓋率不足時會主動提示。
 
@@ -135,6 +140,7 @@ xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # CI 裡
 ```
 
 baseline 的鍵不含行號（行號會漂），但會記錄最差比值（同一個鍵、色值被調暗的色盤漂移照樣抓得到）。
+手改過、entry 缺 `count` 或 `worst` 的 baseline 仍讀得進來，但會警告並說明哪一項檢查因此失效。
 
 **刻意低對比的標記**（理由必填；壓掉的計入 `summary.suppressed`，不會靜默消失）：
 
@@ -143,9 +149,9 @@ baseline 的鍵不含行號（行號會漂），但會記錄最差比值（同�
 <TextBlock Opacity="0.4" Text="草稿" ... />
 ```
 
-完全沒寫理由的 `<!-- xamlcontrast-ignore -->` 視為無效並警告（配對照報）。標記要一字不差：
-寫錯的變體（大小寫不同、冒號後沒有理由、理由換到第二行）目前認不出來，**也不會警告** ——
-配對照報，只是看不出註解沒生效。
+完全沒寫理由的 `<!-- xamlcontrast-ignore -->` 視為無效並警告（配對照報）。標記要一字不差 ——
+小寫、有冒號、理由寫在同一行；寫錯的變體（大小寫不同、冒號後沒有理由、漏冒號、理由換到第二行）
+不會壓掉任何配對，並以同樣方式警告（`summary.invalidIgnores`）。
 
 ### GitHub Action
 
@@ -196,7 +202,7 @@ jobs:
 | 原因 | 意思 |
 |---|---|
 | `no-ancestor-background` | 祖先鏈上沒有任何一層宣告背景。常見於根容器靠 App 層隱含樣式給底,或資源字典裡的向量圖 |
-| `bound-or-gradient` | 顏色來自 `{Binding}` / `{TemplateBinding}` / 漸層 —— 執行期才知道。工具還讀不懂的色彩字面值也歸這裡:短色碼 `#RGB` / `#ARGB`,以及內建小表以外的具名色(例:`Navy`) |
+| `bound-or-gradient` | 顏色來自 `{Binding}` / `{TemplateBinding}` / 漸層或圖片 brush —— 執行期才知道。其他工具讀不出顏色的值也歸這裡(WPF 的色彩字面值 —— `#RGB`、`#ARGB`、`#RRGGBB`、`#AARRGGBB`、具名色 —— 都讀得懂) |
 | `unknown-palette-key` | 資源鍵不在偵測到的色盤裡 —— 打字錯誤,或色盤偵測漏了某個檔 |
 | `translucent-uncomposited` | 半透明背景但底下沒有可疊的顏色 |
 | `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
@@ -208,7 +214,7 @@ jobs:
 設 `"minCoverage": 0`)。
 
 每一筆無法解析的配對都有位置可查:`--show-unresolved` 逐筆列出
-`file:line · 原因 · 卡住的值`(背景側卡住時目前放的是前景值),JSON 頂層的 `unresolved` 陣列帶同一份清單(`file`、`line`、`reason`、`value`)。
+`file:line · 原因 · 卡住的值`(卡在背景時放背景的值),JSON 頂層的 `unresolved` 陣列帶同一份清單(`file`、`line`、`reason`、`value`)。
 unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)——
 每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。
 
@@ -268,9 +274,9 @@ HandyControl)5~19%。稽核函式庫請預期要用 `--min-coverage 0`,並把解
 完整盲區表與逐案證據見[規畫書](XamlContrast專案規畫書.md)。
 
 TargetName 指向模板**內部**元素（指向根的已解析）、跨元素同條件觸發器、
-隱含樣式（根元素背景以外）;sibling 背景已解析「佔滿格子的純色兄弟」,
-文字疊兄弟 Image 誠實歸 `over-sibling-content` —— 但部分覆蓋的兄弟、
-藏在背板元素**裡面**的圖片仍看不到;Binding 來的顏色標「無法解析」而不猜 ——
+隱含樣式（根元素背景以外）;sibling 背景已解析「佔滿格子的兄弟」(純色直接用、半透明合成、
+Binding／漸層計入無法解析),文字疊兄弟 Image 誠實歸 `over-sibling-content` —— 但部分覆蓋的兄弟
+(含 `Canvas` 裡的一切,Canvas 不撐滿子元素)、藏在背板元素**裡面**的圖片仍看不到;Binding 來的顏色標「無法解析」而不猜 ——
 猜了就是拿誠實的不確定去換錯誤的信心。
 另:`VisualStateManager` 的顏色動畫(狀態 storyboard 裡的 `ColorAnimation`)不稽核
 **且尚未計數** —— Blend 時代的樣式方言(實測:kaxaml/snoop 這類老專案有數十處,
