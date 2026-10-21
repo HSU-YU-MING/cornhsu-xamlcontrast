@@ -38,4 +38,9 @@ public class WcagTests
     [Fact]
     public void CompositeAlphaOneIsForeground()
         => Assert.Equal("#000000", Wcag.Composite("#000000", 1.0, "#FFFFFF"));
+
+    [Fact] // 底色可能是 8 位 hex（#FFRRGGBB 的不透明色票原值）—— 前兩位是 alpha 不是紅色版，
+           // 讀錯位置就會把 #FF000000（黑）當成 #FF0000 開頭的紅色來疊
+    public void CompositeReadsTheRgbOfAnEightDigitBackground()
+        => Assert.Equal(Wcag.Composite("#FFFFFF", 0.5, "#000000"), Wcag.Composite("#FFFFFF", 0.5, "#FF000000"));
 }

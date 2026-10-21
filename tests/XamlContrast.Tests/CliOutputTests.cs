@@ -24,6 +24,24 @@ public class CliOutputTests
         Assert.False(Directory.Exists(Path.Combine(fx.Root, "no-such-dir")));
     }
 
+    [Theory] // 寫檔失敗的其他形狀：空字串路徑（ArgumentException）、路徑指到既有目錄（拒絕存取）——
+             // TryWrite 的 catch 一收窄成「只接目錄不存在」，這些就漏回 .NET 堆疊、退出碼落到契約外
+    [InlineData("--json", "json", "")]
+    [InlineData("--sarif", "sarif", "")]
+    [InlineData("--md", "markdown", "")]
+    [InlineData("--write-baseline", "baseline", "")]
+    [InlineData("--json", "json", "{root}")]
+    [InlineData("--write-baseline", "baseline", "{root}")]
+    public void OutputPathThatCannotBeAFileExitsTwo(string flag, string label, string target)
+    {
+        using var fx = CliProjects.Failing();
+        var r = Cli.Run(fx.Root, flag, target.Replace("{root}", fx.Root));
+        Assert.True(r.Exit == 2, r.ToString());
+        Assert.Contains($"cannot write {label} to ", r.Err);
+        Assert.DoesNotContain("   at ", r.Err);
+        Assert.DoesNotContain("Unhandled exception", r.Err);
+    }
+
     [Theory] // --md 在判定「之後」才寫（報告要標 PASS/FAIL）—— 寫不出去時，已決定的 0 或 1 都要被蓋成 2
     [InlineData(true)]
     [InlineData(false)]

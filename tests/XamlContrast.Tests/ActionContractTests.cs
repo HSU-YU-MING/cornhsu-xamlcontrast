@@ -71,6 +71,52 @@ public class ActionContractTests
         Assert.All(uris, u => Assert.Equal("Views/Main.xaml", u));
     }
 
+    [Theory] // 註記與 SARIF 改寫都把 working-directory + root 接成 workspace 相對前綴，再接上 finding 的
+             // root 相對路徑。前綴裡的 "./"、重複的 "/"、結尾的 "/" 不收乾淨，GitHub 就對不上檔案 ——
+             // 註記標不到 PR 的行上、code scanning 對不到檔（而且兩者都不報錯，是安靜地失效）
+    [InlineData(".", "src/MyApp", "src/MyApp/Views/Main.xaml")]     // 預設 working-directory
+    [InlineData(".", "src/MyApp/", "src/MyApp/Views/Main.xaml")]    // 結尾斜線
+    [InlineData("app", "src//MyApp", "app/src/MyApp/Views/Main.xaml")] // 重複斜線
+    [InlineData("./app/", "src", "app/src/Views/Main.xaml")]        // 開頭 ./ + 接縫處的雙斜線
+    [InlineData("a//b", "c//d", "a/b/c/d/Views/Main.xaml")]         // 不只收第一處
+    public void ActionPrefixesFindingPathsIntoWorkspacePaths(string workingDirectory, string root, string expected)
+    {
+        // 兩個步驟（Annotate failing pairs、Upload SARIF to code scanning）的前綴算法必須一字不差
+        var prefixLines = Regex.Matches(ActionYml, @"prefix=\$\(echo ""(?<echo>[^""]+)"" \| sed '(?<sed>[^']+)'\)")
+            .Select(m => (Echo: m.Groups["echo"].Value, Sed: m.Groups["sed"].Value)).ToList();
+        Assert.Equal(2, prefixLines.Count);
+        var (echo, sed) = Assert.Single(prefixLines.Distinct());
+        Assert.Equal("${{ inputs.working-directory }}/${{ inputs.root }}", echo);
+
+        // 前綴之後接 "/" + finding 的 file —— 註記的 jq 與 SARIF 改寫的 jq 都是這樣接
+        Assert.Contains("file=\\($root)/\\(.file)", ActionYml);
+        Assert.Contains("($root + \"/\" + .)", ActionYml);
+
+        var prefix = Sed(sed, $"{workingDirectory}/{root}");
+        Assert.Equal(expected, $"{prefix}/Views/Main.xaml");
+    }
+
+    /// <summary>只支援 action.yml 實際用到的子集：以 ; 串接的 s|BRE|替換|旗標。
+    /// 遇到子集以外的寫法就紅 —— 擴充 sed 的人要同步擴充這裡，而不是讓測試默默算錯。</summary>
+    private static string Sed(string script, string input)
+    {
+        foreach (var raw in script.Split(';'))
+        {
+            var cmd = raw.Trim();
+            Assert.True(cmd.Length > 2 && cmd[0] == 's', $"不支援的 sed 指令：{cmd}");
+            var parts = cmd[2..].Split(cmd[1]);
+            Assert.True(parts.Length == 3, $"不支援的 sed 指令：{cmd}");
+            var (pattern, replacement, flags) = (parts[0], parts[1], parts[2]);
+            // BRE 與 .NET 正則在 ^ $ . * \. 上同義；+ ? ( ) { } 在 BRE 是字面值、在 .NET 不是
+            Assert.DoesNotMatch(@"[+?(){}]", pattern);
+            Assert.DoesNotMatch(@"[&\\]", replacement);
+            Assert.True(flags is "" or "g", $"不支援的 sed 旗標：{flags}");
+            var re = new Regex(pattern);
+            input = flags == "g" ? re.Replace(input, replacement) : re.Replace(input, replacement, 1);
+        }
+        return input;
+    }
+
     [Fact] // inputs 的名稱、必填與預設值（凍結面）。改名、刪除、改預設都是破壞性變更 —— 這條紅了就是在提醒你
     public void ActionInputsArePinned()
     {

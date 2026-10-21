@@ -230,6 +230,56 @@ public class JsonReportContractTests
         Assert.Equal(1, s.GetProperty("invalidIgnores").GetArrayLength());
     }
 
+    [Fact] // summary 的描述欄位要說實話：這份結果是哪個色盤、哪份 config、哪套門檻跑出來的。
+           // 形狀測試只驗型別 —— 值寫反了（singleTheme、configLoaded）形狀照樣對，讀報告的人卻被誤導
+    public void SummaryDescribesThePaletteConfigAndThresholdsOfTheRun()
+    {
+        using var fx = new Fixture().WithPalette().File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Fg}" Text="x"/>
+            </Grid>
+            """);
+        fx.File(ToolConfig.FileName, """{ "thresholds": { "normalText": 7.0 } }""");
+        var cfg = ToolConfig.Load(fx.Root);
+        var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
+        var s = JsonDocument.Parse(Report.ToJson(r)).RootElement.GetProperty("summary");
+
+        Assert.Equal("project", s.GetProperty("paletteSource").GetString());
+        Assert.Equal("pair", s.GetProperty("paletteMode").GetString());
+        Assert.Equal(r.Detection.Description, s.GetProperty("paletteDetail").GetString());
+        Assert.Equal(3, s.GetProperty("paletteKeys").GetInt32());
+        Assert.False(s.GetProperty("singleTheme").GetBoolean());
+        Assert.True(s.GetProperty("configLoaded").GetBoolean());
+        var t = s.GetProperty("thresholds");
+        Assert.Equal(7.0, t.GetProperty("normalText").GetDouble());   // config 覆寫的值
+        Assert.Equal(3.0, t.GetProperty("largeText").GetDouble());    // 沒覆寫的維持預設
+        Assert.Equal(0.67, t.GetProperty("failFactor").GetDouble());
+        Assert.Equal(1, s.GetProperty("files").GetInt32());           // 兩個主題檔是色盤，不算畫面
+
+        // 對照組：沒有 config、寫死色碼 —— 每個描述欄位都要跟著翻
+        using var bare = new Fixture().File("Main.xaml", """<Grid Background="#000000"><TextBlock Foreground="#FFFFFF"/></Grid>""");
+        var b = JsonOf(bare).GetProperty("summary");
+        Assert.Equal("none", b.GetProperty("paletteSource").GetString());
+        Assert.Equal(0, b.GetProperty("paletteKeys").GetInt32());
+        Assert.True(b.GetProperty("singleTheme").GetBoolean());       // 空色盤：寫死色碼深淺恆等
+        Assert.False(b.GetProperty("configLoaded").GetBoolean());
+        Assert.Equal(4.5, b.GetProperty("thresholds").GetProperty("normalText").GetDouble());
+
+        // 第三組：只有深色一套的專案色盤（CelFlow 形狀）—— 色盤來自專案，但對稱欄不適用
+        using var single = new Fixture().File("Themes/DarkTheme.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Dim" Color="#2A2A2A"/>
+            </ResourceDictionary>
+            """).File("Main.xaml", """<Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>""");
+        var one = JsonOf(single).GetProperty("summary");
+        Assert.Equal("project", one.GetProperty("paletteSource").GetString());
+        Assert.Equal("single", one.GetProperty("paletteMode").GetString());
+        Assert.Equal(3, one.GetProperty("paletteKeys").GetInt32());
+        Assert.True(one.GetProperty("singleTheme").GetBoolean());
+    }
+
     [Fact] // unknownKeys 依次數遞減、同數依鍵名（ordinal）—— 點名清單的順序要可重現
     public void UnknownKeysAreOrderedByCountThenName()
     {
