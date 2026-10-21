@@ -2,7 +2,8 @@
 
 > **狀態（2026-07-31）：已實作** —— CLI 自動從專案根目錄載入本檔；
 > 寫錯會 exit 2 並給出欄位級錯誤訊息（設定檔被靜默忽略等於使用者以為改了
-> 稽核標準而其實沒有）。優先序：CLI 旗標 > config > 內建預設。
+> 稽核標準而其實沒有）。優先序：CLI 旗標 > config > 內建預設
+> （`failOn`／`strictPalette` 的旗標只能加嚴，見文末「CLI 對應」）。
 > 非預設門檻會在輸出中標明（`!! non-default thresholds`）。
 
 > 2026-07-30。零設定是預設路徑；這個檔只在自動偵測猜錯或猜不到時用。
@@ -22,7 +23,7 @@
   "thresholds": {
     "normalText": 4.5,
     "largeText": 3.0,
-    "failFactor": 0.667
+    "failFactor": 0.67
   },
   "classification": {
     "extraText": [],
@@ -30,6 +31,8 @@
   },
   "failOn": "fail",
   "strictPalette": false,
+  "minCoverage": 50,
+  "rootBackground": null,
   "ignore": {
     "requireReason": true
   }
@@ -42,32 +45,40 @@
 
 | 欄位 | 預設 | 說明 |
 |---|---|---|
-| `mode` | `"auto"` | `auto` / `pair` / `csharp` / `single` / `none`。自動偵測的四種形狀（見下）各有對應的強制模式 |
-| `darkFile` / `lightFile` | 自動 | `mode: "pair"` 時指定兩份字典；`mode: "single"` 只給 `darkFile` |
-| `csharpFile` | 自動 | `mode: "csharp"` 時指定真相源檔案 |
-| `csharpPattern` | 內建三元組 | 具名群組 `key` / `dark` / `light` 的 regex。內建值就是 Kindling 形狀：`("Key", "#深", "#淺")` |
+| `mode` | `"auto"` | `auto` / `pair` / `csharp` / `single` / `none`。後四個是強制模式，對應自動偵測各路徑回報的模式（見下） |
+| `darkFile` / `lightFile` | 自動 | `mode: "pair"` 時指定兩份字典；`mode: "single"` 只給 `darkFile`。其他模式下忽略 |
+| `csharpFile` | 自動 | `mode: "csharp"` 時指定真相源檔案。其他模式下忽略 |
+| `csharpPattern` | 內建三元組 | 具名群組 `key` / `dark` / `light` 的 regex（沒有這三個名字時退回 `k` / `d` / `l`）。內建值就是 Kindling 形狀：`("Key", "#深", "#淺")`。**只在 `mode: "csharp"` 生效**，自動偵測一律用內建樣式 |
 
-自動偵測順序（2026-07-30 用四個真實專案定下來的，見原型）：
+自動偵測順序（與 README「Zero-config palette detection」同一份；最初四種形狀是
+2026-07-30 用四個真實專案定下來的，兩條合併字典路徑是外部專案實查後加的）：
 
-1. **配對**：dark 檔 × light 檔、brush 鍵集重疊 ≥ 50%（QuillNest 形狀）
-2. **C# 三元組**：深淺都有的來源，**優先於只有一套值的單一 XAML**（Kindling 形狀——
+1. **合併字典・深淺俱全**：專案裡所有 `ResourceDictionary` 併成一份色盤，每個鍵深淺兩套值都有（`pair`）
+2. **配對**：dark 檔 × light 檔、brush 鍵集重疊 ≥ 50%（QuillNest 形狀；`pair`）
+3. **C# 三元組**：深淺都有的來源，**優先於只有一套值的單一 XAML**（Kindling 形狀——
    它的 `Themes\DarkTheme.xaml` 有 33 個 brush 但只有深色值，真相源是 C# 陣列；
-   選錯來源淺色值就全是錯的）
-3. **單一主題**：唯一的色盤檔，深淺同值（CelFlow 形狀）
-4. **無色盤**：退回只算寫死色碼，**大聲喊**（Cornea 形狀）
+   選錯來源淺色值就全是錯的；`csharp`）
+4. **合併字典・單一主題**：同 1 的聯集，但每個鍵只有一套值（`single`）
+5. **單一主題**：唯一的色盤檔，深淺同值（CelFlow 形狀；`single`）
+6. **無色盤**：退回只算寫死色碼，**大聲喊**（Cornea 形狀；`none`）
 
 被認定為色盤來源（或其靜態複本）的 XAML 檔不進 UI 掃描。
 
 ### thresholds
 
-WCAG 2.x AA。`failFactor` 是「破」的分界（門檻 × 2/3）：
-一般文字 破 < 3.0、偏低 3.0~4.5；大字級 破 < 2.0、偏低 2.0~3.0。
+WCAG 2.x AA。`failFactor` 是「破」的分界（門檻 × `failFactor`，預設 0.67 ≈ 2/3）：
+一般文字 破 < 3.015、偏低 3.015~4.5；大字級 破 < 2.01、偏低 2.01~3.0
+（比值先四捨五入到小數兩位再比，所以 3.01:1 的一般文字是「破」）。
+「非預設」是逐值精確比較：`0.667` 也算改了門檻。
 改這些值等於改稽核標準 —— 允許，但輸出要標明用了非預設門檻。
 
 ### classification
 
-`extraText` / `extraNonText`：加進內建分類表的元素名。內建表見原型
+`extraText` / `extraNonText`：加進內建分類表的元素名。內建表見
+`src/XamlContrast.Core/Auditor.cs` 的 `TextEls` / `NonTextEls`
 （`ProgressBar` 誤判事件的教訓：排除清單優先於「有沒有 Foreground」）。
+元素名先比全名，對不上再比後綴、兩表都中時取較長的那個
+（`MetroProgressBar` → `ProgressBar`、`ExtendedTextBlock` → `TextBlock`）。
 
 ### failOn / strictPalette
 
@@ -101,5 +112,7 @@ ratchet 會把「不見了」讀成「還清了」而放行 —— 弄壞主題�
 
 ## CLI 對應
 
-config 的 `failOn` / `strictPalette` 可被 CLI 旗標覆蓋（`--fail-on warn`、`--strict-palette`）。
+config 的 `failOn` / `strictPalette` 可被 CLI 旗標**加嚴**（`--fail-on warn`、`--strict-palette`），
+但不能放寬：config 寫了 `"warn"`，`--fail-on fail` 不會把它改回 `fail`。
+`minCoverage` 是例外：`--min-coverage` 兩個方向都會覆寫 config 的值。
 CLI > config > 內建預設。

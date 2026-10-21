@@ -65,7 +65,7 @@ exit 1: 3 pair(s) below threshold x 2/3 (0 warn)
 
 每筆結果有兩個**獨立**維度：
 
-- **等級**（絕對對比）：`fail`（< 門檻×2/3）／`warn`／`ok`／`decorative`
+- **等級**（絕對對比）：`fail`（< 門檻×0.67，約 2/3）／`warn`／`ok`／`decorative`
 - **對稱**（跨主題）：`both-low`＝色票本身不夠，換主題救不了；
   `dark-fails`／`light-fails`＝設計意圖沒跨主題保住
 
@@ -101,8 +101,8 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
 5. **單一主題檔** —— 一份字典，深淺兩欄同值
 6. **都沒有** —— 退回只算寫死色碼，並**大聲講**
 
-(1)(2) 都回報成 `pair` 模式，(4)(5) 都是 `single`。repo 裡有兩個以上 `App.xaml` 時，
-各應用程式子樹會再各自對自己的色盤解析一次。
+(1)(2) 都回報成 `pair` 模式，(4)(5) 都是 `single`。repo 裡有兩個以上 `<Application>`
+根元素（通常是 `App.xaml`）時，合併字典的 (1)(4) 會讓各應用程式子樹再各自對自己的色盤解析一次。
 
 猜錯可用 `xamlcontrast.config.json` 指定（[schema](docs/config-schema.md)）。
 若你的 App 建在主題函式庫上（MahApps、HandyControl、MaterialDesign⋯），通常色盤找得到、
@@ -117,7 +117,10 @@ xamlcontrast src/MyApp --sarif audit.sarif   # GitHub code scanning 格式
 xamlcontrast src/MyApp --md report.md        # Markdown 報告（可貼 PR 留言）
 ```
 
-退出碼：失敗 `1`、**解析出 0 組配對也是 `1`**（空掃不是通過）、用法錯誤 `2`、其餘 `0`。
+退出碼：失敗 `1`（有 fail、`--fail-on warn` 時有 warn、`--baseline` 下有新增或惡化、
+覆蓋率低於 `--min-coverage`、`--strict-palette` 下色盤退化）、**解析出 0 組配對也是 `1`**
+（空掃不是通過）、用法或設定錯誤 `2`（旗標錯、config 不合法、報告或 baseline 檔寫不出／讀不到）、
+其餘 `0`。
 
 **既有專案導入（baseline ratchet）**：第一天全紅的門會被關掉。先凍結既有債，
 之後只擋新增與惡化 —— 債只准減不准增：
@@ -127,7 +130,9 @@ xamlcontrast src/MyApp --write-baseline xamlcontrast-baseline.json   # 跑一次
 xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # CI 裡
 ```
 
-**刻意低對比的標記**（理由必填，壓掉會計數，不會靜默消失）：
+baseline 的鍵不含行號（行號會漂），但會記錄最差比值（同一個鍵、色值被調暗的色盤漂移照樣抓得到）。
+
+**刻意低對比的標記**（理由必填 —— 沒附理由的視為無效並警告；壓掉的計入 `summary.suppressed`，不會靜默消失）：
 
 ```xml
 <!-- xamlcontrast-ignore: 浮水印，刻意低對比 -->
@@ -152,6 +157,7 @@ jobs:
       - uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.6.1   # 0.x 期間 pin 確切版本
         with:
           root: src/MyApp
+          version: 0.6.1          # 工具本身也要 pin —— 省略的話 action 會裝最新版
 ```
 
 > **`pull-requests: write` 是 PR 留言能不能貼的關鍵。** 沒有它那一步會 403。
@@ -169,8 +175,9 @@ jobs:
 ## JSON 輸出
 
 `--json report.json` 產出兩層報告：`findings`（每組配對一筆）加一個 `summary` 區塊，
-裡面有**全部的退化計數** —— `paletteSource`、`unresolved`、`skipped`、`suppressed`、
-`parseErrors`、`disabledExempt`。工具沒看到的東西，都是機器可讀的。
+裡面有**全部的退化計數** —— `paletteSource`、`coverage`、`unresolved`（含 `unresolvedBy`）、
+`skipped`、`deadForeground`、`disabledExempt`、`suppressed`、`parseErrors`，
+有內容時另有 `unknownKeys`、`parseErrorFiles`、`invalidIgnores`。工具沒看到的東西，都是機器可讀的。
 消費端請檢查 `schemaVersion`。
 
 `unresolved` 在 `summary.unresolvedBy` 裡有原因細目 —— 光看總數看不出「補不補得回來」:
@@ -186,14 +193,16 @@ jobs:
 
 `summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 1** ——
 只掃到一小部分的「通過」不算通過,這是「0 組配對即 exit 1」那條不可設定規則的推廣。
-要關掉用 `--min-coverage 0`。
+要關掉用 `--min-coverage 0`(GitHub Action 沒有對應的 input,改在 `xamlcontrast.config.json`
+設 `"minCoverage": 0`)。
 
 每一筆無法解析的配對都有位置可查:`--show-unresolved` 逐筆列出
 `file:line · 原因 · 卡住的值`,JSON 頂層的 `unresolved` 陣列帶同一份清單。
 unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)——
 每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。
 
-**依專案型態設定預期。** 應用程式型專案通常解析得很好(四個驗證專案 89~100%);
+**依專案型態設定預期。** 應用程式型專案通常解析得很好(四個驗證專案中三個 88~99%,
+第四個幾乎沒有可配對的文字);
 **控制項函式庫天生解析率低** —— 它們的顏色走 `{TemplateBinding}` / `{Binding}`,
 執行期才存在,這是靜態分析的硬邊界(報成 `bound-or-gradient`),不是能用設定修好的
 問題。公開專案實測:應用程式 26~57%,控制項函式庫(MahApps、MaterialDesign、
@@ -226,9 +235,10 @@ HandyControl)5~19%。稽核函式庫請預期要用 `--min-coverage 0`,並把解
 
 信任是怎麼掙來的（完整故事見[開發歷程回顧](docs/開發歷程回顧.md)）：
 
-- **兩套獨立實作互證**：PowerShell 原型（規格）與 .NET 版在四個驗證專案上
-  數字完全一致 —— 精確到每筆 fail 的 `file:line` 與退出碼，
-  `scripts/verify-baselines.ps1` 隨時可重跑。
+- **兩套獨立實作互證**：v0.1.0 時 PowerShell 原型（規格）與 .NET 版在四個驗證專案上
+  數字完全一致 —— 精確到每筆 fail 的 `file:line` 與退出碼。之後原型凍結，
+  .NET 版改以自己凍結的四專案快照做回歸（`scripts/verify-baselines.ps1`，
+  受測的四個 App 未公開，只有維護者能跑）。
 - **十七條解析規則沒有一條是在白板上設計的** —— 每條都來自真實的假警報或漏報實查
   (前十三條來自四個上線產品,後四條來自八個公開 WPF 專案、1909 個 XAML 檔的批次掃描),
   第 12 條（模板根背景）甚至是在驗收工具自己促成的修正時挖出來的。
@@ -240,6 +250,8 @@ HandyControl)5~19%。稽核函式庫請預期要用 `--min-coverage 0`,並把解
 
 ## 已知限制
 
+完整盲區表與逐案證據見[規畫書](XamlContrast專案規畫書.md)。
+
 TargetName 指向模板**內部**元素（指向根的已解析）、跨元素同條件觸發器、
 隱含樣式（根元素背景以外）;sibling 背景已解析「佔滿格子的純色兄弟」,
 文字疊兄弟 Image 誠實歸 `over-sibling-content` —— 但部分覆蓋的兄弟、
@@ -247,7 +259,7 @@ TargetName 指向模板**內部**元素（指向根的已解析）、跨元素�
 猜了就是拿誠實的不確定去換錯誤的信心。
 另:`VisualStateManager` 的顏色動畫(狀態 storyboard 裡的 `ColorAnimation`)不稽核
 **且尚未計數** —— Blend 時代的樣式方言(實測:kaxaml/snoop 這類老專案有數十處,
-現代專案為零)。計數器排入下版;在那之前,這一行就是揭露。
+現代專案為零)。計數器已列入規劃;在那之前,這一行就是揭露。
 
 ## 在你的專案上跑過了嗎？我想知道結果
 

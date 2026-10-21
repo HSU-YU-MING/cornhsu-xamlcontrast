@@ -81,7 +81,7 @@ run on every change, red when broken, pointing at the exact line.
 
 Two independent dimensions per finding:
 
-- **grade** (absolute contrast): `fail` < threshold×2/3, `warn` in between, `ok`, `decorative`
+- **grade** (absolute contrast): `fail` < threshold×0.67 (≈2/3), `warn` in between, `ok`, `decorative`
 - **symmetry** (across themes): `both-low` = the palette itself is too weak;
   `dark-fails` / `light-fails` = the design intent didn't survive the other theme
 
@@ -130,7 +130,8 @@ tried in this order, and the one that ran is always named on the first line of t
 6. **Nothing found** — falls back to hardcoded colors only, and **says so loudly**
 
 (1) and (2) both report as palette mode `pair`; (4) and (5) as `single`. In a repo with two or
-more `App.xaml` files, each application subtree is additionally resolved against its own palette.
+more `<Application>` roots (typically `App.xaml`), the merged paths (1) and (4) additionally
+resolve each application subtree against its own palette.
 
 Wrong guess? Override with `xamlcontrast.config.json` —
 [schema](docs/config-schema.md) (zh-Hant; the JSON example at the top is self-explanatory).
@@ -147,8 +148,11 @@ xamlcontrast src/MyApp --sarif audit.sarif         # GitHub code scanning format
 xamlcontrast src/MyApp --md report.md              # Markdown report (for a PR comment)
 ```
 
-Exit codes: `1` on failure, `1` when **zero pairs resolved** (an empty scan is not a pass),
-`2` on usage errors, `0` otherwise.
+Exit codes: `1` on failure — any `fail` (or `warn` with `--fail-on warn`), new or worsened
+failures vs `--baseline`, coverage below `--min-coverage`, a degraded palette with
+`--strict-palette` — and `1` when **zero pairs resolved** (an empty scan is not a pass);
+`2` on usage or configuration errors (bad flags, invalid config, a report or baseline file
+that can't be written or read); `0` otherwise.
 
 ### Adopting on an existing project (baseline ratchet)
 
@@ -191,6 +195,7 @@ jobs:
       - uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.6.1   # 0.x: pin exact version
         with:
           root: src/MyApp
+          version: 0.6.1          # pins the tool too — without it the action installs the latest release
 ```
 
 > **`pull-requests: write` is what makes the PR comment work.** Without it that step gets a 403.
@@ -210,8 +215,9 @@ Inputs: `root` (required), `working-directory`, `version`, `fail-on`, `baseline`
 ## JSON output
 
 `--json report.json` writes a two-layer report: `findings` (one entry per pair) plus a
-`summary` block carrying every degradation counter — `paletteSource`, `unresolved`,
-`skipped`, `suppressed`, `parseErrors`, `disabledExempt`. If the tool couldn't see
+`summary` block carrying every degradation counter — `paletteSource`, `coverage`, `unresolved`
+(with `unresolvedBy`), `skipped`, `deadForeground`, `disabledExempt`, `suppressed`, `parseErrors`,
+plus `unknownKeys`, `parseErrorFiles` and `invalidIgnores` when non-empty. If the tool couldn't see
 something, that fact is machine-readable. Consumers should check `schemaVersion`.
 
 `unresolved` is broken down by cause in `summary.unresolvedBy`, because the total on its own
@@ -229,7 +235,8 @@ doesn't tell you whether anything can be done about it:
 `summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
 (default 50%) fails**, because a pass over a fraction of the project is not a pass — the same
 principle as the non-configurable zero-pairs rule, which it generalises. Use
-`--min-coverage 0` to opt out.
+`--min-coverage 0` to opt out (the GitHub Action has no input for it — set `"minCoverage": 0`
+in `xamlcontrast.config.json` instead).
 
 Every unresolved pair is listed with its location: `--show-unresolved` prints
 `file:line · reason · offending value`, and the JSON carries the same list in a top-level
@@ -238,7 +245,8 @@ and the top ones on the console) — each one is a dead resource reference, a ty
 file detection missed, which makes this a free lint even before any contrast math.
 
 **Set expectations by project type.** Application projects typically resolve well
-(the four validation apps run at 89–100%). **Control libraries resolve poorly by nature** —
+(three of the four validation apps run at 88–99%; the fourth has almost no text to pair).
+**Control libraries resolve poorly by nature** —
 their colours flow through `{TemplateBinding}` and `{Binding}`, which only exist at runtime;
 that is a hard boundary of static analysis, reported as `bound-or-gradient`, not a bug to fix
 with configuration. Measured on public projects: applications 26–57%, control libraries
@@ -276,10 +284,11 @@ across three shipped WPF apps** (before/after audited by the tool itself):
 How that trust was earned — the highlights, with the full story in the
 [development retrospective](docs/開發歷程回顧.md) (zh-Hant):
 
-- **Two independent implementations cross-verified.** The PowerShell prototype (the spec)
-  and this .NET port agree on every number across all four validation projects —
-  down to each failing pair's `file:line` and the exit code. Re-run it yourself:
-  `scripts/verify-baselines.ps1`.
+- **Two independent implementations cross-verified.** At v0.1.0 the PowerShell prototype (the spec)
+  and this .NET port agreed on every number across all four validation projects —
+  down to each failing pair's `file:line` and the exit code. The prototype has been frozen
+  since; the .NET port is regression-checked against its own frozen snapshots of those projects
+  (`scripts/verify-baselines.ps1` — maintainer-only, the four apps are unreleased).
 - **Every parsing rule came from a real false alarm or a real miss** — none were designed
   at a whiteboard. The 12th (template-root backgrounds) was found while verifying the
   fixes the tool itself had driven.
