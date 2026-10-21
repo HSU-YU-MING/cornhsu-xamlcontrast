@@ -375,4 +375,124 @@ public class PaletteDetectorTests
         var d = PaletteDetector.Detect(fx.Root);
         Assert.Equal(PaletteMode.None, d.Mode);
     }
+
+    // ── 合併式色盤湊不到 3 個鍵時的退路：挑檔（偵測順序的「theme pair」與「single theme file」）──
+    //    合併式只從 brush 取鍵，全專案一個 brush 都沒有才改用 <Color> 鍵 —— 所以「主題檔只有 <Color>、
+    //    別處零星一個 brush」的專案，合併式不成立，交給這兩條挑檔的路。它們沒接住就是整個退化成無色盤。
+
+    private static string ColorDict(params string[] keyHex) => $"""
+        <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+          {string.Join("\n  ", keyHex.Select(kv => kv.Split('=')).Select(kv => $"<Color x:Key=\"{kv[0]}\">{kv[1]}</Color>"))}
+        </ResourceDictionary>
+        """;
+
+    private const string StrayBrush = """
+        <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+          <SolidColorBrush x:Key="Stray" Color="#FF0000"/>
+        </ResourceDictionary>
+        """;
+
+    [Fact] // 深淺兩檔鍵集重疊 ≥ 50% → 配對。專案放在帶 dark 字樣的目錄底下 —— 這條路的檔名提示
+           // （XamlCandidates）也只能看專案內相對路徑，否則淺色檔同時染上 dark、配對整個失效
+    public void ThemePairFallbackWhenTheMergedPaletteIsTooSmall()
+    {
+        using var fx = new Fixture("xc-darkapp-" + Guid.NewGuid().ToString("N"));
+        fx.File("Themes/ColorsDark.xaml", ColorDict("Bg=#111111", "Fg=#EEEEEE", "Accent=#42A5F5"))
+          .File("Themes/ColorsLight.xaml", ColorDict("Bg=#FAFAFA", "Fg=#212121", "Other=#123456"))
+          .File("Controls/Stray.xaml", StrayBrush);
+        Assert.Contains("dark", fx.Root); // 前提：專案所在路徑真的帶著提示字樣
+
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(PaletteMode.Pair, d.Mode);
+        Assert.False(d.IsDegraded);
+        Assert.StartsWith("auto-detected theme pair: ", d.Description);
+        Assert.Equal(2, d.Palette.Count);                                   // 只收兩邊都有的鍵（2/3 ≥ 50%）
+        Assert.Equal(("#111111", "#FAFAFA"), d.Palette.Entries["Bg"]);
+        Assert.Equal(("#EEEEEE", "#212121"), d.Palette.Entries["Fg"]);
+        Assert.Equal(["ColorsDark.xaml", "ColorsLight.xaml"], d.ExcludedFiles.Select(Path.GetFileName).Order());
+    }
+
+    [Fact] // 重疊 < 50% 不配對（1/3）→ 單一主題檔：挑鍵最多的那個（不是掃描順序的第一個），
+           // 其餘候選要點名 —— 沒被採用的色盤檔不能靜默消失
+    public void LargestSingleFileFallbackWhenNoPairOverlapsEnough()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/ColorsDark.xaml", ColorDict("Bg=#111111", "Fg=#EEEEEE", "Accent=#42A5F5"))
+          .File("Themes/ColorsLight.xaml", ColorDict("Bg=#FAFAFA", "L1=#212121", "L2=#2196F3", "L3=#E0E0E0"))
+          .File("Controls/Stray.xaml", StrayBrush);
+
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(PaletteMode.Single, d.Mode);
+        Assert.False(d.IsDegraded);
+        Assert.StartsWith("auto-detected single-theme palette: ", d.Description);
+        Assert.Contains("ColorsLight.xaml (4 keys); unused candidates: ", d.Description);
+        Assert.EndsWith("ColorsDark.xaml", d.Description);
+        Assert.Equal(("#FAFAFA", "#FAFAFA"), d.Palette.Entries["Bg"]);     // 單一主題：深淺同值
+        Assert.Equal(["ColorsLight.xaml"], d.ExcludedFiles.Select(Path.GetFileName));
+    }
+
+    [Fact] // 字面值 brush 也可以寫具名色（Color="White"）—— 合併式的 brush 表要認得，
+           // 否則這一側缺值、退回另一側的值，深淺兩欄變成同一個編造的顏色
+    public void NamedColourLiteralBrushesAreResolved()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="White"/>
+              <SolidColorBrush x:Key="Accent" Color="#42A5F5"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FAFAFA"/>
+              <SolidColorBrush x:Key="Fg" Color="#212121"/>
+              <SolidColorBrush x:Key="Accent" Color="#1D6FC4"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(("#FFFFFF", "#212121"), d.Palette.Entries["Fg"]);
+    }
+
+    [Theory] // 同鍵不同值要明講，但「同鍵同值」不是衝突（兩個字典重複定義同一個品牌色很常見，報出來只是雜訊）；
+             // 衝突清單最多點名 5 個，其餘以 … 表示 —— 數量照實印
+    [InlineData(5, false)]
+    [InlineData(6, true)]
+    public void ConflictNoteCountsRealConflictsAndNamesAtMostFive(int conflicting, bool truncated)
+    {
+        string Dict(string hex) => $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Same" Color="#42A5F5"/>
+              {string.Join("\n  ", Enumerable.Range(1, conflicting).Select(i => $"<SolidColorBrush x:Key=\"K{i}\" Color=\"{hex}\"/>"))}
+            </ResourceDictionary>
+            """;
+        using var fx = new Fixture();
+        fx.File("Lib/A.xaml", Dict("#111111")).File("Lib/B.xaml", Dict("#222222"));
+
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Contains($"!! {conflicting} key(s) defined with conflicting values", d.Description);
+        Assert.Contains("wins): K1, K2, K3, K4, K5", d.Description);
+        Assert.Equal(truncated, d.Description.EndsWith(", …"));
+        Assert.DoesNotContain("K6", d.Description);
+        Assert.DoesNotContain("Same", d.Description);
+        Assert.Equal(("#111111", "#111111"), d.Palette.Entries["K1"]); // 先出現的贏（字典序 A 在 B 前）
+    }
+
+    [Fact] // 根部就不是 XML 的檔案（樣板殘骸、編碼壞掉）不能讓偵測整個崩潰（找 <Application> 根元素那一步也要擋）；
+           // 它交給稽核端喊 parse failed —— 不是讓檔案從報告裡消失
+    public void UnparseableXamlNeitherBreaksDetectionNorDisappears()
+    {
+        using var fx = new Fixture().WithPalette();
+        fx.File("Broken.xaml", "this is not xml at all");
+        fx.File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Fg}" Text="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(PaletteMode.Pair, r.Detection.Mode);
+        Assert.StartsWith("Broken.xaml: ", Assert.Single(r.ParseErrors));
+        Assert.Equal("Main.xaml", Assert.Single(r.Findings).File);
+        Assert.Equal(2, r.FileCount); // 兩個主題檔是色盤，不進 UI 掃描；壞檔照算一個
+    }
 }
