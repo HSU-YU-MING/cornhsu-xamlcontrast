@@ -214,6 +214,92 @@ public class StyleChainTests
         Assert.Equal("#000000", hover.Bg);   // 底由 template trigger 補上
     }
 
+    // ── Style 定義處（WalkStyles）也要合併同條件的觸發器、看 BasedOn ──
+    //    舊版每個觸發器各自跟基礎值合併：style trigger 設字色、同條件的 template trigger 設模板根的底，
+    //    被拆成兩個各缺一半的幻影組合各報一筆假 fail（實際 hover 是 21:1）；衍生 Style 重新套模板時，
+    //    模板觸發器的底被配上衍生 Style 自己的字色單獨評分，看不到基底 style trigger 在同一狀態蓋過的字色
+
+    [Fact]
+    public void DefinitionSiteMergesSameConditionTriggers()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Grid.Resources>
+                <Style x:Key="Btn" TargetType="Button">
+                  <Setter Property="Background" Value="#EEEEEE"/>
+                  <Setter Property="Foreground" Value="#111111"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Border x:Name="root" Background="{TemplateBinding Background}"><ContentPresenter/></Border>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="root" Property="Background" Value="#000000"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                  <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter Property="Foreground" Value="#FFFFFF"/>
+                    </Trigger>
+                  </Style.Triggers>
+                </Style>
+              </Grid.Resources>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.CountOf(Category.Fail)); // 沒有「#FFFFFF 疊 #EEEEEE」「#111111 疊 #000000」兩個幻影
+        Assert.Equal(2, r.Findings.Count);
+        Assert.Contains(r.Findings, f => f.Element == "Style[Btn]/base" && f.Fg == "#111111" && f.Bg == "#EEEEEE");
+        Assert.Contains(r.Findings, f => f.Element == "Style[Btn]/trigger" && f.Fg == "#FFFFFF" && f.Bg == "#000000");
+    }
+
+    [Fact]
+    public void DefinitionSiteOfARetemplatedDerivedStyleSeesTheInheritedStyleTrigger()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Grid.Resources>
+                <Style x:Key="Base" TargetType="Button">
+                  <Setter Property="Foreground" Value="#111111"/>
+                  <Setter Property="Background" Value="#EEEEEE"/>
+                  <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter Property="Foreground" Value="#FFFFFF"/>
+                    </Trigger>
+                  </Style.Triggers>
+                </Style>
+                <Style x:Key="Retemplated" TargetType="Button" BasedOn="{StaticResource Base}">
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"><ContentPresenter/></Border>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="#222222"/>
+                            <Setter Property="Background" Value="#000000"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+            </Grid>
+            """);
+        var r = fx.Run();
+        // hover 的實際字色是基底 style trigger 的 #FFFFFF（style trigger 勝過 template trigger），不是 #222222；
+        // 這個 hover 狀態的字來自 Base、底來自 Retemplated —— 跨來源的組合由使用處評，定義處不另報
+        Assert.DoesNotContain(r.Findings, f => f.Fg == "#222222");
+        Assert.DoesNotContain(r.Findings, f => f.Element.StartsWith("Style[Retemplated]"));
+        // Base 自己（沒被換模板時）的 hover 是 #FFFFFF 疊 #EEEEEE —— 那是真的，照報
+        Assert.Equal(Category.Fail, Assert.Single(r.Findings, f => f.Element == "Style[Base]/trigger").Category);
+    }
+
     // ── 鏈路徑上「評不了」的每一種情況都要落進對的桶：樹走訪那邊有的計數紀律，這條路一樣要有 ──
     //    之前 Style 配對評不了是裸 continue，配對從報告徹底消失、連計數都沒有（NewRuleTests 那條的教訓）
 

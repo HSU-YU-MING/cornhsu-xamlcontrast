@@ -595,38 +595,11 @@ public sealed partial class Auditor
         foreach (var style in doc.Descendants().Where(e => e.Name.LocalName == "Style"))
         {
             var styleSuppressed = IsSuppressedByComment(style, file);
-            var setters = new Dictionary<string, string>();
-            foreach (var s in style.Elements().Where(e => e.Name.LocalName == "Setter"))
-            {
-                var prop = s.Attribute("Property")?.Value;
-                var val = XamlBrush.SetterValue(s);
-                if (prop is not null && val is not null) setters[prop] = val;
-            }
 
-            // 規則 13 也適用於定義處：只收「無 TargetName（套宿主）或指向模板根」的
-            // Setter。指向內部元素的換底配上宿主字色是錯的配對（內部元素的底不一定
-            // 墊在宿主文字下面）—— 不猜。
-            var tmplRootEl = style.Descendants()
-                .FirstOrDefault(e => e.Name.LocalName == "ControlTemplate")
-                ?.Elements().FirstOrDefault(e => !e.Name.LocalName.Contains('.'));
-            var tmplRootName = tmplRootEl?.Attribute(XName.Get("Name", "http://schemas.microsoft.com/winfx/2006/xaml"))?.Value
-                               ?? tmplRootEl?.Attribute("Name")?.Value;
-
-            // 觸發器裡的 Setter 也算進來（它們覆蓋同一個 Style 的基礎值）
-            var trigSetters = new List<(Dictionary<string, string> Set, bool Disabled)>();
-            foreach (var t in style.Descendants().Where(StyleIndex.IsTriggerElement))
-            {
-                var ts = new Dictionary<string, string>();
-                foreach (var s in t.Elements().Where(e => e.Name.LocalName == "Setter"))
-                {
-                    var prop = s.Attribute("Property")?.Value;
-                    var val = XamlBrush.SetterValue(s);
-                    if (prop is null || val is null) continue;
-                    var tn = s.Attribute("TargetName")?.Value;
-                    if (tn is null || (tmplRootName is not null && tn == tmplRootName)) ts[prop] = val;
-                }
-                if (ts.Count > 0) trigSetters.Add((ts, StyleIndex.IsDisabledTrigger(t)));
-            }
+            // 合併鏈：BasedOn 逐層合併、同條件觸發器合併（與元素端的鏈路徑同一套，見 StyleIndex.DefinitionChain）。
+            // 規則 13 也適用於定義處：觸發器只收「無 TargetName（套宿主）或指向模板根」的 Setter ——
+            // 指向內部元素的換底配上宿主字色是錯的配對（內部元素的底不一定墊在宿主文字下面），不猜。
+            var (chain, selfId) = _styles.DefinitionChain(style, _curFile);
 
             // ── 規則 8，誤報過濾：模板沒有 Foreground 消費者 → Style 層 Foreground 是死 setter ──
             // 2026-07-30 QuillNest DataGridCheckBoxStyle 實證：ControlTemplate 把 CheckBox
@@ -655,20 +628,23 @@ public sealed partial class Auditor
             }
             var line = style is IXmlLineInfo sli && sli.HasLineInfo() ? sli.LineNumber : 0;
 
-            // 基礎 + 每個觸發器狀態各檢一次
-            var states = new List<(string Name, Dictionary<string, string> Set, bool Disabled)>
-            { ("base", setters, false) };
-            foreach (var (ts, dis) in trigSetters)
-            {
-                var merged = new Dictionary<string, string>(setters);
-                foreach (var (k, v) in ts) merged[k] = v;
-                states.Add(("trigger", merged, dis));
-            }
+            // 基礎 + 每個（合併後的）觸發器狀態各檢一次。字與底都出自這個 Style 才在定義處報；
+            // 任一半來自 BasedOn 的基底 → 那一組由使用處（元素 × Style 鏈）評，兩邊不重複
+            var states = new List<(string Name, StyleIndex.State? St)> { ("base", null) };
+            states.AddRange(chain.States.Select(s => ("trigger", (StyleIndex.State?)s)));
 
-            foreach (var (stateName, set, stDisabled) in states)
+            foreach (var (stateName, st) in states)
             {
-                if (!set.TryGetValue("Foreground", out var fgv) ||
-                    !set.TryGetValue("Background", out var bgv)) continue;
+                string? Prop(string p, out int src)
+                {
+                    if (st is not null && st.Set.TryGetValue(p, out var sv)) { src = st.SetSrc[p]; return sv; }
+                    if (chain.Props.TryGetValue(p, out var pv)) { src = pv.Src; return pv.V; }
+                    src = -1; return null;
+                }
+                var fgv = Prop("Foreground", out var fgSrc);
+                var bgv = Prop("Background", out var bgSrc);
+                if (fgv is null || bgv is null || fgSrc != selfId || bgSrc != selfId) continue;
+                var stDisabled = st?.Disabled ?? false;
                 if (fgDead) { _deadFg++; continue; }
                 // 停用態（IsEnabled=False 觸發）：WCAG 1.4.3 豁免，計數回報、不評分
                 if (stDisabled) { _disabled++; continue; }
@@ -700,8 +676,8 @@ public sealed partial class Auditor
                 //   不確定（匿名、沒 TargetType）就當文字報出來 —— 不替使用者放過。
                 var isText = ttName is null || !IsNonTextElement(ttName);
                 var fs = 0.0;
-                if (set.TryGetValue("FontSize", out var fsv)) ParseDouble(fsv, out fs);
-                var bold = set.TryGetValue("FontWeight", out var fwv) && IsBold(fwv);
+                if (Prop("FontSize", out _) is { } fsv) ParseDouble(fsv, out fs);
+                var bold = IsBold(Prop("FontWeight", out _));
                 var pt = fs * 0.75; // WPF FontSize 是 DIP，換 point 要 ×0.75（規劃書 4.3）
                 var isLarge = pt >= 18 || (bold && pt >= 14);
                 var need = NeedFor(isText, isLarge);

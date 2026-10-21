@@ -402,6 +402,23 @@ internal sealed partial class StyleIndex
         return merged.Props.TryGetValue("Background", out var v) ? v.V : merged.TemplateRootBg;
     }
 
+    /// <summary>
+    /// Style 定義處（Auditor.WalkStyles）用的合併鏈：這個 Style 連同 BasedOn 逐層合併、同條件觸發器合併 ——
+    /// 與元素端的鏈路徑同一套規則。回傳的 Id 是這個 Style 自己的來源編號：字與底都出自它的配對才在
+    /// 定義處報，任一半來自 BasedOn 基底的組合由使用處（元素 × Style 鏈）評，兩邊不重複。
+    /// ⚠ 舊版定義處每個觸發器各自跟基礎值合併、也不看 BasedOn：style trigger 設字色＋同條件 template trigger
+    ///   設模板根底的同一個 hover 狀態被拆成兩個各缺一半的幻影組合，各報一筆假 fail。
+    /// </summary>
+    public (Merged Chain, int Id) DefinitionChain(XElement style, string file)
+    {
+        var rec = CreateRecord(style, file);
+        var seen = new HashSet<string>();
+        if (rec.Key is not null) seen.Add(rec.Key);
+        var merged = MergeChain(rec, seen, "");
+        merged.States = MergeSameCondition(merged.States);
+        return (merged, rec.Id);
+    }
+
     /// <summary>元素套用的 Style（Style="{StaticResource X}" 或 &lt;X.Style&gt; 行內）。</summary>
     public Merged? GetElementChain(XElement el, string file)
     {
