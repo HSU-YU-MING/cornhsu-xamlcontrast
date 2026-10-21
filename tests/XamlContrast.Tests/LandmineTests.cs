@@ -468,6 +468,42 @@ public class LandmineTests
         Assert.Equal(Wcag.Contrast("#212121", "#FAFAFA"), Assert.Single(r.Findings, f => f.File == "Tools/SubApp/Main.xaml").RatioDark);
     }
 
+    [Theory] // 巢狀 App：外層 App 的作用域是「自己的子樹 ∪ 共用區」，而子樹裡包含內層 App 的目錄 ——
+             // 內層 App 的字典漏進外層，同鍵衝突時看路徑的字典序決定用誰（Plugins 與 Tools 得到不同結論：
+             // 一邊 1.17:1 假 fail、一邊 16.28:1）。外層 App 的作用域要排除更深一層 App 目錄底下的檔案
+    [InlineData("Plugins")]
+    [InlineData("Tools")]
+    public void NestedAppDictionariesDoNotLeakIntoTheOuterAppScope(string folder)
+    {
+        using var fx = new Fixture();
+        fx.File("App.xaml", """<Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="Outer.App"/>""");
+        fx.File("Themes/Theme.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Accent" Color="#42A5F5"/>
+            </ResourceDictionary>
+            """);
+        fx.File($"{folder}/Sub/App.xaml", """<Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="Inner.App"/>""");
+        fx.File($"{folder}/Sub/Theme.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FAFAFA"/>
+              <SolidColorBrush x:Key="Fg" Color="#212121"/>
+              <SolidColorBrush x:Key="Accent" Color="#2196F3"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """
+            <Window Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}" Text="外層"/></Window>
+            """);
+        fx.File($"{folder}/Sub/Views/Main.xaml", """
+            <Window Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}" Text="內層"/></Window>
+            """);
+        var r = fx.Run();
+        Assert.Equal(Wcag.Contrast("#EEEEEE", "#111111"), Assert.Single(r.Findings, f => f.File == "Views/Main.xaml").RatioDark);
+        Assert.Equal(Wcag.Contrast("#212121", "#FAFAFA"),
+                     Assert.Single(r.Findings, f => f.File == $"{folder}/Sub/Views/Main.xaml").RatioDark);
+    }
+
     [Fact] // 共用區退路：不屬於任何 App 目錄的檔案用「共用區」色盤，看不到 App 自己的鍵。
            // （畫面檔在共用區，有沒有 GetFullPath 都落到共用區 —— 正規化那條地雷由上一條守）
     public void FileOutsideEveryAppUsesTheSharedPalette()

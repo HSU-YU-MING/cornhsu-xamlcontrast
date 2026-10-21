@@ -667,8 +667,17 @@ public static partial class PaletteDetector
             foreach (var d in scopeDirs)
             {
                 // 各 App 看得到:自己子樹 ∪ 共用區(函式庫本體之類,不屬於任何 App 目錄)
-                var m = MergedXamlPalette(root, f =>
-                    Path.GetFullPath(f).StartsWith(d + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) || !UnderAny(f));
+                // ⚠ 「自己子樹」要扣掉更深一層的 App 目錄:巢狀 App 的字典屬於內層,舊版會漏進外層,
+                //   同鍵衝突時看路徑字典序決定用誰(資料夾叫 Plugins 還是 Tools 會得到不同結論)
+                bool InThisApp(string f)
+                {
+                    var full = Path.GetFullPath(f);
+                    return full.StartsWith(d + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) &&
+                           !scopeDirs.Any(o => o.Length > d.Length &&
+                                               o.StartsWith(d + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) &&
+                                               full.StartsWith(o + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
+                }
+                var m = MergedXamlPalette(root, f => InThisApp(f) || !UnderAny(f));
                 if (m is { } sm && sm.Pal.Count > 0) scopes.Add(new PaletteScope(d, sm.Pal));
             }
             var shared = MergedXamlPalette(root, f => !UnderAny(f));
