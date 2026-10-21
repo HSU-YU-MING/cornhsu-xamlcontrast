@@ -263,6 +263,27 @@ public class JsonReportContractTests
         Assert.Equal(["Main.xaml:28 Zed", "Main.xaml:29 Zed", "Main.xaml:30 Beta", "Main.xaml:31 Alpha"], sites);
     }
 
+    [Fact] // unresolved[].value 是「卡住的那個值」：問題出在背景時，舊版放的是前景的值（bg.Key ?? fgRaw、bgV ?? fgV）——
+           // `--show-unresolved` 印 "bound-or-gradient #FFFFFF"，點名的是沒問題的字色，不是卡住的 {Binding Z}
+    public void UnresolvedValueNamesTheBackgroundWhenTheBackgroundIsTheProblem()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <StackPanel xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#000000">
+              <StackPanel.Resources>
+                <Style x:Key="Pad" TargetType="Button"><Setter Property="Padding" Value="4"/></Style>
+              </StackPanel.Resources>
+              <Border Background="{Binding Z}"><TextBlock Foreground="#FFFFFF" Text="tree walk"/></Border>
+              <Border Background="{Binding Y}"><Button Style="{StaticResource Pad}" Foreground="#FFFFFF" Content="style chain"/></Border>
+              <Border><Border.Background><LinearGradientBrush/></Border.Background><TextBlock Foreground="#FFFFFF" Text="gradient"/></Border>
+              <Grid><Image Source="a.png"/><TextBlock Foreground="#FFFFFF" Text="over a picture"/></Grid>
+              <TextBlock Foreground="{Binding Fg}" Text="foreground side: still the foreground value"/>
+            </StackPanel>
+            """);
+        var values = fx.Run().UnresolvedSites.Select(s => s.Value).ToList();
+        Assert.Equal(["{Binding Z}", "{Binding Y}", "<LinearGradientBrush>", "<Image>", "{Binding Fg}"], values);
+    }
+
     [Fact] // summary 的描述欄位要說實話：這份結果是哪個色盤、哪份 config、哪套門檻跑出來的。
            // 形狀測試只驗型別 —— 值寫反了（singleTheme、configLoaded）形狀照樣對，讀報告的人卻被誤導
     public void SummaryDescribesThePaletteConfigAndThresholdsOfTheRun()

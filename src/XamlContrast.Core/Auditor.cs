@@ -321,7 +321,7 @@ public sealed partial class Auditor
                     // 關鍵：不能「往上繼承祖先背景」，那會把子元素的文字色配到錯的底色上
                     // （例：標籤徽章的底色綁使用者選的顏色，白字是對的，但繼承祖先會誤判成白配白）。
                     // 標記為無法判定，子元素一律跳過。
-                    bg = new Resolved(ColorKind.Other);
+                    bg = new Resolved(ColorKind.Other, Raw: bgVal);
                 }
                 else if (r.Kind != ColorKind.Transparent)
                 {
@@ -401,7 +401,7 @@ public sealed partial class Auditor
                 }
                 else bgObj = bg; // Style 鏈沒設底 → 退回祖先背景
                 if (bgObj is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgV); continue; }
-                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bgObj, file, LineOf(el), bgV ?? fgV); continue; }
+                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bgObj, file, LineOf(el), bgV ?? bgObj.Key ?? bgObj.Raw ?? fgV); continue; }
                 if (op < 0.01) { _skipped++; continue; }
 
                 // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複
@@ -460,7 +460,7 @@ public sealed partial class Auditor
             if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey) { Unres(fg, file, LineOf(el), fgRaw); continue; }
             if (fg.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
             if (bg is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgRaw); continue; }
-            if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bg, file, LineOf(el), bg.Key ?? fgRaw); continue; }
+            if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bg, file, LineOf(el), bg.Key ?? bg.Raw ?? fgRaw); continue; }
 
             // Opacity 0 = 元素當下完全隱形。XAML 裡寫 Opacity="0" 幾乎都是淡入動畫的
             // 初始狀態，穩態是 1。對「看不見的東西」算對比沒有意義，跳過而不是報 1:1。
@@ -569,7 +569,7 @@ public sealed partial class Auditor
         var name = child.Name.LocalName;
         // (b) 內容元素:底變成一張圖,不可知
         if (name is "Image" or "MediaElement" || name.EndsWith("Image"))
-            return new Resolved(ColorKind.SiblingContent);
+            return new Resolved(ColorKind.SiblingContent, Raw: "<" + name + ">");
 
         // (a) 純色背板候選:要佔滿格子 —— 有明確尺寸或非 Stretch 對齊的不算
         // ⚠ Canvas 不套 Stretch:沒內容、沒尺寸的 Border 在 Canvas 裡實際是 0×0。舊版照樣套 17(a),
@@ -600,7 +600,7 @@ public sealed partial class Auditor
                         Key: $"{raw} over {(under.Key is not null ? "{" + under.Key + "}" : under.Dark)}")
                     : null;
             case ColorKind.Other:
-                return new Resolved(ColorKind.Other); // Binding／漸層:執行期才知道 → 後面的字計入 unresolved
+                return new Resolved(ColorKind.Other, Raw: raw); // Binding／漸層:執行期才知道 → 後面的字計入 unresolved
             case ColorKind.UnknownKey:
                 return r;                             // 不在色盤的鍵 → unknown-palette-key
             default:
