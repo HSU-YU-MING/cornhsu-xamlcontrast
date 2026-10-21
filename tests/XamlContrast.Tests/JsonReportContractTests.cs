@@ -112,6 +112,8 @@ public class JsonReportContractTests
                   </Setter>
                 </Style>
               </Grid.Resources>
+              <!-- 排成一列：Grid 的子元素會疊在同一格，佔滿格子的兄弟（下面的 Binding 底）會變成後面兄弟的背板（規則 17） -->
+              <StackPanel>
               <TextBlock Foreground="{DynamicResource Fg}" Text="ok"/>
               <TextBlock Foreground="{DynamicResource Dim}" FontSize="12" Text="fail, 12px"/>
               <TextBlock Foreground="{DynamicResource Zed}" Text="unknown key 1"/>
@@ -124,6 +126,7 @@ public class JsonReportContractTests
               <!-- xamlcontrast-ignore: watermark -->
               <TextBlock Foreground="{DynamicResource Dim}" Text="suppressed"/>
               <TextBlock Opacity="0" Foreground="#FFFFFF" Text="skipped"/>
+              </StackPanel>
             </Grid>
             """);
         return fx;
@@ -257,7 +260,7 @@ public class JsonReportContractTests
             .Where(x => x.GetProperty("reason").GetString() == "unknown-palette-key")
             .Select(x => $"{x.GetProperty("file").GetString()}:{x.GetProperty("line").GetInt32()} {x.GetProperty("value").GetString()}")
             .ToArray();
-        Assert.Equal(["Main.xaml:26 Zed", "Main.xaml:27 Zed", "Main.xaml:28 Beta", "Main.xaml:29 Alpha"], sites);
+        Assert.Equal(["Main.xaml:28 Zed", "Main.xaml:29 Zed", "Main.xaml:30 Beta", "Main.xaml:31 Alpha"], sites);
     }
 
     [Fact] // summary 的描述欄位要說實話：這份結果是哪個色盤、哪份 config、哪套門檻跑出來的。

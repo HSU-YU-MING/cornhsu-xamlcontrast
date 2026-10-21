@@ -518,7 +518,7 @@ public sealed partial class Auditor
                 if (cellBg!.TryGetValue(cell, out var sb)) childBg = sb;
             }
             Walk(child, childBg, file, op, suppressed);
-            if (overlap && SiblingBackdrop(child, stretches: el.Name.LocalName != "Canvas") is { } backdrop) cellBg![cell] = backdrop;
+            if (overlap && SiblingBackdrop(child, stretches: el.Name.LocalName != "Canvas", under: childBg) is { } backdrop) cellBg![cell] = backdrop;
         }
     }
 
@@ -540,7 +540,7 @@ public sealed partial class Auditor
 
     /// <summary>這個兄弟元素會不會成為「後面同格子兄弟」的背板。
     /// 回傳 null = 不影響(既非佔滿格子的底、也非內容元素)。</summary>
-    private Resolved? SiblingBackdrop(XElement child, bool stretches)
+    private Resolved? SiblingBackdrop(XElement child, bool stretches, Resolved? under)
     {
         var name = child.Name.LocalName;
         // (b) 內容元素:底變成一張圖,不可知
@@ -560,8 +560,28 @@ public sealed partial class Auditor
         var raw = XamlBrush.Read(child, name == "Rectangle" ? "Fill" : "Background");
         if (raw is null) return null;
         var r = ColorResolver.Resolve(raw, _pal);
-        // 只收確定的純色(Hard/Soft);半透明/漸層/Binding 維持原判定,不越權
-        return r is { Kind: ColorKind.Hard or ColorKind.Soft } ? r : null;
+        // ⚠ 舊版只收確定的純色(Hard/Soft),其餘回傳 null「維持原判定」—— 字改配祖先的底,給出篤定的比值:
+        //   白 Grid 裡 #CC000000 的兄弟加黑字報 21:1 ok(寫成巢狀是 1.66:1 fail);Binding 兄弟也報 21:1,
+        //   跟同檔「Binding 底不可往上繼承」的規則矛盾。現在比照巢狀的處理(見 Walk 的 bg 更新塊):
+        switch (r?.Kind)
+        {
+            case ColorKind.Hard or ColorKind.Soft:
+                return r;
+            case ColorKind.Alpha:
+                // 半透明:疊在它底下那層上合成;底下沒有可疊的顏色就維持原判定(同巢狀,不猜)
+                return under is { Dark: not null, Light: not null }
+                    ? new Resolved(ColorKind.Hard,
+                        Dark: Wcag.Composite(r.Rgb!, r.Alpha, under.Dark),
+                        Light: Wcag.Composite(r.RgbLight!, r.AlphaLight, under.Light),
+                        Key: $"{raw} over {(under.Key is not null ? "{" + under.Key + "}" : under.Dark)}")
+                    : null;
+            case ColorKind.Other:
+                return new Resolved(ColorKind.Other); // Binding／漸層:執行期才知道 → 後面的字計入 unresolved
+            case ColorKind.UnknownKey:
+                return r;                             // 不在色盤的鍵 → unknown-palette-key
+            default:
+                return null;                          // Transparent:穿透
+        }
     }
 
     // Style 裡成對的 Setter（Background + Foreground 同時存在）

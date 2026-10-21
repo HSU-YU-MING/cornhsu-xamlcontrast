@@ -39,6 +39,8 @@ public class NotEvaluatedVisibilityTests
                   </Setter>
                 </Style>
               </Grid.Resources>
+              <!-- 排成一列：Grid 的子元素會疊在同一格，佔滿格子的兄弟（下面的 Binding 底）會變成後面兄弟的背板（規則 17） -->
+              <StackPanel>
               <TextBlock Foreground="#FFFFFF" Text="ok"/>
               <TextBlock Foreground="#333333" Text="fail"/>
               <Border Background="{Binding UserColour}"><TextBlock Foreground="#FFFFFF" Text="bound"/></Border>
@@ -47,6 +49,7 @@ public class NotEvaluatedVisibilityTests
               <TextBlock Foreground="#111111" Text="suppressed"/>
               <!-- xamlcontrast-ignore -->
               <TextBlock Foreground="#FFFFFF" Text="ignore without a reason"/>
+              </StackPanel>
             </Grid>
             """);
         var cfg = ToolConfig.Load(fx.Root);

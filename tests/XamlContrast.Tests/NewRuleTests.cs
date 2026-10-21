@@ -710,21 +710,63 @@ public class NewRuleTests
         else Assert.Equal(expectedBg, Assert.Single(text).Bg);
     }
 
-    [Fact] // KnownLimitation —— 釘的是現況,不是正確答案。已知盲區(規畫書 §7「看不到 sibling 元素的背景」;
-           // 規則 17 只補了不透明的那一半):半透明的兄弟背板目前不合成,字改配祖先底。同樣的顏色寫成
-           // 巢狀(Border 包 TextBlock)會合成並照實評分,寫成兄弟就不會。修這個盲區(合成,或至少改報
-           // unresolved)時,這條要跟著改,不要為了讓它維持綠燈而把修正退回去
-    public void KnownLimitation_TranslucentSiblingBackdropIsNotComposited()
+    [Fact] // 佔滿格子的兄弟背板是半透明:比照巢狀,疊在它底下的那層上合成。舊版只收不透明的背板,其餘回傳 null,
+           // 字改配祖先的底 —— 白 Grid 裡 #CC000000 的兄弟加黑字報 21:1 ok,同樣的顏色寫成巢狀是 1.66:1 fail
+    public void TranslucentSiblingBackdropIsCompositedLikeANestedOne()
     {
         using var fx = new Fixture();
         fx.File("Main.xaml", """
             <Grid Background="#FFFFFF">
-              <Border Background="#80000000"/>
-              <TextBlock Foreground="#FFFFFF" Text="x"/>
+              <Border Background="#CC000000"/>
+              <TextBlock Foreground="#000000" Text="sibling"/>
             </Grid>
             """);
-        var f = Assert.Single(fx.Run().Findings);
-        Assert.Equal("#FFFFFF", f.Bg);   // 現況:配到祖先的白,不是「50% 黑疊白」
+        fx.File("Nested.xaml", """
+            <Grid Background="#FFFFFF">
+              <Border Background="#CC000000"><TextBlock Foreground="#000000" Text="nested"/></Border>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var sibling = Assert.Single(r.Findings, f => f.File == "Main.xaml");
+        var nested = Assert.Single(r.Findings, f => f.File == "Nested.xaml");
+        Assert.Equal("{#CC000000 over #FFFFFF}", sibling.Bg);
+        Assert.Equal(nested.Bg, sibling.Bg);
+        Assert.Equal(nested.RatioDark, sibling.RatioDark);  // 1.66:1,不是配祖先白的 21:1
+        Assert.Equal(Category.Fail, sibling.Category);
+    }
+
+    [Theory] // 兄弟背板是 Binding／漸層／不在色盤的鍵:底是執行期才知道的顏色 —— 依「Binding 底不可往上繼承」
+             // 同一條原則計入 unresolved,不是配祖先的底給出篤定比值(舊版 Binding 兄弟照報 21:1)
+    [InlineData("""<Border Background="{Binding OverlayBrush}"/>""", UnresolvedReason.BoundOrGradient)]
+    [InlineData("""<Border><Border.Background><LinearGradientBrush/></Border.Background></Border>""", UnresolvedReason.BoundOrGradient)]
+    [InlineData("""<Border Background="{DynamicResource NoSuchKey}"/>""", UnresolvedReason.UnknownPaletteKey)]
+    public void UnknowableSiblingBackdropIsUnresolved(string sibling, UnresolvedReason reason)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              {sibling}
+              <TextBlock Foreground="#000000" Text="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.DoesNotContain(r.Findings, f => f.Element == "TextBlock");
+        Assert.Equal(reason, Assert.Single(r.UnresolvedSites).Reason);
+    }
+
+    [Fact] // 半透明兄弟底下沒有可疊的顏色:跟巢狀一樣維持原判定(找不到祖先底 → no-ancestor-background),不猜
+    public void TranslucentSiblingWithNothingUnderneathIsLikeTheNestedCase()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid>
+              <Border Background="#CC000000"/>
+              <TextBlock Foreground="#000000" Text="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Equal(UnresolvedReason.NoAncestorBackground, Assert.Single(r.UnresolvedSites).Reason);
     }
 
     [Fact] // 同 brush 配對 = 模板不透明度慣用手法(MaterialDesign 實證):字面 1:1、
