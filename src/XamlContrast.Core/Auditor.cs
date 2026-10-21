@@ -104,15 +104,29 @@ public sealed partial class Auditor
         while (prev is XText t && string.IsNullOrWhiteSpace(t.Value)) prev = prev.PreviousNode;
         if (prev is not XComment c) return false;
         var m = IgnoreComment().Match(c.Value);
-        if (!m.Success) return false;
+        if (!m.Success)
+        {
+            // ⚠ 寫錯的變體（大小寫不同、冒號後沒有理由、漏冒號、理由換到第二行）舊版整段認不出來：
+            //   不壓（方向安全），但也不警告 —— 使用者看不出自己的註解沒生效。看起來像標記就要講出來。
+            //   多行理由維持不接受：接受等於放寬，會讓既有的這類註解開始壓掉配對
+            if (IgnoreCommentLenient().IsMatch(c.Value))
+                _invalidIgnores.Add($"{file}:{LineOfComment(c)}: malformed xamlcontrast-ignore comment (not suppressed)" +
+                                    " — write it as 'xamlcontrast-ignore: reason', lowercase, with the reason on the same line");
+            return false;
+        }
         if (!m.Groups["reason"].Success && _cfg.Ignore.RequireReason)
         {
-            var line = c is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
-            _invalidIgnores.Add($"{file}:{line}: xamlcontrast-ignore without a reason is invalid (not suppressed)");
+            _invalidIgnores.Add($"{file}:{LineOfComment(c)}: xamlcontrast-ignore without a reason is invalid (not suppressed)");
             return false;
         }
         return true;
     }
+
+    /// <summary>「看起來像 ignore 標記」：註解開頭、不分大小寫、整個字（xamlcontrast-ignored 不算）。</summary>
+    [GeneratedRegex(@"^\s*xamlcontrast-ignore\b", RegexOptions.IgnoreCase)]
+    private static partial Regex IgnoreCommentLenient();
+
+    private static int LineOfComment(XComment c) => c is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
 
     /// <summary>XAML 數值屬性一律以 InvariantCulture 解析 ——
     /// 否則德語系等 locale 的 CI 上 Opacity="0.5" 會靜默解析失敗。</summary>

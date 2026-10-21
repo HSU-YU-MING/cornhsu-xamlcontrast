@@ -44,6 +44,48 @@ public class IgnoreAndBaselineTests
         Assert.Contains("without a reason", Report.ToConsole(r));
     }
 
+    [Theory] // 寫錯的變體：舊版整段認不出來 —— 不壓（方向安全），但也不警告，使用者看不出自己的註解沒生效。
+             // 現在一律不壓、記進 invalidIgnores 並說明正確寫法。多行理由維持不接受（接受等於放寬、會讓
+             // 既有註解開始壓掉配對），只是不再沉默
+    [InlineData("xamlcontrast-ignore:")]                                    // 冒號後沒有理由
+    [InlineData("xamlcontrast-ignore:   ")]
+    [InlineData("xamlcontrast-ignore: watermark text,\n  intentionally faint")] // 理由換到第二行
+    [InlineData("XamlContrast-Ignore: watermark")]                          // 大小寫不同
+    [InlineData("xamlcontrast-ignore 浮水印")]                               // 漏了冒號
+    public void MalformedIgnoreCommentIsWarnedAboutAndDoesNotSuppress(string comment)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              <!-- {comment} -->
+              {LowContrastText}
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Suppressed);
+        Assert.Single(r.Findings);                        // 照報
+        var w = Assert.Single(r.InvalidIgnores);
+        Assert.StartsWith("Main.xaml:2: ", w);
+        Assert.Contains("malformed xamlcontrast-ignore", w);
+        Assert.Contains("not suppressed", w);
+    }
+
+    [Theory] // 對照組：不是 ignore 標記的註解不能誤報（標記要在註解開頭、而且是整個字）
+    [InlineData("TODO: xamlcontrast-ignore: later")]
+    [InlineData("xamlcontrast-ignored by design")]
+    [InlineData("an ordinary comment")]
+    public void OrdinaryCommentsAreNotTreatedAsMalformedIgnores(string comment)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              <!-- {comment} -->
+              {LowContrastText}
+            </Grid>
+            """);
+        Assert.Empty(fx.Run().InvalidIgnores);
+    }
+
     [Fact] // ignore 也能壓 Style 配對
     public void IgnoreSuppressesStylePair()
     {
