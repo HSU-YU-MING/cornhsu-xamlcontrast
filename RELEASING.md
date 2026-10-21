@@ -5,6 +5,11 @@
 1. 確認 `CHANGELOG.md` 的版本段落完整、`scripts/verify-baselines.ps1` 綠燈
    （改過 console 輸出的話，`scripts/verify-readme-sample.ps1` 也要綠 ——
    CI 會擋，但發版前先看一眼比較快；不一致就跑 `-Update` 重貼）
+   - 兩份 README 的 0.x pin 換成新版號：引言的 `--version`、Action 範例的 `uses: …@vX.Y.Z`
+     與 `version:`，**每份各三處**（`grep -n "<舊版號>" README.md README.zh-Hant.md` 找得到全部）。
+     README 會隨 tag 打包進 nupkg，所以**推 tag 前**就要改好、commit 進去。
+     沒有守門腳本檢查這幾處（`verify-readme-sample.ps1` 只比對示範輸出）：
+     `uses:` 換了、`version:` 漏了的話 Action 照樣綠燈，裝的卻是舊工具
 2. 推 tag：
 
 ```bash

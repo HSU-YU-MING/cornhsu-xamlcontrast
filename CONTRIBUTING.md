@@ -91,7 +91,7 @@ The script re-runs `samples/demo` and diffs it against the sample output in both
 If you changed console output, run it with `-Update` to re-paste, and include that in your PR.
 
 There is one more script, `scripts/verify-baselines.ps1`. **You cannot run it** — it audits
-four unreleased applications on the maintainer's machine and compares against frozen
+four closed-source applications on the maintainer's machine and compares against frozen
 snapshots. It runs before every release. If your change moves those numbers I will see it
 there, so don't be surprised if I come back with questions about a project you can't see.
 

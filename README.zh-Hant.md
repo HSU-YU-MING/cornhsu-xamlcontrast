@@ -136,12 +136,16 @@ xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # CI 裡
 
 baseline 的鍵不含行號（行號會漂），但會記錄最差比值（同一個鍵、色值被調暗的色盤漂移照樣抓得到）。
 
-**刻意低對比的標記**（理由必填 —— 沒附理由的視為無效並警告；壓掉的計入 `summary.suppressed`，不會靜默消失）：
+**刻意低對比的標記**（理由必填；壓掉的計入 `summary.suppressed`，不會靜默消失）：
 
 ```xml
 <!-- xamlcontrast-ignore: 浮水印，刻意低對比 -->
 <TextBlock Opacity="0.4" Text="草稿" ... />
 ```
+
+完全沒寫理由的 `<!-- xamlcontrast-ignore -->` 視為無效並警告（配對照報）。標記要一字不差：
+寫錯的變體（大小寫不同、冒號後沒有理由、理由換到第二行）目前認不出來，**也不會警告** ——
+配對照報，只是看不出註解沒生效。
 
 ### GitHub Action
 
@@ -192,7 +196,7 @@ jobs:
 | 原因 | 意思 |
 |---|---|
 | `no-ancestor-background` | 祖先鏈上沒有任何一層宣告背景。常見於根容器靠 App 層隱含樣式給底,或資源字典裡的向量圖 |
-| `bound-or-gradient` | 顏色來自 `{Binding}` / `{TemplateBinding}` / 漸層 —— 執行期才知道 |
+| `bound-or-gradient` | 顏色來自 `{Binding}` / `{TemplateBinding}` / 漸層 —— 執行期才知道。工具還讀不懂的色彩字面值也歸這裡:短色碼 `#RGB` / `#ARGB`,以及內建小表以外的具名色(例:`Navy`) |
 | `unknown-palette-key` | 資源鍵不在偵測到的色盤裡 —— 打字錯誤,或色盤偵測漏了某個檔 |
 | `translucent-uncomposited` | 半透明背景但底下沒有可疊的顏色 |
 | `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
@@ -204,7 +208,7 @@ jobs:
 設 `"minCoverage": 0`)。
 
 每一筆無法解析的配對都有位置可查:`--show-unresolved` 逐筆列出
-`file:line · 原因 · 卡住的值`,JSON 頂層的 `unresolved` 陣列帶同一份清單(`file`、`line`、`reason`、`value`)。
+`file:line · 原因 · 卡住的值`(背景側卡住時目前放的是前景值),JSON 頂層的 `unresolved` 陣列帶同一份清單(`file`、`line`、`reason`、`value`)。
 unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)——
 每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。
 
@@ -239,7 +243,7 @@ HandyControl)5~19%。稽核函式庫請預期要用 `--min-coverage 0`,並把解
 |---|---|---|
 | CelFlow | 破 39／偏低 57 | **0**（停用態豁免 21） |
 | Kindling | 破 41／偏低 14 | **真實問題 0**（餘 3 筆皆為已記錄假警報類） |
-| QuillNest | 破 13／偏低 31 | **真實問題 0**（餘 7 筆同上） |
+| QuillNest | 破 13／偏低 31 | **真實問題 0**（餘 破 7／偏低 1，同上） |
 
 「修正後」一欄是當時的紀錄，不是即時數字。目前凍結的快照（`baselines/*.json`，以 v0.6 的工具稽核）
 是 CelFlow 破 0／偏低 0、Kindling 破 0／偏低 1、QuillNest 破 3／偏低 1。
@@ -256,7 +260,7 @@ HandyControl)5~19%。稽核函式庫請預期要用 `--min-coverage 0`,並把解
 - **開發期間工具自己出過八次「看起來健康但錯」的報告，每一次都變成回歸測試。**
   用血寫成的第一原則：**稽核工具最大的風險不是漏報，是謊報健康。**
   所有放過的東西 —— 豁免、排除、壓掉、解析失敗 —— 都計數、都喊出來。
-- **殘餘的 fail 有名有姓、不藏**：每一筆都對應已記錄的假警報類（見已知限制），
+- **殘餘的 fail 有名有姓、不藏**：2026 年 7 月那張表中當時殘餘的每一筆都對應已記錄的假警報類（見已知限制），
   導入 CI 時由 baseline ratchet 承接。
 
 ## 已知限制

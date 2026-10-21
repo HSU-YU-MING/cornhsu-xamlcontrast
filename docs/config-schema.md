@@ -55,11 +55,13 @@
 | `csharpPattern` | 內建三元組 | 具名群組 `key` / `dark` / `light` 的 regex（沒有這三個名字時退回 `k` / `d` / `l`）。內建值就是 Kindling 形狀：`("Key", "#深", "#淺")`。**只在 `mode: "csharp"` 生效**，自動偵測一律用內建樣式 |
 
 自動偵測順序（與 README「Zero-config palette detection」同一份；最初四種形狀是
-2026-07-30 用四個真實專案定下來的，兩條合併字典路徑是外部專案實查後加的）：
+2026-07-30 用四個真實專案定下來的，兩條合併字典路徑是外部專案實查後加的）。
+括號裡的專案名是該路徑**最初的出處**，不代表那個專案現在走這條路——兩條合併字典路徑加入後，
+目前的凍結快照裡 QuillNest 走 (1)、CelFlow 走 (4)：
 
 1. **合併字典・深淺俱全**：專案裡所有定義了具 `x:Key` 的 `Color`／`SolidColorBrush` 的 XAML 併成一份色盤，每個鍵深淺兩套值都有（`pair`）。
    通常就是各個 `ResourceDictionary`；⚠ 但目前**視窗只要在 `Window.Resources` 之類放了一個具 key 的區域 brush 也會被算進來**，
-   於是它被當成色盤檔、整檔不受稽核（見清單下方「被認定為色盤來源」那段；已回報待修）
+   於是它被當成色盤檔、整檔不受稽核（見清單下方「被認定為色盤來源」那段；已知問題）
 2. **配對**：dark 檔 × light 檔、brush 鍵集重疊 ≥ 50%（QuillNest 形狀；`pair`）
 3. **C# 三元組**：深淺都有的來源，**優先於只有一套值的單一 XAML**（Kindling 形狀——
    它的 `Themes\DarkTheme.xaml` 有 33 個 brush 但只有深色值，真相源是 C# 陣列；
@@ -115,7 +117,10 @@ ratchet 會把「不見了」讀成「還清了」而放行 —— 弄壞主題�
 
 ### ignore
 
-`requireReason`（預設 `true`）：`<!-- xamlcontrast-ignore: 理由 -->` 沒理由視為無效並警告。
+`requireReason`（預設 `true`）：理由必填。完全沒寫理由的 `<!-- xamlcontrast-ignore -->`
+視為無效並警告（不壓，記入 `summary.invalidIgnores`）；設成 `false` 時它也生效。
+⚠ 標記要一字不差：寫錯的變體（大小寫不同、冒號後沒有理由、理由換到第二行）目前整段認不出來 ——
+不壓，**也不警告**，配對照報（[公開介面盤點](公開介面盤點.md) 10.2）。
 被壓掉的項目計入 `summary.suppressed`。
 
 ## CLI 對應

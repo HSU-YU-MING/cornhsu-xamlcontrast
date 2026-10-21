@@ -1,4 +1,4 @@
-# <img src="icon.png" width="28" alt=""/> XamlContrast
+# <img src="https://raw.githubusercontent.com/HSU-YU-MING/cornhsu-xamlcontrast/main/icon.png" width="28" alt=""/> XamlContrast
 
 **Static WCAG contrast audit for XAML source. No app launch, whole-project scan, CI-ready exit codes.**
 
@@ -180,8 +180,11 @@ Baseline keys contain no line numbers (lines drift) but do record the worst rati
 <TextBlock Opacity="0.4" Text="DRAFT" ... />
 ```
 
-The reason is **required** — an ignore without one is invalid and warned about.
-Suppressed pairs are counted in `summary.suppressed`; nothing disappears silently.
+The reason is **required** — a bare `<!-- xamlcontrast-ignore -->` is invalid and warned about
+(the pair is still reported). The marker has to be exact: a misspelled one (wrong case, a colon
+with nothing after it, a reason that wraps onto a second line) is currently not recognised and
+**not warned about either** — the pair is still reported, but nothing tells you the comment had
+no effect. Suppressed pairs are counted in `summary.suppressed`; nothing disappears silently.
 
 ### GitHub Action
 
@@ -235,7 +238,7 @@ doesn't tell you whether anything can be done about it:
 | reason | meaning |
 |---|---|
 | `no-ancestor-background` | nothing up the tree declares a background — often a root container relying on an app-level implicit style, or vector artwork in a resource dictionary |
-| `bound-or-gradient` | the colour comes from `{Binding}` / `{TemplateBinding}` / a gradient — only knowable at runtime |
+| `bound-or-gradient` | the colour comes from `{Binding}` / `{TemplateBinding}` / a gradient — only knowable at runtime. Also the catch-all for colour literals the tool doesn't parse yet: short `#RGB` / `#ARGB`, and named colours outside a small built-in table (e.g. `Navy`) |
 | `unknown-palette-key` | the resource key isn't in the detected palette — a typo, or palette detection missed a file |
 | `translucent-uncomposited` | a translucent background with nothing underneath to composite against |
 | `same-brush-pair` | a style sets `Foreground` and `Background` to the *same* brush — the Material template-opacity idiom (the template paints the background at 10–12% opacity as a tint); literally 1:1, not at runtime, and the opacity animation is invisible statically |
@@ -248,7 +251,8 @@ principle as the non-configurable zero-pairs rule, which it generalises. Use
 in `xamlcontrast.config.json` instead).
 
 Every unresolved pair is listed with its location: `--show-unresolved` prints
-`file:line · reason · offending value`, and the JSON carries the same list in a top-level
+`file:line · reason · the value it got stuck on` (for a background-side failure this is currently
+the foreground value), and the JSON carries the same list in a top-level
 `unresolved` array (`file`, `line`, `reason`, `value`). Unknown keys are additionally named
 with counts (`summary.unknownKeys`, and the top ones on the console) — each one is a dead
 resource reference, a typo, or a palette file detection missed, which makes this a free lint
@@ -290,7 +294,7 @@ fixes — July 2026, the v0.1.0-era tool):
 |---|---|---|
 | CelFlow | 39 fail / 57 warn | **0** (21 disabled-state exempted) |
 | Kindling | 41 fail / 14 warn | **0 real** (3 remaining, all verified false alarms of known classes) |
-| QuillNest | 13 fail / 31 warn | **0 real** (7 remaining, same) |
+| QuillNest | 13 fail / 31 warn | **0 real** (7 fail / 1 warn remaining, same) |
 
 The "after" column is a record of that moment, not a live figure. The current frozen snapshots
 (`baselines/*.json`, audited by the v0.6 tool) read CelFlow 0 fail / 0 warn, Kindling 0 fail /
@@ -303,7 +307,7 @@ How that trust was earned — the highlights, with the full story in the
   and this .NET port agreed on every number across all four validation projects —
   down to each failing pair's `file:line` and the exit code. The prototype has been frozen
   since; the .NET port is regression-checked against its own frozen snapshots of those projects
-  (`scripts/verify-baselines.ps1` — maintainer-only, the four apps are unreleased).
+  (`scripts/verify-baselines.ps1` — maintainer-only, the four apps' source isn't public).
 - **Every parsing rule came from a real false alarm or a real miss** — none were designed
   at a whiteboard. The 12th (template-root backgrounds) was found while verifying the
   fixes the tool itself had driven.
@@ -312,9 +316,9 @@ How that trust was earned — the highlights, with the full story in the
   **an audit tool's worst failure mode is not missing issues — it's false confidence.**
   Degradations must shout; nothing gets silently excused — exemptions, exclusions,
   suppressions, and parse failures are all counted and reported.
-- **Remaining fails are named, not hidden**: every residual finding above maps to a
-  documented false-alarm class (see Known limitations) and is absorbed by the
-  baseline ratchet on adoption.
+- **Remaining fails are named, not hidden**: every residual finding in the July 2026 table
+  above mapped to a documented false-alarm class (see Known limitations) and is absorbed by
+  the baseline ratchet on adoption.
 
 ## Known limitations
 
