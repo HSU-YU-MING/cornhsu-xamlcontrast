@@ -78,6 +78,43 @@ public class NewRuleTests
         Assert.Contains("exempted 1 disabled-state", Report.ToConsole(r));
     }
 
+    [Theory] // 停用態豁免的範圍要窄：只有「IsEnabled 為 False」才放行（Trigger 的 Property 可帶型別前綴；
+             // DataTrigger 看 Binding 裡的 IsEnabled）。範圍一放寬，真實的觸發態問題就會被當成豁免藏起來
+    [InlineData("""<Trigger Property="IsEnabled" Value="False">""", "Trigger", true)]
+    [InlineData("""<Trigger Property="UIElement.IsEnabled" Value="False">""", "Trigger", true)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="False">""", "DataTrigger", true)]
+    [InlineData("""<Trigger Property="IsEnabled" Value="True">""", "Trigger", false)]
+    [InlineData("""<Trigger Property="IsReadOnly" Value="False">""", "Trigger", false)]
+    [InlineData("""<Trigger Property="IsEnabledByLicense" Value="False">""", "Trigger", false)] // 自訂屬性：整字比對，不是子字串
+    [InlineData("""<Trigger Property="ParentIsEnabled" Value="False">""", "Trigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding IsBusy}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabled}" Value="True">""", "DataTrigger", false)]
+    [InlineData("""<MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="False"/><Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/></MultiDataTrigger.Conditions>""", "MultiDataTrigger", true)]
+    [InlineData("""<MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding IsBusy}" Value="False"/></MultiDataTrigger.Conditions>""", "MultiDataTrigger", false)]
+    public void DisabledExemptionCoversOnlyIsEnabledFalse(string open, string close, bool exempted)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Grid.Resources>
+                <Style x:Key="Btn" TargetType="Button">
+                  <Setter Property="Background" Value="#000000"/>
+                  <Setter Property="Foreground" Value="#FFFFFF"/>
+                  <Style.Triggers>
+                    {open}
+                      <Setter Property="Foreground" Value="#303030"/>
+                    </{close}>
+                  </Style.Triggers>
+                </Style>
+              </Grid.Resources>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(exempted ? 1 : 0, r.DisabledExempt);
+        Assert.Equal(exempted ? 1 : 2, r.Findings.Count);   // 沒豁免的觸發態照常評分（#303030 疊黑 → fail）
+        Assert.Equal(exempted ? 0 : 1, r.CountOf(Category.Fail));
+    }
+
     [Fact] // 半透明色票：#AARRGGBB 的 palette 鍵要疊底合成，不能剝掉 alpha 當不透明色
     public void TranslucentPaletteKeyCompositesOverBackground()
     {
