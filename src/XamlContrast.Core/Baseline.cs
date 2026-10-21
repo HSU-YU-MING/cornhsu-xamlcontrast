@@ -59,7 +59,14 @@ public static class Baseline
         var doc = JsonDocument.Parse(baselineJson);
         var known = new Dictionary<string, Entry>();
         int noCount = 0, noWorst = 0;
-        foreach (var el in doc.RootElement.GetProperty("entries").EnumerateArray())
+        // 頂層的 entries 與每筆的欄位名同一套政策：不分大小寫（舊版頂層用 GetProperty 分大小寫，
+        // PascalCase 的檔 exit 2，訊息是不知所云的 "The given key was not present in the dictionary."）
+        if (doc.RootElement.ValueKind != JsonValueKind.Object ||
+            !doc.RootElement.EnumerateObject().Any(p => p.Name.Equals("entries", StringComparison.OrdinalIgnoreCase)))
+            throw new FormatException("the file has no 'entries' array");
+        var entries = doc.RootElement.EnumerateObject()
+            .First(p => p.Name.Equals("entries", StringComparison.OrdinalIgnoreCase)).Value;
+        foreach (var el in entries.EnumerateArray())
         {
             var e = el.Deserialize<Entry>(JsonOpts)!;
             known[$"{e.File}|{e.Element}|{e.Fg}|{e.Bg}"] = e;

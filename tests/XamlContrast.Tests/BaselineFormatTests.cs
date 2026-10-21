@@ -104,6 +104,28 @@ public class BaselineFormatTests
         Assert.Equal(1, cmp.KnownDebt);
     }
 
+    [Fact] // 頂層的 entries 也不分大小寫 —— 舊版欄位名不分、頂層卻用 GetProperty("entries") 分大小寫，
+           // 整份 PascalCase 的檔 exit 2，訊息還是不知所云的 "The given key was not present in the dictionary."
+    public void TopLevelEntriesIsCaseInsensitiveToo()
+    {
+        var r = Run(("Main.xaml", OnWhite(FailText)));
+        var f = r.Findings.Single();
+        var cmp = Baseline.Compare(r, JsonSerializer.Serialize(new
+        {
+            Entries = new[] { new { File = f.File, Element = f.Element, Fg = f.Fg, Bg = f.Bg, Count = 1, Worst = f.Worst } },
+        }));
+        Assert.True(cmp.Passes);
+        Assert.Equal(1, cmp.KnownDebt);
+    }
+
+    [Fact] // 真的沒有 entries：訊息要說出缺的是什麼
+    public void MissingEntriesSaysSo()
+    {
+        var r = Run(("Main.xaml", OnWhite(FailText)));
+        var ex = Assert.ThrowsAny<Exception>(() => Baseline.Compare(r, """{ "nope": [] }"""));
+        Assert.Contains("'entries'", ex.Message);
+    }
+
     [Fact] // Worst 的容差是 0.01：四捨五入的雜訊不算惡化，超過才算
     public void WorstToleranceIsOneHundredth()
     {
