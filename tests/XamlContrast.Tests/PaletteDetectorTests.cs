@@ -408,6 +408,74 @@ public class PaletteDetectorTests
         Assert.Equal("Fg", site.Value);
     }
 
+    // ── SolidColorBrush 的 Opacity：整個 brush 變半透明。舊版只取 x:Key 與 Color，
+    //    <SolidColorBrush x:Key="Hint" Color="#FFFFFF" Opacity="0.2"/> 疊黑底實際約 1.66:1，被當成不透明白字報 21:1 ok
+
+    private static Fixture OpacityPalette(string darkExtra, string lightExtra) => new Fixture()
+        .File("Themes/DarkTheme.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#000000"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Line" Color="#808080"/>
+              <Color x:Key="InkColor">#000000</Color>
+              {darkExtra}
+            </ResourceDictionary>
+            """)
+        .File("Themes/LightTheme.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Line" Color="#808080"/>
+              <Color x:Key="InkColor">#000000</Color>
+              {lightExtra}
+            </ResourceDictionary>
+            """);
+
+    [Fact] // 字色：半透明字是既有的「合法跳過、計數」那一桶 —— 不能被當成不透明色報 21:1 ok
+    public void PaletteBrushOpacityMakesTheForegroundTranslucent()
+    {
+        using var fx = OpacityPalette("""<SolidColorBrush x:Key="Hint" Color="#FFFFFF" Opacity="0.2"/>""",
+                                      """<SolidColorBrush x:Key="Hint" Color="#000000" Opacity="0.2"/>""");
+        fx.File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Hint}" Text="hint"/></Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(("#33FFFFFF", "#33000000"), r.Detection.Palette.Entries["Hint"]);
+        Assert.Empty(r.Findings);
+        Assert.Equal(1, r.Skipped);
+    }
+
+    [Theory] // 底色：半透明色票走既有的合成路徑（80% 黑疊白 = #333333，黑字 1.66:1）—— 字面值與引用 Color 鍵兩種寫法
+    [InlineData("""<SolidColorBrush x:Key="Scrim" Color="#000000" Opacity="0.8"/>""")]
+    [InlineData("""<SolidColorBrush x:Key="Scrim" Color="{StaticResource InkColor}" Opacity="0.8"/>""")]
+    public void PaletteBrushOpacityIsCompositedAsABackground(string scrim)
+    {
+        using var fx = OpacityPalette(scrim, scrim);
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Border Background="{DynamicResource Scrim}"><TextBlock Foreground="#000000" Text="x"/></Border>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(("#CC000000", "#CC000000"), r.Detection.Palette.Entries["Scrim"]);
+        var f = Assert.Single(r.Findings);
+        Assert.Equal(1.66, f.RatioDark);
+        Assert.Equal(1.66, f.RatioLight);
+    }
+
+    [Fact] // 讀不懂的 Opacity（Binding 之類）：那個 brush 的實際顏色執行期才知道 —— 剔除、使用處計入 unresolved，不當成不透明
+    public void UnreadablePaletteBrushOpacityDropsTheKey()
+    {
+        using var fx = OpacityPalette("""<SolidColorBrush x:Key="Hint" Color="#FFFFFF" Opacity="{Binding HintOpacity}"/>""",
+                                      """<SolidColorBrush x:Key="Hint" Color="#000000" Opacity="0.5"/>""");
+        fx.File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Hint}" Text="hint"/></Grid>
+            """);
+        var r = fx.Run();
+        Assert.False(r.Detection.Palette.Entries.ContainsKey("Hint"));
+        Assert.Equal(UnresolvedReason.UnknownPaletteKey, Assert.Single(r.UnresolvedSites).Reason);
+    }
+
     [Fact] // 同上，<Color> 字典那條路（純 Color 字典直接當色票時）
     public void InvalidColorValueOnOneSideIsNotFilledFromTheOtherTheme()
     {

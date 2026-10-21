@@ -193,8 +193,8 @@ public static partial class PaletteDetector
         // brush 引用 Color 定義 → 解成實際色值。同檔優先，其次全專案。
         foreach (var (k, c) in refs)
         {
-            if (colors.TryGetValue(c, out var v)) brushes[k] = v;
-            else if (globalColors is not null && globalColors.TryGetValue(c, out var gv)) brushes[k] = gv;
+            if (ResolveRef(c, key => colors.GetValueOrDefault(key) ?? globalColors?.GetValueOrDefault(key)) is { } v and not InvalidValue)
+                brushes[k] = v;
         }
         // 純 <Color> 字典（整份沒有任何 SolidColorBrush）才把 Color 鍵當色票。
         // ⚠ 不能無條件加：Color 鍵通常是 brush 的中介值（BgColor → Bg），
@@ -393,9 +393,9 @@ public static partial class PaletteDetector
         {
             // 每側：字面值優先，其次引用解析（引用對自己那側的 Color 表解）
             var d = darkB.GetValueOrDefault(k)
-                    ?? (darkR.TryGetValue(k, out var dc) ? darkColors.GetValueOrDefault(dc) : null);
+                    ?? (darkR.TryGetValue(k, out var dc) ? ResolveRef(dc, darkColors.GetValueOrDefault) : null);
             var l = lightB.GetValueOrDefault(k)
-                    ?? (lightR.TryGetValue(k, out var lc) ? lightColors.GetValueOrDefault(lc) : null);
+                    ?? (lightR.TryGetValue(k, out var lc) ? ResolveRef(lc, lightColors.GetValueOrDefault) : null);
             if (d is InvalidValue || l is InvalidValue) { invalid.Add(k); continue; } // 讀不懂 ≠ 沒定義：不補
             if (d is null && l is null) continue;
             pal.Entries.TryAdd(k, (d ?? l!, l ?? d!)); // 缺的一側（沒有定義）退回另一側
@@ -446,11 +446,36 @@ public static partial class PaletteDetector
             var key = Attr(KeyAttr(), attrs);
             if (key is null) continue;
             var val = Attr(ColorAttr(), attrs);
-            if (val is not null && LiteralColor(val) is { } hex) lit[key] = hex; // Color="White" 也是合法寫法
-            else if (val is not null && ResourceRefValue().Match(val) is { Success: true } rm) refs[key] = rm.Groups["c"].Value;
+            // Opacity：整個 brush 變半透明。舊版只取 x:Key 與 Color —— Opacity="0.2" 的白字 brush
+            // 被當成不透明白色評分（疊黑底實際約 1.66:1，報 21:1 ok）。讀不懂的 Opacity 等同讀不懂的色值
+            var opRaw = Attr(OpacityAttr(), attrs);
+            double op = 1;
+            var opOk = opRaw is null ||
+                       double.TryParse(opRaw, System.Globalization.NumberStyles.Float,
+                                       System.Globalization.CultureInfo.InvariantCulture, out op) && double.IsFinite(op);
+            if (!opOk) { if (keepInvalid) lit[key] = InvalidValue; continue; }
+            if (val is not null && LiteralColor(val) is { } hex) lit[key] = WithOpacity(hex, op); // Color="White" 也是合法寫法
+            else if (val is not null && ResourceRefValue().Match(val) is { Success: true } rm)
+                refs[key] = rm.Groups["c"].Value + (op < 0.999 ? "@" + op.ToString("R", System.Globalization.CultureInfo.InvariantCulture) : "");
             else if (keepInvalid) lit[key] = InvalidValue;
         }
         return (lit, refs);
+    }
+
+    [GeneratedRegex("""\bOpacity\s*=\s*"(?<v>[^"]+)"\s*""")]
+    private static partial Regex OpacityAttr();
+
+    private static string WithOpacity(string hex, double op)
+        => op >= 0.999 ? hex : ColorResolver.ApplyOpacity(hex, op) ?? InvalidValue;
+
+    /// <summary>brush 對 Color 鍵的引用（"Key" 或帶 brush Opacity 的 "Key@0.5"）→ 實際色值。
+    /// 找不到回傳 null（那一側沒有定義）；讀不懂回傳 <see cref="InvalidValue"/>。</summary>
+    private static string? ResolveRef(string refVal, Func<string, string?> lookup)
+    {
+        var at = refVal.IndexOf('@');
+        var v = lookup(at < 0 ? refVal : refVal[..at]);
+        if (v is null or InvalidValue || at < 0) return v;
+        return WithOpacity(v, double.Parse(refVal[(at + 1)..], System.Globalization.CultureInfo.InvariantCulture));
     }
 
     /// <summary>值讀不懂而剔除的鍵要明講 —— 它們在使用處會變成 unknown-palette-key。</summary>
