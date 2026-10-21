@@ -87,14 +87,76 @@ internal sealed partial class StyleIndex
         {
             var b = t.Attribute("Binding")?.Value;
             var v = t.Attribute("Value")?.Value;
-            return b is not null && v == "False" && b.Contains("IsEnabled");
+            return b is not null && v == "False" && IsOwnIsEnabledBinding(b);
         }
         if (t.Name.LocalName is "MultiTrigger" or "MultiDataTrigger")
             return ConditionsOf(t).Any(c =>
                 c.Attribute("Value")?.Value == "False" &&
                 (c.Attribute("Property")?.Value is { } p && IsEnabledProp().IsMatch(p) ||
-                 c.Attribute("Binding")?.Value is { } b && b.Contains("IsEnabled")));
+                 c.Attribute("Binding")?.Value is { } b && IsOwnIsEnabledBinding(b)));
         return false;
+    }
+
+    /// <summary>
+    /// DataTrigger 的 Binding 是不是「這個控制項自己（或模板宿主、祖先）的 IsEnabled」。
+    ///
+    /// ⚠ 舊版是子字串比對 b.Contains("IsEnabled")：{Binding IsEnabledByLicense}、
+    ///   {Binding ViewModel.CanSave, Converter={StaticResource IsEnabledConverter}} 都被當成停用態豁免 ——
+    ///   真實的 fail 歸 0、exit 0，計數器標示的豁免原因是錯的。WCAG 1.4.3 豁免的是「停用中的控制項」，
+    ///   放行憑據要是條文本身，所以：
+    ///   - Path 的最後一段恰為 IsEnabled（含附加屬性寫法 (UIElement.IsEnabled)）
+    ///   - 來源是元素自己、模板宿主或祖先（RelativeSource Self／TemplatedParent／FindAncestor —— 祖先停用時
+    ///     WPF 會把子元素一併停用）。沒有 RelativeSource 就是 DataContext 上的 view model 旗標，
+    ///     不保證控制項真的停用；ElementName／Source 指向別的物件 —— 都不猜
+    ///   - 沒有 Converter（可能是反相的，Value="False" 不再代表停用）
+    /// </summary>
+    internal static bool IsOwnIsEnabledBinding(string binding)
+    {
+        var b = binding.Trim();
+        if (!b.StartsWith("{Binding", StringComparison.Ordinal) || !b.EndsWith('}')) return false;
+        string? path = null, relativeSource = null;
+        var args = SplitTopLevel(b["{Binding".Length..^1]);
+        for (var i = 0; i < args.Count; i++)
+        {
+            var a = args[i].Trim();
+            if (a.Length == 0) continue;
+            var eq = a.IndexOf('=');
+            var brace = a.IndexOf('{');
+            if (eq < 0 || (brace >= 0 && brace < eq))
+            {
+                if (i == 0) path = a; // 第一個位置參數就是 Path
+                continue;
+            }
+            var name = a[..eq].Trim();
+            var value = a[(eq + 1)..].Trim();
+            switch (name)
+            {
+                case "Path": path = value; break;
+                case "RelativeSource": relativeSource = value; break;
+                case "Converter" or "ElementName" or "Source": return false;
+            }
+        }
+        if (path is null || relativeSource is null) return false;
+        var last = path.Trim('(', ')', ' ').Split('.')[^1];
+        return last == "IsEnabled" &&
+               (relativeSource.Contains("Self") || relativeSource.Contains("TemplatedParent") ||
+                relativeSource.Contains("FindAncestor") || relativeSource.Contains("AncestorType"));
+    }
+
+    /// <summary>markup extension 的參數清單：只在最外層（不在 {…} 裡）的逗號切開。</summary>
+    private static List<string> SplitTopLevel(string s)
+    {
+        var parts = new List<string>();
+        var depth = 0;
+        var start = 0;
+        for (var i = 0; i < s.Length; i++)
+        {
+            if (s[i] == '{') depth++;
+            else if (s[i] == '}') depth--;
+            else if (s[i] == ',' && depth == 0) { parts.Add(s[start..i]); start = i + 1; }
+        }
+        parts.Add(s[start..]);
+        return parts;
     }
 
     private static IEnumerable<XElement> ConditionsOf(XElement t)

@@ -79,16 +79,23 @@ public class NewRuleTests
     }
 
     [Theory] // 停用態豁免的範圍要窄：只有「IsEnabled 為 False」才放行（Trigger 的 Property 可帶型別前綴；
-             // DataTrigger 看 Binding 裡的 IsEnabled）。範圍一放寬，真實的觸發態問題就會被當成豁免藏起來。
-             // ⚠ 整字比對只有 Trigger 的 Property 有列在守（IsEnabledByLicense、ParentIsEnabled 兩列）。
-             //   DataTrigger 與 MultiDataTrigger 的 Binding 目前是子字串比對（StyleIndex.IsDisabledTrigger 的
-             //   b.Contains("IsEnabled")）：{Binding IsEnabledByLicense}、Converter={StaticResource IsEnabledConverter}
-             //   都會被當成停用態豁免 —— 這是待修的產品問題，刻意不加會紅的列（不把 bug 釘成規格）。
-             //   修好時補這幾列（期望 exempted=false）：
-             //     <DataTrigger Binding="{Binding IsEnabledByLicense}" Value="False">
-             //     <DataTrigger Binding="{Binding ViewModel.CanSave, Converter={StaticResource IsEnabledConverter}}" Value="False">
-             //     MultiDataTrigger 的 <Condition Binding="{Binding IsEnabledByLicense}" Value="False"/>
+             // DataTrigger 看 Binding 的 Path）。範圍一放寬，真實的觸發態問題就會被當成豁免藏起來。
+             // DataTrigger／MultiDataTrigger 的 Binding 曾是子字串比對（b.Contains("IsEnabled")）：
+             //   {Binding IsEnabledByLicense}、Converter={StaticResource IsEnabledConverter} 都被當成停用態豁免，
+             //   fail 歸 0、exit 0，計數器標示的豁免原因是錯的。現在要求 Path 的最後一段恰為 IsEnabled、
+             //   來源是元素自己／模板宿主／祖先（RelativeSource Self／TemplatedParent／FindAncestor —— 祖先停用，
+             //   子元素一併停用），且沒有 Converter（可能反相）。DataContext 上的 IsEnabled 是 view model 的旗標，
+             //   不保證控制項真的停用 —— 不猜，照常評分
     [InlineData("""<Trigger Property="IsEnabled" Value="False">""", "Trigger", true)]
+    [InlineData("""<DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsEnabled}" Value="False">""", "DataTrigger", true)]
+    [InlineData("""<DataTrigger Binding="{Binding Path=(UIElement.IsEnabled), RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Value="False">""", "DataTrigger", true)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabledByLicense}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabledByLicense, RelativeSource={RelativeSource Self}}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding ViewModel.CanSave, Converter={StaticResource IsEnabledConverter}}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource Invert}}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabled, ElementName=OtherButton}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabled}" Value="False">""", "DataTrigger", false)] // DataContext 的旗標
+    [InlineData("""<MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding IsEnabledByLicense}" Value="False"/></MultiDataTrigger.Conditions>""", "MultiDataTrigger", false)]
     [InlineData("""<Trigger Property="UIElement.IsEnabled" Value="False">""", "Trigger", true)]
     [InlineData("""<DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="False">""", "DataTrigger", true)]
     [InlineData("""<Trigger Property="IsEnabled" Value="True">""", "Trigger", false)]
