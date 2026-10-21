@@ -4,9 +4,9 @@
 
 [![NuGet](https://img.shields.io/nuget/v/Cornhsu.XamlContrast)](https://www.nuget.org/packages/Cornhsu.XamlContrast)
 [![CI](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/actions/workflows/ci.yml/badge.svg)](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/actions)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/LICENSE)
 
-[繁體中文](README.zh-Hant.md)
+[繁體中文](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/README.zh-Hant.md)
 
 Every existing desktop contrast checker is runtime + manual + one-element-at-a-time
 (Accessibility Insights hovers one element; CCA picks two pixels). XamlContrast flips that:
@@ -24,7 +24,7 @@ xamlcontrast path/to/your/wpf/project
 
 ## What it looks like
 
-Run against [`samples/demo`](samples/demo) (intentionally broken):
+Run against [`samples/demo`](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/tree/main/samples/demo) (intentionally broken):
 
 ```
 palette: merged colour dictionaries: 2 file(s), 6 keys (dark + light)
@@ -119,9 +119,12 @@ Any implementation that just copies the formula misses all of them.
 XamlContrast scans your project and figures out where the palette lives. The paths are
 tried in this order, and the one that ran is always named on the first line of the report:
 
-1. **Merged dictionaries, both themes** — every `ResourceDictionary` in the project read as
-   one palette, and each key ends up with a dark *and* a light value. Tried first because
-   it beats picking a single file: real projects split a palette across several dictionaries.
+1. **Merged dictionaries, both themes** — every XAML file that defines keyed `Color` /
+   `SolidColorBrush` resources is read into one palette, and each key ends up with a dark *and*
+   a light value. Tried first because it beats picking a single file: real projects split a
+   palette across several dictionaries. Normally those files are your resource dictionaries —
+   but today a window with even one keyed brush in `Window.Resources` counts too, and is then
+   left out of the audit (a known issue).
 2. **Theme pair** — one `DarkTheme.xaml` × one `LightTheme.xaml`, keys overlapping ≥ 50%
 3. **C# source of truth** — `("Key", "#dark", "#light")` tuple arrays
    (beats a single-theme XAML copy: a source that provides both themes wins)
@@ -137,7 +140,7 @@ level, `fixture` / `mock`) is never taken as a palette dictionary or an applicat
 still audited.
 
 Wrong guess? Override with `xamlcontrast.config.json` —
-[schema](docs/config-schema.md) (zh-Hant; the JSON example at the top is self-explanatory).
+[schema](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/docs/config-schema.md) (zh-Hant; the JSON example at the top is self-explanatory).
 If your app is built on a theme library (MahApps, HandyControl, MaterialDesign…), the palette
 is usually found fine but the window background isn't — see
 [`rootBackground`](#json-output) below; the tool tells you this when it happens.
@@ -280,16 +283,21 @@ PR comment, and you can use it directly too.
 ## Validated against real products
 
 Not "runs on a demo" — this tool found and drove fixes for **250+ real contrast issues
-across three shipped WPF apps** (before/after audited by the tool itself):
+across three shipped WPF apps** (before/after audited by the tool itself, at the time of the
+fixes — July 2026, the v0.1.0-era tool):
 
-| project | before | after |
+| project | before | after (July 2026) |
 |---|---|---|
 | CelFlow | 39 fail / 57 warn | **0** (21 disabled-state exempted) |
 | Kindling | 41 fail / 14 warn | **0 real** (3 remaining, all verified false alarms of known classes) |
 | QuillNest | 13 fail / 31 warn | **0 real** (7 remaining, same) |
 
+The "after" column is a record of that moment, not a live figure. The current frozen snapshots
+(`baselines/*.json`, audited by the v0.6 tool) read CelFlow 0 fail / 0 warn, Kindling 0 fail /
+1 warn, QuillNest 3 fail / 1 warn.
+
 How that trust was earned — the highlights, with the full story in the
-[development retrospective](docs/開發歷程回顧.md) (zh-Hant):
+[development retrospective](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/docs/開發歷程回顧.md) (zh-Hant):
 
 - **Two independent implementations cross-verified.** At v0.1.0 the PowerShell prototype (the spec)
   and this .NET port agreed on every number across all four validation projects —
@@ -311,7 +319,7 @@ How that trust was earned — the highlights, with the full story in the
 ## Known limitations
 
 Honest list — full blind-spot table with per-case evidence in the
-[planning doc](XamlContrast專案規畫書.md) (zh-Hant):
+[planning doc](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/XamlContrast專案規畫書.md) (zh-Hant):
 
 - `TargetName` setters aimed at **inner** template parts (root-targeted ones are resolved)
 - Cross-element correlated triggers (same condition flips fg on one element, bg on another) — false alarms
@@ -339,7 +347,7 @@ so that is a more serious defect here than a miss.
 
 [Open an issue](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/issues/new/choose) —
 the templates ask for exactly what's needed to reproduce, English or 中文.
-[CONTRIBUTING.md](CONTRIBUTING.md) has the details, including what a pull request needs.
+[CONTRIBUTING.md](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/CONTRIBUTING.md) has the details, including what a pull request needs.
 
 ## See also
 

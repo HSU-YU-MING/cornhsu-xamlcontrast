@@ -76,6 +76,7 @@ Two things every change needs:
 ### Running the checks
 
 ```bash
+dotnet format XamlContrast.slnx --verify-no-changes
 dotnet test XamlContrast.slnx -c Release
 ```
 
@@ -83,11 +84,13 @@ dotnet test XamlContrast.slnx -c Release
 pwsh scripts/verify-readme-sample.ps1
 ```
 
-The second one re-runs `samples/demo` and diffs it against the sample output in both
-READMEs. If you changed console output, run it with `-Update` to re-paste, and include that
-in your PR.
+The format check is its own CI job: a formatting difference turns the PR red even when every
+test passes. Drop `--verify-no-changes` to have it fix the formatting for you.
 
-There is a third script, `scripts/verify-baselines.ps1`. **You cannot run it** — it audits
+The script re-runs `samples/demo` and diffs it against the sample output in both READMEs.
+If you changed console output, run it with `-Update` to re-paste, and include that in your PR.
+
+There is one more script, `scripts/verify-baselines.ps1`. **You cannot run it** — it audits
 four unreleased applications on the maintainer's machine and compares against frozen
 snapshots. It runs before every release. If your change moves those numbers I will see it
 there, so don't be surprised if I come back with questions about a project you can't see.
