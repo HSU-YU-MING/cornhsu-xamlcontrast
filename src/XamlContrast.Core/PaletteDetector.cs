@@ -151,6 +151,21 @@ public static partial class PaletteDetector
     private static HashSet<string> UiExclusions(IEnumerable<string> paletteFiles)
         => new(paletteFiles.Where(IsResourceDictionaryFile), StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// 色盤檔是用正則掃原始文字的 —— 先把 XML 註解拿掉。
+    /// ⚠ 舊版直接掃：註解掉的舊定義（&lt;!-- 舊值：&lt;SolidColorBrush x:Key="Fg" Color="#333333"/&gt; --&gt;）
+    ///   也被收進色盤，而且同鍵後者覆蓋前者 —— 報告用一個已經失效的值算出篤定的比值，
+    ///   舊值比較亮時就藏掉真實的 fail；被註解掉的 brush 也會讓畫面檔看起來像色盤來源。
+    /// </summary>
+    private static string ReadXamlWithoutComments(string file)
+        => XmlComment().Replace(File.ReadAllText(file), " ");
+
+    [GeneratedRegex("<!--.*?-->", RegexOptions.Singleline)]
+    private static partial Regex XmlComment();
+
+    /// <summary>C# 三元組同一個根因：整行被 // 註解掉的舊列不是色盤。</summary>
+    private static bool IsCSharpCommentLine(string line) => line.AsSpan().TrimStart().StartsWith("//");
+
     private static string? Attr(Regex re, string attrs)
     {
         var m = re.Match(attrs);
@@ -163,7 +178,7 @@ public static partial class PaletteDetector
     {
         var colors = new Dictionary<string, string>();
         string text;
-        try { text = File.ReadAllText(file); } catch { return colors; }
+        try { text = ReadXamlWithoutComments(file); } catch { return colors; }
         foreach (Match m in ColorElement().Matches(text))
         {
             var key = Attr(KeyAttr(), m.Groups["attrs"].Value);
@@ -439,7 +454,7 @@ public static partial class PaletteDetector
         var lit = new Dictionary<string, string>();
         var refs = new Dictionary<string, string>();
         string text;
-        try { text = File.ReadAllText(file); } catch { return (lit, refs); }
+        try { text = ReadXamlWithoutComments(file); } catch { return (lit, refs); }
         foreach (Match m in BrushElement().Matches(text))
         {
             var attrs = m.Groups["attrs"].Value;
@@ -495,6 +510,7 @@ public static partial class PaletteDetector
             var map = new Dictionary<string, (string, string)>();
             foreach (var line in File.ReadLines(f))
             {
+                if (IsCSharpCommentLine(line)) continue;
                 var m = CsTuple().Match(line);
                 if (m.Success && IsValidHex(m.Groups["d"].Value) && IsValidHex(m.Groups["l"].Value))
                     map[m.Groups["k"].Value] =
@@ -512,6 +528,7 @@ public static partial class PaletteDetector
         var pal = new Palette();
         foreach (var line in File.ReadLines(file))
         {
+            if (IsCSharpCommentLine(line)) continue;
             var m = pattern.Match(line);
             if (!m.Success) continue;
             var dark = (m.Groups["dark"].Success ? m.Groups["dark"] : m.Groups["d"]).Value;

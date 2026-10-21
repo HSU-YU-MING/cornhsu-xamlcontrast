@@ -408,6 +408,53 @@ public class PaletteDetectorTests
         Assert.Equal("Fg", site.Value);
     }
 
+    [Fact] // 色盤檔是用正則掃原始文字的：註解掉的舊定義也被收進色盤，還蓋掉現役值（同鍵後者覆蓋前者）——
+           // 報告用一個已經失效的值算出篤定的比值，舊值比較亮時就藏掉真實的 fail
+    public void CommentedOutDefinitionsAreNotPartOfThePalette()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#212121"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <!-- 舊值：<SolidColorBrush x:Key="Fg" Color="#333333"/> -->
+              <Color x:Key="AccentColor">#42A5F5</Color>
+              <!--
+                <Color x:Key="AccentColor">#000000</Color>
+                <SolidColorBrush x:Key="Ghost" Color="#123456"/>
+              -->
+              <SolidColorBrush x:Key="Accent" Color="{StaticResource AccentColor}"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FAFAFA"/>
+              <SolidColorBrush x:Key="Fg" Color="#212121"/>
+              <SolidColorBrush x:Key="Accent" Color="#1D6FC4"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(("#EEEEEE", "#212121"), d.Palette.Entries["Fg"]);
+        Assert.Equal(("#42A5F5", "#1D6FC4"), d.Palette.Entries["Accent"]);
+        Assert.False(d.Palette.Entries.ContainsKey("Ghost"));
+        Assert.DoesNotContain("conflicting", d.Description); // 註解不是第二份定義
+    }
+
+    [Fact] // C# 三元組同一個根因：註解掉的舊列不是色盤
+    public void CommentedOutCSharpTuplesAreNotPartOfThePalette()
+    {
+        using var fx = new Fixture();
+        fx.File("Services/ThemeService.cs", """
+            ("Bg", "#111111", "#EAEAEA"),
+            ("Fg", "#EEEEEE", "#1B1B1B"),
+            // ("Fg", "#333333", "#CCCCCC"),   舊值
+            ("Accent", "#42A5F5", "#1D6FC4"),
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(PaletteMode.CSharp, d.Mode);
+        Assert.Equal(("#EEEEEE", "#1B1B1B"), d.Palette.Entries["Fg"]);
+    }
+
     // ── SolidColorBrush 的 Opacity：整個 brush 變半透明。舊版只取 x:Key 與 Color，
     //    <SolidColorBrush x:Key="Hint" Color="#FFFFFF" Opacity="0.2"/> 疊黑底實際約 1.66:1，被當成不透明白字報 21:1 ok
 
