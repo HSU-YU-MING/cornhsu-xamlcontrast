@@ -42,7 +42,8 @@ public sealed class PaletteDetection
         best ??= Scopes.FirstOrDefault(s => s.RootDir.Length == 0);
         return best?.Palette ?? Palette;
     }
-    /// <summary>被認定為色盤檔的 XAML（不進 UI 掃描 —— 色盤定義檔不是畫面）。</summary>
+    /// <summary>被認定為色盤檔、且根元素是 ResourceDictionary 的 XAML（不進 UI 掃描 —— 字典檔不是畫面）。
+    /// 色盤來源是畫面檔（Window.Resources 裡的區域 brush）時照樣稽核，見 <see cref="PaletteDetector.IsResourceDictionaryFile"/>。</summary>
     public required HashSet<string> ExcludedFiles { get; init; }
     /// <summary>偵測結果的人話描述，一律印出來（偵測結果不靜默）。</summary>
     public required string Description { get; init; }
@@ -113,6 +114,30 @@ public static partial class PaletteDetector
         => Directory.EnumerateFiles(root, pattern, SearchOption.AllDirectories)
             .Where(f => !f.Replace('/', '\\').Contains("\\obj\\") && !f.Replace('/', '\\').Contains("\\bin\\"))
             .OrderBy(f => f, StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// 根元素是 ResourceDictionary 的檔，才是可以排除出 UI 掃描的「色盤／資源字典」。
+    ///
+    /// ⚠ 「當色盤來源」與「排除出 UI 掃描」是兩件事。舊版綁在一起：合併式色盤收了任何含
+    ///   keyed brush／Color 的 XAML，於是在 Window.Resources 放一個區域 brush 的視窗、在
+    ///   Application.Resources 放色票的 App.xaml，整檔從稽核消失 —— files 少算、沒有任何提示，
+    ///   裡面真實的不合格就這樣不見了。區域 brush 照樣當色盤來源（畫面上引用得到它），
+    ///   但只有字典檔才不是畫面。讀不出根元素的壞檔不排除，交給稽核端喊 parse failed。
+    /// </summary>
+    internal static bool IsResourceDictionaryFile(string file)
+    {
+        try
+        {
+            using var r = System.Xml.XmlReader.Create(file);
+            r.MoveToContent();
+            return r.LocalName == "ResourceDictionary";
+        }
+        catch { return false; }
+    }
+
+    /// <summary>色盤來源檔 → 不進 UI 掃描的檔（只留根元素是 ResourceDictionary 的）。</summary>
+    private static HashSet<string> UiExclusions(IEnumerable<string> paletteFiles)
+        => new(paletteFiles.Where(IsResourceDictionaryFile), StringComparer.OrdinalIgnoreCase);
 
     private static string? Attr(Regex re, string attrs)
     {
@@ -471,7 +496,7 @@ public static partial class PaletteDetector
                     {
                         Palette = pal,
                         Mode = PaletteMode.Pair,
-                        ExcludedFiles = new HashSet<string>([dFile, lFile], StringComparer.OrdinalIgnoreCase),
+                        ExcludedFiles = UiExclusions([dFile, lFile]),
                         Description = $"config-forced theme pair: {config.Palette.DarkFile} + {config.Palette.LightFile} ({pal.Count} keys)",
                     };
                 }
@@ -495,7 +520,7 @@ public static partial class PaletteDetector
                     {
                         Palette = pal,
                         Mode = PaletteMode.CSharp,
-                        ExcludedFiles = new HashSet<string>(excl, StringComparer.OrdinalIgnoreCase),
+                        ExcludedFiles = UiExclusions(excl),
                         Description = $"config-forced C# source: {config.Palette.CsharpFile} ({pal.Count} keys)",
                     };
                 }
@@ -509,7 +534,7 @@ public static partial class PaletteDetector
                     {
                         Palette = pal,
                         Mode = PaletteMode.Single,
-                        ExcludedFiles = new HashSet<string>([sFile], StringComparer.OrdinalIgnoreCase),
+                        ExcludedFiles = UiExclusions([sFile]),
                         Description = $"config-forced single-theme palette: {config.Palette.DarkFile} ({pal.Count} keys)",
                     };
                 }
@@ -560,7 +585,7 @@ public static partial class PaletteDetector
             {
                 Palette = mp.Pal,
                 Mode = PaletteMode.Pair,
-                ExcludedFiles = mp.Files,
+                ExcludedFiles = UiExclusions(mp.Files),
                 Scopes = scopes,
                 Description = $"merged colour dictionaries: {mp.Files.Count} file(s), {mp.Pal.Count} keys (dark + light)"
                               + scopeNote + ConflictNote(mp.Conflicts),
@@ -586,7 +611,7 @@ public static partial class PaletteDetector
             {
                 Palette = pal,
                 Mode = PaletteMode.Pair,
-                ExcludedFiles = new HashSet<string>(new[] { p.D.File, p.L.File }, StringComparer.OrdinalIgnoreCase),
+                ExcludedFiles = UiExclusions([p.D.File, p.L.File]),
                 Description = $"auto-detected theme pair: {p.D.Rel} + {p.L.Rel} ({pal.Count} keys)",
             };
         }
@@ -606,7 +631,7 @@ public static partial class PaletteDetector
             {
                 Palette = pal,
                 Mode = PaletteMode.CSharp,
-                ExcludedFiles = new HashSet<string>(excl, StringComparer.OrdinalIgnoreCase),
+                ExcludedFiles = UiExclusions(excl),
                 Description = $"auto-detected C# source of truth: {best.Rel} ({pal.Count} keys; assuming tuple = key, dark, light)",
             };
         }
@@ -617,7 +642,7 @@ public static partial class PaletteDetector
             {
                 Palette = ms.Pal,
                 Mode = PaletteMode.Single,
-                ExcludedFiles = ms.Files,
+                ExcludedFiles = UiExclusions(ms.Files),
                 Scopes = scopes,
                 Description = $"merged colour dictionaries: {ms.Files.Count} file(s), {ms.Pal.Count} keys (single theme)"
                               + scopeNote + ConflictNote(ms.Conflicts),
@@ -635,7 +660,7 @@ public static partial class PaletteDetector
             {
                 Palette = pal,
                 Mode = PaletteMode.Single,
-                ExcludedFiles = new HashSet<string>(new[] { best.File }, StringComparer.OrdinalIgnoreCase),
+                ExcludedFiles = UiExclusions([best.File]),
                 Description = $"auto-detected single-theme palette: {best.Rel} ({pal.Count} keys){note}",
             };
         }

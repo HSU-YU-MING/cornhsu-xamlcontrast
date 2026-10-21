@@ -478,6 +478,58 @@ public class PaletteDetectorTests
         Assert.Equal(("#111111", "#111111"), d.Palette.Entries["K1"]); // 先出現的贏（字典序 A 在 B 前）
     }
 
+    [Fact] // 「當色盤來源」與「排除出 UI 掃描」是兩件事：畫面檔在 UserControl.Resources 放一個區域 brush，
+           // 它的鍵照樣進色盤，但檔案本身仍要稽核。舊版合併式色盤把任何含 keyed brush 的 XAML 都當色盤檔
+           // 整檔排除 —— 這份白底淺灰字（1.16:1）從報告消失，CLI 印 files 0／exit 1「0 配對」，混在大專案裡就是靜默漏報
+    public void ScreenWithALocalBrushIsAPaletteSourceButStillAudited()
+    {
+        using var fx = new Fixture().WithPalette();
+        fx.File("Views/B.xaml", """
+            <UserControl xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <UserControl.Resources>
+                <SolidColorBrush x:Key="LocalAccent" Color="#FF0000"/>
+              </UserControl.Resources>
+              <Grid Background="#FFFFFF">
+                <TextBlock Foreground="#EEEEEE" Text="1.16:1"/>
+              </Grid>
+            </UserControl>
+            """);
+        var r = fx.Run();
+        Assert.Equal(PaletteMode.Pair, r.Detection.Mode);
+        Assert.True(r.Detection.Palette.Entries.ContainsKey("LocalAccent")); // 色盤來源照收
+        Assert.DoesNotContain(r.Detection.ExcludedFiles, f => f.EndsWith("B.xaml"));
+        Assert.Equal(2, r.Detection.ExcludedFiles.Count);                    // 只有兩個 ResourceDictionary
+        Assert.Equal(1, r.FileCount);
+        var f = Assert.Single(r.Findings);
+        Assert.Equal("Views/B.xaml", f.File);
+        Assert.Equal(Category.Fail, f.Category);
+    }
+
+    [Fact] // App.xaml 的 Application.Resources 放色票是最常見的寫法 —— 它是色盤來源，但裡面的 Style 一樣要稽核
+    public void ApplicationResourcesBrushesDoNotHideTheAppFile()
+    {
+        using var fx = new Fixture();
+        fx.File("App.xaml", """
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Application.Resources>
+                <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+                <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+                <SolidColorBrush x:Key="Accent" Color="#2196F3"/>
+                <Style x:Key="Pale" TargetType="Button">
+                  <Setter Property="Background" Value="{DynamicResource Bg}"/>
+                  <Setter Property="Foreground" Value="{DynamicResource Fg}"/>
+                </Style>
+              </Application.Resources>
+            </Application>
+            """);
+        var r = fx.Run();
+        Assert.Equal(3, r.Detection.Palette.Count);
+        Assert.Empty(r.Detection.ExcludedFiles);
+        var f = Assert.Single(r.Findings);
+        Assert.Equal("Style[Pale]/base", f.Element);
+        Assert.Equal(Category.Fail, f.Category);
+    }
+
     [Fact] // 根部就不是 XML 的檔案（樣板殘骸、編碼壞掉）不能讓偵測整個崩潰（找 <Application> 根元素那一步也要擋）；
            // 它交給稽核端喊 parse failed —— 不是讓檔案從報告裡消失
     public void UnparseableXamlNeitherBreaksDetectionNorDisappears()
