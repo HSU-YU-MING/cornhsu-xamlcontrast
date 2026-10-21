@@ -53,6 +53,18 @@ public class CliArgumentTests
         Assert.Empty(Directory.EnumerateFileSystemEntries(cwd)); // 沒有寫出名叫旗標的檔
     }
 
+    [Theory] // NaN 對任何比較都是 false：`mc is < 0 or > 100` 擋不住，`覆蓋率 < NaN` 也永遠不成立 →
+             // 覆蓋率下限靜默失效（25% 覆蓋率的專案印 all pairs meet AA、exit 0）。Infinity 原本就被擋
+    [InlineData("NaN")]
+    [InlineData("-NaN")]
+    public void MinCoverageRejectsNaN(string value)
+    {
+        using var fx = CliProjects.QuarterCoverage();
+        var r = Cli.Run(fx.Root, "--min-coverage", value);
+        Assert.True(r.Exit == 2, r.ToString());
+        Assert.Contains("--min-coverage takes a number between 0 and 100", r.Err);
+    }
+
     [Fact] // 沒給 root → usage + exit 2（不是 0：什麼都沒稽核）
     public void MissingRootPrintsUsageAndExitsTwo()
     {

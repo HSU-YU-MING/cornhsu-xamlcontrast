@@ -31,7 +31,9 @@ for (var i = 0; i < args.Length; i++)
             if (i + 1 >= args.Length ||
                 !double.TryParse(args[i + 1], System.Globalization.NumberStyles.Float,
                                  System.Globalization.CultureInfo.InvariantCulture, out var mc) ||
-                mc is < 0 or > 100)
+                // ⚠ NaN 對任何比較都是 false：範圍檢查擋不住它，之後「覆蓋率 < NaN」也永遠不成立 →
+                //   覆蓋率下限靜默失效。IsFinite 一併擋掉 Infinity
+                !double.IsFinite(mc) || mc is < 0 or > 100)
             { Console.Error.WriteLine("--min-coverage takes a number between 0 and 100"); return 2; }
             minCoverage = mc; i++;
             break;
