@@ -291,6 +291,45 @@ public class ConfigTests
         Assert.Equal(7.0, cfg.Thresholds.NormalText);
     }
 
+    [Fact] // 拼錯／未知的屬性不能靜默忽略：{"strictPallete": true} 載入時沒有任何錯誤、StrictPalette 仍是 false，
+           // 使用者以為色盤退化保險開了。退出碼要不要改成 2 是待決定的介面變更（會拒絕現在能跑的設定檔）；
+           // 這裡先守住「一定要講出來」—— 每個未知屬性點名（含區段內的），$schema 是編輯器慣例、放行
+    public void UnknownPropertiesAreNamedNotSilentlyIgnored()
+    {
+        using var fx = new Fixture().WithPalette();
+        fx.File("Main.xaml", """<Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>""");
+        fx.File(ToolConfig.FileName, """
+            {
+              "$schema": "https://example.invalid/xamlcontrast.schema.json",
+              "strictPallete": true,
+              "minCoverage": 10,
+              "palette": { "mode": "auto", "mdoe": "pair" },
+              "thresholds": { "normalText": 4.5 }
+            }
+            """);
+        var cfg = ToolConfig.Load(fx.Root);
+        Assert.Equal(["strictPallete", "palette.mdoe"], cfg.UnknownProperties);
+        Assert.False(cfg.StrictPalette);
+        Assert.Equal(10, cfg.MinCoverage); // 認得的欄位照常生效
+
+        var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
+        var console = Report.ToConsole(r);
+        Assert.Contains("!! config: unknown property 'strictPallete' ignored", console);
+        Assert.Contains("!! config: unknown property 'palette.mdoe' ignored", console);
+        Assert.Contains("unknown property 'strictPallete' ignored", Report.ToMarkdown(r, 0));
+    }
+
+    [Fact] // 沒有未知屬性時不印任何警告（不能變成每次都出現、讓人學會忽略的雜訊）
+    public void KnownPropertiesProduceNoUnknownPropertyWarning()
+    {
+        using var fx = new Fixture().WithPalette();
+        fx.File("Main.xaml", """<Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>""");
+        fx.File(ToolConfig.FileName, """{ "$schema": "x", "FAILON": "warn", "ignore": { "RequireReason": false } }""");
+        var cfg = ToolConfig.Load(fx.Root);
+        Assert.Empty(cfg.UnknownProperties);
+        Assert.DoesNotContain("unknown property", Report.ToConsole(Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg)));
+    }
+
     // ── 強制色盤模式：csharp／single ──────────────────────────────────────
 
     private const string CsPalette = """

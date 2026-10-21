@@ -41,6 +41,13 @@ public sealed class ToolConfig
     /// <summary>載入來源路徑；null = 沒有 config 檔（純預設值）</summary>
     [JsonIgnore] public string? SourcePath { get; private set; }
 
+    /// <summary>config 裡認不得的屬性（含區段內的，以 <c>palette.mdoe</c> 的形式）。
+    /// ⚠ 拼錯的屬性名會被靜默忽略：<c>{"strictPallete": true}</c> 載入時沒有任何錯誤，
+    ///   色盤退化保險其實沒開 —— 使用者以為改了稽核標準而其實沒有。至少要點名講出來
+    ///   （console 與 Markdown 報告都印）；要不要直接 exit 2 是介面決定，見 CHANGELOG。
+    ///   <c>$schema</c> 是 JSON 編輯器的慣例，放行。</summary>
+    [JsonIgnore] public IReadOnlyList<string> UnknownProperties { get; private set; } = [];
+
     public sealed class PaletteSection
     {
         public string Mode { get; init; } = "auto"; // auto | pair | csharp | single | none
@@ -90,7 +97,8 @@ public sealed class ToolConfig
         if (!File.Exists(path)) return new ToolConfig();
 
         ToolConfig cfg;
-        try { cfg = JsonSerializer.Deserialize<ToolConfig>(File.ReadAllText(path), JsonOpts) ?? new ToolConfig(); }
+        var text = File.ReadAllText(path);
+        try { cfg = JsonSerializer.Deserialize<ToolConfig>(text, JsonOpts) ?? new ToolConfig(); }
         catch (JsonException ex) { throw new ConfigException($"{FileName} is not valid JSON: {ex.Message}"); }
 
         if (cfg.Palette.Mode is not ("auto" or "pair" or "csharp" or "single" or "none"))
@@ -110,6 +118,36 @@ public sealed class ToolConfig
             throw new ConfigException($"minCoverage must be between 0 and 100, got {cfg.MinCoverage}");
 
         cfg.SourcePath = path;
+        cfg.UnknownProperties = FindUnknown(text);
         return cfg;
+    }
+
+    private static List<string> FindUnknown(string json)
+    {
+        var unknown = new List<string>();
+        using var doc = JsonDocument.Parse(json, new JsonDocumentOptions
+        {
+            CommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true,
+        });
+        Walk(doc.RootElement, typeof(ToolConfig), "");
+        return unknown;
+
+        void Walk(JsonElement obj, Type type, string path)
+        {
+            if (obj.ValueKind != JsonValueKind.Object) return;
+            foreach (var p in obj.EnumerateObject())
+            {
+                if (path.Length == 0 && p.Name == "$schema") continue;
+                // 與反序列化同一套規則：不分大小寫、只認可寫入且沒有 [JsonIgnore] 的公開屬性
+                var prop = type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
+                    .FirstOrDefault(pi => pi.SetMethod is not null &&
+                                          !pi.IsDefined(typeof(JsonIgnoreAttribute), inherit: true) &&
+                                          string.Equals(pi.Name, p.Name, StringComparison.OrdinalIgnoreCase));
+                if (prop is null) { unknown.Add(path + p.Name); continue; }
+                if (prop.PropertyType.DeclaringType == typeof(ToolConfig))
+                    Walk(p.Value, prop.PropertyType, path + p.Name + ".");
+            }
+        }
     }
 }
