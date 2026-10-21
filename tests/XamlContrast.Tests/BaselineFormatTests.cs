@@ -127,17 +127,19 @@ public class BaselineFormatTests
         Assert.Equal(0, cmp.PaidDebt);
     }
 
-    // ── 缺欄時的現況（寬鬆：補預設值 0）。KnownLimitation —— 釘的是現況，不是正確答案。
-    //    公開介面盤點 9.3 建議 1.0 前改成報錯；改的時候這兩條要跟著翻成「期望例外」，
-    //    那是刻意的格式收緊，不是回歸 ──
+    // ── 缺欄時的現況（寬鬆：補預設值 0）。KnownLimitation —— 釘的是退出碼的現況，不是正確答案。
+    //    缺欄改成報錯（exit 2）是待使用者決定的格式收緊（會拒絕現在讀得進去的 baseline）；
+    //    決定之後這兩條要跟著翻成「期望例外」，那是刻意的收緊，不是回歸。
+    //    在那之前至少不能靜默：缺欄要點名（Warnings，CLI 印成 "!! baseline: …"） ──
 
-    [Fact] // 缺 worst → 0：色盤漂移檢查靜默失效（比值再差也不會 < 0 − 0.01）
+    [Fact] // 缺 worst → 0：色盤漂移檢查失效（比值再差也不會 < 0 − 0.01）—— 退出碼照舊，但要講出來
     public void KnownLimitation_MissingWorstDisablesTheDriftCheck()
     {
         var r = Run(("Main.xaml", OnWhite(FailText)));
         var f = r.Findings.Single();
         var cmp = Baseline.Compare(r, BaselineJson(new { file = f.File, element = f.Element, fg = f.Fg, bg = f.Bg, count = 1 }));
         Assert.True(cmp.Passes);
+        Assert.Contains("1 entry has no 'worst' — palette drift", Assert.Single(cmp.Warnings));
     }
 
     [Fact] // 缺 count → 0：每一處都算惡化（吵，但方向是安全的）
@@ -148,5 +150,24 @@ public class BaselineFormatTests
         var cmp = Baseline.Compare(r, BaselineJson(new { file = f.File, element = f.Element, fg = f.Fg, bg = f.Bg, worst = f.Worst }));
         Assert.False(cmp.Passes);
         Assert.Equal(1, Assert.Single(cmp.WorsenedFailures).Count);
+        Assert.Contains("1 entry has no 'count'", Assert.Single(cmp.Warnings));
+    }
+
+    [Fact] // 工具自己寫出的 baseline 永遠欄位齊全 —— 不能有警告（不能變成每次都出現的雜訊）
+    public void BaselineWrittenByTheToolHasNoWarnings()
+    {
+        var r = Run(("Main.xaml", OnWhite(FailText)));
+        Assert.Empty(Baseline.Compare(r, Baseline.Write(r)).Warnings);
+    }
+
+    [Fact] // CLI 把缺欄警告印在 baseline 那行之後
+    public void CliPrintsMissingFieldWarnings()
+    {
+        using var fx = CliProjects.Failing();
+        var f = fx.Run().Findings.Single();
+        fx.File("baseline.json", BaselineJson(new { file = f.File, element = f.Element, fg = f.Fg, bg = f.Bg, count = 1 }));
+        var cli = Cli.Run(fx.Root, "--baseline", Path.Combine(fx.Root, "baseline.json"));
+        Assert.True(cli.Exit == 0, cli.ToString());
+        Assert.Contains("!! baseline: 1 entry has no 'worst'", cli.Out);
     }
 }

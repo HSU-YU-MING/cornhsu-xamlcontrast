@@ -22,6 +22,8 @@ public static class Baseline
         public required List<Entry> WorsenedFailures { get; init; }
         public required int KnownDebt { get; init; }
         public required int PaidDebt { get; init; }
+        /// <summary>baseline 檔本身的問題（缺欄位之類）—— 不改判定，但一定要講出來。</summary>
+        public List<string> Warnings { get; init; } = new();
         public bool Passes => NewFailures.Count == 0 && WorsenedFailures.Count == 0;
     }
 
@@ -56,11 +58,27 @@ public static class Baseline
     {
         var doc = JsonDocument.Parse(baselineJson);
         var known = new Dictionary<string, Entry>();
+        int noCount = 0, noWorst = 0;
         foreach (var el in doc.RootElement.GetProperty("entries").EnumerateArray())
         {
             var e = el.Deserialize<Entry>(JsonOpts)!;
             known[$"{e.File}|{e.Element}|{e.Fg}|{e.Bg}"] = e;
+            // ⚠ 缺欄位會被補成 0：缺 worst → 色盤漂移檢查失效（比值再差也不會 < 0 − 0.01）；
+            //   缺 count → 每一處都算惡化。工具自己寫出的檔一定有這兩欄，只有手改或外部產生的會中 ——
+            //   但中了就是一整類惡化靜默放行，所以至少要點名（要不要直接拒絕讀取是待決定的格式收緊）
+            if (el.ValueKind == JsonValueKind.Object)
+            {
+                if (!HasProperty(el, "count")) noCount++;
+                if (!HasProperty(el, "worst")) noWorst++;
+            }
         }
+        var warnings = new List<string>();
+        if (noWorst > 0)
+            warnings.Add($"{noWorst} {(noWorst == 1 ? "entry has" : "entries have")} no 'worst' — palette drift " +
+                         "(same key, darker colour) is not detected for them; regenerate with --write-baseline");
+        if (noCount > 0)
+            warnings.Add($"{noCount} {(noCount == 1 ? "entry has" : "entries have")} no 'count' — every occurrence " +
+                         "counts as worsened; regenerate with --write-baseline");
 
         var current = FailKeys(result);
         var newFailures = new List<Finding>();
@@ -101,6 +119,11 @@ public static class Baseline
             WorsenedFailures = worsened,
             KnownDebt = knownDebt,
             PaidDebt = paid,
+            Warnings = warnings,
         };
     }
+
+    /// <summary>屬性名不分大小寫（與 Deserialize 的 PropertyNameCaseInsensitive 一致）。</summary>
+    private static bool HasProperty(JsonElement obj, string name)
+        => obj.EnumerateObject().Any(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
 }

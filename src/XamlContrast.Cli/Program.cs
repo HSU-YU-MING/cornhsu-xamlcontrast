@@ -255,6 +255,7 @@ int DecideExit()
             return 2;
         }
         Console.WriteLine($"baseline: known debt {cmp.KnownDebt}, paid off {cmp.PaidDebt} (debt may only shrink)");
+        foreach (var w in cmp.Warnings) Console.WriteLine($"!! baseline: {w}"); // baseline 檔本身的問題不能靜默
         foreach (var f in cmp.NewFailures)
             Console.WriteLine($"  NEW failure: {f.File}:{f.Line} {f.Element} fg={f.Fg} bg={f.Bg}");
         foreach (var e in cmp.WorsenedFailures)
