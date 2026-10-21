@@ -590,6 +590,34 @@ public class PaletteDetectorTests
         Assert.Equal(PaletteMode.None, d.Mode);
     }
 
+    [Fact] // bin／obj 只看 root 以下的相對路徑：舊版比對含 root 的完整路徑，專案本身放在叫 bin 或 obj 的目錄底下
+           // （root 用絕對路徑）就整個專案 0 個檔 → 「resolved 0 pairs」exit 1，訊息誤導、工具在那裡等於不能用；
+           // 同一個目錄改傳相對路徑又正常 —— 結果跟著 root 的寫法變
+    public void ProjectLivingUnderABinDirectoryIsStillScanned()
+    {
+        using var fx = new Fixture(Path.Combine("xc-" + Guid.NewGuid().ToString("N"), "bin", "MyApp"));
+        fx.File("Main.xaml", """<Grid Background="#000000"><TextBlock Foreground="#FFFFFF"/></Grid>""");
+        try
+        {
+            var r = fx.Run();
+            Assert.Equal(1, r.FileCount);
+            Assert.Single(r.Findings);
+        }
+        finally { Directory.Delete(Path.GetDirectoryName(Path.GetDirectoryName(fx.Root))!, recursive: true); }
+    }
+
+    [Theory] // 而且不分大小寫（Windows 的檔案系統不分）：Bin／OBJ 底下的建置輸出照樣排除；binder 這種名字不算
+    [InlineData("Bin/Release/Main.xaml", 0)]
+    [InlineData("OBJ/Debug/Main.xaml", 0)]
+    [InlineData("binder/Main.xaml", 1)]
+    [InlineData("Views/objects/Main.xaml", 1)]
+    public void BinAndObjSegmentsAreMatchedWholeAndCaseInsensitively(string path, int files)
+    {
+        using var fx = new Fixture();
+        fx.File(path, """<Grid Background="#000000"><TextBlock Foreground="#FFFFFF"/></Grid>""");
+        Assert.Equal(files, fx.Run().FileCount);
+    }
+
     // ── 合併式色盤湊不到 3 個鍵時的退路：挑檔（偵測順序的「theme pair」與「single theme file」）──
     //    合併式只從 brush 取鍵，全專案一個 brush 都沒有才改用 <Color> 鍵 —— 所以「主題檔只有 <Color>、
     //    別處零星一個 brush」的專案，合併式不成立，交給這兩條挑檔的路。它們沒接住就是整個退化成無色盤。

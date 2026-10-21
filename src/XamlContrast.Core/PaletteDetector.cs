@@ -132,10 +132,25 @@ public static partial class PaletteDetector
     private static string? LiteralColor(string v)
         => v.StartsWith('#') ? ColorResolver.NormalizeHex(v) : ColorResolver.NamedHex(v);
 
+    /// <summary>
+    /// 專案內的檔案，排除建置輸出（bin／obj）。
+    /// ⚠ 只看 root 以下的相對路徑、整段比對、不分大小寫。舊版比對的是含 root 的完整路徑：專案本身放在
+    ///   叫 bin 或 obj 的目錄底下（root 用絕對路徑）就整個專案 0 個檔 → 「resolved 0 pairs」exit 1，
+    ///   訊息誤導；改傳相對路徑又正常 —— 跟「dark／light 提示只看專案內相對路徑」同一類地雷。
+    ///   大小寫敏感則讓 Windows 上的 Bin\ 照掃。
+    /// </summary>
     internal static IEnumerable<string> EnumerateFiles(string root, string pattern)
         => Directory.EnumerateFiles(root, pattern, SearchOption.AllDirectories)
-            .Where(f => !f.Replace('/', '\\').Contains("\\obj\\") && !f.Replace('/', '\\').Contains("\\bin\\"))
+            .Where(f => !IsBuildOutput(Path.GetRelativePath(root, f)))
             .OrderBy(f => f, StringComparer.OrdinalIgnoreCase);
+
+    private static bool IsBuildOutput(string rel)
+    {
+        var segments = rel.Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries);
+        // 最後一段是檔名，只看目錄段
+        return segments.Take(segments.Length - 1)
+            .Any(s => s.Equals("bin", StringComparison.OrdinalIgnoreCase) || s.Equals("obj", StringComparison.OrdinalIgnoreCase));
+    }
 
     /// <summary>
     /// 根元素是 ResourceDictionary 的檔，才是可以排除出 UI 掃描的「色盤／資源字典」。
