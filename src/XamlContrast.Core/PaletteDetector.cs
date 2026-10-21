@@ -207,17 +207,32 @@ public static partial class PaletteDetector
     /// <summary>
     /// 測試素材／範例不是專案的色盤。⚠ ILSpy 實證：偵測器挑中的「色盤」是
     /// <c>ILSpy.BamlDecompiler.Tests.Windows\Cases\…</c> —— 一個反編譯測試的假資料檔。
-    /// 只影響「能不能當色盤候選」，不影響這些檔案本身要不要被稽核。
+    /// 只影響「能不能當色盤候選」（XAML 與 C# 兩條路都套用），不影響這些檔案本身要不要被稽核。
+    ///
+    /// ⚠ 判準是「路徑段切成詞、逐詞比前綴」，不是「路徑段以 test 開頭」：.NET 的測試專案慣用
+    ///   <c>MyApp.Tests</c>／<c>UnitTests</c> 命名，舊判準對不上（那一段以 myapp／unit 開頭），
+    ///   放在那裡的假色盤照樣被選中。詞的邊界是 . - _ 與大小寫轉換（UnitTests → Unit + Tests），
+    ///   所以 Contest、LatestNews 這種「詞中間剛好有 test」的名字不受影響。
     /// </summary>
-    private static bool LooksLikeFixture(string rel)
+    internal static bool LooksLikeFixture(string rel)
     {
-        var n = rel.Replace('\\', '/').ToLowerInvariant();
-        return n.Contains("/test") || n.StartsWith("test") ||
-               n.Contains("/sample") || n.StartsWith("sample") ||
-               n.Contains("/demo") || n.StartsWith("demo") ||
-               n.Contains("/example") || n.StartsWith("example") ||
-               n.Contains("/fixture") || n.Contains("/mock");
+        var segments = rel.Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+        for (var i = 0; i < segments.Length; i++)
+        {
+            foreach (var w in WordBoundary().Split(segments[i]))
+            {
+                var word = w.ToLowerInvariant();
+                if (word.StartsWith("test") || word.StartsWith("sample") ||
+                    word.StartsWith("demo") || word.StartsWith("example")) return true;
+                // fixture／mock 只看第二層以下（沿用舊判準）
+                if (i > 0 && (word.StartsWith("fixture") || word.StartsWith("mock"))) return true;
+            }
+        }
+        return false;
     }
+
+    [GeneratedRegex(@"[._\-\s]+|(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])")]
+    private static partial Regex WordBoundary();
 
     /// <summary>全專案的 &lt;Color x:Key&gt; 索引 —— 讓 brush 能引用別的檔案裡的 Color。</summary>
     internal static Dictionary<string, string> GlobalColors(string root)
@@ -449,6 +464,9 @@ public static partial class PaletteDetector
         var cands = new List<CsCandidate>();
         foreach (var f in EnumerateFiles(root, "*.cs"))
         {
+            // 測試檔的 [InlineData("Bg", "#..", "#..")] 正好符合三元組格式 —— 會搶走色盤、報出 1:1 的假 fail，
+            // 還讓偵測看起來沒有退化（--strict-palette 不會觸發）。與 XAML 端同一個判準
+            if (LooksLikeFixture(Path.GetRelativePath(root, f))) continue;
             var map = new Dictionary<string, (string, string)>();
             foreach (var line in File.ReadLines(f))
             {

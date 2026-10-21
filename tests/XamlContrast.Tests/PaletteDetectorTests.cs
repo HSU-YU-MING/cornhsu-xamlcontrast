@@ -281,6 +281,57 @@ public class PaletteDetectorTests
         Assert.False(d.Palette.Entries.ContainsKey("Junk1")); // 測試目錄不進色盤
     }
 
+    [Fact] // C# 三元組那條路也要排除測試／範例路徑：測試檔的 [InlineData("Bg", "#..", "#..")] 正好符合三元組格式，
+           // 會搶走色盤、報出 1:1 的假 fail；搶到假色盤也讓偵測看起來沒有退化，--strict-palette 因此不會觸發
+    public void CSharpTuplesInTestProjectsAreNotPaletteCandidates()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Colors.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Accent" Color="#42A5F5"/>
+            </ResourceDictionary>
+            """);
+        fx.File("App.Tests/ContrastTests.cs", """
+            [InlineData("Bg", "#FFFFFF", "#FFFFFF")]
+            [InlineData("Fg", "#FFFFFF", "#FFFFFF")]
+            [InlineData("Accent", "#FFFFFF", "#FFFFFF")]
+            """);
+        fx.File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>
+            """);
+        var r = fx.Run();
+        Assert.NotEqual(PaletteMode.CSharp, r.Detection.Mode);
+        Assert.DoesNotContain("ContrastTests.cs", r.Detection.Description);
+        Assert.Equal(Category.Ok, Assert.Single(r.Findings).Category); // 不是 1:1 的假 fail
+    }
+
+    [Theory] // 測試／範例路徑的判準：路徑段依 . - _ 與大小寫邊界切成詞逐一比對 —— .NET 的測試專案慣用
+             // MyApp.Tests／UnitTests 命名，舊版的「路徑段以 test 開頭」對不上，放在那裡的假色盤照樣被選中
+    [InlineData("src/MyApp.Tests/Themes/Theme.xaml", true)]
+    [InlineData("src/UnitTests/Theme.xaml", true)]
+    [InlineData("MyApp_IntegrationTests/Theme.xaml", true)]
+    [InlineData("src/App-Samples/Theme.xaml", true)]
+    [InlineData("Tests/Theme.xaml", true)]                  // 舊判準本來就涵蓋的形狀照舊
+    [InlineData("Views/Mocks/Theme.xaml", true)]
+    [InlineData("src/MyApp/Themes/Theme.xaml", false)]
+    [InlineData("src/Contest/Theme.xaml", false)]           // 詞中間的 test 不算
+    [InlineData("src/LatestNews/Theme.xaml", false)]
+    public void TestAndSamplePathsAreRecognisedWordByWord(string path, bool isFixture)
+    {
+        using var fx = new Fixture();
+        fx.File(path, """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Accent" Color="#42A5F5"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(isFixture, d.IsDegraded); // 唯一的色盤在測試路徑裡 → 沒有色盤（退化要喊）
+    }
+
     [Fact] // 帶點的色票鍵（Panel.Background）是 WPF 最普遍的命名慣例。
            // 定義端用 \w+（不含點）、使用端用 [\w.]+（含點）—— 兩邊標準不一致，
            // 於是「看得到有人在用，卻找不到定義」。ScreenToGif 實測：93 個色票認出 0 個。
