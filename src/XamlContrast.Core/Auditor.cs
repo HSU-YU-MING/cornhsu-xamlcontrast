@@ -161,6 +161,7 @@ public sealed partial class Auditor
         var auditor = new Auditor(detection.Palette, config ?? new ToolConfig());
         // 具名 Style 索引含色盤／主題字典 ——「排除出 UI 掃描」不等於「排除出索引」
         auditor._styles = StyleIndex.Build(root);
+        auditor._parseErrors.AddRange(detection.ReadErrors); // 偵測時讀不到的檔（被鎖住的 .cs 之類）一樣要喊
         var all = PaletteDetector.EnumerateFiles(root, "*.xaml").ToList();
         var files = all.Where(f => !detection.ExcludedFiles.Contains(f)).ToList();
 

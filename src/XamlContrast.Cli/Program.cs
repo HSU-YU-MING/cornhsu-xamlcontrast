@@ -98,6 +98,13 @@ catch (ConfigException ex)
     Console.Error.WriteLine($"config error: {ex.Message}");
     return 2;
 }
+catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+{
+    // 列舉專案目錄時碰到沒有權限的子目錄之類 —— 個別檔案讀不到會跳過並列入 parse errors，
+    // 這裡是連「有哪些檔」都拿不到。不能落到契約外的 .NET 堆疊
+    Console.Error.WriteLine($"cannot read the project under {root}: {ex.Message}");
+    return 2;
+}
 
 // rootBackground 寫錯是設定錯誤,不是靜默忽略 —— 設了一個不存在的鍵,
 // 使用者以為地板鋪好了,實際上覆蓋率一點都沒回來(謊報健康的親戚)
@@ -118,7 +125,13 @@ strictPalette = strictPalette || config.StrictPalette;
 //    不是稽核標準。使用者明確傳 --min-coverage 0 表示「我知道，先讓我跑」是合理的逃生口。
 var minCov = minCoverage ?? config.MinCoverage;
 
-var result = Auditor.Run(root, detection, config);
+AuditResult result;
+try { result = Auditor.Run(root, detection, config); }
+catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+{
+    Console.Error.WriteLine($"cannot read the project under {root}: {ex.Message}");
+    return 2;
+}
 
 Console.Write(Report.ToConsole(result, showOk));
 if (showUnresolved && result.UnresolvedSites.Count > 0)

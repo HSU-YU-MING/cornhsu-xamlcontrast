@@ -47,6 +47,10 @@ public sealed class PaletteDetection
     public required HashSet<string> ExcludedFiles { get; init; }
     /// <summary>偵測結果的人話描述，一律印出來（偵測結果不靜默）。</summary>
     public required string Description { get; init; }
+    /// <summary>偵測時讀不到的檔（"相對路徑: 訊息"）。稽核端併進 parse errors —— 檔案不能從報告裡靜默消失。
+    /// ⚠ 自動偵測會讀樹裡每一個 .cs 找 C# 色盤；舊版 File.ReadLines 沒有 try，任何一個被 IDE／建置
+    ///   鎖住的 .cs（跟色盤有沒有關係都一樣）都讓整支程式以未處理的 IOException 結束、退出碼跳出契約。</summary>
+    public List<string> ReadErrors { get; } = new();
     /// <summary>自動偵測找不到色盤、退回只算寫死色碼 —— 退化要喊（規劃書 8.1 規則 3）。
     /// config 明選 mode "none" 不算退化：那是使用者的決定，不是工具的失敗。</summary>
     public bool IsDegraded { get; init; }
@@ -499,7 +503,7 @@ public static partial class PaletteDetector
            $"; !! {invalid.Count} key(s) dropped — defined with a colour value the tool cannot read" +
            $" (uses are counted as unknown-palette-key): {string.Join(", ", invalid.Take(5))}{(invalid.Count > 5 ? ", …" : "")}";
 
-    internal static List<CsCandidate> CsCandidates(string root)
+    internal static List<CsCandidate> CsCandidates(string root, List<string>? readErrors = null)
     {
         var cands = new List<CsCandidate>();
         foreach (var f in EnumerateFiles(root, "*.cs"))
@@ -508,13 +512,22 @@ public static partial class PaletteDetector
             // 還讓偵測看起來沒有退化（--strict-palette 不會觸發）。與 XAML 端同一個判準
             if (LooksLikeFixture(Path.GetRelativePath(root, f))) continue;
             var map = new Dictionary<string, (string, string)>();
-            foreach (var line in File.ReadLines(f))
+            try
             {
-                if (IsCSharpCommentLine(line)) continue;
-                var m = CsTuple().Match(line);
-                if (m.Success && IsValidHex(m.Groups["d"].Value) && IsValidHex(m.Groups["l"].Value))
-                    map[m.Groups["k"].Value] =
-                        (m.Groups["d"].Value.ToUpperInvariant(), m.Groups["l"].Value.ToUpperInvariant());
+                foreach (var line in File.ReadLines(f))
+                {
+                    if (IsCSharpCommentLine(line)) continue;
+                    var m = CsTuple().Match(line);
+                    if (m.Success && IsValidHex(m.Groups["d"].Value) && IsValidHex(m.Groups["l"].Value))
+                        map[m.Groups["k"].Value] =
+                            (m.Groups["d"].Value.ToUpperInvariant(), m.Groups["l"].Value.ToUpperInvariant());
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // 讀不到（被 IDE／建置鎖住）：跳過，但要喊 —— 稽核端併進 parse errors
+                readErrors?.Add($"{Path.GetRelativePath(root, f).Replace(Path.DirectorySeparatorChar, '/')}: {ex.Message}");
+                continue;
             }
             if (map.Count >= 3)
                 cands.Add(new CsCandidate(f, Path.GetRelativePath(root, f), map));
@@ -555,6 +568,14 @@ public static partial class PaletteDetector
 
     public static PaletteDetection Detect(string root, ToolConfig? config = null)
     {
+        var readErrors = new List<string>();
+        var d = DetectCore(root, config, readErrors);
+        d.ReadErrors.AddRange(readErrors);
+        return d;
+    }
+
+    private static PaletteDetection DetectCore(string root, ToolConfig? config, List<string> readErrors)
+    {
         // ── config 強制模式：使用者說了算，檔案不存在是錯誤而不是退化 ──
         switch (config?.Palette.Mode)
         {
@@ -586,7 +607,11 @@ public static partial class PaletteDetector
                             : new Regex(config.Palette.CsharpPattern);
                     }
                     catch (ArgumentException ex) { throw new ConfigException($"palette.csharpPattern is not a valid regex: {ex.Message}"); }
-                    var pal = ParseCsPalette(cFile, pattern);
+                    Palette pal;
+                    // 使用者指定的真相源讀不到 = 設定沒辦法生效 → exit 2（不是退化成別的色盤）
+                    try { pal = ParseCsPalette(cFile, pattern); }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                    { throw new ConfigException($"palette.csharpFile cannot be read: {ex.Message}"); }
                     var excl = XamlCandidates(root)
                         .Where(c => c.Brushes.Count > 0 &&
                                     (double)c.Brushes.Keys.Count(pal.Entries.ContainsKey) / c.Brushes.Count >= 0.5)
@@ -625,7 +650,7 @@ public static partial class PaletteDetector
         }
 
         var xaml = XamlCandidates(root);
-        var cs = CsCandidates(root);
+        var cs = CsCandidates(root, readErrors);
         var merged = MergedXamlPalette(root);
 
         // ── 應用程式層作用域：≥2 個 App.xaml 才啟動;單 App repo 行為完全不變 ──

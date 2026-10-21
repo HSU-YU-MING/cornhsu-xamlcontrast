@@ -97,7 +97,11 @@ public sealed class ToolConfig
         if (!File.Exists(path)) return new ToolConfig();
 
         ToolConfig cfg;
-        var text = File.ReadAllText(path);
+        string text;
+        // 讀不到（被鎖、沒權限）也是設定錯誤 → exit 2；舊版只接 JsonException，IOException 直接逃出契約
+        try { text = File.ReadAllText(path); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        { throw new ConfigException($"cannot read {FileName}: {ex.Message}"); }
         try { cfg = JsonSerializer.Deserialize<ToolConfig>(text, JsonOpts) ?? new ToolConfig(); }
         catch (JsonException ex) { throw new ConfigException($"{FileName} is not valid JSON: {ex.Message}"); }
 

@@ -160,6 +160,39 @@ public class CliArgumentTests
         Assert.DoesNotContain("   at ", r.Err); // 好訊息，不是堆疊
     }
 
+    // ── 讀不到的檔案：被 IDE／建置鎖住的 *.cs 或 config。舊版是未處理的 IOException，退出碼跳出契約
+    //    （−532462766）。自動偵測會讀樹裡每一個 .cs 找 C# 色盤 —— 跟色盤無關的檔被鎖也會中。
+    //    FileShare.None 只有 Windows 會跨行程強制，其他平台這兩條只跑前提就結束
+
+    [Fact] // 讀不到的 .cs：跳過並列入 parse errors（喊出來、不靜默），稽核照常跑完
+    public void UnreadableCSharpFileIsReportedNotFatal()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        using var fx = CliProjects.Passing();
+        fx.File("Services/Locked.cs", "class Locked {}");
+        using (File.Open(Path.Combine(fx.Root, "Services", "Locked.cs"), FileMode.Open, FileAccess.Read, FileShare.None))
+        {
+            var r = Cli.Run(fx.Root);
+            Assert.True(r.Exit == 0, r.ToString());
+            Assert.Contains("!! parse failed: Services/Locked.cs: ", r.Out);
+        }
+    }
+
+    [Fact] // 讀不到的 config：設定錯誤 → exit 2 並說人話
+    public void UnreadableConfigExitsTwo()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        using var fx = CliProjects.Passing();
+        fx.File("xamlcontrast.config.json", "{}");
+        using (File.Open(Path.Combine(fx.Root, "xamlcontrast.config.json"), FileMode.Open, FileAccess.Read, FileShare.None))
+        {
+            var r = Cli.Run(fx.Root);
+            Assert.True(r.Exit == 2, r.ToString());
+            Assert.Contains("config error: cannot read xamlcontrast.config.json", r.Err);
+            Assert.DoesNotContain("   at ", r.Err);
+        }
+    }
+
     [Theory] // rootBackground 解析不出顏色（不存在的鍵、空字串、Binding、畸形色碼）是設定錯誤 ——
              // 使用者以為地板鋪好了，實際上覆蓋率一點都沒回來（謊報健康的親戚）
     [InlineData("Nope")]
