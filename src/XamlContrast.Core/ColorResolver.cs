@@ -39,25 +39,53 @@ public static partial class ColorResolver
     /// <summary>供色盤偵測共用：具名色 → 色碼（認不得回傳 null）。
     /// HandyControl 的 ColorsDark.xaml 寫 &lt;Color&gt;White&lt;/Color&gt; —— 只認 #hex 會讓
     /// 該鍵的深色值缺失、退回淺色值，深字疊深底報出 1.17:1 的假 fail。</summary>
-    internal static string? NamedHex(string name) => Named.GetValueOrDefault(name);
+    internal static string? NamedHex(string name) => Named.GetValueOrDefault(name.Trim());
 
-    private static readonly Dictionary<string, string> Named = new(StringComparer.OrdinalIgnoreCase)
+    /// <summary>
+    /// WPF 的具名色（System.Windows.Media.Colors 的 141 色扣掉 Transparent，另外處理）。
+    /// ⚠ 舊版只有手抄的 14 色：Navy、Teal、CornflowerBlue 這些 WPF 合法的色名全被歸成 bound-or-gradient ——
+    ///   標成「執行期才知道」，其實靜態可解，覆蓋率被低估。WPF 的色名表與 .NET KnownColor 的網頁色
+    ///   是同一份（不分大小寫）；KnownColor 另有系統色（WindowText…，WPF 的 Color 不吃）與
+    ///   RebeccaPurple（CSS4 才有，WPF 沒有），兩者排除。
+    /// </summary>
+    private static readonly Dictionary<string, string> Named = BuildNamedColours();
+
+    private static Dictionary<string, string> BuildNamedColours()
     {
-        ["white"] = "#FFFFFF",
-        ["black"] = "#000000",
-        ["gray"] = "#808080",
-        ["darkgray"] = "#A9A9A9",
-        ["lightgray"] = "#D3D3D3",
-        ["red"] = "#FF0000",
-        ["green"] = "#008000",
-        ["blue"] = "#0000FF",
-        ["orange"] = "#FFA500",
-        ["yellow"] = "#FFFF00",
-        ["silver"] = "#C0C0C0",
-        ["whitesmoke"] = "#F5F5F5",
-        ["gainsboro"] = "#DCDCDC",
-        ["dimgray"] = "#696969",
-    };
+        var named = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var k in Enum.GetValues<System.Drawing.KnownColor>())
+        {
+            var c = System.Drawing.Color.FromKnownColor(k);
+            var name = k.ToString();
+            if (c.IsSystemColor || name is "Transparent" or "RebeccaPurple") continue;
+            named[name] = string.Create(System.Globalization.CultureInfo.InvariantCulture, $"#{c.R:X2}{c.G:X2}{c.B:X2}");
+        }
+        return named;
+    }
+
+    /// <summary>
+    /// 字面色碼正規化成 #RRGGBB／#AARRGGBB（大寫）。WPF 也吃 #RGB 與 #ARGB（每一位各自重複一次）——
+    /// 舊版不認，<c>Foreground="#AAA"</c> 被歸成 bound-or-gradient（CelFlow 快照 39 筆裡有 13 筆是這個）。
+    /// 長度或字元不對回傳 null（#FF0000A 這種七位數打字錯誤不能被默默猜前半段）。
+    /// </summary>
+    internal static string? NormalizeHex(string value)
+    {
+        var v = value.Trim();
+        if (!HexLiteral().IsMatch(v)) return null;
+        var h = v[1..].ToUpperInvariant();
+        return h.Length switch
+        {
+            3 or 4 => "#" + string.Concat(h.Select(ch => new string(ch, 2))),
+            6 or 8 => "#" + h,
+            _ => null,
+        };
+    }
+
+    [GeneratedRegex(@"^#(?:[0-9A-Fa-f]{3,4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$")]
+    private static partial Regex HexLiteral();
+
+    /// <summary>Transparent 不分大小寫（WPF 的色名都是）。</summary>
+    private static bool IsTransparent(string v) => v.Equals("Transparent", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// 字面色（#RRGGBB／#AARRGGBB／具名色）乘上 brush 的 Opacity，折成 #AARRGGBB。
@@ -68,16 +96,12 @@ public static partial class ColorResolver
     internal static string? ApplyOpacity(string color, double opacity)
     {
         var v = color.Trim();
-        if (v == "Transparent") return v;
-        var hex = v.StartsWith('#') ? v : NamedHex(v);
+        if (IsTransparent(v)) return "Transparent";
+        var hex = v.StartsWith('#') ? NormalizeHex(v) : NamedHex(v);
         if (hex is null) return null;
-        int a;
-        string rgb;
-        if (Rgb6().IsMatch(hex)) { a = 255; rgb = hex[1..]; }
-        else if (Rgb8().IsMatch(hex)) { a = Convert.ToInt32(hex[1..3], 16); rgb = hex[3..]; }
-        else return null;
+        var (a, rgb) = hex.Length == 9 ? (Convert.ToInt32(hex[1..3], 16), hex[3..]) : (255, hex[1..]);
         var na = (int)Math.Round(a * Math.Clamp(opacity, 0, 1));
-        return "#" + na.ToString("X2", System.Globalization.CultureInfo.InvariantCulture) + rgb.ToUpperInvariant();
+        return "#" + na.ToString("X2", System.Globalization.CultureInfo.InvariantCulture) + rgb;
     }
 
     /// <summary>色票值 → (alpha, #RRGGBB)。7 碼是不透明（alpha = 1）。</summary>
@@ -85,12 +109,6 @@ public static partial class ColorResolver
         => hex.Length == 9
             ? (Convert.ToInt32(hex.Substring(1, 2), 16) / 255.0, "#" + hex[3..])
             : (1.0, hex);
-
-    [GeneratedRegex(@"^#[0-9A-Fa-f]{6}$")]
-    private static partial Regex Rgb6();
-
-    [GeneratedRegex(@"^#[0-9A-Fa-f]{8}$")]
-    private static partial Regex Rgb8();
 
     [GeneratedRegex(@"^\{(Dynamic|Static)Resource\s+(?<k>[\w\.]+)\}$")]
     private static partial Regex ResourceRef();
@@ -100,25 +118,19 @@ public static partial class ColorResolver
         if (string.IsNullOrWhiteSpace(value)) return null;
         var v = value.Trim();
 
-        if (v == "Transparent") return new Resolved(ColorKind.Transparent);
-        if (Rgb6().IsMatch(v))
+        if (IsTransparent(v)) return new Resolved(ColorKind.Transparent);
+        if (v.StartsWith('#') && NormalizeHex(v) is { } n)
         {
-            var u = v.ToUpperInvariant();
-            return new Resolved(ColorKind.Hard, u, u);
-        }
-        if (Rgb8().IsMatch(v))
-        {
-            var h = v.TrimStart('#');
-            var rgb = "#" + h[2..].ToUpperInvariant();
+            if (n.Length == 7) return new Resolved(ColorKind.Hard, n, n);
+            var rgb = "#" + n[3..];
             // ⚠ #FFRRGGBB 的 alpha=255 是「完全不透明」，不是半透明 —— 這是 Blend／VS
             //   設計工具的預設輸出格式，也是 WPF 生態最常見的寫法。把它當半透明會讓
             //   字色整批落進 skipped（外部專案實測：ScreenToGif 的 97 個色票有 79 個
             //   是 #FFRRGGBB，覆蓋率因此掉到 1%）。四個受測專案剛好都手寫六位數，
             //   所以這個洞一直沒現形 —— 樣本同源的代價。
-            if (h[..2].Equals("FF", StringComparison.OrdinalIgnoreCase))
-                return new Resolved(ColorKind.Hard, rgb, rgb);
+            if (n[1..3] == "FF") return new Resolved(ColorKind.Hard, rgb, rgb);
             // 真半透明：要跟底下的顏色合成，交給呼叫端處理（字面值深淺同值）
-            var a = Convert.ToInt32(h[..2], 16) / 255.0;
+            var a = Convert.ToInt32(n[1..3], 16) / 255.0;
             return new Resolved(ColorKind.Alpha, Alpha: a, Rgb: rgb, AlphaLight: a, RgbLight: rgb);
         }
         if (Named.TryGetValue(v, out var hex))

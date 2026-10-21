@@ -236,6 +236,73 @@ public class ParseRuleTests
         Assert.Equal(1, r.Unresolved);
     }
 
+    // ── 短色碼與完整的 WPF 具名色表 ──
+    // 舊版只認 #RRGGBB／#AARRGGBB 與 14 個內建具名色，WPF 合法的 #RGB／#ARGB 與表外的具名色（Navy…）
+    // 全被歸成 bound-or-gradient：仍計入 unresolved（沒被藏），但原因標錯（標成「執行期才知道」，
+    // 其實可以靜態解析），覆蓋率因此被低估、可能誤觸覆蓋率下限
+
+    [Theory]
+    [InlineData("Navy", "#000080")]
+    [InlineData("navy", "#000080")]                // WPF 的色名不分大小寫
+    [InlineData("CornflowerBlue", "#6495ED")]
+    [InlineData("#AAA", "#AAAAAA")]                // #RGB
+    [InlineData("#f0a", "#FF00AA")]
+    [InlineData("#FAAA", "#AAAAAA")]               // #ARGB，alpha F = 不透明
+    public void ShortHexAndEveryWpfColourNameAreResolved(string value, string hex)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF"><TextBlock Foreground="{value}" Text="x"/></Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Unresolved);
+        Assert.Equal(Wcag.Contrast(hex, "#FFFFFF"), Assert.Single(r.Findings).RatioDark);
+    }
+
+    [Fact] // #ARGB 的半透明走既有路徑（字色半透明 → 合法跳過、計數；底色半透明 → 合成）；transparent 不分大小寫
+    public void ShortTranslucentHexAndLowercaseTransparent()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <StackPanel Background="#FFFFFF">
+              <Border Background="#8000"><TextBlock Foreground="#000" Text="x"/></Border>
+              <TextBlock Foreground="#8000" Text="translucent text"/>
+              <Border Background="transparent"><TextBlock Foreground="#000" Text="y"/></Border>
+            </StackPanel>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Unresolved);
+        Assert.Equal(1, r.Skipped);
+        Assert.Contains(r.Findings, f => f.Bg == "{#8000 over #FFFFFF}");
+        Assert.Contains(r.Findings, f => f.Bg == "#FFFFFF");
+    }
+
+    [Fact] // 表外的字（不是任何 WPF 色名）照樣是 bound-or-gradient，不能被當成顏色
+    public void UnknownColourNameStaysUnresolved()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """<Grid Background="#FFFFFF"><TextBlock Foreground="RebeccaPurple" Text="x"/></Grid>""");
+        Assert.Equal(1, fx.Run().UnresolvedBy[UnresolvedReason.BoundOrGradient]); // CSS 有、WPF 沒有
+    }
+
+    [Fact] // 色盤那一側同一套：短色碼與表外具名色的色票照常收
+    public void PaletteAcceptsShortHexAndWpfColourNames()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Colors.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFF"/>
+              <SolidColorBrush x:Key="Fg" Color="Navy"/>
+              <Color x:Key="AccentColor">Teal</Color>
+              <SolidColorBrush x:Key="Accent" Color="{StaticResource AccentColor}"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(("#FFFFFF", "#FFFFFF"), d.Palette.Entries["Bg"]);
+        Assert.Equal(("#000080", "#000080"), d.Palette.Entries["Fg"]);
+        Assert.Equal(("#008080", "#008080"), d.Palette.Entries["Accent"]);
+    }
+
     // ── 屬性元素語法（<Border.Background>…</Border.Background>）──
     // 舊版只讀屬性：漸層底被忽略、文字配到祖先的底，給出篤定的 21:1 ok；
     // <TextBlock.Foreground> 那組更是整組消失（pairs、unresolved、skipped 全是 0）

@@ -127,9 +127,10 @@ public static partial class PaletteDetector
     /// <summary>「有定義、但值讀不懂」的標記 —— 只在合併式色盤內部流通，見 <see cref="MergedXamlPalette"/>。</summary>
     private const string InvalidValue = "!invalid";
 
-    /// <summary>字面色值（#hex 或具名色）→ 正規化色碼；讀不懂回傳 null。</summary>
+    /// <summary>字面色值（#hex 或具名色）→ 正規化色碼（#RRGGBB／#AARRGGBB）；讀不懂回傳 null。
+    /// WPF 也吃 #RGB／#ARGB 與完整的具名色表 —— 跟 ColorResolver 同一套（色票與使用處的標準要一致）。</summary>
     private static string? LiteralColor(string v)
-        => v.StartsWith('#') ? (IsValidHex(v) ? v.ToUpperInvariant() : null) : ColorResolver.NamedHex(v);
+        => v.StartsWith('#') ? ColorResolver.NormalizeHex(v) : ColorResolver.NamedHex(v);
 
     internal static IEnumerable<string> EnumerateFiles(string root, string pattern)
         => Directory.EnumerateFiles(root, pattern, SearchOption.AllDirectories)
