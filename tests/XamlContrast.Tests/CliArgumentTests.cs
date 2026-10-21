@@ -135,13 +135,29 @@ public class CliArgumentTests
     [InlineData("""{ "failOn": "never" }""", "config error: failOn must be fail|warn")]
     [InlineData("""{ "palette": { "mode": "single", "darkFile": "Nope.xaml" } }""", "config error: palette.darkFile not found: Nope.xaml")]
     [InlineData("""{ "palette": { "mode": "csharp", "csharpFile": "Nope.cs" } }""", "config error: palette.csharpFile not found: Nope.cs")]
+    // 區段、陣列或陣列元素是 null：舊版是未處理的 NullReferenceException／ArgumentNullException，
+    // 印 .NET 堆疊、退出碼跳出 0/1/2 契約（Windows −1073741819／−532462766）
+    [InlineData("""{ "palette": null }""", "config error: palette must be an object")]
+    [InlineData("""{ "thresholds": null }""", "config error: thresholds must be an object")]
+    [InlineData("""{ "classification": null }""", "config error: classification must be an object")]
+    [InlineData("""{ "ignore": null }""", "config error: ignore must be an object")]
+    [InlineData("""{ "classification": { "extraText": null } }""", "config error: classification.extraText must be an array")]
+    [InlineData("""{ "classification": { "extraNonText": [null] } }""", "config error: classification.extraNonText must not contain")]
+    // 空字串的元素名：後綴比對時 EndsWith("") 恆真 —— extraNonText 裡一個 "" 會把所有不在內建表的元素
+    // 都判成裝飾、不受文字門檻檢查（靜默放行），所以跟 null 一樣拒絕
+    [InlineData("""{ "classification": { "extraNonText": [""] } }""", "config error: classification.extraNonText must not contain")]
+    [InlineData("""{ "classification": { "extraText": ["  "] } }""", "config error: classification.extraText must not contain")]
+    // 路徑含 NUL：GetFullPath 丟 ArgumentException，舊版只接 ConfigException
+    [InlineData("""{ "palette": { "mode": "single", "darkFile": "a\u0000b.xaml" } }""", "config error: palette.darkFile is not a valid path")]
     public void InvalidConfigExitsTwo(string config, string expectInStderr)
     {
         using var fx = CliProjects.Passing();
         fx.File("xamlcontrast.config.json", config);
+        fx.File("Fancy.xaml", """<Grid Background="#000000"><FancyLabel Foreground="#FFFFFF"/></Grid>"""); // 走後綴比對的元素名
         var r = Cli.Run(fx.Root);
         Assert.True(r.Exit == 2, r.ToString());
         Assert.Contains(expectInStderr, r.Err);
+        Assert.DoesNotContain("   at ", r.Err); // 好訊息，不是堆疊
     }
 
     [Theory] // rootBackground 解析不出顏色（不存在的鍵、空字串、Binding、畸形色碼）是設定錯誤 ——

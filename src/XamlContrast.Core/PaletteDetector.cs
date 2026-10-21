@@ -543,7 +543,11 @@ public static partial class PaletteDetector
 
     private static string RequireFile(string root, string rel, string field)
     {
-        var full = Path.GetFullPath(Path.Combine(root, rel));
+        string full;
+        // 路徑含 NUL 之類的字元：GetFullPath 丟 ArgumentException —— 設定錯誤，不是 .NET 堆疊
+        try { full = Path.GetFullPath(Path.Combine(root, rel)); }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        { throw new ConfigException($"palette.{field} is not a valid path: {ex.Message}"); }
         if (!File.Exists(full))
             throw new ConfigException($"palette.{field} not found: {rel}");
         return full;

@@ -101,6 +101,16 @@ public sealed class ToolConfig
         try { cfg = JsonSerializer.Deserialize<ToolConfig>(text, JsonOpts) ?? new ToolConfig(); }
         catch (JsonException ex) { throw new ConfigException($"{FileName} is not valid JSON: {ex.Message}"); }
 
+        // ⚠ 區段、陣列、陣列元素給 null 時 System.Text.Json 照單全收 —— 舊版接著就是
+        //   NullReferenceException／ArgumentNullException 的 .NET 堆疊，退出碼跳出 0/1/2 契約。
+        //   寫錯的 config 一律 exit 2 並點名欄位
+        if (cfg.Palette is null) throw new ConfigException("palette must be an object, got null");
+        if (cfg.Thresholds is null) throw new ConfigException("thresholds must be an object, got null");
+        if (cfg.Classification is null) throw new ConfigException("classification must be an object, got null");
+        if (cfg.Ignore is null) throw new ConfigException("ignore must be an object, got null");
+        RequireNames(cfg.Classification.ExtraText, "classification.extraText");
+        RequireNames(cfg.Classification.ExtraNonText, "classification.extraNonText");
+
         if (cfg.Palette.Mode is not ("auto" or "pair" or "csharp" or "single" or "none"))
             throw new ConfigException($"palette.mode must be auto|pair|csharp|single|none, got '{cfg.Palette.Mode}'");
         if (cfg.FailOn is not ("fail" or "warn"))
@@ -120,6 +130,16 @@ public sealed class ToolConfig
         cfg.SourcePath = path;
         cfg.UnknownProperties = FindUnknown(text);
         return cfg;
+    }
+
+    /// <summary>元素名清單：不能是 null，也不能含 null／空白名 —— 分類用後綴比對，
+    /// EndsWith("") 恆真：extraNonText 裡一個 "" 會把所有不在內建表的元素都判成裝飾、
+    /// 不受文字門檻檢查（靜默放行），跟 null 一樣當設定錯誤。</summary>
+    private static void RequireNames(string[]? names, string field)
+    {
+        if (names is null) throw new ConfigException($"{field} must be an array of element names, got null");
+        if (names.Any(string.IsNullOrWhiteSpace))
+            throw new ConfigException($"{field} must not contain null or empty element names");
     }
 
     private static List<string> FindUnknown(string json)
