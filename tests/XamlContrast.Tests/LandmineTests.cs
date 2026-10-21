@@ -530,4 +530,38 @@ public class LandmineTests
         Assert.Equal(UnresolvedReason.UnknownPaletteKey, site.Reason);
         Assert.Equal("Fg", site.Value);
     }
+
+    [Fact] // 同上，但共用區沒有自己的字典：舊版退回全域色盤 —— 等於借用某個 App 的值（"Fg" 被解成 A App 的
+           // #EEEEEE，實際的值由執行期的宿主 App 決定，工具在猜）。有沒有一份不相干的共用字典，不該決定
+           // App 的鍵看不看得到：共用區一律只用共用區自己的，看不到的鍵計入 unknown-palette-key
+    public void FileOutsideEveryAppDoesNotBorrowAnAppPaletteWhenTheSharedAreaHasNone()
+    {
+        using var fx = TwoApps();
+        fx.File("Shared/Control.xaml", """
+            <UserControl Background="#000000">
+              <TextBlock Foreground="{DynamicResource Fg}" Text="whose Fg? depends on the host app"/>
+            </UserControl>
+            """);
+        var r = fx.Run();
+        Assert.DoesNotContain(r.Findings, f => f.File == "Shared/Control.xaml");
+        var site = Assert.Single(r.UnresolvedSites);
+        Assert.Equal(UnresolvedReason.UnknownPaletteKey, site.Reason);
+        Assert.Equal("Fg", site.Value);
+    }
+
+    [Fact] // 共用區或 App 的字典鍵數很少（< 3）也是它自己的色盤 —— 「≥ 3 鍵才算色盤」是偵測的門檻，不是作用域的
+    public void SmallSharedDictionaryStillFormsTheSharedScope()
+    {
+        using var fx = TwoApps();
+        fx.File("Shared/Lib.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Lib.Fg" Color="#FFFFFF"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Shared/Control.xaml", """
+            <UserControl Background="#000000"><TextBlock Foreground="{DynamicResource Lib.Fg}"/></UserControl>
+            """);
+        var r = fx.Run();
+        Assert.Equal(21.0, Assert.Single(r.Findings, f => f.File == "Shared/Control.xaml").RatioDark);
+    }
 }

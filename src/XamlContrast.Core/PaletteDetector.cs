@@ -40,8 +40,13 @@ public sealed class PaletteDetection
                 (best is null || s.RootDir.Length > best.RootDir.Length))
                 best = s;
         best ??= Scopes.FirstOrDefault(s => s.RootDir.Length == 0);
-        return best?.Palette ?? Palette;
+        // ⚠ 不屬於任何 App、共用區又沒有自己的字典 → 空色盤，不是退回全域色盤。全域色盤是各 App 合併
+        //   （同鍵先出現的贏）—— 退回它等於借用某個 App 的值，而共用元件實際的值由執行期的宿主決定，
+        //   那是在猜；也跟「有共用字典時 App 的鍵看不到」不一致。看不到的鍵計入 unknown-palette-key
+        return best?.Palette ?? EmptyPalette;
     }
+    private static readonly Palette EmptyPalette = new();
+
     /// <summary>被認定為色盤檔、且根元素是 ResourceDictionary 的 XAML（不進 UI 掃描 —— 字典檔不是畫面）。
     /// 色盤來源是畫面檔（Window.Resources 裡的區域 brush）時照樣稽核，見 <see cref="PaletteDetector.IsResourceDictionaryFile"/>。</summary>
     public required HashSet<string> ExcludedFiles { get; init; }
@@ -334,7 +339,7 @@ public static partial class PaletteDetector
     }
 
     internal static (Palette Pal, bool IsPair, HashSet<string> Files, SortedSet<string> Conflicts, SortedSet<string> Invalid)? MergedXamlPalette(
-        string root, Func<string, bool>? include = null)
+        string root, Func<string, bool>? include = null, int minKeys = 3)
     {
         // ⚠「缺的一側退回另一側」只適用於**沒有定義**的那一側。有定義、但值讀不懂（七位數打字錯誤、
         //   Color="{Binding …}"、#GGGGGG）的一側舊版也一樣被丟掉，看起來像「沒定義」，於是拿另一個主題的值
@@ -431,7 +436,7 @@ public static partial class PaletteDetector
             }
         }
 
-        if (pal.Count < 3) return null;
+        if (pal.Count < minKeys) return null; // ≥ 3 是「偵測到色盤」的門檻；作用域用 1（小字典也是它自己的）
         var anyDark = colorFiles.Any(c => c.D && !c.L) || brushFiles.Any(b => b.D && !b.L);
         var anyLight = colorFiles.Any(c => c.L && !c.D) || brushFiles.Any(b => b.L && !b.D);
         var files = new HashSet<string>(
@@ -677,10 +682,10 @@ public static partial class PaletteDetector
                                                o.StartsWith(d + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) &&
                                                full.StartsWith(o + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
                 }
-                var m = MergedXamlPalette(root, f => InThisApp(f) || !UnderAny(f));
+                var m = MergedXamlPalette(root, f => InThisApp(f) || !UnderAny(f), minKeys: 1);
                 if (m is { } sm && sm.Pal.Count > 0) scopes.Add(new PaletteScope(d, sm.Pal));
             }
-            var shared = MergedXamlPalette(root, f => !UnderAny(f));
+            var shared = MergedXamlPalette(root, f => !UnderAny(f), minKeys: 1);
             if (shared is { } sh && sh.Pal.Count > 0) scopes.Add(new PaletteScope("", sh.Pal));
             if (scopes.Count == 0) scopes = null;
         }
