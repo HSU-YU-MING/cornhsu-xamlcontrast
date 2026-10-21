@@ -108,7 +108,19 @@ public static partial class PaletteDetector
     /// 與「看不懂就要喊」的原則相反，所以長度不對就不收進色盤；
     /// 用到該鍵的地方自然變成 UnknownKey，走既有的 unresolved 計數喊出來。
     /// </summary>
-    private static bool IsValidHex(string v) => v.Length is 7 or 9;
+    /// ⚠ 也要全是十六進位數字：XAML 那兩條正則吃的是 \w，#GGGGGG 長度對、字元不對，
+    ///   收進色盤之後 Wcag.Luminance 的 Convert.ToInt32 直接丟例外 —— 整支稽核崩潰、退出碼跳出契約。
+    private static bool IsValidHex(string v) => v.Length is 7 or 9 && v[0] == '#' && !v.AsSpan(1).ContainsAnyExcept(HexDigits);
+
+    private static readonly System.Buffers.SearchValues<char> HexDigits =
+        System.Buffers.SearchValues.Create("0123456789abcdefABCDEF");
+
+    /// <summary>「有定義、但值讀不懂」的標記 —— 只在合併式色盤內部流通，見 <see cref="MergedXamlPalette"/>。</summary>
+    private const string InvalidValue = "!invalid";
+
+    /// <summary>字面色值（#hex 或具名色）→ 正規化色碼；讀不懂回傳 null。</summary>
+    private static string? LiteralColor(string v)
+        => v.StartsWith('#') ? (IsValidHex(v) ? v.ToUpperInvariant() : null) : ColorResolver.NamedHex(v);
 
     internal static IEnumerable<string> EnumerateFiles(string root, string pattern)
         => Directory.EnumerateFiles(root, pattern, SearchOption.AllDirectories)
@@ -145,8 +157,9 @@ public static partial class PaletteDetector
         return m.Success ? m.Groups[1].Value : null;
     }
 
-    /// <summary>單一檔案裡的 &lt;Color x:Key&gt; 定義（供跨檔解析 brush 引用）。</summary>
-    internal static Dictionary<string, string> ParseColorDefs(string file)
+    /// <summary>單一檔案裡的 &lt;Color x:Key&gt; 定義（供跨檔解析 brush 引用）。
+    /// <paramref name="keepInvalid"/>：讀不懂的值記成 <see cref="InvalidValue"/> 而不是略過（合併式色盤用）。</summary>
+    internal static Dictionary<string, string> ParseColorDefs(string file, bool keepInvalid = false)
     {
         var colors = new Dictionary<string, string>();
         string text;
@@ -155,9 +168,8 @@ public static partial class PaletteDetector
         {
             var key = Attr(KeyAttr(), m.Groups["attrs"].Value);
             if (key is null) continue;
-            var v = m.Groups["v"].Value;
-            if (v.StartsWith('#')) { if (IsValidHex(v)) colors[key] = v.ToUpperInvariant(); }
-            else if (ColorResolver.NamedHex(v) is { } hex) colors[key] = hex;
+            if (LiteralColor(m.Groups["v"].Value) is { } hex) colors[key] = hex;
+            else if (keepInvalid) colors[key] = InvalidValue;
         }
         return colors;
     }
@@ -174,29 +186,9 @@ public static partial class PaletteDetector
     internal static Dictionary<string, string> ParseXamlPalette(
         string file, IReadOnlyDictionary<string, string>? globalColors = null)
     {
-        var brushes = new Dictionary<string, string>();
-        var refs = new Dictionary<string, string>();
         var colors = ParseColorDefs(file);
-
-        string text;
-        try { text = File.ReadAllText(file); } catch { return brushes; }
-        foreach (Match m in BrushElement().Matches(text))
-        {
-            var attrs = m.Groups["attrs"].Value;
-            var key = Attr(KeyAttr(), attrs);
-            var val = Attr(ColorAttr(), attrs);
-            if (key is null || val is null) continue;
-            if (val.StartsWith('#'))
-            {
-                if (IsValidHex(val)) brushes[key] = val.ToUpperInvariant();
-            }
-            else if (ColorResolver.NamedHex(val) is { } hex) brushes[key] = hex;
-            else
-            {
-                var rm = ResourceRefValue().Match(val);
-                if (rm.Success) refs[key] = rm.Groups["c"].Value;
-            }
-        }
+        var (lit, refs) = ParseBrushDefs(file); // 讀不懂的值不收：這條路沒有「退回另一側」，鍵缺了就是 UnknownKey
+        var brushes = new Dictionary<string, string>(lit);
 
         // brush 引用 Color 定義 → 解成實際色值。同檔優先，其次全專案。
         foreach (var (k, c) in refs)
@@ -307,9 +299,15 @@ public static partial class PaletteDetector
         return dirs.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     }
 
-    internal static (Palette Pal, bool IsPair, HashSet<string> Files, SortedSet<string> Conflicts)? MergedXamlPalette(
+    internal static (Palette Pal, bool IsPair, HashSet<string> Files, SortedSet<string> Conflicts, SortedSet<string> Invalid)? MergedXamlPalette(
         string root, Func<string, bool>? include = null)
     {
+        // ⚠「缺的一側退回另一側」只適用於**沒有定義**的那一側。有定義、但值讀不懂（七位數打字錯誤、
+        //   Color="{Binding …}"、#GGGGGG）的一側舊版也一樣被丟掉，看起來像「沒定義」，於是拿另一個主題的值
+        //   補上 —— 比值是編出來的（demo 的 Fg 深色值打成 #EEEEEEE：深色欄拿到淺色的 #1B1B1B、報 1.09:1；
+        //   unresolved 0，跟文件承諾的「長度不對就走 UnknownKey 喊出來」相反）。
+        //   現在讀不懂的值以 InvalidValue 佔住那一側，整個鍵剔除並在偵測描述點名，使用處走 unknown-palette-key。
+        var invalid = new SortedSet<string>(StringComparer.Ordinal);
         var colorFiles = new List<(string File, Dictionary<string, string> Colors, bool D, bool L)>();
         var brushFiles = new List<(string File, Dictionary<string, string> Lit, Dictionary<string, string> Ref, bool D, bool L)>();
 
@@ -322,10 +320,10 @@ public static partial class PaletteDetector
             var isDark = n.Contains("dark");
             var isLight = n.Contains("light");
 
-            var colors = ParseColorDefs(f);
+            var colors = ParseColorDefs(f, keepInvalid: true);
             if (colors.Count > 0) colorFiles.Add((f, colors, isDark, isLight));
 
-            var (lit, refs) = ParseBrushDefs(f);
+            var (lit, refs) = ParseBrushDefs(f, keepInvalid: true);
             if (lit.Count + refs.Count > 0) brushFiles.Add((f, lit, refs, isDark, isLight));
         }
         if (colorFiles.Count == 0 && brushFiles.Count == 0) return null;
@@ -383,13 +381,21 @@ public static partial class PaletteDetector
                     ?? (darkR.TryGetValue(k, out var dc) ? darkColors.GetValueOrDefault(dc) : null);
             var l = lightB.GetValueOrDefault(k)
                     ?? (lightR.TryGetValue(k, out var lc) ? lightColors.GetValueOrDefault(lc) : null);
+            if (d is InvalidValue || l is InvalidValue) { invalid.Add(k); continue; } // 讀不懂 ≠ 沒定義：不補
             if (d is null && l is null) continue;
-            pal.Entries.TryAdd(k, (d ?? l!, l ?? d!)); // 缺的一側退回另一側
+            pal.Entries.TryAdd(k, (d ?? l!, l ?? d!)); // 缺的一側（沒有定義）退回另一側
         }
         // 沒有任何 brush 字典 → 直接把 Color 鍵當色票（有些專案就這樣用）
         if (pal.Count == 0)
+        {
+            invalid.Clear(); // 上面那輪沒有任何 brush 成立，Color 表才是色盤 —— 點名以這一輪為準
             foreach (var (k, v) in darkColors)
-                pal.Entries.TryAdd(k, (v, lightColors.GetValueOrDefault(k, v)));
+            {
+                var lv = lightColors.GetValueOrDefault(k, v);
+                if (v is InvalidValue || lv is InvalidValue) { invalid.Add(k); continue; }
+                pal.Entries.TryAdd(k, (v, lv));
+            }
+        }
 
         if (pal.Count < 3) return null;
         var anyDark = colorFiles.Any(c => c.D && !c.L) || brushFiles.Any(b => b.D && !b.L);
@@ -398,7 +404,7 @@ public static partial class PaletteDetector
             colorFiles.Select(c => c.File).Concat(brushFiles.Select(b => b.File)),
             StringComparer.OrdinalIgnoreCase);
         conflicts.UnionWith(colorConflicts);
-        return (pal, anyDark && anyLight || !pal.IsSingleTheme, files, conflicts);
+        return (pal, anyDark && anyLight || !pal.IsSingleTheme, files, conflicts, invalid);
     }
 
     /// <summary>同鍵不同值的衝突要明講（規劃書 4.2：「不可默默取其一」）——
@@ -409,8 +415,11 @@ public static partial class PaletteDetector
            $"; !! {conflicts.Count} key(s) defined with conflicting values (resource scoping not modelled" +
            $" — first themed definition wins): {string.Join(", ", conflicts.Take(5))}{(conflicts.Count > 5 ? ", …" : "")}";
 
-    /// <summary>單一檔案的 brush 定義，分成「字面色值」與「引用其他 Color 鍵」兩類。</summary>
-    internal static (Dictionary<string, string> Literal, Dictionary<string, string> Ref) ParseBrushDefs(string file)
+    /// <summary>單一檔案的 brush 定義，分成「字面色值」與「引用其他 Color 鍵」兩類。
+    /// <paramref name="keepInvalid"/>：有 x:Key 但色值讀不懂（七位數、Binding、Color 寫成屬性元素…）
+    /// 的 brush 記成 <see cref="InvalidValue"/> 而不是略過（合併式色盤用）。</summary>
+    internal static (Dictionary<string, string> Literal, Dictionary<string, string> Ref) ParseBrushDefs(
+        string file, bool keepInvalid = false)
     {
         var lit = new Dictionary<string, string>();
         var refs = new Dictionary<string, string>();
@@ -420,18 +429,20 @@ public static partial class PaletteDetector
         {
             var attrs = m.Groups["attrs"].Value;
             var key = Attr(KeyAttr(), attrs);
+            if (key is null) continue;
             var val = Attr(ColorAttr(), attrs);
-            if (key is null || val is null) continue;
-            if (val.StartsWith('#')) { if (IsValidHex(val)) lit[key] = val.ToUpperInvariant(); }
-            else if (ColorResolver.NamedHex(val) is { } hex) lit[key] = hex; // Color="White" 也是合法寫法
-            else
-            {
-                var rm = ResourceRefValue().Match(val);
-                if (rm.Success) refs[key] = rm.Groups["c"].Value;
-            }
+            if (val is not null && LiteralColor(val) is { } hex) lit[key] = hex; // Color="White" 也是合法寫法
+            else if (val is not null && ResourceRefValue().Match(val) is { Success: true } rm) refs[key] = rm.Groups["c"].Value;
+            else if (keepInvalid) lit[key] = InvalidValue;
         }
         return (lit, refs);
     }
+
+    /// <summary>值讀不懂而剔除的鍵要明講 —— 它們在使用處會變成 unknown-palette-key。</summary>
+    private static string InvalidNote(SortedSet<string> invalid)
+        => invalid.Count == 0 ? "" :
+           $"; !! {invalid.Count} key(s) dropped — defined with a colour value the tool cannot read" +
+           $" (uses are counted as unknown-palette-key): {string.Join(", ", invalid.Take(5))}{(invalid.Count > 5 ? ", …" : "")}";
 
     internal static List<CsCandidate> CsCandidates(string root)
     {
@@ -588,7 +599,7 @@ public static partial class PaletteDetector
                 ExcludedFiles = UiExclusions(mp.Files),
                 Scopes = scopes,
                 Description = $"merged colour dictionaries: {mp.Files.Count} file(s), {mp.Pal.Count} keys (dark + light)"
-                              + scopeNote + ConflictNote(mp.Conflicts),
+                              + scopeNote + ConflictNote(mp.Conflicts) + InvalidNote(mp.Invalid),
             };
 
         // 1) 深淺配對：dark 檔 × light 檔，brush 鍵集重疊 ≥ 50%
@@ -645,7 +656,7 @@ public static partial class PaletteDetector
                 ExcludedFiles = UiExclusions(ms.Files),
                 Scopes = scopes,
                 Description = $"merged colour dictionaries: {ms.Files.Count} file(s), {ms.Pal.Count} keys (single theme)"
-                              + scopeNote + ConflictNote(ms.Conflicts),
+                              + scopeNote + ConflictNote(ms.Conflicts) + InvalidNote(ms.Invalid),
             };
 
         // 3) 單一 XAML 色盤檔：深淺同值（單一主題專案）

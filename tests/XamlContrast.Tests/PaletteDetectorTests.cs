@@ -321,6 +321,54 @@ public class PaletteDetectorTests
         Assert.False(d.Palette.Entries.ContainsKey("Typo"));  // 7 位數 —— 不收
     }
 
+    [Theory] // 合併式色盤：某一側的值不合法時，舊版把缺的一側用另一主題的值補上（「缺的一側退回另一側」）——
+             // 比值是編出來的（demo 的 Fg 深色值打成 #EEEEEEE：unresolved 0、fail 3 → 5，深色欄拿到淺色的 #1B1B1B
+             // 報 1.09:1）。有定義但值不合法 ≠ 沒有定義：整個鍵剔除、使用處走 unknown-palette-key，偵測描述點名
+    [InlineData("Color=\"#EEEEEEE\"", "dark")]                 // 七位數打字錯誤
+    [InlineData("Color=\"{Binding Accent}\"", "dark")]         // 色值是 Binding：讀不懂
+    [InlineData("Color=\"#GGGGGG\"", "dark")]                 // 長度對、字元不對：舊版收下之後算對比時直接崩潰
+    [InlineData("Color=\"#EEEEEEE\"", "light")]
+    public void InvalidValueOnOneSideIsNotFilledFromTheOtherTheme(string fgAttr, string side)
+    {
+        string Dict(string fg, string bg) => $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="{bg}"/>
+              <SolidColorBrush x:Key="Fg" {fg}/>
+              <SolidColorBrush x:Key="Accent" Color="#3A78C3"/>
+              <SolidColorBrush x:Key="Line" Color="#808080"/>
+            </ResourceDictionary>
+            """;
+        using var fx = new Fixture();
+        fx.File("Themes/DarkTheme.xaml", Dict(side == "dark" ? fgAttr : "Color=\"#EEEEEE\"", "#121212"))
+          .File("Themes/LightTheme.xaml", Dict(side == "light" ? fgAttr : "Color=\"#1B1B1B\"", "#FAFAFA"))
+          .File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Fg}" Text="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(PaletteMode.Pair, r.Detection.Mode);
+        Assert.False(r.Detection.Palette.Entries.ContainsKey("Fg"));
+        Assert.Contains("1 key(s) dropped", r.Detection.Description);
+        Assert.Contains(": Fg", r.Detection.Description);
+        Assert.Empty(r.Findings);
+        var site = Assert.Single(r.UnresolvedSites);
+        Assert.Equal(UnresolvedReason.UnknownPaletteKey, site.Reason);
+        Assert.Equal("Fg", site.Value);
+    }
+
+    [Fact] // 同上，<Color> 字典那條路（純 Color 字典直接當色票時）
+    public void InvalidColorValueOnOneSideIsNotFilledFromTheOtherTheme()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/ColorsDark.xaml", ColorDict("Bg=#111111", "Fg=#EEEEEEE", "Accent=#42A5F5", "Line=#333333"))
+          .File("Themes/ColorsLight.xaml", ColorDict("Bg=#FAFAFA", "Fg=#212121", "Accent=#2196F3", "Line=#DDDDDD"));
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(("#111111", "#FAFAFA"), d.Palette.Entries["Bg"]);
+        Assert.False(d.Palette.Entries.ContainsKey("Fg"));
+        Assert.Contains("1 key(s) dropped", d.Description);
+    }
+
     [Fact] // 畸形色票的使用處要走 unresolved 喊出來，不是靜默算出一個錯的比值
     public void UsageOfMalformedPaletteKeyCountsAsUnresolved()
     {
