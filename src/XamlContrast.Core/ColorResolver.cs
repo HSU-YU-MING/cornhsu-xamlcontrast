@@ -59,6 +59,27 @@ public static partial class ColorResolver
         ["dimgray"] = "#696969",
     };
 
+    /// <summary>
+    /// 字面色（#RRGGBB／#AARRGGBB／具名色）乘上 brush 的 Opacity，折成 #AARRGGBB。
+    /// SolidColorBrush 的 Opacity 會讓整個 brush 變半透明 —— 忽略它就是把半透明 brush
+    /// 當成不透明色評分（白字 Opacity 0.2 疊黑底實際約 1.66:1，會被報成 21:1）。
+    /// 不是字面色（資源鍵、Binding）回傳 null，由呼叫端決定怎麼誠實地處理。
+    /// </summary>
+    internal static string? ApplyOpacity(string color, double opacity)
+    {
+        var v = color.Trim();
+        if (v == "Transparent") return v;
+        var hex = v.StartsWith('#') ? v : NamedHex(v);
+        if (hex is null) return null;
+        int a;
+        string rgb;
+        if (Rgb6().IsMatch(hex)) { a = 255; rgb = hex[1..]; }
+        else if (Rgb8().IsMatch(hex)) { a = Convert.ToInt32(hex[1..3], 16); rgb = hex[3..]; }
+        else return null;
+        var na = (int)Math.Round(a * Math.Clamp(opacity, 0, 1));
+        return "#" + na.ToString("X2", System.Globalization.CultureInfo.InvariantCulture) + rgb.ToUpperInvariant();
+    }
+
     [GeneratedRegex(@"^#[0-9A-Fa-f]{6}$")]
     private static partial Regex Rgb6();
 

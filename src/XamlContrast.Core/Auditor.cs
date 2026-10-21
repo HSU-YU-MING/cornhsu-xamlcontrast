@@ -24,7 +24,8 @@ namespace XamlContrast.Core;
 /// 明確不處理（標成「無法解析」而不是猜 —— 不猜比猜錯好）：
 ///   - 只有單邊 Setter 的 Style（套用位置由型別決定，不在樹上）
 ///   - TemplateBinding / Binding 來的顏色
-///   - 屬性元素語法 &lt;Border.Background&gt;&lt;LinearGradientBrush/&gt;…
+///   - 漸層等非純色 brush（屬性語法與 &lt;Border.Background&gt; 屬性元素語法都一樣；
+///     屬性元素由 <see cref="XamlBrush"/> 讀進來，純色照常解析，其餘計入 unresolved）
 /// </summary>
 public sealed partial class Auditor
 {
@@ -257,7 +258,7 @@ public sealed partial class Auditor
         // 半透明底先合成一次，逐狀態再合成就是疊兩層
         var ancestorBg = bg;
 
-        var localBgRaw = el.Attribute("Background")?.Value;
+        var localBgRaw = XamlBrush.Read(el, "Background");
         var bgVal = localBgRaw
                     ?? (chain is not null && chain.Props.TryGetValue("Background", out var chainBg) ? chainBg.V : null)
                     ?? chain?.TemplateRootBg // 模板根的背景管到內容
@@ -309,7 +310,7 @@ public sealed partial class Auditor
         if (chain is not null)
         {
             handledFg = true; // Foreground 一律由這裡接手，避免與下面的舊路徑重複輸出
-            var localFgRaw = el.Attribute("Foreground")?.Value;
+            var localFgRaw = XamlBrush.Read(el, "Foreground");
             var emitted = new HashSet<string>();
             var allStates = new List<StyleIndex.State> { new() };
             allStates.AddRange(chain.States);
@@ -423,7 +424,7 @@ public sealed partial class Auditor
         foreach (var attrName in (ReadOnlySpan<string>)["Foreground", "Fill"])
         {
             if (attrName == "Foreground" && handledFg) continue;
-            var fgRaw = el.Attribute(attrName)?.Value;
+            var fgRaw = XamlBrush.Read(el, attrName);
             if (fgRaw is null) continue;
             var fg = ColorResolver.Resolve(fgRaw, _pal);
             if (fg is null) continue;
@@ -502,6 +503,8 @@ public sealed partial class Auditor
         {
             // Style / Setter / Trigger 這些不是視覺樹，個別處理（WalkStyles），這裡跳過
             if (StyleishEls.Contains(child.Name.LocalName)) continue;
+            // <Border.Background> 之類是屬性值（上面已由 XamlBrush 讀進來），不是視覺子樹
+            if (XamlBrush.IsColorPropertyElement(el, child)) continue;
             var childBg = bg;
             (int, int) cell = default;
             if (overlap)
@@ -545,7 +548,7 @@ public sealed partial class Auditor
         if (child.Attribute("Width") is not null || child.Attribute("Height") is not null ||
             !Stretchy(child, "HorizontalAlignment") || !Stretchy(child, "VerticalAlignment"))
             return null;
-        var raw = name == "Rectangle" ? child.Attribute("Fill")?.Value : child.Attribute("Background")?.Value;
+        var raw = XamlBrush.Read(child, name == "Rectangle" ? "Fill" : "Background");
         if (raw is null) return null;
         var r = ColorResolver.Resolve(raw, _pal);
         // 只收確定的純色(Hard/Soft);半透明/漸層/Binding 維持原判定,不越權
@@ -562,7 +565,7 @@ public sealed partial class Auditor
             foreach (var s in style.Elements().Where(e => e.Name.LocalName == "Setter"))
             {
                 var prop = s.Attribute("Property")?.Value;
-                var val = s.Attribute("Value")?.Value;
+                var val = XamlBrush.SetterValue(s);
                 if (prop is not null && val is not null) setters[prop] = val;
             }
 
@@ -583,7 +586,7 @@ public sealed partial class Auditor
                 foreach (var s in t.Elements().Where(e => e.Name.LocalName == "Setter"))
                 {
                     var prop = s.Attribute("Property")?.Value;
-                    var val = s.Attribute("Value")?.Value;
+                    var val = XamlBrush.SetterValue(s);
                     if (prop is null || val is null) continue;
                     var tn = s.Attribute("TargetName")?.Value;
                     if (tn is null || (tmplRootName is not null && tn == tmplRootName)) ts[prop] = val;

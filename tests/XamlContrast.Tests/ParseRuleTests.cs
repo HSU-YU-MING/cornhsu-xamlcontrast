@@ -236,6 +236,106 @@ public class ParseRuleTests
         Assert.Equal(1, r.Unresolved);
     }
 
+    // ── 屬性元素語法（<Border.Background>…</Border.Background>）──
+    // 舊版只讀屬性：漸層底被忽略、文字配到祖先的底，給出篤定的 21:1 ok；
+    // <TextBlock.Foreground> 那組更是整組消失（pairs、unresolved、skipped 全是 0）
+
+    [Fact]
+    public void PropertyElementGradientBackgroundIsUnresolvedNotTheAncestor()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#000000">
+              <Border>
+                <Border.Background>
+                  <LinearGradientBrush><GradientStop Color="#FFFFFF" Offset="0"/><GradientStop Color="#EEEEEE" Offset="1"/></LinearGradientBrush>
+                </Border.Background>
+                <TextBlock Foreground="#FFFFFF" Text="x"/>
+              </Border>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings); // 不是祖先的黑 → 21:1
+        Assert.Equal(1, r.UnresolvedBy[UnresolvedReason.BoundOrGradient]);
+    }
+
+    [Fact]
+    public void PropertyElementSolidForegroundIsAudited()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <TextBlock Text="x">
+                <TextBlock.Foreground><SolidColorBrush Color="#EEEEEE"/></TextBlock.Foreground>
+              </TextBlock>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings);
+        Assert.Equal("#EEEEEE", f.Fg);
+        Assert.Equal(Category.Fail, f.Category);
+    }
+
+    [Fact] // 屬性元素裡的 SolidColorBrush 帶 Opacity：字面色折成 #AARRGGBB，走半透明合成
+    public void PropertyElementBrushOpacityIsComposited()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Border>
+                <Border.Background><SolidColorBrush Color="#000000" Opacity="0.8"/></Border.Background>
+                <TextBlock Foreground="#000000" Text="x"/>
+              </Border>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings);
+        Assert.Equal("{#CC000000 over #FFFFFF}", f.Bg); // 80% 黑疊白 = #333333
+        Assert.Equal(1.66, f.RatioDark);
+    }
+
+    [Fact] // 屬性元素是 Binding／資源引用以外的寫法（資源鍵 + Opacity）：靜態可知的部分才算，其餘誠實計入 unresolved
+    public void PropertyElementResourceBrushWithOpacityIsUnresolved()
+    {
+        using var fx = new Fixture().WithPalette();
+        fx.File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}">
+              <Border>
+                <Border.Background><SolidColorBrush Color="{DynamicResource Fg}" Opacity="0.5"/></Border.Background>
+                <TextBlock Foreground="{DynamicResource Fg}" Text="x"/>
+              </Border>
+              <Border>
+                <Border.Background><DynamicResource ResourceKey="Dim"/></Border.Background>
+                <TextBlock Foreground="{DynamicResource Fg}" Text="y"/>
+              </Border>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(1, r.UnresolvedBy[UnresolvedReason.BoundOrGradient]);
+        var f = Assert.Single(r.Findings); // 元素語法的 <DynamicResource ResourceKey=…/> 照常解析
+        Assert.Equal("{Dim}", f.Bg);
+    }
+
+    [Fact] // Style 的 <Setter.Value> 屬性元素（同一個根因：只讀 Value 屬性，整組 Setter 被靜默丟掉）
+    public void SetterValuePropertyElementIsRead()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid>
+              <Grid.Resources>
+                <Style x:Key="Pale" TargetType="Button" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                  <Setter Property="Background"><Setter.Value><SolidColorBrush Color="#FFFFFF"/></Setter.Value></Setter>
+                  <Setter Property="Foreground" Value="#EEEEEE"/>
+                </Style>
+              </Grid.Resources>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings);
+        Assert.Equal("Style[Pale]/base", f.Element);
+        Assert.Equal(Category.Fail, f.Category);
+    }
+
     [Fact] // 大字級門檻：WPF FontSize 是 DIP，要 ×0.75 換 point
     public void LargeTextThresholdUsesDipConversion()
     {

@@ -129,14 +129,14 @@ internal sealed partial class StyleIndex
         foreach (var s in style.Elements().Where(e => e.Name.LocalName == "Setter"))
         {
             var p = s.Attribute("Property")?.Value;
-            var v = s.Attribute("Value")?.Value;
+            var v = XamlBrush.SetterValue(s);
             if (p is not null && v is not null) rec.Setters[p] = v;
         }
         var tmplEl = style.Descendants().FirstOrDefault(e => e.Name.LocalName == "ControlTemplate");
         rec.HasTemplate = tmplEl is not null;
         // 模板根＝第一個視覺元素（跳過 <ControlTemplate.Resources> 之類的屬性元素）
         var tmplRoot = tmplEl?.Elements().FirstOrDefault(e => !e.Name.LocalName.Contains('.'));
-        rec.TemplateRootBg = tmplRoot?.Attribute("Background")?.Value;
+        rec.TemplateRootBg = tmplRoot is null ? null : XamlBrush.Read(tmplRoot, "Background");
         // 模板根的名字：規則 13 —— 觸發器裡「TargetName=模板根」的 Setter 等同
         // 直接設在宿主上（Kindling CellDeleteBtn hover 換底、QuillNest RadioButton
         // 選取態換底，共六筆假警報全是這形狀）。指向內部元素的 TargetName 仍不做。
@@ -149,7 +149,7 @@ internal sealed partial class StyleIndex
             foreach (var s in t.Elements().Where(e => e.Name.LocalName == "Setter"))
             {
                 var p = s.Attribute("Property")?.Value;
-                var v = s.Attribute("Value")?.Value;
+                var v = XamlBrush.SetterValue(s);
                 if (p is null || v is null) continue;
                 var tn = s.Attribute("TargetName")?.Value;
                 // 無 TargetName＝套宿主；TargetName=模板根＝實質也是宿主的視覺（規則 13）
