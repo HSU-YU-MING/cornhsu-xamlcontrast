@@ -22,16 +22,35 @@ New-Item -ItemType Directory -Force $snapDir | Out-Null
 $projects = @{
     kindling  = 'D:\應用程式\Kindling\Kindling.WPF'
     quillnest = 'D:\應用程式\QuillNest\QuillNest'
-    celflow   = 'D:\應用程式\CelFlow\frontend\CelFlow.WPF'
+    # CelFlow 2026-08-28 改名 ZeroCel（資料夾、專案都改了，舊路徑不再存在）。
+    # 快照名稱沿用 celflow.json：它記錄的是同一個 App，改名不是行為變更
+    celflow   = 'D:\應用程式\ZeroCel\frontend\ZeroCel.WPF'
     cornea    = 'D:\應用程式\Cornea'
 }
 
 $anyFail = $false
 foreach ($name in @('kindling', 'quillnest', 'celflow', 'cornea')) {
+    # 受測專案不在（改名、搬家、沒 clone）→ 紅字點名、繼續比對下一個。
+    # ⚠ 之前直接把不存在的路徑丟給 CLI：它照契約 exit 2、stderr 印 root not found，
+    #   而 Windows PowerShell 5.1 在 $ErrorActionPreference='Stop' 下把原生指令的 stderr 變成終止錯誤，
+    #   整支腳本在那裡中斷 —— 後面的專案從頭到尾沒比對，也沒有任何一行提示
+    if (-not (Test-Path $projects[$name])) {
+        Write-Host "[$name] 找不到受測專案：$($projects[$name]) —— 未比對（改名或搬家了就更新這支腳本的路徑）" -ForegroundColor Red
+        $anyFail = $true; continue
+    }
     $json = Join-Path $env:TEMP "xamlcontrast-verify-$name.json"
-    dotnet run --project $cli -c Release -- $projects[$name] --json $json *> $null
+    if (Test-Path $json) { Remove-Item $json -Force }
+    # 原生指令的輸出（含 stderr）丟掉、只看退出碼；這一段放寬 ErrorActionPreference，
+    # 否則 5.1 會把 stderr 的每一行當成終止錯誤
+    $prev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    & dotnet run --project $cli -c Release -- $projects[$name] --json $json 2>&1 | Out-Null
     $exit = $LASTEXITCODE
+    $ErrorActionPreference = $prev
     $snapPath = Join-Path $snapDir "$name.json"
+    if (-not (Test-Path $json)) {
+        Write-Host "[$name] 稽核沒有產出 JSON（exit=$exit）—— 先手動跑一次看錯誤訊息" -ForegroundColor Red
+        $anyFail = $true; continue
+    }
 
     if ($Update) {
         Copy-Item $json $snapPath -Force
