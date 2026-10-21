@@ -133,6 +133,25 @@ public sealed partial class Auditor
     private static bool ParseDouble(string s, out double value)
         => double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
 
+    /// <summary>
+    /// 字色疊到已解析的不透明底上之後、螢幕上實際的顏色（深淺各自）。元素 Opacity 與半透明字色
+    /// （#AARRGGBB、帶 Opacity 的色票、只有一個主題半透明的色票）都是「以 alpha 疊在底上」，兩者相乘 ——
+    /// 確定性的合成，不是猜。
+    /// ⚠ 舊設計把半透明字色一律歸 skipped（「合法跳過」），而 skipped 不進覆蓋率分母：Opacity 0.2 的白字
+    ///   疊黑底（1.66:1）、只有淺色主題半透明的次要字色（深色那側 1.65:1）整組不在報告裡，覆蓋率照樣 100%。
+    /// </summary>
+    private static (string Dark, string Light) EffectiveForeground(Resolved fg, double op, Resolved bg)
+    {
+        var (rd, ad) = fg.Kind == ColorKind.Alpha ? (fg.Rgb!, fg.Alpha * op) : (fg.Dark!, op);
+        var (rl, al) = fg.Kind == ColorKind.Alpha ? (fg.RgbLight!, fg.AlphaLight * op) : (fg.Light!, op);
+        return (ad < 0.999 ? Wcag.Composite(rd, ad, bg.Dark!) : rd,
+                al < 0.999 ? Wcag.Composite(rl, al, bg.Light!) : rl);
+    }
+
+    /// <summary>字色看得見的程度（兩側 alpha 取大的）—— 兩側都幾乎為 0 才算隱形、合法跳過。</summary>
+    private static double VisibleAlpha(Resolved fg)
+        => fg.Kind == ColorKind.Alpha ? Math.Max(fg.Alpha, fg.AlphaLight) : 1.0;
+
     /// <summary>findings 的 fg 附上累乘的 Opacity（"#FFFFFF ×0.5"）。⚠ 一樣要 InvariantCulture：
     /// fg 是 baseline 鍵的一部分，逗號小數點的機器寫出 "×0,5"，換一台機器比對就全部變成 NEW。</summary>
     private static string WithOpacityNote(string fg, double op)
@@ -379,7 +398,7 @@ public sealed partial class Auditor
                 // 之前全塞 skipped，把盲區藏進「合法豁免」桶）；透明字才是合法跳過
                 if (fgR.Kind is ColorKind.Other or ColorKind.UnknownKey)
                 { Unres(fgR, file, LineOf(el), fgV); continue; }
-                if (fgR.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
+                if (fgR.Kind is ColorKind.Transparent) { _skipped++; continue; } // 半透明字色往下疊到底上評分（見 EffectiveForeground）
 
                 Resolved? bgObj;
                 if (bgV is not null)
@@ -402,10 +421,10 @@ public sealed partial class Auditor
                 else bgObj = bg; // Style 鏈沒設底 → 退回祖先背景
                 if (bgObj is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgV); continue; }
                 if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bgObj, file, LineOf(el), bgV ?? bgObj.Key ?? bgObj.Raw ?? fgV); continue; }
-                if (op < 0.01) { _skipped++; continue; }
+                if (op * VisibleAlpha(fgR) < 0.01) { _skipped++; continue; }
 
                 // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複
-                if (!emitted.Add($"{fgR.Dark}|{bgObj.Dark}")) continue;
+                if (!emitted.Add($"{fgR.Dark ?? fgR.Rgb + "@" + fgR.Alpha}|{bgObj.Dark}")) continue;
 
                 var isTextC = !IsNonTextElement(el.Name.LocalName);
                 var fsC = 0.0;
@@ -420,13 +439,7 @@ public sealed partial class Auditor
                 var isLargeC = ptC >= 18 || (boldC && ptC >= 14);
                 var needC = NeedFor(isTextC, isLargeC);
 
-                var fgDC = fgR.Dark!;
-                var fgLC = fgR.Light!;
-                if (op < 0.999)
-                {
-                    fgDC = Wcag.Composite(fgR.Dark!, op, bgObj.Dark!);
-                    fgLC = Wcag.Composite(fgR.Light!, op, bgObj.Light!);
-                }
+                var (fgDC, fgLC) = EffectiveForeground(fgR, op, bgObj);
 
                 _pairs++;
                 if (suppressed) { _suppressed++; continue; }
@@ -458,13 +471,13 @@ public sealed partial class Auditor
             if (fg is null) continue;
             // 同上：看不懂 → unresolved；透明 → skipped（與背景側同一套分桶標準）
             if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey) { Unres(fg, file, LineOf(el), fgRaw); continue; }
-            if (fg.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
+            if (fg.Kind is ColorKind.Transparent) { _skipped++; continue; } // 半透明字色往下疊到底上評分（見 EffectiveForeground）
             if (bg is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgRaw); continue; }
             if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bg, file, LineOf(el), bg.Key ?? bg.Raw ?? fgRaw); continue; }
 
             // Opacity 0 = 元素當下完全隱形。XAML 裡寫 Opacity="0" 幾乎都是淡入動畫的
             // 初始狀態，穩態是 1。對「看不見的東西」算對比沒有意義，跳過而不是報 1:1。
-            if (op < 0.01) { _skipped++; continue; }
+            if (op * VisibleAlpha(fg) < 0.01) { _skipped++; continue; }
 
             _pairs++;
 
@@ -491,14 +504,8 @@ public sealed partial class Auditor
             var isLarge = pt >= 18 || (bold && pt >= 14);
             var need = NeedFor(isText, isLarge);
 
-            // Opacity < 1 時，螢幕上看到的是「文字色以 op 疊在背景上」的混色結果
-            var fgD = fg.Dark!;
-            var fgL = fg.Light!;
-            if (op < 0.999)
-            {
-                fgD = Wcag.Composite(fg.Dark!, op, bg.Dark!);
-                fgL = Wcag.Composite(fg.Light!, op, bg.Light!);
-            }
+            // Opacity < 1 或字色本身半透明時，螢幕上看到的是「文字色以 alpha 疊在背景上」的混色結果
+            var (fgD, fgL) = EffectiveForeground(fg, op, bg);
 
             _findings.Add(new Finding
             {
@@ -679,7 +686,9 @@ public sealed partial class Auditor
                     var (bad, raw) = fg.Kind is ColorKind.Other or ColorKind.UnknownKey ? (fg, fgv) : (bgr, bgv);
                     Unres(bad, file, line, raw); continue;
                 }
-                if (fg.Kind is ColorKind.Alpha or ColorKind.Transparent ||
+                // 透明字、透明／半透明底 → 合法跳過（定義處沒有底下那層可疊；有用到這個 Style 的元素會在使用處評，
+                // 見元素 × Style 鏈的同源判定）；半透明字色疊到 Style 自己的不透明底上評分
+                if (fg.Kind is ColorKind.Transparent || VisibleAlpha(fg) < 0.01 ||
                     bgr.Kind is ColorKind.Alpha or ColorKind.Transparent) { _skipped++; continue; }
                 // 同一個 brush 同時當字色與底色 —— Material 系的模板不透明度慣用手法：
                 // 模板把 Background 以 10~12% Opacity 畫成暈染（VisualState 動畫），字全濃度。
@@ -711,8 +720,8 @@ public sealed partial class Auditor
                     Fg = fgv,
                     Bg = bgr.Key is not null ? "{" + bgr.Key + "}" : bgr.Dark!,
                     Mixed = fg.Kind != bgr.Kind,
-                    RatioDark = Wcag.Contrast(fg.Dark!, bgr.Dark!),
-                    RatioLight = Wcag.Contrast(fg.Light!, bgr.Light!),
+                    RatioDark = Wcag.Contrast(EffectiveForeground(fg, 1.0, bgr).Dark, bgr.Dark!),
+                    RatioLight = Wcag.Contrast(EffectiveForeground(fg, 1.0, bgr).Light, bgr.Light!),
                     IsText = isText,
                     Need = need,
                     Size = fs > 0 ? $"{(int)Math.Round(fs, MidpointRounding.ToEven)}px" : "",

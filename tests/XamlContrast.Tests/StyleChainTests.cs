@@ -312,7 +312,6 @@ public class StyleChainTests
     [InlineData("""<Image Source="a.png"/><Button Style="{StaticResource Pad}" Foreground="#FFFFFF" Content="疊在兄弟圖片上"/>""", "#000000", "over-sibling-content")]
     [InlineData("""<Button Style="{StaticResource Pad}" Opacity="0" Foreground="#FFFFFF" Content="淡入動畫的初始態"/>""", "#000000", "skipped")]
     [InlineData("""<Button Style="{StaticResource Pad}" Foreground="Transparent" Content="透明字"/>""", "#000000", "skipped")]
-    [InlineData("""<Button Style="{StaticResource Pad}" Foreground="#80FFFFFF" Content="半透明字"/>""", "#000000", "skipped")]
     public void ChainPairsThatCannotBeGradedAreCountedInTheirBucket(string body, string background, string bucket)
     {
         var r = RunMain(body, background);

@@ -478,8 +478,9 @@ public class PaletteDetectorTests
             </ResourceDictionary>
             """);
 
-    [Fact] // 字色：半透明字是既有的「合法跳過、計數」那一桶 —— 不能被當成不透明色報 21:1 ok
-    public void PaletteBrushOpacityMakesTheForegroundTranslucent()
+    [Fact] // 字色：Opacity 0.2 的白字疊黑底實際約 1.66:1 —— 不能被當成不透明色報 21:1 ok，
+           // 也不能歸「跳過」讓它從報告消失（第一版修正就是這樣：21:1 ok 變成 skipped，fail 照樣不在報告裡）
+    public void PaletteBrushOpacityForegroundIsGradedComposited()
     {
         using var fx = OpacityPalette("""<SolidColorBrush x:Key="Hint" Color="#FFFFFF" Opacity="0.2"/>""",
                                       """<SolidColorBrush x:Key="Hint" Color="#000000" Opacity="0.2"/>""");
@@ -488,8 +489,11 @@ public class PaletteDetectorTests
             """);
         var r = fx.Run();
         Assert.Equal(("#33FFFFFF", "#33000000"), r.Detection.Palette.Entries["Hint"]);
-        Assert.Empty(r.Findings);
-        Assert.Equal(1, r.Skipped);
+        Assert.Equal(0, r.Skipped);
+        var f = Assert.Single(r.Findings);
+        Assert.Equal(1.66, f.RatioDark);  // 20% 白疊 #000000
+        Assert.Equal(1.61, f.RatioLight); // 20% 黑疊 #FFFFFF
+        Assert.Equal(Category.Fail, f.Category);
     }
 
     [Theory] // 底色：半透明色票走既有的合成路徑（80% 黑疊白 = #333333，黑字 1.66:1）—— 字面值與引用 Color 鍵兩種寫法

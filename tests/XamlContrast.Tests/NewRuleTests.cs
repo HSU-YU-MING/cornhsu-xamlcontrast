@@ -156,6 +156,61 @@ public class NewRuleTests
         Assert.NotEqual(Wcag.Contrast("#EEEEEE", "#378ADD"), f.RatioDark); // 不是純藍
     }
 
+    [Fact] // 只有一個主題半透明的色票當「字色」：舊版整組歸 skipped —— 另一側（不透明那側）真實的 fail 也跟著消失，
+           // 而 skipped 不進覆蓋率分母（覆蓋率照樣 100%、exit 0）。兩側各自疊到自己的底上評分
+    public void TranslucentOnOneSideForegroundIsGradedOnBothSides()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#121212"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Secondary" Color="#3A3A3A"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Secondary" Color="#99000000"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """
+            <Grid Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Secondary}" Text="secondary"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Skipped);
+        var f = Assert.Single(r.Findings);
+        Assert.Equal(Wcag.Contrast("#3A3A3A", "#121212"), f.RatioDark);                                       // 深色 1.65:1
+        Assert.Equal(Wcag.Contrast(Wcag.Composite("#000000", 0x99 / 255.0, "#FFFFFF"), "#FFFFFF"), f.RatioLight);
+        Assert.Equal(Category.Fail, f.Category);
+    }
+
+    [Fact] // 元素 × Style 鏈與 Style 定義處：半透明字色一樣疊到底上評分（三條路徑同一套）
+    public void TranslucentForegroundIsCompositedOnTheStylePathsToo()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <StackPanel xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#000000">
+              <StackPanel.Resources>
+                <Style x:Key="Pad" TargetType="Button"><Setter Property="Padding" Value="4"/></Style>
+                <Style x:Key="Faded" TargetType="Button">
+                  <Setter Property="Background" Value="#000000"/>
+                  <Setter Property="Foreground" Value="#33FFFFFF"/>
+                </Style>
+              </StackPanel.Resources>
+              <Button Style="{StaticResource Pad}" Foreground="#33FFFFFF" Content="chain"/>
+            </StackPanel>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Skipped);
+        var expected = Wcag.Contrast(Wcag.Composite("#FFFFFF", 0x33 / 255.0, "#000000"), "#000000");
+        Assert.Equal(expected, Assert.Single(r.Findings, f => f.Element == "Button⊕Style[Pad]/base").RatioDark);
+        Assert.Equal(expected, Assert.Single(r.Findings, f => f.Element == "Style[Faded]/base").RatioDark);
+    }
+
     [Theory] // 只有一個主題是半透明的色票（合併式色盤裡只有一個主題用半透明遮罩，是實際會出現的形狀）。
              // 舊版只看深色那側的長度決定走不走 alpha：深色半透明時把 7 碼的淺色值切成 "#E0E0" → 算對比時
              // ArgumentOutOfRangeException、整支崩潰（退出碼跳出契約）；淺色半透明時 alpha 被剝掉、
@@ -395,8 +450,8 @@ public class NewRuleTests
         Assert.Equal(1, r.Skipped);    // Transparent 底 = 合法跳過
     }
 
-    [Fact] // 上一條的另一半：看不懂的是「底」時要點名底的值（unknownKeys 靠它當死引用偵測器），
-           // 半透明的是「字」時一樣是合法跳過
+    [Fact] // 上一條的另一半：看不懂的是「底」時要點名底的值（unknownKeys 靠它當死引用偵測器）；
+           // 半透明的是「字」時疊到 Style 自己的不透明底上照常評分（不是合法跳過）
     public void StyleDefinitionNamesTheSideItCouldNotResolve()
     {
         using var fx = new Fixture();
@@ -415,11 +470,13 @@ public class NewRuleTests
             </Grid>
             """);
         var r = fx.Run();
-        Assert.Empty(r.Findings);
         var site = Assert.Single(r.UnresolvedSites);
         Assert.Equal(UnresolvedReason.UnknownPaletteKey, site.Reason);
         Assert.Equal("Typo", site.Value);
-        Assert.Equal(1, r.Skipped);
+        Assert.Equal(0, r.Skipped);
+        var faded = Assert.Single(r.Findings);
+        Assert.Equal("Style[FadedFg]/base", faded.Element);
+        Assert.Equal(Wcag.Contrast(Wcag.Composite("#FFFFFF", 0x80 / 255.0, "#000000"), "#000000"), faded.RatioDark);
     }
 
     [Fact] // MultiTrigger 曾是黑洞：跳過清單認得它、收集處不認得，組合條件狀態整批沒被檢查

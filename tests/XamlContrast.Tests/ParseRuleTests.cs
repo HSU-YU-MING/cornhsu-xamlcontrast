@@ -88,12 +88,12 @@ public class ParseRuleTests
         Assert.Equal(1, r.Skipped);
     }
 
-    [Theory] // 透明／半透明的字色（裝飾元素的 Fill 同理）是合法跳過 —— 但要計數，不是從報告消失；
+    [Theory] // 完全透明的字色（裝飾元素的 Fill 同理）是合法跳過 —— 但要計數，不是從報告消失；
              // 也不能塞進 unresolved（那是「工具看不懂」的桶，這裡工具看得懂）
     [InlineData("""<TextBlock Foreground="Transparent" Text="x"/>""")]
-    [InlineData("""<TextBlock Foreground="#80FFFFFF" Text="x"/>""")]
+    [InlineData("""<TextBlock Foreground="#00FFFFFF" Text="alpha 0 — invisible"/>""")]
     [InlineData("""<Rectangle Fill="Transparent"/>""")]
-    public void TransparentOrTranslucentForegroundIsSkippedAndCounted(string element)
+    public void TransparentForegroundIsSkippedAndCounted(string element)
     {
         using var fx = new Fixture();
         fx.File("Main.xaml", $"""
@@ -106,6 +106,47 @@ public class ParseRuleTests
         Assert.Equal(0, r.Pairs);
         Assert.Equal(1, r.Skipped);
         Assert.Equal(0, r.Unresolved);
+    }
+
+    [Fact] // 半透明的字色（#AARRGGBB）疊在已解析的不透明底上 —— 跟 Opacity 一樣是確定性的合成，不是猜。
+           // 舊設計一律「合法跳過」，而 skipped 不進覆蓋率分母：80% 透明的白字疊黑底照樣不在報告裡、覆蓋率仍 100%
+    public void TranslucentForegroundIsCompositedOverItsBackground()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#000000">
+              <TextBlock Foreground="#33FFFFFF" Text="20% white"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Skipped);
+        var f = Assert.Single(r.Findings);
+        Assert.Equal(Wcag.Contrast(Wcag.Composite("#FFFFFF", 0x33 / 255.0, "#000000"), "#000000"), f.RatioDark); // 1.66:1
+        Assert.Equal(Category.Fail, f.Category);
+        Assert.Equal("#33FFFFFF", f.Fg);
+    }
+
+    [Fact] // 元素 Opacity 與字色本身的 alpha 相乘（兩者都是「以 alpha 疊上去」）
+    public void TranslucentForegroundAndElementOpacityMultiply()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#000000">
+              <TextBlock Opacity="0.5" Foreground="#80FFFFFF" Text="x"/>
+            </Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+        Assert.Equal(Wcag.Contrast(Wcag.Composite("#FFFFFF", 0x80 / 255.0 * 0.5, "#000000"), "#000000"), f.RatioDark);
+    }
+
+    [Fact] // 底沒解析出來時，半透明字色照舊落進 unresolved（進覆蓋率分母），不是「跳過」讓覆蓋率虛高
+    public void TranslucentForegroundWithoutABackgroundIsUnresolved()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """<Grid><TextBlock Foreground="#80FFFFFF" Text="x"/></Grid>""");
+        var r = fx.Run();
+        Assert.Equal(0, r.Skipped);
+        Assert.Equal(UnresolvedReason.NoAncestorBackground, Assert.Single(r.UnresolvedSites).Reason);
     }
 
     [Fact] // 規則 5：ControlTemplate 自成子樹（模板根的背景管到模板內的文字）
@@ -272,9 +313,11 @@ public class ParseRuleTests
             """);
         var r = fx.Run();
         Assert.Equal(0, r.Unresolved);
-        Assert.Equal(1, r.Skipped);
+        Assert.Equal(0, r.Skipped);
         Assert.Contains(r.Findings, f => f.Bg == "{#8000 over #FFFFFF}");
-        Assert.Contains(r.Findings, f => f.Bg == "#FFFFFF");
+        Assert.Equal(Wcag.Contrast(Wcag.Composite("#000000", 0x88 / 255.0, "#FFFFFF"), "#FFFFFF"),
+                     Assert.Single(r.Findings, f => f.Fg == "#8000").RatioDark); // 半透明字疊到白底上
+        Assert.Contains(r.Findings, f => f.Bg == "#FFFFFF" && f.Fg == "#000");
     }
 
     [Fact] // 表外的字（不是任何 WPF 色名）照樣是 bound-or-gradient，不能被當成顏色
