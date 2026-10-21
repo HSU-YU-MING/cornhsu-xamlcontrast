@@ -303,6 +303,61 @@ public class StyleChainTests
         Assert.Equal(Category.Fail, hover.Category);
     }
 
+    [Fact] // 主題字典（色盤檔，不進 UI 掃描）裡字與底兩個 Setter 都有的 Style：鏈路徑看到「字與底出自同一個
+           // Style 節點」就略過，假設 WalkStyles 會在定義處檢查 —— 但色盤檔從來沒被 WalkStyles 走到，
+           // 這組 1.2:1 的按鈕不在 findings、也不在任何計數器裡（CelFlow 主題檔裡放按鈕 Style 是實際寫法）
+    public void StyleDefinedInAThemeDictionaryIsAuditedAtItsDefinition()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Dim" Color="#222222"/>
+              <Style x:Key="DimBtn" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource Bg}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Dim}"/>
+              </Style>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FAFAFA"/>
+              <SolidColorBrush x:Key="Fg" Color="#212121"/>
+              <SolidColorBrush x:Key="Dim" Color="#E8E8E8"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Fg}" Text="ok"/>
+              <Button Style="{StaticResource DimBtn}" Content="1.2:1"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Contains(r.Detection.ExcludedFiles, f => f.EndsWith("Dark.xaml")); // 前提：主題檔不進 UI 掃描
+        var btn = Assert.Single(r.Findings, f => f.Element == "Style[DimBtn]/base");
+        Assert.Equal("Themes/Dark.xaml", btn.File);
+        Assert.Equal(Category.Fail, btn.Category);
+        Assert.Equal(2, r.Pairs);
+        Assert.Equal(1, r.FileCount); // 主題檔仍不算畫面檔
+    }
+
+    [Fact] // 同上，色盤檔解析失敗時不能靜默消失：WalkStyles 要讀它，讀不了就喊 parse failed
+    public void UnparseablePaletteDictionaryIsReported()
+    {
+        using var fx = new Fixture().WithPalette();
+        fx.File("Themes/Extra.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="A1" Color="#111111"/>
+              <SolidColorBrush x:Key="A2" Color="#222222"/>
+              <Style x:Key="Broken" TargetType="Button">
+            </ResourceDictionary>
+            """);
+        fx.File("Main.xaml", """<Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>""");
+        var r = fx.Run();
+        Assert.StartsWith("Themes/Extra.xaml: ", Assert.Single(r.ParseErrors));
+    }
+
     [Fact] // BasedOn 成環（A↔B、自己指自己）與指到不存在的鍵：照樣解析，不能無窮遞迴 ——
            // 那會是 StackOverflow，整支程式崩潰、連退出碼契約都守不住
     public void BasedOnCyclesAndMissingBasesDoNotRecurseForever()

@@ -161,12 +161,15 @@ public sealed partial class Auditor
         var auditor = new Auditor(detection.Palette, config ?? new ToolConfig());
         // 具名 Style 索引含色盤／主題字典 ——「排除出 UI 掃描」不等於「排除出索引」
         auditor._styles = StyleIndex.Build(root);
-        var files = PaletteDetector.EnumerateFiles(root, "*.xaml")
-            .Where(f => !detection.ExcludedFiles.Contains(f))
-            .ToList();
+        var all = PaletteDetector.EnumerateFiles(root, "*.xaml").ToList();
+        var files = all.Where(f => !detection.ExcludedFiles.Contains(f)).ToList();
 
-        foreach (var f in files)
+        // 色盤檔不是畫面（不走樹、不算進 files），但裡面的 Style 一樣要在定義處檢查：
+        // 鏈路徑看到「字與底出自同一個 Style 節點」就略過、交給 WalkStyles —— 主題字典裡的
+        // 按鈕 Style 若沒有人走 WalkStyles，那組配對就不在 findings、也不在任何計數器裡。
+        foreach (var f in all)
         {
+            var paletteFile = detection.ExcludedFiles.Contains(f);
             XDocument doc;
             // 報告用 repo 相對路徑（正斜線）：只給檔名的話，MVVM 專案的同名檔
             // （ItemView.xaml）無法定位，baseline 的鍵還會跨資料夾互相污染。
@@ -185,7 +188,7 @@ public sealed partial class Auditor
                 // 多 App repo:這個檔案屬於哪個 App,就用哪個 App 的色盤
                 // (單 App 或無作用域資訊時 PaletteFor 回傳全域色盤,行為不變)
                 auditor._pal = detection.PaletteFor(f);
-                auditor.Walk(doc.Root, null, name, 1.0, suppressed: false);
+                if (!paletteFile) auditor.Walk(doc.Root, null, name, 1.0, suppressed: false);
                 auditor.WalkStyles(doc, name);
             }
         }
