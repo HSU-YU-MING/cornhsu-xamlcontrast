@@ -527,6 +527,64 @@ public class PaletteDetectorTests
         Assert.Equal(UnresolvedReason.UnknownPaletteKey, Assert.Single(r.UnresolvedSites).Reason);
     }
 
+    [Fact] // 剔除讀不懂的鍵之後色盤掉到 3 鍵門檻以下：舊版因此放棄合併式色盤、落到「單一主題檔」那條路，
+           // 整欄深色值改用淺色檔的值（Bg 深色欄拿到 #FFFFFF）—— 編造的程度比原本的 bug 還大，而且沒標退化、
+           // --strict-palette 照樣 exit 0。門檻要算「定義了的鍵」，讀不懂的那個也算一個
+    public void DroppingAnUnreadableKeyDoesNotKnockTheMergedPaletteBelowTheThreshold()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEEE"/>
+              <SolidColorBrush x:Key="Line" Color="#333333"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Line" Color="#CCCCCC"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(PaletteMode.Pair, d.Mode);
+        Assert.False(d.IsDegraded);
+        Assert.Equal(("#111111", "#FFFFFF"), d.Palette.Entries["Bg"]); // 不是淺色值佔據兩欄
+        Assert.False(d.Palette.Entries.ContainsKey("Fg"));
+        Assert.Contains("1 key(s) dropped", d.Description);
+    }
+
+    [Fact] // 極端情況：某個主題的值全部讀不懂、一個鍵都沒剩 —— 不能退到「挑一個檔」讓另一個主題的值佔據兩欄；
+           // 這是色盤偵測失敗，要標成退化（--strict-palette 才擋得住）並點名
+    public void AllKeysUnreadableIsADegradedDetectionNotASingleThemeGuess()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#11111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEEE"/>
+              <SolidColorBrush x:Key="Line" Color="{Binding Line}"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Line" Color="#CCCCCC"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Main.xaml", """<Grid Background="#000000"><TextBlock Foreground="#FFFFFF"/></Grid>""");
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.True(d.IsDegraded);
+        Assert.Equal(0, d.Palette.Count);
+        Assert.Contains("3 key(s) dropped", d.Description);
+
+        var cli = Cli.Run(fx.Root, "--strict-palette");
+        Assert.True(cli.Exit == 1, cli.ToString());
+        Assert.Contains("exit 1: palette detection failed and --strict-palette is set", cli.Out);
+    }
+
     [Fact] // 同上，<Color> 字典那條路（純 Color 字典直接當色票時）
     public void InvalidColorValueOnOneSideIsNotFilledFromTheOtherTheme()
     {

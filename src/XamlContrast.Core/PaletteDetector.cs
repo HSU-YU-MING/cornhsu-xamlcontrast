@@ -441,9 +441,9 @@ public static partial class PaletteDetector
             pal.Entries.TryAdd(k, (d ?? l!, l ?? d!)); // 缺的一側（沒有定義）退回另一側
         }
         // 沒有任何 brush 字典 → 直接把 Color 鍵當色票（有些專案就這樣用）
-        if (pal.Count == 0)
+        // （brush 有定義、只是全部讀不懂時不退回 Color 表：那些 brush 才是色盤，讀不懂要照實喊出來）
+        if (pal.Count == 0 && invalid.Count == 0)
         {
-            invalid.Clear(); // 上面那輪沒有任何 brush 成立，Color 表才是色盤 —— 點名以這一輪為準
             foreach (var (k, v) in darkColors)
             {
                 var lv = lightColors.GetValueOrDefault(k, v);
@@ -452,7 +452,15 @@ public static partial class PaletteDetector
             }
         }
 
-        if (pal.Count < minKeys) return null; // ≥ 3 是「偵測到色盤」的門檻；作用域用 1（小字典也是它自己的）
+        // ≥ 3 是「偵測到色盤」的門檻；作用域用 1（小字典也是它自己的）。
+        // ⚠ 門檻算「定義了的鍵」：讀不懂而剔除的鍵也算一個。只算剩下的鍵的話，剔除一個就可能掉到門檻以下、
+        //   放棄合併式色盤，落到「單一主題檔」那條路 —— 整欄深色值改用淺色檔的值，比原本的編造更大，而且不算退化。
+        //   一個鍵都沒剩（全部讀不懂）才放棄：剩下的路只會喊「找不到色盤」，不會編
+        if (pal.Count == 0 && invalid.Count >= minKeys)
+            // 定義了夠多的鍵、卻一個都讀不懂：回傳空色盤＋點名，讓 Detect 判成退化，而不是交給「挑一個檔」去編
+            return (pal, false, new HashSet<string>(colorFiles.Select(c => c.File).Concat(brushFiles.Select(b => b.File)), StringComparer.OrdinalIgnoreCase),
+                    new SortedSet<string>(StringComparer.Ordinal), invalid);
+        if (pal.Count == 0 || pal.Count + invalid.Count < minKeys) return null;
         var anyDark = colorFiles.Any(c => c.D && !c.L) || brushFiles.Any(b => b.D && !b.L);
         var anyLight = colorFiles.Any(c => c.L && !c.D) || brushFiles.Any(b => b.L && !b.D);
         var files = new HashSet<string>(
@@ -765,6 +773,19 @@ public static partial class PaletteDetector
                 Description = $"auto-detected C# source of truth: {best.Rel} ({pal.Count} keys; assuming tuple = key, dark, light)",
             };
         }
+
+        // 2.4) 字典裡定義了鍵、卻一個都讀不懂：這是偵測失敗，不能往下交給「挑一個檔」——
+        //      那會讓另一個主題的值佔據兩欄。標成退化（--strict-palette 擋得住）並點名
+        if (merged is { Pal.Count: 0, Invalid.Count: > 0 } mi)
+            return new PaletteDetection
+            {
+                Palette = new Palette(),
+                Mode = PaletteMode.None,
+                IsDegraded = true,
+                ExcludedFiles = UiExclusions(mi.Files),
+                Description = "no usable palette — every colour key the dictionaries define has a value the tool cannot read; auditing hardcoded colors only"
+                              + InvalidNote(mi.Invalid),
+            };
 
         // 2.5) 合併式色盤（單一主題）—— 仍優於「挑一個檔」，鍵集是所有字典的聯集
         if (merged is { } ms && ms.Pal.Count > 0)
