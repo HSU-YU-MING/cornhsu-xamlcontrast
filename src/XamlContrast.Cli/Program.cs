@@ -41,16 +41,16 @@ for (var i = 0; i < args.Length; i++)
             failOnWarn = args[++i] == "warn";
             break;
         case "--json":
-            if (i + 1 >= args.Length) { Console.Error.WriteLine("--json takes a file path"); return 2; }
-            jsonPath = args[++i];
+            if (OutputPath(args, i, "--json") is not { } jp) return 2;
+            jsonPath = jp; i++;
             break;
         case "--sarif":
-            if (i + 1 >= args.Length) { Console.Error.WriteLine("--sarif takes a file path"); return 2; }
-            sarifPath = args[++i];
+            if (OutputPath(args, i, "--sarif") is not { } sp) return 2;
+            sarifPath = sp; i++;
             break;
         case "--md":
-            if (i + 1 >= args.Length) { Console.Error.WriteLine("--md takes a file path"); return 2; }
-            mdPath = args[++i];
+            if (OutputPath(args, i, "--md") is not { } mp) return 2;
+            mdPath = mp; i++;
             break;
         case "--baseline":
             // 路徑可省略 —— 預設檔名慣例 xamlcontrast-baseline.json
@@ -142,6 +142,18 @@ var exitCode = DecideExit();
 if (mdPath is not null && !TryWrite(mdPath, Report.ToMarkdown(result, exitCode), "markdown")) return 2;
 
 return exitCode;
+
+// --json／--sarif／--md 的值：必填，而且不能長得像旗標。舊版只檢查「後面還有沒有字」，
+// `--json --strict-palette` 會寫出一個叫 --strict-palette 的檔、把保險旗標靜默吃掉。
+// 以 - 開頭的檔名沒有正當用途（真的要就寫 ./-name）；「-」也不代表 stdout。
+static string? OutputPath(string[] args, int i, string flag)
+{
+    if (i + 1 < args.Length && !args[i + 1].StartsWith('-')) return args[i + 1];
+    Console.Error.WriteLine(i + 1 >= args.Length
+        ? $"{flag} takes a file path"
+        : $"{flag} takes a file path, got '{args[i + 1]}' (an option?) — for a file name starting with '-', write ./{args[i + 1]}");
+    return null;
+}
 
 // 輸出寫檔失敗要落在 0/1/2 的退出碼契約內，並給人話 —— 之前是裸 File.WriteAllText，
 // `--json out/report.json` 而 out/ 不存在就噴 .NET 堆疊、exit 127（未處理例外的退出碼，

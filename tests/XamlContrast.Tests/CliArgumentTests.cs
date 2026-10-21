@@ -34,6 +34,25 @@ public class CliArgumentTests
         Assert.DoesNotContain("   at ", r.Err); // 好訊息，不是堆疊
     }
 
+    [Theory] // --json／--sarif／--md 的值必填，而且不能是下一個旗標：舊版只檢查「後面還有沒有字」，
+             // `--json --strict-palette` 會寫出一個叫 --strict-palette 的檔、色盤退化保險靜默失效。
+             // 以 - 開頭的檔名沒有正當用途（真的要就寫 ./-name）；「-」也不是 stdout，舊版會寫出一個叫 - 的檔
+    [InlineData("--json", "--strict-palette")]
+    [InlineData("--json", "--show-ok")]
+    [InlineData("--sarif", "--md")]
+    [InlineData("--md", "-")]
+    public void OutputFlagsDoNotSwallowTheNextFlag(string flag, string next)
+    {
+        using var fx = CliProjects.Failing();
+        var cwd = Path.Combine(fx.Root, "cwd");
+        Directory.CreateDirectory(cwd);
+        var r = Cli.RunIn(cwd, fx.Root, flag, next);
+        Assert.True(r.Exit == 2, r.ToString());
+        Assert.Contains($"{flag} takes a file path", r.Err);
+        Assert.Contains("./", r.Err); // 指出真的要以 - 開頭的檔名該怎麼寫
+        Assert.Empty(Directory.EnumerateFileSystemEntries(cwd)); // 沒有寫出名叫旗標的檔
+    }
+
     [Fact] // 沒給 root → usage + exit 2（不是 0：什麼都沒稽核）
     public void MissingRootPrintsUsageAndExitsTwo()
     {
