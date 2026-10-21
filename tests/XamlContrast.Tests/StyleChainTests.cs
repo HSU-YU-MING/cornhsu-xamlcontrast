@@ -214,6 +214,52 @@ public class StyleChainTests
         Assert.Equal("#000000", hover.Bg);   // 底由 template trigger 補上
     }
 
+    [Theory] // 字與底出自同一個 Style、但底是透明／半透明：定義處沒有底下那層可疊（只能記 skipped），
+             // 鏈路徑又看到「同源」就略過、交給定義處 —— 這組在哪裡都沒被評分，也不在覆蓋率裡。
+             // 透明／半透明的底要在使用處對著祖先的底評
+    [InlineData("Transparent", "#FFFFFF")]
+    [InlineData("#80000000", "{#80000000 over #FFFFFF}")]
+    public void SameSourceStylePairWithASeeThroughBackgroundIsGradedWhereUsed(string background, string expectedBg)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $$"""
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="SeeThrough" TargetType="Button">
+                  <Setter Property="Background" Value="{{background}}"/>
+                  <Setter Property="Foreground" Value="#EEEEEE"/>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource SeeThrough}" Content="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings);
+        Assert.Equal("Button⊕Style[SeeThrough]/base", f.Element);
+        Assert.Equal(expectedBg, f.Bg);
+        Assert.Equal(1, r.Skipped); // 定義處那一筆照舊記 skipped（那裡沒有底可疊）
+    }
+
+    [Fact] // 同上，祖先的底是 Binding：unresolved 點名的是卡住的祖先底，不是只負責穿透的 "Transparent"
+    public void SeeThroughStyleOverABoundBackgroundNamesTheBoundValue()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Grid.Resources>
+                <Style x:Key="SeeThrough" TargetType="Button">
+                  <Setter Property="Background" Value="Transparent"/>
+                  <Setter Property="Foreground" Value="#EEEEEE"/>
+                </Style>
+              </Grid.Resources>
+              <Border Background="{Binding NoteColour}"><Button Style="{StaticResource SeeThrough}" Content="x"/></Border>
+            </Grid>
+            """);
+        var site = Assert.Single(fx.Run().UnresolvedSites);
+        Assert.Equal(UnresolvedReason.BoundOrGradient, site.Reason);
+        Assert.Equal("{Binding NoteColour}", site.Value);
+    }
+
     // ── Style 定義處（WalkStyles）也要合併同條件的觸發器、看 BasedOn ──
     //    舊版每個觸發器各自跟基礎值合併：style trigger 設字色、同條件的 template trigger 設模板根的底，
     //    被拆成兩個各缺一半的幻影組合各報一筆假 fail（實際 hover 是 21:1）；衍生 Style 重新套模板時，

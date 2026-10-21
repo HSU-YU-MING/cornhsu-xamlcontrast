@@ -387,8 +387,11 @@ public sealed partial class Auditor
                     bgV = chain.TemplateRootBg; bgSrc = "tmpl";
                 }
 
-                // 字與底都出自同一個 Style 節點 → WalkStyles 在定義處已檢過，不重複
-                if (fgSrc is int fi && bgSrc is int bi && fi == bi) continue;
+                // 字與底都出自同一個 Style 節點 → WalkStyles 在定義處已檢過，不重複。
+                // ⚠ 例外：底是透明／半透明時定義處沒有底下那層可疊（只能記 skipped），這組要在使用處
+                //   對著祖先的底評 —— 否則它在哪裡都沒被評分，也不在覆蓋率裡
+                if (fgSrc is int fi && bgSrc is int bi && fi == bi &&
+                    ColorResolver.Resolve(bgV, _pal) is not { Kind: ColorKind.Transparent or ColorKind.Alpha }) continue;
                 // 停用態：WCAG 1.4.3 豁免，計數回報、不評分
                 if (st.Disabled) { _disabled++; continue; }
 
@@ -401,11 +404,12 @@ public sealed partial class Auditor
                 if (fgR.Kind is ColorKind.Transparent) { _skipped++; continue; } // 半透明字色往下疊到底上評分（見 EffectiveForeground）
 
                 Resolved? bgObj;
+                var bgOwnRaw = bgV; // 卡住時要點名的底：透明的 Setter 只是穿透，卡住的是祖先那一層
                 if (bgV is not null)
                 {
                     var rb = ColorResolver.Resolve(bgV, _pal);
                     if (rb is null) continue;
-                    if (rb.Kind == ColorKind.Transparent) bgObj = bg;
+                    if (rb.Kind == ColorKind.Transparent) { bgObj = bg; bgOwnRaw = null; }
                     else if (rb.Kind == ColorKind.Alpha)
                     {
                         bgObj = ancestorBg is { Dark: not null, Light: not null }
@@ -420,7 +424,7 @@ public sealed partial class Auditor
                 }
                 else bgObj = bg; // Style 鏈沒設底 → 退回祖先背景
                 if (bgObj is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgV); continue; }
-                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bgObj, file, LineOf(el), bgV ?? bgObj.Key ?? bgObj.Raw ?? fgV); continue; }
+                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bgObj, file, LineOf(el), bgOwnRaw ?? bgObj.Key ?? bgObj.Raw ?? fgV); continue; }
                 if (op * VisibleAlpha(fgR) < 0.01) { _skipped++; continue; }
 
                 // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複
