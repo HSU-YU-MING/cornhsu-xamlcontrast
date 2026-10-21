@@ -205,6 +205,9 @@ int DecideExit()
     {
         // 0 組配對時「達標」無意義 —— 沒有任何可稽核的項目。空掃綠燈就是謊報健康。
         Console.WriteLine("exit 1: resolved 0 pairs — nothing was audited, this result does not mean the project passes");
+        // 整個視窗沒有底（全是 no-ancestor-background）正是最需要 rootBackground 提示的情況 ——
+        // 舊版這裡先 return，走不到下面覆蓋率那條的求救指引
+        if (Report.CoverageHint(result) is { } zeroHint) Console.WriteLine(zeroHint);
         return 1;
     }
 

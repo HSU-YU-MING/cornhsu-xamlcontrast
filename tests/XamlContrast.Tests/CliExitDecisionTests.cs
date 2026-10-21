@@ -37,6 +37,20 @@ public class CliExitDecisionTests
         Assert.DoesNotContain("2/3", Cli.Run("--help").Out); // help 不寫死係數
     }
 
+    [Fact] // 0 組配對、而且全是 no-ancestor-background（整個視窗沒有底）：最需要 rootBackground 提示的情況。
+           // 舊版 0 配對那個分支先 return，走不到求救提示 —— 只印 "resolved 0 pairs"
+    public void ZeroPairsCaseStillPrintsTheRootBackgroundHint()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Window><TextBlock Foreground="#FFFFFF" Text="no ancestor background"/></Window>
+            """);
+        var r = Cli.Run(fx.Root);
+        Assert.True(r.Exit == 1, r.ToString());
+        Assert.Contains("exit 1: resolved 0 pairs", r.Out);
+        Assert.Contains("hint: 1 of them are 'no-ancestor-background'", r.Out);
+        Assert.Contains("rootBackground", r.Out);
+    }
+
     [Fact] // 0 組配對不可設定 —— 空掃綠燈就是謊報健康
     public void ZeroPairsExitsOne()
     {
