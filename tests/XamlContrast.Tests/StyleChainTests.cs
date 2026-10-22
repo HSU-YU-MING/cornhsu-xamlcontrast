@@ -712,6 +712,41 @@ public class StyleChainTests
         Assert.Equal(Symmetry.SingleTheme, f.Symmetry);
     }
 
+    // ── 只在一個主題定義的 Style key（審查最後一輪 5：素材 per-onlydark_dyn、per-onlydark_fg）──
+    //    92520b2 之後另一個主題解析不到這個 Style，那一側整組靜默消失 —— 沒評分、也不在任何計數器裡
+    //    （舊版拿 Dark 的 Style 配淺色欄，報出淺色 fail）。缺的那一側記 unknown-palette-key，點名 Style key
+    [Theory]
+    [InlineData("""<Style x:Key="OnlyDark" TargetType="Button"><Setter Property="Background" Value="Transparent"/></Style>""",
+                """<Button Style="{DynamicResource OnlyDark}" Foreground="{DynamicResource Muted}" Content="x"/>""", "Button")]
+    [InlineData("""<Style x:Key="OnlyDark" TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource Muted}"/></Style>""",
+                """<TextBlock Style="{DynamicResource OnlyDark}" Text="x"/>""", "TextBlock")]
+    public void StyleDefinedInOneThemeOnlyCountsTheOtherThemeAsUnresolved(string style, string use, string element)
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Muted" Color="#888888"/>
+              {style}
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Muted" Color="#DDDDDD"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", $"""<Grid Background="{"{"}DynamicResource Bg{"}"}">{use}</Grid>""");
+        var r = fx.Run();
+        var dark = Assert.Single(r.Findings, f => f.File == "Views/Main.xaml");
+        Assert.Equal($"{element}⊕Style[OnlyDark]@dark/base", dark.Element);
+        var light = Assert.Single(r.UnresolvedSites, u => u.File == "Views/Main.xaml");
+        Assert.Equal(UnresolvedReason.UnknownPaletteKey, light.Reason);
+        Assert.Equal("OnlyDark", light.Value);
+    }
+
     [Fact] // 中性檔的 Style BasedOn 主題檔的 Style：基底依主題各自解析
     public void NeutralStyleBasedOnAPerThemeStyleIsResolvedPerTheme()
     {

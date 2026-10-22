@@ -77,6 +77,13 @@ public sealed partial class Auditor
 
     private static bool IsBold(string? fw) => fw is not null && BoldWeight().IsMatch(fw);
 
+    [GeneratedRegex(@"^\{(Dynamic|Static)Resource\s+(?<k>[\w\.]+)\}$")]
+    private static partial Regex StyleResourceRef();
+
+    /// <summary>元素 Style="{StaticResource X}" 的 X（行內 Style 或其他寫法回傳 null）。</summary>
+    private static string? StyleKeyOf(XElement el)
+        => el.Attribute("Style")?.Value is { } s && StyleResourceRef().Match(s.Trim()) is { Success: true } m ? m.Groups["k"].Value : null;
+
     // 非 readonly:多 App repo 時每個檔案切到它所屬作用域的色盤(PaletteFor)
     private Palette _pal;
     private readonly ToolConfig _cfg;
@@ -397,6 +404,10 @@ public sealed partial class Auditor
         {
             if (chain is not null) GradeChain(el, chain, ThemeSide.Dark, bd, ancestorBd, localBgRaw, file, op, suppressed);
             if (chainLight is not null) GradeChain(el, chainLight, ThemeSide.Light, bd, ancestorBd, localBgRaw, file, op, suppressed);
+            // 只在一個主題定義的 Style key：另一個主題下這個元素的樣子工具不知道（StaticResource 會丟例外、
+            // DynamicResource 退回預設樣式）—— 不評，但要計數。⚠ 92520b2 那一側整組靜默消失（審查最後一輪 5）
+            if ((chain is null || chainLight is null) && StyleKeyOf(el) is { } styleKey)
+                Unres(UnresolvedReason.UnknownPaletteKey, file, LineOf(el), styleKey);
         }
         else if (chain is not null) GradeChain(el, chain, null, bd, ancestorBd, localBgRaw, file, op, suppressed);
 
