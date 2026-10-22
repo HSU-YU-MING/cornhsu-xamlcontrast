@@ -1065,6 +1065,35 @@ public class PaletteDetectorTests
         Assert.Equal(2, r.CountOf(Category.Fail));
     }
 
+    [Fact] // 區域 brush 引用的 Color 兩個主題的值不同（審查最後一輪 8 的 L3，素材 loc-colorref）：逐側解析 ——
+           // 拿深色的黃配淺色的白底會編出 1.07:1 的假 fail
+    public void LocalColourReferenceIsResolvedPerTheme()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="AccentColor">#FFFF00</Color>
+              <SolidColorBrush x:Key="Bg" Color="#111111"/><SolidColorBrush x:Key="Fg" Color="#EEEEEE"/><SolidColorBrush x:Key="Line" Color="#333333"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="AccentColor">#0000AA</Color>
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/><SolidColorBrush x:Key="Fg" Color="#1B1B1B"/><SolidColorBrush x:Key="Line" Color="#CCCCCC"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/A.xaml", """
+            <UserControl xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <UserControl.Resources><SolidColorBrush x:Key="LocalAccent" Color="{StaticResource AccentColor}"/></UserControl.Resources>
+              <Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource LocalAccent}" Text="a"/></Grid>
+            </UserControl>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+        Assert.Equal(Wcag.Contrast("#FFFF00", "#111111"), f.RatioDark);
+        Assert.Equal(Wcag.Contrast("#0000AA", "#FFFFFF"), f.RatioLight);
+        Assert.Equal(Category.Ok, f.Category);
+    }
+
     [Fact] // 區域 brush 引用的 Color 在畫面與專案裡都找不到（外部函式庫的 MahApps.Colors.Accent）：使用處記
            // unknown-palette-key、點名的是找不到的那個 Color；偵測描述不能說成「主題定義了讀不懂的值」
     public void LocalBrushReferencingALibraryColourNamesTheMissingColour()

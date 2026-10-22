@@ -187,6 +187,25 @@ public class ParseRuleTests
         Assert.Equal(Category.Warn, f.Category);
     }
 
+    [Fact] // 兩層 Opacity 群組都畫了底（審查最後一輪 8 的 O3，素材 op-nested2）：內層的底與字先疊到外層那一層的底上，
+           // 外層再整層疊到白底上。每一層以 8 位元合成（WPF 的 Opacity 層是 8 位元的中間繪製面），所以是 2.49:1；
+           // 不逐層取整的手算是 2.47:1
+    public void NestedFadedLayersThatBothPaintABackgroundCompositeLayerByLayer()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF"><Border Background="#000000" Opacity="0.6"><Border Background="#000080" Opacity="0.5">
+              <TextBlock Foreground="#FFFF00" Text="a"/>
+            </Border></Border></Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+        var text = Wcag.Composite(Wcag.Composite("#FFFF00", 0.5, "#000000"), 0.6, "#FFFFFF");
+        var bg = Wcag.Composite(Wcag.Composite("#000080", 0.5, "#000000"), 0.6, "#FFFFFF");
+        Assert.Equal(Wcag.Contrast(text, bg), f.RatioDark);
+        Assert.Equal(2.49, f.RatioDark);
+        Assert.Equal(f.RatioDark, f.RatioLight);
+    }
+
     [Fact] // 字自己也有 Opacity：先在那一層裡疊到黑底上，再整層疊到白底上
     public void TextOpacityInsideAFadedLayerIsCompositedLayerByLayer()
     {
