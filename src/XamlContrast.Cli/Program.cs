@@ -166,8 +166,10 @@ if (baselinePath is not null)
     {
         // 壞掉的 baseline 要有好訊息，不是裸拋堆疊
         Say(Console.Error, $"baseline is not valid ({baselinePath}): {ex.Message}");
-        // 例外訊息已經帶了重寫的指引（0.x 的檔、舊的 keyVersion）就不再說一次
-        if (!ex.Message.Contains("--write-baseline")) Console.Error.WriteLine("regenerate it with --write-baseline");
+        // 例外訊息已經帶了指引就不再補：重寫（0.x 的檔、舊的 keyVersion）或升級工具（比這個版本新的檔 ——
+        // 這時叫人重寫，等於用舊工具把新工具寫的債清單蓋掉）
+        if (!ex.Message.Contains("--write-baseline") && !ex.Message.Contains("upgrade XamlContrast"))
+            Console.Error.WriteLine("regenerate it with --write-baseline");
         return 2;
     }
 }

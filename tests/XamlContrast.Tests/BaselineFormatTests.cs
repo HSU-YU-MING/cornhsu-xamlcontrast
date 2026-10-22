@@ -248,8 +248,8 @@ public class BaselineFormatTests
         Assert.Contains("regenerate it with --write-baseline", ex.Message);
     }
 
-    [Theory] // 比自己新的 keyVersion，或不是正整數：不猜著讀
-    [InlineData("2", "newer")]
+    [Theory] // 比自己新的 keyVersion，或不是正整數：不猜著讀。比自己新的要叫人升級工具，不是叫人用舊工具重寫（審查 1.0 最終驗證 S7）
+    [InlineData("2", "upgrade XamlContrast")]
     [InlineData("0", "positive integer")]
     [InlineData("\"1\"", "positive integer")]
     [InlineData("1.5", "positive integer")]
@@ -269,6 +269,20 @@ public class BaselineFormatTests
         var cli = Cli.Run(fx.Root, "--baseline", Path.Combine(fx.Root, "baseline.json"));
         Assert.True(cli.Exit == 2, cli.ToString());
         Assert.Equal(1, cli.Err.Split("--write-baseline").Length - 1);
+    }
+
+    [Theory] // 比這個版本新的 baseline（schemaVersion 或 keyVersion）：該做的是升級工具。舊版的 CLI 一律補一行
+             // 「regenerate it with --write-baseline」—— 照做的話，是用舊工具把新工具寫的債清單蓋掉（審查 1.0 最終驗證 S7）
+    [InlineData("""{ "schemaVersion": 2, "entries": [] }""")]
+    [InlineData("""{ "schemaVersion": 1, "keyVersion": 2, "entries": [] }""")]
+    public void BaselineFromANewerVersionAsksForAnUpgrade(string json)
+    {
+        using var fx = CliProjects.Failing();
+        fx.File("baseline.json", json);
+        var cli = Cli.Run(fx.Root, "--baseline", Path.Combine(fx.Root, "baseline.json"));
+        Assert.True(cli.Exit == 2, cli.ToString());
+        Assert.Contains("upgrade XamlContrast", cli.Err);
+        Assert.DoesNotContain("regenerate", cli.Err);
     }
 
     [Fact] // CLI：讀不了的 baseline → exit 2、stderr 說出原因與怎麼重寫
