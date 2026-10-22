@@ -137,6 +137,7 @@ public class ParseRuleTests
             """);
         var f = Assert.Single(fx.Run().Findings);
         Assert.Equal(Wcag.Contrast(Wcag.Composite("#FFFFFF", 0x80 / 255.0 * 0.5, "#000000"), "#000000"), f.RatioDark);
+        Assert.Equal(f.RatioDark, f.RatioLight); // 淺色欄一樣要乘 Opacity（審查 mutation F2b：只斷言深色欄時存活）
     }
 
     [Fact] // 底沒解析出來時，半透明字色照舊落進 unresolved（進覆蓋率分母），不是「跳過」讓覆蓋率虛高
@@ -481,6 +482,26 @@ public class ParseRuleTests
         var button = Assert.Single(r.Findings, f => f.Element == "Button");
         Assert.Equal("#EEEEEE", button.Fg);
         Assert.Equal(Category.Fail, button.Category);
+    }
+
+    [Fact] // 同上，屬性元素用基底類別的名字（Grid 裡的 <Panel.Background>）：一樣是屬性值、不走成視覺子樹
+           // （審查 mutation M6b：只認「本元素型別.屬性」時存活 —— 裡面的浮水印字被當成疊在祖先底上的文字）
+    public void BaseClassColorPropertyElementsAreNotWalkedAsVisualChildren()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Grid>
+                <Panel.Background>
+                  <VisualBrush><VisualBrush.Visual><TextBlock Foreground="#EEEEEE" Text="watermark pattern"/></VisualBrush.Visual></VisualBrush>
+                </Panel.Background>
+                <TextBlock Foreground="#000000" Text="real text"/>
+              </Grid>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Equal("<VisualBrush>", Assert.Single(r.UnresolvedSites).Value);
     }
 
     [Fact] // 屬性元素是屬性值、不是視覺子樹：VisualBrush 裡畫的字是背景圖樣的一部分，不能當成疊在祖先底上的文字評分

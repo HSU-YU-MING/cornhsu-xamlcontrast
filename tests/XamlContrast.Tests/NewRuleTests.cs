@@ -193,6 +193,35 @@ public class NewRuleTests
         Assert.Equal(Category.Fail, f.Category);
     }
 
+    [Fact] // 只有一個主題完全透明的色票：另一個主題看得見，就不是「隱形、合法跳過」—— 兩欄照評，透明那側 1:1
+           // （審查 mutation F4b：VisibleAlpha 取兩側較小的那個時存活，這組整個變成 skipped）
+    public void ForegroundInvisibleInOneThemeOnlyIsStillGraded()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#121212"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Hint" Color="#00FFFFFF"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Hint" Color="#1B1B1B"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """
+            <Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Hint}" Text="hint"/></Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Skipped);
+        var f = Assert.Single(r.Findings);
+        Assert.Equal(1, f.RatioDark);
+        Assert.Equal(Wcag.Contrast("#1B1B1B", "#FFFFFF"), f.RatioLight);
+    }
+
     [Fact] // 元素 × Style 鏈與 Style 定義處：半透明字色一樣疊到底上評分（三條路徑同一套）
     public void TranslucentForegroundIsCompositedOnTheStylePathsToo()
     {
@@ -212,8 +241,13 @@ public class NewRuleTests
         var r = fx.Run();
         Assert.Equal(0, r.Skipped);
         var expected = Wcag.Contrast(Wcag.Composite("#FFFFFF", 0x33 / 255.0, "#000000"), "#000000");
-        Assert.Equal(expected, Assert.Single(r.Findings, f => f.Element == "Button⊕Style[Pad]/base").RatioDark);
-        Assert.Equal(expected, Assert.Single(r.Findings, f => f.Element == "Style[Faded]/base").RatioDark);
+        var chain = Assert.Single(r.Findings, f => f.Element == "Button⊕Style[Pad]/base");
+        var definition = Assert.Single(r.Findings, f => f.Element == "Style[Faded]/base");
+        Assert.Equal(expected, chain.RatioDark);
+        Assert.Equal(expected, definition.RatioDark);
+        // 淺色欄一樣要合成（審查 mutation F5b：定義處淺色欄沒合成時存活 —— 只斷言了深色欄）
+        Assert.Equal(expected, chain.RatioLight);
+        Assert.Equal(expected, definition.RatioLight);
     }
 
     [Theory] // 只有一個主題是半透明的色票（合併式色盤裡只有一個主題用半透明遮罩，是實際會出現的形狀）。
@@ -917,6 +951,20 @@ public class NewRuleTests
         var f = Assert.Single(fx.Run().Findings, x => x.Element == "TextBlock");
         Assert.Equal(Wcag.Contrast("#FFFFFF", Wcag.Composite("#000000", 0.2, "#FFFFFF")), f.RatioDark);
         Assert.Equal(Category.Fail, f.Category);
+    }
+
+    [Fact] // 背板 brush 本身半透明、元素又有 Opacity：兩個 alpha 相乘（審查 mutation M4c：半透明 brush 不乘 Opacity 時存活）
+    public void TranslucentSiblingBrushIsMultipliedByElementOpacity()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Border Background="#80000000" Opacity="0.5"/>
+              <TextBlock Foreground="#000000" Text="over a light scrim"/>
+            </Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+        Assert.Equal(Wcag.Contrast("#000000", Wcag.Composite("#000000", 0x80 / 255.0 * 0.5, "#FFFFFF")), f.RatioDark);
     }
 
     [Fact] // 背板的 Opacity 是 Binding：執行期才知道 → 後面的字計入 unresolved，不是當成不透明

@@ -558,6 +558,31 @@ public class PaletteDetectorTests
         Assert.Contains(": Fg", d.Description);
     }
 
+    [Fact] // 反方向：找不到的是淺色那側（審查 mutation M2b：淺色側的 Color 引用缺失沒當成讀不懂時存活）
+    public void ColorReferenceMissingOnTheLightSideIsNotFilledFromTheDarkTheme()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="FgColor">#EEEEEE</Color>
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="{StaticResource FgColor}"/>
+              <SolidColorBrush x:Key="Line" Color="#333333"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="{StaticResource FgColor}"/>
+              <SolidColorBrush x:Key="Line" Color="#CCCCCC"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(PaletteMode.Pair, d.Mode);
+        Assert.False(d.Palette.Entries.ContainsKey("Fg")); // 不是 ("#EEEEEE", "#EEEEEE")
+        Assert.Contains(": Fg", d.Description);
+    }
+
     [Fact] // 剔除讀不懂的鍵之後色盤掉到 3 鍵門檻以下：舊版因此放棄合併式色盤、落到「單一主題檔」那條路，
            // 整欄深色值改用淺色檔的值（Bg 深色欄拿到 #FFFFFF）—— 編造的程度比原本的 bug 還大，而且沒標退化、
            // --strict-palette 照樣 exit 0。門檻要算「定義了的鍵」，讀不懂的那個也算一個
@@ -614,6 +639,37 @@ public class PaletteDetectorTests
         var cli = Cli.Run(fx.Root, "--strict-palette");
         Assert.True(cli.Exit == 1, cli.ToString());
         Assert.Contains("exit 1: palette detection failed and --strict-palette is set", cli.Out);
+    }
+
+    [Fact] // 同上，字典裡另外有 <Color> 定義：brush 有定義、只是全部讀不懂時不退回 Color 表 —— 那些 brush 才是色盤，
+           // 拿 Color 鍵充當色票會讓偵測看起來成功（審查 mutation B3c：「沒有 brush 才用 Color 表」的條件拿掉時存活）
+    public void AllBrushesUnreadableDoesNotFallBackToTheColourTable()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="C1">#111111</Color>
+              <Color x:Key="C2">#222222</Color>
+              <Color x:Key="C3">#333333</Color>
+              <SolidColorBrush x:Key="Bg" Color="#11111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEEE"/>
+              <SolidColorBrush x:Key="Line" Color="{Binding Line}"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="C1">#EEEEEE</Color>
+              <Color x:Key="C2">#DDDDDD</Color>
+              <Color x:Key="C3">#CCCCCC</Color>
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Line" Color="#CCCCCC"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.True(d.IsDegraded);
+        Assert.Equal(0, d.Palette.Count);
+        Assert.Contains("3 key(s) dropped", d.Description);
     }
 
     [Fact] // 同上，<Color> 字典那條路（純 Color 字典直接當色票時）
