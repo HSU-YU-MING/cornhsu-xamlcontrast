@@ -83,7 +83,12 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
   （element 標籤、合成底的描述）—— 這些改了是 minor，鍵的寫法變了就遞增 `Baseline.KeyVersion`。
   - **1.x 只增**：新旗標／input／config 屬性／JSON 欄位／SARIF 規則／開放集的新值 = minor。
     開放集：unresolved 原因、paletteMode、failOn、theme；封閉集：category、symmetry、baseline。
-    改名、刪除、**改預設**、收緊驗證 = 2.0（改預設比 Parity 的範本嚴，刻意的：預設值決定同一份程式碼在 CI 上紅不紅）。
+    改名、刪除、**改預設**、收緊驗證 = 2.0（改預設比 Parity 的範本嚴，刻意的：預設值決定 gate 本身，不在 minor 改；
+    稽核語意的改進仍可能讓 build 變紅，會寫在 Upgrading）。
+  - 第 9 面凍的是**預設行為**：opt-in 的範圍擴充（`--config`、額外排除路徑、`.axaml`）= minor；改內建範圍 = 2.0。
+    console 與 Markdown 的輸出屬 presentation、不凍結，機器讀取請用 JSON。
+  - 對外的說法（README 兩份、SECURITY、CONTRIBUTING、RELEASING）一律是「語法凍結；稽核語意與 baseline 鍵的寫法可以在 minor 改變，
+    Upgrading 會說明，keyVersion 遞增時舊 baseline 被拒並提示重寫」。⚠ 不要寫成「1.x 升級不會打壞任何東西」。
   - SARIF 的等級表示嚴重度、不表示 gate（預設 gate warn 時 warn 讓 CI 失敗，SARIF 裡照樣是 warning）；
     跟著 gate 走的是 Action 的行內註記。
   - **JSON 新增欄位不遞增 `schemaVersion`**（`Report.JsonSchemaVersion`，凍結在 6；消費端必須忽略未知欄位）。

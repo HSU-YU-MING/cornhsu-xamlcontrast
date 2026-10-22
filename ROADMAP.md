@@ -31,8 +31,9 @@
 
 ## 1.0（2026-10-22）
 
-- [x] 介面凍結：CLI 旗標、退出碼、JSON 報告（schemaVersion 6）、Action inputs、config、baseline 檔、
-      SARIF ruleId、壓抑註解語法、稽核範圍判準 —— 宣告與 1.x 演進規則見 `CHANGELOG.md` 的 1.0.0
+- [x] 語法凍結：CLI 旗標、退出碼、JSON 報告（schemaVersion 6）、Action inputs、config、baseline 檔的格式、
+      SARIF 規則、壓抑註解語法、稽核範圍的硬規則（預設行為）；稽核語意與 baseline 鍵的寫法可以在 minor 改進
+      （寫 Upgrading、鍵變了就遞增 keyVersion）—— 宣告與 1.x 演進規則見 `CHANGELOG.md` 的 1.0.0
 - [x] 預設 gate 改成 warn（沒達到 AA 就算失敗）；「結果不可信」改用 exit 3
 - [x] 直接從 0.6.1 發 1.0.0，不經 0.7.0。規劃書第 10 節「至少一個非作者的專案回報」的條件，
       改成四個驗證專案的實測（差異逐項歸因，交維護者確認後才重凍快照）

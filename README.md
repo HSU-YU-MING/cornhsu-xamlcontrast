@@ -20,9 +20,13 @@ xamlcontrast path/to/your/wpf/project
 ```
 
 > Requires the **.NET 10 runtime** (the analysis itself is pure XML — runs on Linux CI too).
-> **1.x interfaces are frozen**: the CLI flags, exit codes, JSON report, config and baseline files,
-> and Action inputs change only by addition until 2.0. Coming from 0.x? The
-> [1.0.0 notes](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/CHANGELOG.md) list what you have to change.
+> **1.x freezes the syntax, not the findings.** The CLI flags, exit codes, JSON report, Action inputs,
+> config file, baseline file format, SARIF rule, suppression comment and audit scope change only by
+> addition until 2.0 ([the full list](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/CHANGELOG.md)). What the audit *finds* can improve in a minor release —
+> counts may move and a build may turn red; each such release says so in its CHANGELOG *Upgrading*
+> note. If a release changes how baseline keys are spelled, it bumps `keyVersion` and an older baseline
+> is refused with a note to regenerate it. Coming from 0.x? The [1.0.0 notes](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/CHANGELOG.md) list what you
+> have to change.
 
 ## What it looks like
 

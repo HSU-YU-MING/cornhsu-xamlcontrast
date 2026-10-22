@@ -14,8 +14,10 @@ xamlcontrast 你的專案路徑
 ```
 
 > 需要 **.NET 10 執行環境**（解析本身是純 XML —— Linux CI 也跑得動）。
-> **1.x 介面凍結**：CLI 旗標、退出碼、JSON 報告、config 與 baseline 檔、Action inputs 到 2.0 之前只增不改。
-> 從 0.x 升級？先看 [CHANGELOG 的 1.0.0](CHANGELOG.md)，裡面列了必須改的地方。
+> **1.x 凍結的是語法，不是稽核結果。** CLI 旗標、退出碼、JSON 報告、Action inputs、config 檔、baseline 檔的格式、
+> SARIF 規則、壓抑註解、稽核範圍在 2.0 之前只增不改（[完整清單](CHANGELOG.md)）。稽核**找到什麼**可以在 minor 改進 ——
+> 計數會動、build 可能因此變紅，每一版都會寫在 CHANGELOG 的 Upgrading。baseline 鍵的寫法改變時遞增 `keyVersion`，
+> 舊的 baseline 會被拒並提示重寫。從 0.x 升級？先看 [CHANGELOG 的 1.0.0](CHANGELOG.md)，裡面列了必須改的地方。
 
 ## 實際跑起來長這樣
 

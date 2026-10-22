@@ -124,7 +124,8 @@ an empty map `{}` (5 omitted some and printed others).
 4. **Action inputs** — names, defaults and accepted values of `root`, `working-directory`, `version`,
    `fail-on`, `min-coverage`, `baseline`, `strict-palette`, `comment`, `upload-report`, `sarif`,
    `artifact-name`; `@v1` installs only 1.x tools (`[1.*,2.0.0)`). The wording of annotations and of the
-   PR comment is presentation, not frozen.
+   PR comment is presentation, not frozen — and so is the CLI's console and Markdown output: read the
+   JSON report when a program needs the results.
 5. **Config file** — `xamlcontrast.config.json` at the project root: every property, its type, range
    and default (`thresholds` 4.5 / 3.0 / 0.67, `failOn` `warn`, `minCoverage` 50, `ignore.requireReason`
    `true`, `layout` names without a namespace prefix, …), unknown properties rejected, `$schema`
@@ -147,9 +148,11 @@ an empty map `{}` (5 omitted some and printed others).
    the comment, reason required (unless `ignore.requireReason: false`) and on the same line; applies to
    the immediately following element and its whole subtree, including `Style` definitions inside it;
    malformed variants never suppress and are listed in `summary.invalidIgnores`.
-9. **Audit scope (hard rules only)** — `*.xaml` under the root are audited; `bin` and `obj`
-   directories below the root (any case) are skipped; `*.cs` files are read only to find a C# palette;
-   the config is read from `<root>/xamlcontrast.config.json` only.
+9. **Audit scope (hard rules, default behaviour)** — by default `*.xaml` under the root are audited;
+   `bin` and `obj` directories below the root (any case) are skipped; `*.cs` files are read only to
+   find a C# palette; the config is read from `<root>/xamlcontrast.config.json` only. Opt-in scope
+   extensions (a `--config` path, extra exclude paths, `.axaml` files) are additions → minor; changing
+   what is audited by default is 2.0.
 
 **Audit semantics — not frozen, improved in minor releases** (rule 3 below): which pairs exist and what
 they are graded against — the parsing rules, palette detection (including which files count as test
@@ -172,8 +175,8 @@ backgrounds.
    re-run `--write-baseline`.
 4. **Changing a default** (the gate, the thresholds, `minCoverage`, `requireReason`) **is 2.0.** This
    is deliberately stricter than the Parity template it follows, where tolerance defaults may move in a
-   minor with a notice: here a default decides whether the same code passes CI, and a minor must not
-   turn a green build red on its own.
+   minor with a notice: here a default *is* the gate, so it does not change in a minor. An audit-semantics
+   improvement (rule 3) can still turn a build red in a minor — its *Upgrading* note says so.
 5. Fixes that change no output → **patch**.
 6. When an old artifact stops being valid, the tool fails loudly and says what to do — a 0.x baseline,
    an unknown `schemaVersion`, a baseline from an older `keyVersion` — never a silently wrong result.

@@ -59,7 +59,9 @@ git tag v1 v1.0.0 && git push origin v1      # @v1 的使用者從這裡開始�
   - 只新增（新旗標、新 input、JSON 新欄位、config 新屬性、開放集的新值）= minor
   - **稽核語意的改進 = minor**（計數會動，所以不是 patch），CHANGELOG 開頭寫 Upgrading 與四個驗證專案的實測影響；
     baseline 的鍵因此改變時遞增 `Baseline.KeyVersion`
-  - 改名、刪除、改預設值、收緊驗證（凍結的語法）= 2.0
+  - 改名、刪除、改預設值、收緊驗證（凍結的語法）= 2.0。預設值決定 gate 本身，不在 minor 改；
+    語意改進仍可能讓 build 變紅，那一版的 Upgrading 要寫明
+  - 稽核範圍凍的是預設行為：opt-in 的擴充（`--config`、額外排除路徑、`.axaml`）= minor，改內建範圍 = 2.0
   - 輸出完全不變的修正 = patch
   - JSON 的 `schemaVersion` 只在破壞性變更時遞增（也就是只在 major）；新增欄位不遞增，消費端必須忽略不認得的欄位與開放集的新值
 

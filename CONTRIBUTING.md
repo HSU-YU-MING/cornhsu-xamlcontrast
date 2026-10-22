@@ -131,7 +131,9 @@ one and would be willing to be the guinea pig, say so in an issue — that unblo
 6. the baseline file's format: `schemaVersion`, `keyVersion`, the fields and the `file|element|fg|bg` key
 7. the SARIF `wcag-contrast` rule and its level mapping (more rules may be added)
 8. the `xamlcontrast-ignore` comment syntax
-9. the hard scope rules: `*.xaml` under the root, `bin`/`obj` skipped, `*.cs` read only for a C# palette, the config read from the root only
+9. the hard scope rules, as default behaviour: `*.xaml` under the root, `bin`/`obj` skipped, `*.cs` read only for a C# palette, the config read from the root only (opt-in extensions such as extra exclude paths are minor; changing the default scope is 2.0)
+
+The console and Markdown output are presentation, not frozen — programs should read the JSON report.
 
 What is **not** frozen is the **audit semantics**: which pairs exist and what they are graded against —
 the parsing rules, palette detection (including the test/sample-path heuristic), the classification of
@@ -144,7 +146,8 @@ descriptions). The full declaration and the evolution rules are in the
   change `schemaVersion`; consumers are required to ignore fields and open-set values they don't know.
 - **Renaming, removing, changing a default, or tightening what is accepted** on any of the nine
   surfaces is a 2.0 change, however small it looks. It waits. (Changing a default is 2.0 on purpose:
-  a default decides whether the same code passes CI.)
+  a default is the gate itself. An audit-semantics improvement can still turn a build red in a minor;
+  its *Upgrading* note says so.)
 - **A change to audit semantics** — more pairs found, a confident ratio turned into an honest
   `unresolved`, a better heuristic — is a minor release, never a patch. It needs an *Upgrading* note at
   the top of the CHANGELOG entry with the measured effect; if it changes how baseline keys are spelled,
