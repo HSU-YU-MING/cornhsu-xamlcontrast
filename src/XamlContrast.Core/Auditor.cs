@@ -630,6 +630,26 @@ public sealed partial class Auditor
         var raw = XamlBrush.Read(child, name == "Rectangle" ? "Fill" : "Background");
         if (raw is null) return null;
         var r = ColorResolver.Resolve(raw, _pal);
+        // 背板元素自己的 Opacity 讓它變半透明（<Rectangle Fill="#000000" Opacity="0.2"/> 的遮罩寫法）——
+        // 舊版當成不透明，20% 黑的遮罩被當成純黑。Opacity 與 brush 的 alpha 相乘；讀不懂的 Opacity（Binding）
+        // = 執行期才知道；幾乎為 0 = 看不見，不影響
+        if (r is not null && child.Attribute("Opacity")?.Value is { } opRaw)
+        {
+            if (!ParseDouble(opRaw, out var bop) || !double.IsFinite(bop))
+                return new Resolved(ColorKind.Other, Raw: $"{raw} (Opacity={opRaw})");
+            if (bop < 0.01) return null;
+            if (bop < 0.999)
+            {
+                raw = WithOpacityNote(raw, bop);
+                r = r.Kind switch
+                {
+                    ColorKind.Hard or ColorKind.Soft => new Resolved(ColorKind.Alpha, Key: r.Key,
+                        Alpha: bop, Rgb: r.Dark, AlphaLight: bop, RgbLight: r.Light),
+                    ColorKind.Alpha => r with { Alpha = r.Alpha * bop, AlphaLight = r.AlphaLight * bop },
+                    _ => r,
+                };
+            }
+        }
         // ⚠ 舊版只收確定的純色(Hard/Soft),其餘回傳 null「維持原判定」—— 字改配祖先的底,給出篤定的比值:
         //   白 Grid 裡 #CC000000 的兄弟加黑字報 21:1 ok(寫成巢狀是 1.66:1 fail);Binding 兄弟也報 21:1,
         //   跟同檔「Binding 底不可往上繼承」的規則矛盾。現在比照巢狀的處理(見 Walk 的 bg 更新塊):

@@ -792,6 +792,37 @@ public class NewRuleTests
         Assert.Equal(Category.Fail, sibling.Category);
     }
 
+    [Fact] // 兄弟背板靠元素自己的 Opacity 變半透明（<Rectangle Fill="#000000" Opacity="0.2"/> 的遮罩寫法）：
+           // 舊版仍當成不透明黑，白字報 21:1，實際是 20% 黑疊白 = #CCCCCC 上的白字 ≈ 1.61:1（審查素材 h15op）
+    public void SiblingBackdropWithElementOpacityIsComposited()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Rectangle Fill="#000000" Opacity="0.2"/>
+              <TextBlock Foreground="#FFFFFF" Text="over scrim"/>
+            </Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings, x => x.Element == "TextBlock");
+        Assert.Equal(Wcag.Contrast("#FFFFFF", Wcag.Composite("#000000", 0.2, "#FFFFFF")), f.RatioDark);
+        Assert.Equal(Category.Fail, f.Category);
+    }
+
+    [Fact] // 背板的 Opacity 是 Binding：執行期才知道 → 後面的字計入 unresolved，不是當成不透明
+    public void SiblingBackdropWithBoundOpacityIsUnresolved()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Border Background="#000000" Opacity="{Binding ScrimOpacity}"/>
+              <TextBlock Foreground="#FFFFFF" Text="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.DoesNotContain(r.Findings, f => f.Element == "TextBlock");
+        Assert.Equal(UnresolvedReason.BoundOrGradient, Assert.Single(r.UnresolvedSites).Reason);
+    }
+
     [Theory] // 兄弟背板是 Binding／漸層／不在色盤的鍵:底是執行期才知道的顏色 —— 依「Binding 底不可往上繼承」
              // 同一條原則計入 unresolved,不是配祖先的底給出篤定比值(舊版 Binding 兄弟照報 21:1)
     [InlineData("""<Border Background="{Binding OverlayBrush}"/>""", UnresolvedReason.BoundOrGradient)]
