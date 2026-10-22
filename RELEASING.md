@@ -53,10 +53,24 @@ git tag v1 v1.0.0 && git push origin v1      # @v1 的使用者從這裡開始�
   用意是讓「從原始碼 build 的」一眼看得出不是正式版 —— 曾經寫死 0.5.1
   而跟著 v0.6.0 一起漂掉，source build 自稱舊版、SARIF 與 JSON 報告的工具版本也錯
 - 唯一要人手維護版號的地方是 **`CHANGELOG.md`**：它是「還沒推 tag 之前」的版本真相源
-- **1.0 起介面凍結**（凍結面與 1.x 的相容性規則見 `CHANGELOG.md` 的 1.0.0 一節與 `CONTRIBUTING.md`）：
-  - 1.x 只能新增：新旗標、新 input、JSON 新欄位、config 新屬性 = minor
-  - 改名、刪除、改預設值、改語意 = 2.0
-  - JSON 的 `schemaVersion` 只在破壞性變更時遞增（也就是只在 major）；新增欄位不遞增，消費端必須忽略不認得的欄位
+- **1.0 起介面凍結**（凍結宣告與 1.x 的演進規則見 `CHANGELOG.md` 的 1.0.0 一節，對外摘要在 `CONTRIBUTING.md`）。
+  凍結的是**語法**（旗標、退出碼、JSON 欄位、input、config、baseline 檔的格式、SARIF 規則、壓抑註解、稽核範圍的硬規則），
+  不是**稽核語意**（找到哪些配對、配到什麼底、測試路徑的判準、鍵裡的文字）：
+  - 只新增（新旗標、新 input、JSON 新欄位、config 新屬性、開放集的新值）= minor
+  - **稽核語意的改進 = minor**（計數會動，所以不是 patch），CHANGELOG 開頭寫 Upgrading 與四個驗證專案的實測影響；
+    baseline 的鍵因此改變時遞增 `Baseline.KeyVersion`
+  - 改名、刪除、改預設值、收緊驗證（凍結的語法）= 2.0
+  - 輸出完全不變的修正 = patch
+  - JSON 的 `schemaVersion` 只在破壞性變更時遞增（也就是只在 major）；新增欄位不遞增，消費端必須忽略不認得的欄位與開放集的新值
+
+## 預覽版（目前沒有發佈路徑）
+
+`v1.1.0-rc.1` 之類的預覽版 tag 會被 `release.yml` 擋下：觸發條件是三段式 `v[0-9]*.[0-9]*.[0-9]*`（`-rc.1` 結尾照樣符合），
+但「CHANGELOG 頂端版號 = tag」的守門只取三段式的版號（`1.1.0`），與 `1.1.0-rc.1` 不相等 → 失敗、不發佈。
+這是刻意的現狀（Parity 也沒有預覽版路徑）：要試新版就從原始碼 build，或在本機 `dotnet pack -p:Version=1.1.0-rc.1`
+後用 `--add-source` 安裝。真的需要發預覽版到 nuget.org 時，要一起改的是：守門接受「CHANGELOG 頂端 = tag 去掉
+預發行標籤」、GitHub Release 標成 prerelease、而且**不前移 `v1`**（`@v1` 只能指向正式版；`action.yml` 的
+`[1.*,2.0.0)` 本來就不會裝到預覽版）。
 
 ## 首次發佈前的一次性設定
 

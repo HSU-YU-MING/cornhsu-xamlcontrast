@@ -5,7 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-10-22
+## 1.0.0 — 2026-10-22
 
 **1.0 freezes the public interface.** From this release on, the nine surfaces listed under
 *Interface freeze* below change only in the ways the 1.x compatibility rules allow; anything else
@@ -101,59 +101,82 @@ an empty map `{}` (5 omitted some and printed others).
 
 ### Interface freeze (1.x compatibility rules)
 
-**Frozen from 1.0.** Breaking any of these is a 2.0 change:
+1.0 separates two things: the **syntax** people write and parse (frozen — breaking it is 2.0), and the
+**audit semantics** that decide what the tool finds (improved in minor releases, with a notice).
 
-1. **CLI** — `xamlcontrast <project-root> [options]`; the flags `--json <path>`, `--sarif <path>`,
-   `--md <path>`, `--fail-on <warn|fail>`, `--strict-palette`, `--min-coverage <0-100>`,
-   `--baseline <path>`, `--write-baseline <path>`, `--show-ok`, `--show-unresolved`, `--version`,
-   `-h`/`--help`, with their value forms and defaults (`--fail-on` default `warn`, `--min-coverage`
-   default 50, flag > config > default).
+**Frozen syntax.** Breaking any of these is a 2.0 change:
+
+1. **CLI** — `xamlcontrast <project-root> [options]` and `xamlcontrast [options] -- <project-root>`;
+   the flags `--json <path>`, `--sarif <path>`, `--md <path>`, `--fail-on <warn|fail>`,
+   `--strict-palette`, `--min-coverage <0-100>`, `--baseline <path>`, `--write-baseline <path>`,
+   `--show-ok`, `--show-unresolved`, `--version`, `-h`/`--help`, with their value forms and defaults
+   (`--fail-on` default `warn`, `--min-coverage` default 50, flag > config > default).
 2. **Exit codes** — `0` pass, `1` pairs below the gate (or new/worsened ones in `--baseline` mode),
    `2` usage, config or input-file error (including an output file that can't be written), `3` the
    result can't be trusted. Order: usage/config/input errors → the three trust checks (before either
    baseline mode) → baseline modes → findings.
-3. **JSON report** — `schemaVersion` 6 and every field in `docs/report.schema.json`.
-   `category`, `symmetry`, `theme`, `baseline` and `failOn` are closed sets (a new member is 2.0);
-   the unresolved reasons (`unresolvedBy` keys, `unresolvedSites[].reason`) and `paletteMode` are
-   **open sets**: 1.x may add a value, existing values keep their spelling.
+3. **JSON report** — `schemaVersion` 6: every field name and type in `docs/report.schema.json`.
+   `category`, `symmetry` and `baseline` are **closed sets** (a new member is 2.0). The unresolved
+   reasons (`unresolvedBy` keys, `unresolvedSites[].reason`), `paletteMode`, `summary.failOn` and
+   `findings[].theme` are **open sets**: 1.x may add a value (a new blind spot, a detection path,
+   `--fail-on none`, a high-contrast theme), existing values keep their spelling, and the schema writes
+   them as strings with the current values in the description.
 4. **Action inputs** — names, defaults and accepted values of `root`, `working-directory`, `version`,
-   `fail-on`, `min-coverage`, `baseline`, `strict-palette`, `comment`, `upload-report`, `sarif`; the
-   `@v1` tag installs only 1.x tools.
+   `fail-on`, `min-coverage`, `baseline`, `strict-palette`, `comment`, `upload-report`, `sarif`,
+   `artifact-name`; `@v1` installs only 1.x tools (`[1.*,2.0.0)`). The wording of annotations and of the
+   PR comment is presentation, not frozen.
 5. **Config file** — `xamlcontrast.config.json` at the project root: every property, its type, range
    and default (`thresholds` 4.5 / 3.0 / 0.67, `failOn` `warn`, `minCoverage` 50, `ignore.requireReason`
-   `true`, …), unknown properties rejected, `$schema` allowed (see `docs/config-schema.md`).
-6. **Baseline file** — `schemaVersion` 1, `entries[]` of `file`, `element`, `fg`, `bg`, `count`,
-   `worst`; the key `file|element|fg|bg` (no line numbers) and the text forms it is built from
-   (`file` root-relative with `/`; `element` as `Name`, `Name⊕Style[Key]/state`,
-   `Name⊕Style[Key]@dark/state`, `Style[Key]/state`; `fg` as written, with ` ×<opacity>` in the
-   invariant culture; `bg` as `{Key}`, `#RRGGBB` or a composite). Every 1.x reads every baseline 1.0
-   writes.
-7. **SARIF** — 2.1.0, one rule `wcag-contrast`, `error` = fail, `warning` = warn, `uri` relative to the
-   scanned root.
+   `true`, `layout` names without a namespace prefix, …), unknown properties rejected, `$schema`
+   allowed (see `docs/config-schema.md`).
+6. **Baseline file** — `schemaVersion` 1 and `keyVersion` (missing = 1); `entries[]` of `file`,
+   `element`, `fg`, `bg`, `count` (≥ 1) and `worst` (1–21), no duplicate keys; the key is
+   `file|element|fg|bg` with no line numbers, `file` relative to the root with `/`. Every 1.x reads
+   every baseline its own `keyVersion` writes. **The text inside `element`, `fg` and `bg` is audit
+   semantics, not frozen syntax** — element labels (`Name⊕Style[Key]@dark/state`), the composite
+   background description (`{Hi} over {Bg}`, `#88000000 over #FFFFFF`), the ` ×0.5` opacity note. A
+   minor that changes how they are spelled bumps `keyVersion`, and an older baseline is then refused
+   with "regenerate it with --write-baseline" instead of a wall of false NEW entries.
+7. **SARIF** — 2.1.0; the `wcag-contrast` rule and its level mapping (`error` = fail, `warning` = warn)
+   are frozen, and 1.x may add rules; `uri` is relative to the scanned root. **A SARIF level states
+   severity, not the gate**, deliberately: under the default `warn` gate a warn pair fails the run yet
+   stays `warning` in code scanning, which has its own severity scale. The Action's inline annotations
+   are the ones that follow the gate (`error` for what the gate blocks, `warning` for warns it lets
+   through, `notice` for known baseline debt).
 8. **Suppression comment** — `<!-- xamlcontrast-ignore: reason -->`: case-sensitive, at the start of
    the comment, reason required (unless `ignore.requireReason: false`) and on the same line; applies to
    the immediately following element and its whole subtree, including `Style` definitions inside it;
    malformed variants never suppress and are listed in `summary.invalidIgnores`.
-9. **Audit scope** — every `*.xaml` under the root except `bin`/`obj` directories below the root (any
-   case); `*.cs` files only for the C# palette; files whose root element is a `ResourceDictionary` are
-   palette sources, left out of `files` but still walked; test and sample paths — a path segment with a
-   word starting with `test`, `sample`, `demo` or `example` (words split at `.` `-` `_`, spaces and case
-   changes, so `MyApp.Tests` and `UnitTests` count), or `fixture`/`mock` below the first level — are
-   never palette or application candidates but are still audited; the config is read from the root only.
+9. **Audit scope (hard rules only)** — `*.xaml` under the root are audited; `bin` and `obj`
+   directories below the root (any case) are skipped; `*.cs` files are read only to find a C# palette;
+   the config is read from `<root>/xamlcontrast.config.json` only.
+
+**Audit semantics — not frozen, improved in minor releases** (rule 3 below): which pairs exist and what
+they are graded against — the parsing rules, palette detection (including which files count as test
+or sample paths: today a path segment containing the whole word `test`, `sample`, `demo` or `example`,
+singular or plural, or `fixture`/`mock` below the first level — so `MyApp.Tests` and `UnitTests` count,
+`Contoso.Demographics` and `Testimonials` don't), which dictionaries are palette sources or belong to
+one theme, how an unresolved pair is classified, and the text of element labels and composite
+backgrounds.
 
 **Evolution rules** (a promise from this release on):
 
-1. Breaking any surface above → **major**.
-2. Additions only — a new flag, input, config property, JSON field, or a value in an open set →
-   **minor**. `schemaVersion` does not change for additions; it changes only with a breaking change,
-   i.e. a major. **JSON consumers must ignore fields and open-set values they don't know.**
-3. Audit-semantics improvements — a rule that finds more pairs, a confident ratio that becomes an
-   honest `unresolved`, a backdrop resolved differently — are **minor**, never patch, and the CHANGELOG
-   opens with an *Upgrading* note giving the measured effect. If baseline keys move, the note says so
-   and says to re-run `--write-baseline`.
-4. Fixes that change no output → **patch**.
-5. When an old artifact stops being valid, the tool fails loudly and says what to do (as a 0.x baseline
-   does now) — never a silently wrong result.
+1. Breaking any frozen surface above → **major**.
+2. Additions only — a new flag, input, config property, JSON field, SARIF rule, or a value in an open
+   set → **minor**. `schemaVersion` does not change for additions; it changes only with a breaking
+   change, i.e. a major. **JSON consumers must ignore fields and open-set values they don't know.**
+3. Audit-semantics changes — a rule that finds more pairs, a confident ratio that becomes an honest
+   `unresolved`, a backdrop resolved differently, a better test-path heuristic — are **minor**, never
+   patch, and the CHANGELOG opens with an *Upgrading* note giving the measured effect on the
+   validation projects. If baseline keys change, the release bumps `keyVersion` and the note says to
+   re-run `--write-baseline`.
+4. **Changing a default** (the gate, the thresholds, `minCoverage`, `requireReason`) **is 2.0.** This
+   is deliberately stricter than the Parity template it follows, where tolerance defaults may move in a
+   minor with a notice: here a default decides whether the same code passes CI, and a minor must not
+   turn a green build red on its own.
+5. Fixes that change no output → **patch**.
+6. When an old artifact stops being valid, the tool fails loudly and says what to do — a 0.x baseline,
+   an unknown `schemaVersion`, a baseline from an older `keyVersion` — never a silently wrong result.
 
 Forward compatibility is not promised: a config that uses a property added in 1.y is refused by an
 older 1.x (exit 2, naming the property).

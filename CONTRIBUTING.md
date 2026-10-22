@@ -121,29 +121,34 @@ one and would be willing to be the guinea pig, say so in an issue — that unblo
 
 ## Interfaces and versions
 
-1.0 froze the public interface. Nine surfaces change only by addition within 1.x:
+1.0 froze the public interface's **syntax** — nine surfaces that change only by addition within 1.x:
 
-1. CLI flags (names, value forms, defaults)
+1. CLI flags (names, value forms, defaults) and `--` before the project root
 2. exit codes (`0` pass, `1` below the gate, `2` usage/config/input error, `3` result can't be trusted) and the order they are decided in
-3. the JSON report (`schemaVersion` 6, [`docs/report.schema.json`](docs/report.schema.json))
+3. the JSON report (`schemaVersion` 6, [`docs/report.schema.json`](docs/report.schema.json)); `category`, `symmetry` and `baseline` are closed sets, the unresolved reasons, `paletteMode`, `failOn` and `theme` are open sets
 4. the Action inputs
-5. the config file
-6. the baseline file, including how its keys are spelled
-7. the SARIF `ruleId` (`wcag-contrast`) and levels
+5. the config file, including its defaults
+6. the baseline file's format: `schemaVersion`, `keyVersion`, the fields and the `file|element|fg|bg` key
+7. the SARIF `wcag-contrast` rule and its level mapping (more rules may be added)
 8. the `xamlcontrast-ignore` comment syntax
-9. which files get audited
+9. the hard scope rules: `*.xaml` under the root, `bin`/`obj` skipped, `*.cs` read only for a C# palette, the config read from the root only
 
-The full declaration and the evolution rules are in the
+What is **not** frozen is the **audit semantics**: which pairs exist and what they are graded against —
+the parsing rules, palette detection (including the test/sample-path heuristic), the classification of
+unresolved pairs, and the text inside baseline keys (element labels, composite background
+descriptions). The full declaration and the evolution rules are in the
 [CHANGELOG's 1.0.0 entry](CHANGELOG.md). What that means for a pull request:
 
 - **Additions are minor and welcome** — a new flag, Action input, config property, JSON field, or a
   new value in an open set (an `unresolved` reason, a palette mode). Adding a JSON field does **not**
-  change `schemaVersion`; consumers are required to ignore fields they don't know.
+  change `schemaVersion`; consumers are required to ignore fields and open-set values they don't know.
 - **Renaming, removing, changing a default, or tightening what is accepted** on any of the nine
-  surfaces is a 2.0 change, however small it looks. It waits.
-- **A change to audit semantics that moves counts** — more pairs found, a confident ratio turned into
-  an honest `unresolved` — is a minor release, never a patch. It needs an *Upgrading* note at the
-  top of the CHANGELOG entry with the measured effect, and has to say so if baseline keys move.
+  surfaces is a 2.0 change, however small it looks. It waits. (Changing a default is 2.0 on purpose:
+  a default decides whether the same code passes CI.)
+- **A change to audit semantics** — more pairs found, a confident ratio turned into an honest
+  `unresolved`, a better heuristic — is a minor release, never a patch. It needs an *Upgrading* note at
+  the top of the CHANGELOG entry with the measured effect; if it changes how baseline keys are spelled,
+  it bumps `Baseline.KeyVersion` so old baselines are refused with a clear message.
 
 ## License
 

@@ -74,11 +74,18 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
   報告上的 `toolVersion` 也是錯的**。整格刪掉更糟：退回 MSBuild 預設的 `1.0.0`，
   等於對外宣告介面已凍結。**tag 是唯一真相源，發版不要手動改版本欄位。**
 - **1.0.0（2026-10-22）起介面凍結**，直接從 0.6.1 跳到 1.0（沒有 0.7.0）。凍結宣告與 1.x 演進規則寫在
-  `CHANGELOG.md` 的 1.0.0 一節，`CONTRIBUTING.md`「Interfaces and versions」是對外的摘要。九個面：
-  CLI 旗標、退出碼（含判定順序）、JSON 報告（schemaVersion 6 + `docs/report.schema.json`）、Action inputs、
-  config 檔、baseline 檔（含鍵的文字形式）、SARIF `ruleId`、壓抑註解語法、稽核範圍判準。
-  - **1.x 只增**：新旗標／input／config 屬性／JSON 欄位／開放集的新值（unresolved 原因、paletteMode）= minor。
-    改名、刪除、改預設、收緊驗證 = 2.0。
+  `CHANGELOG.md` 的 1.0.0 一節，`CONTRIBUTING.md`「Interfaces and versions」是對外的摘要。
+  **凍結的是語法，不是稽核語意**（審查 1.0 A2：舊版宣告把兩者混在一起，還凍住了一個會誤判的啟發法）。九個面：
+  CLI 旗標（含 `--`）、退出碼（含判定順序）、JSON 報告（schemaVersion 6 + `docs/report.schema.json`）、Action inputs、
+  config 檔（含預設值）、baseline 檔的格式（schemaVersion、keyVersion、欄位、`file|element|fg|bg` 的鍵）、
+  SARIF 的 `wcag-contrast` 規則與等級對應、壓抑註解語法、稽核範圍的**硬規則**（`*.xaml`、bin／obj、`*.cs` 只找 C# 色盤、
+  config 只讀 root）。**不凍結**：找到哪些配對、配到什麼底、測試／範例路徑判準、unresolved 的分類、鍵裡的文字
+  （element 標籤、合成底的描述）—— 這些改了是 minor，鍵的寫法變了就遞增 `Baseline.KeyVersion`。
+  - **1.x 只增**：新旗標／input／config 屬性／JSON 欄位／SARIF 規則／開放集的新值 = minor。
+    開放集：unresolved 原因、paletteMode、failOn、theme；封閉集：category、symmetry、baseline。
+    改名、刪除、**改預設**、收緊驗證 = 2.0（改預設比 Parity 的範本嚴，刻意的：預設值決定同一份程式碼在 CI 上紅不紅）。
+  - SARIF 的等級表示嚴重度、不表示 gate（預設 gate warn 時 warn 讓 CI 失敗，SARIF 裡照樣是 warning）；
+    跟著 gate 走的是 Action 的行內註記。
   - **JSON 新增欄位不遞增 `schemaVersion`**（`Report.JsonSchemaVersion`，凍結在 6；消費端必須忽略未知欄位）。
     但 `docs/report.schema.json` 與 `JsonReportContractTests` 的形狀表要跟著加，測試會擋。
     破壞性改變才遞增，而且只在 major。⚠ 0.x 是「形狀變了就遞增」，1.x 不是。
