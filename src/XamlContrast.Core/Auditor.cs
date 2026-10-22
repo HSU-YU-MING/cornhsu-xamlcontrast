@@ -148,6 +148,24 @@ public sealed partial class Auditor
         => double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
 
     /// <summary>
+    /// FontSize → DIP，照 WPF 的 FontSizeConverter（LengthConverter）：數字後面可以接單位 px（預設）、in（96）、
+    /// cm（96/2.54）、pt（96/72），不分大小寫，數字與單位之間可以有空白（審查 1.0 C4）。
+    /// ⚠ 舊版只吃純數字：FontSize="18pt"（= 24 DIP，大字級）讀不懂 → 當成沒設，照一般文字要求 4.5。
+    /// 讀不懂（資源引用、Binding、不是正數）回 false、dip = 0。
+    /// </summary>
+    internal static bool ParseFontSize(string s, out double dip)
+    {
+        dip = 0;
+        var v = s.Trim();
+        var (mul, div) = (1.0, 1.0);
+        foreach (var (unit, m, d) in new[] { ("px", 1.0, 1.0), ("in", 96.0, 1.0), ("cm", 96.0, 2.54), ("pt", 96.0, 72.0) })
+            if (v.EndsWith(unit, StringComparison.OrdinalIgnoreCase)) { (mul, div) = (m, d); v = v[..^2].TrimEnd(); break; }
+        if (!ParseDouble(v, out var n) || !double.IsFinite(n) || n <= 0) return false;
+        dip = n * mul / div;
+        return true;
+    }
+
+    /// <summary>
     /// 字色疊到已解析的不透明底上之後、螢幕上實際的顏色（深淺各自）。元素 Opacity 與半透明字色
     /// （#AARRGGBB、帶 Opacity 的色票、只有一個主題半透明的色票）都是「以 alpha 疊在底上」，兩者相乘 ——
     /// 確定性的合成，不是猜。
@@ -720,9 +738,9 @@ public sealed partial class Auditor
                 var isTextC = !IsNonTextElement(el.Name.LocalName);
                 var fsC = 0.0;
                 var fsRawC = el.Attribute("FontSize")?.Value;
-                if (fsRawC is not null) ParseDouble(fsRawC, out fsC);
-                else if (st.Set.TryGetValue("FontSize", out var sfs)) ParseDouble(sfs, out fsC);
-                else if (chain.Props.TryGetValue("FontSize", out var pfs)) ParseDouble(pfs.V, out fsC);
+                if (fsRawC is not null) ParseFontSize(fsRawC, out fsC);
+                else if (st.Set.TryGetValue("FontSize", out var sfs)) ParseFontSize(sfs, out fsC);
+                else if (chain.Props.TryGetValue("FontSize", out var pfs)) ParseFontSize(pfs.V, out fsC);
                 var fwV = el.Attribute("FontWeight")?.Value
                           ?? (chain.Props.TryGetValue("FontWeight", out var pfw) ? pfw.V : null);
                 var boldC = IsBold(fwV);
@@ -801,7 +819,7 @@ public sealed partial class Auditor
             //    18px 的字誤判成大字級而放過它。
             var fs = 0.0;
             var fsRaw = el.Attribute("FontSize")?.Value;
-            if (fsRaw is not null) ParseDouble(fsRaw, out fs);
+            if (fsRaw is not null) ParseFontSize(fsRaw, out fs);
             var fw = el.Attribute("FontWeight")?.Value;
             var bold = IsBold(fw);
             var pt = fs * 0.75;
@@ -1067,7 +1085,7 @@ public sealed partial class Auditor
                 //   不確定（匿名、沒 TargetType）就當文字報出來 —— 不替使用者放過。
                 var isText = ttName is null || !IsNonTextElement(ttName);
                 var fs = 0.0;
-                if (Prop("FontSize", out _) is { } fsv) ParseDouble(fsv, out fs);
+                if (Prop("FontSize", out _) is { } fsv) ParseFontSize(fsv, out fs);
                 var bold = IsBold(Prop("FontWeight", out _));
                 var pt = fs * 0.75; // WPF FontSize 是 DIP，換 point 要 ×0.75（規劃書 4.3）
                 var isLarge = pt >= 18 || (bold && pt >= 14);

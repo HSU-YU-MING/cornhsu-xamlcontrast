@@ -88,7 +88,7 @@
           "symmetry": { "enum": ["both-low", "dark-fails", "light-fails", "single-theme", null], "description": "Only for fail and warn; null otherwise." },
           "isText": { "type": "boolean" },
           "isLargeText": { "type": "boolean" },
-          "fontSize": { "type": ["number", "null"], "description": "FontSize in device-independent pixels as written; null when none is set." },
+          "fontSize": { "type": ["number", "null"], "description": "FontSize in device-independent pixels (1/96 inch), converted the way WPF's FontSizeConverter does: a plain number is DIP; a unit suffix px, in (96), cm (96/2.54) or pt (96/72) is converted. Not rounded. null when no FontSize is set or it cannot be read statically (a resource reference, a binding)." },
           "theme": { "type": ["string", "null"], "description": "The one theme this pair exists in (a style in a one-theme dictionary, or a style key resolved per theme); the other theme's ratio is null. null when the pair exists in both. An open set: a 1.x release may add a theme (high contrast, say), so consumers must accept values they do not know. Current values: `dark`, `light`." },
           "baseline": { "enum": ["known", "new", "worsened", null], "description": "With --baseline: the ratchet verdict for pairs the gate blocks; null otherwise." }
         }

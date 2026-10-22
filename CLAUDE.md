@@ -165,7 +165,8 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 
 - **WPF 的 `FontSize` 是 DIP（1/96 吋）不是 point（1/72 吋），換算要 ×0.75。**
   18pt = 24px、14pt = 18.67px。少這一步會把 18px 的字當大字級放過。
-  `Auditor.cs` 有三處在算（樹走訪、Style 鏈逐狀態、`WalkStyles`），改要一起改。
+  `Auditor.cs` 有三處在算（樹走訪、Style 鏈逐狀態、`WalkStyles`），改要一起改；三處都經 `ParseFontSize`，
+  它照 WPF 的 FontSizeConverter 認單位（px、in = 96、cm = 96/2.54、pt = 96/72）—— `FontSize="18pt"` 是 24 DIP、大字級。
 - **所有數值屬性一律 `InvariantCulture`**（`Auditor.ParseDouble`）。否則德語系 locale 的
   CI 上 `Opacity="0.5"` 會靜默解析失敗。
 - **`BoldWeight()` 是錨定的整字匹配。** 舊版用子字串（`"Bold"` 命中 `"SemiBold"`），

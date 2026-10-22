@@ -61,6 +61,46 @@ public class LandmineTests
         Assert.Equal("24px", fromStyle.Size);
     }
 
+    [Fact] // FontSize 可以帶單位（審查 1.0 C4）：WPF 的 FontSizeConverter 認 px（預設）、in（96）、cm（96/2.54）、pt（96/72），
+           // 不分大小寫。舊版只吃純數字，FontSize="18pt"（= 24 DIP，大字級）讀不懂 → 字級當成沒設、照一般文字要求 4.5，
+           // JSON 的 fontSize 是 null。三條路徑（樹走訪、Style 鏈、Style 定義處）同一套
+    public void FontSizeUnitsAreConvertedLikeWpf()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <StackPanel xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <StackPanel.Resources>
+                <Style x:Key="Pt" TargetType="Button">
+                  <Setter Property="Background" Value="#FFFFFF"/>
+                  <Setter Property="Foreground" Value="#949494"/>
+                  <Setter Property="FontSize" Value="18PT"/>
+                </Style>
+              </StackPanel.Resources>
+              <TextBlock Foreground="#949494" FontSize="18pt" Text="18pt = 24 DIP"/>
+              <TextBlock Foreground="#949494" FontSize="0.25in" Text="0.25in = 24 DIP"/>
+              <TextBlock Foreground="#949494" FontSize="1cm" Text="1cm = 37.8 DIP"/>
+              <TextBlock Foreground="#949494" FontSize="12 px" Text="12px"/>
+              <TextBlock Foreground="#949494" FontSize="{StaticResource Big}" Text="unknowable"/>
+              <Button Style="{StaticResource Pt}" Foreground="#949494" Content="18pt from the Style, chain path"/>
+            </StackPanel>
+            """);
+        var r = fx.Run();
+        double? Size(string text) => Assert.Single(r.Findings, f => f.Element == "TextBlock" && f.Line == Line(text)).FontSize;
+        int Line(string text) => File.ReadAllLines(Path.Combine(fx.Root, "Main.xaml")).Select((l, i) => (l, i)).Single(x => x.l.Contains($"Text=\"{text}\"")).i + 1;
+        Assert.Equal(24, Size("18pt = 24 DIP")!.Value, 6);
+        Assert.Equal(24, Size("0.25in = 24 DIP")!.Value, 6);
+        Assert.Equal(96 / 2.54, Size("1cm = 37.8 DIP")!.Value, 6);
+        Assert.Equal(12, Size("12px")!.Value, 6);
+        Assert.Null(Size("unknowable"));
+        // 24 DIP = 18pt → 大字級（3:1）：#949494 疊白是 3.03:1，過
+        Assert.Equal(3, r.Findings.Count(f => f.Large && f.Category == Category.Ok && f.Element == "TextBlock"));
+        var style = Assert.Single(r.Findings, f => f.Element.StartsWith("Style[Pt]"));
+        Assert.Equal(24, style.FontSize!.Value, 6);
+        Assert.True(style.Large);
+        var use = Assert.Single(r.Findings, f => f.Element.StartsWith("Button⊕"));
+        Assert.True(use.Large);
+    }
+
     [Fact] // Style 鏈逐狀態路徑的第三個 FontSize 來源：觸發器（hover 放大字）—— 一樣要換算
     public void FontSizeSetByATriggerStateIsConvertedToo()
     {

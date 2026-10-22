@@ -301,6 +301,9 @@ older 1.x (exit 2, naming the property).
 - **Nested applications' dictionaries no longer leak into the outer application's scope**, and files
   outside every application no longer borrow an application's palette when the shared area has none
   (an app-only key is `unknown-palette-key` there — its value depends on the host).
+- **`FontSize` with a unit is read** the way WPF's converter reads it — `18pt` (= 24 DIP, large text),
+  `0.25in`, `1cm`, `12px`. 0.6.1 read plain numbers only, so `FontSize="18pt"` text was held to 4.5:1 as if it had
+  no size, and the JSON's `fontSize` was `null`.
 - **Short colour literals and the full WPF named-colour table** (`#AAA`, `#8000`, `Navy`, `Teal`, …) are
   resolved instead of being filed under `bound-or-gradient`.
 - **`bin`/`obj` exclusion looks only below the scanned root, whole segments, any case** — a project that
