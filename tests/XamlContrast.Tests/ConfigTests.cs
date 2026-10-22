@@ -313,43 +313,37 @@ public class ConfigTests
         Assert.Equal(7.0, cfg.Thresholds.NormalText);
     }
 
-    [Fact] // 拼錯／未知的屬性不能靜默忽略：{"strictPallete": true} 載入時沒有任何錯誤、StrictPalette 仍是 false，
-           // 使用者以為色盤退化保險開了。退出碼要不要改成 2 是待決定的介面變更（會拒絕現在能跑的設定檔）；
-           // 這裡先守住「一定要講出來」—— 每個未知屬性點名（含區段內的），$schema 是編輯器慣例、放行
-    public void UnknownPropertiesAreNamedNotSilentlyIgnored()
+    [Fact] // 1.0：未知屬性是設定錯誤（exit 2，決策檔 H5 選項 A）。{"strictPallete": true} 在 0.x 載入時沒有任何錯誤、
+           // StrictPalette 仍是 false —— 使用者以為色盤退化保險開了。本分支先改成點名警告，現在升級成錯誤：
+           // 每個未知屬性都點名（含區段內的，以 palette.mdoe 的形式）；$schema 是編輯器慣例、放行
+    public void UnknownPropertiesAreAConfigError()
     {
         using var fx = new Fixture().WithPalette();
-        fx.File("Main.xaml", """<Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>""");
         fx.File(ToolConfig.FileName, """
             {
               "$schema": "https://example.invalid/xamlcontrast.schema.json",
               "strictPallete": true,
               "minCoverage": 10,
-              "palette": { "mode": "auto", "mdoe": "pair" },
-              "thresholds": { "normalText": 4.5 }
+              "palette": { "mode": "auto", "mdoe": "pair" }
             }
             """);
-        var cfg = ToolConfig.Load(fx.Root);
-        Assert.Equal(["strictPallete", "palette.mdoe"], cfg.UnknownProperties);
-        Assert.False(cfg.StrictPalette);
-        Assert.Equal(10, cfg.MinCoverage); // 認得的欄位照常生效
+        var ex = Assert.Throws<ConfigException>(() => ToolConfig.Load(fx.Root));
+        Assert.Contains("unknown properties 'strictPallete', 'palette.mdoe'", ex.Message);
+        Assert.Contains("docs/config-schema.md", ex.Message);
 
-        var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
-        var console = Report.ToConsole(r);
-        Assert.Contains("!! config: unknown property 'strictPallete' ignored", console);
-        Assert.Contains("!! config: unknown property 'palette.mdoe' ignored", console);
-        Assert.Contains("unknown property 'strictPallete' ignored", Report.ToMarkdown(r, 0));
+        var cli = Cli.Run(fx.Root);
+        Assert.True(cli.Exit == 2, cli.ToString());
+        Assert.Contains("config error: unknown properties 'strictPallete'", cli.Err);
     }
 
-    [Fact] // 沒有未知屬性時不印任何警告（不能變成每次都出現、讓人學會忽略的雜訊）
-    public void KnownPropertiesProduceNoUnknownPropertyWarning()
+    [Fact] // 認得的屬性（不分大小寫）與 $schema 照常載入
+    public void KnownPropertiesAndSchemaLoad()
     {
         using var fx = new Fixture().WithPalette();
-        fx.File("Main.xaml", """<Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>""");
         fx.File(ToolConfig.FileName, """{ "$schema": "x", "FAILON": "warn", "ignore": { "RequireReason": false } }""");
         var cfg = ToolConfig.Load(fx.Root);
-        Assert.Empty(cfg.UnknownProperties);
-        Assert.DoesNotContain("unknown property", Report.ToConsole(Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg)));
+        Assert.Equal("warn", cfg.FailOn);
+        Assert.False(cfg.Ignore.RequireReason);
     }
 
     // ── 強制色盤模式：csharp／single ──────────────────────────────────────

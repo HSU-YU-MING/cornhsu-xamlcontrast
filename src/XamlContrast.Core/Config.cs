@@ -41,13 +41,6 @@ public sealed class ToolConfig
     /// <summary>載入來源路徑；null = 沒有 config 檔（純預設值）</summary>
     [JsonIgnore] public string? SourcePath { get; private set; }
 
-    /// <summary>config 裡認不得的屬性（含區段內的，以 <c>palette.mdoe</c> 的形式）。
-    /// ⚠ 拼錯的屬性名會被靜默忽略：<c>{"strictPallete": true}</c> 載入時沒有任何錯誤，
-    ///   色盤退化保險其實沒開 —— 使用者以為改了稽核標準而其實沒有。至少要點名講出來
-    ///   （console 與 Markdown 報告都印）；要不要直接 exit 2 是介面決定，見 CHANGELOG。
-    ///   <c>$schema</c> 是 JSON 編輯器的慣例，放行。</summary>
-    [JsonIgnore] public IReadOnlyList<string> UnknownProperties { get; private set; } = [];
-
     public sealed class PaletteSection
     {
         public string Mode { get; init; } = "auto"; // auto | pair | csharp | single | none
@@ -105,6 +98,14 @@ public sealed class ToolConfig
         try { cfg = JsonSerializer.Deserialize<ToolConfig>(text, JsonOpts) ?? new ToolConfig(); }
         catch (JsonException ex) { throw new ConfigException($"{FileName} is not valid JSON: {ex.Message}"); }
 
+        // 未知屬性是設定錯誤（1.0，決策檔 H5）。⚠ 0.x 靜默忽略：{"strictPallete": true} 載入時沒有任何錯誤，
+        //   色盤退化保險其實沒開 —— 使用者以為改了稽核標準而其實沒有。全部點名（含區段內的，以 palette.mdoe 的形式）；
+        //   $schema 是 JSON 編輯器的慣例，放行
+        if (FindUnknown(text) is { Count: > 0 } unknown)
+            throw new ConfigException(
+                $"unknown propert{(unknown.Count == 1 ? "y" : "ies")} {string.Join(", ", unknown.Select(u => $"'{u}'"))} " +
+                "— check the spelling against docs/config-schema.md");
+
         // ⚠ 區段、陣列、陣列元素給 null 時 System.Text.Json 照單全收 —— 舊版接著就是
         //   NullReferenceException／ArgumentNullException 的 .NET 堆疊，退出碼跳出 0/1/2 契約。
         //   寫錯的 config 一律 exit 2 並點名欄位
@@ -132,7 +133,6 @@ public sealed class ToolConfig
             throw new ConfigException($"minCoverage must be between 0 and 100, got {cfg.MinCoverage.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
 
         cfg.SourcePath = path;
-        cfg.UnknownProperties = FindUnknown(text);
         return cfg;
     }
 
