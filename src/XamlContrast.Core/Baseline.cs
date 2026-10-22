@@ -26,6 +26,9 @@ public static class Baseline
         public required List<Entry> WorsenedFailures { get; init; }
         public required int KnownDebt { get; init; }
         public required int PaidDebt { get; init; }
+        /// <summary>gate 擋的每一筆 finding 的判定：known／new／worsened（JSON 的 findings[].baseline）。
+        /// 鍵惡化時那個鍵底下 gate 擋的每一筆都標 worsened —— 鍵不含行號，分不出「多出來的是哪一處」。</summary>
+        public IReadOnlyDictionary<Finding, string> Status { get; init; } = new Dictionary<Finding, string>();
         public bool Passes => NewFailures.Count == 0 && WorsenedFailures.Count == 0;
     }
 
@@ -120,7 +123,9 @@ public static class Baseline
         var current = result.Findings.Where(BelowAa).GroupBy(KeyOf).ToDictionary(g => g.Key, g => g.ToList());
         var newFailures = new List<Finding>();
         var worsened = new List<Entry>();
+        var status = new Dictionary<Finding, string>(ReferenceEqualityComparer.Instance);
         var knownDebt = 0;
+        void Mark(List<Finding> gating, string s) { foreach (var f in gating) status[f] = s; }
 
         foreach (var (key, list) in current)
         {
@@ -130,20 +135,24 @@ public static class Baseline
             if (!known.TryGetValue(key, out var entry))
             {
                 newFailures.AddRange(gating);
+                Mark(gating, "new");
                 continue;
             }
             var worstNow = list.Min(f => f.Worst);
             if (count > entry.Count)
             {
                 worsened.Add(entry with { Count = count }); // 同鍵的處數變多也是惡化
+                Mark(gating, "worsened");
             }
             else if (worstNow < entry.Worst - 0.01)
             {
                 worsened.Add(entry with { Worst = worstNow }); // 色盤漂移：鍵沒變但比值更差
+                Mark(gating, "worsened");
             }
             else
             {
                 knownDebt += count;
+                Mark(gating, "known");
             }
         }
 
@@ -157,6 +166,7 @@ public static class Baseline
             WorsenedFailures = worsened,
             KnownDebt = knownDebt,
             PaidDebt = paid,
+            Status = status,
         };
     }
 

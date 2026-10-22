@@ -241,7 +241,7 @@ public class RegressionTests
         Assert.Equal(2, doc.RootElement.GetProperty("runs")[0].GetProperty("results").GetArrayLength());
     }
 
-    // 4.5 輸出合約：退化要機器可讀 —— summary 區塊要有 paletteSource / unresolved / skipped
+    // 4.5 輸出合約：退化要機器可讀 —— summary 區塊要有 paletteMode / unresolved / skipped
     [Fact]
     public void JsonSummaryCarriesDegradationCounters()
     {
@@ -253,7 +253,7 @@ public class RegressionTests
             """);
         var r = fx.Run();
         var json = Report.ToJson(r);
-        Assert.Contains("\"paletteSource\": \"none\"", json);
+        Assert.Contains("\"paletteMode\": \"none\"", json); // 6 拿掉 paletteSource（由 paletteMode 推得）
         Assert.Contains("\"unresolved\": 1", json);
         Assert.Contains("\"pairs\": 0", json);
         // 退化計數要能行動：光知道「漏了 1 組」不夠，要知道是哪一類漏

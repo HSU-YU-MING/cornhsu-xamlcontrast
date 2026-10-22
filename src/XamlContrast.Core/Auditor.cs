@@ -95,8 +95,7 @@ public sealed partial class Auditor
     private int _pairs, _unresolved, _skipped, _deadFg, _suppressed, _disabled, _translucentOverNothing;
     private StyleIndex _styles = null!;
     private string _curFile = ""; // 具名 Style 查找的「同檔優先」範圍（完整路徑）
-    private bool _oneThemeOnly;   // 目前這個檔只屬於一個主題（ThemeFileSides）
-    private ThemeSide? _curSide;  // 同上，是哪一個主題（Style 查找依主題解析，見 StyleIndex.Build）
+    private ThemeSide? _curSide;  // 目前這個檔只屬於哪一個主題（ThemeFileSides；Style 查找依主題解析，見 StyleIndex.Build）
     private readonly Dictionary<(Palette, ThemeSide), Palette> _sideViews = new();
 
     [GeneratedRegex(@"^\s*xamlcontrast-ignore(?:\s*:\s*(?<reason>.*\S))?\s*$")]
@@ -288,13 +287,12 @@ public sealed partial class Auditor
                 // 多 App repo:這個檔案屬於哪個 App,就用哪個 App 的色盤
                 // (單 App 或無作用域資訊時 PaletteFor 回傳全域色盤,行為不變)
                 // 只屬於一個主題的字典（色盤來自分開的深／淺 XAML 字典時）：兩欄都用那個主題的色票，
-                // findings 標 OneThemeOnly —— 拿 Dark.xaml 的 Style 配淺色色票是執行期不存在的組合。
+                // findings 標 Theme（那個主題）—— 拿 Dark.xaml 的 Style 配淺色色票是執行期不存在的組合。
                 // 不限色盤檔：不含色票的主題檔（Themes/Dark/Styles.xaml）一樣只屬於那個主題
                 var side = detection.SideOf(f);
                 // 只有別的畫面定義的區域鍵，這個檔看不到
                 var basePal = VisibleIn(detection.PaletteFor(f), f);
                 auditor._pal = side is { } s ? auditor.SideView(basePal, s) : basePal;
-                auditor._oneThemeOnly = side is not null;
                 auditor._curSide = side;
                 // 畫面檔自己的區域 brush 在那個畫面裡蓋過全域（見 MergedXamlPalette 的區域層）
                 if (!paletteFile && PaletteDetector.LocalOverrides(f, basePal) is { Count: > 0 } local)
@@ -616,21 +614,20 @@ public sealed partial class Auditor
     }
 
     /// <summary>元素 × Style 鏈的逐狀態檢查。<paramref name="side"/> 不是 null 時只評那一個主題
-    /// （同 key 的 Style 依主題各自解析、兩個主題解析到不同的鏈）：色盤用那個主題的視圖、finding 標 OneThemeOnly，
+    /// （同 key 的 Style 依主題各自解析、兩個主題解析到不同的鏈）：色盤用那個主題的視圖、finding 標那個主題（Theme），
     /// 元素名的 Style 標籤帶 @dark／@light。</summary>
     private void GradeChain(XElement el, StyleIndex.Merged chain, ThemeSide? side, Backdrop bd, Backdrop ancestorBd,
         string? localBgRaw, string file, double op, bool suppressed)
     {
         var pal = _pal;
         var label = chain.Label;
-        var oneThemeOnly = _oneThemeOnly;
+        var theme = side ?? _curSide;
         if (side is { } s)
         {
             pal = SideView(_pal, s);
             bd = OnSide(bd, s);
             ancestorBd = OnSide(ancestorBd, s);
             label += s == ThemeSide.Dark ? "@dark" : "@light";
-            oneThemeOnly = true;
         }
         {
             var localFgRaw = XamlBrush.Read(el, "Foreground");
@@ -739,8 +736,9 @@ public sealed partial class Auditor
                     IsText = isTextC,
                     Need = needC,
                     Size = fsC > 0 ? $"{(int)Math.Round(fsC, MidpointRounding.ToEven)}px" : "",
+                    FontSize = fsC > 0 ? fsC : null,
                     Large = isLargeC,
-                    OneThemeOnly = oneThemeOnly,
+                    Theme = theme,
                 });
             }
         }
@@ -810,8 +808,9 @@ public sealed partial class Auditor
                 IsText = isText,
                 Need = need,
                 Size = fs > 0 ? $"{(int)Math.Round(fs, MidpointRounding.ToEven)}px" : "",
+                FontSize = fs > 0 ? fs : null,
                 Large = isLarge,
-                OneThemeOnly = _oneThemeOnly,
+                Theme = _curSide,
             });
         }
 
@@ -1072,8 +1071,9 @@ public sealed partial class Auditor
                     IsText = isText,
                     Need = need,
                     Size = fs > 0 ? $"{(int)Math.Round(fs, MidpointRounding.ToEven)}px" : "",
+                    FontSize = fs > 0 ? fs : null,
                     Large = isLarge,
-                    OneThemeOnly = _oneThemeOnly,
+                    Theme = _curSide,
                 });
             }
         }

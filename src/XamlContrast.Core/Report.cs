@@ -6,6 +6,21 @@ using System.Text.Json.Serialization;
 namespace XamlContrast.Core;
 
 /// <summary>
+/// 只有 CLI 執行時才知道的事：工具版本、這次的退出碼、實際生效的 gate、--baseline 的逐筆判定。
+/// 函式庫呼叫端可以不給 —— toolVersion／exitCode 輸出 null，gate 取 <see cref="AuditResult.Config"/> 的值，baseline 全 null。
+/// </summary>
+public sealed record ReportContext
+{
+    public string? ToolVersion { get; init; }
+    /// <summary>稽核的判定（0／1／3）。之後寫輸出檔失敗的 exit 2 不在這裡 —— 那時這份 JSON 已經寫出去了。</summary>
+    public int? ExitCode { get; init; }
+    public string? FailOn { get; init; }
+    public double? MinCoverage { get; init; }
+    public bool? StrictPalette { get; init; }
+    public IReadOnlyDictionary<Finding, string>? BaselineStatus { get; init; }
+}
+
+/// <summary>
 /// 輸出合約（規劃書 4.5）。JSON 分兩層：summary 讓退化資訊機器可讀
 /// （CI 只消費 findings 的話，「退化要用喊的」等於不存在），findings 是逐筆結果。
 /// 文案一律英文 —— JSON 的 category 是給 CI 腳本 match 的。
@@ -105,25 +120,40 @@ public static class Report
         _ => "none",
     };
 
+    // SARIF 省略 null（SARIF 的慣例，消費端是 GitHub code scanning）
     private static readonly JsonSerializerOptions JsonOpts = new()
     {
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
-    public static string ToJson(AuditResult r)
+    // --json 從 schemaVersion 6 起每個欄位一律輸出，沒有值的是 null —— 消費端不必分辨「省略」與「null」
+    private static readonly JsonSerializerOptions ReportJsonOpts = new() { WriteIndented = true };
+
+    /// <summary>JSON 報告的格式版本。1.0 凍結在 6：1.x 只新增欄位、不改名不刪除，新增不遞增這個數字
+    /// （消費端必須忽略不認得的欄位）；破壞性的改變才遞增，而且只在主版本。形狀見 docs/report.schema.json。</summary>
+    public const int JsonSchemaVersion = 6;
+
+    private static string ThemeLabel(ThemeSide s) => s == ThemeSide.Dark ? "dark" : "light";
+
+    public static string ToJson(AuditResult r, ReportContext? context = null)
     {
+        var ctx = context ?? new ReportContext();
         var payload = new
         {
-            // JSON 消費端要能偵測格式演進 —— 0.x 期間欄位可能變動，變動時遞增
+            // JSON 消費端要能偵測格式演進
             // 2：ok/decorative 的 findings 不再輸出 symmetry（該維度只在沒過的配對上有意義）
             // 3：summary 新增 unresolvedBy（unresolved 的原因細目）
             // 4：summary 新增 coverage（解析成功的配對佔看到的比例）
             // 5：summary 新增 unknownKeys；頂層新增 unresolved 陣列（逐筆位置）
-            schemaVersion = 5,
+            // 6（1.0 凍結）：每個欄位一律輸出（null／[]／{}）；頂層 unresolved → unresolvedSites、新增 toolVersion／exitCode；
+            //    summary 新增 failOn／minCoverage／strictPalette／invalidIgnoreCount、拿掉 paletteSource；
+            //    findings 的 largeText → isLargeText、fontSize 改成數字、新增 theme／baseline
+            schemaVersion = JsonSchemaVersion,
+            toolVersion = ctx.ToolVersion,
+            exitCode = ctx.ExitCode,
             summary = new
             {
-                paletteSource = r.Detection.Mode == PaletteMode.None ? "none" : "project",
                 paletteMode = ModeLabel(r.Detection.Mode),
                 paletteDetail = r.Detection.Description,
                 paletteKeys = r.Detection.Palette.Count,
@@ -135,6 +165,10 @@ public static class Report
                     largeText = r.Config.Thresholds.LargeText,
                     failFactor = r.Config.Thresholds.FailFactor,
                 },
+                // 這份結果是用哪把尺量的：預設 gate 在 1.0 改成 warn，只看 counts 分不出這次 warn 擋不擋
+                failOn = ctx.FailOn ?? r.Config.FailOn,
+                minCoverage = ctx.MinCoverage ?? r.Config.MinCoverage,
+                strictPalette = ctx.StrictPalette ?? r.Config.StrictPalette,
                 files = r.FileCount,
                 pairs = r.Pairs,
                 // 覆蓋率是「這份結果代不代表專案」的關鍵數字 —— 只給 pairs 的話，
@@ -145,18 +179,18 @@ public static class Report
                 // 使用者看不出其中絕大多數可能是同一個可補救的原因
                 unresolvedBy = Reasons(r).ToDictionary(kv => ReasonLabel(kv.Key), kv => kv.Value),
                 // 每個 unknown key 都是死引用、打字錯誤、或偵測漏掉的色盤檔 —— 全量點名
-                unknownKeys = r.UnresolvedSites.Any(s => s.Reason == UnresolvedReason.UnknownPaletteKey)
-                    ? r.UnresolvedSites.Where(s => s.Reason == UnresolvedReason.UnknownPaletteKey)
-                        .GroupBy(s => s.Value).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.Ordinal)
-                        .ToDictionary(g => g.Key, g => g.Count())
-                    : null,
+                unknownKeys = r.UnresolvedSites.Where(s => s.Reason == UnresolvedReason.UnknownPaletteKey)
+                    .GroupBy(s => s.Value).OrderByDescending(g => g.Count()).ThenBy(g => g.Key, StringComparer.Ordinal)
+                    .ToDictionary(g => g.Key, g => g.Count()),
                 skipped = r.Skipped,
                 deadForeground = r.DeadForeground,
                 disabledExempt = r.DisabledExempt,
                 parseErrors = r.ParseErrors.Count,
-                parseErrorFiles = r.ParseErrors.Count > 0 ? r.ParseErrors : null,
+                parseErrorFiles = r.ParseErrors,
                 suppressed = r.Suppressed,
-                invalidIgnores = r.InvalidIgnores.Count > 0 ? r.InvalidIgnores : null,
+                // 與 parseErrors／parseErrorFiles 同一個樣子：計數＋清單
+                invalidIgnoreCount = r.InvalidIgnores.Count,
+                invalidIgnores = r.InvalidIgnores,
                 counts = new
                 {
                     fail = r.CountOf(Category.Fail),
@@ -166,7 +200,8 @@ public static class Report
                 },
             },
             // 逐筆的「工具沒看到的地方」—— 與 findings 分開:它們不是問題,是盲區地圖
-            unresolved = r.UnresolvedSites.Count == 0 ? null : r.UnresolvedSites.Select(s => new
+            // （6 改名：舊名與 summary.unresolved 同名，一個是計數一個是陣列）
+            unresolvedSites = r.UnresolvedSites.Select(s => new
             {
                 file = s.File,
                 line = s.Line,
@@ -184,15 +219,17 @@ public static class Report
                 ratioLight = f.RatioLight,
                 threshold = f.Need,
                 category = CategoryLabel(f.Category),
-                // 合格的配對沒有「換主題救不救得回來」可言 —— 欄位整個省略（null 不輸出），
+                // 合格的配對沒有「換主題救不救得回來」可言 —— null，
                 // 比給一個看起來像分類結果的錯值安全
                 symmetry = f.Symmetry == Symmetry.NotApplicable ? null : SymmetryLabel(f.Symmetry),
                 isText = f.IsText,
-                fontSize = f.Size.Length > 0 ? f.Size : null,
-                largeText = f.Large,
+                isLargeText = f.Large,
+                fontSize = f.FontSize,
+                theme = f.Theme is { } t ? ThemeLabel(t) : null,
+                baseline = ctx.BaselineStatus is { } st && st.TryGetValue(f, out var b) ? b : null,
             }),
         };
-        return JsonSerializer.Serialize(payload, JsonOpts);
+        return JsonSerializer.Serialize(payload, ReportJsonOpts);
     }
 
     /// <summary>

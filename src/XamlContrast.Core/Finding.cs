@@ -10,7 +10,7 @@ public enum Category { Ok, Warn, Fail, Decorative }
 ///
 /// ⚠ 這個維度只在「沒過」的配對上有意義：BothLow 的語意是「色票本身不夠亮，
 /// 換主題救不了」，套在 21:1 的合格配對上是胡說。ok/decorative 一律 NotApplicable，
-/// JSON 直接不輸出該欄位 —— 人看的報告本來就只印 fail/warn，錯的標籤只會流到
+/// JSON 輸出 null —— 人看的報告本來就只印 fail/warn，錯的標籤只會流到
 /// 吃 JSON 的下游手上。
 /// </summary>
 public enum Symmetry { BothLow, DarkFails, LightFails, SingleTheme, NotApplicable }
@@ -29,10 +29,16 @@ public sealed class Finding
     public bool IsText { get; init; }
     /// <summary>門檻：一般文字 4.5、大字級 3.0、裝飾 0</summary>
     public double Need { get; init; }
+    /// <summary>給人看的字級標籤（"12px"，取整；沒設是空字串）—— console 用。JSON 用 <see cref="FontSize"/>。</summary>
     public string Size { get; init; } = "";
+    /// <summary>FontSize（DIP），照寫的值不取整；沒設字級是 null。</summary>
+    public double? FontSize { get; init; }
     public bool Large { get; init; }
-    /// <summary>只屬於一個主題的配對（Dark.xaml 裡的 Style 之類）：兩欄都是那個主題的值，對稱欄標 single-theme</summary>
-    public bool OneThemeOnly { get; init; }
+    /// <summary>這組配對只存在於哪一個主題（Dark.xaml 裡的 Style、依主題解析到的 @dark／@light 鏈）；兩個主題都有是 null。
+    /// 不是 null 時 RatioDark 與 RatioLight 都是那個主題的值，對稱欄標 single-theme。</summary>
+    public ThemeSide? Theme { get; init; }
+    /// <summary>只屬於一個主題的配對（<see cref="Theme"/> 不是 null）</summary>
+    public bool OneThemeOnly => Theme is not null;
 
     // 分級後填入
     public Category Category { get; set; }

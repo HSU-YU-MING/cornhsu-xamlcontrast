@@ -67,9 +67,7 @@ for (var i = 0; i < args.Length; i++)
             PrintUsage(Console.Out);
             return 0;
         case "--version":
-            Console.WriteLine(typeof(Program).Assembly
-                .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
-                is [System.Reflection.AssemblyInformationalVersionAttribute a, ..] ? a.InformationalVersion.Split('+')[0] : "unknown");
+            Console.WriteLine(ToolVersion() ?? "unknown");
             return 0;
         default:
             if (root is null && !args[i].StartsWith('-')) { root = args[i]; break; }
@@ -175,26 +173,41 @@ Console.Write(Report.ToConsole(result, showOk));
 if (showUnresolved && result.UnresolvedSites.Count > 0)
     Console.Write(Report.UnresolvedList(result));
 
-if (jsonPath is not null && !TryWrite(jsonPath, Report.ToJson(result), "json")) return 2;
-
-if (sarifPath is not null)
-{
-    var ver = typeof(Program).Assembly
-        .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
-        is [System.Reflection.AssemblyInformationalVersionAttribute va, ..] ? va.InformationalVersion.Split('+')[0] : "0.0.0";
-    if (!TryWrite(sarifPath, Report.ToSarif(result, ver), "sarif")) return 2;
-}
-
 var fail = result.CountOf(Category.Fail);
 var warn = result.CountOf(Category.Warn);
+Baseline.ComparisonResult? cmp = null; // --baseline 模式的比對結果（JSON 的 findings[].baseline 要用）
 
-// 退出碼的判定抽成區域函式,因為 --md 的報告要標明 PASS/FAIL —— 得先知道結論才能寫檔。
-// 判定邏輯與各分支的輸出一字未改,只是包了一層。
+// 先判定、再寫輸出檔：JSON 帶退出碼與 baseline 判定、--md 標 PASS/FAIL，都得先知道結論。
+// 判定（0／1／3）只看稽核結果；之後任何一個輸出檔寫不出去 → 2（那時寫出去的 JSON 記的是判定）
 var exitCode = DecideExit();
+
+var context = new ReportContext
+{
+    ToolVersion = ToolVersion(),
+    ExitCode = exitCode,
+    FailOn = gateWarn ? "warn" : "fail",
+    MinCoverage = minCov,
+    StrictPalette = strictPalette,
+    BaselineStatus = cmp?.Status,
+};
+if (jsonPath is not null && !TryWrite(jsonPath, Report.ToJson(result, context), "json")) return 2;
+
+if (sarifPath is not null && !TryWrite(sarifPath, Report.ToSarif(result, ToolVersion() ?? "0.0.0"), "sarif")) return 2;
+
+// 導入模式第一步：把現況凍成已知債清單（存進 repo）。之後只擋新增與惡化。
+// 收「低於 AA」的每一組（fail＋warn），不論 gate —— 之後換 gate 也不必重寫。
+// 結果不可信（3）時不寫：把「工具沒看到」凍成「沒有債」，之後每一組都會被當成新的
+if (writeBaselinePath is not null && exitCode == 0 &&
+    !TryWrite(writeBaselinePath, Baseline.Write(result), "baseline", $" ({fail + warn} known pair(s) below AA)")) return 2;
 
 if (mdPath is not null && !TryWrite(mdPath, Report.ToMarkdown(result, exitCode), "markdown")) return 2;
 
 return exitCode;
+
+// 版本字串（不含 +build metadata）；組件沒帶版本時 null
+static string? ToolVersion() => typeof(Program).Assembly
+    .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+    is [System.Reflection.AssemblyInformationalVersionAttribute a, ..] ? a.InformationalVersion.Split('+')[0] : null;
 
 // --json／--sarif／--md／--baseline／--write-baseline 的值：必填，而且不能長得像旗標。舊版只檢查「後面還有沒有字」，
 // `--json --strict-palette` 會寫出一個叫 --strict-palette 的檔、把保險旗標靜默吃掉。
@@ -273,18 +286,12 @@ int DecideExit()
         return 3;
     }
 
-    if (writeBaselinePath is not null)
-    {
-        // 導入模式第一步：把現況凍成已知債清單（存進 repo）。之後只擋新增與惡化。
-        // 收「低於 AA」的每一組（fail＋warn），不論 gate —— 之後換 gate 也不必重寫
-        if (!TryWrite(writeBaselinePath, Baseline.Write(result), "baseline",
-                      $" ({fail + warn} known pair(s) below AA)")) return 2;
-        return 0;
-    }
+    // --write-baseline：通過三道保險就是 0（檔案在判定之後寫，見上面）
+    if (writeBaselinePath is not null) return 0;
 
     if (known is not null)
     {
-        var cmp = Baseline.Compare(result, known, gateWarn);
+        cmp = Baseline.Compare(result, known, gateWarn);
         Console.WriteLine($"baseline: known debt {cmp.KnownDebt}, paid off {cmp.PaidDebt} (debt may only shrink)");
         foreach (var f in cmp.NewFailures)
             Console.WriteLine($"  NEW failure: {f.File}:{f.Line} {f.Element} fg={f.Fg} bg={f.Bg}");

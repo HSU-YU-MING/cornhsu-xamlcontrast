@@ -66,7 +66,8 @@ public class CliOutputTests
         Assert.Matches(@"sarif written: .*report\.sarif", r.Out);
 
         var report = Cli.ReadJson(json);
-        Assert.Equal(5, report.GetProperty("schemaVersion").GetInt32());
+        Assert.Equal(6, report.GetProperty("schemaVersion").GetInt32());
+        Assert.Equal(1, report.GetProperty("exitCode").GetInt32());
         Assert.Equal(1, report.GetProperty("summary").GetProperty("counts").GetProperty("fail").GetInt32());
 
         // SARIF 的 driver.version 就是 --version 印的那個（去掉 +sha）—— 兩處自稱的版本不能分家

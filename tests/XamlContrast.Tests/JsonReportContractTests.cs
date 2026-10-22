@@ -78,6 +78,78 @@ public class JsonReportContractTests
             "unresolved[].value:String",
             "unresolved[]:Object",
         ],
+        // 6（1.0）：盤點 4.7 的命名與空值整理一次做完 —— 頂層 unresolved → unresolvedSites（與 summary.unresolved 不再同名）、
+        // findings[].largeText → isLargeText、fontSize 改成數字（DIP，不取整）、拿掉 paletteSource（由 paletteMode 推得）；
+        // 每個欄位一律輸出（沒有值是 null、清單可為空），不再省略；新增 toolVersion、exitCode、summary.failOn／minCoverage／
+        // strictPalette（實際生效的 gate）、summary.invalidIgnoreCount、findings[].theme（只屬於一個主題的配對）、
+        // findings[].baseline（--baseline 模式下的 known／new／worsened）
+        [6] =
+        [
+            "exitCode:Number",
+            "findings:Array",
+            "findings[]:Object",
+            "findings[].baseline:Null",
+            "findings[].bg:String",
+            "findings[].category:String",
+            "findings[].element:String",
+            "findings[].fg:String",
+            "findings[].file:String",
+            "findings[].fontSize:Null",
+            "findings[].fontSize:Number",
+            "findings[].isLargeText:Boolean",
+            "findings[].isText:Boolean",
+            "findings[].line:Number",
+            "findings[].ratioDark:Number",
+            "findings[].ratioLight:Number",
+            "findings[].symmetry:Null",
+            "findings[].symmetry:String",
+            "findings[].theme:Null",
+            "findings[].threshold:Number",
+            "schemaVersion:Number",
+            "summary.configLoaded:Boolean",
+            "summary.counts.decorative:Number",
+            "summary.counts.fail:Number",
+            "summary.counts.ok:Number",
+            "summary.counts.warn:Number",
+            "summary.counts:Object",
+            "summary.coverage:Number",
+            "summary.deadForeground:Number",
+            "summary.disabledExempt:Number",
+            "summary.failOn:String",
+            "summary.files:Number",
+            "summary.invalidIgnoreCount:Number",
+            "summary.invalidIgnores:Array",
+            "summary.invalidIgnores[]:String",
+            "summary.minCoverage:Number",
+            "summary.pairs:Number",
+            "summary.paletteDetail:String",
+            "summary.paletteKeys:Number",
+            "summary.paletteMode:String",
+            "summary.parseErrorFiles:Array",
+            "summary.parseErrorFiles[]:String",
+            "summary.parseErrors:Number",
+            "summary.singleTheme:Boolean",
+            "summary.skipped:Number",
+            "summary.strictPalette:Boolean",
+            "summary.suppressed:Number",
+            "summary.thresholds.failFactor:Number",
+            "summary.thresholds.largeText:Number",
+            "summary.thresholds.normalText:Number",
+            "summary.thresholds:Object",
+            "summary.unknownKeys.*:Number",
+            "summary.unknownKeys:Object",
+            "summary.unresolved:Number",
+            "summary.unresolvedBy.*:Number",
+            "summary.unresolvedBy:Object",
+            "summary:Object",
+            "toolVersion:String",
+            "unresolvedSites:Array",
+            "unresolvedSites[].file:String",
+            "unresolvedSites[].line:Number",
+            "unresolvedSites[].reason:String",
+            "unresolvedSites[].value:String",
+            "unresolvedSites[]:Object",
+        ],
     };
 
     private static readonly HashSet<string> DynamicKeyMaps = ["summary.unresolvedBy", "summary.unknownKeys"];
@@ -132,7 +204,9 @@ public class JsonReportContractTests
         return fx;
     }
 
-    private static JsonElement JsonOf(Fixture fx) => JsonDocument.Parse(Report.ToJson(fx.Run())).RootElement;
+    // CLI 會帶上工具版本與退出碼；函式庫呼叫端沒給的話這兩欄是 null
+    private static JsonElement JsonOf(Fixture fx)
+        => JsonDocument.Parse(Report.ToJson(fx.Run(), new ReportContext { ToolVersion = "1.0.0", ExitCode = 1 })).RootElement;
 
     private static string KindOf(JsonElement e) => e.ValueKind is JsonValueKind.True or JsonValueKind.False
         ? "Boolean" : e.ValueKind.ToString();
@@ -166,22 +240,61 @@ public class JsonReportContractTests
         Assert.Equal(expected.OrderBy(s => s, StringComparer.Ordinal), actual);
     }
 
-    [Fact] // 選填欄位的出現規則：symmetry 只在 fail/warn、fontSize 只在有 FontSize 時
-    public void OptionalFindingFieldsAppearOnlyWhenTheyApply()
+    [Fact] // docs/report.schema.json 與實際輸出一致：每一層物件的欄位一個不多一個不少、全部 required，列舉值與工具的標籤相同。
+           // 形狀測試釘的是型別，這條釘的是「發佈出去的那份 schema 沒有說謊」
+    public void PublishedJsonSchemaMatchesTheOutput()
+    {
+        var schema = JsonDocument.Parse(File.ReadAllText(Repo.PathOf("docs/report.schema.json"))).RootElement;
+        Assert.Equal(6, schema.GetProperty("properties").GetProperty("schemaVersion").GetProperty("const").GetInt32());
+
+        using var fx = Everything();
+        var root = JsonOf(fx);
+        void Same(JsonElement node, JsonElement actual, string path)
+        {
+            var props = node.GetProperty("properties").EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal).ToList();
+            Assert.True(props.SequenceEqual(actual.EnumerateObject().Select(p => p.Name).Order(StringComparer.Ordinal)), $"{path}: schema 的欄位與輸出不同");
+            Assert.True(props.SequenceEqual(node.GetProperty("required").EnumerateArray().Select(e => e.GetString()!).Order(StringComparer.Ordinal)), $"{path}: required 要列出全部欄位");
+        }
+        var p = schema.GetProperty("properties");
+        Same(schema, root, "$");
+        Same(p.GetProperty("summary"), root.GetProperty("summary"), "summary");
+        Same(p.GetProperty("summary").GetProperty("properties").GetProperty("thresholds"), root.GetProperty("summary").GetProperty("thresholds"), "thresholds");
+        Same(p.GetProperty("summary").GetProperty("properties").GetProperty("counts"), root.GetProperty("summary").GetProperty("counts"), "counts");
+        Same(p.GetProperty("unresolvedSites").GetProperty("items"), root.GetProperty("unresolvedSites")[0], "unresolvedSites[]");
+        Same(p.GetProperty("findings").GetProperty("items"), root.GetProperty("findings")[0], "findings[]");
+
+        string?[] EnumOf(JsonElement e) => e.GetProperty("enum").EnumerateArray()
+            .Select(x => x.ValueKind == JsonValueKind.Null ? null : x.GetString()).ToArray();
+        var finding = p.GetProperty("findings").GetProperty("items").GetProperty("properties");
+        Assert.Equal(new[] { Category.Ok, Category.Warn, Category.Fail, Category.Decorative }.Select(Report.CategoryLabel), EnumOf(finding.GetProperty("category")));
+        IEnumerable<string?> symmetry = [.. new[] { Symmetry.BothLow, Symmetry.DarkFails, Symmetry.LightFails, Symmetry.SingleTheme }.Select(Report.SymmetryLabel), null];
+        Assert.Equal(symmetry, EnumOf(finding.GetProperty("symmetry")));
+        IEnumerable<string?> theme = ["dark", "light", null], baseline = ["known", "new", "worsened", null];
+        Assert.Equal(theme, EnumOf(finding.GetProperty("theme")));
+        Assert.Equal(baseline, EnumOf(finding.GetProperty("baseline")));
+        Assert.Equal(System.Enum.GetValues<UnresolvedReason>().Select(Report.ReasonLabel), EnumOf(schema.GetProperty("$defs").GetProperty("reason")));
+    }
+
+    [Fact] // 6：每一個 finding 的每一個欄位都在 —— 沒有值的是 null（symmetry 在 ok／decorative、fontSize 在沒設字級時）。
+           // fontSize 是 DIP 的數字（不取整；0.x 是 "12px" 字串、銀行家捨入）
+    public void EveryFindingFieldIsPresentAndNullWhenItDoesNotApply()
     {
         using var fx = Everything();
         var findings = JsonOf(fx).GetProperty("findings").EnumerateArray().ToList();
+        string[] fields = ["file", "line", "element", "fg", "bg", "ratioDark", "ratioLight", "threshold", "category",
+                           "symmetry", "isText", "isLargeText", "fontSize", "theme", "baseline"];
         foreach (var f in findings)
         {
+            Assert.Equal(fields, f.EnumerateObject().Select(p => p.Name));
             var category = f.GetProperty("category").GetString();
-            Assert.Equal(category is "fail" or "warn", f.TryGetProperty("symmetry", out _));
+            Assert.Equal(category is "fail" or "warn", f.GetProperty("symmetry").ValueKind == JsonValueKind.String);
         }
-        var sized = Assert.Single(findings, f => f.TryGetProperty("fontSize", out _));
-        Assert.Equal("12px", sized.GetProperty("fontSize").GetString());
+        var sized = Assert.Single(findings, f => f.GetProperty("fontSize").ValueKind == JsonValueKind.Number);
+        Assert.Equal(12, sized.GetProperty("fontSize").GetDouble());
     }
 
-    [Fact] // 空值政策：沒資料的清單整個省略（null 不輸出），unresolvedBy 例外 —— 一律輸出、可為 {}
-    public void EmptyOptionalFieldsAreOmittedButUnresolvedByIsAlwaysPresent()
+    [Fact] // 6 的空值政策：一律輸出 —— 沒資料的清單是 []、字典是 {}（0.x 有的省略、有的輸出 {}，消費端得兩種都處理）
+    public void EmptyCollectionsArePresentAndEmpty()
     {
         using var fx = new Fixture().File("Main.xaml", """
             <Grid Background="#000000">
@@ -189,19 +302,89 @@ public class JsonReportContractTests
             </Grid>
             """);
         var root = JsonOf(fx);
-        Assert.False(root.TryGetProperty("unresolved", out _));
+        Assert.Equal(0, root.GetProperty("unresolvedSites").GetArrayLength());
+        Assert.False(root.TryGetProperty("unresolved", out _)); // 6 改名，不再與 summary.unresolved 同名
         var summary = root.GetProperty("summary");
-        Assert.False(summary.TryGetProperty("unknownKeys", out _));
-        Assert.False(summary.TryGetProperty("parseErrorFiles", out _));
-        Assert.False(summary.TryGetProperty("invalidIgnores", out _));
-        var by = summary.GetProperty("unresolvedBy");
-        Assert.Equal(JsonValueKind.Object, by.ValueKind);
-        Assert.Empty(by.EnumerateObject());
-        var f = Assert.Single(root.GetProperty("findings").EnumerateArray().ToList());
-        Assert.False(f.TryGetProperty("fontSize", out _));
-        Assert.False(f.TryGetProperty("symmetry", out _));
-        Assert.Equal("none", summary.GetProperty("paletteSource").GetString());
+        Assert.Empty(summary.GetProperty("unknownKeys").EnumerateObject());
+        Assert.Equal(0, summary.GetProperty("parseErrorFiles").GetArrayLength());
+        Assert.Equal(0, summary.GetProperty("invalidIgnores").GetArrayLength());
+        Assert.Equal(0, summary.GetProperty("invalidIgnoreCount").GetInt32());
+        Assert.Empty(summary.GetProperty("unresolvedBy").EnumerateObject());
+        Assert.False(summary.TryGetProperty("paletteSource", out _)); // 6 拿掉：由 paletteMode 推得
         Assert.Equal("none", summary.GetProperty("paletteMode").GetString());
+        var f = Assert.Single(root.GetProperty("findings").EnumerateArray().ToList());
+        Assert.Equal(JsonValueKind.Null, f.GetProperty("fontSize").ValueKind);
+        Assert.Equal(JsonValueKind.Null, f.GetProperty("symmetry").ValueKind);
+        Assert.Equal(JsonValueKind.Null, f.GetProperty("theme").ValueKind);
+        Assert.Equal(JsonValueKind.Null, f.GetProperty("baseline").ValueKind);
+    }
+
+    [Fact] // 實際生效的 gate 寫進 summary：預設 gate 在 1.0 改了，讀報告的人要知道這份結果是用哪把尺量的
+    public void SummaryCarriesTheGateInEffect()
+    {
+        using var fx = new Fixture().File("Main.xaml", """<Grid Background="#000000"><TextBlock Foreground="#FFFFFF"/></Grid>""");
+        var lib = JsonDocument.Parse(Report.ToJson(fx.Run())).RootElement;
+        Assert.Equal("warn", lib.GetProperty("summary").GetProperty("failOn").GetString());
+        Assert.Equal(50, lib.GetProperty("summary").GetProperty("minCoverage").GetDouble());
+        Assert.False(lib.GetProperty("summary").GetProperty("strictPalette").GetBoolean());
+        Assert.Equal(JsonValueKind.Null, lib.GetProperty("toolVersion").ValueKind); // 函式庫呼叫沒給
+        Assert.Equal(JsonValueKind.Null, lib.GetProperty("exitCode").ValueKind);
+
+        var json = Path.Combine(fx.Root, "r.json");
+        var cli = Cli.Run(fx.Root, "--json", json, "--fail-on", "fail", "--min-coverage", "30", "--strict-palette");
+        Assert.True(cli.Exit == 3, cli.ToString()); // 寫死色碼的專案：色盤退化
+        var s = Cli.ReadJson(json);
+        Assert.Equal(3, s.GetProperty("exitCode").GetInt32());
+        Assert.Equal("fail", s.GetProperty("summary").GetProperty("failOn").GetString());
+        Assert.Equal(30, s.GetProperty("summary").GetProperty("minCoverage").GetDouble());
+        Assert.True(s.GetProperty("summary").GetProperty("strictPalette").GetBoolean());
+        Assert.Matches(@"^\d+\.\d+\.\d+", s.GetProperty("toolVersion").GetString());
+    }
+
+    [Fact] // 只屬於一個主題的配對（Dark.xaml 的 Style、依主題解析到的 @dark／@light 鏈）帶 theme：ratioLight 是那個主題的值
+    public void OneThemeFindingsNameTheirTheme()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/><SolidColorBrush x:Key="Fg" Color="#EEEEEE"/><SolidColorBrush x:Key="Line" Color="#333333"/>
+              <Style x:Key="Chip" TargetType="Button"><Setter Property="Background" Value="{DynamicResource Bg}"/><Setter Property="Foreground" Value="#EEEEEE"/></Style>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/><SolidColorBrush x:Key="Fg" Color="#1B1B1B"/><SolidColorBrush x:Key="Line" Color="#CCCCCC"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """<Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>""");
+        var findings = JsonOf(fx).GetProperty("findings").EnumerateArray().ToList();
+        Assert.Equal("dark", Assert.Single(findings, f => f.GetProperty("file").GetString() == "Themes/Dark.xaml").GetProperty("theme").GetString());
+        Assert.Equal(JsonValueKind.Null, Assert.Single(findings, f => f.GetProperty("file").GetString() == "Views/Main.xaml").GetProperty("theme").ValueKind);
+    }
+
+    [Fact] // --baseline 模式下，gate 擋的每一筆帶 known／new／worsened（Action 的註記才分得出既有債與新問題）
+    public void BaselineModeMarksEachGatedFinding()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <TextBlock Foreground="#EEEEEE" Text="known"/>
+            </Grid>
+            """);
+        var baseline = Path.Combine(fx.Root, "baseline.json");
+        Assert.Equal(0, Cli.Run(fx.Root, "--write-baseline", baseline).Exit);
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <TextBlock Foreground="#EEEEEE" Text="known"/>
+              <TextBlock Foreground="#DDDDDD" Text="new"/>
+              <TextBlock Foreground="#000000" Text="ok"/>
+            </Grid>
+            """);
+        var json = Path.Combine(fx.Root, "r.json");
+        Assert.Equal(1, Cli.Run(fx.Root, "--baseline", baseline, "--json", json).Exit);
+        var marks = Cli.ReadJson(json).GetProperty("findings").EnumerateArray()
+            .Select(f => $"{f.GetProperty("fg").GetString()}={(f.GetProperty("baseline").ValueKind == JsonValueKind.Null ? "null" : f.GetProperty("baseline").GetString())}")
+            .ToArray();
+        Assert.Equal(["#EEEEEE=known", "#DDDDDD=new", "#000000=null"], marks);
     }
 
     [Fact] // 計數器之間的恆等式 —— 任何一個計數「漏算」或「重算」都會讓它們對不上
@@ -219,18 +402,19 @@ public class JsonReportContractTests
 
         var unresolved = N(s, "unresolved");
         Assert.Equal(unresolved, s.GetProperty("unresolvedBy").EnumerateObject().Sum(p => p.Value.GetInt32()));
-        Assert.Equal(unresolved, root.GetProperty("unresolved").GetArrayLength());
+        Assert.Equal(unresolved, root.GetProperty("unresolvedSites").GetArrayLength());
         Assert.Equal(s.GetProperty("unresolvedBy").GetProperty("unknown-palette-key").GetInt32(),
                      s.GetProperty("unknownKeys").EnumerateObject().Sum(p => p.Value.GetInt32()));
         Assert.Equal(N(s, "parseErrors"), s.GetProperty("parseErrorFiles").GetArrayLength());
 
         var pairs = N(s, "pairs");
-        Assert.Equal(Math.Round(100.0 * pairs / (pairs + unresolved), 1), s.GetProperty("coverage").GetDouble());
+        Assert.Equal(Math.Round(100.0 * pairs / (pairs + unresolved), 1, MidpointRounding.AwayFromZero), s.GetProperty("coverage").GetDouble());
 
         // 這個素材每個計數器都非零 —— 恆等式不是在比 0 == 0
         Assert.All(new[] { "pairs", "unresolved", "suppressed", "skipped", "deadForeground", "disabledExempt", "parseErrors" },
             name => Assert.True(N(s, name) > 0, name));
         Assert.Equal(1, s.GetProperty("invalidIgnores").GetArrayLength());
+        Assert.Equal(1, N(s, "invalidIgnoreCount"));
     }
 
     [Fact] // summary.coverage 四捨五入到小數一位：1 / 3 → 33.3，不是 33.333…
@@ -256,7 +440,7 @@ public class JsonReportContractTests
     public void UnresolvedSitesNameTheUnknownKeyAtEachLocation()
     {
         using var fx = Everything();
-        var sites = JsonOf(fx).GetProperty("unresolved").EnumerateArray()
+        var sites = JsonOf(fx).GetProperty("unresolvedSites").EnumerateArray()
             .Where(x => x.GetProperty("reason").GetString() == "unknown-palette-key")
             .Select(x => $"{x.GetProperty("file").GetString()}:{x.GetProperty("line").GetInt32()} {x.GetProperty("value").GetString()}")
             .ToArray();
@@ -298,7 +482,6 @@ public class JsonReportContractTests
         var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
         var s = JsonDocument.Parse(Report.ToJson(r)).RootElement.GetProperty("summary");
 
-        Assert.Equal("project", s.GetProperty("paletteSource").GetString());
         Assert.Equal("pair", s.GetProperty("paletteMode").GetString());
         Assert.Equal(r.Detection.Description, s.GetProperty("paletteDetail").GetString());
         Assert.Equal(3, s.GetProperty("paletteKeys").GetInt32());
@@ -313,7 +496,7 @@ public class JsonReportContractTests
         // 對照組：沒有 config、寫死色碼 —— 每個描述欄位都要跟著翻
         using var bare = new Fixture().File("Main.xaml", """<Grid Background="#000000"><TextBlock Foreground="#FFFFFF"/></Grid>""");
         var b = JsonOf(bare).GetProperty("summary");
-        Assert.Equal("none", b.GetProperty("paletteSource").GetString());
+        Assert.Equal("none", b.GetProperty("paletteMode").GetString());
         Assert.Equal(0, b.GetProperty("paletteKeys").GetInt32());
         Assert.True(b.GetProperty("singleTheme").GetBoolean());       // 空色盤：寫死色碼深淺恆等
         Assert.False(b.GetProperty("configLoaded").GetBoolean());
@@ -328,7 +511,6 @@ public class JsonReportContractTests
             </ResourceDictionary>
             """).File("Main.xaml", """<Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>""");
         var one = JsonOf(single).GetProperty("summary");
-        Assert.Equal("project", one.GetProperty("paletteSource").GetString());
         Assert.Equal("single", one.GetProperty("paletteMode").GetString());
         Assert.Equal(3, one.GetProperty("paletteKeys").GetInt32());
         Assert.True(one.GetProperty("singleTheme").GetBoolean());

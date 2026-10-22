@@ -1241,9 +1241,11 @@ public class NewRuleTests
         var bad = Assert.Single(r.Findings, f => f.Category == Category.Fail);
         Assert.NotEqual(Symmetry.NotApplicable, bad.Symmetry); // 沒過的照分類
 
-        var json = Report.ToJson(r);
-        // 合格那筆整個沒有 symmetry 欄位 —— 給錯值不如不給
-        Assert.Equal(1, json.Split("\"symmetry\"").Length - 1);
+        // 合格那筆的 symmetry 是 null —— 給錯值不如不給（6 起欄位一律輸出，0.x 是整個省略）
+        var symmetries = System.Text.Json.JsonDocument.Parse(Report.ToJson(r)).RootElement.GetProperty("findings")
+            .EnumerateArray().Select(f => (f.GetProperty("category").GetString(), f.GetProperty("symmetry").ValueKind)).ToList();
+        Assert.Contains(("ok", System.Text.Json.JsonValueKind.Null), symmetries);
+        Assert.Contains(("fail", System.Text.Json.JsonValueKind.String), symmetries);
     }
 
     [Fact] // WCAG 大字級的「粗體」是 weight ≥ 700：SemiBold(600) 不算 —— 舊版子字串匹配誤放寬到 3:1
