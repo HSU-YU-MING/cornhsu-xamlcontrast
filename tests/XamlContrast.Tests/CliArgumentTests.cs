@@ -42,6 +42,46 @@ public class CliArgumentTests
         Assert.DoesNotContain("   at ", r.Err); // 好訊息，不是堆疊
     }
 
+    [Fact] // console 是 workflow command 的通道：GitHub 的 runner 把以 :: 開頭的行當成指令（審查 1.0 最終驗證 S2，0.6.1 就有）。
+           // 被稽核的 XAML 裡一個 &#10; 就能讓後面的內容落在行首 —— 鍵名、元素名、檔名、值一律把控制字元換成看得見的跳脫
+    public void ScannedTextCannotStartAWorkflowCommandOnTheConsole()
+    {
+        using var fx = new Fixture();
+        fx.File("Views/Main.xaml", """
+            <UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <UserControl.Resources>
+                <Style x:Key="Chip&#10;::error file=README.md,line=1::INJECTED annotation from scanned XAML" TargetType="TextBlock">
+                  <Setter Property="Foreground" Value="#777777"/><Setter Property="Background" Value="#888888"/>
+                </Style>
+              </UserControl.Resources>
+              <Grid Background="#FFFFFF">
+                <TextBlock Foreground="{DynamicResource Key&#13;&#10;::warning::INJECTED}" Text="unknown key with a line break"/>
+                <TextBlock Foreground="#000000" Text="ok"/>
+              </Grid>
+            </UserControl>
+            """);
+        fx.File("baseline.json", """{ "schemaVersion": 1, "entries": [] }""");
+        foreach (var args in new[]
+        {
+            new[] { fx.Root, "--show-unresolved", "--show-ok" },
+            new[] { fx.Root, "--baseline", Path.Combine(fx.Root, "baseline.json") }, // NEW failure 那幾行
+        })
+        {
+            var r = Cli.Run(args);
+            Assert.DoesNotContain(r.Out.Split('\n'), l => l.TrimStart().StartsWith("::"));
+            Assert.DoesNotContain(r.Err.Split('\n'), l => l.TrimStart().StartsWith("::"));
+            Assert.Contains("\\n::error file=README.md", r.Out); // 看得見，只是不在行首
+        }
+        Assert.Contains("Key\\r\\n::warning::INJECTED", Cli.Run(fx.Root, "--show-unresolved").Out);
+
+        // 使用者輸入（config 的屬性名）也一樣：錯誤訊息印在 stderr
+        fx.File("xamlcontrast.config.json", "{ \"a\\n::error::INJECTED\": 1 }");
+        var bad = Cli.Run(fx.Root);
+        Assert.Equal(2, bad.Exit);
+        Assert.DoesNotContain(bad.Err.Split('\n'), l => l.TrimStart().StartsWith("::"));
+        Assert.Contains("a\\n::error::INJECTED", bad.Err);
+    }
+
     [Fact] // `--` 結束旗標：之後的字一律是位置參數（審查 1.0 A3）。root 以 - 開頭時沒有別的寫法 ——
            // 舊版把 `-weird` 當成未知旗標（exit 2），把 `--version` 當成旗標（印版本、exit 0，什麼都沒稽核）
     public void DoubleDashEndsTheOptions()

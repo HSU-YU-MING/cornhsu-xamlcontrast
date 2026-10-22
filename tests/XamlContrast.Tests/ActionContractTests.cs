@@ -365,6 +365,20 @@ public class ActionContractTests
             Assert.Contains(part, all.Calls);
     }
 
+    [Fact] // 雙重防護（審查 1.0 最終驗證 S2）：CLI 的輸出包在一次性 token 的 ::stop-commands:: 裡 —— 就算 console 漏跳脫，
+           // 那段期間 runner 也不解析任何 workflow command。token 每次都不同（固定的 token 可以被輸出內容提前關掉）
+    public void AuditOutputIsFencedByStopCommands()
+    {
+        var a = RunStep("Run audit", stubExit: 1);
+        var lines = a.Stdout.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(l => l.TrimEnd('\r')).ToList();
+        var open = Regex.Match(lines[0], @"^::stop-commands::(?<t>[0-9a-f]{32})$");
+        Assert.True(open.Success, a.ToString());
+        Assert.Equal($"::{open.Groups["t"].Value}::", lines[^1]);
+        Assert.Equal("exit=1\n", a.Output); // 退出碼照樣交給最後一步
+        var b = RunStep("Run audit");
+        Assert.NotEqual(lines[0], b.Stdout.Split('\n')[0].TrimEnd('\r'));
+    }
+
     [Theory] // 稽核的退出碼原樣交給最後一步（先產報告與註記，最後才擋）；這一步本身不失敗
     [InlineData(0)]
     [InlineData(1)]

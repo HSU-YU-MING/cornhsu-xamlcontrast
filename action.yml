@@ -149,8 +149,14 @@ runs:
         [ -n "$XC_BASELINE" ] && args+=(--baseline "$XC_BASELINE")
         # root 放在 -- 後面：之後的字一律是位置參數，以 - 開頭也不會被當成旗標
         args+=(-- "$XC_ROOT")
+        # CLI 的輸出包在一次性 token 的 ::stop-commands:: 裡：被稽核的 XAML 是不可信的輸入，CLI 已經把控制字元跳脫，
+        # 這是第二道防線 —— 這段期間 runner 不解析任何 workflow command。token 每次隨機（固定的 token 可以被輸出內容提前關掉）
+        token=$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')
+        echo "::stop-commands::$token"
         xamlcontrast "${args[@]}"
-        echo "exit=$?" >> "$GITHUB_OUTPUT"
+        code=$?
+        echo "::$token::"
+        echo "exit=$code" >> "$GITHUB_OUTPUT"
 
     # 把稽核報告貼成 PR 留言（同一則反覆更新，不洗版）。
     # 行內註記只標在出問題的那一行，PR 上沒有總覽 —— reviewer 看不到「總共破幾組、

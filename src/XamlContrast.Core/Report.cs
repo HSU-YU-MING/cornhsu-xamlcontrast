@@ -106,12 +106,36 @@ public static class Report
     {
         var sb = new StringBuilder();
         sb.AppendLine();
-        sb.AppendLine($"===== unresolved ({r.UnresolvedSites.Count}) =====");
+        SafeLine(sb, $"===== unresolved ({r.UnresolvedSites.Count}) =====");
         foreach (var s in r.UnresolvedSites
                      .OrderBy(s => s.Reason).ThenBy(s => s.File, StringComparer.Ordinal).ThenBy(s => s.Line))
-            sb.AppendLine($"{s.File + ":" + s.Line,-42} {ReasonLabel(s.Reason),-26} {s.Value}");
+            SafeLine(sb, $"{s.File + ":" + s.Line,-42} {ReasonLabel(s.Reason),-26} {s.Value}");
         return sb.ToString();
     }
+
+    /// <summary>
+    /// console 輸出的一行：控制字元換成看得見的跳脫（\n、\r、\u001B…）。console 是 workflow command 的通道 ——
+    /// GitHub 的 runner 把以 :: 開頭的行當成指令，被稽核的 XAML 裡一個 &amp;#10;（鍵名、元素名、檔名、值）就能讓後面的內容
+    /// 落在行首（審查 1.0 最終驗證 S2，0.6.1 就有）。與 Markdown 的 Esc 同一個立場：報告裡的文字只能是資料。
+    /// 定位字元保留（不換行，排版用得到）。
+    /// </summary>
+    public static string ConsoleSafe(string s)
+    {
+        static bool Escape(char c) => (char.IsControl(c) && c != '\t') || c is '\u2028' or '\u2029';
+        if (!s.Any(Escape)) return s;
+        var sb = new StringBuilder(s.Length + 8);
+        foreach (var c in s)
+            sb.Append(c switch
+            {
+                '\n' => "\\n",
+                '\r' => "\\r",
+                _ when Escape(c) => $"\\u{(int)c:X4}",
+                _ => c.ToString(),
+            });
+        return sb.ToString();
+    }
+
+    private static void SafeLine(StringBuilder sb, string line) => sb.AppendLine(ConsoleSafe(line));
 
     internal static string ModeLabel(PaletteMode m) => m switch
     {
@@ -322,27 +346,27 @@ public static class Report
         var inv = CultureInfo.InvariantCulture;
         var sb = new StringBuilder();
 
-        sb.AppendLine((r.Detection.IsDegraded ? "!! palette: " : "palette: ") + r.Detection.Description);
+        SafeLine(sb, (r.Detection.IsDegraded ? "!! palette: " : "palette: ") + r.Detection.Description);
         if (r.Config.SourcePath is not null)
-            sb.AppendLine($"config: {Path.GetFileName(r.Config.SourcePath)} loaded");
+            SafeLine(sb, $"config: {Path.GetFileName(r.Config.SourcePath)} loaded");
         foreach (var n in r.UnmatchedLayoutNames)
-            sb.AppendLine($"!! config: layout name '{n}' matched no element — names are matched exactly (case-sensitive, without a namespace prefix)");
+            SafeLine(sb, $"!! config: layout name '{n}' matched no element — names are matched exactly (case-sensitive, without a namespace prefix)");
         if (!r.Config.Thresholds.IsDefault)
         {
             // 改門檻等於改稽核標準 —— 允許，但要標明，報告的讀者才知道基準不是 WCAG 預設
             var t = r.Config.Thresholds;
-            sb.AppendLine(string.Create(inv,
+            SafeLine(sb, string.Create(inv,
                 $"!! non-default thresholds: normal {t.NormalText}, large {t.LargeText}, fail-factor {t.FailFactor}"));
         }
-        sb.AppendLine(string.Create(inv,
+        SafeLine(sb, string.Create(inv,
             $"files {r.FileCount} | text-on-background pairs {r.Pairs} | coverage {r.CoveragePercent:F1}% of pairs seen"));
-        sb.AppendLine(string.Create(inv,
+        SafeLine(sb, string.Create(inv,
             $"unresolved (colour bound at runtime / gradient / key not in palette): {r.Unresolved} | skipped (invisible: transparent or opacity 0): {r.Skipped}"));
         if (r.Unresolved > 0)
         {
             // 細目才是可行動的部分：no-ancestor-background 佔大宗代表「宣告根背景就會回來」，
             // bound-or-gradient 佔大宗代表那是靜態分析的硬邊界，沒得救
-            sb.AppendLine("  unresolved by reason: " +
+            SafeLine(sb, "  unresolved by reason: " +
                 string.Join(", ", Reasons(r).Select(kv => string.Create(inv, $"{ReasonLabel(kv.Key)} {kv.Value}"))));
             // unknown-key 點名 —— 每一個都是死引用、打字錯誤、或色盤偵測漏了某個檔。
             // 這對開發者是免費的 lint,可能比對比度本身更常派上用場
@@ -351,7 +375,7 @@ public static class Report
             {
                 // 偵測時因為定義讀不懂而剔除的鍵另外標明 —— 原因不是打字錯誤或死引用，看偵測那一行
                 var dropped = r.Detection.DroppedKeys;
-                sb.AppendLine("  unknown palette keys (top): " +
+                SafeLine(sb, "  unknown palette keys (top): " +
                     string.Join(", ", unknown.Select(kv => string.Create(inv,
                         $"{kv.Key} x{kv.Value}{(dropped.Contains(kv.Key) ? " (dropped: unreadable definition)" : "")}"))) +
                     (unknown.All(kv => dropped.Contains(kv.Key))
@@ -362,27 +386,27 @@ public static class Report
         if (r.DeadForeground > 0)
         {
             // 過濾不靜默：被判定為死 setter 的配對要讓使用者知道有幾組、憑什麼被排除
-            sb.AppendLine(string.Create(inv,
+            SafeLine(sb, string.Create(inv,
                 $"excluded {r.DeadForeground} style pair(s): template has no Foreground consumer (no ContentPresenter/TextBlock/... — the Foreground setter is never rendered)"));
         }
         if (r.DisabledExempt > 0)
-            sb.AppendLine(string.Create(inv,
+            SafeLine(sb, string.Create(inv,
                 $"exempted {r.DisabledExempt} disabled-state pair(s) (IsEnabled=False; WCAG 1.4.3 does not require contrast for disabled controls)"));
         foreach (var e in r.ParseErrors)
-            sb.AppendLine($"!! parse failed: {e}"); // 檔案不能從報告裡靜默消失
+            SafeLine(sb, $"!! parse failed: {e}"); // 檔案不能從報告裡靜默消失
         if (r.Suppressed > 0)
-            sb.AppendLine(string.Create(inv, $"suppressed {r.Suppressed} pair(s) via xamlcontrast-ignore comments"));
+            SafeLine(sb, string.Create(inv, $"suppressed {r.Suppressed} pair(s) via xamlcontrast-ignore comments"));
         foreach (var w in r.InvalidIgnores)
-            sb.AppendLine($"!! {w}"); // 沒理由的 ignore 是無效的，且要讓人看見
+            SafeLine(sb, $"!! {w}"); // 沒理由的 ignore 是無效的，且要讓人看見
         sb.AppendLine();
 
         if (r.Detection.Palette.Count > 0 && r.Detection.Palette.IsSingleTheme)
-            sb.AppendLine("single-theme palette detected: symmetry column not applicable, absolute contrast only");
+            SafeLine(sb, "single-theme palette detected: symmetry column not applicable, absolute contrast only");
 
         foreach (var cat in (ReadOnlySpan<Category>)[Category.Ok, Category.Fail, Category.Warn, Category.Decorative])
         {
             var n = r.CountOf(cat);
-            if (n > 0) sb.AppendLine(string.Create(inv, $"  {CategoryLabel(cat),-11} {n}"));
+            if (n > 0) SafeLine(sb, string.Create(inv, $"  {CategoryLabel(cat),-11} {n}"));
         }
         sb.AppendLine();
 
@@ -391,12 +415,12 @@ public static class Report
         var bad = r.Findings.Where(f => f.Category is Category.Fail or Category.Warn).ToList();
         if (bad.Count > 0)
         {
-            sb.AppendLine(string.Create(inv, $"  below AA: {bad.Count}, by cause:"));
+            SafeLine(sb, string.Create(inv, $"  below AA: {bad.Count}, by cause:"));
             foreach (var g in bad.GroupBy(f => f.Symmetry).OrderByDescending(g => g.Count()))
-                sb.AppendLine(string.Create(inv, $"    {SymmetryLabel(g.Key),-13} {g.Count()}"));
+                SafeLine(sb, string.Create(inv, $"    {SymmetryLabel(g.Key),-13} {g.Count()}"));
             sb.AppendLine();
-            sb.AppendLine("  both-low = the palette itself is too weak, switching theme won't save it;");
-            sb.AppendLine("  dark-fails / light-fails = the design intent didn't survive the other theme.");
+            SafeLine(sb, "  both-low = the palette itself is too weak, switching theme won't save it;");
+            SafeLine(sb, "  dark-fails / light-fails = the design intent didn't survive the other theme.");
             sb.AppendLine();
         }
 
@@ -404,13 +428,13 @@ public static class Report
         {
             var group = r.Findings.Where(f => f.Category == cat).ToList();
             if (group.Count == 0) continue;
-            sb.AppendLine($"===== {CategoryLabel(cat)} ({group.Count}) =====");
+            SafeLine(sb, $"===== {CategoryLabel(cat)} ({group.Count}) =====");
             foreach (var f in group.OrderBy(f => f.Worst))
             {
                 var tag = string.Create(inv, $"need {f.Need}");
                 if (f.Large) tag += $" large-text {f.Size}";
                 else if (f.Size.Length > 0) tag += $" {f.Size}";
-                sb.AppendLine(string.Create(inv,
+                SafeLine(sb, string.Create(inv,
                     $"{f.File + ":" + f.Line,-34} {f.Element,-24} fg={f.Fg,-26} bg={f.Bg,-20} dark={RatioCell(f, ThemeSide.Dark, 6)} light={RatioCell(f, ThemeSide.Light, 6)}  [{SymmetryLabel(f.Symmetry)}] {tag}"));
             }
             sb.AppendLine();
@@ -419,11 +443,11 @@ public static class Report
         if (showOk)
         {
             var ok = r.Findings.Where(f => f.Category == Category.Ok).ToList();
-            sb.AppendLine($"===== ok ({ok.Count}), grouped by pair (top 30) =====");
+            SafeLine(sb, $"===== ok ({ok.Count}), grouped by pair (top 30) =====");
             foreach (var g in ok.GroupBy(f => (f.Fg, f.Bg, f.Theme)).OrderByDescending(g => g.Count()).Take(30))
             {
                 var x = g.First();
-                sb.AppendLine(string.Create(inv,
+                SafeLine(sb, string.Create(inv,
                     $"  fg={x.Fg,-28} bg={x.Bg,-20} dark={RatioCell(x, ThemeSide.Dark, 6)} light={RatioCell(x, ThemeSide.Light, 6)}   x{g.Count()}"));
             }
             sb.AppendLine();

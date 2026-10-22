@@ -69,7 +69,7 @@ for (var i = 0; i < args.Length; i++)
             for (i++; i < args.Length; i++)
             {
                 if (root is null) { root = args[i]; continue; }
-                Console.Error.WriteLine($"unknown argument: {args[i]}");
+                Say(Console.Error, $"unknown argument: {args[i]}");
                 return 2;
             }
             break;
@@ -81,7 +81,7 @@ for (var i = 0; i < args.Length; i++)
             return 0;
         default:
             if (root is null && !args[i].StartsWith('-')) { root = args[i]; break; }
-            Console.Error.WriteLine($"unknown argument: {args[i]}");
+            Say(Console.Error, $"unknown argument: {args[i]}");
             return 2;
     }
 }
@@ -99,13 +99,13 @@ if (root is null)
     // `--baseline src/MyApp`：可省略的路徑把 root 吃掉了 —— 舊版只印 usage，看不出發生了什麼
     foreach (var (flag, taken) in new[] { ("--baseline", baselinePath), ("--write-baseline", writeBaselinePath) })
         if (taken is not null && Directory.Exists(taken))
-            Console.Error.WriteLine($"note: {flag} took '{taken}' as the baseline file — " +
+            Say(Console.Error, $"note: {flag} took '{taken}' as the baseline file — " +
                                     $"put <project-root> first, or give {flag} an explicit file path");
     return 2;
 }
 if (!Directory.Exists(root))
 {
-    Console.Error.WriteLine($"root not found: {root}");
+    Say(Console.Error, $"root not found: {root}");
     return 2;
 }
 
@@ -119,14 +119,14 @@ try
 }
 catch (ConfigException ex)
 {
-    Console.Error.WriteLine($"config error: {ex.Message}");
+    Say(Console.Error, $"config error: {ex.Message}");
     return 2;
 }
 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 {
     // 列舉專案目錄時碰到沒有權限的子目錄之類 —— 個別檔案讀不到會跳過並列入 parse errors，
     // 這裡是連「有哪些檔」都拿不到。不能落到契約外的 .NET 堆疊
-    Console.Error.WriteLine($"cannot read the project under {root}: {ex.Message}");
+    Say(Console.Error, $"cannot read the project under {root}: {ex.Message}");
     return 2;
 }
 
@@ -137,7 +137,7 @@ if (config.RootBackground is not null)
     var rb = ColorResolver.Resolve(Auditor.NormalizeRootBackground(config.RootBackground), detection.Palette);
     if (rb is null || rb.Kind is ColorKind.UnknownKey or ColorKind.Other)
     {
-        Console.Error.WriteLine($"config error: rootBackground '{config.RootBackground}' is not a colour or a key in the detected palette ({detection.Palette.Count} keys)");
+        Say(Console.Error, $"config error: rootBackground '{config.RootBackground}' is not a colour or a key in the detected palette ({detection.Palette.Count} keys)");
         return 2;
     }
 }
@@ -158,14 +158,14 @@ if (baselinePath is not null)
 {
     if (!File.Exists(baselinePath))
     {
-        Console.Error.WriteLine($"baseline not found: {baselinePath}");
+        Say(Console.Error, $"baseline not found: {baselinePath}");
         return 2;
     }
     try { known = Baseline.Parse(File.ReadAllText(baselinePath)); }
     catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Text.Json.JsonException or FormatException or InvalidOperationException or ArgumentException)
     {
         // 壞掉的 baseline 要有好訊息，不是裸拋堆疊
-        Console.Error.WriteLine($"baseline is not valid ({baselinePath}): {ex.Message}");
+        Say(Console.Error, $"baseline is not valid ({baselinePath}): {ex.Message}");
         // 例外訊息已經帶了重寫的指引（0.x 的檔、舊的 keyVersion）就不再說一次
         if (!ex.Message.Contains("--write-baseline")) Console.Error.WriteLine("regenerate it with --write-baseline");
         return 2;
@@ -176,7 +176,7 @@ AuditResult result;
 try { result = Auditor.Run(root, detection, config); }
 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
 {
-    Console.Error.WriteLine($"cannot read the project under {root}: {ex.Message}");
+    Say(Console.Error, $"cannot read the project under {root}: {ex.Message}");
     return 2;
 }
 
@@ -220,6 +220,10 @@ static string? ToolVersion() => typeof(Program).Assembly
     .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
     is [System.Reflection.AssemblyInformationalVersionAttribute a, ..] ? a.InformationalVersion.Split('+')[0] : null;
 
+// 帶資料的一行輸出：控制字元換成看得見的跳脫（Report.ConsoleSafe）—— 檔名、鍵名、例外訊息、使用者輸入都可能帶換行，
+// 換行後的內容落在行首就成了 runner 會解析的 workflow command（審查 1.0 最終驗證 S2）
+static void Say(TextWriter w, string line) => w.WriteLine(Report.ConsoleSafe(line));
+
 // --json／--sarif／--md／--baseline／--write-baseline 的值：必填，而且不能長得像旗標。舊版只檢查「後面還有沒有字」，
 // `--json --strict-palette` 會寫出一個叫 --strict-palette 的檔、把保險旗標靜默吃掉。
 // 以 - 開頭的檔名沒有正當用途（真的要就寫 ./-name）；「-」也不代表 stdout。
@@ -241,12 +245,12 @@ static bool TryWrite(string path, string content, string label, string suffix = 
     try
     {
         File.WriteAllText(path, content);
-        Console.WriteLine($"{label} written: {path}{suffix}");
+        Say(Console.Out, $"{label} written: {path}{suffix}");
         return true;
     }
     catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException or ArgumentException)
     {
-        Console.Error.WriteLine($"cannot write {label} to {path}: {ex.Message}");
+        Say(Console.Error, $"cannot write {label} to {path}: {ex.Message}");
         return false;
     }
 }
@@ -303,14 +307,14 @@ int DecideExit()
     if (known is not null)
     {
         cmp = Baseline.Compare(result, known, gateWarn);
-        Console.WriteLine($"baseline: known debt {cmp.KnownDebt}, paid off {cmp.PaidDebt} (debt may only shrink)");
+        Say(Console.Out, $"baseline: known debt {cmp.KnownDebt}, paid off {cmp.PaidDebt} (debt may only shrink)");
         foreach (var f in cmp.NewFailures)
-            Console.WriteLine($"  NEW failure: {f.File}:{f.Line} {f.Element} fg={f.Fg} bg={f.Bg}");
+            Say(Console.Out, $"  NEW failure: {f.File}:{f.Line} {f.Element} fg={f.Fg} bg={f.Bg}");
         foreach (var e in cmp.WorsenedFailures)
-            Console.WriteLine($"  WORSENED: {e.File} {e.Element} fg={e.Fg} bg={e.Bg} (now {e.Count} occurrence(s))");
+            Say(Console.Out, $"  WORSENED: {e.File} {e.Element} fg={e.Fg} bg={e.Bg} (now {e.Count} occurrence(s))");
         if (!cmp.Passes)
         {
-            Console.WriteLine($"exit 1: {cmp.NewFailures.Count} new / {cmp.WorsenedFailures.Count} worsened failure(s) vs baseline");
+            Say(Console.Out, $"exit 1: {cmp.NewFailures.Count} new / {cmp.WorsenedFailures.Count} worsened failure(s) vs baseline");
             return 1;
         }
         // warn 也在 ratchet 裡（baseline 收「低於 AA」的每一組）—— 0.x 在這裡另外對「所有」warn 套 --fail-on warn，
@@ -329,11 +333,11 @@ int DecideExit()
     }
     if (gateWarn && warn > 0)
     {
-        Console.WriteLine($"exit 1: {warn} pair(s) below AA");
+        Say(Console.Out, $"exit 1: {warn} pair(s) below AA");
         return 1;
     }
     // 放寬的 gate 從哪裡來要說對：config 設的不能印成旗標（預設是 warn，走到這裡不是旗標就是 config）
-    if (warn > 0) Console.WriteLine($"exit 0: no fail, but {warn} pair(s) below AA ({(failOnFlag is not null ? "--fail-on fail" : $"\"failOn\": \"fail\" in {ToolConfig.FileName}")})");
+    if (warn > 0) Say(Console.Out, $"exit 0: no fail, but {warn} pair(s) below AA ({(failOnFlag is not null ? "--fail-on fail" : $"\"failOn\": \"fail\" in {ToolConfig.FileName}")})");
     else Console.WriteLine("exit 0: all pairs meet AA");
     return 0;
 
