@@ -1004,11 +1004,20 @@ public sealed partial class Auditor
                 }
                 // 透明（看不見）的字 → 合法跳過；半透明字色疊到 Style 自己的不透明底上評分
                 if (fg.Kind is ColorKind.Transparent || VisibleAlpha(fg) < 0.01) { _skipped++; continue; }
-                // 透明／半透明的底：定義處沒有底下那層可疊 → unresolved，不是合法跳過。具名 Style 在用到它的元素上
-                // 另外對著祖先的底評（見元素 × Style 鏈的同源判定）；⚠ 隱含樣式（沒有 x:Key）不會在使用處補評 ——
-                // 舊版記 skipped（不進覆蓋率分母），這組整個從報告消失、覆蓋率照樣 100%（審查素材 use 的 ToggleButton）
+                // 透明／半透明的底：定義處沒有底下那層可疊。
+                // - 會在使用處被評到的（有元素 Style= 引用的具名 Style、它們的 BasedOn 基底、行內 Style）：交給使用處
+                //   對著祖先的底評（見元素 × Style 鏈的同源判定），這裡不另外計 —— 再記一筆就是同一組算兩次
+                //   （審查最後一輪 3：QuillNest 的覆蓋率因此被多扣）
+                // - 使用處評不到的（隱含樣式、只透過 ItemContainerStyle 之類套用或沒用到的具名 Style）→ unresolved。
+                //   ⚠ 舊版記 skipped（不進覆蓋率分母），這組整個從報告消失、覆蓋率照樣 100%（審查素材 use 的 ToggleButton）
                 if (bgr.Kind is ColorKind.Alpha or ColorKind.Transparent)
-                { Unres(UnresolvedReason.TranslucentUncomposited, file, line, bgv); continue; }
+                {
+                    var gradedWhereUsed = key is not null
+                        ? _styles.IsUsedByAnElement(key)
+                        : style.Parent?.Name.LocalName.EndsWith(".Style", StringComparison.Ordinal) == true;
+                    if (!gradedWhereUsed) Unres(UnresolvedReason.TranslucentUncomposited, file, line, bgv);
+                    continue;
+                }
                 // 同一個 brush 同時當字色與底色 —— Material 系的模板不透明度慣用手法：
                 // 模板把 Background 以 10~12% Opacity 畫成暈染（VisualState 動畫），字全濃度。
                 // 字面上 1:1、執行期不是；Opacity 藏在模板動畫裡，靜態看不到 —— 不猜，

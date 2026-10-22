@@ -238,8 +238,52 @@ public class StyleChainTests
         Assert.Equal("Button⊕Style[SeeThrough]/base", f.Element);
         Assert.Equal(expectedBg, f.Bg);
         Assert.Equal(0, r.Skipped);
-        // 定義處那一筆記 unresolved（那裡沒有底可疊；具名 Style 在使用處另外評，就是上面那筆）
-        Assert.Equal(UnresolvedReason.TranslucentUncomposited, Assert.Single(r.UnresolvedSites).Reason);
+        // 定義處不另外計：有元素用到這個具名 Style，這組在使用處評（就是上面那筆）——
+        // 定義處再記一筆 unresolved 就是同一組算兩次（審查最後一輪 3）
+        Assert.Empty(r.UnresolvedSites);
+    }
+
+    // ── Style 定義處的透明底：只有「不會在任何使用處被評到」的才記 unresolved（審查最後一輪 3）──
+    //    ac7e903 讓定義處一律記 unresolved，但具名 Style 與行內 Style 在使用處都評了 —— 同一組被重複計算，
+    //    QuillNest 的覆蓋率被多扣。隱含樣式（沒有 x:Key）、以及沒有任何元素用 Style= 引用的具名 Style
+    //    （只透過 ItemContainerStyle 之類套用、或根本沒用到）在使用處不會被評到，這些才記
+    [Theory]
+    [InlineData("""<Style x:Key="Ghost" TargetType="Button"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#EEEEEE"/></Style>""",
+                """<Button Style="{StaticResource Ghost}" Content="x"/>""", 0)]                   // 用到了：使用處評
+    [InlineData("""<Style x:Key="Base" TargetType="Button"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#EEEEEE"/></Style><Style x:Key="Derived" TargetType="Button" BasedOn="{StaticResource Base}"><Setter Property="FontSize" Value="20"/></Style>""",
+                """<Button Style="{StaticResource Derived}" Content="x"/>""", 0)]                 // 經 BasedOn 用到：使用處評
+    [InlineData("""<Style x:Key="Ghost" TargetType="Button"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#EEEEEE"/></Style>""",
+                """<ListBox ItemContainerStyle="{StaticResource Ghost}"/>""", 1)]                 // 沒有元素用 Style= 引用它：哪裡都評不到
+    [InlineData("""<Style TargetType="ToggleButton"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#EEEEEE"/></Style>""",
+                """<ToggleButton Content="x"/>""", 1)]                                            // 隱含樣式：使用處不評
+    public void SeeThroughStyleDefinitionIsUnresolvedOnlyWhenNoUseSiteGradesIt(string styles, string use, int unresolved)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>{styles}</Grid.Resources>
+              {use}
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(unresolved, r.UnresolvedSites.Count(u => u.Reason == UnresolvedReason.TranslucentUncomposited));
+        Assert.Equal(0, r.Skipped);
+    }
+
+    [Fact] // 行內 Style（<Button.Style><Style>…）一定被那個元素用到：定義處不另外計
+    public void InlineSeeThroughStyleIsGradedOnlyWhereItSits()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Button Content="x">
+                <Button.Style><Style TargetType="Button"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#EEEEEE"/></Style></Button.Style>
+              </Button>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.UnresolvedSites);
+        Assert.Equal(Wcag.Contrast("#EEEEEE", "#FFFFFF"), Assert.Single(r.Findings).RatioDark);
     }
 
     [Fact] // 同上，祖先的底是 Binding：unresolved 點名的是卡住的祖先底，不是只負責穿透的 "Transparent"

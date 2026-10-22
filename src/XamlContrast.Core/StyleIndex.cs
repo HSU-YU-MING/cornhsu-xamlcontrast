@@ -89,6 +89,16 @@ internal sealed partial class StyleIndex
     /// <summary>有沒有「只屬於一個主題」的字典檔（色盤來自分開的深／淺 XAML 字典時才有）。</summary>
     public bool HasThemeSides { get; private set; }
 
+    // 有元素以 Style="{…Resource K}" 引用的 Style 鍵（含經 BasedOn 間接用到的基底）
+    private readonly HashSet<string> _usedKeys = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// 這個具名 Style 會不會在某個使用處被評到：有元素以 Style= 引用它，或它是這種 Style（或行內 Style）的 BasedOn 基底。
+    /// 會的話，Style 定義處評不了的組合（透明底）交給使用處，不在定義處另外計 —— 否則同一組算兩次。
+    /// 只透過 ItemContainerStyle 之類套用、或根本沒用到的，使用處評不到。
+    /// </summary>
+    public bool IsUsedByAnElement(string key) => _usedKeys.Contains(key);
+
     [GeneratedRegex(@"(?<t>\w+)\s*\}?\s*$")]
     private static partial Regex TargetTypeName();
 
@@ -307,7 +317,26 @@ internal sealed partial class StyleIndex
                 if (isGlobal && !idx._global.ContainsKey(rec.Key)) idx._global[rec.Key] = rec;
                 if (isGlobal) idx.AddBySide(idx._globalBySide, rec.Key, rec);
             }
+            foreach (var el in doc.Descendants())
+            {
+                if (el.Attribute("Style")?.Value is { } s && ResourceRef().Match(s.Trim()) is { Success: true } m)
+                    idx._usedKeys.Add(m.Groups["k"].Value);
+                // 行內 Style 一定被那個元素用到 —— 它的 BasedOn 基底也在使用處評
+                if (el.Name.LocalName == "Style" && el.Parent?.Name.LocalName.EndsWith(".Style", StringComparison.Ordinal) == true &&
+                    el.Attribute("BasedOn")?.Value is { } bo && ResourceRef().Match(bo.Trim()) is { Success: true } bm)
+                    idx._usedKeys.Add(bm.Groups["k"].Value);
+            }
         }
+        // BasedOn 的閉包：用到的 Style 的基底也會在使用處的合併鏈裡被評到
+        var basesOf = idx._byFile.Values.SelectMany(map => map.Values)
+            .Where(r => r.Key is not null && r.BasedOn is not null)
+            .GroupBy(r => r.Key!, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Select(r => r.BasedOn!).ToList(), StringComparer.Ordinal);
+        var queue = new Queue<string>(idx._usedKeys);
+        while (queue.Count > 0)
+            if (basesOf.TryGetValue(queue.Dequeue(), out var bases))
+                foreach (var b in bases)
+                    if (idx._usedKeys.Add(b)) queue.Enqueue(b);
         return idx;
     }
 
