@@ -5,37 +5,181 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
-Fixes from a source review (2026-10-22) that listed 33 product bugs: 30 are fixed here; two are
-fixed only partly — unknown config properties and incomplete baseline entries are now *named*, but
-whether they should become exit-code-2 errors is an open interface decision — and one
-(`translucent-uncomposited`, a reason that was listed but never emitted) is only partly settled: it
-is now emitted for the two new cases below, while the original case still reads
-`no-ancestor-background` pending a decision. Three follow-up reviews of these fixes found regressions
-and leftovers in the same areas; those are fixed here too. The JSON shape is unchanged (`schemaVersion` stays 5), and so are the CLI flags
-and the Action inputs. Several fixes **move counts on real projects** — more pairs found, problems
-that used to be hidden now reported, some confident-but-wrong ratios now honestly `unresolved` — so a
-`--baseline` may show NEW or paid-off entries after upgrading; re-run `--write-baseline` once you
-have reviewed them.
+## [1.0.0] - 2026-10-22
 
-> **Upgrading from 0.6.1 — coverage reads lower, and that can change the exit code.** Pairs that were
-> silently skipped, or graded against a guessed colour, are now counted as `unresolved` (see-through
-> styles nothing grades at a use site, containers whose layout is unknowable, `Opacity` layers over an
-> unknown background, keys only another screen defines, a style key only one theme defines). A project
-> close to `--min-coverage` (default 50%; it applies in `--baseline` mode too) can go from exit 0 to
-> exit 1 on the coverage floor alone. Measured on the four validation projects, 0.6.1 → this version:
->
-> | project | pairs | unresolved | coverage | fail | exit |
-> |---|---|---|---|---|---|
-> | Kindling | 168 → 182 | 1 → 5 | 99.4% → 97.3% | 0 → 1 | 0 → 1 (a real failure now found) |
-> | QuillNest | 842 → 906 | 38 → 95 | 95.7% → 90.5% | 3 → 2 | 1 → 1 (the third is now `unresolved`) |
-> | ZeroCel | 468 → 518 | 206 → 184 | 69.4% → 73.8% | 0 → 1 | 0 → 1 (a real failure now found) |
-> | Cornea | 0 → 0 | 1 → 2 | — | 0 → 0 | 1 → 1 (nothing audited, as before) |
->
-> **Baseline keys change for per-theme styles.** A style key defined in both themes' dictionaries is
-> now graded once per theme where it's used, and the element reads `TextBlock⊕Style[Tag]@dark/base`
-> instead of `TextBlock⊕Style[Tag]/base`. The element is part of the baseline key, so an old baseline
-> reports such an entry as paid off and the same pair as a NEW failure — review it and re-run
-> `--write-baseline`.
+**1.0 freezes the public interface.** From this release on, the nine surfaces listed under
+*Interface freeze* below change only in the ways the 1.x compatibility rules allow; anything else
+waits for 2.0. Getting there took the breaking changes that had to happen before a freeze — every one
+is listed below with what to do about it — and the release also collects every fix since 0.6.1.
+There is no 0.7.0: the breaking changes ship once.
+
+### Upgrading from 0.6.1 — what you have to do
+
+1. **The gate is stricter by default.** Without flags, *any* pair below AA now fails the run (exit 1);
+   0.6.1 failed only on pairs below the fail line (threshold × 0.67) and let the rest through as `warn`.
+   To keep the 0.6.1 gate, pass `--fail-on fail`, set `"failOn": "fail"` in `xamlcontrast.config.json`,
+   or `fail-on: fail` in the Action. `--fail-on` is now a real override in both directions
+   (flag > config > default); in 0.6.1 it could only tighten, so `--fail-on fail` was a no-op.
+2. **Exit 3 means "this result can't be trusted".** Zero pairs, a degraded palette under
+   `--strict-palette`, and coverage below `--min-coverage` used to exit 1 — the same code as "found
+   violations", although the fix is different (configuration, not colours). They now exit 3. A CI step
+   that treats any non-zero code as failure keeps working; a script that tests for exactly `1` has to
+   handle `3` as well.
+3. **Regenerate your baseline** with `xamlcontrast <root> --write-baseline <path>`. 1.0 refuses a 0.x
+   baseline file (exit 2, and the message says to regenerate it): a baseline now records every pair
+   below AA, not only fails, and carries a `schemaVersion`. Read as-is, every existing warn would have
+   come back as NEW. `--baseline` and `--write-baseline` now require a path and can't be combined.
+4. **Fix config mistakes 0.6.1 ignored.** An unknown property in `xamlcontrast.config.json` (a typo
+   such as `strictPallete`) is now a config error (exit 2) that names it; so is
+   `thresholds.largeText` greater than `thresholds.normalText`. `$schema` is allowed.
+5. **JSON consumers: move to `schemaVersion` 6** (field changes below). The shape is published as
+   [`docs/report.schema.json`](docs/report.schema.json).
+6. **Action users: switch to `@v1`** (a moving tag that follows the latest 1.x). With `version` left
+   empty the Action installs the newest 1.x tool, never 2.0. Its `fail-on` input now defaults to empty
+   — the config's `failOn`, else `warn` — and every input value is checked: `fail-on: Warn`,
+   `strict-palette: True` or `sarif: yes` used to fall back to the default silently and now fail the
+   job (exit 2) naming the input.
+7. **Expect different numbers on the same code.** Fixes since 0.6.1 find pairs that were silently
+   skipped, report problems that were hidden, and count confident-but-wrong ratios as `unresolved`
+   instead — see *Changed* and *Fixed* below. Measured on the four validation projects, 0.6.1 → 1.0:
+
+   | project | pairs | unresolved | coverage | fail | warn | exit |
+   |---|---|---|---|---|---|---|
+   | Kindling | 168 → 182 | 1 → 5 | 99.4% → 97.3% | 0 → 1 | 1 → 1 | 0 → 1 (a real failure now found; under the new gate its warn fails too) |
+   | QuillNest | 842 → 906 | 38 → 95 | 95.7% → 90.5% | 3 → 2 | 1 → 1 | 1 → 1 (one of the three is now `unresolved`) |
+   | ZeroCel | 468 → 518 | 206 → 184 | 69.4% → 73.8% | 0 → 1 | 3 → 6 | 0 → 1 (a real failure now found) |
+   | Cornea | 0 → 0 | 1 → 2 | — | 0 → 0 | 0 → 0 | 1 → 3 (nothing audited, as before; now reported as untrustworthy) |
+
+   Coverage can read lower than in 0.6.1, and a project close to `--min-coverage` (default 50%; it
+   applies in `--baseline` mode too) can go from passing to exit 3 on the coverage floor alone.
+
+### Breaking changes
+
+| # | What changed | 0.6.1 | 1.0 | What to do |
+|---|---|---|---|---|
+| 1 | Default gate | fail only below threshold × 0.67 | every pair below AA (`failOn` default `warn`) | nothing, or `--fail-on fail` / `"failOn": "fail"` / `fail-on: fail` to keep 0.6.1's gate |
+| 2 | `--fail-on` | could only tighten the config (`flag \|\| config`) | overrides the config both ways (flag > config > default) | nothing; `--fail-on fail` now loosens a config `warn` |
+| 3 | Untrustworthy result (0 pairs, degraded palette with `--strict-palette`, coverage below the floor) | exit 1 | exit 3 | treat 3 as failure in scripts that test for exactly 1 |
+| 4 | Baseline contents | fail pairs only | every pair below AA (fail + warn), sorted by file, element, fg, bg; compared against the pairs the current gate blocks | re-run `--write-baseline` |
+| 5 | Baseline format | no version; missing `count`/`worst` read as 0 | `"schemaVersion": 1` required; a missing field, an unknown version or a 0.x file → exit 2 naming the problem | re-run `--write-baseline` |
+| 6 | Baseline in `--fail-on warn` mode | every warn blocked, known or not | warns are in the ratchet like fails: only new or worsened ones block | nothing |
+| 7 | `--baseline [path]`, `--write-baseline [path]` | path optional (default `xamlcontrast-baseline.json`; the next word was taken as the path); `--write-baseline` silently won over `--baseline` | path required, a value starting with `-` is refused; using both → exit 2 | pass the path explicitly |
+| 8 | Unknown config properties | named in a warning, ignored | config error (exit 2); `$schema` allowed | fix or remove the property |
+| 9 | `thresholds.largeText > normalText` | accepted | config error (exit 2) | swap the two values |
+| 10 | JSON report | `schemaVersion` 5 | `schemaVersion` 6 (below) | update consumers |
+| 11 | Action `fail-on` | default `fail`; only `warn` was passed on, so the config's `failOn` never applied | default empty = config's `failOn`, else `warn`; `warn` and `fail` both passed on | set `fail-on: fail` to keep 0.6.1's gate |
+| 12 | Action input values | unknown values silently became the default | unknown values fail the job (exit 2) naming the input; a line break in `root`/`working-directory`/`version`/`baseline`/`min-coverage` is refused | fix the value |
+| 13 | Action `version` empty | latest stable tool, any major | latest 1.x (`--version "1.*"`) | nothing; pin `version:` for fully reproducible runs |
+| 14 | Baseline keys of styles resolved per theme | `TextBlock⊕Style[Tag]/base` | `TextBlock⊕Style[Tag]@dark/base` and `…@light/…` | re-run `--write-baseline` |
+| 15 | A translucent background with nothing underneath | `no-ancestor-background` | `translucent-uncomposited` | nothing; scripts counting reasons see the shift |
+| 16 | `xamlcontrast-ignore` on a container | suppressed the container's elements, not the `Style` definitions in its `Resources` | covers the `Style` definitions inside it too | nothing; check that the comment means what you intended |
+
+**JSON `schemaVersion` 6** — every field is always present: no value is `null`, an empty list `[]`,
+an empty map `{}` (5 omitted some and printed others).
+
+- Top level: `unresolved` → **`unresolvedSites`** (it shared a name with the `summary.unresolved`
+  count); new **`toolVersion`** (no build metadata) and **`exitCode`** (the audit verdict 0/1/3; a later
+  output-file error still exits 2). Both are `null` when the report is produced through the library.
+- `summary`: new **`failOn`**, **`minCoverage`**, **`strictPalette`** (the gate in effect, after
+  flag > config > default) and **`invalidIgnoreCount`** (next to `invalidIgnores`, like
+  `parseErrors`/`parseErrorFiles`); **`paletteSource` removed** (it was `none` exactly when
+  `paletteMode` is `none`).
+- `findings[]`: `largeText` → **`isLargeText`** (it shared a name with `thresholds.largeText`);
+  **`fontSize` is a number** (DIP, as written; 5 had a `"12px"` string rounded half-to-even) or
+  `null`; new **`theme`** (`"dark"`/`"light"` for a pair that exists in one theme only — a style in a
+  one-theme dictionary or resolved per theme — whose `ratioDark` and `ratioLight` both hold that
+  theme's ratio; `null` otherwise) and **`baseline`** (`known`/`new`/`worsened` for the pairs the gate
+  blocks in `--baseline` mode; `null` otherwise). `symmetry` is `null` for ok/decorative.
+- Kept on purpose: `findings[].threshold` (a number, unlike the `thresholds` object — no real
+  ambiguity); `fg` as written in the source and `bg` normalised (both are part of the baseline key, and
+  `fg` is the text you can grep for; `bg` is resolved from ancestors, styles and compositing and has no
+  single source text); no `root` field (a machine-specific absolute path would make the same commit
+  produce different reports; every path in the report is already relative to it).
+
+### Interface freeze (1.x compatibility rules)
+
+**Frozen from 1.0.** Breaking any of these is a 2.0 change:
+
+1. **CLI** — `xamlcontrast <project-root> [options]`; the flags `--json <path>`, `--sarif <path>`,
+   `--md <path>`, `--fail-on <warn|fail>`, `--strict-palette`, `--min-coverage <0-100>`,
+   `--baseline <path>`, `--write-baseline <path>`, `--show-ok`, `--show-unresolved`, `--version`,
+   `-h`/`--help`, with their value forms and defaults (`--fail-on` default `warn`, `--min-coverage`
+   default 50, flag > config > default).
+2. **Exit codes** — `0` pass, `1` pairs below the gate (or new/worsened ones in `--baseline` mode),
+   `2` usage, config or input-file error (including an output file that can't be written), `3` the
+   result can't be trusted. Order: usage/config/input errors → the three trust checks (before either
+   baseline mode) → baseline modes → findings.
+3. **JSON report** — `schemaVersion` 6 and every field in `docs/report.schema.json`.
+   `category`, `symmetry`, `theme`, `baseline` and `failOn` are closed sets (a new member is 2.0);
+   the unresolved reasons (`unresolvedBy` keys, `unresolvedSites[].reason`) and `paletteMode` are
+   **open sets**: 1.x may add a value, existing values keep their spelling.
+4. **Action inputs** — names, defaults and accepted values of `root`, `working-directory`, `version`,
+   `fail-on`, `min-coverage`, `baseline`, `strict-palette`, `comment`, `upload-report`, `sarif`; the
+   `@v1` tag installs only 1.x tools.
+5. **Config file** — `xamlcontrast.config.json` at the project root: every property, its type, range
+   and default (`thresholds` 4.5 / 3.0 / 0.67, `failOn` `warn`, `minCoverage` 50, `ignore.requireReason`
+   `true`, …), unknown properties rejected, `$schema` allowed (see `docs/config-schema.md`).
+6. **Baseline file** — `schemaVersion` 1, `entries[]` of `file`, `element`, `fg`, `bg`, `count`,
+   `worst`; the key `file|element|fg|bg` (no line numbers) and the text forms it is built from
+   (`file` root-relative with `/`; `element` as `Name`, `Name⊕Style[Key]/state`,
+   `Name⊕Style[Key]@dark/state`, `Style[Key]/state`; `fg` as written, with ` ×<opacity>` in the
+   invariant culture; `bg` as `{Key}`, `#RRGGBB` or a composite). Every 1.x reads every baseline 1.0
+   writes.
+7. **SARIF** — 2.1.0, one rule `wcag-contrast`, `error` = fail, `warning` = warn, `uri` relative to the
+   scanned root.
+8. **Suppression comment** — `<!-- xamlcontrast-ignore: reason -->`: case-sensitive, at the start of
+   the comment, reason required (unless `ignore.requireReason: false`) and on the same line; applies to
+   the immediately following element and its whole subtree, including `Style` definitions inside it;
+   malformed variants never suppress and are listed in `summary.invalidIgnores`.
+9. **Audit scope** — every `*.xaml` under the root except `bin`/`obj` directories below the root (any
+   case); `*.cs` files only for the C# palette; files whose root element is a `ResourceDictionary` are
+   palette sources, left out of `files` but still walked; test and sample paths — a path segment with a
+   word starting with `test`, `sample`, `demo` or `example` (words split at `.` `-` `_`, spaces and case
+   changes, so `MyApp.Tests` and `UnitTests` count), or `fixture`/`mock` below the first level — are
+   never palette or application candidates but are still audited; the config is read from the root only.
+
+**Evolution rules** (a promise from this release on):
+
+1. Breaking any surface above → **major**.
+2. Additions only — a new flag, input, config property, JSON field, or a value in an open set →
+   **minor**. `schemaVersion` does not change for additions; it changes only with a breaking change,
+   i.e. a major. **JSON consumers must ignore fields and open-set values they don't know.**
+3. Audit-semantics improvements — a rule that finds more pairs, a confident ratio that becomes an
+   honest `unresolved`, a backdrop resolved differently — are **minor**, never patch, and the CHANGELOG
+   opens with an *Upgrading* note giving the measured effect. If baseline keys move, the note says so
+   and says to re-run `--write-baseline`.
+4. Fixes that change no output → **patch**.
+5. When an old artifact stops being valid, the tool fails loudly and says what to do (as a 0.x baseline
+   does now) — never a silently wrong result.
+
+Forward compatibility is not promised: a config that uses a property added in 1.y is refused by an
+older 1.x (exit 2, naming the property).
+
+### Added
+- **JSON**: `toolVersion`, `exitCode`, `summary.failOn` / `minCoverage` / `strictPalette` /
+  `invalidIgnoreCount`, `findings[].theme` / `baseline`; the shape is published as
+  `docs/report.schema.json`.
+- **Action**: a `min-coverage` input (empty = the config's `minCoverage`, else 50). Annotations follow
+  the gate: pairs the gate blocks are `error` (with the default gate, warns too), warns it lets through
+  are `warning`, and known debt in `--baseline` mode is `notice` — 0.6.1 marked known debt as `error`
+  on a green job.
+- **Config `layout`** declares how your own containers lay out their children, so rule 17 doesn't have
+  to guess: `"layout": { "overlap": ["MyCardHost"], "sideBySide": ["MyToolbar"] }`. A name in
+  `overlap` stacks its children in one cell (the earlier siblings can be the text's backdrop); a name in
+  `sideBySide` places them apart. Declarations win over the built-in rules; a name in both lists is a
+  config error.
+
+### Changed
+- **A translucent background with nothing underneath now reads `translucent-uncomposited`**, the reason
+  that describes it, instead of `no-ancestor-background`. The `rootBackground` hint on the coverage-floor
+  and zero-pairs exits counts these sites too — a declared root background is what they are missing.
+- **A `xamlcontrast-ignore` comment on a container also covers the `Style` definitions in its
+  `Resources`.** 0.6.1 suppressed the container's elements but still reported the definition-site
+  pairs of styles declared inside it.
+- `--help` documents `--fail-on <warn|fail>` and the four exit codes; the exit lines read
+  `exit 1: N pair(s) below AA` (no `(--fail-on warn)` suffix) and `exit 3: …`.
+- The CLI decides the exit code before writing `--json`/`--sarif`/`--write-baseline`/`--md`, so the
+  JSON can carry it; `json written: …` now prints after the `exit …` line.
 
 ### Changed — translucent text colours are graded, not skipped
 - **A translucent foreground is composited onto its resolved background and graded**, like element
@@ -92,7 +236,7 @@ have reviewed them.
   symmetry), and a style key defined in both themes' dictionaries is resolved per theme where it is
   used (`Button⊕Style[Chip]@dark/base`) — pairing a dark style with light values reported failures for
   combinations that never exist at runtime. Such findings carry the one theme's ratio in both
-  `ratioDark` and `ratioLight`; a style key only one theme defines is `unknown-palette-key` (naming the
+  `ratioDark` and `ratioLight`, and the JSON's `theme` names that theme; a style key only one theme defines is `unknown-palette-key` (naming the
   style) for the other theme. Grouping the *palette* into dark and light still uses the looser 0.6.1
   rule (any part of the path), so `darktheme.xaml`, `Dark2.xaml` or `深色Dark.xaml` still form a pair;
   when file names can't tell the themes apart at all (`Ocean.xaml` / `Nord.xaml`) and three or more
@@ -166,24 +310,20 @@ have reviewed them.
 - Numbers written into baseline keys (`fg ×0.5`), SARIF messages and config errors use the invariant
   culture; on comma-decimal machines baselines no longer change keys.
 
-### Changed
-- Misspelled or unknown config properties are named in the console and the Markdown report
-  (`!! config: unknown property 'strictPallete' ignored`). They are still not an error — whether they
-  should exit 2 is an open interface decision.
-- A baseline whose entries lack `count` or `worst` is read with a warning naming what is no longer
-  checked (missing `worst` silently disabled palette-drift detection). The top-level `entries` key is now
-  case-insensitive like the entry fields.
+### Changed — reporting details
+- The baseline's top-level keys are case-insensitive like the entry fields (`Entries` was refused).
 - Misspelled `xamlcontrast-ignore` markers (wrong case, empty or missing reason, missing colon, reason on
   a second line) still don't suppress anything, but are now listed in `summary.invalidIgnores`.
-- `unresolved[].value` / `--show-unresolved` name the **background** value when the background is what
+- `unresolvedSites[].value` / `--show-unresolved` name the **background** value when the background is what
   couldn't be resolved (it used to repeat the foreground value).
 - The exit-1 line prints the fail factor in effect (`below threshold x 0.67`) instead of a hard-coded
-  `2/3`; `--help` lists `--version`, `-h, --help` and `--fail-on <fail|warn>`; a usage error prints the
+  `2/3`; `--help` lists `--version` and `-h, --help`; a usage error prints the
   usage to stderr, with a note when `--baseline`/`--write-baseline` consumed the project root.
 - The zero-pairs exit also prints the `rootBackground` hint when it applies.
 - Action: the annotation/SARIF path prefix is normalised correctly for `root: .` and `/./` segments.
 - `scripts/verify-baselines.ps1` follows the CelFlow → ZeroCel rename and keeps going (with a red line)
-  when a validation project is missing, instead of aborting under Windows PowerShell 5.1.
+  when a validation project is missing, instead of aborting under Windows PowerShell 5.1. Its expected
+  exit code follows the 1.0 rules, or the snapshot's own `exitCode` when the snapshot has one.
 
 ## [0.6.1] - 2026-08-12
 

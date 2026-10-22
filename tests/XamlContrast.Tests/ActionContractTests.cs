@@ -239,6 +239,16 @@ public class ActionContractTests
         Assert.Equal(expected, r.Calls);
     }
 
+    [Fact] // 鎖的 major = CHANGELOG 最新發佈版的 major。發 2.0.0 時這裡會紅，提醒把 action.yml 一起改成 "2.*"
+    public void TheFloatingMajorIsTheLatestReleasesMajor()
+    {
+        var floating = Regex.Match(Step("Install XamlContrast"), @"--version ""(?<major>\d+)\.\*""");
+        Assert.True(floating.Success, "沒指定 version 時要用 \"<major>.*\" 鎖住 major");
+        var latest = Regex.Match(File.ReadAllText(Repo.PathOf("CHANGELOG.md")), @"^## \[?(?<major>\d+)\.\d+\.\d+", RegexOptions.Multiline);
+        Assert.True(latest.Success, "CHANGELOG.md 找不到版本標題");
+        Assert.Equal(latest.Groups["major"].Value, floating.Groups["major"].Value);
+    }
+
     [Theory] // 布林與列舉 input 先驗再用：0.x 的 `fail-on: Warn`、`strict-palette: True`、`sarif: yes` 都靜默變成預設值。
              // 未知值 → exit 2（與 CLI 的用法錯誤同一碼）並點名是哪個 input。
              // 帶換行的值一律拒絕：CLI／dotnet 的錯誤訊息會把它原樣印出，換行後的內容落在行首就成了 runner 會解析的
