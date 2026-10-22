@@ -129,6 +129,10 @@ public sealed class ToolConfig
         if (cfg.Thresholds.NormalText <= 1 || cfg.Thresholds.LargeText <= 1 ||
             cfg.Thresholds.FailFactor is <= 0 or > 1)
             throw new ConfigException("thresholds out of range (contrast ratios > 1, failFactor in (0,1])");
+        // 大字級的門檻不能比一般文字嚴（1.0）：0.x 照單全收，大字反而要更高的對比 —— 幾乎一定是兩個值寫反了
+        if (cfg.Thresholds.LargeText > cfg.Thresholds.NormalText)
+            throw new ConfigException(string.Create(System.Globalization.CultureInfo.InvariantCulture,
+                $"thresholds.largeText ({cfg.Thresholds.LargeText}) must not exceed thresholds.normalText ({cfg.Thresholds.NormalText})"));
         if (cfg.MinCoverage is < 0 or > 100)
             throw new ConfigException($"minCoverage must be between 0 and 100, got {cfg.MinCoverage.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
 

@@ -198,6 +198,9 @@ public class ConfigTests
     [InlineData("""{ "thresholds": { "largeText": 0.5 } }""", "thresholds out of range")]
     [InlineData("""{ "thresholds": { "largeText": 1 } }""", "thresholds out of range")]     // 恰為 1 也拒（> 1 才合法）
     [InlineData("""{ "thresholds": { "failFactor": 0 } }""", "thresholds out of range")]
+    // 1.0：大字級的門檻不能比一般文字嚴（盤點 8.3 第 3 點）—— 0.x 照單全收，大字反而要更高的對比
+    [InlineData("""{ "thresholds": { "largeText": 5 } }""", "thresholds.largeText (5) must not exceed thresholds.normalText (4.5)")]
+    [InlineData("""{ "thresholds": { "normalText": 2.5 } }""", "thresholds.largeText (3) must not exceed thresholds.normalText (2.5)")]
     [InlineData("""{ "thresholds": { "failFactor": 1.01 } }""", "thresholds out of range")]
     [InlineData("""{ "minCoverage": -0.1 }""", "minCoverage must be between 0 and 100")]
     [InlineData("""{ "minCoverage": "50" }""", "not valid JSON")]                       // 型別錯
