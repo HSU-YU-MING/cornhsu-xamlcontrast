@@ -637,8 +637,8 @@ public class PaletteDetectorTests
         Assert.Contains("3 key(s) dropped", d.Description);
 
         var cli = Cli.Run(fx.Root, "--strict-palette");
-        Assert.True(cli.Exit == 1, cli.ToString());
-        Assert.Contains("exit 1: palette detection failed and --strict-palette is set", cli.Out);
+        Assert.True(cli.Exit == 3, cli.ToString());
+        Assert.Contains("exit 3: palette detection failed and --strict-palette is set", cli.Out);
     }
 
     // ── 色盤分組的主題提示要寬鬆（審查最後一輪 1：素材 hint-lowercase、hint-capfirst、hint-digits、hint-chinesemix、hint-deepdir）──
@@ -692,8 +692,8 @@ public class PaletteDetectorTests
         Assert.Contains("themes the file names don't tell apart", d.Description);
 
         var cli = Cli.Run(fx.Root, "--strict-palette");
-        Assert.True(cli.Exit == 1, cli.ToString());
-        Assert.Contains("exit 1: palette detection failed and --strict-palette is set", cli.Out);
+        Assert.True(cli.Exit == 3, cli.ToString());
+        Assert.Contains("exit 3: palette detection failed and --strict-palette is set", cli.Out);
     }
 
     [Fact] // 反方向：兩個中性字典只是各自定義不同的鍵、或同鍵同值 —— 正常的拆檔，不是退化

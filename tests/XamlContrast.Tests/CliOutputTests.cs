@@ -139,15 +139,15 @@ public class CliOutputTests
         Assert.Contains("exit 0: no new or worsened failures vs baseline", check.Out);
     }
 
-    [Fact] // 兩個模式並用時 --write-baseline 勝（先判）—— 指到不存在的 --baseline 也不會被讀
-    public void WriteBaselineWinsOverBaseline()
+    [Fact] // --baseline 的檔是輸入，在稽核之前就驗：指到不存在的檔就是 exit 2，不論還給了什麼旗標
+           // （0.x 時兩個模式並用 --write-baseline 勝、--baseline 根本不讀）
+    public void BaselineFileIsValidatedBeforeAnythingElse()
     {
         using var fx = CliProjects.Failing();
         var outFile = Path.Combine(fx.Root, "new-baseline.json");
         var r = Cli.Run(fx.Root, "--baseline", Path.Combine(fx.Root, "missing.json"), "--write-baseline", outFile);
-        Assert.True(r.Exit == 0, r.ToString());
-        Assert.True(File.Exists(outFile));
-        Assert.DoesNotContain("baseline not found", r.Err);
+        Assert.True(r.Exit == 2, r.ToString());
+        Assert.False(File.Exists(outFile));
     }
 
     [Fact] // ratchet 的三種結論：新增 → 逐處點名、惡化（同鍵處數變多）→ 點名、修好 → paid off 看得見

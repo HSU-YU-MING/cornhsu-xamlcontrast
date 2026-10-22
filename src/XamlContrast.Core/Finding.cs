@@ -107,4 +107,7 @@ public sealed class AuditResult
     /// 「幾乎什麼都沒看」和「看過了都沒問題」在退出碼上分不出來，等於同一種謊報。
     /// </summary>
     public double Coverage => Pairs + Unresolved == 0 ? 0 : (double)Pairs / (Pairs + Unresolved);
+
+    /// <summary>覆蓋率百分比，四捨五入到一位（.5 進位）—— console、JSON、Markdown 印的與覆蓋率下限比的都是這一個值。</summary>
+    public double CoveragePercent => Math.Round(Coverage * 100, 1, MidpointRounding.AwayFromZero);
 }

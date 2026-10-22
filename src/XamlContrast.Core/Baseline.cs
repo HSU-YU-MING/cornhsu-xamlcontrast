@@ -58,8 +58,19 @@ public static class Baseline
 
     /// <param name="gateWarn">gate 是 warn（預設）：低於 AA 的都擋；false（--fail-on fail）：只擋 fail。</param>
     public static ComparisonResult Compare(AuditResult result, string baselineJson, bool gateWarn = true)
+        => Compare(result, Parse(baselineJson), gateWarn);
+
+    /// <summary>讀進來的 baseline：鍵 → entry，加上檔案本身的問題。</summary>
+    public sealed class Known
     {
-        var doc = JsonDocument.Parse(baselineJson);
+        public required Dictionary<string, Entry> Entries { get; init; }
+        public List<string> Warnings { get; init; } = new();
+    }
+
+    /// <summary>解析 baseline 檔。格式錯誤擲例外（CLI 轉成 exit 2）—— 在稽核之前就驗，輸入錯了後面都沒有意義。</summary>
+    public static Known Parse(string baselineJson)
+    {
+        using var doc = JsonDocument.Parse(baselineJson);
         var known = new Dictionary<string, Entry>();
         int noCount = 0, noWorst = 0;
         // 頂層的 entries 與每筆的欄位名同一套政策：不分大小寫（舊版頂層用 GetProperty 分大小寫，
@@ -71,6 +82,7 @@ public static class Baseline
             .First(p => p.Name.Equals("entries", StringComparison.OrdinalIgnoreCase)).Value;
         foreach (var el in entries.EnumerateArray())
         {
+            if (el.ValueKind != JsonValueKind.Object) throw new FormatException("every entry must be an object");
             var e = el.Deserialize<Entry>(JsonOpts)!;
             known[$"{e.File}|{e.Element}|{e.Fg}|{e.Bg}"] = e;
             // ⚠ 缺欄位會被補成 0：缺 worst → 色盤漂移檢查失效（比值再差也不會 < 0 − 0.01）；
@@ -89,6 +101,13 @@ public static class Baseline
         if (noCount > 0)
             warnings.Add($"{noCount} {(noCount == 1 ? "entry has" : "entries have")} no 'count' — every occurrence " +
                          "counts as worsened; regenerate with --write-baseline");
+        return new Known { Entries = known, Warnings = warnings };
+    }
+
+    public static ComparisonResult Compare(AuditResult result, Known baseline, bool gateWarn = true)
+    {
+        var known = baseline.Entries;
+        var warnings = baseline.Warnings;
 
         bool Gating(Finding f) => f.Category == Category.Fail || gateWarn && f.Category == Category.Warn;
         // 目前低於 AA 的每一組，依鍵分組；處數與最差比值都算整組（warn 惡化成 fail 也是比值變差）

@@ -2,10 +2,10 @@ using XamlContrast.Core;
 
 // XamlContrast CLI — 靜態 XAML 對比度稽核，退出碼給 CI 當守門員。
 //
-// 退出碼政策（規劃書 4.5；1.0 起的 gate 見 CHANGELOG 1.0.0）：
-//   低於 AA（gate warn，預設）或低於 fail 線（gate fail）的配對 > 0 → 1
-//   配對數 0                    → 1（不可設定 —— 空掃綠燈就是謊報健康）
-//   --strict-palette 且色盤退化 → 1
+// 退出碼契約（1.0 凍結；判定順序見 DecideExit 與 CLAUDE.md「退出碼契約與檢查順序」）：
+//   0 通過 ／ 1 找到違規（低於 gate 的配對）／ 2 用法、設定或輸入檔錯誤 ／ 3 結果不可信
+//   （0 組配對、--strict-palette 且色盤退化、覆蓋率低於下限 —— 「工具沒看到」與「看到了有問題」
+//   在 CI 上的處置不同：前者要修設定，後者要修顏色。比照 Parity 的 exit 3）
 
 var showOk = false;
 var showUnresolved = false;
@@ -135,6 +135,26 @@ strictPalette = strictPalette || config.StrictPalette;
 //    不是稽核標準。使用者明確傳 --min-coverage 0 表示「我知道，先讓我跑」是合理的逃生口。
 var minCov = minCoverage ?? config.MinCoverage;
 
+// baseline 檔是輸入：在稽核之前就驗（不存在、壞掉 → exit 2），排在「結果不可信」（3）之前 ——
+// 輸入本身錯了，後面的判定都沒有意義
+Baseline.Known? known = null;
+if (baselinePath is not null)
+{
+    if (!File.Exists(baselinePath))
+    {
+        Console.Error.WriteLine($"baseline not found: {baselinePath}");
+        return 2;
+    }
+    try { known = Baseline.Parse(File.ReadAllText(baselinePath)); }
+    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Text.Json.JsonException or FormatException or InvalidOperationException or ArgumentException)
+    {
+        // 壞掉的 baseline 要有好訊息，不是裸拋堆疊
+        Console.Error.WriteLine($"baseline is not valid ({baselinePath}): {ex.Message}");
+        Console.Error.WriteLine("regenerate it with --write-baseline");
+        return 2;
+    }
+}
+
 AuditResult result;
 try { result = Auditor.Run(root, detection, config); }
 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -202,14 +222,15 @@ static bool TryWrite(string path, string content, string label, string suffix = 
 int DecideExit()
 {
 
+    // ── 結果不可信 → 3。三道保險並排、擋在兩個 baseline 模式之前（見下面的地雷註記）──
     if (result.Pairs == 0)
     {
         // 0 組配對時「達標」無意義 —— 沒有任何可稽核的項目。空掃綠燈就是謊報健康。
-        Console.WriteLine("exit 1: resolved 0 pairs — nothing was audited, this result does not mean the project passes");
+        Console.WriteLine("exit 3: resolved 0 pairs — nothing was audited, this result does not mean the project passes");
         // 整個視窗沒有底（全是 no-ancestor-background）正是最需要 rootBackground 提示的情況 ——
         // 舊版這裡先 return，走不到下面覆蓋率那條的求救指引
         if (Report.CoverageHint(result) is { } zeroHint) Console.WriteLine(zeroHint);
-        return 1;
+        return 3;
     }
 
     // ⚠ 色盤退化在「所有模式」下都算失敗。這個檢查原本擺在函式最尾端，而
@@ -221,8 +242,8 @@ int DecideExit()
     //   放在 Pairs==0 之後、模式分支之前：兩道「這份結果不可信」的保險並排。
     if (strictPalette && detection.IsDegraded)
     {
-        Console.WriteLine("exit 1: palette detection failed and --strict-palette is set");
-        return 1;
+        Console.WriteLine("exit 3: palette detection failed and --strict-palette is set");
+        return 3;
     }
 
     // ⚠ 覆蓋率下限 —— 「0 組配對就擋」的自然推廣。二元的那條線擋不住實際發生的情況：
@@ -230,17 +251,18 @@ int DecideExit()
     //   342 個檔只解析出 7 組，然後印「all pairs meet AA」）。「幾乎什麼都沒看」
     //   與「看過了都沒問題」在退出碼上分不出來，是同一種謊報健康。
     //   與 --strict-palette 並排放在模式分支之前，baseline 模式一樣適用。
-    if (result.Coverage * 100 < minCov)
+    //   比的是報告上那個數字（四捨五入到一位）：舊版拿未取整的值比，JSON 與 console 寫 66.7、退出碼卻說不到 66.7
+    if (result.CoveragePercent < minCov)
     {
         Console.WriteLine(string.Create(System.Globalization.CultureInfo.InvariantCulture,
-            $"exit 1: only {result.Coverage * 100:F1}% of colour pairs could be resolved " +
+            $"exit 3: only {result.CoveragePercent:F1}% of colour pairs could be resolved " +
             $"({result.Pairs} of {result.Pairs + result.Unresolved}), below the {minCov:F0}% floor — " +
             $"this result does not represent the project. See the unresolved breakdown above; " +
             $"pass --min-coverage 0 to proceed anyway."));
 
         // 求救指引（文字與觸發條件見 Report.CoverageHint）—— 使用者在這裡最可能放棄
         if (Report.CoverageHint(result) is { } hint) Console.WriteLine(hint);
-        return 1;
+        return 3;
     }
 
     if (writeBaselinePath is not null)
@@ -252,22 +274,9 @@ int DecideExit()
         return 0;
     }
 
-    if (baselinePath is not null)
+    if (known is not null)
     {
-        if (!File.Exists(baselinePath))
-        {
-            Console.Error.WriteLine($"baseline not found: {baselinePath}");
-            return 2;
-        }
-        Baseline.ComparisonResult cmp;
-        try { cmp = Baseline.Compare(result, File.ReadAllText(baselinePath), gateWarn); }
-        catch (Exception ex)
-        {
-            // 壞掉的 baseline 要有好訊息，不是裸拋堆疊
-            Console.Error.WriteLine($"baseline is not valid ({baselinePath}): {ex.Message}");
-            Console.Error.WriteLine("regenerate it with --write-baseline");
-            return 2;
-        }
+        var cmp = Baseline.Compare(result, known, gateWarn);
         Console.WriteLine($"baseline: known debt {cmp.KnownDebt}, paid off {cmp.PaidDebt} (debt may only shrink)");
         foreach (var w in cmp.Warnings) Console.WriteLine($"!! baseline: {w}"); // baseline 檔本身的問題不能靜默
         foreach (var f in cmp.NewFailures)
@@ -332,6 +341,8 @@ static void PrintUsage(TextWriter w)
           --version                print the tool version
           -h, --help               print this help
 
-        exit codes: 0 pass, 1 fail (or the result cannot be trusted), 2 usage or config error
+        exit codes: 0 pass; 1 pairs below the gate; 2 usage, config or input-file error;
+                    3 the result cannot be trusted (0 pairs, degraded palette with
+                    --strict-palette, coverage below --min-coverage)
         """);
 }

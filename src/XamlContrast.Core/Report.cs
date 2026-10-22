@@ -134,7 +134,7 @@ public static class Report
                 pairs = r.Pairs,
                 // 覆蓋率是「這份結果代不代表專案」的關鍵數字 —— 只給 pairs 的話，
                 // 消費端無從分辨「全綠」是掃得乾淨還是根本沒掃到
-                coverage = Math.Round(r.Coverage * 100, 1),
+                coverage = r.CoveragePercent,
                 unresolved = r.Unresolved,
                 // 細目讓「漏了多少」變成「該修哪裡」—— 只有總數的話，
                 // 使用者看不出其中絕大多數可能是同一個可補救的原因
@@ -277,7 +277,7 @@ public static class Report
                 $"!! non-default thresholds: normal {t.NormalText}, large {t.LargeText}, fail-factor {t.FailFactor}"));
         }
         sb.AppendLine(string.Create(inv,
-            $"files {r.FileCount} | text-on-background pairs {r.Pairs} | coverage {r.Coverage * 100:F1}% of pairs seen"));
+            $"files {r.FileCount} | text-on-background pairs {r.Pairs} | coverage {r.CoveragePercent:F1}% of pairs seen"));
         sb.AppendLine(string.Create(inv,
             $"unresolved (colour bound at runtime / gradient / key not in palette): {r.Unresolved} | skipped (invisible: transparent or opacity 0): {r.Skipped}"));
         if (r.Unresolved > 0)
