@@ -267,8 +267,9 @@ older 1.x (exit 2, naming the property).
   starting with `//`); an old value in a comment used to override the live one.
 - **Test projects can't hijack the palette.** C# tuple detection now skips test/sample paths like the
   XAML side does (`[InlineData("Bg", "#..", "#..")]` matched the tuple format and produced 1:1 false
-  fails while making detection look healthy), and the path rule now matches words — `MyApp.Tests`,
-  `UnitTests`, `Foo_IntegrationTests` — not just segments starting with `test`.
+  fails while making detection look healthy), and the path rule now matches whole words — `MyApp.Tests`,
+  `UnitTests`, `Foo_IntegrationTests` count; `Contoso.Demographics` and `Testimonials.Module` don't (0.6.1
+  excluded them as samples, so a project whose only palette lived there audited 0 pairs).
 - **`DataTrigger` disabled-state exemption is no longer a substring match.** `{Binding IsEnabledByLicense}`
   or a converter named `IsEnabledConverter` counted as WCAG 1.4.3 "disabled". The binding's path must
   now be exactly `IsEnabled` (or `(IsEnabled)` / `(UIElement.IsEnabled)`), point at the element itself, its templated

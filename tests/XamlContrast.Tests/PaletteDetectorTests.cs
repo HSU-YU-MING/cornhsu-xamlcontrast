@@ -307,17 +307,30 @@ public class PaletteDetectorTests
         Assert.Equal(Category.Ok, Assert.Single(r.Findings).Category); // 不是 1:1 的假 fail
     }
 
-    [Theory] // 測試／範例路徑的判準：路徑段依 . - _ 與大小寫邊界切成詞逐一比對 —— .NET 的測試專案慣用
-             // MyApp.Tests／UnitTests 命名，舊版的「路徑段以 test 開頭」對不上，放在那裡的假色盤照樣被選中
+    [Theory] // 測試／範例路徑的判準：路徑段依 . - _ 與大小寫邊界切成詞，**整詞**比對 —— .NET 的測試專案慣用
+             // MyApp.Tests／UnitTests 命名，舊版的「路徑段以 test 開頭」對不上，放在那裡的假色盤照樣被選中。
+             // ⚠ 也不能是「詞以 test 開頭」：Contoso.Demographics、Testimonials.Module 會被當成範例路徑，
+             //   唯一的色盤被排除，整個專案 0 組配對、exit 3（審查 1.0 A2）
     [InlineData("src/MyApp.Tests/Themes/Theme.xaml", true)]
     [InlineData("src/UnitTests/Theme.xaml", true)]
     [InlineData("MyApp_IntegrationTests/Theme.xaml", true)]
     [InlineData("src/App-Samples/Theme.xaml", true)]
     [InlineData("Tests/Theme.xaml", true)]                  // 舊判準本來就涵蓋的形狀照舊
+    [InlineData("test/Theme.xaml", true)]
+    [InlineData("samples/Gallery/Theme.xaml", true)]
+    [InlineData("DemoApp/Theme.xaml", true)]
+    [InlineData("docs/Examples/Theme.xaml", true)]
+    [InlineData("src/TestData/Theme.xaml", true)]
     [InlineData("Views/Mocks/Theme.xaml", true)]
+    [InlineData("App/Fixtures/Theme.xaml", true)]
     [InlineData("src/MyApp/Themes/Theme.xaml", false)]
     [InlineData("src/Contest/Theme.xaml", false)]           // 詞中間的 test 不算
     [InlineData("src/LatestNews/Theme.xaml", false)]
+    [InlineData("Contoso.Demographics/Themes/Theme.xaml", false)] // 以 demo 開頭的詞不算
+    [InlineData("Testimonials.Module/Themes/Theme.xaml", false)]  // 以 test 開頭的詞不算
+    [InlineData("src/Examplar/Theme.xaml", false)]
+    [InlineData("src/Mockups/Theme.xaml", false)]
+    [InlineData("Mocks/Theme.xaml", false)]                 // fixture／mock 只看第二層以下（沿用）
     public void TestAndSamplePathsAreRecognisedWordByWord(string path, bool isFixture)
     {
         using var fx = new Fixture();
@@ -330,6 +343,28 @@ public class PaletteDetectorTests
             """);
         var d = PaletteDetector.Detect(fx.Root);
         Assert.Equal(isFixture, d.IsDegraded); // 唯一的色盤在測試路徑裡 → 沒有色盤（退化要喊）
+    }
+
+    [Theory] // 審查者的 fixture：模組名剛好以 Demo／Test 開頭的專案，色盤照常偵測、照常稽核（不是 0 組、exit 3）
+    [InlineData("Contoso.Demographics")]
+    [InlineData("Testimonials.Module")]
+    public void ModuleNamesThatOnlyStartWithTestOrDemoAreAudited(string module)
+    {
+        using var fx = new Fixture();
+        foreach (var (side, bg, fg) in new[] { ("Dark", "#111111", "#EEEEEE"), ("Light", "#FFFFFF", "#1B1B1B") })
+            fx.File($"{module}/Themes/{side}.xaml", $$"""
+                <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                  <SolidColorBrush x:Key="Bg" Color="{{bg}}"/><SolidColorBrush x:Key="Fg" Color="{{fg}}"/><SolidColorBrush x:Key="Muted" Color="#777777"/>
+                </ResourceDictionary>
+                """);
+        fx.File("Views/Main.xaml", """
+            <UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+            <Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}" Text="a"/></Grid></UserControl>
+            """);
+        var r = fx.Run();
+        Assert.Equal(PaletteMode.Pair, r.Detection.Mode);
+        Assert.Equal(1, r.Pairs);
+        Assert.Equal(Category.Ok, Assert.Single(r.Findings).Category);
     }
 
     [Fact] // 帶點的色票鍵（Panel.Background）是 WPF 最普遍的命名慣例。

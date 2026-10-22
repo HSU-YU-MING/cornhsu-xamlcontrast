@@ -153,9 +153,9 @@ more `<Application>` roots (typically `App.xaml`), the merged paths (1) and (4) 
 resolve each application subtree against its own palette; files outside every application use only
 the shared area's own dictionaries (a key that only an application defines is reported as
 `unknown-palette-key` there — its value depends on the host app). A path below the scanned root
-containing a word that starts with `test`, `sample`, `demo` or `example` (or, below the top level,
-`fixture` / `mock`) — words split on `.` `-` `_` and case changes, so `MyApp.Tests` and `UnitTests`
-count — is never taken as a palette source (XAML dictionary or C# tuple file) or an application
+containing the whole word `test`, `sample`, `demo` or `example`, singular or plural (or, below the top
+level, `fixture` / `mock`) — words split on `.` `-` `_` and case changes, so `MyApp.Tests` and
+`UnitTests` count while `Contoso.Demographics` and `Testimonials` don't — is never taken as a palette source (XAML dictionary or C# tuple file) or an application
 root; its XAML is still audited.
 
 Wrong guess? Override with `xamlcontrast.config.json` —

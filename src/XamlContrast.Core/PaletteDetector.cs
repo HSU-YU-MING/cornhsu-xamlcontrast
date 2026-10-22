@@ -444,10 +444,13 @@ public static partial class PaletteDetector
     /// <c>ILSpy.BamlDecompiler.Tests.Windows\Cases\…</c> —— 一個反編譯測試的假資料檔。
     /// 只影響「能不能當色盤候選」（XAML 與 C# 兩條路都套用），不影響這些檔案本身要不要被稽核。
     ///
-    /// ⚠ 判準是「路徑段切成詞、逐詞比前綴」，不是「路徑段以 test 開頭」：.NET 的測試專案慣用
+    /// ⚠ 判準是「路徑段切成詞、**整詞**比對」，不是「路徑段以 test 開頭」：.NET 的測試專案慣用
     ///   <c>MyApp.Tests</c>／<c>UnitTests</c> 命名，舊判準對不上（那一段以 myapp／unit 開頭），
     ///   放在那裡的假色盤照樣被選中。詞的邊界是 . - _ 與大小寫轉換（UnitTests → Unit + Tests），
     ///   所以 Contest、LatestNews 這種「詞中間剛好有 test」的名字不受影響。
+    /// ⚠ 也不能比詞的前綴：<c>Contoso.Demographics</c>、<c>Testimonials.Module</c> 以 demo／test 開頭，
+    ///   被當成範例路徑之後唯一的色盤被排除，整個專案 0 組配對、exit 3（審查 1.0 A2）。
+    /// 這是稽核語意（1.0 凍結宣告的演進規則 3），不是凍結的語法：判準改進屬 minor。
     /// </summary>
     internal static bool LooksLikeFixture(string rel)
     {
@@ -457,10 +460,10 @@ public static partial class PaletteDetector
             foreach (var w in WordBoundary().Split(segments[i]))
             {
                 var word = w.ToLowerInvariant();
-                if (word.StartsWith("test") || word.StartsWith("sample") ||
-                    word.StartsWith("demo") || word.StartsWith("example")) return true;
+                if (word is "test" or "tests" or "sample" or "samples" or "demo" or "demos" or "example" or "examples")
+                    return true;
                 // fixture／mock 只看第二層以下（沿用舊判準）
-                if (i > 0 && (word.StartsWith("fixture") || word.StartsWith("mock"))) return true;
+                if (i > 0 && word is "fixture" or "fixtures" or "mock" or "mocks") return true;
             }
         }
         return false;

@@ -118,8 +118,9 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
 根元素（通常是 `App.xaml`）時，合併字典的 (1)(4) 會讓各應用程式子樹再各自對自己的色盤解析一次；
 不屬於任何應用程式的檔案只用共用區自己的字典（只有某個 App 定義的鍵在那裡記為 `unknown-palette-key` ——
 它的值取決於執行期的宿主 App）。
-掃描根目錄以下的路徑中，含有以 `test`、`sample`、`demo`、`example` 開頭的詞（或在第二層以下以
-`fixture`／`mock` 開頭）的 —— 詞依 `.` `-` `_` 與大小寫轉換切開，所以 `MyApp.Tests`、`UnitTests` 都算 ——
+掃描根目錄以下的路徑中，含有**整個詞**是 `test`、`sample`、`demo`、`example`（單複數皆可；第二層以下另含
+`fixture`／`mock`）的 —— 詞依 `.` `-` `_` 與大小寫轉換切開，所以 `MyApp.Tests`、`UnitTests` 都算，
+`Contoso.Demographics`、`Testimonials` 不算 ——
 不會被當成色盤來源（XAML 字典或 C# 三元組檔）或應用程式根元素；其中的 XAML 照樣受稽核。
 
 猜錯可用 `xamlcontrast.config.json` 指定（[schema](docs/config-schema.md)）。
