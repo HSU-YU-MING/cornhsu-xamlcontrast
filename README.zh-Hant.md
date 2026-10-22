@@ -158,8 +158,9 @@ xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # CI 裡
 ```
 
 兩個旗標都要給路徑，而且不能同時用。baseline 的鍵不含行號（行號會漂），但會記錄最差比值
-（同一個鍵、色值被調暗的色盤漂移照樣抓得到）。檔案帶 `schemaVersion`；缺欄位的、或 0.x 寫的
-baseline 會被拒絕（exit 2），並提示重跑 `--write-baseline`。
+（同一個鍵、色值被調暗的色盤漂移照樣抓得到）。檔案帶 `schemaVersion` 與 `keyVersion`；缺欄位的、0.x 寫的、
+或鍵是較舊版本產生的（之後的版本可能改變鍵的寫法）baseline 會被拒絕（exit 2），並提示重跑 `--write-baseline`
+—— 而不是把每一筆既有債都報成 NEW。
 
 **刻意低對比的標記**（理由必填；壓掉的計入 `summary.suppressed`，不會靜默消失）：
 

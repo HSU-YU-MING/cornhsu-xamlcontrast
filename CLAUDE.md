@@ -239,7 +239,9 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 `paid off` 數的是**處數**不是鍵數，要跟 `knownDebt` 同單位。
 1.0 起 baseline 收「低於 AA」的每一組（fail＋warn），不論寫出時的 gate；比對時只擋目前 gate 擋的那些
 （`--fail-on fail` 下 warn 不判新增或惡化）。檔頭有 `"schemaVersion": 1`；0.x 的檔沒有，一律拒絕並叫人重寫
-—— 照讀的話既有的 warn 全部會變成 NEW。鍵的文字形式（`element` 的 `⊕Style[…]@dark/…`、`fg` 的 ` ×0.5`）是凍結面的一部分。
+—— 照讀的話既有的 warn 全部會變成 NEW。
+**`keyVersion`（`Baseline.KeyVersion`，缺省視為 1）**：鍵的文字（`element` 的標籤、`fg` 的寫法、`bg` 的合成描述）屬稽核語意，
+1.x 的 minor 可以改 —— **改了產生鍵的方式就要遞增 `KeyVersion`**，舊檔會被拒絕並叫人重寫，不然使用者會看到一整排假的 NEW。
 
 ### 守門腳本自身
 

@@ -199,8 +199,10 @@ xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # in CI
 
 Both flags take a path, and they can't be combined. Baseline keys contain no line numbers (lines
 drift) but do record the worst ratio (so palette drift — same key, darker value — still gets
-caught). The file carries a `schemaVersion`; one with a missing field, or one written by 0.x, is
-refused (exit 2) with a note to regenerate it.
+caught). The file carries a `schemaVersion` and a `keyVersion`; one with a missing field, one
+written by 0.x, or one whose keys an older version generated (a later release may change how keys
+are spelled) is refused (exit 2) with a note to regenerate it — rather than reporting every known
+pair as NEW.
 
 ### Suppressing intentional low contrast
 

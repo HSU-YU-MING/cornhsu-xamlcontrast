@@ -43,8 +43,9 @@ public class BaselineFormatTests
             ("B.xaml", OnWhite(FailText)));
         var root = JsonDocument.Parse(Baseline.Write(r)).RootElement;
 
-        Assert.Equal(["schemaVersion", "comment", "entries"], root.EnumerateObject().Select(p => p.Name));
+        Assert.Equal(["schemaVersion", "keyVersion", "comment", "entries"], root.EnumerateObject().Select(p => p.Name));
         Assert.Equal(1, root.GetProperty("schemaVersion").GetInt32());
+        Assert.Equal(Baseline.KeyVersion, root.GetProperty("keyVersion").GetInt32());
         Assert.Equal("XamlContrast baseline — known debt; may only shrink", root.GetProperty("comment").GetString());
 
         var entries = root.GetProperty("entries").EnumerateArray().ToList();
@@ -189,6 +190,40 @@ public class BaselineFormatTests
         var r = Run(("Main.xaml", OnWhite(FailText)));
         var ex = Assert.ThrowsAny<Exception>(() => Baseline.Compare(r, $$"""{ "schemaVersion": {{version}}, "entries": [] }"""));
         Assert.Contains("schemaVersion", ex.Message);
+    }
+
+    // ── keyVersion（審查 1.0 A2，演進規則 5「舊產物失效時要大聲失敗」）：鍵的產生方式（element 的標籤、bg 的合成描述……）
+    //    屬稽核語意，1.x 的 minor 可以改。改的那一版遞增 keyVersion；讀到舊的 keyVersion 就明確叫人重寫，
+    //    不是冒出一整排假的 NEW（同一組配對、新的鍵）加一整排假的 paid off ──
+
+    [Fact] // 缺 keyVersion 視為 1（手寫的檔、只帶 schemaVersion 的檔照樣讀得進）
+    public void MissingKeyVersionIsReadAsOne()
+    {
+        var r = Run(("Main.xaml", OnWhite(FailText)));
+        var f = r.Findings.Single();
+        var known = Baseline.Parse(BaselineJson(new { file = f.File, element = f.Element, fg = f.Fg, bg = f.Bg, count = 1, worst = f.Worst }));
+        Assert.Single(known.Entries);
+        Assert.True(Baseline.Compare(r, known).Passes);
+    }
+
+    [Fact] // 這個版本產生鍵的方式比檔案新：鍵對不上，照讀會把每一筆既有債報成 NEW —— 改成點名並叫人重寫
+    public void OlderKeyVersionAsksForARegeneratedBaseline()
+    {
+        var ex = Assert.ThrowsAny<FormatException>(() => Baseline.Parse("""{ "schemaVersion": 1, "entries": [] }""", currentKeyVersion: 2));
+        Assert.Contains("keyVersion 1", ex.Message);
+        Assert.Contains("regenerate it with --write-baseline", ex.Message);
+    }
+
+    [Theory] // 比自己新的 keyVersion，或不是正整數：不猜著讀
+    [InlineData("2", "newer")]
+    [InlineData("0", "positive integer")]
+    [InlineData("\"1\"", "positive integer")]
+    [InlineData("1.5", "positive integer")]
+    public void UnknownKeyVersionIsAnError(string version, string expect)
+    {
+        var ex = Assert.ThrowsAny<FormatException>(() => Baseline.Parse($$"""{ "schemaVersion": 1, "keyVersion": {{version}}, "entries": [] }"""));
+        Assert.Contains("keyVersion", ex.Message);
+        Assert.Contains(expect, ex.Message);
     }
 
     [Fact] // CLI：讀不了的 baseline → exit 2、stderr 說出原因與怎麼重寫
