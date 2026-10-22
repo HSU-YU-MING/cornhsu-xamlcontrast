@@ -23,7 +23,7 @@ xamlcontrast 你的專案路徑
 ```
 palette: merged colour dictionaries: 2 file(s), 6 keys (dark + light)
 files 1 | text-on-background pairs 8 | coverage 100.0% of pairs seen
-unresolved (colour bound at runtime / gradient / key not in palette): 0 | skipped (translucent, invisible): 0
+unresolved (colour bound at runtime / gradient / key not in palette): 0 | skipped (invisible: transparent or opacity 0): 0
 exempted 1 disabled-state pair(s) (IsEnabled=False; WCAG 1.4.3 does not require contrast for disabled controls)
 suppressed 1 pair(s) via xamlcontrast-ignore comments
 

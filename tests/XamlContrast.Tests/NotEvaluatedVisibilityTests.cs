@@ -61,7 +61,7 @@ public class NotEvaluatedVisibilityTests
     {
         var console = Report.ToConsole(RunEverySkipShape());
         Assert.Contains("!! non-default thresholds: normal 7, large 3, fail-factor 0.67", console);
-        Assert.Contains("unresolved (colour bound at runtime / gradient / key not in palette): 1 | skipped (translucent, invisible): 1", console);
+        Assert.Contains("unresolved (colour bound at runtime / gradient / key not in palette): 1 | skipped (invisible: transparent or opacity 0): 1", console);
         Assert.Contains("unresolved by reason: bound-or-gradient 1", console);
         Assert.Contains("excluded 1 style pair(s): template has no Foreground consumer", console);
         Assert.Contains("exempted 1 disabled-state pair(s)", console);
@@ -76,7 +76,7 @@ public class NotEvaluatedVisibilityTests
     {
         var md = Report.ToMarkdown(RunEverySkipShape(), exitCode: 1);
         Assert.Contains("**Non-default thresholds** — normal 7, large 3, fail-factor 0.67.", md);
-        Assert.Contains("**Not evaluated:** 1 unresolved (bound-or-gradient 1) · 1 skipped (translucent, invisible) · " +
+        Assert.Contains("**Not evaluated:** 1 unresolved (bound-or-gradient 1) · 1 skipped (invisible: transparent or opacity 0) · " +
                         "1 excluded (dead Foreground setter) · 1 exempted (IsEnabled=False; WCAG 1.4.3) · " +
                         "1 suppressed via xamlcontrast-ignore", md);
         Assert.Contains("**Parse failed:** Broken.xaml", md);

@@ -279,7 +279,7 @@ public static class Report
         sb.AppendLine(string.Create(inv,
             $"files {r.FileCount} | text-on-background pairs {r.Pairs} | coverage {r.Coverage * 100:F1}% of pairs seen"));
         sb.AppendLine(string.Create(inv,
-            $"unresolved (colour bound at runtime / gradient / key not in palette): {r.Unresolved} | skipped (translucent, invisible): {r.Skipped}"));
+            $"unresolved (colour bound at runtime / gradient / key not in palette): {r.Unresolved} | skipped (invisible: transparent or opacity 0): {r.Skipped}"));
         if (r.Unresolved > 0)
         {
             // 細目才是可行動的部分：no-ancestor-background 佔大宗代表「宣告根背景就會回來」，
@@ -453,7 +453,7 @@ public static class Report
         var notes = new List<string>();
         if (r.Unresolved > 0)
             notes.Add(string.Create(inv, $"{r.Unresolved} unresolved ({string.Join(", ", Reasons(r).Select(kv => string.Create(inv, $"{ReasonLabel(kv.Key)} {kv.Value}")))})"));
-        if (r.Skipped > 0) notes.Add(string.Create(inv, $"{r.Skipped} skipped (translucent, invisible)"));
+        if (r.Skipped > 0) notes.Add(string.Create(inv, $"{r.Skipped} skipped (invisible: transparent or opacity 0)"));
         if (r.DeadForeground > 0) notes.Add(string.Create(inv, $"{r.DeadForeground} excluded (dead Foreground setter)"));
         if (r.DisabledExempt > 0) notes.Add(string.Create(inv, $"{r.DisabledExempt} exempted (IsEnabled=False; WCAG 1.4.3)"));
         if (r.Suppressed > 0) notes.Add(string.Create(inv, $"{r.Suppressed} suppressed via xamlcontrast-ignore"));
