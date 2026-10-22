@@ -235,7 +235,10 @@ public class ActionContractTests
         var r = RunStep("Comment report on PR", new() { ["artifact-name"] = "app-dark.v2" }, prepareTemp: temp =>
             File.WriteAllText(Path.Combine(temp, "xamlcontrast-report.md"), "## report\n"));
         Assert.True(r.Exit == 0, r.ToString());
-        Assert.Contains("""--jq|map(select(.body | startswith("<!-- app-dark.v2 -->"))) | .[0].id // empty|""", r.Calls);
+        // 找舊留言（審查 1.0 最終驗證，可接受項，比照 Parity）：--paginate（不分頁只看得到前 30 則，留言一多就找不到、每次都發新的）；
+        // 只認 github-actions[bot] 自己的留言（任何人都能搶先貼一則以標記開頭的留言，不看作者就會去改那則）
+        Assert.Contains("""api|--paginate|""", r.Calls);
+        Assert.Contains("""--jq|.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- app-dark.v2 -->"))) | .id|""", r.Calls);
         Assert.Contains("api|-X|POST|", r.Calls);
         var defaults = RunStep("Comment report on PR", prepareTemp: temp =>
             File.WriteAllText(Path.Combine(temp, "xamlcontrast-report.md"), "## report\n"));
