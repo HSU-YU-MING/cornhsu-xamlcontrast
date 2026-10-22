@@ -123,10 +123,15 @@ tried in this order, and the one that ran is always named on the first line of t
    `SolidColorBrush` resources is read into one palette, and each key ends up with a dark *and*
    a light value. Tried first because it beats picking a single file: real projects split a
    palette across several dictionaries. `Application.Resources` counts as a dictionary; a window's
-   local brushes (`Window.Resources`, `UserControl.Resources`) only fill keys no dictionary defines,
-   and override the palette inside their own window. Dictionary files don't count as screens in
-   `summary.files`, but their styles and templates are still audited — and when the palette comes
-   from separate dark/light dictionaries, a style in `Dark.xaml` is graded against the dark theme only.
+   local brushes (`Window.Resources`, `UserControl.Resources`) are visible only inside that window,
+   as in WPF's resource lookup: there they override the palette (a local brush referencing a `Color`
+   is resolved per theme), and a key only some window defines is `unknown-palette-key` everywhere else.
+   Dictionary files don't count as screens in `summary.files`, but their styles and templates are
+   still audited. When the palette comes from separate dark/light dictionaries, a dictionary whose
+   file name or last folder contains *dark* or *light* as a whole word (`Dark.xaml`, `DarkTheme.xaml`,
+   `Colors.Dark.xaml`, `Themes/Dark/Styles.xaml` — but not `Highlight.xaml` or `Starlight/`) belongs to
+   that theme: its styles are graded against that theme only, and a style key defined in both themes'
+   dictionaries is resolved per theme where it's used (the element reads `Button⊕Style[Chip]@dark/base`).
 2. **Theme pair** — one `DarkTheme.xaml` × one `LightTheme.xaml`, keys overlapping ≥ 50%
 3. **C# source of truth** — `("Key", "#dark", "#light")` tuple arrays
    (beats a single-theme XAML copy: a source that provides both themes wins)
@@ -240,6 +245,13 @@ something, that fact is machine-readable. Consumers should check `schemaVersion`
 Each finding carries `file`, `line`, `element`, `fg`, `bg`, `ratioDark`, `ratioLight`, `threshold`,
 `category`, `isText` and `largeText`, plus `symmetry` (fail/warn only) and `fontSize` (when one is
 set); suppressed pairs are counted in `summary`, not listed.
+A pair that exists in **one theme only** (a style in a one-theme dictionary, or a use site whose
+style resolves differently per theme — see palette detection above) carries that theme's ratio in
+*both* `ratioDark` and `ratioLight`: the `ratioLight` of a `Dark.xaml` style is the dark-theme ratio.
+Failing and warning ones say so with `symmetry: single-theme`; ok and decorative ones carry no
+per-finding marker in this schema version.
+`skipped` counts only text you cannot see (transparent, alpha ≈ 0, `Opacity="0"`); a translucent
+colour is composited and graded.
 
 `unresolved` is broken down by cause in `summary.unresolvedBy`, because the total on its own
 doesn't tell you whether anything can be done about it:
@@ -249,7 +261,7 @@ doesn't tell you whether anything can be done about it:
 | `no-ancestor-background` | nothing up the tree declares a background — often a root container relying on an app-level implicit style, or vector artwork in a resource dictionary |
 | `bound-or-gradient` | the colour comes from `{Binding}` / `{TemplateBinding}` / a gradient or image brush — only knowable at runtime. Also anything else the tool can't read as a colour (every WPF colour literal — `#RGB`, `#ARGB`, `#RRGGBB`, `#AARRGGBB`, the named colours — is read) |
 | `unknown-palette-key` | the resource key isn't in the detected palette — a typo, or palette detection missed a file |
-| `translucent-uncomposited` | a translucent background with nothing underneath to composite against |
+| `translucent-uncomposited` | a transparent or translucent background with nothing underneath to composite against — a style's own `Background="Transparent"` at its definition (a named style is graded again where it's used; an implicit style is not), or an `Opacity`-faded layer over nothing |
 | `same-brush-pair` | a style sets `Foreground` and `Background` to the *same* brush — the Material template-opacity idiom (the template paints the background at 10–12% opacity as a tint); literally 1:1, not at runtime, and the opacity animation is invisible statically |
 | `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio |
 
@@ -339,10 +351,13 @@ Honest list — full blind-spot table with per-case evidence in the
 - Sibling backdrops are resolved for full-cell siblings in a `Grid` cell (solid ones directly;
   translucent ones — through the brush's alpha or the element's own `Opacity` — composited; bound
   or gradient ones reported as unresolved), and text over a sibling `Image` is honestly
-  `over-sibling-content`. In a custom `*Panel` whose layout the tool can't know, text after a
-  possible backdrop is `over-sibling-content` too. Partial-coverage siblings (including anything in
-  a `Canvas`, where nothing stretches) and images nested inside a backdrop element are still invisible
-- Implicit styles (beyond the document root's background)
+  `over-sibling-content`. In a custom `*Panel`, or a derived `*Canvas` / `*Grid`, whose layout the
+  tool can't know, text after a possible backdrop is `over-sibling-content` too (`InkCanvas` overlaps
+  like `Canvas`). Partial-coverage siblings (including anything in a `Canvas`, where nothing stretches)
+  and images nested inside a backdrop element are still invisible
+- Implicit styles (beyond the document root's background) — e.g. a button inside a `DataGrid` row
+  is graded against the grid's background, not the selected row's highlight that the implicit
+  `DataGridRow` style paints (measured: a ghost button reported ok is 4.06:1 on a selected row)
 - `VisualStateManager` colour animations (`ColorAnimation` in state storyboards) are not
   audited **and not yet counted** — a Blend-era styling dialect (measured: dozens of sites
   in kaxaml/snoop-class projects, zero in modern ones). A counter is planned; until then

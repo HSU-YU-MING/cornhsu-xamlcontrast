@@ -163,18 +163,27 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   只有根元素是 `ResourceDictionary` 的色盤檔不算畫面檔，但**照樣走樹、照樣跑 `WalkStyles`**——
   元素端的鏈路徑看到「字與底同源」就略過、交給定義處，定義處沒人走的話那組配對就從報告與所有計數器消失；
   字典裡的 DataTemplate 也一樣。比對排除清單時兩邊都 `GetFullPath`。
-- **畫面檔的區域定義只是那個畫面的**：合併式色盤的「區域層」只讓畫面檔（Window／UserControl…）的區域 brush
-  補字典沒定義的鍵，讀不懂的區域值不進全域；在那個畫面裡由 `LocalOverrides` 蓋過全域（綁 Binding 的記成
-  `Palette.RuntimeKeys` → bound-or-gradient）。當成中性檔灌進全域的話，一個畫面的區域 brush 會污染全部畫面。
-- **只屬於一個主題的字典**（`PaletteDetection.ThemeFileSides`）：色盤來自分開的深／淺 XAML 字典時，
-  `Dark.xaml` 裡的 Style 只用深色那一欄評（兩欄同值、對稱標 single-theme）；拿它配淺色色票是執行期不存在的組合。
-  C#／單一主題模式不建這張表——Kindling 的 `DarkTheme.xaml` 是 C# 色盤的靜態複本，兩個主題共用。
+- **畫面檔的區域定義只是那個畫面的**：畫面檔（Window／UserControl…）的區域定義不進全域的 Color／brush 表；
+  字典沒定義、只有畫面定義的鍵記在 `Palette.LocalOnly`（照樣算進偵測），稽核時 `Auditor.VisibleIn` 只讓定義它的畫面看得到。
+  在那個畫面裡由 `LocalOverrides` 蓋過全域：字面值兩欄同值、`Color` 引用對「畫面的 Color ∪ 全域 Color 表」逐側解析
+  （`Palette.DarkColors`／`LightColors`）；讀不懂 → `Palette.RuntimeKeys`（bound-or-gradient），找不到 Color →
+  `Palette.MissingRefs`（unknown-palette-key，點名 Color）。⚠ 補全域的洞也是猜：只在 Badge.xaml 定義的鍵，Main.xaml 執行期查不到。
+- **只屬於一個主題的字典**（`PaletteDetection.ThemeFileSides`）：色盤來自分開的深／淺 XAML 字典時，檔名或最後一段目錄
+  有「完整的詞」dark／light 的字典（`PaletteDetector.ThemeHint`，**不是子字串**——Highlight、Starlight/ 不算）只屬於那個主題，
+  範圍是專案裡每個帶提示的 ResourceDictionary（不只貢獻了色票的檔）。那些檔用單一主題視圖評（兩欄同值、對稱標 single-theme）；
+  `StyleIndex.Build(sideOf)` 讓同 key 的 Style 在使用處依主題各自解析，兩個主題解析到不同的鏈時各評各的（`@dark`／`@light`）。
+  拿 Dark 的 Style 配淺色色票是執行期不存在的組合。C#／單一主題模式不建這張表——Kindling 的 `DarkTheme.xaml`
+  是 C# 色盤的靜態複本，兩個主題共用。
+- **元素 Opacity 是群組**（`Auditor.Backdrop`／`OpacityGroup`）：WPF 的 Opacity 把整棵子樹畫成一層再疊。
+  底畫在變淡的那一層裡時，底跟字一起變淡（白底上 Opacity 0.5 的黑 Border 裡的白字是 3.95:1，不是 5.32）。
+  底在群組外面時與 `EffectiveForeground` 逐位相同；變淡的一層底下沒有底 → translucent-uncomposited。
 - **多 App 作用域**：外層 App 的子樹要扣掉內層 App 的目錄；不屬於任何 App 的檔案沒有共用區色盤時
   用空色盤，不是退回全域（全域是各 App 合併，等於借用某個 App 的值）。
 - **半透明字色疊到底上評分**（`Auditor.EffectiveForeground`，三條路徑同一套）：`#AARRGGBB`、帶 Opacity 的色票、
   只有一個主題半透明的色票都以各自的 alpha（乘上元素 Opacity）合成到已解析的底上。舊設計一律歸 skipped，
   而 skipped 不進覆蓋率分母——Opacity 0.2 的白字疊黑底（1.66:1）整組不在報告裡、覆蓋率照樣 100%。
-  完全透明才是合法跳過；底沒解析出來照舊進 unresolved。
+  完全透明才是合法跳過；底沒解析出來照舊進 unresolved。Style 定義處遇到透明／半透明的**底**也記 unresolved
+  （translucent-uncomposited），不是 skipped——隱含樣式不會在使用處補評，記 skipped 等於整組消失。
 - **元素分類用「後綴比對」不是全名相等**（`Auditor.IsNonTextElement`）：MahApps 的
   `MetroProgressBar` 對不上 `ProgressBar`，進度條填色會被當文字用 4.5 要求。
   兩邊都中時取最長的後綴（名字愈長愈具體）。

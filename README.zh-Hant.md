@@ -96,8 +96,12 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
 1. **合併字典・深淺俱全** —— 專案裡所有定義了具 key 的 `Color`／`SolidColorBrush` 的 XAML
    併成一份色盤，且每個鍵深淺兩套值都有。排在最前面，因為真實專案的色票常拆散在多個字典裡，
    「挑單一檔」會漏。`Application.Resources` 算字典；視窗自己的區域 brush（`Window.Resources`、
-   `UserControl.Resources`）只補字典沒定義的鍵，並在那個視窗裡蓋過色盤。字典檔不算進 `summary.files`
-   的畫面數，但裡面的 Style 與模板照樣稽核 —— 色盤來自分開的深／淺字典時，`Dark.xaml` 裡的 Style 只評深色主題
+   `UserControl.Resources`）跟 WPF 的資源查找一樣只在那個視窗裡看得到：在那裡蓋過色盤（引用 `Color` 的
+   區域 brush 依主題各自解析），只有某個視窗定義的鍵在其他地方一律是 `unknown-palette-key`。字典檔不算進
+   `summary.files` 的畫面數，但裡面的 Style 與模板照樣稽核。色盤來自分開的深／淺字典時，檔名或最後一段
+   資料夾裡有一個完整的詞是 dark 或 light 的字典（`Dark.xaml`、`DarkTheme.xaml`、`Colors.Dark.xaml`、
+   `Themes/Dark/Styles.xaml`；`Highlight.xaml`、`Starlight/` 不算）只屬於那個主題：裡面的 Style 只評那個主題，
+   兩個主題的字典都定義的同 key Style 在使用處依主題各自解析（元素名顯示成 `Button⊕Style[Chip]@dark/base`）
 2. **主題配對** —— 一個 Dark 檔 × 一個 Light 檔，鍵集重疊 ≥ 50%
 3. **C# 真相源** —— 三元組陣列，**提供兩套主題的來源優先於只有一套的**
 4. **合併字典・單一主題** —— 同 (1) 的聯集，但每個鍵只有一套值
@@ -196,6 +200,11 @@ jobs:
 每筆 finding 帶 `file`、`line`、`element`、`fg`、`bg`、`ratioDark`、`ratioLight`、`threshold`、
 `category`、`isText`、`largeText`，`fail`／`warn` 另帶 `symmetry`、有設字級時另帶 `fontSize`；
 被壓掉的配對只計入 `summary`，不列出。
+**只存在於一個主題**的配對（只屬於一個主題的字典裡的 Style，或使用處的 Style 依主題解析到不同的鏈，
+見上面的色盤偵測）`ratioDark` 與 `ratioLight` **兩欄都是那個主題的比值**：`Dark.xaml` 裡的 Style，
+`ratioLight` 其實是深色主題的值。fail／warn 會標 `symmetry: single-theme`；ok／decorative 在這一版的
+schema 裡沒有逐筆標記。
+`skipped` 只計看不見的字（透明、alpha ≈ 0、`Opacity="0"`）；半透明的字色會合成後評分。
 
 `unresolved` 在 `summary.unresolvedBy` 裡有原因細目 —— 光看總數看不出「補不補得回來」:
 
@@ -204,7 +213,7 @@ jobs:
 | `no-ancestor-background` | 祖先鏈上沒有任何一層宣告背景。常見於根容器靠 App 層隱含樣式給底,或資源字典裡的向量圖 |
 | `bound-or-gradient` | 顏色來自 `{Binding}` / `{TemplateBinding}` / 漸層或圖片 brush —— 執行期才知道。其他工具讀不出顏色的值也歸這裡(WPF 的色彩字面值 —— `#RGB`、`#ARGB`、`#RRGGBB`、`#AARRGGBB`、具名色 —— 都讀得懂) |
 | `unknown-palette-key` | 資源鍵不在偵測到的色盤裡 —— 打字錯誤,或色盤偵測漏了某個檔 |
-| `translucent-uncomposited` | 半透明背景但底下沒有可疊的顏色 |
+| `translucent-uncomposited` | 透明或半透明的背景、底下沒有可疊的顏色 —— Style 定義處自己的 `Background="Transparent"`（具名 Style 會在使用處再評一次；隱含樣式不會），或以 `Opacity` 變淡、底下什麼都沒有的一層 |
 | `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
 | `over-sibling-content` | 文字墊在同格子的兄弟 `Image`/媒體元素上 —— 真正的底是一張圖,靜態不可知;硬配祖先背景等於編造比值 |
 
@@ -274,10 +283,12 @@ HandyControl)5~19%。稽核函式庫請預期要用 `--min-coverage 0`,並把解
 完整盲區表與逐案證據見[規畫書](XamlContrast專案規畫書.md)。
 
 TargetName 指向模板**內部**元素（指向根的已解析）、跨元素同條件觸發器、
-隱含樣式（根元素背景以外）;sibling 背景已解析 `Grid` 格子裡「佔滿格子的兄弟」(純色直接用;
+隱含樣式（根元素背景以外;例:`DataGrid` 列裡的按鈕是配表格的底評,不是隱含 `DataGridRow` 樣式畫的選取列底 ——
+實測一個報 ok 的 ghost 按鈕在選取列上是 4.06:1）;sibling 背景已解析 `Grid` 格子裡「佔滿格子的兄弟」(純色直接用;
 半透明的 —— 不論來自 brush 的 alpha 或元素自己的 `Opacity` —— 合成;Binding／漸層計入無法解析),
-文字疊兄弟 Image 誠實歸 `over-sibling-content`;版面無法得知的自訂 `*Panel` 裡,可能是背板的兄弟之後的字
-也歸 `over-sibling-content` —— 但部分覆蓋的兄弟(含 `Canvas` 裡的一切,Canvas 不撐滿子元素)、
+文字疊兄弟 Image 誠實歸 `over-sibling-content`;版面無法得知的自訂 `*Panel`、衍生命名的 `*Canvas`／`*Grid` 裡,
+可能是背板的兄弟之後的字也歸 `over-sibling-content`(`InkCanvas` 與 `Canvas` 一樣疊層)——
+但部分覆蓋的兄弟(含 `Canvas` 裡的一切,Canvas 不撐滿子元素)、
 藏在背板元素**裡面**的圖片仍看不到;Binding 來的顏色標「無法解析」而不猜 ——
 猜了就是拿誠實的不確定去換錯誤的信心。
 另:`VisualStateManager` 的顏色動畫(狀態 storyboard 裡的 `ColorAnimation`)不稽核

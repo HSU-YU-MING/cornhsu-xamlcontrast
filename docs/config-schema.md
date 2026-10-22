@@ -72,10 +72,14 @@
 6. **無色盤**：退回只算寫死色碼，**大聲喊**（Cornea 形狀；`none`）
 
 被認定為色盤來源（或其靜態複本）、**而且根元素是 `ResourceDictionary`** 的 XAML 檔不算進 `summary.files`
-（字典不是畫面），但裡面的 Style 與模板照樣稽核；色盤來自分開的深／淺 XAML 字典時，`Dark.xaml` 裡的 Style
-只評深色那一欄（對稱標 single-theme）。畫面檔（`Window`、`UserControl`…）就算提供了色票也照樣稽核；
-它們的區域 brush 只補字典與 `App.xaml` 都沒定義的鍵，並在自己那個畫面裡蓋過色盤（綁 Binding 的記為
-bound-or-gradient）。
+（字典不是畫面），但裡面的 Style 與模板照樣稽核。色盤來自分開的深／淺 XAML 字典時（1、2 與 `mode: "pair"`），
+檔名（不含副檔名）或最後一段資料夾切成詞後有一個詞恰好是 dark 或 light 的 `ResourceDictionary`
+（`Dark.xaml`、`DarkTheme.xaml`、`Colors.Dark.xaml`、`Themes/Dark/Styles.xaml`；`Highlight.xaml`、`Starlight/` 不算；
+兩者都有就不算），加上 `pair` 模式指定的兩個檔，只屬於那個主題：裡面的 Style 只評那一欄（兩欄同值、對稱標
+single-theme），兩個主題的字典都定義的同 key Style 在使用處依主題各自解析（元素名帶 `@dark`／`@light`）。
+畫面檔（`Window`、`UserControl`…）就算提供了色票也照樣稽核；它們的區域 brush 跟 WPF 的資源查找一樣只在自己那個畫面裡
+看得到：在那裡蓋過色盤（字面值兩欄同值；引用 `Color` 的依主題各自解析；綁 Binding 的記為 bound-or-gradient；
+引用的 `Color` 找不到記為 unknown-palette-key、點名那個 Color），只有某個畫面定義的鍵在其他檔一律是 unknown-palette-key。
 反過來，路徑（相對掃描根目錄）中有以 `test`／`sample`／`demo`／`example` 開頭的詞
 （第二層以下另含 `fixture`／`mock`；詞依 `.` `-` `_` 與大小寫轉換切開，`MyApp.Tests`、`UnitTests` 都算）的
 檔案不當色盤候選（XAML 字典與 C# 三元組檔都一樣）、也不算應用程式根元素，但其中的 XAML 照樣受稽核。

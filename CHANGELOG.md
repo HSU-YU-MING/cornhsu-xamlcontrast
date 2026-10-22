@@ -8,9 +8,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 Fixes from a source review (2026-10-22) that listed 33 product bugs: 30 are fixed here; two are
 fixed only partly — unknown config properties and incomplete baseline entries are now *named*, but
 whether they should become exit-code-2 errors is an open interface decision — and one
-(`translucent-uncomposited`, a reason that is listed but never emitted) is untouched pending a
-decision. A follow-up review of these fixes found regressions and leftovers in the same areas; those
-are fixed here too. The JSON shape is unchanged (`schemaVersion` stays 5), and so are the CLI flags
+(`translucent-uncomposited`, a reason that was listed but never emitted) is only partly settled: it
+is now emitted for the two new cases below, while the original case still reads
+`no-ancestor-background` pending a decision. Two follow-up reviews of these fixes found regressions
+and leftovers in the same areas; those are fixed here too. The JSON shape is unchanged (`schemaVersion` stays 5), and so are the CLI flags
 and the Action inputs. Several fixes **move counts on real projects** — more pairs found, problems
 that used to be hidden now reported, some confident-but-wrong ratios now honestly `unresolved` — so a
 `--baseline` may show NEW or paid-off entries after upgrading; re-run `--write-baseline` once you
@@ -25,9 +26,20 @@ have reviewed them.
   Fully transparent text is still skipped; a translucent colour over a background the tool can't
   resolve is counted as `unresolved`. This reverses a deliberate earlier design; expect more pairs.
 - **A style whose foreground and background share a definition but whose background is transparent or
-  translucent is graded where it is used**, against the element's real backdrop. The definition site
-  has nothing underneath to composite against (it still counts it as skipped), and the element path
-  used to skip same-source pairs — so these pairs were graded nowhere.
+  translucent is graded where it is used**, against the element's real backdrop — the element path
+  used to skip same-source pairs, so these pairs were graded nowhere. The definition site, which has
+  nothing underneath to composite against, now counts the pair as `unresolved`
+  (`translucent-uncomposited`) instead of `skipped`: an implicit style (no `x:Key`) is never graded at
+  a use site, so as `skipped` it vanished from the report with coverage still at 100%.
+- **`skipped` now means only text you cannot see** (transparent, alpha ≈ 0, `Opacity="0"`), and the
+  console/Markdown label says so: `skipped (invisible: transparent or opacity 0)` (was
+  `skipped (translucent, invisible)`). The JSON field is unchanged.
+- **Element `Opacity` on the background's owner (or above it) fades the background too.** WPF renders
+  an element with `Opacity` as one layer and blends the whole layer; the tool used to fade only the
+  text, so white text in a 50%-opaque black `Border` on white was reported 5.32:1 (ok) when it is
+  3.95:1. When the background sits outside every `Opacity` layer the numbers are unchanged; a faded
+  layer over nothing is `translucent-uncomposited`. A translucent state background over a bound one
+  is now `bound-or-gradient`, naming the binding (it read `no-ancestor-background`).
 
 ### Fixed — findings that silently disappeared or were graded against the wrong colour
 - **A screen with one local brush is no longer dropped from the audit.** Merged-dictionary detection
@@ -35,17 +47,26 @@ have reviewed them.
   a `UserControl.Resources` brush or an `App.xaml` with `Application.Resources` colours made the
   file vanish (`files` short, no message). Only files whose root is a `ResourceDictionary` are now
   left out of the file count, and even those are still walked (data templates included).
-- **A screen's local brushes no longer leak into the whole project.** They only fill keys no
-  dictionary defines; inside their own screen they override the global value (a brush bound to
-  `{Binding}` reads as `bound-or-gradient` there). Before, a screen's local literal could override a
-  theme key project-wide, and an unreadable local value could knock the key out everywhere.
+- **A screen's local resources are visible only in that screen**, as in WPF's resource lookup. Inside
+  it they override the global value — literal brushes, and brushes referencing a `Color` (resolved per
+  theme against the screen's own and the global colours); a brush bound to `{Binding}` reads as
+  `bound-or-gradient`, and one referencing a colour that can't be found (a library's
+  `MahApps.Colors.Accent`) is `unknown-palette-key` naming that colour. A key only some screen defines
+  is `unknown-palette-key` everywhere else. Before, a screen's local literal could override a theme key
+  project-wide, an unreadable local value could knock the key out everywhere, one screen's local brush
+  answered for another's, and a local reference to a library colour was reported as an unreadable theme
+  value.
 - **Styles defined in theme dictionaries are audited.** The element path skips a pair whose
   foreground and background come from the same style, expecting the definition-site check to cover
   it — but palette files never got that check, so a 1.2:1 button style in `Themes/Dark.xaml` was in
   no finding and no counter. Palette files now get the style check (they still don't count as screens).
-  When the palette comes from separate dark/light XAML dictionaries, a style in `Dark.xaml` is graded
-  against the dark theme only (single-theme symmetry) — pairing it with light values reported
-  failures for combinations that never exist at runtime.
+  When the palette comes from separate dark/light XAML dictionaries, a dictionary whose file name or
+  last folder contains *dark* or *light* as a whole word (`Dark.xaml`, `DarkTheme.xaml`,
+  `Themes/Dark/Styles.xaml` — not `Highlight.xaml` or a `Starlight/` folder) belongs to that theme: its
+  styles are graded against that theme only (single-theme symmetry), and a style key defined in both
+  themes' dictionaries is resolved per theme where it is used (`Button⊕Style[Chip]@dark/base`) —
+  pairing a dark style with light values reported failures for combinations that never exist at
+  runtime. Such findings carry the one theme's ratio in both `ratioDark` and `ratioLight`.
 - **Property-element syntax is read.** `<Border.Background>` / `<TextBlock.Foreground>` /
   `<Setter.Value>` were ignored: a gradient background was graded against the ancestor (confident
   wrong `ok`), and a property-element foreground vanished from every counter. Solid brushes are
@@ -72,17 +93,21 @@ have reviewed them.
   `UnitTests`, `Foo_IntegrationTests` — not just segments starting with `test`.
 - **`DataTrigger` disabled-state exemption is no longer a substring match.** `{Binding IsEnabledByLicense}`
   or a converter named `IsEnabledConverter` counted as WCAG 1.4.3 "disabled". The binding's path must
-  now be exactly `IsEnabled` (or `(UIElement.IsEnabled)`), point at the element itself, its templated
+  now be exactly `IsEnabled` (or `(IsEnabled)` / `(UIElement.IsEnabled)`), point at the element itself, its templated
   parent or an ancestor, and have no converter; a view-model flag (`{Binding IsEnabled}` without
   `RelativeSource`, or `DataContext.IsEnabled`) is graded normally.
 - **A palette key translucent in only one theme** crashed the audit (dark side translucent) or had its
   alpha stripped (light side translucent, 3.91:1 reported as 1.3:1). Each side now carries its own alpha.
 - **Rule 17 no longer invents backdrops in a `Canvas`** (nothing stretches there; an empty `Border` is
   0×0) or in side-by-side panels with derived names (`VirtualizingWrapPanel`, `MyDockPanel`); in a
-  custom `*Panel` whose layout is unknown, text after a possible backdrop is `over-sibling-content`
-  instead of a guess. **Translucent full-cell siblings** — through the brush's alpha or the element's
-  own `Opacity` — are composited, and **bound / gradient ones** are reported as unresolved, instead of
-  letting the text fall through to the ancestor's colour.
+  custom `*Panel`, or a derived `*Canvas` / `*Grid`, whose layout is unknown, text after a possible
+  backdrop is `over-sibling-content` instead of a guess, and `InkCanvas` overlaps like `Canvas`.
+  **Translucent full-cell siblings** — through the brush's alpha or the element's own `Opacity` — are
+  composited, and **bound / gradient ones** are reported as unresolved, instead of letting the text
+  fall through to the ancestor's colour; a transparent sibling stays transparent whatever its
+  `Opacity`.
+- **A trigger state that differs only in the light theme is no longer dropped as a duplicate.** The
+  "trigger changed nothing visible" check compared dark values only.
 - **Definition-site style checks merge same-condition triggers and follow `BasedOn`**, like the element
   path already did — no more phantom "hover foreground × base background" fails.
 - **Nested applications' dictionaries no longer leak into the outer application's scope**, and files
