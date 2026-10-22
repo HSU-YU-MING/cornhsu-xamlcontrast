@@ -132,7 +132,7 @@ public class CliArgumentTests
     [Theory] // 壞掉的 baseline 要有好訊息並指出下一步，不是裸拋堆疊
     [InlineData("""{ "nope": [] }""")]
     [InlineData("this is not json")]
-    [InlineData("""{ "entries": [ 42 ] }""")]
+    [InlineData("""{ "schemaVersion": 1, "entries": [ 42 ] }""")]
     public void InvalidBaselineFileExitsTwoAndSaysHowToRegenerate(string content)
     {
         using var fx = CliProjects.Failing();

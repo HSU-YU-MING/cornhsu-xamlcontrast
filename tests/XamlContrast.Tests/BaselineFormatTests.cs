@@ -27,9 +27,9 @@ public class BaselineFormatTests
     private const string FailText = """<TextBlock Foreground="#EEEEEE" Text="fail"/>""";
 
     /// <summary>手寫一份 baseline（數值經 JsonSerializer，不吃 locale）。</summary>
-    private static string BaselineJson(params object[] entries) => JsonSerializer.Serialize(new { entries });
+    private static string BaselineJson(params object[] entries) => JsonSerializer.Serialize(new { schemaVersion = 1, entries });
 
-    [Fact] // 寫出格式：根只有 comment + entries；欄位 camelCase；收「低於 AA」的每一組（fail＋warn，1.0 起）；同鍵聚合
+    [Fact] // 寫出格式：根只有 schemaVersion（1.0 起）＋ comment ＋ entries；欄位 camelCase；收「低於 AA」的每一組（fail＋warn，1.0 起）；同鍵聚合
            // （count／worst=最差）；依 file、element、fg、bg 以 ordinal 排序 —— 跨 OS 寫出的檔逐字相同，diff 才看得懂
     public void WriteEmitsBelowAaPairsAggregatedAndSortedOrdinally()
     {
@@ -43,7 +43,8 @@ public class BaselineFormatTests
             ("B.xaml", OnWhite(FailText)));
         var root = JsonDocument.Parse(Baseline.Write(r)).RootElement;
 
-        Assert.Equal(["comment", "entries"], root.EnumerateObject().Select(p => p.Name));
+        Assert.Equal(["schemaVersion", "comment", "entries"], root.EnumerateObject().Select(p => p.Name));
+        Assert.Equal(1, root.GetProperty("schemaVersion").GetInt32());
         Assert.Equal("XamlContrast baseline — known debt; may only shrink", root.GetProperty("comment").GetString());
 
         var entries = root.GetProperty("entries").EnumerateArray().ToList();
@@ -88,8 +89,8 @@ public class BaselineFormatTests
     public void MissingEntriesIsAnError()
     {
         var r = Run(("Main.xaml", OnWhite(FailText)));
-        Assert.ThrowsAny<Exception>(() => Baseline.Compare(r, """{ "comment": "no entries" }"""));
-        Assert.ThrowsAny<Exception>(() => Baseline.Compare(r, """{ "entries": null }"""));
+        Assert.ThrowsAny<Exception>(() => Baseline.Compare(r, """{ "schemaVersion": 1, "comment": "no entries" }"""));
+        Assert.ThrowsAny<Exception>(() => Baseline.Compare(r, """{ "schemaVersion": 1, "entries": null }"""));
     }
 
     [Fact] // 欄位名不分大小寫：手寫或其他工具產出的 PascalCase 檔照樣讀得進
@@ -99,13 +100,14 @@ public class BaselineFormatTests
         var f = r.Findings.Single();
         var cmp = Baseline.Compare(r, JsonSerializer.Serialize(new
         {
+            schemaVersion = 1,
             entries = new[] { new { File = f.File, Element = f.Element, Fg = f.Fg, Bg = f.Bg, Count = 1, Worst = f.Worst } },
         }));
         Assert.True(cmp.Passes);
         Assert.Equal(1, cmp.KnownDebt);
     }
 
-    [Fact] // 頂層的 entries 也不分大小寫 —— 舊版欄位名不分、頂層卻用 GetProperty("entries") 分大小寫，
+    [Fact] // 頂層的 entries（與 schemaVersion）也不分大小寫 —— 舊版欄位名不分、頂層卻用 GetProperty("entries") 分大小寫，
            // 整份 PascalCase 的檔 exit 2，訊息還是不知所云的 "The given key was not present in the dictionary."
     public void TopLevelEntriesIsCaseInsensitiveToo()
     {
@@ -113,6 +115,7 @@ public class BaselineFormatTests
         var f = r.Findings.Single();
         var cmp = Baseline.Compare(r, JsonSerializer.Serialize(new
         {
+            SchemaVersion = 1,
             Entries = new[] { new { File = f.File, Element = f.Element, Fg = f.Fg, Bg = f.Bg, Count = 1, Worst = f.Worst } },
         }));
         Assert.True(cmp.Passes);
@@ -123,7 +126,7 @@ public class BaselineFormatTests
     public void MissingEntriesSaysSo()
     {
         var r = Run(("Main.xaml", OnWhite(FailText)));
-        var ex = Assert.ThrowsAny<Exception>(() => Baseline.Compare(r, """{ "nope": [] }"""));
+        var ex = Assert.ThrowsAny<Exception>(() => Baseline.Compare(r, """{ "schemaVersion": 1, "nope": [] }"""));
         Assert.Contains("'entries'", ex.Message);
     }
 
@@ -150,47 +153,53 @@ public class BaselineFormatTests
         Assert.Equal(0, cmp.PaidDebt);
     }
 
-    // ── 缺欄時的現況（寬鬆：補預設值 0）。KnownLimitation —— 釘的是退出碼的現況，不是正確答案。
-    //    缺欄改成報錯（exit 2）是待使用者決定的格式收緊（會拒絕現在讀得進去的 baseline）；
-    //    決定之後這兩條要跟著翻成「期望例外」，那是刻意的收緊，不是回歸。
-    //    在那之前至少不能靜默：缺欄要點名（Warnings，CLI 印成 "!! baseline: …"） ──
+    // ── 1.0 的嚴格讀取（決策檔 H17，選項 A）：缺 count／worst、沒有或不認得 schemaVersion → 例外（CLI 轉成 exit 2）──
+    //    0.x 缺欄時補 0：缺 worst → 色盤漂移檢查靜默失效（比值再差也不會 < 0 − 0.01）；缺 count → 每一處都算惡化。
+    //    工具自己寫出的檔一定齊全，只有手改或外部產生的會中 —— 但中了就是一整類惡化靜默放行
 
-    [Fact] // 缺 worst → 0：色盤漂移檢查失效（比值再差也不會 < 0 − 0.01）—— 退出碼照舊，但要講出來
-    public void KnownLimitation_MissingWorstDisablesTheDriftCheck()
+    [Theory]
+    [InlineData("worst")]
+    [InlineData("count")]
+    public void EntryWithoutCountOrWorstIsAnError(string missing)
     {
         var r = Run(("Main.xaml", OnWhite(FailText)));
         var f = r.Findings.Single();
-        var cmp = Baseline.Compare(r, BaselineJson(new { file = f.File, element = f.Element, fg = f.Fg, bg = f.Bg, count = 1 }));
-        Assert.True(cmp.Passes);
-        Assert.Contains("1 entry has no 'worst' — palette drift", Assert.Single(cmp.Warnings));
+        var entry = new Dictionary<string, object> { ["file"] = f.File, ["element"] = f.Element, ["fg"] = f.Fg, ["bg"] = f.Bg, ["count"] = 1, ["worst"] = f.Worst };
+        entry.Remove(missing);
+        var ex = Assert.ThrowsAny<Exception>(() => Baseline.Compare(r, BaselineJson(entry)));
+        Assert.Contains($"no '{missing}'", ex.Message);
     }
 
-    [Fact] // 缺 count → 0：每一處都算惡化（吵，但方向是安全的）
-    public void KnownLimitation_MissingCountFlagsEveryOccurrenceAsWorsened()
+    [Fact] // 沒有 schemaVersion = 0.x 寫的檔。1.0 改了 baseline 收的東西（低於 AA 的每一組，不只 fail），
+           // 舊檔照讀的話所有 warn 都會變成 NEW —— 大聲失敗並說出怎麼辦，比一牆的假 NEW 好
+    public void BaselineWithoutASchemaVersionWasWrittenByZeroX()
     {
         var r = Run(("Main.xaml", OnWhite(FailText)));
-        var f = r.Findings.Single();
-        var cmp = Baseline.Compare(r, BaselineJson(new { file = f.File, element = f.Element, fg = f.Fg, bg = f.Bg, worst = f.Worst }));
-        Assert.False(cmp.Passes);
-        Assert.Equal(1, Assert.Single(cmp.WorsenedFailures).Count);
-        Assert.Contains("1 entry has no 'count'", Assert.Single(cmp.Warnings));
+        var ex = Assert.ThrowsAny<Exception>(() => Baseline.Compare(r, """{ "entries": [] }"""));
+        Assert.Contains("written by XamlContrast 0.x", ex.Message);
+        Assert.Contains("--write-baseline", ex.Message);
     }
 
-    [Fact] // 工具自己寫出的 baseline 永遠欄位齊全 —— 不能有警告（不能變成每次都出現的雜訊）
-    public void BaselineWrittenByTheToolHasNoWarnings()
+    [Theory] // 比自己新的版本（或不是整數）：不猜著讀
+    [InlineData("2")]
+    [InlineData("\"1\"")]
+    [InlineData("1.5")]
+    public void UnknownSchemaVersionIsAnError(string version)
     {
         var r = Run(("Main.xaml", OnWhite(FailText)));
-        Assert.Empty(Baseline.Compare(r, Baseline.Write(r)).Warnings);
+        var ex = Assert.ThrowsAny<Exception>(() => Baseline.Compare(r, $$"""{ "schemaVersion": {{version}}, "entries": [] }"""));
+        Assert.Contains("schemaVersion", ex.Message);
     }
 
-    [Fact] // CLI 把缺欄警告印在 baseline 那行之後
-    public void CliPrintsMissingFieldWarnings()
+    [Fact] // CLI：讀不了的 baseline → exit 2、stderr 說出原因與怎麼重寫
+    public void CliRejectsAnIncompleteBaseline()
     {
         using var fx = CliProjects.Failing();
         var f = fx.Run().Findings.Single();
         fx.File("baseline.json", BaselineJson(new { file = f.File, element = f.Element, fg = f.Fg, bg = f.Bg, count = 1 }));
         var cli = Cli.Run(fx.Root, "--baseline", Path.Combine(fx.Root, "baseline.json"));
-        Assert.True(cli.Exit == 0, cli.ToString());
-        Assert.Contains("!! baseline: 1 entry has no 'worst'", cli.Out);
+        Assert.True(cli.Exit == 2, cli.ToString());
+        Assert.Contains("no 'worst'", cli.Err);
+        Assert.Contains("regenerate it with --write-baseline", cli.Err);
     }
 }

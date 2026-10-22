@@ -175,7 +175,7 @@ public class ActionContractTests
         Assert.Equal(new HashSet<string> { "--json", "--md", "--sarif", "--fail-on", "--strict-palette", "--baseline" }, flags);
 
         using var fx = CliProjects.Passing().WithPalette();
-        fx.File("baseline.json", """{ "entries": [] }""");
+        fx.File("baseline.json", """{ "schemaVersion": 1, "entries": [] }""");
         string P(string name) => Path.Combine(fx.Root, name);
         var r = Cli.Run(fx.Root, "--json", P("report.json"), "--md", P("report.md"), "--sarif", P("report.sarif"),
                         "--fail-on", "warn", "--strict-palette", "--baseline", P("baseline.json"));

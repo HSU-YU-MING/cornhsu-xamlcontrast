@@ -26,8 +26,6 @@ public static class Baseline
         public required List<Entry> WorsenedFailures { get; init; }
         public required int KnownDebt { get; init; }
         public required int PaidDebt { get; init; }
-        /// <summary>baseline 檔本身的問題（缺欄位之類）—— 不改判定，但一定要講出來。</summary>
-        public List<string> Warnings { get; init; } = new();
         public bool Passes => NewFailures.Count == 0 && WorsenedFailures.Count == 0;
     }
 
@@ -42,6 +40,10 @@ public static class Baseline
 
     private static bool BelowAa(Finding f) => f.Category is Category.Fail or Category.Warn;
 
+    /// <summary>baseline 檔格式的版本。1.0 起寫進檔裡、讀取時必須認得 ——
+    /// 沒有它就無法在 1.x 演進格式，舊格式的檔也分辨不出來（0.x 的檔沒有這一欄）。</summary>
+    public const int SchemaVersion = 1;
+
     public static string Write(AuditResult result)
     {
         var entries = result.Findings.Where(BelowAa)
@@ -53,61 +55,65 @@ public static class Baseline
             })
             .OrderBy(e => e.File, StringComparer.Ordinal).ThenBy(e => e.Element, StringComparer.Ordinal)
             .ThenBy(e => e.Fg, StringComparer.Ordinal).ThenBy(e => e.Bg, StringComparer.Ordinal);
-        return JsonSerializer.Serialize(new { comment = "XamlContrast baseline — known debt; may only shrink", entries }, JsonOpts);
+        return JsonSerializer.Serialize(new { schemaVersion = SchemaVersion, comment = "XamlContrast baseline — known debt; may only shrink", entries }, JsonOpts);
     }
 
     /// <param name="gateWarn">gate 是 warn（預設）：低於 AA 的都擋；false（--fail-on fail）：只擋 fail。</param>
     public static ComparisonResult Compare(AuditResult result, string baselineJson, bool gateWarn = true)
         => Compare(result, Parse(baselineJson), gateWarn);
 
-    /// <summary>讀進來的 baseline：鍵 → entry，加上檔案本身的問題。</summary>
+    /// <summary>讀進來的 baseline：鍵 → entry。</summary>
     public sealed class Known
     {
         public required Dictionary<string, Entry> Entries { get; init; }
-        public List<string> Warnings { get; init; } = new();
     }
 
-    /// <summary>解析 baseline 檔。格式錯誤擲例外（CLI 轉成 exit 2）—— 在稽核之前就驗，輸入錯了後面都沒有意義。</summary>
+    /// <summary>
+    /// 解析 baseline 檔。格式錯誤擲例外（CLI 轉成 exit 2、提示重跑 --write-baseline）—— 在稽核之前就驗，輸入錯了後面都沒有意義。
+    /// 1.0 起嚴格（決策檔 H17）：
+    /// - 必須有 schemaVersion 而且是這個版本認得的。沒有 = 0.x 寫的檔：1.0 改了 baseline 收的東西（低於 AA 的每一組，
+    ///   不只 fail），照讀的話所有 warn 都會變成 NEW —— 大聲失敗並說出怎麼辦，比一牆的假 NEW 好。
+    /// - 每筆都要有 file／element／fg／bg／count／worst。⚠ 0.x 缺欄時補 0：缺 worst → 色盤漂移檢查靜默失效
+    ///   （比值再差也不會 &lt; 0 − 0.01）；缺 count → 每一處都算惡化。
+    /// 頂層與每筆的欄位名都不分大小寫。
+    /// </summary>
     public static Known Parse(string baselineJson)
     {
         using var doc = JsonDocument.Parse(baselineJson);
-        var known = new Dictionary<string, Entry>();
-        int noCount = 0, noWorst = 0;
-        // 頂層的 entries 與每筆的欄位名同一套政策：不分大小寫（舊版頂層用 GetProperty 分大小寫，
-        // PascalCase 的檔 exit 2，訊息是不知所云的 "The given key was not present in the dictionary."）
-        if (doc.RootElement.ValueKind != JsonValueKind.Object ||
-            !doc.RootElement.EnumerateObject().Any(p => p.Name.Equals("entries", StringComparison.OrdinalIgnoreCase)))
+        var root = doc.RootElement;
+        if (root.ValueKind != JsonValueKind.Object) throw new FormatException("the file is not a JSON object");
+        JsonElement? Prop(JsonElement obj, string name)
+            => obj.EnumerateObject().Where(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                  .Select(p => (JsonElement?)p.Value).FirstOrDefault();
+
+        if (Prop(root, "schemaVersion") is not { } ver)
+            throw new FormatException("the file has no schemaVersion — it was written by XamlContrast 0.x. " +
+                                      "1.0 changed what a baseline holds (every pair below AA, not only fails), " +
+                                      "so regenerate it with --write-baseline");
+        if (ver.ValueKind != JsonValueKind.Number || !ver.TryGetInt32(out var v) || v != SchemaVersion)
+            throw new FormatException($"schemaVersion {ver.GetRawText()} is not supported (this version reads {SchemaVersion}) — " +
+                                      "was the file written by a newer XamlContrast?");
+        if (Prop(root, "entries") is not { ValueKind: JsonValueKind.Array } entries)
             throw new FormatException("the file has no 'entries' array");
-        var entries = doc.RootElement.EnumerateObject()
-            .First(p => p.Name.Equals("entries", StringComparison.OrdinalIgnoreCase)).Value;
+
+        var known = new Dictionary<string, Entry>();
+        var i = 0;
         foreach (var el in entries.EnumerateArray())
         {
-            if (el.ValueKind != JsonValueKind.Object) throw new FormatException("every entry must be an object");
+            i++;
+            if (el.ValueKind != JsonValueKind.Object) throw new FormatException($"entry {i} is not an object");
+            foreach (var field in (ReadOnlySpan<string>)["file", "element", "fg", "bg", "count", "worst"])
+                if (Prop(el, field) is not { } fv || fv.ValueKind == JsonValueKind.Null)
+                    throw new FormatException($"entry {i} has no '{field}'");
             var e = el.Deserialize<Entry>(JsonOpts)!;
             known[$"{e.File}|{e.Element}|{e.Fg}|{e.Bg}"] = e;
-            // ⚠ 缺欄位會被補成 0：缺 worst → 色盤漂移檢查失效（比值再差也不會 < 0 − 0.01）；
-            //   缺 count → 每一處都算惡化。工具自己寫出的檔一定有這兩欄，只有手改或外部產生的會中 ——
-            //   但中了就是一整類惡化靜默放行，所以至少要點名（要不要直接拒絕讀取是待決定的格式收緊）
-            if (el.ValueKind == JsonValueKind.Object)
-            {
-                if (!HasProperty(el, "count")) noCount++;
-                if (!HasProperty(el, "worst")) noWorst++;
-            }
         }
-        var warnings = new List<string>();
-        if (noWorst > 0)
-            warnings.Add($"{noWorst} {(noWorst == 1 ? "entry has" : "entries have")} no 'worst' — palette drift " +
-                         "(same key, darker colour) is not detected for them; regenerate with --write-baseline");
-        if (noCount > 0)
-            warnings.Add($"{noCount} {(noCount == 1 ? "entry has" : "entries have")} no 'count' — every occurrence " +
-                         "counts as worsened; regenerate with --write-baseline");
-        return new Known { Entries = known, Warnings = warnings };
+        return new Known { Entries = known };
     }
 
     public static ComparisonResult Compare(AuditResult result, Known baseline, bool gateWarn = true)
     {
         var known = baseline.Entries;
-        var warnings = baseline.Warnings;
 
         bool Gating(Finding f) => f.Category == Category.Fail || gateWarn && f.Category == Category.Warn;
         // 目前低於 AA 的每一組，依鍵分組；處數與最差比值都算整組（warn 惡化成 fail 也是比值變差）
@@ -151,11 +157,7 @@ public static class Baseline
             WorsenedFailures = worsened,
             KnownDebt = knownDebt,
             PaidDebt = paid,
-            Warnings = warnings,
         };
     }
 
-    /// <summary>屬性名不分大小寫（與 Deserialize 的 PropertyNameCaseInsensitive 一致）。</summary>
-    private static bool HasProperty(JsonElement obj, string name)
-        => obj.EnumerateObject().Any(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
 }
