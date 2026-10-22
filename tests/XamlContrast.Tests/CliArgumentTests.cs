@@ -168,12 +168,14 @@ public class CliArgumentTests
 
     // ── 讀不到的檔案：被 IDE／建置鎖住的 *.cs 或 config。舊版是未處理的 IOException，退出碼跳出契約
     //    （−532462766）。自動偵測會讀樹裡每一個 .cs 找 C# 色盤 —— 跟色盤無關的檔被鎖也會中。
-    //    FileShare.None 只有 Windows 會跨行程強制，其他平台這兩條只跑前提就結束
+    //    FileShare.None 只有 Windows 會跨行程強制；其他平台這兩條標成「略過」（看得出來沒驗），不是 return 算通過
 
-    [Fact] // 讀不到的 .cs：跳過並列入 parse errors（喊出來、不靜默），稽核照常跑完
+    private const string FileShareNoneOnlyOnWindows =
+        "FileShare.None is enforced across processes only on Windows — elsewhere the lock cannot be reproduced";
+
+    [WindowsOnlyFact(FileShareNoneOnlyOnWindows)] // 讀不到的 .cs：跳過並列入 parse errors（喊出來、不靜默），稽核照常跑完
     public void UnreadableCSharpFileIsReportedNotFatal()
     {
-        if (!OperatingSystem.IsWindows()) return;
         using var fx = CliProjects.Passing();
         fx.File("Services/Locked.cs", "class Locked {}");
         using (File.Open(Path.Combine(fx.Root, "Services", "Locked.cs"), FileMode.Open, FileAccess.Read, FileShare.None))
@@ -184,10 +186,9 @@ public class CliArgumentTests
         }
     }
 
-    [Fact] // 讀不到的 config：設定錯誤 → exit 2 並說人話
+    [WindowsOnlyFact(FileShareNoneOnlyOnWindows)] // 讀不到的 config：設定錯誤 → exit 2 並說人話
     public void UnreadableConfigExitsTwo()
     {
-        if (!OperatingSystem.IsWindows()) return;
         using var fx = CliProjects.Passing();
         fx.File("xamlcontrast.config.json", "{}");
         using (File.Open(Path.Combine(fx.Root, "xamlcontrast.config.json"), FileMode.Open, FileAccess.Read, FileShare.None))

@@ -409,6 +409,26 @@ public class ParseRuleTests
         Assert.Equal(Category.Fail, button.Category);
     }
 
+    [Fact] // 屬性元素是屬性值、不是視覺子樹：VisualBrush 裡畫的字是背景圖樣的一部分，不能當成疊在祖先底上的文字評分
+    public void ColorPropertyElementsAreNotWalkedAsVisualChildren()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Border>
+                <Border.Background>
+                  <VisualBrush><VisualBrush.Visual><TextBlock Foreground="#EEEEEE" Text="watermark pattern"/></VisualBrush.Visual></VisualBrush>
+                </Border.Background>
+                <TextBlock Foreground="#000000" Text="real text"/>
+              </Border>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings); // 沒有「#EEEEEE 疊 #FFFFFF」那筆假的 fail
+        var site = Assert.Single(r.UnresolvedSites); // 真正的文字疊在 VisualBrush 上 → 執行期才知道
+        Assert.Equal("<VisualBrush>", site.Value);
+    }
+
     [Fact] // 屬性元素裡的 SolidColorBrush 帶 Opacity：字面色折成 #AARRGGBB，走半透明合成
     public void PropertyElementBrushOpacityIsComposited()
     {
