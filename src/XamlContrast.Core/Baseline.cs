@@ -131,8 +131,18 @@ public static class Baseline
             i++;
             if (el.ValueKind != JsonValueKind.Object) throw new FormatException($"entry {i} is not an object");
             foreach (var field in (ReadOnlySpan<string>)["file", "element", "fg", "bg", "count", "worst"])
+            {
                 if (Prop(el, field) is not { } fv || fv.ValueKind == JsonValueKind.Null)
                     throw new FormatException($"entry {i} has no '{field}'");
+                // 型別錯誤點名欄位與期望的型別（舊版是 .NET 的「could not be converted to XamlContrast.Core.Baseline+Entry」）
+                var expected = field switch
+                {
+                    "count" => fv.ValueKind == JsonValueKind.Number && fv.TryGetInt32(out _) ? null : "a whole number",
+                    "worst" => fv.ValueKind == JsonValueKind.Number ? null : "a number",
+                    _ => fv.ValueKind == JsonValueKind.String ? null : "a string",
+                };
+                if (expected is not null) throw new FormatException($"entry {i} has '{field}' {fv.GetRawText()} — it must be {expected}");
+            }
             var e = el.Deserialize<Entry>(JsonOpts)!;
             // 值的範圍（審查 1.0 C7）：count 0 讓每一處都算惡化；worst ≤ 0 讓色盤漂移永遠抓不到 —— 跟缺欄同一類
             if (e.Count < 1) throw new FormatException($"entry {i} has 'count' {e.Count} — it must be at least 1");

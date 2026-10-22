@@ -107,7 +107,7 @@ public sealed class ToolConfig
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         { throw new ConfigException($"cannot read {FileName}: {ex.Message}"); }
         try { cfg = JsonSerializer.Deserialize<ToolConfig>(text, JsonOpts) ?? new ToolConfig(); }
-        catch (JsonException ex) { throw new ConfigException(DescribeJsonError(ex)); }
+        catch (JsonException ex) { throw new ConfigException(DescribeJsonError(ex, text)); }
 
         // 未知屬性是設定錯誤（1.0，決策檔 H5）。⚠ 0.x 靜默忽略：{"strictPallete": true} 載入時沒有任何錯誤，
         //   色盤退化保險其實沒開 —— 使用者以為改了稽核標準而其實沒有。全部點名（含區段內的，以 palette.mdoe 的形式）；
@@ -166,8 +166,27 @@ public sealed class ToolConfig
     /// ⚠ 舊版一律「is not valid JSON: The JSON value could not be converted to System.Boolean. Path: …」——
     ///   JSON 本身沒錯，訊息卻這樣說，還帶出 .NET 的型別名。
     /// </summary>
-    private static string DescribeJsonError(JsonException ex)
+    private static string DescribeJsonError(JsonException ex, string text)
     {
+        // 根不是物件（[]、42、"warn"）：舊版說「is not valid JSON … could not be converted to XamlContrast.Core.ToolConfig」
+        if (ex.Path == "$")
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(text, new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+                var got = doc.RootElement.ValueKind switch
+                {
+                    JsonValueKind.Array => "an array",
+                    JsonValueKind.String => "a string",
+                    JsonValueKind.Number => "a number",
+                    JsonValueKind.True or JsonValueKind.False => "a boolean",
+                    JsonValueKind.Null => "null",
+                    _ => null,
+                };
+                if (got is not null) return $"{FileName} must be a JSON object, got {got}";
+            }
+            catch (JsonException) { }
+        }
         var type = System.Text.RegularExpressions.Regex.Match(ex.Message, @"could not be converted to (?<t>\S+?)\.?(\s|$)");
         if (type.Success && ex.Path is { Length: > 2 } path && path.StartsWith("$."))
         {

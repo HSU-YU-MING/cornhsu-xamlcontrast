@@ -133,6 +133,20 @@ public class ConfigTests
         Assert.DoesNotContain("not valid JSON", ex.Message);
     }
 
+    [Theory] // 根不是物件：說「要是一個 JSON 物件」，不是「not valid JSON」也不帶出 .NET 的型別名（審查 1.0 最終驗證，可接受項）
+    [InlineData("[]", "an array")]
+    [InlineData("42", "a number")]
+    [InlineData("\"warn\"", "a string")]
+    public void ConfigRootMustBeAnObject(string json, string got)
+    {
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, json);
+        var ex = Assert.Throws<ConfigException>(() => ToolConfig.Load(fx.Root));
+        Assert.Contains($"{ToolConfig.FileName} must be a JSON object, got {got}", ex.Message);
+        Assert.DoesNotContain("XamlContrast.Core", ex.Message);
+        Assert.DoesNotContain("not valid JSON", ex.Message);
+    }
+
     [Fact] // JSON 本身壞掉才說「不是合法的 JSON」
     public void BrokenJsonStillSaysSo()
     {

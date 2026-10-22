@@ -209,6 +209,28 @@ public class BaselineFormatTests
         Assert.Contains($"'{field}'", ex.Message);
     }
 
+    [Theory] // 型別錯誤點名第幾筆、哪一欄、期望的型別 —— 舊版是 .NET 的訊息「could not be converted to
+             // XamlContrast.Core.Baseline+Entry」（審查 1.0 最終驗證，可接受項）
+    [InlineData("\"count\": \"1\", \"worst\": 1.49", "entry 1 has 'count' \"1\" — it must be a whole number")]
+    [InlineData("\"count\": 1.5, \"worst\": 1.49", "entry 1 has 'count' 1.5 — it must be a whole number")]
+    [InlineData("\"count\": 1, \"worst\": \"1.49\"", "entry 1 has 'worst' \"1.49\" — it must be a number")]
+    public void EntryFieldTypesAreNamed(string countAndWorst, string expected)
+    {
+        var json = $$"""{ "schemaVersion": 1, "entries": [ { "file": "Main.xaml", "element": "TextBlock", "fg": "#EEEEEE", "bg": "#FFFFFF", {{countAndWorst}} } ] }""";
+        var ex = Assert.ThrowsAny<FormatException>(() => Baseline.Parse(json));
+        Assert.Contains(expected, ex.Message);
+        Assert.DoesNotContain("XamlContrast.Core", ex.Message);
+        Assert.DoesNotContain("System.", ex.Message);
+    }
+
+    [Fact]
+    public void EntryTextFieldsMustBeStrings()
+    {
+        var ex = Assert.ThrowsAny<FormatException>(() => Baseline.Parse(
+            """{ "schemaVersion": 1, "entries": [ { "file": 3, "element": "TextBlock", "fg": "#EEEEEE", "bg": "#FFFFFF", "count": 1, "worst": 1.2 } ] }"""));
+        Assert.Contains("entry 1 has 'file' 3 — it must be a string", ex.Message);
+    }
+
     [Theory] // 範圍內的極值照收
     [InlineData(1, 1.0)]
     [InlineData(250, 21.0)]
