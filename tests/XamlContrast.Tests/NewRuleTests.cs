@@ -89,6 +89,11 @@ public class NewRuleTests
     [InlineData("""<Trigger Property="IsEnabled" Value="False">""", "Trigger", true)]
     [InlineData("""<DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsEnabled}" Value="False">""", "DataTrigger", true)]
     [InlineData("""<DataTrigger Binding="{Binding Path=(UIElement.IsEnabled), RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Value="False">""", "DataTrigger", true)]
+    [InlineData("""<DataTrigger Binding="{Binding (IsEnabled), RelativeSource={RelativeSource Self}}" Value="False">""", "DataTrigger", true)]
+    // Path 要恰好是 IsEnabled 本身：帶點的路徑是別的物件的屬性 —— 這裡是祖先 Window 的 DataContext（view model）上的
+    // IsEnabled，不是控制項停用（審查素材 h10a：舊版只看最後一段，照樣豁免）
+    [InlineData("""<DataTrigger Binding="{Binding DataContext.IsEnabled, RelativeSource={RelativeSource AncestorType=Window}}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding Path=Owner.IsEnabled, RelativeSource={RelativeSource Self}}" Value="False">""", "DataTrigger", false)]
     [InlineData("""<DataTrigger Binding="{Binding IsEnabledByLicense}" Value="False">""", "DataTrigger", false)]
     [InlineData("""<DataTrigger Binding="{Binding IsEnabledByLicense, RelativeSource={RelativeSource Self}}" Value="False">""", "DataTrigger", false)]
     [InlineData("""<DataTrigger Binding="{Binding ViewModel.CanSave, Converter={StaticResource IsEnabledConverter}}" Value="False">""", "DataTrigger", false)]

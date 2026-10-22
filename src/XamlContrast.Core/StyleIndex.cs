@@ -104,7 +104,7 @@ internal sealed partial class StyleIndex
     ///   {Binding ViewModel.CanSave, Converter={StaticResource IsEnabledConverter}} 都被當成停用態豁免 ——
     ///   真實的 fail 歸 0、exit 0，計數器標示的豁免原因是錯的。WCAG 1.4.3 豁免的是「停用中的控制項」，
     ///   放行憑據要是條文本身，所以：
-    ///   - Path 的最後一段恰為 IsEnabled（含附加屬性寫法 (UIElement.IsEnabled)）
+    ///   - Path 恰為 IsEnabled、(IsEnabled) 或 (UIElement.IsEnabled)（帶點的路徑是別的物件的屬性）
     ///   - 來源是元素自己、模板宿主或祖先（RelativeSource Self／TemplatedParent／FindAncestor —— 祖先停用時
     ///     WPF 會把子元素一併停用）。沒有 RelativeSource 就是 DataContext 上的 view model 旗標，
     ///     不保證控制項真的停用；ElementName／Source 指向別的物件 —— 都不猜
@@ -137,8 +137,9 @@ internal sealed partial class StyleIndex
             }
         }
         if (path is null || relativeSource is null) return false;
-        var last = path.Trim('(', ')', ' ').Split('.')[^1];
-        return last == "IsEnabled" &&
+        // Path 要恰好是 IsEnabled 本身（含附加屬性寫法）。⚠ 只看最後一段的話，DataContext.IsEnabled、
+        // Owner.IsEnabled 這種「別的物件的 IsEnabled」也會被豁免 —— 那是 view model 的旗標，不是控制項停用
+        return path.Trim() is "IsEnabled" or "(IsEnabled)" or "(UIElement.IsEnabled)" &&
                (relativeSource.Contains("Self") || relativeSource.Contains("TemplatedParent") ||
                 relativeSource.Contains("FindAncestor") || relativeSource.Contains("AncestorType"));
     }
