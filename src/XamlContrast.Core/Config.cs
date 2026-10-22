@@ -16,6 +16,9 @@ public sealed class ToolConfig
     public PaletteSection Palette { get; init; } = new();
     public ThresholdSection Thresholds { get; init; } = new();
     public ClassificationSection Classification { get; init; } = new();
+    /// <summary>自訂容器的版面（規則 17 的兄弟背板）：疊層或排開。工具認不得的容器版面靜態不可知 →
+    /// over-sibling-content；使用者知道自己的容器怎麼排，宣告的就是事實（決策檔 m7 的逃生口）。</summary>
+    public LayoutSection Layout { get; init; } = new();
     public string FailOn { get; init; } = "warn"; // 1.0 的預設 gate：沒達到 AA 就算失敗
     public bool StrictPalette { get; init; }
 
@@ -67,6 +70,14 @@ public sealed class ToolConfig
         public string[] ExtraNonText { get; init; } = [];
     }
 
+    public sealed class LayoutSection
+    {
+        /// <summary>子元素疊在一起的容器（當成只有一格的 Grid：佔滿的純色兄弟是後面字的底）。比對元素名（不含前綴），分大小寫。</summary>
+        public string[] Overlap { get; init; } = [];
+        /// <summary>子元素排開的容器（兄弟不是彼此的底）。</summary>
+        public string[] SideBySide { get; init; } = [];
+    }
+
     public sealed class IgnoreSection
     {
         public bool RequireReason { get; init; } = true;
@@ -113,6 +124,11 @@ public sealed class ToolConfig
         if (cfg.Thresholds is null) throw new ConfigException("thresholds must be an object, got null");
         if (cfg.Classification is null) throw new ConfigException("classification must be an object, got null");
         if (cfg.Ignore is null) throw new ConfigException("ignore must be an object, got null");
+        if (cfg.Layout is null) throw new ConfigException("layout must be an object, got null");
+        RequireNames(cfg.Layout.Overlap, "layout.overlap");
+        RequireNames(cfg.Layout.SideBySide, "layout.sideBySide");
+        if (cfg.Layout.Overlap.Intersect(cfg.Layout.SideBySide, StringComparer.Ordinal).FirstOrDefault() is { } both)
+            throw new ConfigException($"layout: '{both}' is declared both overlap and sideBySide");
         RequireNames(cfg.Classification.ExtraText, "classification.extraText");
         RequireNames(cfg.Classification.ExtraNonText, "classification.extraNonText");
 

@@ -845,6 +845,38 @@ public class NewRuleTests
         Assert.Equal("#FFFFFF", Assert.Single(r.Findings).Bg);
     }
 
+    // ── 版面的逃生口：config 的 layout（決策檔 m7，比照 classification 的形狀）──
+    //    自訂容器的版面靜態不可知 → over-sibling-content。使用者知道自己的容器是疊層還是排開：宣告的就是事實
+
+    [Theory]
+    [InlineData("""{ "layout": { "overlap": ["CardGrid"] } }""", "l:CardGrid", 21.0)]        // 疊層：黑色方塊是白字的底
+    [InlineData("""{ "layout": { "sideBySide": ["LayeredPanel"] } }""", "l:LayeredPanel", 1.0)] // 排開：白字配祖先的白底
+    public void ConfigDeclaresTheLayoutOfCustomContainers(string config, string container, double ratio)
+    {
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, config);
+        fx.File("Main.xaml", $"""
+            <Grid xmlns:l="clr-namespace:App" Background="#FFFFFF">
+              <{container}><Border Background="#000000"/><TextBlock Foreground="#FFFFFF" Text="x"/></{container}>
+            </Grid>
+            """);
+        var cfg = ToolConfig.Load(fx.Root);
+        var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
+        Assert.Empty(r.UnresolvedSites);
+        Assert.Equal(ratio, Assert.Single(r.Findings).RatioDark);
+    }
+
+    [Theory] // 寫錯要說：同一個名字不能兩邊都宣告、不能是 null 或空白
+    [InlineData("""{ "layout": { "overlap": ["CardGrid"], "sideBySide": ["CardGrid"] } }""", "layout: 'CardGrid' is declared both overlap and sideBySide")]
+    [InlineData("""{ "layout": null }""", "layout must be an object, got null")]
+    [InlineData("""{ "layout": { "overlap": [""] } }""", "layout.overlap must not contain null or empty element names")]
+    public void LayoutConfigErrorsAreNamed(string config, string message)
+    {
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, config);
+        Assert.Contains(message, Assert.Throws<ConfigException>(() => ToolConfig.Load(fx.Root)).Message);
+    }
+
     [Theory] // Canvas 裡有尺寸的純色兄弟也不當背板:Canvas.Left/Top 與文字的實際範圍靜態不可知,
              // 它在不在字底下沒辦法判定 —— 與 Grid 裡「有明確尺寸 = 不是佔滿」的強調色條同一個處理
     [InlineData("""<Border Background="#000000"/>""")]

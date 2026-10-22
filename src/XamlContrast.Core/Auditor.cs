@@ -859,8 +859,11 @@ public sealed partial class Auditor
     /// ⚠ 衍生命名的 *Canvas／*Grid 同理（審查素材 m7）：舊版只看 *Panel，ZoomCanvas 與 CardGrid 落到「排開」——
     ///   疊在 Image 上的字報 21:1 ok、疊在黑色方塊上的白字配祖先白底編出 1:1 fail。它們是不是真的衍生自
     ///   Canvas／Grid、Grid 的格子怎麼切，靜態都不知道 → Unknown。InkCanvas 是 WPF 內建，跟 Canvas 一樣疊在一起。</summary>
-    private static PanelLayout LayoutOf(string name)
+    private PanelLayout LayoutOf(string name)
     {
+        // config 的宣告優先（使用者知道自己的容器怎麼排）
+        if (_cfg.Layout.Overlap.Contains(name, StringComparer.Ordinal)) return PanelLayout.Overlap;
+        if (_cfg.Layout.SideBySide.Contains(name, StringComparer.Ordinal)) return PanelLayout.SideBySide;
         if (name is "Grid" or "Canvas" or "InkCanvas") return PanelLayout.Overlap;
         if (name.EndsWith("StackPanel") || name.EndsWith("WrapPanel") || name.EndsWith("DockPanel") ||
             name.EndsWith("UniformGrid") || name.EndsWith("ToolBarPanel") || name.EndsWith("TabPanel") ||
