@@ -112,7 +112,7 @@ public static class Report
         return sb.ToString();
     }
 
-    private static string ModeLabel(PaletteMode m) => m switch
+    internal static string ModeLabel(PaletteMode m) => m switch
     {
         PaletteMode.Pair => "pair",
         PaletteMode.CSharp => "csharp",

@@ -273,7 +273,36 @@ public class JsonReportContractTests
         IEnumerable<string?> theme = ["dark", "light", null], baseline = ["known", "new", "worsened", null];
         Assert.Equal(theme, EnumOf(finding.GetProperty("theme")));
         Assert.Equal(baseline, EnumOf(finding.GetProperty("baseline")));
-        Assert.Equal(System.Enum.GetValues<UnresolvedReason>().Select(Report.ReasonLabel), EnumOf(schema.GetProperty("$defs").GetProperty("reason")));
+    }
+
+    /// <summary>開放集在 schema 裡的寫法：description 裡「Current values:」之後以反引號列出的值。</summary>
+    internal static string[] DocumentedValues(JsonElement node)
+    {
+        var d = node.GetProperty("description").GetString()!;
+        var at = d.IndexOf("Current values:", StringComparison.Ordinal);
+        Assert.True(at >= 0, $"開放集的 description 要有「Current values:」：{d}");
+        return System.Text.RegularExpressions.Regex.Matches(d[at..], "`(?<v>[^`]+)`").Select(m => m.Groups["v"].Value).ToArray();
+    }
+
+    [Fact] // 開放集（審查 1.0 A1）：unresolved 原因與 paletteMode 在 1.x 可以加新值 —— schema 不能寫成封閉的 enum，
+           // 不然用 schema 驗證的消費端，在 1.y 加第一個新原因那天就紅。型別是 string、目前的值列在 description，
+           // 實作會輸出的每一個值都要列在文件上（實作 ⊆ 文件）
+    public void OpenSetsAreStringsThatDocumentTheirCurrentValues()
+    {
+        var schema = JsonDocument.Parse(File.ReadAllText(Repo.PathOf("docs/report.schema.json"))).RootElement;
+        var reason = schema.GetProperty("$defs").GetProperty("reason");
+        var mode = schema.GetProperty("properties").GetProperty("summary").GetProperty("properties").GetProperty("paletteMode");
+        foreach (var (node, emitted) in new (JsonElement, IEnumerable<string>)[]
+        {
+            (reason, System.Enum.GetValues<UnresolvedReason>().Select(Report.ReasonLabel)),
+            (mode, System.Enum.GetValues<PaletteMode>().Select(Report.ModeLabel)),
+        })
+        {
+            Assert.False(node.TryGetProperty("enum", out _), "開放集不能是 enum");
+            Assert.Equal("string", node.GetProperty("type").GetString());
+            Assert.Contains("open set", node.GetProperty("description").GetString());
+            Assert.Subset(DocumentedValues(node).ToHashSet(), emitted.ToHashSet());
+        }
     }
 
     [Fact] // 6：每一個 finding 的每一個欄位都在 —— 沒有值的是 null（symmetry 在 ok／decorative、fontSize 在沒設字級時）。

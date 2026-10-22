@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/docs/report.schema.json",
   "title": "XamlContrast --json report, schemaVersion 6",
-  "description": "Frozen in 1.0. Every field is always present (null when it has no value, [] or {} when empty). Within 1.x fields are only added, never renamed or removed, and an addition does not change schemaVersion: consumers must ignore fields they do not know. A breaking change raises schemaVersion and the major version.",
+  "description": "Frozen in 1.0. Every field is always present (null when it has no value, [] or {} when empty). Within 1.x fields are only added, never renamed or removed, and an addition does not change schemaVersion: consumers must ignore fields they do not know. Fields written as an enum are closed sets (a new value is a breaking change); fields described as an open set may gain values in 1.x and consumers must accept values they do not know. A breaking change raises schemaVersion and the major version.",
   "type": "object",
   "required": ["schemaVersion", "toolVersion", "exitCode", "summary", "unresolvedSites", "findings"],
   "properties": {
@@ -13,7 +13,7 @@
       "type": "object",
       "required": ["paletteMode", "paletteDegraded", "paletteDetail", "paletteKeys", "singleTheme", "configLoaded", "thresholds", "failOn", "minCoverage", "strictPalette", "files", "pairs", "coverage", "unresolved", "unresolvedBy", "unknownKeys", "skipped", "deadForeground", "disabledExempt", "parseErrors", "parseErrorFiles", "suppressed", "invalidIgnoreCount", "invalidIgnores", "counts"],
       "properties": {
-        "paletteMode": { "enum": ["pair", "csharp", "single", "none"] },
+        "paletteMode": { "type": "string", "description": "Which palette detection path ran. An open set: a 1.x release may add a value (a new detection path), so consumers must accept values they do not know. Current values: `pair`, `csharp`, `single`, `none`." },
         "paletteDegraded": { "type": "boolean", "description": "Palette detection degraded: no palette found (hard-coded colours only) or the themes could not be told apart. --strict-palette turns this into exit 3. false when the config chose mode none." },
         "paletteDetail": { "type": "string", "description": "Human-readable detection description (free text)." },
         "paletteKeys": { "type": "integer", "minimum": 0 },
@@ -96,6 +96,6 @@
     }
   },
   "$defs": {
-    "reason": { "enum": ["no-ancestor-background", "bound-or-gradient", "unknown-palette-key", "translucent-uncomposited", "same-brush-pair", "over-sibling-content"] }
+    "reason": { "type": "string", "description": "Why a pair could not be resolved. An open set: a 1.x release may add a reason (a newly named blind spot), so consumers must accept values they do not know; existing values keep their spelling. Current values: `no-ancestor-background`, `bound-or-gradient`, `unknown-palette-key`, `translucent-uncomposited`, `same-brush-pair`, `over-sibling-content`." }
   }
 }
