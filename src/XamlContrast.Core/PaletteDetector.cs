@@ -472,11 +472,12 @@ public static partial class PaletteDetector
         var pal = new Palette();
         foreach (var k in darkB.Keys.Concat(lightB.Keys).Concat(darkR.Keys).Concat(lightR.Keys).Distinct())
         {
-            // 每側：字面值優先，其次引用解析（引用對自己那側的 Color 表解）
+            // 每側：字面值優先，其次引用解析（引用對自己那側的 Color 表解；那一側找不到引用的 Color = 解不出顏色，
+            // 跟讀不懂同一個處理 —— 不能拿另一個主題的值補）
             var d = darkB.GetValueOrDefault(k)
-                    ?? (darkR.TryGetValue(k, out var dc) ? ResolveRef(dc, darkColors.GetValueOrDefault) : null);
+                    ?? (darkR.TryGetValue(k, out var dc) ? (ResolveRef(dc, darkColors.GetValueOrDefault) ?? InvalidValue) : null);
             var l = lightB.GetValueOrDefault(k)
-                    ?? (lightR.TryGetValue(k, out var lc) ? ResolveRef(lc, lightColors.GetValueOrDefault) : null);
+                    ?? (lightR.TryGetValue(k, out var lc) ? (ResolveRef(lc, lightColors.GetValueOrDefault) ?? InvalidValue) : null);
             if (d is InvalidValue || l is InvalidValue) { invalid.Add(k); continue; } // 讀不懂 ≠ 沒定義：不補
             if (d is null && l is null) continue;
             pal.Entries.TryAdd(k, (d ?? l!, l ?? d!)); // 缺的一側（沒有定義）退回另一側
@@ -570,7 +571,8 @@ public static partial class PaletteDetector
     /// <summary>值讀不懂而剔除的鍵要明講 —— 它們在使用處會變成 unknown-palette-key。</summary>
     private static string InvalidNote(SortedSet<string> invalid)
         => invalid.Count == 0 ? "" :
-           $"; !! {invalid.Count} key(s) dropped — defined with a colour value the tool cannot read" +
+           $"; !! {invalid.Count} key(s) dropped — a theme defines them with a colour value the tool cannot read" +
+           " or a Color reference it cannot find for that theme" +
            $" (uses are counted as unknown-palette-key): {string.Join(", ", invalid.Take(5))}{(invalid.Count > 5 ? ", …" : "")}";
 
     internal static List<CsCandidate> CsCandidates(string root, List<string>? readErrors = null)

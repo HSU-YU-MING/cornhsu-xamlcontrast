@@ -527,6 +527,33 @@ public class PaletteDetectorTests
         Assert.Equal(UnresolvedReason.UnknownPaletteKey, Assert.Single(r.UnresolvedSites).Reason);
     }
 
+    [Fact] // 同一族：brush 引用的 Color 鍵在某一側找不到（只有淺色檔定義了 FgColor）—— 深色主題下這個 brush
+           // 解不出顏色，舊版仍把缺的一側用淺色的值補上，比值是編出來的。找不到的引用比照「讀不懂」處理
+    public void ColorReferenceMissingOnOneSideIsNotFilledFromTheOtherTheme()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="{StaticResource FgColor}"/>
+              <SolidColorBrush x:Key="Line" Color="#333333"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="FgColor">#1B1B1B</Color>
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="{StaticResource FgColor}"/>
+              <SolidColorBrush x:Key="Line" Color="#CCCCCC"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(PaletteMode.Pair, d.Mode);
+        Assert.False(d.Palette.Entries.ContainsKey("Fg")); // 舊版：("#1B1B1B", "#1B1B1B")
+        Assert.Contains("1 key(s) dropped", d.Description);
+        Assert.Contains(": Fg", d.Description);
+    }
+
     [Fact] // 剔除讀不懂的鍵之後色盤掉到 3 鍵門檻以下：舊版因此放棄合併式色盤、落到「單一主題檔」那條路，
            // 整欄深色值改用淺色檔的值（Bg 深色欄拿到 #FFFFFF）—— 編造的程度比原本的 bug 還大，而且沒標退化、
            // --strict-palette 照樣 exit 0。門檻要算「定義了的鍵」，讀不懂的那個也算一個
