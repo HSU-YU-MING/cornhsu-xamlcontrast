@@ -14,7 +14,7 @@
 
 ```bash
 dotnet build XamlContrast.slnx -c Release
-dotnet test  XamlContrast.slnx -c Release          # 2026-08-26 實跑：101 綠
+dotnet test  XamlContrast.slnx -c Release          # 2026-10-22 實跑：660 綠
 dotnet format XamlContrast.slnx --verify-no-changes # CI 第一關，不過直接紅
 
 # 示範專案（刻意做壞的，exit 1 才是對的）
@@ -29,6 +29,8 @@ powershell -File .\scripts\verify-readme-sample.ps1  # README 示範輸出比對
 ```
 
 兩支都吃 `-Update`：確認新行為才是對的之後，一鍵重貼／重凍，然後**人工看 git diff 再 commit**。
+⚠ `verify-baselines.ps1` 紅燈時**不要為了變綠就跑 `-Update`**：先逐項說明每個差異是哪個 commit 造成的，
+給維護者看過、同意之後才重凍（1.0 的那份說明在 `D:/擴充功能/nuget/稽核-2026-10-22/XamlContrast-快照變動說明.md`）。
 
 ## 守門機制：這個 repo 是四個套件裡做得最完整的，其他 repo 要抄的樣板
 
@@ -71,13 +73,23 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
   `-p:Version=` 從 tag 覆寫），但**從原始碼 build 出來的執行檔自稱 0.5.1，連它蓋在 JSON
   報告上的 `toolVersion` 也是錯的**。整格刪掉更糟：退回 MSBuild 預設的 `1.0.0`，
   等於對外宣告介面已凍結。**tag 是唯一真相源，發版不要手動改版本欄位。**
-- **這是四個套件裡唯一還在 0.x 的**（目前 v0.6.1）。介面尚未凍結，所以：
-  - README 要維持「0.x 期間請 pin 確切版本」的說明（`README.md` 第 23 行的引言、
-    第 191 行的 Action 範例都寫著 `@v0.6.1`）。**發新版時這兩處要跟著換。**
-  - GitHub Action 的用法**到 1.0 之後才改成 `@v1`**（那時才需要開始維護移動式 v1 tag，
-    Parity 已經在做，形狀照抄它）。
-  - 凍結的定義是：CLI 旗標、JSON schema（含 `summary`）、Action inputs。
-  - **JSON 形狀變了就遞增 `Report.cs` 的 `schemaVersion`**（目前 5），不要默默改欄位。
+- **1.0.0（2026-10-22）起介面凍結**，直接從 0.6.1 跳到 1.0（沒有 0.7.0）。凍結宣告與 1.x 演進規則寫在
+  `CHANGELOG.md` 的 1.0.0 一節，`CONTRIBUTING.md`「Interfaces and versions」是對外的摘要。九個面：
+  CLI 旗標、退出碼（含判定順序）、JSON 報告（schemaVersion 6 + `docs/report.schema.json`）、Action inputs、
+  config 檔、baseline 檔（含鍵的文字形式）、SARIF `ruleId`、壓抑註解語法、稽核範圍判準。
+  - **1.x 只增**：新旗標／input／config 屬性／JSON 欄位／開放集的新值（unresolved 原因、paletteMode）= minor。
+    改名、刪除、改預設、收緊驗證 = 2.0。
+  - **JSON 新增欄位不遞增 `schemaVersion`**（`Report.JsonSchemaVersion`，凍結在 6；消費端必須忽略未知欄位）。
+    但 `docs/report.schema.json` 與 `JsonReportContractTests` 的形狀表要跟著加，測試會擋。
+    破壞性改變才遞增，而且只在 major。⚠ 0.x 是「形狀變了就遞增」，1.x 不是。
+  - **稽核語意的改進（計數會動）是 minor，不是 patch**，CHANGELOG 開頭要有 Upgrading 說明實測影響；
+    baseline 的鍵會動的話要明講、叫使用者重跑 `--write-baseline`。
+  - README 兩份引用移動式 `@v1`，1.x 發版**不必**改 README 的版號。每發一個 1.x 把 `v1` 前移
+    （`git tag -f v1 v1.x.y && git push -f origin v1`，見 `RELEASING.md`）；`release.yml` 只認三段式 tag，
+    前移 `v1` 不會觸發發版。
+  - `action.yml` 在 `version` 留空時裝 `"1.*"`。發 2.0.0 時要改成 `"2.*"`
+    （`ActionContractTests.TheFloatingMajorIsTheLatestReleasesMajor` 會在 CHANGELOG 頂端變成 2.x 時紅）。
+  - `release.yml` 會核對 CHANGELOG 最上面的版號 = tag，不一致不發。
 - `release.yml` 的 `NuGet/login` **已釘 commit SHA**
   （`8d196754b4036150537f80ac539e15c2f1028841` = v1.2.0），2026-08-25 的安全硬化，
   **不要改回 `@v1`**。上游出新版要更新時，四個 repo 一起換新 SHA。
@@ -96,8 +108,8 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
 - **不猜。** `{Binding}` / `{TemplateBinding}` / 漸層的顏色只有執行期才知道，一律計入
   `unresolved` 並點名位置，**永不推測**。拿誠實的不確定去換一個看起來很篤定的數字，
   是這個工具唯一不能做的事。
-- **靜默退化等於謊報健康。** 所以 `Program.cs` 的退出碼有四道保險：
-  0 組配對、色盤退化（`--strict-palette`）、覆蓋率低於下限（預設 50%）、fail > 0。
+- **靜默退化等於謊報健康。** 所以 `Program.cs` 的退出碼有三道「結果不可信」的保險（exit 3）：
+  0 組配對、色盤退化（`--strict-palette`）、覆蓋率低於下限（預設 50%）；之後才是 gate（exit 1）。
   豁免、壓抑、跳過、解析失敗全部有計數器且一律印出來。
   **「更乾淨的報告」不是改進**——把沒看過的東西藏起來的報告是更糟的報告。
 - **對稱不是設計意圖的證據。** 舊版把「深淺兩邊都低而且差不多」判成「刻意低對比」藏起來，
@@ -117,8 +129,30 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
 
 ### 退出碼契約與檢查順序
 
-`0`／`1`／`2` 是對使用者的契約（2 = 用法或設定錯誤）。**輸出寫檔失敗必須落在契約內**——
-之前是裸 `File.WriteAllText`，目錄不存在就噴 .NET 堆疊、exit 127。
+`0`／`1`／`2`／`3` 是對使用者的契約（1.0 凍結）：0 通過、1 低於 gate、2 用法／設定／輸入檔錯誤、3 結果不可信。
+**輸出寫檔失敗必須落在契約內**（2）——之前是裸 `File.WriteAllText`，目錄不存在就噴 .NET 堆疊、exit 127。
+
+判定順序（先中先回；`Program.cs` 的旗標解析與 `DecideExit()`）：
+
+| # | 條件 | 退出碼 |
+|---|---|---|
+| 1 | 旗標錯誤（未知旗標、缺值、值以 `-` 開頭、`--fail-on`／`--min-coverage` 不合法、`--baseline` 與 `--write-baseline` 並用、缺 root） | 2 |
+| 2 | root 不存在 | 2 |
+| 3 | config 錯誤（JSON、型別、範圍、未知屬性、`largeText > normalText`、`layout` 兩邊都宣告、`null`）；連檔案清單都拿不到 | 2 |
+| 4 | `rootBackground` 在色盤裡解析不出顏色 | 2 |
+| 5 | `--baseline` 檔不存在或不合法（**稽核之前**就驗：缺 `schemaVersion`、版本不認得、缺欄位） | 2 |
+| 6 | 稽核時讀不到專案 | 2 |
+| 7 | 0 組配對 | 3 |
+| 8 | `--strict-palette`（或 config）且色盤退化 | 3 |
+| 9 | 覆蓋率（`CoveragePercent`，四捨五入到一位）< 下限 | 3 |
+| 10 | `--write-baseline` | 0（檔案在判定之後寫；寫不出去 → 2） |
+| 11 | `--baseline`：有新增或惡化（只看目前 gate 擋的） | 1，否則 0 |
+| 12 | fail > 0 | 1 |
+| 13 | gate 是 warn（預設）且 warn > 0 | 1 |
+| 14 | 其餘 | 0 |
+| 15 | 判定之後寫 `--json`／`--sarif`／baseline／`--md`，任何一個寫不出去 | 2 |
+
+JSON 的 `exitCode` 記的是判定（0／1／3）；第 15 列的 2 發生時，JSON 已經寫出去了。
 
 ⚠ **`--strict-palette` 與覆蓋率下限必須留在模式分支（`--baseline` / `--write-baseline`）
 之前。** 這兩個檢查原本擺在 `DecideExit()` 尾端，而 baseline 兩個分支都會直接 return，
@@ -201,8 +235,11 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 
 `Baseline.KeyOf` 是 `file|element|fg|bg`，**刻意不含行號**——行號隨編輯漂移，含進去每次
 重排版都會「假性新增」。相對地必須存 `Count`（同鍵處數變多 = 惡化）與 `Worst`
-（鍵不變但色盤值被調暗 = 惡化）。少任何一欄都會有一整類惡化靜默放行。
+（鍵不變但色盤值被調暗 = 惡化）。少任何一欄都會有一整類惡化靜默放行 —— 所以 1.0 起缺欄位是 exit 2，不再補 0。
 `paid off` 數的是**處數**不是鍵數，要跟 `knownDebt` 同單位。
+1.0 起 baseline 收「低於 AA」的每一組（fail＋warn），不論寫出時的 gate；比對時只擋目前 gate 擋的那些
+（`--fail-on fail` 下 warn 不判新增或惡化）。檔頭有 `"schemaVersion": 1`；0.x 的檔沒有，一律拒絕並叫人重寫
+—— 照讀的話既有的 warn 全部會變成 NEW。鍵的文字形式（`element` 的 `⊕Style[…]@dark/…`、`fg` 的 ` ×0.5`）是凍結面的一部分。
 
 ### 守門腳本自身
 
@@ -221,7 +258,11 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 
 ## 技術債（留帳）
 
-- **`baselines/celflow.json` 目前是紅的**（2026-08-26 實跑：`pairs` 期望 363 實得 353、
+- **四份 `baselines/*.json` 在 1.0 都是紅的，而且刻意還沒重凍**（2026-10-22）。每一個差異都歸因到 commit
+  （逐 commit 重播 v0.6.1 之後的 70 個 src commit），寫在
+  `D:/擴充功能/nuget/稽核-2026-10-22/XamlContrast-快照變動說明.md`，等維護者同意後才跑 `-Update`。
+  舊快照（schemaVersion 5）照樣讀得懂；`verify-baselines.ps1` 的退出碼期望改成 1.0 規則，快照有 `exitCode` 就用它。
+- **`baselines/celflow.json` 早在 1.0 之前就是紅的**（2026-08-26 實跑：`pairs` 期望 363 實得 353、
   `ok` 期望 346 實得 336，`fail` 仍是 0）。**不是 XamlContrast 的回歸**——`src/` 最後一次
   變動是 2026-08-12，而 CelFlow.WPF 有四個 XAML 檔在 2026-08-18 被改過。
   2026-08-28 CelFlow 改名 ZeroCel，腳本已改指 `D:\應用程式\ZeroCel\frontend\ZeroCel.WPF`
@@ -255,8 +296,11 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   解釋不了就是回歸。
 - **改了 console 輸出**（包含只是換個字）→ `verify-readme-sample.ps1`，不一致就 `-Update`
   重貼並把 README 的 diff 一起 commit。CI 會擋，但本機先看一眼省一趟。
-- **改了 JSON 輸出的形狀** → 遞增 `schemaVersion`，並確認 `action.yml` 裡那幾段 `jq`
-  （行內註記、SARIF 路徑改寫）還讀得到欄位。
+- **改了 JSON 輸出的形狀** → 1.x 只能新增：`docs/report.schema.json` 與 `JsonReportContractTests` 的形狀表
+  一起加（`schemaVersion` 不動）；改名或刪除要等 2.0。並確認 `action.yml` 裡那幾段 `jq`
+  （行內註記、SARIF 路徑改寫）還讀得到欄位（`ActionContractTests` 會驗）。
+- **改了 `action.yml`** → input 一律經 `env:` 進 run 區塊，不直接 `${{ }}` 內插；布林／列舉 input 在
+  Validate inputs 那一步驗。`ActionContractTests` 用 bash 實跑 step（dotnet／xamlcontrast 換成 stub）。
 - **新增任何「這組可以放過」的邏輯**（豁免／過濾／跳過）→ 一定要有計數器 + 回歸測試。
   開發期間這個工具產出過八份「看起來很健康但是錯的」報告，每一份現在都是一個測試。
   問自己：這條新邏輯有沒有可能讓一個真實問題從報告裡消失？

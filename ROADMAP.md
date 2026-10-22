@@ -15,7 +15,7 @@
 - [x] `xamlcontrast.config.json` 實際載入 —— 2026-07-31：強制色盤模式（pair/csharp/
       single/none）、門檻與分類覆寫（非預設會標明）、failOn/strictPalette、
       requireReason；寫錯 exit 2 給欄位級訊息（null 區段／元素、讀不到的檔 2026-10 補齊；
-      不認得的屬性名目前只點名警告，要不要改成 exit 2 待決定）
+      不認得的屬性名 1.0 起也是 exit 2）
 - [x] findings 的 `file` 改成 root 相對路徑（正斜線，跨 OS baseline 可攜）——
       2026-07-31，同名檔不再互撞
 - [x] TargetName 模板 Setter 的解析（指向模板根）—— 2026-07-31 規則 13，
@@ -29,11 +29,13 @@
   發佈管線與平台二進位的維護成本；出現真實的 npm 需求再開（同 M6 雲端外殼
   的決策模式）
 
-## 1.0 條件
+## 1.0（2026-10-22）
 
-見規劃書第 10 節：四專案零設定、CLI 與 JSON schema 凍結、
-十七條解析規則＋八個回歸形狀全覆蓋、baseline/ignore 實戰驗證、
-至少一個非作者的專案回報。
+- [x] 介面凍結：CLI 旗標、退出碼、JSON 報告（schemaVersion 6）、Action inputs、config、baseline 檔、
+      SARIF ruleId、壓抑註解語法、稽核範圍判準 —— 宣告與 1.x 演進規則見 `CHANGELOG.md` 的 1.0.0
+- [x] 預設 gate 改成 warn（沒達到 AA 就算失敗）；「結果不可信」改用 exit 3
+- [x] 直接從 0.6.1 發 1.0.0，不經 0.7.0。規劃書第 10 節「至少一個非作者的專案回報」的條件，
+      改成四個驗證專案的實測（差異逐項歸因，交維護者確認後才重凍快照）
 
 ## 1.x+
 

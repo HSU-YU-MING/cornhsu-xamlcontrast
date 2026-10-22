@@ -121,9 +121,29 @@ one and would be willing to be the guinea pig, say so in an issue — that unblo
 
 ## Interfaces and versions
 
-The project stays on 0.x until its interfaces freeze — CLI flags, the JSON schema
-(including `summary`), and the Action inputs. Pin an exact version while it does.
-The JSON `schemaVersion` increments whenever the shape changes; consumers should check it.
+1.0 froze the public interface. Nine surfaces change only by addition within 1.x:
+
+1. CLI flags (names, value forms, defaults)
+2. exit codes (`0` pass, `1` below the gate, `2` usage/config/input error, `3` result can't be trusted) and the order they are decided in
+3. the JSON report (`schemaVersion` 6, [`docs/report.schema.json`](docs/report.schema.json))
+4. the Action inputs
+5. the config file
+6. the baseline file, including how its keys are spelled
+7. the SARIF `ruleId` (`wcag-contrast`) and levels
+8. the `xamlcontrast-ignore` comment syntax
+9. which files get audited
+
+The full declaration and the evolution rules are in the
+[CHANGELOG's 1.0.0 entry](CHANGELOG.md). What that means for a pull request:
+
+- **Additions are minor and welcome** — a new flag, Action input, config property, JSON field, or a
+  new value in an open set (an `unresolved` reason, a palette mode). Adding a JSON field does **not**
+  change `schemaVersion`; consumers are required to ignore fields they don't know.
+- **Renaming, removing, changing a default, or tightening what is accepted** on any of the nine
+  surfaces is a 2.0 change, however small it looks. It waits.
+- **A change to audit semantics that moves counts** — more pairs found, a confident ratio turned into
+  an honest `unresolved` — is a minor release, never a patch. It needs an *Upgrading* note at the
+  top of the CHANGELOG entry with the measured effect, and has to say so if baseline keys move.
 
 ## License
 

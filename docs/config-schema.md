@@ -4,12 +4,14 @@
 > 值不合法（不是合法 JSON、型別錯、列舉值錯、範圍外、強制模式缺檔）會 exit 2，並指出出錯的欄位或區段
 > （設定檔被靜默忽略等於使用者以為改了稽核標準而其實沒有）。
 > 區段、陣列或陣列元素給 `null`、元素名清單裡有空字串、檔案讀不到，也一樣 exit 2 並點名欄位。
-> ⚠ 例外：**工具不認得的屬性名（含拼錯，例：`"minCoverge": 99`）目前不報錯** —— 那一格不生效
-> （下限仍是預設 50），但 console 與 Markdown 報告會逐一點名（`!! config: unknown property 'minCoverge' ignored`），
-> 不再靜默。要不要直接改成 exit 2 是待決定的介面變更（會拒絕現在讀得進去的設定檔）。`$schema` 一律放行。
-> 優先序：CLI 旗標 > config > 內建預設
-> （`failOn`／`strictPalette` 的旗標只能加嚴，見文末「CLI 對應」）。
+> **工具不認得的屬性名（含拼錯，例：`"minCoverge": 99`）也是設定錯誤**（1.0 起；exit 2，
+> `config error: unknown property 'minCoverge' — check the spelling against docs/config-schema.md`）。
+> 0.x 只警告、照跑，那一格不生效而使用者以為生效了。`$schema` 一律放行。
+> 優先序：CLI 旗標 > config > 內建預設（見文末「CLI 對應」）。
 > 非預設門檻會在輸出中標明（`!! non-default thresholds`）。
+>
+> **1.0 凍結**：這裡的每個屬性、型別、範圍與預設值在 1.x 期間只增不改（新增屬性 = minor）。
+> 不承諾向前相容：用到 1.y 新屬性的設定檔，在較舊的 1.x 上會因為「不認得的屬性」exit 2 並點名。
 
 > 2026-07-30。零設定是預設路徑；這個檔只在自動偵測猜錯或猜不到時用。
 > 原則：**config 是逃生口，不是必經之路。** 四個驗證專案全部零設定可跑。
@@ -34,7 +36,11 @@
     "extraText": [],
     "extraNonText": []
   },
-  "failOn": "fail",
+  "layout": {
+    "overlap": [],
+    "sideBySide": []
+  },
+  "failOn": "warn",
   "strictPalette": false,
   "minCoverage": 50,
   "rootBackground": null,
@@ -100,6 +106,9 @@ WCAG 2.x AA。`failFactor` 是「破」的分界（門檻 × `failFactor`，預�
 （比值先四捨五入到小數兩位再比，所以 3.01:1 的一般文字是「破」）。
 「非預設」是逐值精確比較：`0.667` 也算改了門檻。
 改這些值等於改稽核標準 —— 允許，但輸出要標明用了非預設門檻。
+`largeText` 大於 `normalText` 是設定錯誤（1.0 起 exit 2）：大字反而要更高的對比，幾乎一定是兩個值寫反了。相等可以。
+`failFactor` 的預設維持 `0.67`（不是 `2/3`）：結論行印的是實際生效的係數，改成 2/3 只會讓 fail 線從 3.015 移到 3.0，
+而且讓所有寫了 `0.67` 的設定檔變成「非預設」。
 
 ### classification
 
@@ -109,16 +118,34 @@ WCAG 2.x AA。`failFactor` 是「破」的分界（門檻 × `failFactor`，預�
 元素名先比全名，對不上再比後綴、兩表都中時取較長的那個
 （`MetroProgressBar` → `ProgressBar`、`ExtendedTextBlock` → `TextBlock`）。
 
+### layout
+
+告訴工具**你自己的容器**怎麼排子元素，規則 17（重疊容器的兄弟背板）就不必猜：
+
+```json
+{ "layout": { "overlap": ["MyCardHost"], "sideBySide": ["MyToolbar"] } }
+```
+
+| 欄位 | 預設 | 說明 |
+|---|---|---|
+| `overlap` | `[]` | 子元素疊在同一格（像 `Grid` 的同一格）：前面佔滿的兄弟是後面文字的背板 |
+| `sideBySide` | `[]` | 子元素排開（像 `StackPanel`）：兄弟不會是背板 |
+
+元素名是完整的 XAML 元素名（不含命名空間前綴、大小寫相符）。宣告優先於內建判斷：內建只認 `Grid`／`Canvas`／`InkCanvas`
+是疊層、`*StackPanel`／`*WrapPanel`／`*DockPanel` 等是排開；其他名字以 `Panel`／`Canvas`／`Grid` 結尾的自訂容器版面未知，
+可能是背板的兄弟之後的字記 `over-sibling-content`（不猜）。同一個名字同時出現在兩個清單是設定錯誤（exit 2）；
+`null` 或空字串一樣 exit 2。宣告成 `overlap` 的容器所有子元素算同一格（`Grid` 才看 `Grid.Row`／`Grid.Column`）。
+
 ### failOn / strictPalette
 
 | 欄位 | 預設 | 說明 |
 |---|---|---|
-| `failOn` | `"fail"` | `"warn"` = 偏低也擋（法遵場景 AA 全過） |
-| `strictPalette` | `false` | `true` = 色盤偵測失敗（退回寫死色碼模式）直接 exit 1 |
-| `minCoverage` | `50` | 解析成功的配對低於此百分比即 exit 1 —— 只解析到一小部分的「通過」沒有意義。設 `0` 關閉 |
+| `failOn` | `"warn"` | `"warn"` = 沒達到 AA 就擋（fail 與 warn 都算，1.0 的預設）；`"fail"` = 只擋低於 fail 線的（0.x 的預設） |
+| `strictPalette` | `false` | `true` = 色盤偵測失敗（退回寫死色碼模式）時 exit 3（結果不可信） |
+| `minCoverage` | `50` | 解析成功的配對低於此百分比即 exit 3（結果不可信）—— 只解析到一小部分的「通過」沒有意義。設 `0` 關閉。比的是報告上印的那個數（四捨五入到一位） |
 | `rootBackground` | — | 文件根元素的預設背景:色票鍵(`"MahApps.Brushes.Window.Background"`)或色碼(`"#FF202020"`)。給**主題函式庫的使用者**:視窗底色鍵在 repo 的主題檔裡,但「視窗 → 那個鍵」的隱含樣式住在 NuGet 套件裡,工具看不到。鍵不在偵測到的色盤裡 → exit 2。實測:NETworkManager 一行設定,覆蓋率 8.8% → 87.2% |
 
-配對數為 0 時 exit 1 是**不可設定的預設** —— 空掃綠燈就是謊報健康。
+配對數為 0 時 exit 3 是**不可設定的預設** —— 空掃綠燈就是謊報健康。
 `minCoverage` 是同一條原則的推廣:那條線原本是二元的,而八個公開專案實測有三個
 在 0.2% / 1.7% / 10.2% 的覆蓋率下照樣亮綠燈(HandyControl 342 個檔只解析出 7 組,
 然後印「all pairs meet AA」)。「幾乎什麼都沒看」與「看過了都沒問題」在退出碼上
@@ -146,7 +173,12 @@ ratchet 會把「不見了」讀成「還清了」而放行 —— 弄壞主題�
 
 ## CLI 對應
 
-config 的 `failOn` / `strictPalette` 可被 CLI 旗標**加嚴**（`--fail-on warn`、`--strict-palette`），
-但不能放寬：config 寫了 `"warn"`，`--fail-on fail` 不會把它改回 `fail`。
-`minCoverage` 是例外：`--min-coverage` 兩個方向都會覆寫 config 的值。
 CLI > config > 內建預設。
+
+| config | 旗標 | 覆寫的方向 |
+|---|---|---|
+| `failOn` | `--fail-on <warn\|fail>` | 兩個方向（1.0 起）：config 寫 `"warn"`，`--fail-on fail` 會放寬回只擋 fail。0.x 的旗標只能加嚴 —— 預設改成 warn 之後，那會讓 `--fail-on fail` 永遠放不寬 |
+| `minCoverage` | `--min-coverage <0-100>` | 兩個方向 |
+| `strictPalette` | `--strict-palette` | 只能打開（沒有關掉的旗標）：config 寫了 `true` 就一律生效 |
+
+GitHub Action 的 `fail-on`／`min-coverage` 留空時不傳旗標，交給 config（沒有就是內建預設）。
