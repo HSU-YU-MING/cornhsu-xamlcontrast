@@ -477,8 +477,9 @@ public class StyleChainTests
     //    Dark.xaml 與 Light.xaml 各定義一個 Chip：Dark.xaml 的 Chip 只在深色主題下存在，拿它配淺色色票算出的
     //    「light=1.16:1」是執行期不存在的組合（反之亦然）—— 審查素材 h3pair，報出兩筆編造的 fail
 
-    private static Fixture ThemePairWithChips(string darkChipFg, string lightChipFg) => new Fixture()
-        .File("Themes/Dark.xaml", $"""
+    private static Fixture ThemePairWithChips(string darkChipFg, string lightChipFg,
+        string darkFile = "Themes/Dark.xaml", string lightFile = "Themes/Light.xaml") => new Fixture()
+        .File(darkFile, $"""
             <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
               <SolidColorBrush x:Key="Bg" Color="#111111"/>
               <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
@@ -489,7 +490,7 @@ public class StyleChainTests
               </Style>
             </ResourceDictionary>
             """)
-        .File("Themes/Light.xaml", $"""
+        .File(lightFile, $"""
             <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
               <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
               <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
@@ -529,6 +530,90 @@ public class StyleChainTests
         Assert.Equal(Wcag.Contrast("#333333", "#111111"), f.RatioDark);
         Assert.Equal(Symmetry.SingleTheme, f.Symmetry);
     }
+
+    [Theory] // 主題提示要能認出常見的寫法：檔名本身、檔名裡的一個詞、或所在的最後一段目錄
+    [InlineData("Themes/Dark.xaml", "Themes/Light.xaml")]
+    [InlineData("Themes/DarkTheme.xaml", "Themes/LightTheme.xaml")]
+    [InlineData("Themes/ColorsDark.xaml", "Themes/ColorsLight.xaml")]
+    [InlineData("Themes/Theme.Dark.xaml", "Themes/Theme.Light.xaml")]
+    [InlineData("Themes/dark-theme.xaml", "Themes/light_theme.xaml")]
+    [InlineData("Themes/Dark/Colors.xaml", "Themes/Light/Colors.xaml")]
+    public void ThemeDictionaryNamingConventionsAreRecognised(string darkFile, string lightFile)
+    {
+        using var fx = ThemePairWithChips("#EEEEEE", "#1B1B1B", darkFile, lightFile);
+        var r = fx.Run();
+        Assert.Equal(PaletteMode.Pair, r.Detection.Mode);
+        Assert.Equal(0, r.CountOf(Category.Fail));
+        var dark = Assert.Single(r.Findings, f => f.File == darkFile);
+        Assert.Equal(dark.RatioDark, dark.RatioLight);
+        Assert.Equal(Wcag.Contrast("#EEEEEE", "#111111"), dark.RatioDark);
+        var light = Assert.Single(r.Findings, f => f.File == lightFile);
+        Assert.Equal(Wcag.Contrast("#1B1B1B", "#FFFFFF"), light.RatioLight);
+    }
+
+    // ── 主題提示是「整個詞」，不是子字串（審查素材 b4hl、b4dir）──
+    //    舊版對整條相對路徑做 Contains("dark")／Contains("light")：Highlight、Lightweight、Spotlight 都命中 light，
+    //    中性檔被當成「只屬於淺色主題」只評淺色那欄 —— 深色主題下 1.04:1 的真 fail 消失。資料夾叫 Starlight/
+    //    的話整個專案每個檔都帶 light 提示（Action 的預設 root 是 repo 根，CI 上最容易踩到）
+
+    [Theory]
+    [InlineData("", "Themes/HighlightStyles.xaml")]
+    [InlineData("", "Themes/Lightweight.xaml")]
+    [InlineData("", "Themes/Spotlight.xaml")]
+    [InlineData("", "Themes/Darkroom.xaml")]
+    [InlineData("Starlight/", "Themes/Shared.xaml")]
+    [InlineData("", "Dark/Themes/Shared.xaml")] // 只看最後一段目錄
+    public void ThemeHintIsAWholeWordNotASubstring(string prefix, string sharedFile)
+    {
+        using var fx = new Fixture();
+        fx.File(prefix + "Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Line" Color="#333333"/>
+            </ResourceDictionary>
+            """);
+        fx.File(prefix + "Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Line" Color="#CCCCCC"/>
+            </ResourceDictionary>
+            """);
+        fx.File(prefix + sharedFile, """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="NoteBg" Color="#FFF59D"/>
+              <Style x:Key="Note" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource NoteBg}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Fg}"/>
+              </Style>
+            </ResourceDictionary>
+            """);
+        fx.File(prefix + "Views/Main.xaml", """<Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>""");
+        var r = fx.Run();
+        Assert.Equal(PaletteMode.Pair, r.Detection.Mode);
+        Assert.Equal(("#111111", "#FFFFFF"), r.Detection.Palette.Entries["Bg"]);
+        Assert.Null(r.Detection.SideOf(Path.Combine(fx.Root, prefix + sharedFile)));
+        var note = Assert.Single(r.Findings, f => f.Element == "Style[Note]/base");
+        Assert.Equal(Wcag.Contrast("#EEEEEE", "#FFF59D"), note.RatioDark); // 深色主題 1.04:1
+        Assert.Equal(Wcag.Contrast("#1B1B1B", "#FFF59D"), note.RatioLight);
+        Assert.Equal(Category.Fail, note.Category);
+        Assert.Equal(Symmetry.DarkFails, note.Symmetry);
+    }
+
+    [Theory] // 直接驗提示本身：整詞、只看檔名與最後一段目錄、兩個都有就不確定
+    [InlineData("Dark.xaml", ThemeSide.Dark)]
+    [InlineData("Themes/LightTheme.xaml", ThemeSide.Light)]
+    [InlineData("Themes/Colors.DARK.xaml", ThemeSide.Dark)]
+    [InlineData("Themes\\Light\\Brushes.xaml", ThemeSide.Light)]
+    [InlineData("Themes/HighlightStyles.xaml", null)]
+    [InlineData("Themes/Lightweight.xaml", null)]
+    [InlineData("Starlight/Themes/Shared.xaml", null)]
+    [InlineData("Dark/Themes/Shared.xaml", null)]
+    [InlineData("Themes/Dark/LightOverrides.xaml", null)]
+    [InlineData("Themes/DarkLight.xaml", null)]
+    public void ThemeHintOfAPath(string rel, ThemeSide? expected)
+        => Assert.Equal(expected, PaletteDetector.ThemeHint(rel));
 
     [Fact] // C# 真相源時，XAML 主題檔是兩個主題共用的靜態複本（Kindling 形狀）—— 裡面的 Style 兩欄都要評，
            // Kindling DarkTheme.xaml:149 DarkBtn 按下態的淺色 2.49:1 就是這樣抓到的，不能因為檔名有 Dark 就只評深色

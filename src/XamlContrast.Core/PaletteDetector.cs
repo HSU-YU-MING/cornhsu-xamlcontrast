@@ -194,7 +194,7 @@ public static partial class PaletteDetector
         catch { return false; }
     }
 
-    /// <summary>主題字典的歸屬：用與合併式色盤同一套檔名提示（專案內相對路徑含 dark 或 light、只含其一），
+    /// <summary>主題字典的歸屬：用與合併式色盤同一套檔名提示（<see cref="ThemeHint"/>），
     /// 只收根元素是 ResourceDictionary 的檔（畫面檔不是「某個主題的字典」）。</summary>
     private static Dictionary<string, ThemeSide> ThemeSides(string root, IEnumerable<string> files)
     {
@@ -202,11 +202,36 @@ public static partial class PaletteDetector
         foreach (var f in files)
         {
             if (!IsResourceDictionaryFile(f)) continue;
-            var n = Path.GetRelativePath(root, f).ToLowerInvariant();
-            bool d = n.Contains("dark"), l = n.Contains("light");
-            if (d ^ l) sides[Path.GetFullPath(f)] = d ? ThemeSide.Dark : ThemeSide.Light;
+            if (ThemeHint(Path.GetRelativePath(root, f)) is { } side) sides[Path.GetFullPath(f)] = side;
         }
         return sides;
+    }
+
+    /// <summary>
+    /// 檔名提示：這個檔只屬於深色或淺色主題嗎？看「檔名（不含副檔名）」與「最後一段目錄」，切成詞
+    /// （與 <see cref="LooksLikeFixture"/> 同一套詞邊界：. - _ 與大小寫轉換），有一個詞恰好是 dark 或 light。
+    /// 兩種都有、或都沒有 → null（不確定歸屬 = 兩個主題共用，兩欄都評）。
+    /// ⚠ 舊版對整條相對路徑做子字串比對：Highlight、Lightweight、Spotlight 都命中 light，資料夾叫 Starlight/
+    ///   的話整個專案每個檔都帶 light 提示 —— 中性檔被當成只屬於淺色主題、只評淺色那欄，深色主題下的真 fail
+    ///   消失（審查素材 b4hl、b4dir）。Dark.xaml、DarkTheme.xaml、ColorsDark.xaml、Theme.Dark.xaml、
+    ///   Themes/Dark/Colors.xaml 照樣認得；全小寫黏在一起的 darktheme.xaml 認不得，退回中性（兩欄都評，不猜）。
+    /// </summary>
+    internal static ThemeSide? ThemeHint(string rel)
+    {
+        var segments = rel.Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (segments.Length == 0) return null;
+        bool dark = false, light = false;
+        void Scan(string segment)
+        {
+            foreach (var w in WordBoundary().Split(segment))
+            {
+                if (w.Equals("dark", StringComparison.OrdinalIgnoreCase)) dark = true;
+                else if (w.Equals("light", StringComparison.OrdinalIgnoreCase)) light = true;
+            }
+        }
+        Scan(Path.GetFileNameWithoutExtension(segments[^1]));
+        if (segments.Length >= 2) Scan(segments[^2]);
+        return dark == light ? null : dark ? ThemeSide.Dark : ThemeSide.Light;
     }
 
     /// <summary>明確指定深／淺的兩個字典檔（主題配對、config 強制 pair）。</summary>
@@ -373,8 +398,8 @@ public static partial class PaletteDetector
             // ⚠ 提示只看「專案內的相對路徑」。看完整路徑的話，專案放在
             //   D:\dark-projects\ 底下會讓所有候選都染上 dark 提示、配對整個失效。
             var rel = Path.GetRelativePath(root, f);
-            var n = rel.ToLowerInvariant();
-            cands.Add(new XamlCandidate(f, rel, brushes, n.Contains("dark"), n.Contains("light")));
+            var hint = ThemeHint(rel);
+            cands.Add(new XamlCandidate(f, rel, brushes, hint == ThemeSide.Dark, hint == ThemeSide.Light));
         }
         return cands;
     }
@@ -447,9 +472,9 @@ public static partial class PaletteDetector
             var rel = Path.GetRelativePath(root, f);
             if (LooksLikeFixture(rel)) continue;
             if (include is not null && !include(f)) continue;
-            var n = rel.ToLowerInvariant();
-            var isDark = n.Contains("dark");
-            var isLight = n.Contains("light");
+            var hint = ThemeHint(rel); // 整詞比對，見 ThemeHint
+            var isDark = hint == ThemeSide.Dark;
+            var isLight = hint == ThemeSide.Light;
 
             var colors = ParseColorDefs(f, keepInvalid: true);
             var (lit, refs) = ParseBrushDefs(f, keepInvalid: true);
