@@ -159,12 +159,22 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   另一版把字面值 brush 一律當「深淺同值」收，`Dark.xaml` 排在 `Light.xaml` 前 →
   **456 筆 findings 全部 dark==light，淺色欄整欄是編造的**。
   ⚠ 這兩個回歸四個驗證專案都抓不到（它們的配對走 Color 引用那條路）。動這塊要加測試。
-- **「當色盤來源」與「排除出 UI 掃描」是兩件事**（`PaletteDetector.IsResourceDictionaryFile`）：
-  畫面檔的區域 brush 照樣進色盤，但只有根元素是 `ResourceDictionary` 的檔才不走樹；
-  而且色盤檔裡的 Style 一樣跑 `WalkStyles`——元素端的鏈路徑看到「字與底同源」就略過、交給定義處，
-  定義處沒人走的話那組配對就從報告與所有計數器消失。比對排除清單時兩邊都 `GetFullPath`。
+- **「當色盤來源」與「不算進 files」是兩件事**（`PaletteDetector.IsResourceDictionaryFile`）：
+  只有根元素是 `ResourceDictionary` 的色盤檔不算畫面檔，但**照樣走樹、照樣跑 `WalkStyles`**——
+  元素端的鏈路徑看到「字與底同源」就略過、交給定義處，定義處沒人走的話那組配對就從報告與所有計數器消失；
+  字典裡的 DataTemplate 也一樣。比對排除清單時兩邊都 `GetFullPath`。
+- **畫面檔的區域定義只是那個畫面的**：合併式色盤的「區域層」只讓畫面檔（Window／UserControl…）的區域 brush
+  補字典沒定義的鍵，讀不懂的區域值不進全域；在那個畫面裡由 `LocalOverrides` 蓋過全域（綁 Binding 的記成
+  `Palette.RuntimeKeys` → bound-or-gradient）。當成中性檔灌進全域的話，一個畫面的區域 brush 會污染全部畫面。
+- **只屬於一個主題的字典**（`PaletteDetection.ThemeFileSides`）：色盤來自分開的深／淺 XAML 字典時，
+  `Dark.xaml` 裡的 Style 只用深色那一欄評（兩欄同值、對稱標 single-theme）；拿它配淺色色票是執行期不存在的組合。
+  C#／單一主題模式不建這張表——Kindling 的 `DarkTheme.xaml` 是 C# 色盤的靜態複本，兩個主題共用。
 - **多 App 作用域**：外層 App 的子樹要扣掉內層 App 的目錄；不屬於任何 App 的檔案沒有共用區色盤時
   用空色盤，不是退回全域（全域是各 App 合併，等於借用某個 App 的值）。
+- **半透明字色疊到底上評分**（`Auditor.EffectiveForeground`，三條路徑同一套）：`#AARRGGBB`、帶 Opacity 的色票、
+  只有一個主題半透明的色票都以各自的 alpha（乘上元素 Opacity）合成到已解析的底上。舊設計一律歸 skipped，
+  而 skipped 不進覆蓋率分母——Opacity 0.2 的白字疊黑底（1.66:1）整組不在報告裡、覆蓋率照樣 100%。
+  完全透明才是合法跳過；底沒解析出來照舊進 unresolved。
 - **元素分類用「後綴比對」不是全名相等**（`Auditor.IsNonTextElement`）：MahApps 的
   `MetroProgressBar` 對不上 `ProgressBar`，進度條填色會被當文字用 4.5 要求。
   兩邊都中時取最長的後綴（名字愈長愈具體）。
@@ -198,9 +208,9 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   變動是 2026-08-12，而 CelFlow.WPF 有四個 XAML 檔在 2026-08-18 被改過。
   2026-08-28 CelFlow 改名 ZeroCel，腳本已改指 `D:\應用程式\ZeroCel\frontend\ZeroCel.WPF`
   （快照名稱沿用 `celflow.json`）；之前路徑消失時腳本在 Windows PowerShell 5.1 下整支中斷、
-  cornea 沒比對到，現在找不到專案會紅字點名並繼續。2026-10-22 的產品 bug 修正（fix/product-bugs）
-  又刻意改變了三個專案的計數，四份快照的差異與解釋記在那條分支的 CHANGELOG 與回報裡，
-  確認後由維護者決定是否 `-Update`。
+  cornea 沒比對到，現在找不到專案會紅字點名並繼續。2026-10-22 那批產品 bug 修正又刻意改變了
+  三個專案的計數（逐項解釋在那批修正各自的 commit 訊息裡，CHANGELOG 只記行為），快照尚未重凍 ——
+  逐項看過差異之後才由維護者決定是否 `-Update`。
   這暴露了 `verify-baselines.ps1` 的結構性弱點：**受測對象是四個活在 repo 外、會自己演化的
   專案**，紅燈分不出「工具行為變了」與「被稽核的 App 改了」。目前只能靠人工看 diff 判斷。
   修法有兩條（都還沒做）：把四個專案的 XAML 快照複製進 repo 當固定素材，

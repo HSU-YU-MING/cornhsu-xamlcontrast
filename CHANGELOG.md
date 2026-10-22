@@ -5,34 +5,65 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
-A sweep of 33 product bugs found in a source review (2026-10-22). The JSON shape is unchanged
-(`schemaVersion` stays 5), and so are the CLI flags and the Action inputs. Several fixes **move
-counts on real projects** — more pairs found, problems that used to be hidden now reported, some
-confident-but-wrong ratios now honestly `unresolved` — so a `--baseline` may show NEW or paid-off
-entries after upgrading; re-run `--write-baseline` once you have reviewed them.
+Fixes from a source review (2026-10-22) that listed 33 product bugs: 30 are fixed here; two are
+fixed only partly — unknown config properties and incomplete baseline entries are now *named*, but
+whether they should become exit-code-2 errors is an open interface decision — and one
+(`translucent-uncomposited`, a reason that is listed but never emitted) is untouched pending a
+decision. A follow-up review of these fixes found regressions and leftovers in the same areas; those
+are fixed here too. The JSON shape is unchanged (`schemaVersion` stays 5), and so are the CLI flags
+and the Action inputs. Several fixes **move counts on real projects** — more pairs found, problems
+that used to be hidden now reported, some confident-but-wrong ratios now honestly `unresolved` — so a
+`--baseline` may show NEW or paid-off entries after upgrading; re-run `--write-baseline` once you
+have reviewed them.
+
+### Changed — translucent text colours are graded, not skipped
+- **A translucent foreground is composited onto its resolved background and graded**, like element
+  `Opacity` always was. Until now every translucent text colour (`#AARRGGBB`, a palette brush with
+  `Opacity`, a palette key translucent in only one theme) was "skipped" — and skipped pairs are not in
+  the coverage denominator, so a 20%-white hint on black (1.66:1) never reached the report while
+  coverage read 100%, and a key translucent in one theme hid the *other* theme's real failure too.
+  Fully transparent text is still skipped; a translucent colour over a background the tool can't
+  resolve is counted as `unresolved`. This reverses a deliberate earlier design; expect more pairs.
+- **A style whose foreground and background share a definition but whose background is transparent or
+  translucent is graded where it is used**, against the element's real backdrop. The definition site
+  has nothing underneath to composite against (it still counts it as skipped), and the element path
+  used to skip same-source pairs — so these pairs were graded nowhere.
 
 ### Fixed — findings that silently disappeared or were graded against the wrong colour
 - **A screen with one local brush is no longer dropped from the audit.** Merged-dictionary detection
   treated any XAML with a keyed `SolidColorBrush`/`Color` as a palette file and excluded it whole —
   a `UserControl.Resources` brush or an `App.xaml` with `Application.Resources` colours made the
-  file vanish (`files` short, no message). Local brushes still feed the palette, but only files whose
-  root is a `ResourceDictionary` are left out of the screen audit.
+  file vanish (`files` short, no message). Only files whose root is a `ResourceDictionary` are now
+  left out of the file count, and even those are still walked (data templates included).
+- **A screen's local brushes no longer leak into the whole project.** They only fill keys no
+  dictionary defines; inside their own screen they override the global value (a brush bound to
+  `{Binding}` reads as `bound-or-gradient` there). Before, a screen's local literal could override a
+  theme key project-wide, and an unreadable local value could knock the key out everywhere.
 - **Styles defined in theme dictionaries are audited.** The element path skips a pair whose
   foreground and background come from the same style, expecting the definition-site check to cover
   it — but palette files never got that check, so a 1.2:1 button style in `Themes/Dark.xaml` was in
   no finding and no counter. Palette files now get the style check (they still don't count as screens).
+  When the palette comes from separate dark/light XAML dictionaries, a style in `Dark.xaml` is graded
+  against the dark theme only (single-theme symmetry) — pairing it with light values reported
+  failures for combinations that never exist at runtime.
 - **Property-element syntax is read.** `<Border.Background>` / `<TextBlock.Foreground>` /
   `<Setter.Value>` were ignored: a gradient background was graded against the ancestor (confident
   wrong `ok`), and a property-element foreground vanished from every counter. Solid brushes are
   resolved (with `Opacity`); gradients, image brushes and resource-plus-opacity count as
   `bound-or-gradient`.
-- **`SolidColorBrush Opacity` in the palette is honoured.** A 20%-white hint brush on black (~1.66:1)
-  was graded as opaque white (21:1).
+- **`SolidColorBrush Opacity` in the palette is read.** A 20%-white hint brush on black (~1.66:1)
+  was graded as opaque white (21:1); it is now a translucent colour, graded as described above
+  (1.66:1, fail). Property elements named after a base class (`<Panel.Background>`,
+  `<Control.Foreground>`) are read too.
 - **A value one theme can't read is no longer filled from the other theme.** In merged dictionaries a
   typo like `#EEEEEEE`, a bound colour or an unreadable `Opacity` on one side made the tool borrow the
-  other theme's value and report a fabricated ratio. The key is now dropped (uses count as
-  `unknown-palette-key`) and named on the palette line (`!! N key(s) dropped — …`). Hex values with
-  non-hex digits (`#GGGGGG`) are rejected too — they used to crash the audit.
+  other theme's value and report a fabricated ratio; so did a brush whose `Color` reference exists in
+  only one theme. The key is now dropped (uses count as `unknown-palette-key`, marked "dropped:
+  unreadable definition" on the console) and named on the palette line (`!! N key(s) dropped — …`).
+  A dropped key still counts towards the three-key detection threshold, so dropping one can't push
+  detection down to "pick one theme file for both columns"; if *every* key is unreadable, detection is
+  reported as failed (degraded — `--strict-palette` blocks it). Hex values with non-hex digits
+  (`#GGGGGG`) are rejected too — they used to crash the audit.
 - **Commented-out definitions are no longer part of the palette** (XAML `<!-- -->`, and C# tuple lines
   starting with `//`); an old value in a comment used to override the live one.
 - **Test projects can't hijack the palette.** C# tuple detection now skips test/sample paths like the
@@ -41,13 +72,17 @@ entries after upgrading; re-run `--write-baseline` once you have reviewed them.
   `UnitTests`, `Foo_IntegrationTests` — not just segments starting with `test`.
 - **`DataTrigger` disabled-state exemption is no longer a substring match.** `{Binding IsEnabledByLicense}`
   or a converter named `IsEnabledConverter` counted as WCAG 1.4.3 "disabled". The binding's path must
-  now end in `IsEnabled`, point at the element itself, its templated parent or an ancestor, and have no
-  converter; a view-model `IsEnabled` (no `RelativeSource`) is graded normally.
+  now be exactly `IsEnabled` (or `(UIElement.IsEnabled)`), point at the element itself, its templated
+  parent or an ancestor, and have no converter; a view-model flag (`{Binding IsEnabled}` without
+  `RelativeSource`, or `DataContext.IsEnabled`) is graded normally.
 - **A palette key translucent in only one theme** crashed the audit (dark side translucent) or had its
   alpha stripped (light side translucent, 3.91:1 reported as 1.3:1). Each side now carries its own alpha.
 - **Rule 17 no longer invents backdrops in a `Canvas`** (nothing stretches there; an empty `Border` is
-  0×0), and **translucent / bound / gradient full-cell siblings** are composited or reported as
-  unresolved instead of letting the text fall through to the ancestor's colour.
+  0×0) or in side-by-side panels with derived names (`VirtualizingWrapPanel`, `MyDockPanel`); in a
+  custom `*Panel` whose layout is unknown, text after a possible backdrop is `over-sibling-content`
+  instead of a guess. **Translucent full-cell siblings** — through the brush's alpha or the element's
+  own `Opacity` — are composited, and **bound / gradient ones** are reported as unresolved, instead of
+  letting the text fall through to the ancestor's colour.
 - **Definition-site style checks merge same-condition triggers and follow `BasedOn`**, like the element
   path already did — no more phantom "hover foreground × base background" fails.
 - **Nested applications' dictionaries no longer leak into the outer application's scope**, and files

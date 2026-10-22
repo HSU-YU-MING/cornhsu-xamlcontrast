@@ -122,10 +122,11 @@ tried in this order, and the one that ran is always named on the first line of t
 1. **Merged dictionaries, both themes** — every XAML file that defines keyed `Color` /
    `SolidColorBrush` resources is read into one palette, and each key ends up with a dark *and*
    a light value. Tried first because it beats picking a single file: real projects split a
-   palette across several dictionaries. A window's local brushes (`Window.Resources`,
-   `Application.Resources`) feed the palette too, but only files whose root is a
-   `ResourceDictionary` are left out of the screen audit — and the styles inside those
-   dictionaries are still audited where they are defined.
+   palette across several dictionaries. `Application.Resources` counts as a dictionary; a window's
+   local brushes (`Window.Resources`, `UserControl.Resources`) only fill keys no dictionary defines,
+   and override the palette inside their own window. Dictionary files don't count as screens in
+   `summary.files`, but their styles and templates are still audited — and when the palette comes
+   from separate dark/light dictionaries, a style in `Dark.xaml` is graded against the dark theme only.
 2. **Theme pair** — one `DarkTheme.xaml` × one `LightTheme.xaml`, keys overlapping ≥ 50%
 3. **C# source of truth** — `("Key", "#dark", "#light")` tuple arrays
    (beats a single-theme XAML copy: a source that provides both themes wins)
@@ -335,11 +336,12 @@ Honest list — full blind-spot table with per-case evidence in the
 
 - `TargetName` setters aimed at **inner** template parts (root-targeted ones are resolved)
 - Cross-element correlated triggers (same condition flips fg on one element, bg on another) — false alarms
-- Sibling backdrops are resolved for full-cell siblings in overlapping containers (solid ones
-  directly, translucent ones composited, bound or gradient ones reported as unresolved), and
-  text over a sibling `Image` is honestly `over-sibling-content` — but partial-coverage
-  siblings (including anything in a `Canvas`, where nothing stretches) and images nested
-  inside a backdrop element are still invisible
+- Sibling backdrops are resolved for full-cell siblings in a `Grid` cell (solid ones directly;
+  translucent ones — through the brush's alpha or the element's own `Opacity` — composited; bound
+  or gradient ones reported as unresolved), and text over a sibling `Image` is honestly
+  `over-sibling-content`. In a custom `*Panel` whose layout the tool can't know, text after a
+  possible backdrop is `over-sibling-content` too. Partial-coverage siblings (including anything in
+  a `Canvas`, where nothing stretches) and images nested inside a backdrop element are still invisible
 - Implicit styles (beyond the document root's background)
 - `VisualStateManager` colour animations (`ColorAnimation` in state storyboards) are not
   audited **and not yet counted** — a Blend-era styling dialect (measured: dozens of sites

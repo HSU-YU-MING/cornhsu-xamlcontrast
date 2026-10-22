@@ -71,9 +71,11 @@
 5. **單一主題**：唯一的色盤檔，深淺同值（CelFlow 形狀；`single`）
 6. **無色盤**：退回只算寫死色碼，**大聲喊**（Cornea 形狀；`none`）
 
-被認定為色盤來源（或其靜態複本）、**而且根元素是 `ResourceDictionary`** 的 XAML 檔不進 UI 掃描
-（不走樹、不算進 `summary.files`），但裡面的 Style 仍在定義處受稽核；畫面檔（`Window`、`UserControl`、
-`Application`…）就算提供了色票也照樣稽核。
+被認定為色盤來源（或其靜態複本）、**而且根元素是 `ResourceDictionary`** 的 XAML 檔不算進 `summary.files`
+（字典不是畫面），但裡面的 Style 與模板照樣稽核；色盤來自分開的深／淺 XAML 字典時，`Dark.xaml` 裡的 Style
+只評深色那一欄（對稱標 single-theme）。畫面檔（`Window`、`UserControl`…）就算提供了色票也照樣稽核；
+它們的區域 brush 只補字典與 `App.xaml` 都沒定義的鍵，並在自己那個畫面裡蓋過色盤（綁 Binding 的記為
+bound-or-gradient）。
 反過來，路徑（相對掃描根目錄）中有以 `test`／`sample`／`demo`／`example` 開頭的詞
 （第二層以下另含 `fixture`／`mock`；詞依 `.` `-` `_` 與大小寫轉換切開，`MyApp.Tests`、`UnitTests` 都算）的
 檔案不當色盤候選（XAML 字典與 C# 三元組檔都一樣）、也不算應用程式根元素，但其中的 XAML 照樣受稽核。

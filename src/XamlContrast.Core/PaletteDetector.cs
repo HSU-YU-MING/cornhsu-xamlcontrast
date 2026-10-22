@@ -68,7 +68,8 @@ public sealed class PaletteDetection
     public ThemeSide? SideOf(string file)
         => ThemeFileSides.Count > 0 && ThemeFileSides.TryGetValue(Path.GetFullPath(file), out var s) ? s : null;
 
-    /// <summary>被認定為色盤檔、且根元素是 ResourceDictionary 的 XAML（不進 UI 掃描 —— 字典檔不是畫面）。
+    /// <summary>被認定為色盤檔、且根元素是 ResourceDictionary 的 XAML：不算進 summary.files（字典檔不是畫面），
+    /// 但照樣走樹與 WalkStyles（裡面的模板與 Style 一樣要稽核）。
     /// 色盤來源是畫面檔（Window.Resources 裡的區域 brush）時照樣稽核，見 <see cref="PaletteDetector.IsResourceDictionaryFile"/>。</summary>
     public required HashSet<string> ExcludedFiles { get; init; }
     /// <summary>偵測結果的人話描述，一律印出來（偵測結果不靜默）。</summary>
@@ -244,7 +245,7 @@ public static partial class PaletteDetector
         return overrides;
     }
 
-    /// <summary>色盤來源檔 → 不進 UI 掃描的檔（只留根元素是 ResourceDictionary 的）。</summary>
+    /// <summary>色盤來源檔 → 不算進 files 的「字典檔」（只留根元素是 ResourceDictionary 的；照樣稽核）。</summary>
     private static HashSet<string> UiExclusions(IEnumerable<string> paletteFiles)
         => new(paletteFiles.Where(IsResourceDictionaryFile), StringComparer.OrdinalIgnoreCase);
 

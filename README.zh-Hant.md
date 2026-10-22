@@ -95,9 +95,9 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
 
 1. **合併字典・深淺俱全** —— 專案裡所有定義了具 key 的 `Color`／`SolidColorBrush` 的 XAML
    併成一份色盤，且每個鍵深淺兩套值都有。排在最前面，因為真實專案的色票常拆散在多個字典裡，
-   「挑單一檔」會漏。視窗自己的區域 brush（`Window.Resources`、`Application.Resources`）
-   也會併進色盤，但只有根元素是 `ResourceDictionary` 的檔才排除在畫面稽核之外 ——
-   而且這些字典裡的 Style 仍在定義處受稽核
+   「挑單一檔」會漏。`Application.Resources` 算字典；視窗自己的區域 brush（`Window.Resources`、
+   `UserControl.Resources`）只補字典沒定義的鍵，並在那個視窗裡蓋過色盤。字典檔不算進 `summary.files`
+   的畫面數，但裡面的 Style 與模板照樣稽核 —— 色盤來自分開的深／淺字典時，`Dark.xaml` 裡的 Style 只評深色主題
 2. **主題配對** —— 一個 Dark 檔 × 一個 Light 檔，鍵集重疊 ≥ 50%
 3. **C# 真相源** —— 三元組陣列，**提供兩套主題的來源優先於只有一套的**
 4. **合併字典・單一主題** —— 同 (1) 的聯集，但每個鍵只有一套值
@@ -274,9 +274,11 @@ HandyControl)5~19%。稽核函式庫請預期要用 `--min-coverage 0`,並把解
 完整盲區表與逐案證據見[規畫書](XamlContrast專案規畫書.md)。
 
 TargetName 指向模板**內部**元素（指向根的已解析）、跨元素同條件觸發器、
-隱含樣式（根元素背景以外）;sibling 背景已解析「佔滿格子的兄弟」(純色直接用、半透明合成、
-Binding／漸層計入無法解析),文字疊兄弟 Image 誠實歸 `over-sibling-content` —— 但部分覆蓋的兄弟
-(含 `Canvas` 裡的一切,Canvas 不撐滿子元素)、藏在背板元素**裡面**的圖片仍看不到;Binding 來的顏色標「無法解析」而不猜 ——
+隱含樣式（根元素背景以外）;sibling 背景已解析 `Grid` 格子裡「佔滿格子的兄弟」(純色直接用;
+半透明的 —— 不論來自 brush 的 alpha 或元素自己的 `Opacity` —— 合成;Binding／漸層計入無法解析),
+文字疊兄弟 Image 誠實歸 `over-sibling-content`;版面無法得知的自訂 `*Panel` 裡,可能是背板的兄弟之後的字
+也歸 `over-sibling-content` —— 但部分覆蓋的兄弟(含 `Canvas` 裡的一切,Canvas 不撐滿子元素)、
+藏在背板元素**裡面**的圖片仍看不到;Binding 來的顏色標「無法解析」而不猜 ——
 猜了就是拿誠實的不確定去換錯誤的信心。
 另:`VisualStateManager` 的顏色動畫(狀態 storyboard 裡的 `ColorAnimation`)不稽核
 **且尚未計數** —— Blend 時代的樣式方言(實測:kaxaml/snoop 這類老專案有數十處,
