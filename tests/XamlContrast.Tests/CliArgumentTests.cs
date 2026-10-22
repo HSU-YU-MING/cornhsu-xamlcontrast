@@ -25,6 +25,14 @@ public class CliArgumentTests
     [InlineData(new[] { "{root}", "--min-coverage", "Infinity" }, "--min-coverage takes a number between 0 and 100")]
     [InlineData(new[] { "{root}/no-such-dir" }, "root not found: ")]
     [InlineData(new[] { "{root}", "--baseline", "{root}/no-such-baseline.json" }, "baseline not found: ")]
+    // 1.0：--baseline／--write-baseline 的路徑必填（0.x 可省略、預設 xamlcontrast-baseline.json，
+    // 下一個字不以 - 開頭就被吃成路徑 —— `--baseline src/MyApp` 把 root 吃掉）
+    [InlineData(new[] { "{root}", "--baseline" }, "--baseline takes a file path")]
+    [InlineData(new[] { "{root}", "--write-baseline" }, "--write-baseline takes a file path")]
+    [InlineData(new[] { "{root}", "--baseline", "--show-ok" }, "--baseline takes a file path")]
+    [InlineData(new[] { "{root}", "--write-baseline", "--strict-palette" }, "--write-baseline takes a file path")]
+    // 兩個模式並用沒有意義（寫出新的已知債，同時又跟舊的比？）—— 0.x 是 --write-baseline 勝、--baseline 被靜默忽略
+    [InlineData(new[] { "{root}", "--baseline", "{root}/a.json", "--write-baseline", "{root}/b.json" }, "--baseline and --write-baseline cannot be used together")]
     public void UsageErrorsExitTwoWithAMessage(string[] args, string expectInStderr)
     {
         using var fx = CliProjects.Passing();
@@ -75,9 +83,8 @@ public class CliArgumentTests
         Assert.DoesNotContain("usage:", r.Out);
     }
 
-    [Fact] // --baseline 的路徑可省略：下一個字不以 - 開頭就被當成 baseline 路徑 ——
-           // 所以 `--baseline <root>` 會把 root 吃掉、root 落空 → usage + exit 2。
-           // 形狀本身是待決定的介面變更（決策檔）；在那之前至少說出發生了什麼（舊版 stderr 沒有任何說明）
+    [Fact] // 路徑必填之後，`xamlcontrast --baseline src/MyApp`（把 root 寫在後面、漏了 baseline 路徑）仍然是把 root
+           // 當成 baseline 檔、root 落空 → usage + exit 2。說出發生了什麼（0.x 時 stderr 沒有任何說明）
     public void BaselineFlagSwallowsTheFollowingPositional()
     {
         using var fx = CliProjects.Passing();

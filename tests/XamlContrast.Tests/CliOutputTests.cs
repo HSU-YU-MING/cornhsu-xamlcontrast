@@ -119,36 +119,25 @@ public class CliOutputTests
 
     // ── baseline：預設路徑相對 CWD、兩個模式的優先序、ratchet 的結論行 ──
 
-    [Fact] // 路徑可省略 → xamlcontrast-baseline.json，相對「執行時的工作目錄」而不是 root；
-           // 下一個字以 - 開頭就不當路徑（--show-ok 不會被吃成檔名）
-    public void BaselineDefaultPathIsRelativeToWorkingDirectory()
+    [Fact] // 相對路徑相對「執行時的工作目錄」而不是 root（與 --json 一致）
+    public void BaselinePathIsRelativeToWorkingDirectory()
     {
         using var proj = CliProjects.Failing();
         using var cwd = new Fixture();
 
-        var write = Cli.RunIn(cwd.Root, proj.Root, "--write-baseline", "--show-ok");
+        var write = Cli.RunIn(cwd.Root, proj.Root, "--write-baseline", "xamlcontrast-baseline.json", "--show-ok");
         Assert.True(write.Exit == 0, write.ToString());
         Assert.Contains("baseline written: xamlcontrast-baseline.json (1 known pair(s) below AA)", write.Out);
-        Assert.Contains("===== ok (0)", write.Out);  // --show-ok 照樣生效，沒被當成路徑
+        Assert.Contains("===== ok (0)", write.Out);
         Assert.True(File.Exists(Path.Combine(cwd.Root, "xamlcontrast-baseline.json")));
         Assert.False(File.Exists(Path.Combine(proj.Root, "xamlcontrast-baseline.json")));
 
-        var check = Cli.RunIn(cwd.Root, proj.Root, "--baseline");
+        var check = Cli.RunIn(cwd.Root, proj.Root, "--baseline", "xamlcontrast-baseline.json");
         Assert.True(check.Exit == 0, check.ToString());
         Assert.Contains("baseline: known debt 1, paid off 0 (debt may only shrink)", check.Out);
         Assert.Contains("exit 0: no new or worsened failures vs baseline", check.Out);
     }
 
-    [Fact] // --baseline 的檔是輸入，在稽核之前就驗：指到不存在的檔就是 exit 2，不論還給了什麼旗標
-           // （0.x 時兩個模式並用 --write-baseline 勝、--baseline 根本不讀）
-    public void BaselineFileIsValidatedBeforeAnythingElse()
-    {
-        using var fx = CliProjects.Failing();
-        var outFile = Path.Combine(fx.Root, "new-baseline.json");
-        var r = Cli.Run(fx.Root, "--baseline", Path.Combine(fx.Root, "missing.json"), "--write-baseline", outFile);
-        Assert.True(r.Exit == 2, r.ToString());
-        Assert.False(File.Exists(outFile));
-    }
 
     [Fact] // ratchet 的三種結論：新增 → 逐處點名、惡化（同鍵處數變多）→ 點名、修好 → paid off 看得見
     public void BaselineRatchetReportsNewWorsenedAndPaidOff()

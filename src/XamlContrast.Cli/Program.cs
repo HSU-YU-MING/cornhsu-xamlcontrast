@@ -53,14 +53,15 @@ for (var i = 0; i < args.Length; i++)
             if (OutputPath(args, i, "--md") is not { } mp) return 2;
             mdPath = mp; i++;
             break;
+        // 路徑必填（1.0）。⚠ 0.x 可省略（預設 xamlcontrast-baseline.json）：下一個字不以 - 開頭就被吃成路徑，
+        //   `--baseline src/MyApp` 把 root 吃掉、root 落空，看起來只是 usage 錯誤
         case "--baseline":
-            // 路徑可省略 —— 預設檔名慣例 xamlcontrast-baseline.json
-            baselinePath = i + 1 < args.Length && !args[i + 1].StartsWith('-')
-                ? args[++i] : "xamlcontrast-baseline.json";
+            if (OutputPath(args, i, "--baseline") is not { } bp) return 2;
+            baselinePath = bp; i++;
             break;
         case "--write-baseline":
-            writeBaselinePath = i + 1 < args.Length && !args[i + 1].StartsWith('-')
-                ? args[++i] : "xamlcontrast-baseline.json";
+            if (OutputPath(args, i, "--write-baseline") is not { } wbp) return 2;
+            writeBaselinePath = wbp; i++;
             break;
         case "-h" or "--help":
             PrintUsage(Console.Out);
@@ -75,6 +76,13 @@ for (var i = 0; i < args.Length; i++)
             Console.Error.WriteLine($"unknown argument: {args[i]}");
             return 2;
     }
+}
+
+// 兩個 baseline 模式並用沒有意義（寫出新的已知債，同時又跟舊的比？）—— 0.x 是 --write-baseline 勝、--baseline 被靜默忽略
+if (baselinePath is not null && writeBaselinePath is not null)
+{
+    Console.Error.WriteLine("--baseline and --write-baseline cannot be used together");
+    return 2;
 }
 
 if (root is null)
@@ -188,7 +196,7 @@ if (mdPath is not null && !TryWrite(mdPath, Report.ToMarkdown(result, exitCode),
 
 return exitCode;
 
-// --json／--sarif／--md 的值：必填，而且不能長得像旗標。舊版只檢查「後面還有沒有字」，
+// --json／--sarif／--md／--baseline／--write-baseline 的值：必填，而且不能長得像旗標。舊版只檢查「後面還有沒有字」，
 // `--json --strict-palette` 會寫出一個叫 --strict-palette 的檔、把保險旗標靜默吃掉。
 // 以 - 開頭的檔名沒有正當用途（真的要就寫 ./-name）；「-」也不代表 stdout。
 static string? OutputPath(string[] args, int i, string flag)
@@ -332,9 +340,9 @@ static void PrintUsage(TextWriter w)
           --min-coverage <0-100>   fail when fewer than N% of colour pairs could be
                                    resolved (default 50; a pass over a fraction of the
                                    project is not a pass). 0 disables.
-          --baseline [path]        ratchet mode: only fail on NEW or WORSENED failures
-                                   (default path: xamlcontrast-baseline.json)
-          --write-baseline [path]  freeze current failures as known debt (run once, commit the file)
+          --baseline <path>        ratchet mode: only fail on NEW or WORSENED pairs below the gate
+          --write-baseline <path>  freeze every pair below AA as known debt (run once, commit the
+                                   file); cannot be combined with --baseline
           --show-ok                list passing pairs, grouped
           --show-unresolved        list every pair the tool could NOT resolve, with
                                    file:line, reason and the offending value/key
