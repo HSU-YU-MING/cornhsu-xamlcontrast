@@ -189,8 +189,9 @@ older 1.x (exit 2, naming the property).
   `docs/report.schema.json`.
 - **Action**: a `min-coverage` input (empty = the config's `minCoverage`, else 50), and an
   `artifact-name` input (default `xamlcontrast-report`) that names the uploaded artifact and keys the PR
-  comment — give each call its own name when the action runs more than once in a workflow run; the same
-  name twice collides on upload and the comments overwrite each other. Annotations follow
+  comment — give each call its own name when the action runs more than once in a workflow run (with
+  `sarif: true` a non-default name is also the code-scanning `category`); the same name twice collides on
+  upload and the comments overwrite each other. Annotations follow
   the gate: pairs the gate blocks are `error` (with the default gate, warns too), warns it lets through
   are `warning`, and known debt in `--baseline` mode is `notice` — 0.6.1 marked known debt as `error`
   on a green job.

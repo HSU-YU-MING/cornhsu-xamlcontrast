@@ -247,6 +247,8 @@ runs:
       uses: github/codeql-action/upload-sarif@v4
       with:
         sarif_file: ${{ runner.temp }}/xamlcontrast.sarif
+        # 同一個 run 用兩次時 code scanning 以 category 區分兩份分析（不給的話後一份蓋掉前一份）；預設名稱照舊不給
+        category: ${{ inputs.artifact-name != 'xamlcontrast-report' && inputs.artifact-name || '' }}
 
     - name: Upload report
       if: ${{ always() && inputs.upload-report == 'true' }}

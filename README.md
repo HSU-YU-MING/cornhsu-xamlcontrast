@@ -266,8 +266,9 @@ default. `root` and `baseline` must not start with `-` (write `./-name`).
 
 **Running the action more than once in a workflow run** (a matrix, or two calls in one job)? Give
 each call its own `artifact-name` — it names the uploaded artifact and keys the PR comment, so each
-name keeps its own comment. Same name twice means the second upload collides and the comments
-overwrite each other.
+name keeps its own comment. With `sarif: true`, a non-default name is also passed as the code-scanning
+`category`, so the two analyses don't replace each other. Same name twice means the second upload
+collides and the comments (and SARIF analyses) overwrite each other.
 
 ## JSON output
 

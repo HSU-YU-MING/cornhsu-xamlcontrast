@@ -216,7 +216,8 @@ baseline 模式下的既有債是 notice。
 不認得的值會讓 job 失敗並點名是哪個 input，不會悄悄退回預設值。`root` 與 `baseline` 不能以 `-` 開頭（寫成 `./-name`）。
 
 **同一個 workflow run 裡用到兩次以上**（matrix，或同一個 job 呼叫兩次）？每一次給不同的 `artifact-name` ——
-它是上傳的 artifact 名稱，也是 PR 留言的標記，各名稱各自一則留言。同一個名稱用兩次，第二次上傳會撞名、留言會互相蓋掉。
+它是上傳的 artifact 名稱，也是 PR 留言的標記，各名稱各自一則留言。開 `sarif: true` 時，不是預設值的名稱也會當成
+code scanning 的 `category` 傳出去，兩份分析不會互相取代。同一個名稱用兩次，第二次上傳會撞名、留言（與 SARIF 分析）會互相蓋掉。
 
 ## JSON 輸出
 

@@ -219,6 +219,14 @@ public class ActionContractTests
         Assert.Equal(0, RunStep("Validate inputs", new() { ["artifact-name"] = ".hidden_v2-1" }).Exit);
     }
 
+    [Fact] // 同一個 job 呼叫兩次又開 sarif：code scanning 以 category 區分分析，兩次都沒給 category 會互相蓋掉（審查 1.0 最終驗證 S6）。
+           // artifact-name 不是預設值時當成 category 傳；預設值照舊不給（既有使用者的分析類別不變）
+    public void ArtifactNameBecomesTheSarifCategoryWhenSet()
+    {
+        Assert.Matches(new Regex(@"^        category: \$\{\{ inputs\.artifact-name != 'xamlcontrast-report' && inputs\.artifact-name \|\| '' \}\}$",
+            RegexOptions.Multiline), Step("Upload SARIF"));
+    }
+
     [Fact] // artifact-name 也是 PR 留言的標記：各名稱各自一則留言，同一個名稱反覆更新同一則。預設名稱的標記與 1.0 之前相同，
            // 既有的留言照樣被更新
     public void ArtifactNameKeysTheArtifactAndTheComment()
