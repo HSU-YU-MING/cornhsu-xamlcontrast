@@ -572,7 +572,8 @@ public sealed partial class Auditor
         //       報假警報(HandyControl Carousel:白字疊照片被配 RegionBrush,light=1)
         // 防呆:有明確尺寸或非 Stretch 對齊的兄弟不算背板(強調色條 Width="4" 之類)。
         //   Canvas 只套 (b):它不把子元素撐滿,(a) 的「佔滿格子」前提不成立。
-        var overlap = IsOverlapContainer(el.Name.LocalName);
+        var layout = LayoutOf(el.Name.LocalName);
+        var overlap = layout != PanelLayout.SideBySide;
         Dictionary<(int Row, int Col), Resolved>? cellBg = overlap ? new() : null;
         foreach (var child in el.Elements())
         {
@@ -588,17 +589,27 @@ public sealed partial class Auditor
                 if (cellBg!.TryGetValue(cell, out var sb)) childBg = sb;
             }
             Walk(child, childBg, file, op, suppressed);
-            if (overlap && SiblingBackdrop(child, stretches: el.Name.LocalName != "Canvas", under: childBg) is { } backdrop) cellBg![cell] = backdrop;
+            if (overlap && SiblingBackdrop(child, stretches: el.Name.LocalName != "Canvas", under: childBg) is { } backdrop)
+                cellBg![cell] = layout == PanelLayout.Unknown
+                    // 版面未知的自訂面板：它若是疊層，這就是後面兄弟的背板；若是排開，就不是 —— 靜態不可知，不猜
+                    ? new Resolved(ColorKind.SiblingContent, Raw: $"<{child.Name.LocalName}> in <{el.Name.LocalName}>")
+                    : backdrop;
         }
     }
 
-    /// <summary>子元素會彼此重疊的容器。StackPanel 系的會排開,不算。</summary>
-    private static bool IsOverlapContainer(string name)
+    private enum PanelLayout { SideBySide, Overlap, Unknown }
+
+    /// <summary>容器的子元素會不會疊在一起。Grid（同一格）、Canvas 會；StackPanel／WrapPanel／DockPanel／
+    /// UniformGrid／ToolBarPanel／TabPanel 系（含衍生命名，例 VirtualizingWrapPanel、MyDockPanel）會排開。
+    /// ⚠ 其他自訂 *Panel 的版面靜態不可知：舊版「保守視為疊層」，在排開的面板裡就是捏造背板
+    ///   （VirtualizingWrapPanel 裡的黑色方塊被當成旁邊白字的底）；當成排開一樣是猜 → Unknown。</summary>
+    private static PanelLayout LayoutOf(string name)
     {
-        if (name is "StackPanel" or "DockPanel" or "WrapPanel" or "UniformGrid"
-            or "VirtualizingStackPanel" or "ToolBarPanel" or "TabPanel") return false;
-        return name is "Grid" or "Canvas" ||
-               (name.EndsWith("Panel") && !name.EndsWith("StackPanel"));
+        if (name is "Grid" or "Canvas") return PanelLayout.Overlap;
+        if (name.EndsWith("StackPanel") || name.EndsWith("WrapPanel") || name.EndsWith("DockPanel") ||
+            name.EndsWith("UniformGrid") || name.EndsWith("ToolBarPanel") || name.EndsWith("TabPanel") ||
+            name.EndsWith("ToolBarOverflowPanel")) return PanelLayout.SideBySide;
+        return name.EndsWith("Panel") ? PanelLayout.Unknown : PanelLayout.SideBySide;
     }
 
     private static (int, int) CellOf(XElement child, bool isGrid)

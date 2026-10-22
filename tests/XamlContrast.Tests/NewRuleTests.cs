@@ -675,13 +675,14 @@ public class NewRuleTests
         Assert.Equal(21.0, f.RatioDark);
     }
 
-    [Theory] // 規則 17(a) 只在子元素會重疊、而且背板會被撐滿的容器裡成立:Grid/自訂 *Panel 是疊層,
+    [Theory] // 規則 17(a) 只在子元素會重疊、而且背板會被撐滿的容器裡成立:Grid 是疊層,
              // StackPanel 系與各種排開的 Panel 不是 —— 在那裡把前一個兄弟當背板,就是把旁邊的方塊當成字的底。
              // Canvas 子元素會重疊、但不會被撐滿:Canvas 不套 Stretch,沒尺寸的 Border 實際是 0×0。舊版照樣套 17(a),
              // 把一塊不存在的背板捏造出來(白字白底 1:1 報成 21:1 合格)。Canvas 只套 17(b),見下兩條
     [InlineData("Canvas", false)]
     [InlineData("Grid", true)]
-    [InlineData("LayeredPanel", true)]           // 自訂 Panel:保守視為疊層
+    [InlineData("VirtualizingWrapPanel", false)] // 衍生的 WrapPanel 一樣排開(審查素材 h14wrap:舊版當成疊層、捏造背板)
+    [InlineData("MyDockPanel", false)]
     [InlineData("StackPanel", false)]
     [InlineData("VirtualizingStackPanel", false)]
     [InlineData("MyStackPanel", false)]          // 衍生的 StackPanel 一樣排開
@@ -703,6 +704,29 @@ public class NewRuleTests
             """);
         var f = Assert.Single(fx.Run().Findings);
         Assert.Equal(overlaps ? "#000000" : "#FFFFFF", f.Bg);
+    }
+
+    [Fact] // 版面未知的自訂 *Panel：子元素疊不疊在一起靜態不可知 —— 舊版「保守視為疊層」，排開的面板裡就是捏造背板；
+           // 當成排開也一樣是猜。前面有可能是背板的兄弟時，後面的字計入 over-sibling-content（不猜），並點名是哪個面板
+    public void CustomPanelOfUnknownLayoutMakesTheSiblingBackdropUnknowable()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <LayeredPanel>
+                <Border Background="#000000"/>
+                <TextBlock Foreground="#FFFFFF" Text="x"/>
+              </LayeredPanel>
+              <LayeredPanel>
+                <TextBlock Foreground="#000000" Text="nothing before me — the ancestor background is fine"/>
+              </LayeredPanel>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var site = Assert.Single(r.UnresolvedSites);
+        Assert.Equal(UnresolvedReason.OverSiblingContent, site.Reason);
+        Assert.Equal("<Border> in <LayeredPanel>", site.Value);
+        Assert.Equal("#FFFFFF", Assert.Single(r.Findings).Bg);
     }
 
     [Theory] // Canvas 裡有尺寸的純色兄弟也不當背板:Canvas.Left/Top 與文字的實際範圍靜態不可知,
