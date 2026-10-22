@@ -446,7 +446,19 @@ public sealed partial class Auditor
 
     private static bool IsOpaque(Resolved? r) => r is { Kind: ColorKind.Hard or ColorKind.Soft };
     private static bool IsUnknowable(Resolved? r) => r is { Kind: ColorKind.Other or ColorKind.UnknownKey or ColorKind.SiblingContent };
-    private static string LabelOf(Resolved r) => r.Key is not null ? "{" + r.Key + "}" : r.Dark ?? r.Raw ?? r.Rgb ?? "?";
+    /// <summary>
+    /// 背景在報告與 baseline 鍵裡的寫法，一套到底：色票 <c>{Key}</c>、字面色 <c>#RRGGBB</c>／<c>#AARRGGBB</c>、
+    /// 合成的底 <c>A over B</c>（每一層用同一套寫法，不包外層大括號）、兩個主題不同 <c>A (dark) / B (light)</c>。
+    /// ⚠ 1.0 之前合成的底把原始寫法與 {Key} 混用、外面再包一層（<c>{{DynamicResource SelectionHi} over {Bg1}}</c>、
+    ///   <c>{#8000 over #FFFFFF}</c>）。這段描述屬稽核語意（凍結宣告不凍結它的格式），但寫法要一致。
+    /// </summary>
+    private static string LabelOf(Resolved r) => r.Composite
+        ?? (r.Key is not null ? "{" + r.Key + "}"
+            : r.Kind == ColorKind.Alpha && r.Rgb is not null ? HexWithAlpha(r.Alpha, r.Rgb)
+            : r.Dark ?? r.Rgb ?? r.Raw ?? "?");
+
+    private static string HexWithAlpha(double alpha, string rgb)
+        => "#" + ((int)Math.Round(Math.Clamp(alpha, 0, 1) * 255)).ToString("X2", CultureInfo.InvariantCulture) + rgb.TrimStart('#')[^6..];
 
     /// <summary>一側的像素 (rgb, alpha)；null（沒畫東西）是透明。</summary>
     private static (string? Rgb, double A) Px(Resolved? r, bool dark) => r switch
@@ -477,12 +489,12 @@ public sealed partial class Auditor
         return (sb.ToString(), Math.Min(a, 1));
     }
 
-    private static Resolved? FromPx((string? Rgb, double A) dark, (string? Rgb, double A) light, string? key)
+    private static Resolved? FromPx((string? Rgb, double A) dark, (string? Rgb, double A) light, string? composite)
     {
         if (dark.Rgb is null && light.Rgb is null) return null;
-        if (dark.A >= 0.999 && light.A >= 0.999) return new Resolved(ColorKind.Hard, dark.Rgb, light.Rgb, Key: key);
-        return new Resolved(ColorKind.Alpha, Key: key, Alpha: dark.A, Rgb: dark.Rgb ?? light.Rgb,
-            AlphaLight: light.A, RgbLight: light.Rgb ?? dark.Rgb);
+        if (dark.A >= 0.999 && light.A >= 0.999) return new Resolved(ColorKind.Hard, dark.Rgb, light.Rgb, Composite: composite);
+        return new Resolved(ColorKind.Alpha, Alpha: dark.A, Rgb: dark.Rgb ?? light.Rgb,
+            AlphaLight: light.A, RgbLight: light.Rgb ?? dark.Rgb, Composite: composite);
     }
 
     /// <summary>元素自己的底（bgVal）畫到目前的底上（at = 元素的累乘透明度，含它自己的 Opacity）。</summary>
@@ -526,10 +538,10 @@ public sealed partial class Auditor
             return new Resolved(ColorKind.Hard,
                 Dark: Wcag.Composite(painted.Rgb!, painted.Alpha, layer.Dark!),
                 Light: Wcag.Composite(painted.RgbLight!, painted.AlphaLight, layer.Light!),
-                Key: $"{label} over {LabelOf(layer)}");
+                Composite: $"{LabelOf(painted)} over {LabelOf(layer)}");
         // 那一層本身是半透明的（群組裡、底下還沒有不透明的東西）
         return FromPx(Over(Px(painted, true), Px(layer, true)), Over(Px(painted, false), Px(layer, false)),
-            $"{label} over {LabelOf(layer)}");
+            $"{LabelOf(painted)} over {LabelOf(layer)}");
     }
 
     /// <summary>一層（群組）裡的像素以群組的透明度疊到上一層的 under 上。</summary>
@@ -539,9 +551,9 @@ public sealed partial class Auditor
         if (IsUnknowable(pix)) return pix;
         if (IsUnknowable(under)) return under; // 疊到看不懂的底上（Binding 的底之類）= 看不懂
         var (pd, pl) = (Px(pix, true), Px(pix, false));
-        var key = string.Create(CultureInfo.InvariantCulture,
-            $"{pix.Raw ?? LabelOf(pix)} ×{Math.Round(ratio, 2)} over {(under is null ? "nothing" : LabelOf(under))}");
-        return FromPx(Over((pd.Rgb, pd.A * ratio), Px(under, true)), Over((pl.Rgb, pl.A * ratio), Px(under, false)), key);
+        var composite = string.Create(CultureInfo.InvariantCulture,
+            $"{LabelOf(pix)} ×{Math.Round(ratio, 2)} over {(under is null ? "nothing" : LabelOf(under))}");
+        return FromPx(Over((pd.Rgb, pd.A * ratio), Px(under, true)), Over((pl.Rgb, pl.A * ratio), Px(under, false)), composite);
     }
 
     /// <summary>螢幕上實際看到的底：最內層的顏色一層一層疊出去。不透明 = 解得出來；
@@ -602,15 +614,20 @@ public sealed partial class Auditor
         if (IsUnknowable(dark)) return dark;
         if (IsUnknowable(light)) return light;
         if (dark is null && light is null) return null;
-        var key = dark?.Key == light?.Key ? dark?.Key
-            : $"{dark?.Key ?? dark?.Dark ?? dark?.Rgb ?? "nothing"} (dark) / {light?.Key ?? light?.Light ?? light?.RgbLight ?? "nothing"} (light)";
+        // 兩側同一個色票 → 照舊是那個鍵；寫法相同的合成 → 那段描述；不同 → 「A (dark) / B (light)」
+        var dl = dark is null ? "nothing" : LabelOf(dark);
+        var ll = light is null ? "nothing" : LabelOf(light);
+        var key = dark is { Key: { } k, Composite: null } && light is { Composite: null } && light.Key == k ? k : null;
+        var composite = key is not null ? null
+            : dl == ll ? dark?.Composite ?? light?.Composite
+            : $"{dl} (dark) / {ll} (light)";
         if (IsOpaque(dark) && IsOpaque(light))
         {
             var same = dark!.Kind == ColorKind.Hard && light!.Kind == ColorKind.Hard && dark.Dark == light.Light;
-            return new Resolved(same ? ColorKind.Hard : ColorKind.Soft, Dark: dark.Dark, Light: light!.Light, Key: key);
+            return new Resolved(same ? ColorKind.Hard : ColorKind.Soft, Dark: dark.Dark, Light: light!.Light, Key: key, Composite: composite);
         }
         if (!inGroup) return !IsOpaque(dark) ? dark : light;
-        return FromPx(Px(dark, true), Px(light, false), key);
+        return FromPx(Px(dark, true), Px(light, false), composite ?? (key is null ? null : "{" + key + "}"));
     }
 
     /// <summary>元素 × Style 鏈的逐狀態檢查。<paramref name="side"/> 不是 null 時只評那一個主題
@@ -696,7 +713,7 @@ public sealed partial class Auditor
                 // （半透明的 hover 底疊在 Background="{Binding …}" 的祖先上 → 點名那個 Binding，不是 hover 的色碼）
                 if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent)
                 {
-                    Unres(bgObj, file, LineOf(el), IsUnknowable(bgObj) ? bgObj.Raw ?? bgObj.Key ?? fgV : bgOwnRaw ?? bgObj.Key ?? bgObj.Raw ?? fgV);
+                    Unres(bgObj, file, LineOf(el), IsUnknowable(bgObj) ? bgObj.Raw ?? bgObj.Key ?? fgV : bgOwnRaw ?? bgObj.Key ?? bgObj.Composite ?? bgObj.Raw ?? fgV);
                     continue;
                 }
 
@@ -729,7 +746,7 @@ public sealed partial class Auditor
                     Line = lineC,
                     Element = $"{el.Name.LocalName}⊕{label}/{(st.Cond is null && st.Set.Count == 0 ? "base" : "trigger")}",
                     Fg = op < 0.999 ? WithOpacityNote(fgV, op) : fgV,
-                    Bg = bgObj.Key is not null ? "{" + bgObj.Key + "}" : bgObj.Dark!,
+                    Bg = LabelOf(bgObj),
                     Mixed = fgR.Kind != bgObj.Kind,
                     RatioDark = Wcag.Contrast(fgDC, bgObj.Dark!),
                     RatioLight = Wcag.Contrast(fgLC, bgObj.Light!),
@@ -764,7 +781,7 @@ public sealed partial class Auditor
             //   「什麼都沒有」或 Binding 的底上時，先被底的判斷攔成 unresolved）
             if (op * VisibleAlpha(fg) < 0.01) { _skipped++; continue; }
             if (bg is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgRaw); continue; }
-            if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bg, file, LineOf(el), bg.Key ?? bg.Raw ?? fgRaw); continue; }
+            if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bg, file, LineOf(el), bg.Key ?? bg.Composite ?? bg.Raw ?? fgRaw); continue; }
 
             _pairs++;
 
@@ -801,7 +818,7 @@ public sealed partial class Auditor
                 Line = line,
                 Element = localName,
                 Fg = op < 0.999 ? WithOpacityNote(fgRaw, op) : fgRaw,
-                Bg = bg.Key is not null ? "{" + bg.Key + "}" : bg.Dark!,
+                Bg = LabelOf(bg),
                 Mixed = fg.Kind != bg.Kind,
                 RatioDark = Wcag.Contrast(fgD, bg.Dark!),
                 RatioLight = Wcag.Contrast(fgL, bg.Light!),
@@ -1064,7 +1081,7 @@ public sealed partial class Auditor
                     Line = line,
                     Element = $"Style[{label}]/{stateName}",
                     Fg = fgv,
-                    Bg = bgr.Key is not null ? "{" + bgr.Key + "}" : bgr.Dark!,
+                    Bg = LabelOf(bgr),
                     Mixed = fg.Kind != bgr.Kind,
                     RatioDark = Wcag.Contrast(EffectiveForeground(fg, 1.0, bgr).Dark, bgr.Dark!),
                     RatioLight = Wcag.Contrast(EffectiveForeground(fg, 1.0, bgr).Light, bgr.Light!),

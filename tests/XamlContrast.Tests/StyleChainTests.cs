@@ -98,6 +98,30 @@ public class StyleChainTests
         Assert.Equal(0, r.Unresolved);
     }
 
+    [Fact] // 合成底的寫法（baseline 鍵的一部分）：每一層用同一套正規化寫法 —— 色票 {Key}、字面色 #RRGGBB／#AARRGGBB ——
+           // 以 " over " 串起來，不包外層大括號。1.0 之前是原始寫法與 {Key} 混用、外面再包一層：
+           // {{DynamicResource SelectionHi} over {Bg1}}、{#8000 over #FFFFFF}（審查 1.0 A2）
+    public void CompositeBackgroundsUseOneNormalisedSpelling()
+    {
+        using var fx = new Fixture();
+        foreach (var (side, bg, hi) in new[] { ("Dark", "#111111", "#80FFFFFF"), ("Light", "#FFFFFF", "#80000000") })
+            fx.File($"Themes/{side}.xaml", $$"""
+                <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                  <SolidColorBrush x:Key="Bg" Color="{{bg}}"/><SolidColorBrush x:Key="Hi" Color="{{hi}}"/><SolidColorBrush x:Key="Fg" Color="#777777"/>
+                </ResourceDictionary>
+                """);
+        fx.File("Views/Main.xaml", """
+            <StackPanel Background="{DynamicResource Bg}">
+              <Grid><Border Background="{DynamicResource Hi}"/><TextBlock Foreground="{DynamicResource Fg}" Text="key over key"/></Grid>
+              <Grid><Border Background="#8000"/><TextBlock Foreground="{StaticResource Fg}" Text="literal over key"/></Grid>
+            </StackPanel>
+            """);
+        var r = fx.Run();
+        Assert.Equal(["{Hi} over {Bg}", "#88000000 over {Bg}"], r.Findings.Select(f => f.Bg).ToArray());
+        Assert.All(r.Findings, f => Assert.DoesNotContain("{{", f.Bg));
+        Assert.All(r.Findings, f => Assert.DoesNotContain("Resource", f.Bg));
+    }
+
     [Fact] // ROADMAP「Style＋半透明底的逐狀態路徑重複合成修正」：半透明底只能疊在「更新前」的祖先底上一次。
            // 用已經合成過的底再合成一次，等於疊兩層（50% 白疊黑 = #808080，疊兩次就變 #C0C0C0）
     public void ChainTranslucentBackgroundIsCompositedOnce()
@@ -106,7 +130,7 @@ public class StyleChainTests
         var f = Assert.Single(r.Findings);
         var once = Wcag.Composite("#FFFFFF", 0x80 / 255.0, "#000000");
         Assert.Equal(Wcag.Contrast("#000000", once), f.RatioDark);
-        Assert.Equal("{#80FFFFFF over #000000}", f.Bg);
+        Assert.Equal("#80FFFFFF over #000000", f.Bg);
     }
 
     [Fact] // Opacity 在鏈路徑一樣要把字色疊到底上（CelFlow 提示文字 Opacity=0.3 的盲區）
@@ -218,7 +242,7 @@ public class StyleChainTests
              // 鏈路徑又看到「同源」就略過、交給定義處 —— 這組在哪裡都沒被評分，也不在覆蓋率裡。
              // 透明／半透明的底要在使用處對著祖先的底評
     [InlineData("Transparent", "#FFFFFF")]
-    [InlineData("#80000000", "{#80000000 over #FFFFFF}")]
+    [InlineData("#80000000", "#80000000 over #FFFFFF")]
     public void SameSourceStylePairWithASeeThroughBackgroundIsGradedWhereUsed(string background, string expectedBg)
     {
         using var fx = new Fixture();

@@ -963,7 +963,7 @@ public class NewRuleTests
         var r = fx.Run();
         var sibling = Assert.Single(r.Findings, f => f.File == "Main.xaml");
         var nested = Assert.Single(r.Findings, f => f.File == "Nested.xaml");
-        Assert.Equal("{#CC000000 over #FFFFFF}", sibling.Bg);
+        Assert.Equal("#CC000000 over #FFFFFF", sibling.Bg);
         Assert.Equal(nested.Bg, sibling.Bg);
         Assert.Equal(nested.RatioDark, sibling.RatioDark);  // 1.66:1,不是配祖先白的 21:1
         Assert.Equal(Category.Fail, sibling.Category);

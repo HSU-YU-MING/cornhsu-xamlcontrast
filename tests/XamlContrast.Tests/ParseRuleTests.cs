@@ -457,7 +457,7 @@ public class ParseRuleTests
         var r = fx.Run();
         Assert.Equal(0, r.Unresolved);
         Assert.Equal(0, r.Skipped);
-        Assert.Contains(r.Findings, f => f.Bg == "{#8000 over #FFFFFF}");
+        Assert.Contains(r.Findings, f => f.Bg == "#88000000 over #FFFFFF"); // 短色碼也正規化
         Assert.Equal(Wcag.Contrast(Wcag.Composite("#000000", 0x88 / 255.0, "#FFFFFF"), "#FFFFFF"),
                      Assert.Single(r.Findings, f => f.Fg == "#8000").RatioDark); // 半透明字疊到白底上
         Assert.Contains(r.Findings, f => f.Bg == "#FFFFFF" && f.Fg == "#000");
@@ -606,7 +606,7 @@ public class ParseRuleTests
             """);
         var r = fx.Run();
         var f = Assert.Single(r.Findings);
-        Assert.Equal("{#CC000000 over #FFFFFF}", f.Bg); // 80% 黑疊白 = #333333
+        Assert.Equal("#CC000000 over #FFFFFF", f.Bg); // 80% 黑疊白 = #333333
         Assert.Equal(1.66, f.RatioDark);
     }
 

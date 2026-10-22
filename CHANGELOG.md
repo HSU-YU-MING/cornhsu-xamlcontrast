@@ -170,6 +170,10 @@ older 1.x (exit 2, naming the property).
   config error.
 
 ### Changed
+- **A composited background has one spelling** in `bg` and in baseline keys: each layer as `{Key}` or
+  `#RRGGBB`/`#AARRGGBB`, joined by ` over `, with no outer braces — `{SelectionHi} over {Bg1}`, `#88000000 over #FFFFFF`.
+  0.6.1 mixed the source text with `{Key}` and wrapped the whole thing in another pair of braces
+  (`{{DynamicResource SelectionHi} over {Bg1}}`, `{#8000 over #FFFFFF}`). Baselines are rewritten for 1.0 anyway.
 - **A translucent background with nothing underneath now reads `translucent-uncomposited`**, the reason
   that describes it, instead of `no-ancestor-background`. The `rootBackground` hint on the coverage-floor
   and zero-pairs exits counts these sites too — a declared root background is what they are missing.

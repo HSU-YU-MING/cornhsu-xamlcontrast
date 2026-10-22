@@ -24,7 +24,8 @@ public enum ColorKind
 /// <summary>Alpha 種類帶深淺各自的 A/RGB：字面 #AARRGGBB 深淺同值；
 /// 半透明「色票」（palette 鍵的值是 8 碼）深淺各帶自己的 alpha。
 /// Raw：背景是 Binding／漸層／兄弟圖片時的原始值 —— 它一路往下傳成子元素的底，
-/// 子元素卡在它上面時 unresolved[].value 要點名它，不是點名沒問題的字色。</summary>
+/// 子元素卡在它上面時 unresolved[].value 要點名它，不是點名沒問題的字色。
+/// Composite：合成出來的底的描述（「A over B」）—— 與色票鍵 Key 分開，Key 永遠是真的資源鍵。</summary>
 public sealed record Resolved(
     ColorKind Kind,
     string? Dark = null,
@@ -34,7 +35,8 @@ public sealed record Resolved(
     string? Rgb = null,
     double AlphaLight = 0,
     string? RgbLight = null,
-    string? Raw = null);
+    string? Raw = null,
+    string? Composite = null);
 
 /// <summary>把 XAML 屬性值解析成顏色（或「工具知道自己不知道」的標記）。</summary>
 public static partial class ColorResolver
