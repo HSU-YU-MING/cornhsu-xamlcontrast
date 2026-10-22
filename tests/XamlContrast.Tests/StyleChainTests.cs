@@ -382,6 +382,9 @@ public class StyleChainTests
     [InlineData("""<Image Source="a.png"/><Button Style="{StaticResource Pad}" Foreground="#FFFFFF" Content="疊在兄弟圖片上"/>""", "#000000", "over-sibling-content")]
     [InlineData("""<Button Style="{StaticResource Pad}" Opacity="0" Foreground="#FFFFFF" Content="淡入動畫的初始態"/>""", "#000000", "skipped")]
     [InlineData("""<Button Style="{StaticResource Pad}" Foreground="Transparent" Content="透明字"/>""", "#000000", "skipped")]
+    // Opacity 0 的字不管底是什麼都是看不見（審查最後一輪 4：底的判斷不能先把它攔成 unresolved）
+    [InlineData("""<Button Style="{StaticResource Pad}" Opacity="0" Foreground="#FFFFFF" Content="淡入動畫的初始態，沒有底"/>""", "Transparent", "skipped")]
+    [InlineData("""<Button Style="{StaticResource Pad}" Opacity="0" Foreground="#FFFFFF" Content="淡入動畫的初始態，底綁執行期"/>""", "{Binding WindowBg}", "skipped")]
     public void ChainPairsThatCannotBeGradedAreCountedInTheirBucket(string body, string background, string bucket)
     {
         var r = RunMain(body, background);

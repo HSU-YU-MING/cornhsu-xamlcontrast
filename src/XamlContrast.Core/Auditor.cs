@@ -654,6 +654,8 @@ public sealed partial class Auditor
                 if (fgR.Kind is ColorKind.Other or ColorKind.UnknownKey)
                 { Unres(fgR, file, LineOf(el), fgV); continue; }
                 if (fgR.Kind is ColorKind.Transparent) { _skipped++; continue; } // 半透明字色往下疊到底上評分（見 EffectiveForeground）
+                // 看不見的字（Opacity 0、alpha ≈ 0）排在底的判斷前面，理由同樹走訪那邊
+                if (op * VisibleAlpha(fgR) < 0.01) { _skipped++; continue; }
 
                 Backdrop stateBd;
                 var bgOwnRaw = bgV; // 卡住時要點名的底：透明的 Setter 只是穿透，卡住的是祖先那一層
@@ -676,7 +678,6 @@ public sealed partial class Auditor
                     Unres(bgObj, file, LineOf(el), IsUnknowable(bgObj) ? bgObj.Raw ?? bgObj.Key ?? fgV : bgOwnRaw ?? bgObj.Key ?? bgObj.Raw ?? fgV);
                     continue;
                 }
-                if (op * VisibleAlpha(fgR) < 0.01) { _skipped++; continue; }
 
                 var isTextC = !IsNonTextElement(el.Name.LocalName);
                 var fsC = 0.0;
@@ -735,12 +736,13 @@ public sealed partial class Auditor
             // 同上：看不懂 → unresolved；透明 → skipped（與背景側同一套分桶標準）
             if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey) { Unres(fg, file, LineOf(el), fgRaw); continue; }
             if (fg.Kind is ColorKind.Transparent) { _skipped++; continue; } // 半透明字色往下疊到底上評分（見 EffectiveForeground）
-            if (bg is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgRaw); continue; }
-            if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bg, file, LineOf(el), bg.Key ?? bg.Raw ?? fgRaw); continue; }
-
             // Opacity 0 = 元素當下完全隱形。XAML 裡寫 Opacity="0" 幾乎都是淡入動畫的
             // 初始狀態，穩態是 1。對「看不見的東西」算對比沒有意義，跳過而不是報 1:1。
+            // ⚠ 要排在底的判斷前面：看不見的字不管底是什麼都看不見（審查最後一輪 4：Opacity 0 的群組疊到
+            //   「什麼都沒有」或 Binding 的底上時，先被底的判斷攔成 unresolved）
             if (op * VisibleAlpha(fg) < 0.01) { _skipped++; continue; }
+            if (bg is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgRaw); continue; }
+            if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bg, file, LineOf(el), bg.Key ?? bg.Raw ?? fgRaw); continue; }
 
             _pairs++;
 

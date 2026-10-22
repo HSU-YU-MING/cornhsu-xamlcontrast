@@ -150,6 +150,23 @@ public class ParseRuleTests
         Assert.Equal(UnresolvedReason.NoAncestorBackground, Assert.Single(r.UnresolvedSites).Reason);
     }
 
+    // ── Opacity 0 的字是「看不見」，不管底是什麼（審查最後一輪 4：素材 op-zero-root、op-zero-inner）──
+    //    4202b4c 之後，Opacity 0 的群組疊到「什麼都沒有」或 Binding 的底上時，先被底的判斷攔下來記成
+    //    unresolved（no-ancestor-background／bound-or-gradient）—— 與 skipped 的標籤、README 的說法矛盾
+    [Theory]
+    [InlineData("""<UserControl Opacity="0" Background="#FFFFFF"><Grid><TextBlock Foreground="#000000" Text="a"/></Grid></UserControl>""")]
+    [InlineData("""<Grid Background="{Binding Bg}"><Border Opacity="0" Background="#333333"><TextBlock Foreground="#FFFFFF" Text="toast"/></Border></Grid>""")]
+    [InlineData("""<Grid><TextBlock Opacity="0" Foreground="#FFFFFF" Text="no background at all"/></Grid>""")]
+    public void InvisibleTextIsSkippedWhateverTheBackground(string xaml)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", xaml);
+        var r = fx.Run();
+        Assert.Equal(1, r.Skipped);
+        Assert.Equal(0, r.Unresolved);
+        Assert.Empty(r.Findings);
+    }
+
     // ── 元素 Opacity 在提供底色的元素上或更上層（審查素材 math 第 6 行）──
     //    WPF 的 Opacity 是整棵子樹先畫成一層、再整層疊到底下。底畫在那一層裡時，底也跟著變淡：白底上
     //    Opacity 0.5 的黑 Border 裡的白字，實際是白字配 #808080（3.95:1）。舊版只把字疊上去、底仍當純黑，
