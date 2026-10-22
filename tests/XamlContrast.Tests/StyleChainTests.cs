@@ -237,7 +237,9 @@ public class StyleChainTests
         var f = Assert.Single(r.Findings);
         Assert.Equal("Button⊕Style[SeeThrough]/base", f.Element);
         Assert.Equal(expectedBg, f.Bg);
-        Assert.Equal(1, r.Skipped); // 定義處那一筆照舊記 skipped（那裡沒有底可疊）
+        Assert.Equal(0, r.Skipped);
+        // 定義處那一筆記 unresolved（那裡沒有底可疊；具名 Style 在使用處另外評，就是上面那筆）
+        Assert.Equal(UnresolvedReason.TranslucentUncomposited, Assert.Single(r.UnresolvedSites).Reason);
     }
 
     [Fact] // 同上，祖先的底是 Binding：unresolved 點名的是卡住的祖先底，不是只負責穿透的 "Transparent"
@@ -255,7 +257,7 @@ public class StyleChainTests
               <Border Background="{Binding NoteColour}"><Button Style="{StaticResource SeeThrough}" Content="x"/></Border>
             </Grid>
             """);
-        var site = Assert.Single(fx.Run().UnresolvedSites);
+        var site = Assert.Single(fx.Run().UnresolvedSites, s => s.Line == 8); // 第 3 行是定義處（沒有底可疊）
         Assert.Equal(UnresolvedReason.BoundOrGradient, site.Reason);
         Assert.Equal("{Binding NoteColour}", site.Value);
     }

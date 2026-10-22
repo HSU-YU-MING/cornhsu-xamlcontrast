@@ -451,8 +451,35 @@ public class NewRuleTests
             """);
         var r = fx.Run();
         Assert.Empty(r.Findings);
-        Assert.Equal(1, r.Unresolved); // Binding 字色 = 看不懂
-        Assert.Equal(1, r.Skipped);    // Transparent 底 = 合法跳過
+        Assert.Equal(2, r.Unresolved); // Binding 字色 = 看不懂；Transparent 底 = 定義處沒有底下那層可疊
+        Assert.Equal(0, r.Skipped);    // 不是合法跳過（skipped 不進覆蓋率分母）
+        var seeThrough = Assert.Single(r.UnresolvedSites, s => s.Value == "Transparent");
+        Assert.Equal(UnresolvedReason.TranslucentUncomposited, seeThrough.Reason);
+    }
+
+    [Fact] // 隱含樣式（沒有 x:Key）的透明底不會在使用處補評：定義處記 skipped 的話這組整個消失、覆蓋率照樣 100%
+           // （審查素材 use：白底上的 ToggleButton 實際 1.16:1）。記成 unresolved，覆蓋率照實掉下來
+    public void ImplicitStyleWithASeeThroughBackgroundIsUnresolvedNotSkipped()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Grid.Resources>
+                <Style TargetType="ToggleButton">
+                  <Setter Property="Background" Value="Transparent"/>
+                  <Setter Property="Foreground" Value="#EEEEEE"/>
+                </Style>
+              </Grid.Resources>
+              <ToggleButton Content="x"/>
+              <TextBlock Foreground="#000000" Text="ok"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Skipped);
+        var site = Assert.Single(r.UnresolvedSites);
+        Assert.Equal(UnresolvedReason.TranslucentUncomposited, site.Reason);
+        Assert.Equal("Main.xaml", site.File);
+        Assert.Equal(0.5, r.Coverage);
     }
 
     [Fact] // 上一條的另一半：看不懂的是「底」時要點名底的值（unknownKeys 靠它當死引用偵測器）；
