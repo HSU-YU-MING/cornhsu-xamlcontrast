@@ -386,6 +386,29 @@ public class ParseRuleTests
         Assert.Equal(Category.Fail, f.Category);
     }
 
+    [Fact] // 屬性元素可以用基底類別命名（<Panel.Background>、<Control.Foreground>）—— WPF 照樣認，
+           // 舊版只認「元素自己的型別名.屬性」，白字白底報成 21:1（審查素材 h2panel）
+    public void PropertyElementNamedAfterABaseClassIsRead()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#000000">
+              <Grid>
+                <Panel.Background><SolidColorBrush Color="#FFFFFF"/></Panel.Background>
+                <TextBlock Foreground="#FFFFFF" Text="white on white via Panel.Background"/>
+              </Grid>
+              <Border Background="#FFFFFF">
+                <Button Content="x"><Control.Foreground><SolidColorBrush Color="#EEEEEE"/></Control.Foreground></Button>
+              </Border>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(1.0, Assert.Single(r.Findings, f => f.Element == "TextBlock").RatioDark);
+        var button = Assert.Single(r.Findings, f => f.Element == "Button");
+        Assert.Equal("#EEEEEE", button.Fg);
+        Assert.Equal(Category.Fail, button.Category);
+    }
+
     [Fact] // 屬性元素裡的 SolidColorBrush 帶 Opacity：字面色折成 #AARRGGBB，走半透明合成
     public void PropertyElementBrushOpacityIsComposited()
     {

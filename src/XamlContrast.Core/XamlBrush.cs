@@ -37,17 +37,24 @@ internal static class XamlBrush
         return pe is null ? null : FromPropertyElement(pe);
     }
 
-    /// <summary>這個子元素是不是「本元素的顏色屬性元素」—— 它是屬性值，不是視覺子樹。</summary>
+    /// <summary>這個子元素是不是「本元素的顏色屬性元素」—— 它是屬性值，不是視覺子樹。
+    /// 屬性元素可以用基底類別命名（&lt;Panel.Background&gt; 放在 Grid 底下、&lt;Control.Foreground&gt; 放在 Button 底下）。</summary>
     public static bool IsColorPropertyElement(XElement owner, XElement child)
+        => PropertyName(child) is "Background" or "Foreground" or "Fill";
+
+    /// <summary>「型別名.屬性」形式的元素名 → 屬性名；不是屬性元素回傳 null。</summary>
+    private static string? PropertyName(XElement child)
     {
         var n = child.Name.LocalName;
-        var prefix = owner.Name.LocalName + ".";
-        return n.StartsWith(prefix, StringComparison.Ordinal) &&
-               n.AsSpan(prefix.Length) is "Background" or "Foreground" or "Fill";
+        var dot = n.IndexOf('.');
+        return dot > 0 && dot == n.LastIndexOf('.') && dot < n.Length - 1 ? n[(dot + 1)..] : null;
     }
 
+    /// <summary>元素的屬性元素：先找「元素自己的型別名.屬性」，再找用基底類別命名的（Panel.Background）。
+    /// ⚠ 舊版只認前者，&lt;Panel.Background&gt; 被忽略、字配到祖先的底（白字白底報成 21:1）。</summary>
     private static XElement? PropertyElement(XElement el, string prop)
-        => el.Elements().FirstOrDefault(e => e.Name.LocalName == el.Name.LocalName + "." + prop);
+        => el.Elements().FirstOrDefault(e => e.Name.LocalName == el.Name.LocalName + "." + prop)
+           ?? el.Elements().FirstOrDefault(e => PropertyName(e) == prop);
 
     private static string? FromPropertyElement(XElement pe)
     {
