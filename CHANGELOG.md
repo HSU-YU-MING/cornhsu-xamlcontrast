@@ -81,7 +81,9 @@ an empty map `{}` (5 omitted some and printed others).
   count); new **`toolVersion`** (no build metadata) and **`exitCode`** (the audit verdict 0/1/3; a later
   output-file error still exits 2). Both are `null` when the report is produced through the library.
 - `summary`: new **`failOn`**, **`minCoverage`**, **`strictPalette`** (the gate in effect, after
-  flag > config > default) and **`invalidIgnoreCount`** (next to `invalidIgnores`, like
+  flag > config > default), **`paletteDegraded`** (palette detection fell back to hard-coded colours
+  or couldn't tell the themes apart — what `--strict-palette` blocks; until now only readable from the
+  console line) and **`invalidIgnoreCount`** (next to `invalidIgnores`, like
   `parseErrors`/`parseErrorFiles`); **`paletteSource` removed** (it was `none` exactly when
   `paletteMode` is `none`).
 - `findings[]`: `largeText` → **`isLargeText`** (it shared a name with `thresholds.largeText`);
@@ -160,7 +162,7 @@ older 1.x (exit 2, naming the property).
 - **`--` ends the options**: everything after it is the project root, so a root that starts with `-`
   can be audited (`xamlcontrast --json r.json -- -legacy-ui`). The Action passes its `root` this way.
 - **JSON**: `toolVersion`, `exitCode`, `summary.failOn` / `minCoverage` / `strictPalette` /
-  `invalidIgnoreCount`, `findings[].theme` / `baseline`; the shape is published as
+  `paletteDegraded` / `invalidIgnoreCount`, `findings[].theme` / `baseline`; the shape is published as
   `docs/report.schema.json`.
 - **Action**: a `min-coverage` input (empty = the config's `minCoverage`, else 50). Annotations follow
   the gate: pairs the gate blocks are `error` (with the default gate, warns too), warns it lets through

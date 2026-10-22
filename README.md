@@ -270,7 +270,7 @@ fields are only added and `schemaVersion` stays 6 — **ignore fields you don't 
 - Top level: `toolVersion`, `exitCode` (the audit verdict: 0, 1 or 3), `summary`,
   `unresolvedSites`, `findings`.
 - `summary` carries the gate in effect (`failOn`, `minCoverage`, `strictPalette`) and every
-  degradation counter — `coverage`, `unresolved` (with `unresolvedBy`), `skipped`,
+  degradation signal — `paletteDegraded`, `coverage`, `unresolved` (with `unresolvedBy`), `skipped`,
   `deadForeground`, `disabledExempt`, `suppressed`, `parseErrors` / `parseErrorFiles`,
   `invalidIgnoreCount` / `invalidIgnores`, `unknownKeys`. If the tool couldn't see something, that
   fact is machine-readable.

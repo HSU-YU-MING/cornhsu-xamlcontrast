@@ -11,9 +11,10 @@
     "exitCode": { "type": ["integer", "null"], "enum": [0, 1, 3, null], "description": "The audit verdict: 0 pass, 1 pairs below the gate, 3 the result cannot be trusted. An output-file error afterwards still exits 2. Null outside the CLI." },
     "summary": {
       "type": "object",
-      "required": ["paletteMode", "paletteDetail", "paletteKeys", "singleTheme", "configLoaded", "thresholds", "failOn", "minCoverage", "strictPalette", "files", "pairs", "coverage", "unresolved", "unresolvedBy", "unknownKeys", "skipped", "deadForeground", "disabledExempt", "parseErrors", "parseErrorFiles", "suppressed", "invalidIgnoreCount", "invalidIgnores", "counts"],
+      "required": ["paletteMode", "paletteDegraded", "paletteDetail", "paletteKeys", "singleTheme", "configLoaded", "thresholds", "failOn", "minCoverage", "strictPalette", "files", "pairs", "coverage", "unresolved", "unresolvedBy", "unknownKeys", "skipped", "deadForeground", "disabledExempt", "parseErrors", "parseErrorFiles", "suppressed", "invalidIgnoreCount", "invalidIgnores", "counts"],
       "properties": {
         "paletteMode": { "enum": ["pair", "csharp", "single", "none"] },
+        "paletteDegraded": { "type": "boolean", "description": "Palette detection degraded: no palette found (hard-coded colours only) or the themes could not be told apart. --strict-palette turns this into exit 3. false when the config chose mode none." },
         "paletteDetail": { "type": "string", "description": "Human-readable detection description (free text)." },
         "paletteKeys": { "type": "integer", "minimum": 0 },
         "singleTheme": { "type": "boolean" },

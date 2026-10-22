@@ -122,6 +122,7 @@ public class JsonReportContractTests
             "summary.invalidIgnores[]:String",
             "summary.minCoverage:Number",
             "summary.pairs:Number",
+            "summary.paletteDegraded:Boolean",
             "summary.paletteDetail:String",
             "summary.paletteKeys:Number",
             "summary.paletteMode:String",
@@ -339,6 +340,22 @@ public class JsonReportContractTests
         Assert.Equal(30, s.GetProperty("summary").GetProperty("minCoverage").GetDouble());
         Assert.True(s.GetProperty("summary").GetProperty("strictPalette").GetBoolean());
         Assert.Matches(@"^\d+\.\d+\.\d+", s.GetProperty("toolVersion").GetString());
+    }
+
+    [Theory] // 色盤退化要機器可讀（審查 1.0 B4）：summary.paletteDegraded。之前只能從 paletteMode／paletteDetail 的字串猜，
+             // README 說「工具沒看到的東西都是機器可讀的」卻少了這一項。config 明選 mode:none 是使用者的決定，不算退化
+    [InlineData(true, null, true)]
+    [InlineData(false, null, false)]
+    [InlineData(true, """{ "palette": { "mode": "none" } }""", false)]
+    public void SummaryCarriesWhetherPaletteDetectionDegraded(bool hardcodedOnly, string? config, bool degraded)
+    {
+        using var fx = hardcodedOnly ? CliProjects.Passing() : CliProjects.Passing().WithPalette();
+        if (config is not null) fx.File(ToolConfig.FileName, config);
+        var detection = PaletteDetector.Detect(fx.Root, ToolConfig.Load(fx.Root));
+        var r = Auditor.Run(fx.Root, detection, ToolConfig.Load(fx.Root));
+        var s = JsonDocument.Parse(Report.ToJson(r)).RootElement.GetProperty("summary");
+        Assert.Equal(degraded, s.GetProperty("paletteDegraded").GetBoolean());
+        Assert.Equal(detection.IsDegraded, degraded);
     }
 
     [Fact] // 只屬於一個主題的配對（Dark.xaml 的 Style、依主題解析到的 @dark／@light 鏈）帶 theme：ratioLight 是那個主題的值

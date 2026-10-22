@@ -167,6 +167,8 @@ public static class Report
             summary = new
             {
                 paletteMode = ModeLabel(r.Detection.Mode),
+                // 色盤偵測退化（退回寫死色碼、或深淺分不出來）要機器可讀 —— 只看 paletteMode 分不出「明選 none」與「找不到」
+                paletteDegraded = r.Detection.IsDegraded,
                 paletteDetail = r.Detection.Description,
                 paletteKeys = r.Detection.Palette.Count,
                 singleTheme = r.Detection.Palette.IsSingleTheme,
