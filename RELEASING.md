@@ -40,9 +40,10 @@ git tag v1 v1.0.0 && git push origin v1      # @v1 的使用者從這裡開始�
 - 之後**每發一個 1.x**：`git tag -f v1 v1.x.y && git push -f origin v1`
 - 移動式 tag 的推送**不會**觸發 release —— `release.yml` 只認三段式 `v*.*.*` tag，這是刻意的：
   `v1` 若觸發，守門會因 tag ≠ CHANGELOG 版號而必紅一次，徒增失敗通知（Parity 發 1.0.0 與 1.1.0 時各踩一次）
-- Action 的工具版本也鎖在同一個 major：`action.yml` 在 `version` 留空時裝 `"1.*"`（最高的 1.x 穩定版）。
+- Action 的工具版本也鎖在同一個 major：`action.yml` 在 `version` 留空時裝 `"[1.*,2.0.0)"`（最高的 1.x 穩定版；上界擋住 2.0.0 ——
+  光寫 `"1.*"` 的話，NuGet 上還沒有穩定的 1.x 時會裝到 2.0.0）。
   所以 `v1` 停在哪一版都不會裝到 2.x 的工具
-- **下一個 major（2.0.0）**要一起改：`action.yml` 的 `"1.*"` → `"2.*"`（`ActionContractTests` 會在 CHANGELOG 頂端
+- **下一個 major（2.0.0）**要一起改：`action.yml` 的 `"[1.*,2.0.0)"` → `"[2.*,3.0.0)"`（`ActionContractTests` 會在 CHANGELOG 頂端
   變成 2.x 時紅燈）、兩份 README 的 `@v1` → `@v2` 與 1.x 的說明、建 `v2` tag。`v1` 停在最後一個 1.x，不再前移
 
 ## 版本規則

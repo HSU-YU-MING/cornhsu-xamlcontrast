@@ -87,7 +87,8 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
   - README 兩份引用移動式 `@v1`，1.x 發版**不必**改 README 的版號。每發一個 1.x 把 `v1` 前移
     （`git tag -f v1 v1.x.y && git push -f origin v1`，見 `RELEASING.md`）；`release.yml` 只認三段式 tag，
     前移 `v1` 不會觸發發版。
-  - `action.yml` 在 `version` 留空時裝 `"1.*"`。發 2.0.0 時要改成 `"2.*"`
+  - `action.yml` 在 `version` 留空時裝 `"[1.*,2.0.0)"`（上界不能省：光寫 `"1.*"`，NuGet 上沒有穩定 1.x 時會裝到 2.0.0）。
+    發 2.0.0 時要改成 `"[2.*,3.0.0)"`
     （`ActionContractTests.TheFloatingMajorIsTheLatestReleasesMajor` 會在 CHANGELOG 頂端變成 2.x 時紅）。
   - `release.yml` 會核對 CHANGELOG 最上面的版號 = tag，不一致不發。
 - `release.yml` 的 `NuGet/login` **已釘 commit SHA**

@@ -109,8 +109,9 @@ runs:
           dotnet tool install --global Cornhsu.XamlContrast --version "$XC_VERSION"
         else
           # @v1 只跟隨 1.x（介面凍結的承諾）：不帶範圍會裝到 NuGet 上最新的穩定版，2.0.0 一發佈就跨 major。
-          # "1.*" 取最高的 1.x 穩定版；發 2.0.0 時這行要跟著改成 "2.*"（ActionContractTests 會提醒）
-          dotnet tool install --global Cornhsu.XamlContrast --version "1.*"
+          # "[1.*,2.0.0)" 取最高的 1.x 穩定版、而且上界擋住 2.0.0 —— 光寫 "1.*"，NuGet 上還沒有穩定的 1.x 時會裝到 2.0.0
+          # （審查 1.0 B5 實測；有了上界就改成找不到版本而失敗）。發 2.0.0 時改成 "[2.*,3.0.0)"（ActionContractTests 會提醒）
+          dotnet tool install --global Cornhsu.XamlContrast --version "[1.*,2.0.0)"
         fi
         echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
 

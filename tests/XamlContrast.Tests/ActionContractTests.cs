@@ -230,8 +230,9 @@ public class ActionContractTests
 
     [Theory] // 沒給 version：裝這個 action 自己那個 major 的最新版（@v1 只跟隨 1.x —— 介面凍結的承諾）。
              // 0.x 不帶範圍，裝的是 NuGet 上最新的穩定版：下一個 major 一發佈，所有 @v1 的 workflow 就會跨過去。
-             // "1.*" 取最高的 1.x 穩定版（NuGet 的 "[1.0.0,2.0.0)" 會取最低的 1.0.0，不能用）
-    [InlineData("", "tool|install|--global|Cornhsu.XamlContrast|--version|1.*|\n")]
+             // "[1.*,2.0.0)" 取最高的 1.x 穩定版、而且不會越過 2.0.0（NuGet 的 "[1.0.0,2.0.0)" 會取最低的 1.0.0；
+             // 光寫 "1.*"，在 NuGet 上還沒有穩定 1.x 時會裝到 2.0.0 —— 審查 1.0 B5 實測）
+    [InlineData("", "tool|install|--global|Cornhsu.XamlContrast|--version|[1.*,2.0.0)|\n")]
     [InlineData("1.0.0", "tool|install|--global|Cornhsu.XamlContrast|--version|1.0.0|\n")]
     public void InstallPassesTheVersionOrTheFloatingMajor(string version, string expected)
     {
@@ -240,11 +241,13 @@ public class ActionContractTests
         Assert.Equal(expected, r.Calls);
     }
 
-    [Fact] // 鎖的 major = CHANGELOG 最新發佈版的 major。發 2.0.0 時這裡會紅，提醒把 action.yml 一起改成 "2.*"
+    [Fact] // 鎖的 major = CHANGELOG 最新發佈版的 major。發 2.0.0 時這裡會紅，提醒把 action.yml 一起改成 "[2.*,3.0.0)"。
+           // 範圍的上界要是下一個 major：審查者實測，NuGet 上還沒有穩定的 1.x 時，光寫 "1.*" 會裝到 2.0.0（審查 1.0 B5）
     public void TheFloatingMajorIsTheLatestReleasesMajor()
     {
-        var floating = Regex.Match(Step("Install XamlContrast"), @"--version ""(?<major>\d+)\.\*""");
-        Assert.True(floating.Success, "沒指定 version 時要用 \"<major>.*\" 鎖住 major");
+        var floating = Regex.Match(Step("Install XamlContrast"), @"--version ""\[(?<major>\d+)\.\*,(?<next>\d+)\.0\.0\)""");
+        Assert.True(floating.Success, "沒指定 version 時要用 \"[<major>.*,<major+1>.0.0)\" 鎖住 major");
+        Assert.Equal(int.Parse(floating.Groups["major"].Value) + 1, int.Parse(floating.Groups["next"].Value));
         var latest = Regex.Match(File.ReadAllText(Repo.PathOf("CHANGELOG.md")), @"^## \[?(?<major>\d+)\.\d+\.\d+", RegexOptions.Multiline);
         Assert.True(latest.Success, "CHANGELOG.md 找不到版本標題");
         Assert.Equal(latest.Groups["major"].Value, floating.Groups["major"].Value);

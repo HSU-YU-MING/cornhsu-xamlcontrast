@@ -69,7 +69,7 @@ There is no 0.7.0: the breaking changes ship once.
 | 10 | JSON report | `schemaVersion` 5 | `schemaVersion` 6 (below) | update consumers |
 | 11 | Action `fail-on` | default `fail`; only `warn` was passed on, so the config's `failOn` never applied | default empty = config's `failOn`, else `warn`; `warn` and `fail` both passed on | set `fail-on: fail` to keep 0.6.1's gate |
 | 12 | Action input values | unknown values silently became the default; `root: --version` printed the version and passed without auditing | unknown values fail the job (exit 2) naming the input; a line break in `root`/`working-directory`/`version`/`baseline`/`min-coverage`, or a `root`/`baseline` starting with `-`, is refused; `root` is passed after `--` | fix the value (`./-name` for a path that starts with `-`) |
-| 13 | Action `version` empty | latest stable tool, any major | latest 1.x (`--version "1.*"`) | nothing; pin `version:` for fully reproducible runs |
+| 13 | Action `version` empty | latest stable tool, any major | latest 1.x (`--version "[1.*,2.0.0)"`; without the upper bound, `1.*` would install 2.0.0 when no stable 1.x exists) | nothing; pin `version:` for fully reproducible runs |
 | 14 | Baseline keys of styles resolved per theme | `TextBlock⊕Style[Tag]/base` | `TextBlock⊕Style[Tag]@dark/base` and `…@light/…` | re-run `--write-baseline` |
 | 15 | A translucent background with nothing underneath | `no-ancestor-background` | `translucent-uncomposited` | nothing; scripts counting reasons see the shift |
 | 16 | `xamlcontrast-ignore` on a container | suppressed the container's elements, not the `Style` definitions in its `Resources` | covers the `Style` definitions inside it too | nothing; check that the comment means what you intended |
