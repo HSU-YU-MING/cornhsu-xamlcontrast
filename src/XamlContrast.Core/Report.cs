@@ -58,19 +58,24 @@ public static class Report
     /// 解法只有一行 config,但它住在 README 深處 —— 而使用者不會回頭讀 README,
     /// 他會把工具判定成「不支援我的專案」然後關掉。求救訊號要出現在人求救的那一刻。
     ///
-    /// 只在 no-ancestor-background 過半時印,否則是雜訊:bound-or-gradient 佔大宗
+    /// 只在「底下沒有底」過半時印 —— no-ancestor-background，加上半透明的一層疊不到東西的
+    /// translucent-uncomposited（1.0，決策檔 L2：rootBackground 給那一層一個可以疊的底；Style 定義處的透明底不算，
+    /// 那裡根本沒有祖先）。否則是雜訊:bound-or-gradient 佔大宗
     /// 代表那是靜態分析的硬邊界,rootBackground 救不了(見 ROADMAP 的 Roslyn 決策)。
     /// 已經設了 rootBackground 還不夠的人不需要再被叫去設一次。</summary>
     public static string? CoverageHint(AuditResult r)
     {
         if (r.Config.RootBackground is not null || r.Unresolved == 0) return null;
         var noBg = r.UnresolvedBy.GetValueOrDefault(UnresolvedReason.NoAncestorBackground);
-        if (noBg * 2 < r.Unresolved) return null;
+        var overNothing = r.TranslucentOverNothing;
+        if ((noBg + overNothing) * 2 < r.Unresolved) return null;
 
         var inv = System.Globalization.CultureInfo.InvariantCulture;
         var sb = new StringBuilder();
-        sb.AppendLine(string.Create(inv,
-            $"  hint: {noBg} of them are 'no-ancestor-background' — typical of an app built on a theme"));
+        sb.AppendLine(overNothing == 0
+            ? string.Create(inv, $"  hint: {noBg} of them are 'no-ancestor-background' — typical of an app built on a theme")
+            : string.Create(inv, $"  hint: {noBg + overNothing} of them have nothing underneath ({noBg} 'no-ancestor-background', " +
+                                 $"{overNothing} 'translucent-uncomposited') — typical of an app built on a theme"));
         sb.AppendLine("        library (MahApps, HandyControl, MaterialDesign...), where the implicit style that");
         sb.AppendLine("        paints your windows lives inside the NuGet package, invisible to static analysis.");
         sb.AppendLine("        Declare your window background key once in xamlcontrast.config.json:");

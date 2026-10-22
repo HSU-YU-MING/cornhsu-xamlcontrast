@@ -1019,7 +1019,7 @@ public class NewRuleTests
         Assert.Equal(reason, Assert.Single(r.UnresolvedSites).Reason);
     }
 
-    [Fact] // 半透明兄弟底下沒有可疊的顏色:跟巢狀一樣維持原判定(找不到祖先底 → no-ancestor-background),不猜
+    [Fact] // 半透明兄弟底下沒有可疊的顏色:跟巢狀一樣,不猜 —— 1.0 起兩者都記 translucent-uncomposited(決策檔 L2 選項 A)
     public void TranslucentSiblingWithNothingUnderneathIsLikeTheNestedCase()
     {
         using var fx = new Fixture();
@@ -1031,7 +1031,7 @@ public class NewRuleTests
             """);
         var r = fx.Run();
         Assert.Empty(r.Findings);
-        Assert.Equal(UnresolvedReason.NoAncestorBackground, Assert.Single(r.UnresolvedSites).Reason);
+        Assert.Equal(UnresolvedReason.TranslucentUncomposited, Assert.Single(r.UnresolvedSites).Reason);
     }
 
     [Fact] // 同 brush 配對 = 模板不透明度慣用手法(MaterialDesign 實證):字面 1:1、

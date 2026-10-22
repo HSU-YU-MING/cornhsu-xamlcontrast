@@ -92,7 +92,7 @@ public sealed partial class Auditor
     private readonly List<Finding> _findings = new();
     private readonly List<string> _parseErrors = new();
     private readonly List<string> _invalidIgnores = new();
-    private int _pairs, _unresolved, _skipped, _deadFg, _suppressed, _disabled;
+    private int _pairs, _unresolved, _skipped, _deadFg, _suppressed, _disabled, _translucentOverNothing;
     private StyleIndex _styles = null!;
     private string _curFile = ""; // 具名 Style 查找的「同檔優先」範圍（完整路徑）
     private bool _oneThemeOnly;   // 目前這個檔只屬於一個主題（ThemeFileSides）
@@ -308,6 +308,7 @@ public sealed partial class Auditor
             Unresolved = auditor._unresolved,
             UnresolvedBy = auditor._unresolvedBy,
             UnresolvedSites = auditor._unresolvedSites,
+            TranslucentOverNothing = auditor._translucentOverNothing,
             Skipped = auditor._skipped,
             DeadForeground = auditor._deadFg,
             DisabledExempt = auditor._disabled,
@@ -343,15 +344,19 @@ public sealed partial class Auditor
         _unresolvedSites.Add(new UnresolvedSite(why, file, line, value));
     }
 
-    /// <summary>依解析結果分類;UnknownKey 以「鍵名」當 value,其餘用原始屬性值。</summary>
+    /// <summary>依解析結果分類;UnknownKey 以「鍵名」當 value,其餘用原始屬性值。
+    /// 底是 Alpha（半透明的一層、底下什麼都沒有）另外計數給求救指引：rootBackground 對它一樣有用。</summary>
     private void Unres(Resolved r, string file, int line, string raw)
-        => Unres(r.Kind switch
+    {
+        if (r.Kind == ColorKind.Alpha) _translucentOverNothing++;
+        Unres(r.Kind switch
         {
             ColorKind.UnknownKey => UnresolvedReason.UnknownPaletteKey,
             ColorKind.Alpha => UnresolvedReason.TranslucentUncomposited,
             ColorKind.SiblingContent => UnresolvedReason.OverSiblingContent,
             _ => UnresolvedReason.BoundOrGradient,
         }, file, line, r.Kind == ColorKind.UnknownKey && r.Key is not null ? r.Key : raw);
+    }
 
     private void Walk(XElement el, Backdrop bd, string file, double op, bool suppressed)
     {
@@ -507,8 +512,11 @@ public sealed partial class Auditor
     private static Resolved? PaintOver(Resolved painted, string label, Resolved? layer, bool inGroup)
     {
         if (painted.Kind != ColorKind.Alpha) return painted;
-        // 那一層還沒畫東西：群組裡是透明（整層之後疊出去）；不在群組裡 = 找不到底色，維持原本的（後面計入 unresolved）
-        if (layer is null) return inGroup ? painted with { Raw = label } : null;
+        // 那一層還沒畫東西：群組裡是透明（整層之後疊出去）；不在群組裡 = 底下什麼都沒有 —— 半透明的那一層本身
+        // 往下傳（Alpha），後面的字記 translucent-uncomposited、點名它的值。
+        // ⚠ 1.0 之前這裡回 null（維持「沒有底」），字一律記 no-ancestor-background，列舉裡的 translucent-uncomposited
+        //   永遠不會出現（決策檔 L2，選項 A）
+        if (layer is null) return painted with { Raw = label };
         if (IsUnknowable(layer)) return layer;
         // 半透明遮罩：疊在目前生效的背景上算出實際顏色（WPF 以 sRGB 混合；半透明「色票」深淺各帶自己的 alpha）
         if (IsOpaque(layer))

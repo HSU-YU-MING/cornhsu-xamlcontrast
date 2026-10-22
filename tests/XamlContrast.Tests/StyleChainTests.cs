@@ -417,7 +417,8 @@ public class StyleChainTests
 
     [Theory]
     [InlineData("""<Button Style="{StaticResource Pad}" Foreground="#FFFFFF" Content="x"/>""", "Transparent", "no-ancestor-background")]
-    [InlineData("""<Button Style="{StaticResource Pad}" Background="#80FFFFFF" Foreground="#000000" Content="半透明底、底下沒東西"/>""", "Transparent", "no-ancestor-background")]
+    // 半透明底、底下沒東西：1.0 起是 translucent-uncomposited（決策檔 L2 選項 A），不是「祖先沒有底」
+    [InlineData("""<Button Style="{StaticResource Pad}" Background="#80FFFFFF" Foreground="#000000" Content="半透明底、底下沒東西"/>""", "Transparent", "translucent-uncomposited")]
     // 半透明的字、沒有底：一樣是 no-ancestor-background，不是 skipped（B1 的核心；審查 mutation F6b：鏈路徑沒有這條測試）
     [InlineData("""<Button Style="{StaticResource Pad}" Foreground="#80FFFFFF" Content="半透明字、沒有底"/>""", "Transparent", "no-ancestor-background")]
     [InlineData("""<Button Style="{StaticResource Pad}" Foreground="#FFFFFF" Content="祖先底綁執行期"/>""", "{Binding WindowBg}", "bound-or-gradient")]

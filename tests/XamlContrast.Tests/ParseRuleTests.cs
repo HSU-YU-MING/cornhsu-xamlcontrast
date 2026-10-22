@@ -140,6 +140,38 @@ public class ParseRuleTests
         Assert.Equal(f.RatioDark, f.RatioLight); // 淺色欄一樣要乘 Opacity（審查 mutation F2b：只斷言深色欄時存活）
     }
 
+    // ── 半透明的底、底下什麼都沒有（決策檔 L2 選項 A）──
+    //    0.x 與 1.0 之前：樹走訪保留原本的底（祖先沒有底 → null）、鏈路徑給 null，兩條路都記成 no-ancestor-background ——
+    //    列舉裡的 translucent-uncomposited 永遠不會出現。現在名實相符：卡住的是那一層半透明的底，點名它的值
+    [Theory]
+    [InlineData("""<Grid><Border Background="#80000000"><TextBlock Foreground="#FFFFFF" Text="x"/></Border></Grid>""", "#80000000")]
+    [InlineData("""<Grid><Border Background="#80000000"/><TextBlock Foreground="#FFFFFF" Text="over a translucent sibling"/></Grid>""", "#80000000")]
+    public void TranslucentBackgroundOverNothingIsTranslucentUncomposited(string xaml, string value)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", xaml);
+        var site = Assert.Single(fx.Run().UnresolvedSites);
+        Assert.Equal(UnresolvedReason.TranslucentUncomposited, site.Reason);
+        Assert.Equal(value, site.Value);
+    }
+
+    [Fact] // 求救指引一起改：半透明底疊不到東西，跟「祖先沒有底」一樣是 rootBackground 救得回來的（它給那一層一個可以疊的底）
+    public void CoverageHintCountsTranslucentLayersOverNothing()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Window>
+              <Grid Background="#000000"><TextBlock Foreground="#FFFFFF" Text="resolved"/></Grid>
+              <Border Background="#80000000"><TextBlock Foreground="#FFFFFF" Text="1"/></Border>
+              <Border Background="#80000000"><TextBlock Foreground="#FFFFFF" Text="2"/></Border>
+            </Window>
+            """);
+        var hint = Report.CoverageHint(fx.Run());
+        Assert.NotNull(hint);
+        Assert.Contains("translucent-uncomposited", hint);
+        Assert.Contains("rootBackground", hint);
+    }
+
     [Fact] // 底沒解析出來時，半透明字色照舊落進 unresolved（進覆蓋率分母），不是「跳過」讓覆蓋率虛高
     public void TranslucentForegroundWithoutABackgroundIsUnresolved()
     {

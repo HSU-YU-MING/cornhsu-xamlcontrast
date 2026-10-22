@@ -82,6 +82,9 @@ public sealed class AuditResult
     public required Dictionary<UnresolvedReason, int> UnresolvedBy { get; init; }
     /// <summary>逐筆的無法解析位置（file:line＋卡住的值）。</summary>
     public required List<UnresolvedSite> UnresolvedSites { get; init; }
+    /// <summary>translucent-uncomposited 裡「半透明的一層、底下什麼都沒有」的那些（不含 Style 定義處的透明底）——
+    /// rootBackground 救得回來，求救指引要算進去。</summary>
+    internal int TranslucentOverNothing { get; init; }
     public required int Skipped { get; init; }
     /// <summary>死 setter 過濾排除的 Style 配對數（過濾不靜默）</summary>
     public required int DeadForeground { get; init; }
