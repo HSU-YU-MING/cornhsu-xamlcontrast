@@ -758,6 +758,70 @@ public class StyleChainTests
         Assert.True(a.OneThemeOnly);
     }
 
+    // ── 鏈路徑的去重：「觸發器只動了無關屬性 → 與基礎同組」要比兩個主題合成後的實際顏色（審查素材 dedup）──
+    //    舊版的鍵只看深色值（與深色 alpha）：hover 換成深色同值、淺色不同的色票時，淺色 1.16:1 的真 fail 被當成
+    //    重複丟掉，結果 pairs 1、exit 0。半透明色票（深色同 alpha、淺色不同 alpha）同樣被吞
+    [Theory]
+    [InlineData("#FFFFFF", "#FFFFFF", "#333333", "#EEEEEE")] // 不透明：深色同值，淺色不同
+    [InlineData("#80FFFFFF", "#80FFFFFF", "#E0000000", "#20000000")] // 半透明：深色同 alpha，淺色 alpha 不同
+    public void ChainStatesThatDifferOnlyOnTheLightSideAreNotDeduplicated(string aDark, string bDark, string aLight, string bLight)
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#000000"/>
+              <SolidColorBrush x:Key="A" Color="{aDark}"/>
+              <SolidColorBrush x:Key="B" Color="{bDark}"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="A" Color="{aLight}"/>
+              <SolidColorBrush x:Key="B" Color="{bLight}"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{DynamicResource Bg}">
+              <Grid.Resources>
+                <Style x:Key="S" TargetType="Button">
+                  <Setter Property="Foreground" Value="{DynamicResource A}"/>
+                  <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter Property="Foreground" Value="{DynamicResource B}"/></Trigger>
+                  </Style.Triggers>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource S}" Content="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(2, r.Pairs);
+        var hover = Assert.Single(r.Findings, f => f.Element == "Button⊕Style[S]/trigger");
+        Assert.Equal(Category.Fail, hover.Category);
+        Assert.Equal(Symmetry.LightFails, hover.Symmetry);
+    }
+
+    [Fact] // 反方向：只動了無關屬性的觸發器（停用態以外，例如只設 Cursor）照樣與基礎同組，不重複
+    public void TriggerThatChangesNothingVisibleIsStillDeduplicated()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="S" TargetType="Button">
+                  <Setter Property="Foreground" Value="#000000"/>
+                  <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter Property="Cursor" Value="Hand"/></Trigger>
+                  </Style.Triggers>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource S}" Content="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(1, r.Pairs);
+    }
+
     [Fact] // 根元素的隱含樣式背景（地板）也一樣：Dark.xaml 與 Light.xaml 各自的隱含 UserControl 樣式只在自己的主題下生效
     public void ImplicitRootBackgroundFromThemeDictionariesIsResolvedPerTheme()
     {

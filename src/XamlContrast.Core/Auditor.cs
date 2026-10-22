@@ -517,9 +517,6 @@ public sealed partial class Auditor
                 if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bgObj, file, LineOf(el), bgOwnRaw ?? bgObj.Key ?? bgObj.Raw ?? fgV); continue; }
                 if (op * VisibleAlpha(fgR) < 0.01) { _skipped++; continue; }
 
-                // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複
-                if (!emitted.Add($"{fgR.Dark ?? fgR.Rgb + "@" + fgR.Alpha}|{bgObj.Dark}")) continue;
-
                 var isTextC = !IsNonTextElement(el.Name.LocalName);
                 var fsC = 0.0;
                 var fsRawC = el.Attribute("FontSize")?.Value;
@@ -534,6 +531,11 @@ public sealed partial class Auditor
                 var needC = NeedFor(isTextC, isLargeC);
 
                 var (fgDC, fgLC) = EffectiveForeground(fgR, op, bgObj);
+
+                // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複。
+                // ⚠ 鍵是兩個主題合成後的實際顏色（加上門檻）：舊版只看深色值，hover 換成「深色同值、淺色不同」的色票時，
+                //   淺色 1.16:1 的真 fail 被當成重複丟掉（審查素材 dedup；半透明色票深色同 alpha、淺色不同 alpha 也一樣）
+                if (!emitted.Add($"{fgDC}|{fgLC}|{bgObj.Dark}|{bgObj.Light}|{needC}")) continue;
 
                 _pairs++;
                 if (suppressed) { _suppressed++; continue; }
