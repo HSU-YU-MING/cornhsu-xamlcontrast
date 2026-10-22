@@ -21,8 +21,9 @@ public static class Grader
 
         foreach (var f in result.Findings)
         {
-            var worst = Math.Min(f.RatioDark, f.RatioLight);
-            var best = Math.Max(f.RatioDark, f.RatioLight);
+            // 只存在於一個主題的配對沒有「另一個主題」可比：落差 0
+            var worst = f.Worst;
+            var best = f.Theme is null ? Math.Max(f.RatioDark, f.RatioLight) : worst;
             f.Gap = Math.Round(best - worst, 2);
 
             // 門檻依元素而異：一般文字 4.5、大字級 3.0、裝飾元素不設限（Need = 0）；

@@ -280,10 +280,10 @@ fields are only added and `schemaVersion` stays 6 — **ignore fields you don't 
   the gate blocks in `--baseline` mode). Suppressed pairs are counted in `summary`, not listed.
 
 A pair that exists in **one theme only** (a style in a one-theme dictionary, or a use site whose
-style resolves differently per theme — see palette detection above) carries that theme's ratio in
-*both* `ratioDark` and `ratioLight`: the `ratioLight` of a `Dark.xaml` style is the dark-theme ratio.
-Its `theme` says which (`"dark"` / `"light"`; `null` for pairs that exist in both), and failing and
-warning ones also read `symmetry: single-theme`.
+style resolves differently per theme — see palette detection above) has a ratio for that theme only:
+`theme` says which (`"dark"` / `"light"`; `null` for pairs that exist in both), the other theme's
+ratio is `null`, and the console, Markdown, SARIF and Action annotations print `n/a (dark theme only)`
+instead of a number. Failing and warning ones also read `symmetry: single-theme`.
 `skipped` counts only text you cannot see (transparent, alpha ≈ 0, `Opacity="0"`); a translucent
 colour is composited and graded.
 

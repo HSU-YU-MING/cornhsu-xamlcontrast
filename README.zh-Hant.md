@@ -228,8 +228,8 @@ baseline 模式下的既有債是 notice。
   `baseline`（`--baseline` 模式下 gate 擋的那些：`known`／`new`／`worsened`）。被壓掉的配對只計入 `summary`，不列出。
 
 **只存在於一個主題**的配對（只屬於一個主題的字典裡的 Style，或使用處的 Style 依主題解析到不同的鏈，
-見上面的色盤偵測）`ratioDark` 與 `ratioLight` **兩欄都是那個主題的比值**：`Dark.xaml` 裡的 Style，
-`ratioLight` 其實是深色主題的值。`theme` 標出是哪一個（`"dark"`／`"light"`；兩個主題都有的是 `null`），
+見上面的色盤偵測）**只有那個主題的比值**：`theme` 標出是哪一個（`"dark"`／`"light"`；兩個主題都有的是 `null`），
+另一個主題的比值是 `null`，console、Markdown、SARIF 與 Action 註記印 `n/a (dark theme only)` 而不是一個數字。
 fail／warn 另標 `symmetry: single-theme`。
 `skipped` 只計看不見的字（透明、alpha ≈ 0、`Opacity="0"`）；半透明的字色會合成後評分。
 

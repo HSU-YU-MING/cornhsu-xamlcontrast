@@ -87,8 +87,9 @@ an empty map `{}` (5 omitted some and printed others).
 - `findings[]`: `largeText` → **`isLargeText`** (it shared a name with `thresholds.largeText`);
   **`fontSize` is a number** (DIP, as written; 5 had a `"12px"` string rounded half-to-even) or
   `null`; new **`theme`** (`"dark"`/`"light"` for a pair that exists in one theme only — a style in a
-  one-theme dictionary or resolved per theme — whose `ratioDark` and `ratioLight` both hold that
-  theme's ratio; `null` otherwise) and **`baseline`** (`known`/`new`/`worsened` for the pairs the gate
+  one-theme dictionary or resolved per theme — whose other theme's ratio is **`null`**: `ratioDark` and
+  `ratioLight` are `number | null`, and the console, Markdown, SARIF and annotations print
+  `n/a (dark theme only)` instead of repeating the one theme's ratio; `null` otherwise) and **`baseline`** (`known`/`new`/`worsened` for the pairs the gate
   blocks in `--baseline` mode; `null` otherwise). `symmetry` is `null` for ok/decorative.
 - Kept on purpose: `findings[].threshold` (a number, unlike the `thresholds` object — no real
   ambiguity); `fg` as written in the source and `bg` normalised (both are part of the baseline key, and
@@ -241,8 +242,8 @@ older 1.x (exit 2, naming the property).
   with no `LightButton.xaml` is shared. Its styles are graded against that theme only (single-theme
   symmetry), and a style key defined in both themes' dictionaries is resolved per theme where it is
   used (`Button⊕Style[Chip]@dark/base`) — pairing a dark style with light values reported failures for
-  combinations that never exist at runtime. Such findings carry the one theme's ratio in both
-  `ratioDark` and `ratioLight`, and the JSON's `theme` names that theme; a style key only one theme defines is `unknown-palette-key` (naming the
+  combinations that never exist at runtime. Such findings carry a ratio for that theme only (the other
+  is `null`), and the JSON's `theme` names that theme; a style key only one theme defines is `unknown-palette-key` (naming the
   style) for the other theme. Grouping the *palette* into dark and light still uses the looser 0.6.1
   rule (any part of the path), so `darktheme.xaml`, `Dark2.xaml` or `深色Dark.xaml` still form a pair;
   when file names can't tell the themes apart at all (`Ocean.xaml` / `Nord.xaml`) and three or more

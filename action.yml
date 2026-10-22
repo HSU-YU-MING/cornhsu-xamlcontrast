@@ -190,7 +190,8 @@ runs:
           | .findings[]
           | select(.category == "fail" or .category == "warn")
           | (if .baseline == "known" then "notice" elif .category == "fail" or $gate == "warn" then "error" else "warning" end) as $level
-          | "::\($level) file=\($root)\(.file),line=\(.line)::contrast \(.ratioDark):1 dark / \(.ratioLight):1 light (need \(.threshold)) — fg=\(.fg) bg=\(.bg) [\(.symmetry)]\(if .baseline == "known" then " — known debt in the baseline" else "" end)"
+          | (if .ratioLight == null then "\(.ratioDark):1 (dark theme only)" elif .ratioDark == null then "\(.ratioLight):1 (light theme only)" else "\(.ratioDark):1 dark / \(.ratioLight):1 light" end) as $ratio
+          | "::\($level) file=\($root)\(.file),line=\(.line)::contrast \($ratio) (need \(.threshold)) — fg=\(.fg) bg=\(.bg) [\(.symmetry)]\(if .baseline == "known" then " — known debt in the baseline" else "" end)"
         ' "$report" || true
 
     # SARIF 的路徑是 root 相對 —— 先補上前綴變成 repo 相對，code scanning 才對得上檔案

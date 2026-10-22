@@ -209,7 +209,8 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   - 只評單欄（`PaletteDetection.ThemeFileSides`）要**嚴**：檔名或最後一段目錄有「完整的詞」dark／light
     （`ThemeHint`，Highlight、Starlight/ 不算）**而且定義了色票**，或另一個主題的對應檔存在（`CounterpartExists`，
     此時寬鬆提示也算）。⚠ 認錯會藏 fail：兩個主題共用的 `Styles/DarkButton.xaml` 只評深色，淺色 fail 消失。
-  那些檔用單一主題視圖評（兩欄同值、對稱標 single-theme）；`StyleIndex.Build(sideOf)` 讓同 key 的 Style 在使用處依主題
+  那些檔用單一主題視圖評（對稱標 single-theme；`Finding.Theme` 記是哪個主題，另一個主題的比值經 `Finding.RatioIn` 是 null ——
+  ⚠ `RatioDark`／`RatioLight` 內部兩欄都填那個主題的值，對外輸出一律走 `RatioIn`，不然會印出不存在的主題的比值）；`StyleIndex.Build(sideOf)` 讓同 key 的 Style 在使用處依主題
   各自解析，兩個主題解析到不同的鏈時各評各的（`@dark`／`@light`），只有一個主題解析得到時另一側記 unknown-palette-key。
   拿 Dark 的 Style 配淺色色票是執行期不存在的組合。C#／單一主題模式不建這張表——Kindling 的 `DarkTheme.xaml`
   是 C# 色盤的靜態複本，兩個主題共用。

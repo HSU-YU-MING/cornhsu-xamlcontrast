@@ -24,8 +24,16 @@ public sealed class Finding
     public required string Bg { get; init; }
     /// <summary>字與底一個是色票一個是寫死（跨主題時寫死那邊不會跟著換）</summary>
     public bool Mixed { get; init; }
+    /// <summary>深色主題下的比值。⚠ 只存在於淺色主題的配對（<see cref="Theme"/> 是 Light），這一欄內部填的是淺色的值 ——
+    /// 對外一律經 <see cref="RatioIn"/>，不印一個不存在的主題的比值。</summary>
     public double RatioDark { get; init; }
+    /// <summary>淺色主題下的比值（只存在於深色主題的配對，同上）。</summary>
     public double RatioLight { get; init; }
+
+    /// <summary>那個主題下的比值；這組配對在那個主題不存在（<see cref="Theme"/> 是另一個主題）時是 null。
+    /// JSON、console、Markdown、SARIF 都經這裡（審查 1.0 B3：1.0 之前兩欄都填那個主題的值，讀的人會以為另一個主題也量過）。</summary>
+    public double? RatioIn(ThemeSide side) => Theme is { } t && t != side ? null
+        : side == ThemeSide.Dark ? RatioDark : RatioLight;
     public bool IsText { get; init; }
     /// <summary>門檻：一般文字 4.5、大字級 3.0、裝飾 0</summary>
     public double Need { get; init; }
@@ -35,7 +43,7 @@ public sealed class Finding
     public double? FontSize { get; init; }
     public bool Large { get; init; }
     /// <summary>這組配對只存在於哪一個主題（Dark.xaml 裡的 Style、依主題解析到的 @dark／@light 鏈）；兩個主題都有是 null。
-    /// 不是 null 時 RatioDark 與 RatioLight 都是那個主題的值，對稱欄標 single-theme。</summary>
+    /// 不是 null 時另一個主題的比值不存在（<see cref="RatioIn"/> 是 null），對稱欄標 single-theme。</summary>
     public ThemeSide? Theme { get; init; }
     /// <summary>只屬於一個主題的配對（<see cref="Theme"/> 不是 null）</summary>
     public bool OneThemeOnly => Theme is not null;
@@ -45,7 +53,13 @@ public sealed class Finding
     public Symmetry Symmetry { get; set; }
     public double Gap { get; set; }
 
-    public double Worst => Math.Min(RatioDark, RatioLight);
+    /// <summary>最差比值：只存在於一個主題的配對就是那個主題的比值（baseline 的 worst、分級都用它）。</summary>
+    public double Worst => Theme switch
+    {
+        ThemeSide.Dark => RatioDark,
+        ThemeSide.Light => RatioLight,
+        _ => Math.Min(RatioDark, RatioLight),
+    };
 }
 
 /// <summary>

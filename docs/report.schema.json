@@ -80,15 +80,15 @@
           "element": { "type": "string" },
           "fg": { "type": "string", "description": "The foreground as written in the source (a ' ×<opacity>' suffix when an element opacity applies)." },
           "bg": { "type": "string", "description": "The resolved backdrop: '{Key}', '#RRGGBB', or a composite description." },
-          "ratioDark": { "type": "number" },
-          "ratioLight": { "type": "number", "description": "For a one-theme pair (theme is not null) this is that theme's ratio, equal to ratioDark." },
+          "ratioDark": { "type": ["number", "null"], "description": "Contrast ratio in the dark theme; null when the pair exists in the light theme only (theme is \"light\")." },
+          "ratioLight": { "type": ["number", "null"], "description": "Contrast ratio in the light theme; null when the pair exists in the dark theme only (theme is \"dark\")." },
           "threshold": { "type": "number", "description": "0 for decorative elements, largeText or normalText otherwise." },
           "category": { "enum": ["ok", "warn", "fail", "decorative"] },
           "symmetry": { "enum": ["both-low", "dark-fails", "light-fails", "single-theme", null], "description": "Only for fail and warn; null otherwise." },
           "isText": { "type": "boolean" },
           "isLargeText": { "type": "boolean" },
           "fontSize": { "type": ["number", "null"], "description": "FontSize in device-independent pixels as written; null when none is set." },
-          "theme": { "enum": ["dark", "light", null], "description": "The one theme this pair exists in (a style in a one-theme dictionary, or a style key resolved per theme); null when it exists in both." },
+          "theme": { "enum": ["dark", "light", null], "description": "The one theme this pair exists in (a style in a one-theme dictionary, or a style key resolved per theme); the other theme's ratio is null. null when the pair exists in both." },
           "baseline": { "enum": ["known", "new", "worsened", null], "description": "With --baseline: the ratchet verdict for pairs the gate blocks; null otherwise." }
         }
       }

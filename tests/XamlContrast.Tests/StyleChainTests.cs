@@ -610,10 +610,10 @@ public class StyleChainTests
         Assert.Equal(0, r.CountOf(Category.Fail)); // 沒有 Light.xaml 的 dark=1.1、Dark.xaml 的 light=1.16 兩筆編造
         var dark = Assert.Single(r.Findings, f => f.File == "Themes/Dark.xaml");
         Assert.Equal(Wcag.Contrast("#EEEEEE", "#111111"), dark.RatioDark);
-        Assert.Equal(dark.RatioDark, dark.RatioLight);              // 只有深色主題這一欄
+        Assert.Null(dark.RatioIn(ThemeSide.Light));                 // 只有深色主題這一欄
         var light = Assert.Single(r.Findings, f => f.File == "Themes/Light.xaml");
         Assert.Equal(Wcag.Contrast("#1B1B1B", "#FFFFFF"), light.RatioLight);
-        Assert.Equal(light.RatioLight, light.RatioDark);
+        Assert.Null(light.RatioIn(ThemeSide.Dark));
     }
 
     [Fact] // 真的不合格照樣報，而且標 single-theme（只屬於一個主題，「換主題救不救得回來」不適用）
@@ -625,6 +625,42 @@ public class StyleChainTests
         Assert.Equal("Themes/Dark.xaml", f.File);
         Assert.Equal(Wcag.Contrast("#333333", "#111111"), f.RatioDark);
         Assert.Equal(Symmetry.SingleTheme, f.Symmetry);
+    }
+
+    [Fact] // 只存在於一個主題的配對：另一個主題的比值不存在 —— JSON 是 null，console／Markdown／SARIF 都不印一個編出來的數
+           // （審查 1.0 B3）。1.0 之前兩欄都填那個主題的值：Dark.xaml 的 Style 的 ratioLight 其實是深色主題的比值，
+           // 讀的人會以為淺色主題也量過。最差比值與落差只看那一個主題
+    public void OneThemePairsReportNoRatioForTheOtherTheme()
+    {
+        using var fx = ThemePairWithChips("#333333", "#1B1B1B");
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings, x => x.Category == Category.Fail);
+        Assert.Equal(ThemeSide.Dark, f.Theme);
+        Assert.Equal(Wcag.Contrast("#333333", "#111111"), f.RatioIn(ThemeSide.Dark));
+        Assert.Null(f.RatioIn(ThemeSide.Light));
+        Assert.Equal(f.RatioIn(ThemeSide.Dark), f.Worst);
+        Assert.Equal(0, f.Gap);
+        var lightOnly = Assert.Single(r.Findings, x => x.File == "Themes/Light.xaml");
+        Assert.Null(lightOnly.RatioIn(ThemeSide.Dark));
+
+        var json = System.Text.Json.JsonDocument.Parse(Report.ToJson(r)).RootElement.GetProperty("findings").EnumerateArray().ToList();
+        var jf = Assert.Single(json, x => x.GetProperty("category").GetString() == "fail");
+        Assert.Equal(f.RatioDark, jf.GetProperty("ratioDark").GetDouble());
+        Assert.Equal(System.Text.Json.JsonValueKind.Null, jf.GetProperty("ratioLight").ValueKind);
+        var jl = Assert.Single(json, x => x.GetProperty("file").GetString() == "Themes/Light.xaml");
+        Assert.Equal(System.Text.Json.JsonValueKind.Null, jl.GetProperty("ratioDark").ValueKind);
+        Assert.Equal(lightOnly.RatioLight, jl.GetProperty("ratioLight").GetDouble());
+
+        var line = Assert.Single(Report.ToConsole(r).Split('\n'), l => l.StartsWith("Themes/Dark.xaml"));
+        Assert.Contains("light=n/a (dark theme only)", line);
+        var ok = Report.ToConsole(r, showOk: true).Split('\n').Where(l => l.Contains("x1")).ToList();
+        Assert.Contains(ok, l => l.Contains("dark=n/a (light theme only)"));
+        var md = Assert.Single(Report.ToMarkdown(r, 1).Split('\n'), l => l.Contains("Themes/Dark.xaml"));
+        Assert.Contains("| n/a (dark theme only) |", md);
+        var sarif = System.Text.Json.JsonDocument.Parse(Report.ToSarif(r, "1.0.0")).RootElement
+            .GetProperty("runs")[0].GetProperty("results")[0].GetProperty("message").GetProperty("text").GetString()!;
+        Assert.StartsWith(string.Create(System.Globalization.CultureInfo.InvariantCulture, $"Contrast {f.RatioDark}:1 (dark theme only) — needs 4.5:1"), sarif);
+        Assert.DoesNotContain("light", sarif.Split('(')[0]);
     }
 
     [Theory] // 主題提示要能認出常見的寫法：檔名本身、檔名裡的一個詞、或所在的最後一段目錄

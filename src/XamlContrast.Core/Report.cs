@@ -136,6 +136,18 @@ public static class Report
 
     private static string ThemeLabel(ThemeSide s) => s == ThemeSide.Dark ? "dark" : "light";
 
+    /// <summary>一個主題那一欄：有值印「4.5:1」（width 是數字的欄寬），那個主題下不存在的配對印「n/a (dark theme only)」——
+    /// 不印一個不存在的主題的比值（審查 1.0 B3）。</summary>
+    private static string RatioCell(Finding f, ThemeSide side, int width = 0)
+        => f.RatioIn(side) is { } v
+            ? string.Create(CultureInfo.InvariantCulture, $"{v.ToString(CultureInfo.InvariantCulture).PadLeft(width)}:1")
+            : $"n/a ({ThemeLabel(f.Theme!.Value)} theme only)";
+
+    /// <summary>SARIF 訊息的比值：兩個主題「X:1 dark / Y:1 light」；只存在於一個主題「X:1 (dark theme only)」。</summary>
+    private static string RatioPhrase(Finding f) => f.Theme is { } t
+        ? string.Create(CultureInfo.InvariantCulture, $"{f.RatioIn(t)}:1 ({ThemeLabel(t)} theme only)")
+        : string.Create(CultureInfo.InvariantCulture, $"{f.RatioDark}:1 dark / {f.RatioLight}:1 light");
+
     public static string ToJson(AuditResult r, ReportContext? context = null)
     {
         var ctx = context ?? new ReportContext();
@@ -215,8 +227,9 @@ public static class Report
                 element = f.Element,
                 fg = f.Fg,
                 bg = f.Bg,
-                ratioDark = f.RatioDark,
-                ratioLight = f.RatioLight,
+                // 只存在於一個主題的配對：另一個主題的比值不存在 → null（1.0 之前兩欄都填那個主題的值）
+                ratioDark = f.RatioIn(ThemeSide.Dark),
+                ratioLight = f.RatioIn(ThemeSide.Light),
                 threshold = f.Need,
                 category = CategoryLabel(f.Category),
                 // 合格的配對沒有「換主題救不救得回來」可言 —— null，
@@ -249,7 +262,7 @@ public static class Report
                 {
                     // InvariantCulture：console 與 Markdown 早就是，這裡漏了 —— de-DE 下會印 "1,92:1 … needs 4,5:1"
                     text = string.Create(CultureInfo.InvariantCulture,
-                        $"Contrast {f.RatioDark}:1 dark / {f.RatioLight}:1 light — needs {f.Need}:1 " +
+                        $"Contrast {RatioPhrase(f)} — needs {f.Need}:1 " +
                         $"(fg={f.Fg}, bg={f.Bg}, {SymmetryLabel(f.Symmetry)}, {f.Element})"),
                 },
                 locations = new[]
@@ -393,7 +406,7 @@ public static class Report
                 if (f.Large) tag += $" large-text {f.Size}";
                 else if (f.Size.Length > 0) tag += $" {f.Size}";
                 sb.AppendLine(string.Create(inv,
-                    $"{f.File + ":" + f.Line,-34} {f.Element,-24} fg={f.Fg,-26} bg={f.Bg,-20} dark={f.RatioDark,6}:1 light={f.RatioLight,6}:1  [{SymmetryLabel(f.Symmetry)}] {tag}"));
+                    $"{f.File + ":" + f.Line,-34} {f.Element,-24} fg={f.Fg,-26} bg={f.Bg,-20} dark={RatioCell(f, ThemeSide.Dark, 6)} light={RatioCell(f, ThemeSide.Light, 6)}  [{SymmetryLabel(f.Symmetry)}] {tag}"));
             }
             sb.AppendLine();
         }
@@ -402,11 +415,11 @@ public static class Report
         {
             var ok = r.Findings.Where(f => f.Category == Category.Ok).ToList();
             sb.AppendLine($"===== ok ({ok.Count}), grouped by pair (top 30) =====");
-            foreach (var g in ok.GroupBy(f => (f.Fg, f.Bg)).OrderByDescending(g => g.Count()).Take(30))
+            foreach (var g in ok.GroupBy(f => (f.Fg, f.Bg, f.Theme)).OrderByDescending(g => g.Count()).Take(30))
             {
                 var x = g.First();
                 sb.AppendLine(string.Create(inv,
-                    $"  fg={x.Fg,-28} bg={x.Bg,-20} dark={x.RatioDark,6}:1 light={x.RatioLight,6}:1   x{g.Count()}"));
+                    $"  fg={x.Fg,-28} bg={x.Bg,-20} dark={RatioCell(x, ThemeSide.Dark, 6)} light={RatioCell(x, ThemeSide.Light, 6)}   x{g.Count()}"));
             }
             sb.AppendLine();
         }
@@ -472,7 +485,7 @@ public static class Report
                 if (f.Large) need += " (large)";
                 sb.AppendLine(string.Create(inv,
                     $"| `{Esc(f.File)}:{f.Line}` | {Esc(f.Element)} | `{Esc(f.Fg)}` → `{Esc(f.Bg)}` | " +
-                    $"{f.RatioDark}:1 | {f.RatioLight}:1 | {need} | {SymmetryLabel(f.Symmetry)} |"));
+                    $"{RatioCell(f, ThemeSide.Dark)} | {RatioCell(f, ThemeSide.Light)} | {need} | {SymmetryLabel(f.Symmetry)} |"));
             }
             sb.AppendLine();
         }
