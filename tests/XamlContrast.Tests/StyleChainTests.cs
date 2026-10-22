@@ -706,6 +706,58 @@ public class StyleChainTests
         Assert.Equal(Wcag.Contrast("#1B1B1B", "#FFFFFF"), Assert.Single(uses, f => f.Element.Contains("@light")).RatioDark);
     }
 
+    [Fact] // Style 放在不含色票的主題檔（Themes/Dark/Styles.xaml 搭配 Themes/Dark/Colors.xaml，審查素材 b4split）：
+           // 舊版的主題歸屬只看「貢獻了色票的檔」，Styles.xaml 被當成兩個主題共用，Dark 的 Chip 配淺色底報 1.16:1
+    public void StylesInAThemeFolderWithoutColourKeysBelongToThatTheme()
+    {
+        using var fx = new Fixture();
+        foreach (var (theme, bg, fg, line) in new[] { ("Dark", "#111111", "#EEEEEE", "#333333"), ("Light", "#FFFFFF", "#1B1B1B", "#CCCCCC") })
+        {
+            fx.File($"Themes/{theme}/Colors.xaml", $"""
+                <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                  <SolidColorBrush x:Key="Bg" Color="{bg}"/>
+                  <SolidColorBrush x:Key="Fg" Color="{fg}"/>
+                  <SolidColorBrush x:Key="Line" Color="{line}"/>
+                </ResourceDictionary>
+                """);
+            fx.File($"Themes/{theme}/Styles.xaml", $$"""
+                <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                  <Style x:Key="Chip" TargetType="Button">
+                    <Setter Property="Background" Value="{DynamicResource Bg}"/>
+                    <Setter Property="Foreground" Value="{{fg}}"/>
+                  </Style>
+                </ResourceDictionary>
+                """);
+        }
+        fx.File("Views/Main.xaml", """<Grid Background="{DynamicResource Bg}"><Button Style="{StaticResource Chip}" Content="x"/></Grid>""");
+        var r = fx.Run();
+        Assert.Equal(PaletteMode.Pair, r.Detection.Mode);
+        Assert.Equal(ThemeSide.Dark, r.Detection.SideOf(Path.Combine(fx.Root, "Themes/Dark/Styles.xaml")));
+        Assert.Equal(0, r.CountOf(Category.Fail));
+        var dark = Assert.Single(r.Findings, f => f.File == "Themes/Dark/Styles.xaml");
+        Assert.Equal(Wcag.Contrast("#EEEEEE", "#111111"), dark.RatioDark);
+        Assert.Equal(dark.RatioDark, dark.RatioLight);
+        var light = Assert.Single(r.Findings, f => f.File == "Themes/Light/Styles.xaml");
+        Assert.Equal(Wcag.Contrast("#1B1B1B", "#FFFFFF"), light.RatioLight);
+    }
+
+    [Fact] // config 強制 pair：指定的兩個檔就是各自主題的字典（檔名沒有 dark/light 提示也一樣），裡面的 Style 只評那一側
+    public void ForcedPairFilesAreOneThemeDictionaries()
+    {
+        using var fx = ThemePairWithChips("#EEEEEE", "#1B1B1B", "Colors/A.xaml", "Colors/B.xaml");
+        fx.File(ToolConfig.FileName, """
+            { "palette": { "mode": "pair", "darkFile": "Colors/A.xaml", "lightFile": "Colors/B.xaml" } }
+            """);
+        var cfg = ToolConfig.Load(fx.Root);
+        var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
+        Assert.Equal(PaletteMode.Pair, r.Detection.Mode);
+        Assert.Equal(0, r.CountOf(Category.Fail));
+        var a = Assert.Single(r.Findings, f => f.File == "Colors/A.xaml");
+        Assert.Equal(Wcag.Contrast("#EEEEEE", "#111111"), a.RatioDark);
+        Assert.Equal(a.RatioDark, a.RatioLight);
+        Assert.True(a.OneThemeOnly);
+    }
+
     [Fact] // 根元素的隱含樣式背景（地板）也一樣：Dark.xaml 與 Light.xaml 各自的隱含 UserControl 樣式只在自己的主題下生效
     public void ImplicitRootBackgroundFromThemeDictionariesIsResolvedPerTheme()
     {

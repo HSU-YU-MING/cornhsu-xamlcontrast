@@ -261,8 +261,9 @@ public sealed partial class Auditor
                 // 多 App repo:這個檔案屬於哪個 App,就用哪個 App 的色盤
                 // (單 App 或無作用域資訊時 PaletteFor 回傳全域色盤,行為不變)
                 // 只屬於一個主題的字典（色盤來自分開的深／淺 XAML 字典時）：兩欄都用那個主題的色票，
-                // findings 標 OneThemeOnly —— 拿 Dark.xaml 的 Style 配淺色色票是執行期不存在的組合
-                var side = paletteFile ? detection.SideOf(f) : null;
+                // findings 標 OneThemeOnly —— 拿 Dark.xaml 的 Style 配淺色色票是執行期不存在的組合。
+                // 不限色盤檔：不含色票的主題檔（Themes/Dark/Styles.xaml）一樣只屬於那個主題
+                var side = detection.SideOf(f);
                 auditor._pal = side is { } s ? auditor.SideView(detection.PaletteFor(f), s) : detection.PaletteFor(f);
                 auditor._oneThemeOnly = side is not null;
                 auditor._curSide = side;

@@ -194,16 +194,24 @@ public static partial class PaletteDetector
         catch { return false; }
     }
 
-    /// <summary>主題字典的歸屬：用與合併式色盤同一套檔名提示（<see cref="ThemeHint"/>），
-    /// 只收根元素是 ResourceDictionary 的檔（畫面檔不是「某個主題的字典」）。</summary>
-    private static Dictionary<string, ThemeSide> ThemeSides(string root, IEnumerable<string> files)
+    /// <summary>
+    /// 主題字典的歸屬（色盤來自分開的深／淺字典時才建）：專案裡每個帶主題提示的字典檔（與合併式色盤同一套
+    /// <see cref="ThemeHint"/>），加上明確指定的深／淺兩檔（主題配對、config 強制 pair；指定的優先）。
+    /// 只收根元素是 ResourceDictionary 的檔（畫面檔不是「某個主題的字典」），測試素材不算。
+    /// ⚠ 舊版只看「貢獻了色票的檔」：Style 放在不含色票的主題檔（Themes/Dark/Styles.xaml 搭配
+    ///   Themes/Dark/Colors.xaml）時被當成兩個主題共用，Dark 的 Chip 配淺色底照樣編出 1.16:1（審查素材 b4split）。
+    /// </summary>
+    private static Dictionary<string, ThemeSide> ThemeSides(string root, string? darkFile = null, string? lightFile = null)
     {
         var sides = new Dictionary<string, ThemeSide>(StringComparer.OrdinalIgnoreCase);
-        foreach (var f in files)
+        foreach (var f in EnumerateFiles(root, "*.xaml"))
         {
-            if (!IsResourceDictionaryFile(f)) continue;
-            if (ThemeHint(Path.GetRelativePath(root, f)) is { } side) sides[Path.GetFullPath(f)] = side;
+            var rel = Path.GetRelativePath(root, f);
+            if (LooksLikeFixture(rel)) continue;
+            if (ThemeHint(rel) is { } side && IsResourceDictionaryFile(f)) sides[Path.GetFullPath(f)] = side;
         }
+        if (darkFile is not null && IsResourceDictionaryFile(darkFile)) sides[Path.GetFullPath(darkFile)] = ThemeSide.Dark;
+        if (lightFile is not null && IsResourceDictionaryFile(lightFile)) sides[Path.GetFullPath(lightFile)] = ThemeSide.Light;
         return sides;
     }
 
@@ -234,14 +242,6 @@ public static partial class PaletteDetector
         return dark == light ? null : dark ? ThemeSide.Dark : ThemeSide.Light;
     }
 
-    /// <summary>明確指定深／淺的兩個字典檔（主題配對、config 強制 pair）。</summary>
-    private static Dictionary<string, ThemeSide> ThemeSides(string darkFile, string lightFile)
-    {
-        var sides = new Dictionary<string, ThemeSide>(StringComparer.OrdinalIgnoreCase);
-        if (IsResourceDictionaryFile(darkFile)) sides[Path.GetFullPath(darkFile)] = ThemeSide.Dark;
-        if (IsResourceDictionaryFile(lightFile)) sides[Path.GetFullPath(lightFile)] = ThemeSide.Light;
-        return sides;
-    }
 
     /// <summary>畫面檔：根元素讀得出來、而且不是 ResourceDictionary 或 Application（App.xaml 的
     /// Application.Resources 是整個 App 的範圍，照全域處理）。它的區域資源只在那個畫面裡生效。</summary>
@@ -750,7 +750,7 @@ public static partial class PaletteDetector
                         Palette = pal,
                         Mode = PaletteMode.Pair,
                         ExcludedFiles = UiExclusions([dFile, lFile]),
-                        ThemeFileSides = ThemeSides(dFile, lFile),
+                        ThemeFileSides = ThemeSides(root, dFile, lFile),
                         Description = $"config-forced theme pair: {config.Palette.DarkFile} + {config.Palette.LightFile} ({pal.Count} keys)",
                     };
                 }
@@ -853,7 +853,7 @@ public static partial class PaletteDetector
                 Palette = mp.Pal,
                 Mode = PaletteMode.Pair,
                 ExcludedFiles = UiExclusions(mp.Files),
-                ThemeFileSides = ThemeSides(root, mp.Files),
+                ThemeFileSides = ThemeSides(root),
                 DroppedKeys = mp.Invalid,
                 Scopes = scopes,
                 Description = $"merged colour dictionaries: {mp.Files.Count} file(s), {mp.Pal.Count} keys (dark + light)"
@@ -881,7 +881,7 @@ public static partial class PaletteDetector
                 Palette = pal,
                 Mode = PaletteMode.Pair,
                 ExcludedFiles = UiExclusions([p.D.File, p.L.File]),
-                ThemeFileSides = ThemeSides(p.D.File, p.L.File),
+                ThemeFileSides = ThemeSides(root, p.D.File, p.L.File),
                 Description = $"auto-detected theme pair: {p.D.Rel} + {p.L.Rel} ({pal.Count} keys)",
             };
         }
