@@ -27,6 +27,32 @@ public class IgnoreAndBaselineTests
         Assert.Contains("\"suppressed\": 1", Report.ToJson(r));
     }
 
+    [Fact] // 「下一個元素連同整個子樹」也包含子樹裡的 Style 定義（盤點 10.3 第 2 點，1.0 前要定）。0.x 只看緊鄰 <Style> 的註解：
+           // 容器上的 ignore 壓得到容器內「元素 × Style 鏈」的配對，卻壓不到容器 Resources 裡 Style 定義處的配對 ——
+           // 同一個註解、同一個子樹，一半壓一半不壓
+    public void ContainerIgnoreCoversStyleDefinitionsInsideIt()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <!-- xamlcontrast-ignore: legacy panel, redesign tracked elsewhere -->
+              <Grid Background="#FFFFFF">
+                <Grid.Resources>
+                  <Style x:Key="Faint" TargetType="Button">
+                    <Setter Property="Background" Value="#FFFFFF"/>
+                    <Setter Property="Foreground" Value="#EEEEEE"/>
+                  </Style>
+                </Grid.Resources>
+                <TextBlock Foreground="#EEEEEE" Text="also inside"/>
+              </Grid>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Equal(2, r.Suppressed); // Style 定義處那一組＋TextBlock
+        Assert.Empty(r.InvalidIgnores);
+    }
+
     [Fact] // 理由必填 —— 沒理由的 ignore 無效、不壓、要警告
     public void IgnoreWithoutReasonIsInvalidAndDoesNotSuppress()
     {

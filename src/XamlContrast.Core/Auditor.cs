@@ -109,27 +109,32 @@ public sealed partial class Auditor
     /// </summary>
     private bool IsSuppressedByComment(XElement el, string file)
     {
+        var (suppressed, invalid) = IgnoreStateOf(el, file);
+        if (invalid is not null) _invalidIgnores.Add(invalid);
+        return suppressed;
+    }
+
+    /// <summary>同上，不記錄無效的註解（給「祖先有沒有被壓掉」這種重複查詢用 —— 那些註解在樹走訪時已經記過）。</summary>
+    private (bool Suppressed, string? Invalid) IgnoreStateOf(XElement el, string file)
+    {
         // 往前找最近的非空白節點；只有「緊鄰的前一個註解」才算數
         var prev = el.PreviousNode;
         while (prev is XText t && string.IsNullOrWhiteSpace(t.Value)) prev = prev.PreviousNode;
-        if (prev is not XComment c) return false;
+        if (prev is not XComment c) return (false, null);
         var m = IgnoreComment().Match(c.Value);
         if (!m.Success)
         {
             // ⚠ 寫錯的變體（大小寫不同、冒號後沒有理由、漏冒號、理由換到第二行）舊版整段認不出來：
             //   不壓（方向安全），但也不警告 —— 使用者看不出自己的註解沒生效。看起來像標記就要講出來。
             //   多行理由維持不接受：接受等於放寬，會讓既有的這類註解開始壓掉配對
-            if (IgnoreCommentLenient().IsMatch(c.Value))
-                _invalidIgnores.Add($"{file}:{LineOfComment(c)}: malformed xamlcontrast-ignore comment (not suppressed)" +
-                                    " — write it as 'xamlcontrast-ignore: reason', lowercase, with the reason on the same line");
-            return false;
+            return (false, IgnoreCommentLenient().IsMatch(c.Value)
+                ? $"{file}:{LineOfComment(c)}: malformed xamlcontrast-ignore comment (not suppressed)" +
+                  " — write it as 'xamlcontrast-ignore: reason', lowercase, with the reason on the same line"
+                : null);
         }
         if (!m.Groups["reason"].Success && _cfg.Ignore.RequireReason)
-        {
-            _invalidIgnores.Add($"{file}:{LineOfComment(c)}: xamlcontrast-ignore without a reason is invalid (not suppressed)");
-            return false;
-        }
-        return true;
+            return (false, $"{file}:{LineOfComment(c)}: xamlcontrast-ignore without a reason is invalid (not suppressed)");
+        return (true, null);
     }
 
     /// <summary>「看起來像 ignore 標記」：註解開頭、不分大小寫、整個字（xamlcontrast-ignored 不算）。</summary>
@@ -944,7 +949,10 @@ public sealed partial class Auditor
     {
         foreach (var style in doc.Descendants().Where(e => e.Name.LocalName == "Style"))
         {
-            var styleSuppressed = IsSuppressedByComment(style, file);
+            // ignore 管「下一個元素連同整個子樹」—— 子樹裡的 Style 定義也算（1.0）。⚠ 0.x 只看緊鄰 <Style> 的註解：
+            //   容器上的 ignore 壓得到容器內元素 × Style 鏈的配對，卻壓不到容器 Resources 裡 Style 定義處的配對
+            var styleSuppressed = IsSuppressedByComment(style, file) ||
+                                  style.Ancestors().Any(a => IgnoreStateOf(a, file).Suppressed);
 
             // 合併鏈：BasedOn 逐層合併、同條件觸發器合併（與元素端的鏈路徑同一套，見 StyleIndex.DefinitionChain）。
             // 規則 13 也適用於定義處：觸發器只收「無 TargetName（套宿主）或指向模板根」的 Setter ——
