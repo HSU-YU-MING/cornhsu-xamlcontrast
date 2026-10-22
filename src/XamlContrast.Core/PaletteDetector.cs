@@ -200,6 +200,11 @@ public static partial class PaletteDetector
     /// 只收根元素是 ResourceDictionary 的檔（畫面檔不是「某個主題的字典」），測試素材不算。
     /// ⚠ 舊版只看「貢獻了色票的檔」：Style 放在不含色票的主題檔（Themes/Dark/Styles.xaml 搭配
     ///   Themes/Dark/Colors.xaml）時被當成兩個主題共用，Dark 的 Chip 配淺色底照樣編出 1.16:1（審查素材 b4split）。
+    /// ⚠ 但只評單欄認錯會藏 fail：兩個主題共用的 Styles/DarkButton.xaml（按鈕叫 DarkButton）被判成只屬於深色，
+    ///   淺色 1.36:1 的 fail 消失（審查素材 hint-falsepos）。所以：
+    ///   - 定義了色票的字典：嚴格提示（<see cref="ThemeHint"/>）就算 —— 它的色票在合併式色盤裡本來就只算那一側；
+    ///   - 只放 Style 的字典：要有對應檔（同一路徑、dark↔light 互換後的檔存在）才算；
+    ///   - 有對應檔時，寬鬆提示（<see cref="GroupHint"/>，例 darktheme.xaml ↔ lighttheme.xaml）也算。
     /// </summary>
     private static Dictionary<string, ThemeSide> ThemeSides(string root, string? darkFile = null, string? lightFile = null)
     {
@@ -207,12 +212,45 @@ public static partial class PaletteDetector
         foreach (var f in EnumerateFiles(root, "*.xaml"))
         {
             var rel = Path.GetRelativePath(root, f);
-            if (LooksLikeFixture(rel)) continue;
-            if (ThemeHint(rel) is { } side && IsResourceDictionaryFile(f)) sides[Path.GetFullPath(f)] = side;
+            if (LooksLikeFixture(rel) || !IsResourceDictionaryFile(f)) continue;
+            if (ThemeHint(rel) is { } side && (DefinesColours(f) || CounterpartExists(root, rel, side)))
+                sides[Path.GetFullPath(f)] = side;
+            else if (GroupHint(rel) is { } loose && CounterpartExists(root, rel, loose))
+                sides[Path.GetFullPath(f)] = loose;
         }
         if (darkFile is not null && IsResourceDictionaryFile(darkFile)) sides[Path.GetFullPath(darkFile)] = ThemeSide.Dark;
         if (lightFile is not null && IsResourceDictionaryFile(lightFile)) sides[Path.GetFullPath(lightFile)] = ThemeSide.Light;
         return sides;
+    }
+
+    private static bool DefinesColours(string file)
+    {
+        if (ParseColorDefs(file, keepInvalid: true).Count > 0) return true;
+        var (lit, refs) = ParseBrushDefs(file, keepInvalid: true);
+        return lit.Count + refs.Count > 0;
+    }
+
+    /// <summary>
+    /// 另一個主題的對應檔存在嗎：相對路徑裡的某一段把 dark 換成 light（或反過來，保留大小寫）之後的檔。
+    /// 一次只換一段（資料夾叫 Starlight/ 的話，Starlight/Themes/Light.xaml 的對應檔是 Starlight/Themes/Dark.xaml，
+    /// 不是 Stardark/…）。
+    /// </summary>
+    internal static bool CounterpartExists(string root, string rel, ThemeSide side)
+    {
+        var segments = rel.Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var (from, to) = side == ThemeSide.Dark ? ("dark", "light") : ("light", "dark");
+        for (var i = 0; i < segments.Length; i++)
+        {
+            var swapped = Regex.Replace(segments[i], from, m =>
+                m.Value == m.Value.ToUpperInvariant() ? to.ToUpperInvariant() :
+                char.IsUpper(m.Value[0]) ? char.ToUpperInvariant(to[0]) + to[1..] : to,
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            if (swapped == segments[i]) continue;
+            var candidate = segments.ToArray();
+            candidate[i] = swapped;
+            if (File.Exists(Path.Combine(root, Path.Combine(candidate)))) return true;
+        }
+        return false;
     }
 
     /// <summary>

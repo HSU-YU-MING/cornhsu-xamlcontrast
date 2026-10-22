@@ -803,6 +803,70 @@ public class StyleChainTests
         Assert.Equal(Wcag.Contrast("#1B1B1B", "#FFFFFF"), light.RatioLight);
     }
 
+    // ── 只放 Style 的字典要有對應檔才算主題專屬（審查最後一輪 6：素材 hint-falsepos）──
+    //    69912a5 把不含色票的字典也納入主題歸屬：兩個主題共用的 Styles/DarkButton.xaml（按鈕叫 DarkButton）被判成只屬於深色，
+    //    只評深色那欄，淺色 1.36:1 的 fail 消失；Controls/LightBox.xaml 反過來只評淺色。只評單欄認錯就會藏 fail ——
+    //    要「同一路徑、dark↔light 互換後的檔」存在（Themes/Dark/Styles.xaml ↔ Themes/Light/Styles.xaml）才算
+
+    private static Fixture ThemePairPlusStyleFiles(params string[] styleFiles)
+    {
+        var fx = new Fixture()
+            .File("Themes/Dark.xaml", """
+                <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                  <SolidColorBrush x:Key="Bg" Color="#111111"/>
+                  <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+                  <SolidColorBrush x:Key="Muted" Color="#888888"/>
+                </ResourceDictionary>
+                """)
+            .File("Themes/Light.xaml", """
+                <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                  <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+                  <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+                  <SolidColorBrush x:Key="Muted" Color="#DDDDDD"/>
+                </ResourceDictionary>
+                """);
+        foreach (var f in styleFiles)
+            fx.File(f, $$"""
+                <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                  <Style x:Key="{{Path.GetFileNameWithoutExtension(f)}}Style" TargetType="Button">
+                    <Setter Property="Foreground" Value="{DynamicResource Muted}"/>
+                    <Setter Property="Background" Value="{DynamicResource Bg}"/>
+                  </Style>
+                </ResourceDictionary>
+                """);
+        return fx;
+    }
+
+    [Fact]
+    public void StyleOnlyDictionaryWithoutACounterpartIsSharedByBothThemes()
+    {
+        using var fx = ThemePairPlusStyleFiles("Styles/DarkButton.xaml", "Controls/LightBox.xaml");
+        var r = fx.Run();
+        Assert.Null(r.Detection.SideOf(Path.Combine(fx.Root, "Styles/DarkButton.xaml")));
+        Assert.Null(r.Detection.SideOf(Path.Combine(fx.Root, "Controls/LightBox.xaml")));
+        foreach (var file in new[] { "Styles/DarkButton.xaml", "Controls/LightBox.xaml" })
+        {
+            var f = Assert.Single(r.Findings, x => x.File == file);
+            Assert.Equal(Wcag.Contrast("#888888", "#111111"), f.RatioDark);
+            Assert.Equal(Wcag.Contrast("#DDDDDD", "#FFFFFF"), f.RatioLight); // 淺色 1.36:1 照報
+            Assert.Equal(Category.Fail, f.Category);
+        }
+    }
+
+    [Theory] // 有對應檔就是一組主題字典 —— 連嚴格提示認不得的寫法（全小寫黏在一起）也一樣
+    [InlineData("Themes/Dark/Styles.xaml", "Themes/Light/Styles.xaml")]
+    [InlineData("Styles/DarkButtons.xaml", "Styles/LightButtons.xaml")]
+    [InlineData("Styles/darkbuttons.xaml", "Styles/lightbuttons.xaml")]
+    public void StyleOnlyDictionaryWithACounterpartBelongsToItsTheme(string darkFile, string lightFile)
+    {
+        using var fx = ThemePairPlusStyleFiles(darkFile, lightFile);
+        var r = fx.Run();
+        Assert.Equal(ThemeSide.Dark, r.Detection.SideOf(Path.Combine(fx.Root, darkFile)));
+        Assert.Equal(ThemeSide.Light, r.Detection.SideOf(Path.Combine(fx.Root, lightFile)));
+        var dark = Assert.Single(r.Findings, x => x.File == darkFile);
+        Assert.Equal(dark.RatioDark, dark.RatioLight);
+    }
+
     [Fact] // config 強制 pair：指定的兩個檔就是各自主題的字典（檔名沒有 dark/light 提示也一樣），裡面的 Style 只評那一側
     public void ForcedPairFilesAreOneThemeDictionaries()
     {
