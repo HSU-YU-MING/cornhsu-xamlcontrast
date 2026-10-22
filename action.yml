@@ -77,6 +77,10 @@ runs:
         case "$XC_ROOT$XC_WORKDIR$XC_VERSION$XC_BASELINE$XC_MIN_COVERAGE" in
           *$'\n'* | *$'\r'*) refuse "root, working-directory, version, baseline and min-coverage must not contain a line break" ;;
         esac
+        # 以 - 開頭的路徑會被 CLI 當成旗標：root: --version 印版本、exit 0，什麼都沒稽核就綠燈（審查 1.0 A3）。
+        # Run audit 另外以 -- 傳 root（雙重保險），這裡先點名擋下
+        case "$XC_ROOT" in -*) refuse "root must not start with '-' (write ./-name for such a directory)" ;; esac
+        case "$XC_BASELINE" in -*) refuse "baseline must not start with '-' (write ./-name for such a file)" ;; esac
         case "$XC_FAIL_ON" in
           '' | warn | fail) ;;
           *) refuse "fail-on must be 'warn', 'fail' or empty (the config file's failOn, else warn)" ;;
@@ -124,7 +128,7 @@ runs:
         XC_SARIF: ${{ inputs.sarif }}
       run: |
         set +e
-        args=("$XC_ROOT" --json "$RUNNER_TEMP/xamlcontrast-report.json")
+        args=(--json "$RUNNER_TEMP/xamlcontrast-report.json")
         args+=(--md "$RUNNER_TEMP/xamlcontrast-report.md")
         [ "$XC_SARIF" = "true" ] && args+=(--sarif "$RUNNER_TEMP/xamlcontrast.sarif")
         # gate 與覆蓋率下限：空白就不傳，交給 config（沒有就是內建預設）—— 旗標 > config > 預設
@@ -132,6 +136,8 @@ runs:
         [ -n "$XC_MIN_COVERAGE" ] && args+=(--min-coverage "$XC_MIN_COVERAGE")
         [ "$XC_STRICT_PALETTE" = "true" ] && args+=(--strict-palette)
         [ -n "$XC_BASELINE" ] && args+=(--baseline "$XC_BASELINE")
+        # root 放在 -- 後面：之後的字一律是位置參數，以 - 開頭也不會被當成旗標
+        args+=(-- "$XC_ROOT")
         xamlcontrast "${args[@]}"
         echo "exit=$?" >> "$GITHUB_OUTPUT"
 

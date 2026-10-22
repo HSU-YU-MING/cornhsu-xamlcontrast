@@ -207,8 +207,9 @@ public class ActionContractTests
         using var fx = CliProjects.Passing().WithPalette();
         fx.File("baseline.json", """{ "schemaVersion": 1, "entries": [] }""");
         string P(string name) => Path.Combine(fx.Root, name);
-        var r = Cli.Run(fx.Root, "--json", P("report.json"), "--md", P("report.md"), "--sarif", P("report.sarif"),
-                        "--fail-on", "warn", "--min-coverage", "0", "--strict-palette", "--baseline", P("baseline.json"));
+        // 照 Action 的順序：旗標在前，root 接在 -- 後面
+        var r = Cli.Run("--json", P("report.json"), "--md", P("report.md"), "--sarif", P("report.sarif"),
+                        "--fail-on", "warn", "--min-coverage", "0", "--strict-palette", "--baseline", P("baseline.json"), "--", fx.Root);
         Assert.True(r.Exit == 0, r.ToString());
         Assert.True(File.Exists(P("report.json")) && File.Exists(P("report.md")) && File.Exists(P("report.sarif")));
     }
@@ -265,6 +266,10 @@ public class ActionContractTests
     [InlineData("baseline", "baseline.json\r", "line break")]
     [InlineData("root", "src\n::add-mask::INJECTED", "line break")]
     [InlineData("working-directory", ".\n::warning::INJECTED", "line break")]
+    // 以 - 開頭的 root：舊版直接當成 CLI 的旗標 —— root: --version 印版本、exit 0，什麼都沒稽核就綠燈（審查 1.0 A3）
+    [InlineData("root", "--version", "root must not start with '-'")]
+    [InlineData("root", "-weird", "root must not start with '-'")]
+    [InlineData("baseline", "--strict-palette", "baseline must not start with '-'")]
     public void UnknownInputValuesFailBeforeAnythingRuns(string input, string value, string message)
     {
         var r = RunStep("Validate inputs", new() { [input] = value });
@@ -297,7 +302,9 @@ public class ActionContractTests
     {
         var plain = RunStep("Run audit");
         Assert.True(plain.Exit == 0, plain.ToString());
-        Assert.StartsWith("src/App|--json|", plain.Calls);
+        // root 永遠接在 -- 後面、放在最後：就算驗證漏掉，以 - 開頭的值也不會被當成旗標
+        Assert.StartsWith("--json|", plain.Calls);
+        Assert.EndsWith("|--|src/App|\n", plain.Calls);
         foreach (var flag in new[] { "--fail-on", "--min-coverage", "--strict-palette", "--sarif", "--baseline" })
             Assert.DoesNotContain(flag, plain.Calls);
 
