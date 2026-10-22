@@ -121,6 +121,7 @@ public static class Baseline
             throw new FormatException("the file has no 'entries' array");
 
         var known = new Dictionary<string, Entry>();
+        var firstSeen = new Dictionary<string, int>();
         var i = 0;
         foreach (var el in entries.EnumerateArray())
         {
@@ -130,7 +131,17 @@ public static class Baseline
                 if (Prop(el, field) is not { } fv || fv.ValueKind == JsonValueKind.Null)
                     throw new FormatException($"entry {i} has no '{field}'");
             var e = el.Deserialize<Entry>(JsonOpts)!;
-            known[$"{e.File}|{e.Element}|{e.Fg}|{e.Bg}"] = e;
+            // 值的範圍（審查 1.0 C7）：count 0 讓每一處都算惡化；worst ≤ 0 讓色盤漂移永遠抓不到 —— 跟缺欄同一類
+            if (e.Count < 1) throw new FormatException($"entry {i} has 'count' {e.Count} — it must be at least 1");
+            if (!double.IsFinite(e.Worst) || e.Worst < 1 || e.Worst > 21)
+                throw new FormatException(string.Create(System.Globalization.CultureInfo.InvariantCulture,
+                    $"entry {i} has 'worst' {e.Worst} — a contrast ratio is between 1 and 21"));
+            var key = $"{e.File}|{e.Element}|{e.Fg}|{e.Bg}";
+            // 同一個鍵兩次：手改或合併衝突的痕跡。0.x 後者勝、前者靜默消失
+            if (firstSeen.TryGetValue(key, out var first))
+                throw new FormatException($"entries {first} and {i} have the same key ({key}) — one of them is stale");
+            firstSeen[key] = i;
+            known[key] = e;
         }
         return new Known { Entries = known };
     }

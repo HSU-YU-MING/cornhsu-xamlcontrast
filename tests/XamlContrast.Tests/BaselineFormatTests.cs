@@ -192,6 +192,40 @@ public class BaselineFormatTests
         Assert.Contains("schemaVersion", ex.Message);
     }
 
+    [Theory] // 值的範圍（審查 1.0 C7）：count 至少 1、worst 是對比值（1～21）。0.x 照收 —— count 0 讓每一處都算惡化，
+             // worst 0 讓色盤漂移永遠抓不到（比值再差也不會 < 0 − 0.01），跟缺欄一樣是一整類惡化靜默放行。
+             // 1.0 之後再收緊就是 2.0，所以現在定
+    [InlineData(0, 1.5, "count")]
+    [InlineData(-1, 1.5, "count")]
+    [InlineData(1, 0, "worst")]
+    [InlineData(1, -2, "worst")]
+    [InlineData(1, 0.5, "worst")]
+    [InlineData(1, 22, "worst")]
+    public void EntryValuesOutOfRangeAreAnError(int count, double worst, string field)
+    {
+        var ex = Assert.ThrowsAny<FormatException>(() => Baseline.Parse(BaselineJson(
+            new { file = "Main.xaml", element = "TextBlock", fg = "#EEEEEE", bg = "#FFFFFF", count, worst })));
+        Assert.Contains("entry 1", ex.Message);
+        Assert.Contains($"'{field}'", ex.Message);
+    }
+
+    [Theory] // 範圍內的極值照收
+    [InlineData(1, 1.0)]
+    [InlineData(250, 21.0)]
+    public void EntryValuesAtTheEdgesAreAccepted(int count, double worst)
+        => Assert.Single(Baseline.Parse(BaselineJson(
+            new { file = "Main.xaml", element = "TextBlock", fg = "#EEEEEE", bg = "#FFFFFF", count, worst })).Entries);
+
+    [Fact] // 同一個鍵出現兩次：手改或合併衝突的痕跡。0.x 後者勝、前者靜默消失 —— 改成點名是哪兩筆
+    public void DuplicateKeysAreAnError()
+    {
+        var e = new { file = "Main.xaml", element = "TextBlock", fg = "#EEEEEE", bg = "#FFFFFF", count = 1, worst = 1.16 };
+        var other = new { file = "Main.xaml", element = "Label", fg = "#EEEEEE", bg = "#FFFFFF", count = 1, worst = 1.16 };
+        var ex = Assert.ThrowsAny<FormatException>(() => Baseline.Parse(BaselineJson(e, other, e with { count = 2 })));
+        Assert.Contains("entries 1 and 3", ex.Message);
+        Assert.Contains("Main.xaml|TextBlock|#EEEEEE|#FFFFFF", ex.Message);
+    }
+
     // ── keyVersion（審查 1.0 A2，演進規則 5「舊產物失效時要大聲失敗」）：鍵的產生方式（element 的標籤、bg 的合成描述……）
     //    屬稽核語意，1.x 的 minor 可以改。改的那一版遞增 keyVersion；讀到舊的 keyVersion 就明確叫人重寫，
     //    不是冒出一整排假的 NEW（同一組配對、新的鍵）加一整排假的 paid off ──
