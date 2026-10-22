@@ -75,11 +75,13 @@ internal sealed partial class StyleIndex
     // 依主題的全域查找表：只收兩個主題共用的檔與那個主題自己的檔（先出現的贏，與 _global 同一個順序）
     private readonly Dictionary<ThemeSide, Dictionary<string, Record>> _globalBySide = new()
     {
-        [ThemeSide.Dark] = new(), [ThemeSide.Light] = new(),
+        [ThemeSide.Dark] = new(),
+        [ThemeSide.Light] = new(),
     };
     private readonly Dictionary<ThemeSide, Dictionary<string, Record>> _implicitBySide = new()
     {
-        [ThemeSide.Dark] = new(StringComparer.Ordinal), [ThemeSide.Light] = new(StringComparer.Ordinal),
+        [ThemeSide.Dark] = new(StringComparer.Ordinal),
+        [ThemeSide.Light] = new(StringComparer.Ordinal),
     };
     private Func<string, ThemeSide?>? _sideOf;
     private int _seq;
