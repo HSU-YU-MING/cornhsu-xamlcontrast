@@ -78,7 +78,8 @@
 6. **無色盤**：退回只算寫死色碼，**大聲喊**（Cornea 形狀；`none`）
 
 被認定為色盤來源（或其靜態複本）、**而且根元素是 `ResourceDictionary`** 的 XAML 檔不算進 `summary.files`
-（字典不是畫面），但裡面的 Style 與模板照樣稽核。自動偵測把字典依路徑裡任何位置的 dark／light 分成深淺兩組
+（字典不是畫面），但裡面的 Style 照樣稽核。⚠ Style 的 `Template` setter 裡的 ControlTemplate 不走樹：裡面自己帶
+`Foreground` 的文字元素還沒有評分，計入 unresolved（`in-style-template`）並點名位置；不在 Style 裡的 DataTemplate／ControlTemplate 照常走。自動偵測把字典依路徑裡任何位置的 dark／light 分成深淺兩組
 （與 v0.6.1 相同；`darktheme.xaml`、`Dark2.xaml`、`Themes/Dark/Colors/Palette.xaml` 都算）；檔名完全看不出主題、
 又有三個以上的鍵在不同字典裡值不同時，判成偵測退化並點名（`--strict-palette` 擋得住）。
 色盤來自分開的深／淺 XAML 字典時（1、2 與 `mode: "pair"`），下面這些 `ResourceDictionary` **只屬於一個主題**：

@@ -96,6 +96,6 @@
     }
   },
   "$defs": {
-    "reason": { "type": "string", "description": "Why a pair could not be resolved. An open set: a 1.x release may add a reason (a newly named blind spot), so consumers must accept values they do not know; existing values keep their spelling. Current values: `no-ancestor-background`, `bound-or-gradient`, `unknown-palette-key`, `translucent-uncomposited`, `same-brush-pair`, `over-sibling-content`." }
+    "reason": { "type": "string", "description": "Why a pair could not be resolved. An open set: a 1.x release may add a reason (a newly named blind spot), so consumers must accept values they do not know; existing values keep their spelling. Current values: `no-ancestor-background`, `bound-or-gradient`, `unknown-palette-key`, `translucent-uncomposited`, `same-brush-pair`, `over-sibling-content`, `in-style-template`." }
   }
 }

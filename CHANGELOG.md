@@ -45,9 +45,9 @@ There is no 0.7.0: the breaking changes ship once.
 
    | project | pairs | unresolved | coverage | fail | warn | exit |
    |---|---|---|---|---|---|---|
-   | Kindling | 168 → 182 | 1 → 5 | 99.4% → 97.3% | 0 → 1 | 1 → 1 | 0 → 1 (a real failure now found; under the new gate its warn fails too) |
-   | QuillNest | 842 → 906 | 38 → 95 | 95.7% → 90.5% | 3 → 2 | 1 → 1 | 1 → 1 (one of the three is now `unresolved`) |
-   | ZeroCel | 468 → 518 | 206 → 184 | 69.4% → 73.8% | 0 → 1 | 3 → 6 | 0 → 1 (a real failure now found) |
+   | Kindling | 168 → 182 | 1 → 8 | 99.4% → 95.8% | 0 → 1 | 1 → 1 | 0 → 1 (a real failure now found; under the new gate its warn fails too) |
+   | QuillNest | 842 → 906 | 38 → 107 | 95.7% → 89.4% | 3 → 2 | 1 → 1 | 1 → 1 (one of the three is now `unresolved`) |
+   | ZeroCel | 468 → 518 | 206 → 188 | 69.4% → 73.4% | 0 → 1 | 3 → 6 | 0 → 1 (a real failure now found) |
    | Cornea | 0 → 0 | 1 → 2 | — | 0 → 0 | 0 → 0 | 1 → 3 (nothing audited, as before; now reported as untrustworthy) |
 
    Coverage can read lower than in 0.6.1, and a project close to `--min-coverage` (default 50%; it
@@ -202,6 +202,13 @@ older 1.x (exit 2, naming the property).
   declared name that matches no element is named on the console and in the Markdown report.
 
 ### Changed
+- **Text inside a style's `Template` setter is no longer silent.** The tree walk never enters a style, so a
+  text element with its own `Foreground` inside `<Setter Property="Template"><Setter.Value><ControlTemplate>`
+  was graded nowhere and counted nowhere — coverage read as if it didn't exist. It is now counted as
+  unresolved under a new reason, `in-style-template`, with its location and foreground. Grading it is
+  audit semantics for a 1.x release; the host's foreground, rendered through `{TemplateBinding Foreground}`
+  or a `ContentPresenter`, is graded through the style chain as before. Measured: Kindling +3,
+  QuillNest +12, ZeroCel +4 unresolved.
 - **A composited background has one spelling** in `bg` and in baseline keys: each layer as `{Key}` or
   `#RRGGBB`/`#AARRGGBB`, joined by ` over `, with no outer braces — `{SelectionHi} over {Bg1}`, `#88000000 over #FFFFFF`.
   0.6.1 mixed the source text with `{Key}` and wrapped the whole thing in another pair of braces

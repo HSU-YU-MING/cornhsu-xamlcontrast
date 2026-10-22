@@ -53,6 +53,7 @@ public static class Report
         UnresolvedReason.UnknownPaletteKey => "unknown-palette-key",
         UnresolvedReason.SameBrushPair => "same-brush-pair",
         UnresolvedReason.OverSiblingContent => "over-sibling-content",
+        UnresolvedReason.InStyleTemplate => "in-style-template",
         _ => "translucent-uncomposited",
     };
 

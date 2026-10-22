@@ -84,6 +84,10 @@ public enum UnresolvedReason
     /// <summary>文字墊在同格子的兄弟「內容」元素上（Image 等）—— 實際背景是圖片，
     /// 靜態不可知；配祖先背景會產生假警報。</summary>
     OverSiblingContent,
+    /// <summary>Style 的 Template setter 裡（&lt;Setter.Value&gt;&lt;ControlTemplate&gt;）自己帶 Foreground 的文字元素 ——
+    /// 樹走訪不進 Style，這些從來沒有被評過，也不在任何計數器裡（審查 1.0 最終驗證 S3）。完整稽核屬稽核語意、留到 1.x；
+    /// 1.0 先讓它不靜默：計入 unresolved、點名位置與那個 Foreground。</summary>
+    InStyleTemplate,
 }
 
 /// <summary>一筆無法解析的配對「在哪裡、為什麼、卡在哪個值」。

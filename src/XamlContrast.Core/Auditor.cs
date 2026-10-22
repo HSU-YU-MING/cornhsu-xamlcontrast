@@ -986,6 +986,33 @@ public sealed partial class Auditor
     }
 
     // Style 裡成對的 Setter（Background + Foreground 同時存在）
+    /// <summary>
+    /// Style 的 Template setter（含觸發器裡換模板的 setter）裡的 ControlTemplate：樹走訪不進 Style（Setter.Value 是屬性值），
+    /// 模板裡自己帶 Foreground 的文字元素從來沒有被評過 —— 靜默退化（審查 1.0 最終驗證 S3）。
+    /// 1.0 先計入 unresolved（in-style-template），點名位置與那個 Foreground；完整稽核屬稽核語意，留到 1.x。
+    /// Foreground 是 TemplateBinding 的不算：那是宿主的字色，已經由元素 × Style 鏈評過。
+    /// 跟樹走訪一樣，壓抑註解不影響 unresolved 的計數。模板裡出現的元素名也記成「見過」，
+    /// config 的 layout 宣告不會因為那個容器只用在模板裡就被報成「matched no element」。
+    /// </summary>
+    private void CountStyleTemplateText(XElement style, string file)
+    {
+        var templates = style.Descendants()
+            .Where(e => e.Name.LocalName == "ControlTemplate"
+                        && e.Ancestors().FirstOrDefault(a => a.Name.LocalName == "Style") == style
+                        && e.Ancestors().TakeWhile(a => a != style)
+                            .Any(a => a.Name.LocalName == "Setter" && a.Attribute("Property")?.Value == "Template")
+                        // 只取最外層：模板裡再套的模板（ToggleButton.Template）已經在外層的子孫裡，不能算兩次
+                        && !e.Ancestors().TakeWhile(a => a != style).Any(a => a.Name.LocalName == "ControlTemplate"));
+        foreach (var tmpl in templates)
+            foreach (var el in tmpl.Descendants())
+            {
+                _walkedNames.Add(el.Name.LocalName);
+                if (el.Name.LocalName.Contains('.') || IsNonTextElement(el.Name.LocalName)) continue; // 屬性元素、非文字元素
+                if (XamlBrush.Read(el, "Foreground") is not { } fg || fg.TrimStart().StartsWith("{TemplateBinding")) continue;
+                Unres(UnresolvedReason.InStyleTemplate, file, LineOf(el), fg);
+            }
+    }
+
     private void WalkStyles(XDocument doc, string file)
     {
         foreach (var style in doc.Descendants().Where(e => e.Name.LocalName == "Style"))
@@ -994,6 +1021,8 @@ public sealed partial class Auditor
             //   容器上的 ignore 壓得到容器內元素 × Style 鏈的配對，卻壓不到容器 Resources 裡 Style 定義處的配對
             var styleSuppressed = IsSuppressedByComment(style, file) ||
                                   style.Ancestors().Any(a => IgnoreStateOf(a, file).Suppressed);
+
+            CountStyleTemplateText(style, file);
 
             // 合併鏈：BasedOn 逐層合併、同條件觸發器合併（與元素端的鏈路徑同一套，見 StyleIndex.DefinitionChain）。
             // 規則 13 也適用於定義處：觸發器只收「無 TargetName（套宿主）或指向模板根」的 Setter ——

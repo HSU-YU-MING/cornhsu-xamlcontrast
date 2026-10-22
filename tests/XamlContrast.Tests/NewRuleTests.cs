@@ -880,6 +880,87 @@ public class NewRuleTests
         Assert.Contains(message, Assert.Throws<ConfigException>(() => ToolConfig.Load(fx.Root)).Message);
     }
 
+    // ── Style 的 Template setter 裡的 ControlTemplate（審查 1.0 最終驗證 S3）──
+    //    樹走訪不進 Style（Setter.Value 是屬性值），模板裡自己帶 Foreground 的文字元素從來沒有被評過，
+    //    也不在任何計數器裡 —— 靜默退化。完整稽核屬稽核語意、留到 1.x；1.0 先讓它不靜默：
+    //    計入 unresolved（in-style-template），點名位置與那個 Foreground，覆蓋率照實反映
+
+    [Fact]
+    public void TextInsideAStyleTemplateIsCountedAsUnresolved()
+    {
+        using var fx = new Fixture();
+        fx.File("Views/Main.xaml", """
+            <UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+            <UserControl.Resources><Style x:Key="S" TargetType="ContentControl"><Setter Property="Template"><Setter.Value>
+            <ControlTemplate TargetType="ContentControl"><Grid Background="#000000">
+              <TextBlock Foreground="#111111" Text="own foreground: never graded"/>
+              <TextBlock Foreground="{TemplateBinding Foreground}" Text="the host's foreground: graded through the style chain"/>
+              <ContentPresenter/>
+            </Grid></ControlTemplate>
+            </Setter.Value></Setter></Style></UserControl.Resources>
+            <Grid Background="#FFFFFF"><TextBlock Foreground="#000000" Text="x"/></Grid></UserControl>
+            """);
+        var r = fx.Run();
+        Assert.Equal(1, r.Pairs);
+        var site = Assert.Single(r.UnresolvedSites);
+        Assert.Equal(UnresolvedReason.InStyleTemplate, site.Reason);
+        Assert.Equal(("Views/Main.xaml", 4, "#111111"), (site.File, site.Line, site.Value));
+        Assert.Equal(1, r.UnresolvedBy[UnresolvedReason.InStyleTemplate]);
+        Assert.Equal(50.0, r.CoveragePercent);
+        Assert.Equal("in-style-template", Report.ReasonLabel(UnresolvedReason.InStyleTemplate));
+    }
+
+    [Fact] // 模板裡再套模板（ComboBox 的 ToggleButton.Template）：裡面那個字只算一次
+    public void NestedTemplatesInsideAStyleTemplateCountEachTextOnce()
+    {
+        using var fx = new Fixture();
+        fx.File("Views/Main.xaml", """
+            <UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+            <UserControl.Resources><Style TargetType="ComboBox"><Setter Property="Template"><Setter.Value>
+            <ControlTemplate TargetType="ComboBox"><Grid><ToggleButton><ToggleButton.Template>
+              <ControlTemplate TargetType="ToggleButton"><Border Background="#222222"><TextBlock Foreground="#444444" Text="▾"/></Border></ControlTemplate>
+            </ToggleButton.Template></ToggleButton></Grid></ControlTemplate>
+            </Setter.Value></Setter></Style></UserControl.Resources>
+            <Grid Background="#FFFFFF"><TextBlock Foreground="#000000" Text="x"/></Grid></UserControl>
+            """);
+        var r = fx.Run();
+        var site = Assert.Single(r.UnresolvedSites);
+        Assert.Equal((UnresolvedReason.InStyleTemplate, 4), (site.Reason, site.Line));
+    }
+
+    [Fact] // 樹裡（Resources 裡獨立的 ControlTemplate、元素自己的 Template 屬性元素）照舊會走，不另外計
+    public void ControlTemplatesOutsideStylesAreStillWalked()
+    {
+        using var fx = new Fixture();
+        fx.File("Views/Main.xaml", """
+            <UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+            <UserControl.Resources><ControlTemplate x:Key="T" TargetType="ContentControl"><Grid><Border Background="#000000"/><TextBlock Foreground="#111111" Text="t"/></Grid></ControlTemplate></UserControl.Resources>
+            <Grid Background="#FFFFFF"><TextBlock Foreground="#000000" Text="x"/></Grid></UserControl>
+            """);
+        var r = fx.Run();
+        Assert.Equal(2, r.Pairs);
+        Assert.DoesNotContain(r.UnresolvedSites, s => s.Reason == UnresolvedReason.InStyleTemplate);
+    }
+
+    [Fact] // layout 宣告的名稱只出現在 Style 的模板裡：那個元素存在，不能報「matched no element」（審查 1.0 最終驗證 S3 對 B8 的連帶）
+    public void LayoutNamesUsedOnlyInsideStyleTemplatesAreNotReportedAsUnmatched()
+    {
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, """{ "layout": { "overlap": ["TemplHost"] } }""");
+        fx.File("Themes/Generic.xaml", """
+            <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:l="clr-namespace:App">
+              <Style x:Key="Card" TargetType="ContentControl"><Setter Property="Template"><Setter.Value>
+                <ControlTemplate TargetType="ContentControl"><l:TemplHost><Border Background="#000000"/><TextBlock Foreground="#EEEEEE" Text="t"/></l:TemplHost></ControlTemplate>
+              </Setter.Value></Setter></Style>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """<Grid Background="#FFFFFF"><TextBlock Foreground="#000000" Text="x"/></Grid>""");
+        var cfg = ToolConfig.Load(fx.Root);
+        var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
+        Assert.Empty(r.UnmatchedLayoutNames);
+        Assert.Equal(1, r.UnresolvedBy[UnresolvedReason.InStyleTemplate]);
+    }
+
     [Fact] // 宣告了但整個專案沒有任何元素叫這個名字：多半是拼錯或大小寫不對 —— 宣告靜默失效（審查 1.0 B8）。
            // 不是錯誤（可能只是那個容器這次沒在掃描範圍裡），但要點名
     public void LayoutNamesThatMatchNoElementAreNamed()

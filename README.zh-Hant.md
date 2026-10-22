@@ -100,7 +100,7 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
    「挑單一檔」會漏。`Application.Resources` 算字典；視窗自己的區域 brush（`Window.Resources`、
    `UserControl.Resources`）跟 WPF 的資源查找一樣只在那個視窗裡看得到：在那裡蓋過色盤（引用 `Color` 的
    區域 brush 依主題各自解析），只有某個視窗定義的鍵在其他地方一律是 `unknown-palette-key`。字典檔不算進
-   `summary.files` 的畫面數，但裡面的 Style 與模板照樣稽核。色盤依路徑裡任何位置的 dark／light 分成深淺兩組
+   `summary.files` 的畫面數，但裡面的 Style（以及不在 Style 裡的 DataTemplate／ControlTemplate）照樣稽核。色盤依路徑裡任何位置的 dark／light 分成深淺兩組
    （`darktheme.xaml`、`Dark2.xaml`、`Themes/Dark/Colors/Palette.xaml` 都算）；檔名完全看不出主題（`Ocean.xaml`／
    `Nord.xaml`）、又有三個以上的鍵在不同字典裡值不同時，判成偵測退化，不靜默只評其中一套。
    字典**只屬於一個主題**的條件：檔名或最後一段資料夾裡有一個完整的詞是 dark 或 light（`Dark.xaml`、
@@ -250,6 +250,7 @@ fail／warn 另標 `symmetry: single-theme`。
 | `translucent-uncomposited` | 透明或半透明的背景、底下沒有可疊的顏色 —— 半透明的 `Background`、上面的祖先都沒有底；Style 定義處自己的 `Background="Transparent"`，而且沒有任何使用處會評到它（隱含樣式，或沒有元素以 `Style=` 引用的具名 Style；有元素用到的改在使用處評）；或以 `Opacity` 變淡、底下什麼都沒有的一層。第一種用下面的 `rootBackground` 補得回來 |
 | `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
 | `over-sibling-content` | 文字墊在同格子的兄弟 `Image`/媒體元素上 —— 真正的底是一張圖,靜態不可知;硬配祖先背景等於編造比值 |
+| `in-style-template` | Style 的 `Template` setter（`<Setter Property="Template"><Setter.Value><ControlTemplate>`）裡自己帶 `Foreground` 的文字元素 —— 還沒有評分（見已知限制），計入這裡讓覆蓋率反映這個缺口 |
 
 `summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 3** ——
 只掃到一小部分的「通過」不算通過,這是「0 組配對不算通過」那條不可設定規則的推廣。
@@ -261,7 +262,7 @@ fail／warn 另標 `symmetry: single-theme`。
 unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)——
 每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。
 
-**依專案型態設定預期。** 應用程式型專案通常解析得很好(1.0 實測:Kindling 97.3%、QuillNest 90.5%、ZeroCel 73.8%;
+**依專案型態設定預期。** 應用程式型專案通常解析得很好(1.0 實測:Kindling 95.8%、QuillNest 89.4%、ZeroCel 73.4%;
 第四個 Cornea 是截圖覆蓋視窗,字疊在工具看不到的畫面上 —— 0 組配對、exit 3);
 **控制項函式庫天生解析率低** —— 它們的顏色走 `{TemplateBinding}` / `{Binding}`,
 執行期才存在,這是靜態分析的硬邊界(報成 `bound-or-gradient`),不是能用設定修好的
@@ -317,6 +318,9 @@ ZeroCel（原 CelFlow）破 1／偏低 6、Kindling 破 1／偏低 1、QuillNest
 
 完整盲區表與逐案證據見[規畫書](XamlContrast專案規畫書.md)。
 
+Style 的 `Template` setter 裡自己帶 `Foreground` 的文字元素**還沒有評分**（樹走訪不進 Style）——
+計入 unresolved（`in-style-template`，點名 `file:line` 與那個字色），覆蓋率照實反映；模板經 `{TemplateBinding Foreground}`
+或 `ContentPresenter` 顯示的宿主字色照舊由 Style 鏈評分。
 TargetName 指向模板**內部**元素（指向根的已解析）、跨元素同條件觸發器、
 隱含樣式（根元素背景以外;例:`DataGrid` 列裡的按鈕是配表格的底評,不是隱含 `DataGridRow` 樣式畫的選取列底 ——
 實測一個報 ok 的 ghost 按鈕在選取列上是 4.06:1）;sibling 背景已解析 `Grid` 格子裡「佔滿格子的兄弟」(純色直接用;

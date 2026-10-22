@@ -129,8 +129,8 @@ tried in this order, and the one that ran is always named on the first line of t
    local brushes (`Window.Resources`, `UserControl.Resources`) are visible only inside that window,
    as in WPF's resource lookup: there they override the palette (a local brush referencing a `Color`
    is resolved per theme), and a key only some window defines is `unknown-palette-key` everywhere else.
-   Dictionary files don't count as screens in `summary.files`, but their styles and templates are
-   still audited. Files are grouped into dark and light by *dark* / *light* anywhere in their path
+   Dictionary files don't count as screens in `summary.files`, but their styles (and the templates of
+   their data and control templates outside styles) are still audited. Files are grouped into dark and light by *dark* / *light* anywhere in their path
    (`darktheme.xaml`, `Dark2.xaml` and `Themes/Dark/Colors/Palette.xaml` all count); if no name tells
    the themes apart (`Ocean.xaml` / `Nord.xaml`) and three or more keys have different values in
    different dictionaries, detection is reported as degraded rather than grading one theme silently.
@@ -310,6 +310,7 @@ doesn't tell you whether anything can be done about it:
 | `translucent-uncomposited` | a transparent or translucent background with nothing underneath to composite against — a translucent `Background` with no background above it, a style's own `Background="Transparent"` at its definition when no use site grades it (an implicit style, or a named style no element references with `Style=`; a used style is graded where it's used instead), or an `Opacity`-faded layer over nothing. `rootBackground` (below) fixes the first kind |
 | `same-brush-pair` | a style sets `Foreground` and `Background` to the *same* brush — the Material template-opacity idiom (the template paints the background at 10–12% opacity as a tint); literally 1:1, not at runtime, and the opacity animation is invisible statically |
 | `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio |
+| `in-style-template` | a text element with its own `Foreground` inside a style's `Template` setter (`<Setter Property="Template"><Setter.Value><ControlTemplate>`) — not graded yet (see Known limitations), counted so the gap shows in coverage |
 
 `summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
 (default 50%) exits 3**, because a pass over a fraction of the project is not a pass — the same
@@ -326,7 +327,7 @@ resource reference, a typo, or a palette file detection missed, which makes this
 even before any contrast math.
 
 **Set expectations by project type.** Application projects typically resolve well
-(measured with 1.0: Kindling 97.3%, QuillNest 90.5%, ZeroCel 73.8%; the fourth, Cornea, is a
+(measured with 1.0: Kindling 95.8%, QuillNest 89.4%, ZeroCel 73.4%; the fourth, Cornea, is a
 screen-capture overlay whose text sits on nothing the tool can see — 0 pairs, exit 3).
 **Control libraries resolve poorly by nature** —
 their colours flow through `{TemplateBinding}` and `{Binding}`, which only exist at runtime;
@@ -404,6 +405,11 @@ Honest list — full blind-spot table with per-case evidence in the
   like `Canvas`) — unless you declare the container in the config's `layout`
   (`"overlap": [...]` or `"sideBySide": [...]`). Partial-coverage siblings (including anything in a `Canvas`, where nothing stretches)
   and images nested inside a backdrop element are still invisible
+- Text elements with their own `Foreground` inside a style's `Template` setter are **not graded yet** —
+  the tree walk doesn't enter styles. They are counted as unresolved (`in-style-template`, with
+  `file:line` and the foreground), so coverage shows the gap; the host's own foreground, which the
+  template renders through `{TemplateBinding Foreground}` or a `ContentPresenter`, is graded through
+  the style chain as before
 - Implicit styles (beyond the document root's background) — e.g. a button inside a `DataGrid` row
   is graded against the grid's background, not the selected row's highlight that the implicit
   `DataGridRow` style paints (measured: a ghost button reported ok is 4.06:1 on a selected row)
