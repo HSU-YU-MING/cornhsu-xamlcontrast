@@ -816,7 +816,7 @@ public sealed partial class Auditor
             }
             Walk(child, childBd, file, op, suppressed);
             // 兄弟背板畫在容器那一層（容器的累乘透明度）；它自己的 Opacity 已折進 alpha（見 SiblingBackdrop）
-            if (overlap && SiblingBackdrop(child, stretches: el.Name.LocalName != "Canvas") is { } backdrop)
+            if (overlap && SiblingBackdrop(child, stretches: StretchesChildren(el.Name.LocalName)) is { } backdrop)
                 cellBg![cell] = layout == PanelLayout.Unknown
                     // 版面未知的自訂面板：它若是疊層，這就是後面兄弟的背板；若是排開，就不是 —— 靜態不可知，不猜
                     ? Paint(childBd, op, new Resolved(ColorKind.SiblingContent, Raw: $"<{child.Name.LocalName}> in <{el.Name.LocalName}>"), "")
@@ -829,15 +829,22 @@ public sealed partial class Auditor
     /// <summary>容器的子元素會不會疊在一起。Grid（同一格）、Canvas 會；StackPanel／WrapPanel／DockPanel／
     /// UniformGrid／ToolBarPanel／TabPanel 系（含衍生命名，例 VirtualizingWrapPanel、MyDockPanel）會排開。
     /// ⚠ 其他自訂 *Panel 的版面靜態不可知：舊版「保守視為疊層」，在排開的面板裡就是捏造背板
-    ///   （VirtualizingWrapPanel 裡的黑色方塊被當成旁邊白字的底）；當成排開一樣是猜 → Unknown。</summary>
+    ///   （VirtualizingWrapPanel 裡的黑色方塊被當成旁邊白字的底）；當成排開一樣是猜 → Unknown。
+    /// ⚠ 衍生命名的 *Canvas／*Grid 同理（審查素材 m7）：舊版只看 *Panel，ZoomCanvas 與 CardGrid 落到「排開」——
+    ///   疊在 Image 上的字報 21:1 ok、疊在黑色方塊上的白字配祖先白底編出 1:1 fail。它們是不是真的衍生自
+    ///   Canvas／Grid、Grid 的格子怎麼切，靜態都不知道 → Unknown。InkCanvas 是 WPF 內建，跟 Canvas 一樣疊在一起。</summary>
     private static PanelLayout LayoutOf(string name)
     {
-        if (name is "Grid" or "Canvas") return PanelLayout.Overlap;
+        if (name is "Grid" or "Canvas" or "InkCanvas") return PanelLayout.Overlap;
         if (name.EndsWith("StackPanel") || name.EndsWith("WrapPanel") || name.EndsWith("DockPanel") ||
             name.EndsWith("UniformGrid") || name.EndsWith("ToolBarPanel") || name.EndsWith("TabPanel") ||
-            name.EndsWith("ToolBarOverflowPanel")) return PanelLayout.SideBySide;
-        return name.EndsWith("Panel") ? PanelLayout.Unknown : PanelLayout.SideBySide;
+            name.EndsWith("ToolBarOverflowPanel") || name.EndsWith("DataGrid")) return PanelLayout.SideBySide;
+        return name.EndsWith("Panel") || name.EndsWith("Canvas") || name.EndsWith("Grid")
+            ? PanelLayout.Unknown : PanelLayout.SideBySide;
     }
+
+    /// <summary>Canvas 系不把子元素撐滿（沒有尺寸的 Border 實際是 0×0），見 <see cref="SiblingBackdrop"/>。</summary>
+    private static bool StretchesChildren(string name) => name is not ("Canvas" or "InkCanvas");
 
     private static (int, int) CellOf(XElement child, bool isGrid)
     {

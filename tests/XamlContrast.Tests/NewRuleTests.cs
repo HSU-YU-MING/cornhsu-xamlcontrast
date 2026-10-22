@@ -729,6 +729,61 @@ public class NewRuleTests
         Assert.Equal("#FFFFFF", Assert.Single(r.Findings).Bg);
     }
 
+    // ── 名稱結尾不是 Panel 的容器（審查素材 m7）──
+    //    InkCanvas 與衍生的 *Canvas 舊版落到「排開」：疊在 Image 上的字報 21:1 ok；衍生的 Grid（CardGrid）
+    //    也落到「排開」，黑色方塊旁（其實疊在上面）的白字配祖先的白底，編出 1:1 fail
+
+    [Fact] // InkCanvas 是 WPF 內建、跟 Canvas 一樣把子元素疊在一起
+    public void InkCanvasOverlapsLikeACanvas()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <InkCanvas><Image/><TextBlock Foreground="#000000" Text="over the image"/></InkCanvas>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Equal(UnresolvedReason.OverSiblingContent, Assert.Single(r.UnresolvedSites).Reason);
+    }
+
+    [Theory] // 衍生命名的 *Canvas／*Grid：版面靜態不可知（是不是真的衍生自 Canvas／Grid、Grid 的格子怎麼切都不知道）——
+             // 與自訂 *Panel 同一個處理：前面有可能是背板的兄弟時，後面的字計入 over-sibling-content
+    [InlineData("l:ZoomCanvas", "<Image/>", "<Image> in <ZoomCanvas>")]
+    [InlineData("l:CardGrid", """<Border Background="#000000"/>""", "<Border> in <CardGrid>")]
+    [InlineData("l:CardGrid", "<Image/>", "<Image> in <CardGrid>")]
+    public void DerivedCanvasAndGridLayoutsAreUnknowable(string container, string sibling, string value)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid xmlns:l="clr-namespace:App" Background="#FFFFFF">
+              <{container}>{sibling}<TextBlock Foreground="#FFFFFF" Text="x"/></{container}>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        var site = Assert.Single(r.UnresolvedSites);
+        Assert.Equal(UnresolvedReason.OverSiblingContent, site.Reason);
+        Assert.Equal(value, site.Value);
+    }
+
+    [Theory] // 已知會排開的 *Grid 不受影響：UniformGrid（含衍生命名）、DataGrid
+    [InlineData("MyUniformGrid")]
+    [InlineData("UniformGrid")]
+    [InlineData("DataGrid")]
+    public void KnownSideBySideGridsAreNotUnknowable(string container)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              <{container}><Border Background="#000000"/><TextBlock Foreground="#000000" Text="x"/></{container}>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.UnresolvedSites);
+        Assert.Equal("#FFFFFF", Assert.Single(r.Findings).Bg);
+    }
+
     [Theory] // Canvas 裡有尺寸的純色兄弟也不當背板:Canvas.Left/Top 與文字的實際範圍靜態不可知,
              // 它在不在字底下沒辦法判定 —— 與 Grid 裡「有明確尺寸 = 不是佔滿」的強調色條同一個處理
     [InlineData("""<Border Background="#000000"/>""")]
