@@ -81,7 +81,9 @@ jobs:
         run: dotnet test XamlContrast.slnx -c Release --no-build
 
       # 離線示範刻意做壞 → 預期 exit 1。這正是 CI 把關該有的行為，
-      # 所以「跑出 exit 1」= 成功；跑出別的才是回歸（含 0 —— 守門員靜默放行）。
+      # 所以「跑出 exit 1」= 成功；跑出別的才是回歸（含 0 —— 守門員靜默放行；含 3 —— 工具根本沒看到 demo）。
+      # 1.0 的退出碼變動（預設 gate warn、「結果不可信」改 exit 3）不改變 demo 的期望：它沒有 warn、覆蓋率 100%，
+      # 3 組 fail 照樣是 1。計數也不變；schemaVersion 6 起 JSON 帶 exitCode，一併核對它與實際退出碼一致
       - name: Audit demo (預期 fail, exit 1)
         run: |
           set +e
@@ -95,7 +97,7 @@ jobs:
             exit 1
           fi
           # 再驗 JSON 的關鍵計數：3 fail、1 豁免、1 壓掉（骨架自我把關，不只看退出碼）
-          jq -e '.summary.counts.fail == 3 and .summary.disabledExempt == 1 and .summary.suppressed == 1' \
+          jq -e '.exitCode == 1 and .summary.counts.fail == 3 and .summary.disabledExempt == 1 and .summary.suppressed == 1' \
             "$RUNNER_TEMP/demo-report.json" > /dev/null \
             || { echo "✗ demo 報告計數與預期不符"; jq .summary "$RUNNER_TEMP/demo-report.json"; exit 1; }
           echo "✓ demo 報告計數正確"

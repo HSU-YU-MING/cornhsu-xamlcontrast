@@ -2,7 +2,10 @@ name: release
 
 on:
   push:
-    tags: ['v*']   # 推 v0.1.0 這種 tag 就發佈
+    # 只認三段式版號 tag（v1.2.3）。刻意不用 'v*'：1.0 起維護移動式 major tag（v1，每個 1.x 發版後前移，
+    # 見 RELEASING.md），它也符合 'v*'，每次前移都會誤觸發一次注定失敗的 release
+    # （Parity 2026-08-26 發 1.0.0 與 1.1.0 時各踩一次）
+    tags: ['v[0-9]*.[0-9]*.[0-9]*']
 
 jobs:
   release:
@@ -23,11 +26,28 @@ jobs:
         id: ver
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
+      # CHANGELOG 是「推 tag 之前」的版本真相源（Release 的說明也取自它）。兩者不一致就別發：
+      # 擋在這裡的代價是「tag 已推、但沒發出去」—— 刪 tag 重來即可；
+      # 相對地，CHANGELOG 沒寫就發到 nuget.org 是沒有反悔機會的（照 Parity）
+      - name: Assert CHANGELOG top entry matches the tag
+        env:
+          XC_VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          set -euo pipefail
+          top=$(grep -m1 -oE '^## +\[?[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)
+          if [ "$top" != "$XC_VERSION" ]; then
+            echo "✗ tag 是 v$XC_VERSION，但 CHANGELOG.md 最上面那個版本是 ${top:-（沒有）}。先補上 ## $XC_VERSION 的段落再重推 tag。"
+            exit 1
+          fi
+          echo "✓ CHANGELOG 頂端 $top 與 tag 一致"
+
       - run: dotnet restore XamlContrast.slnx
       - run: dotnet build XamlContrast.slnx -c Release --no-restore -p:Version=${{ steps.ver.outputs.version }}
       - run: dotnet test XamlContrast.slnx -c Release --no-build
 
-      # 發佈前的最後一道守門：示範專案必須如預期 exit 1
+      # 發佈前的最後一道守門：示範專案必須如預期 exit 1（3 組 fail）。
+      # 1.0 的退出碼變動（預設 gate warn、「結果不可信」改 exit 3）不影響 demo：它沒有 warn、覆蓋率 100%，
+      # 照樣是「找到違規」的 1。跑出 3 = 工具沒看到 demo（偵測或解析壞了），一樣中止
       - name: Audit demo (預期 fail, exit 1)
         run: |
           set +e
