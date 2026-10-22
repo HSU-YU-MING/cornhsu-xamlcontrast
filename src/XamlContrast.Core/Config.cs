@@ -107,7 +107,7 @@ public sealed class ToolConfig
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         { throw new ConfigException($"cannot read {FileName}: {ex.Message}"); }
         try { cfg = JsonSerializer.Deserialize<ToolConfig>(text, JsonOpts) ?? new ToolConfig(); }
-        catch (JsonException ex) { throw new ConfigException($"{FileName} is not valid JSON: {ex.Message}"); }
+        catch (JsonException ex) { throw new ConfigException(DescribeJsonError(ex)); }
 
         // 未知屬性是設定錯誤（1.0，決策檔 H5）。⚠ 0.x 靜默忽略：{"strictPallete": true} 載入時沒有任何錯誤，
         //   色盤退化保險其實沒開 —— 使用者以為改了稽核標準而其實沒有。全部點名（含區段內的，以 palette.mdoe 的形式）；
@@ -159,6 +159,27 @@ public sealed class ToolConfig
     /// <summary>元素名清單：不能是 null，也不能含 null／空白名 —— 分類用後綴比對，
     /// EndsWith("") 恆真：extraNonText 裡一個 "" 會把所有不在內建表的元素都判成裝飾、
     /// 不受文字門檻檢查（靜默放行），跟 null 一樣當設定錯誤。</summary>
+    /// <summary>
+    /// 型別錯誤 → 「欄位 must be 期望的型別」；JSON 本身壞掉才說不是合法的 JSON（審查 1.0 C5）。
+    /// ⚠ 舊版一律「is not valid JSON: The JSON value could not be converted to System.Boolean. Path: …」——
+    ///   JSON 本身沒錯，訊息卻這樣說，還帶出 .NET 的型別名。
+    /// </summary>
+    private static string DescribeJsonError(JsonException ex)
+    {
+        var type = System.Text.RegularExpressions.Regex.Match(ex.Message, @"could not be converted to (?<t>\S+?)\.?(\s|$)");
+        if (type.Success && ex.Path is { Length: > 2 } path && path.StartsWith("$."))
+        {
+            var t = type.Groups["t"].Value;
+            var expected = t.EndsWith("[]") ? "an array of strings"
+                : t.Contains("Boolean") ? "true or false"
+                : t.Contains("Double") || t.Contains("Int32") ? "a number"
+                : t.Contains("String") ? "a string"
+                : "an object";
+            return $"{path[2..]} must be {expected}";
+        }
+        return $"{FileName} is not valid JSON: {ex.Message}";
+    }
+
     private static void RequireNames(string[]? names, string field)
     {
         if (names is null) throw new ConfigException($"{field} must be an array of element names, got null");

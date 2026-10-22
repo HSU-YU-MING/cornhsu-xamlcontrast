@@ -260,6 +260,17 @@ public class BaselineFormatTests
         Assert.Contains(expect, ex.Message);
     }
 
+    [Fact] // 0.x 的 baseline 被拒時，「regenerate it with --write-baseline」只說一次 —— 例外訊息已經帶了，
+           // CLI 那一行提示是給沒帶的訊息用的（審查 1.0 C5：舊版印兩次）
+    public void CliSaysRegenerateOnceForAZeroXBaseline()
+    {
+        using var fx = CliProjects.Failing();
+        fx.File("baseline.json", """{ "entries": [] }""");
+        var cli = Cli.Run(fx.Root, "--baseline", Path.Combine(fx.Root, "baseline.json"));
+        Assert.True(cli.Exit == 2, cli.ToString());
+        Assert.Equal(1, cli.Err.Split("--write-baseline").Length - 1);
+    }
+
     [Fact] // CLI：讀不了的 baseline → exit 2、stderr 說出原因與怎麼重寫
     public void CliRejectsAnIncompleteBaseline()
     {

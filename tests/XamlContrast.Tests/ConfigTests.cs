@@ -113,6 +113,35 @@ public class ConfigTests
         Assert.Equal(0, r.UnresolvedBy.GetValueOrDefault(UnresolvedReason.NoAncestorBackground));
     }
 
+    [Theory] // 型別錯誤：點名欄位與期望的型別。舊版說「is not valid JSON」（JSON 本身沒錯）並帶出 .NET 的型別名
+             // （could not be converted to System.Boolean）—— 使用者看不懂也找不到是哪一格（審查 1.0 C5）
+    [InlineData("""{ "strictPalette": "yes" }""", "strictPalette must be true or false")]
+    [InlineData("""{ "minCoverage": "50" }""", "minCoverage must be a number")]
+    [InlineData("""{ "thresholds": { "normalText": "4.5" } }""", "thresholds.normalText must be a number")]
+    [InlineData("""{ "failOn": 1 }""", "failOn must be a string")]
+    [InlineData("""{ "palette": [] }""", "palette must be an object")]
+    [InlineData("""{ "classification": { "extraText": "TextBlock" } }""", "classification.extraText must be an array of strings")]
+    [InlineData("""{ "layout": { "overlap": [1] } }""", "layout.overlap[0] must be a string")]
+    [InlineData("""{ "ignore": { "requireReason": "no" } }""", "ignore.requireReason must be true or false")]
+    public void TypeErrorsNameTheFieldAndTheExpectedType(string json, string expected)
+    {
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, json);
+        var ex = Assert.Throws<ConfigException>(() => ToolConfig.Load(fx.Root));
+        Assert.Contains(expected, ex.Message);
+        Assert.DoesNotContain("System.", ex.Message);
+        Assert.DoesNotContain("not valid JSON", ex.Message);
+    }
+
+    [Fact] // JSON 本身壞掉才說「不是合法的 JSON」
+    public void BrokenJsonStillSaysSo()
+    {
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, """{ "strictPalette": tru }""");
+        var ex = Assert.Throws<ConfigException>(() => ToolConfig.Load(fx.Root));
+        Assert.Contains("is not valid JSON", ex.Message);
+    }
+
     [Fact] // minCoverage 要驗證範圍 —— config 寫錯要有欄位級訊息，不能靜默忽略
     public void MinCoverageOutOfRangeIsRejected()
     {
@@ -203,8 +232,8 @@ public class ConfigTests
     [InlineData("""{ "thresholds": { "normalText": 2.5 } }""", "thresholds.largeText (3) must not exceed thresholds.normalText (2.5)")]
     [InlineData("""{ "thresholds": { "failFactor": 1.01 } }""", "thresholds out of range")]
     [InlineData("""{ "minCoverage": -0.1 }""", "minCoverage must be between 0 and 100")]
-    [InlineData("""{ "minCoverage": "50" }""", "not valid JSON")]                       // 型別錯
-    [InlineData("""{ "classification": { "extraText": "TextBlock" } }""", "not valid JSON")]
+    [InlineData("""{ "minCoverage": "50" }""", "minCoverage must be a number")]         // 型別錯：點名欄位與型別
+    [InlineData("""{ "classification": { "extraText": "TextBlock" } }""", "classification.extraText must be an array of strings")]
     [InlineData("""{ not json """, "not valid JSON")]
     public void InvalidConfigThrowsWithHelpfulMessage(string json, string expectInMessage)
     {

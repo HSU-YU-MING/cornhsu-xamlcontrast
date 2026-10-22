@@ -75,9 +75,10 @@ public class CliExitDecisionTests
         if (config is not null) fx.File("xamlcontrast.config.json", config);
         var r = Cli.Run([fx.Root, .. flags]);
         Assert.True(r.Exit == expectedExit, r.ToString());
-        Assert.Contains(expectedExit == 1
-            ? "exit 1: 1 pair(s) below AA"
-            : "exit 0: no fail, but 1 pair(s) below AA (--fail-on fail)", r.Out);
+        // 放寬的 gate 從哪裡來要說對：config 設的不能印成「(--fail-on fail)」—— 使用者沒下那個旗標（審查 1.0 C5）
+        Assert.Contains(expectedExit == 1 ? "exit 1: 1 pair(s) below AA"
+            : flags.Length > 0 ? "exit 0: no fail, but 1 pair(s) below AA (--fail-on fail)"
+            : "exit 0: no fail, but 1 pair(s) below AA (\"failOn\": \"fail\" in xamlcontrast.config.json)", r.Out);
     }
 
     [Theory] // 色盤退化：預設只喊（!! palette），--strict-palette 或 config strictPalette 才擋；
@@ -229,6 +230,24 @@ public class CliExitDecisionTests
         var r = Cli.Run(fx.Root, "--min-coverage", "66.7");
         Assert.True(r.Exit == 0, r.ToString());
         Assert.Contains("coverage 66.7% of pairs seen", r.Out);
+    }
+
+    [Fact] // 下限照使用者給的值印：舊版印 {minCov:F0}，--min-coverage 33.35 時寫「only 33.3% … below the 33% floor」——
+           // 33.3 低於 33 是自相矛盾（審查 1.0 C5）。比的是報告上的覆蓋率與使用者給的下限，印的也是這兩個數
+    public void CoverageFloorMessagePrintsTheFloorItCompared()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid Background="#000000">
+              <TextBlock Foreground="#FFFFFF" Text="1"/>
+              <Border Background="{Binding A}"><TextBlock Foreground="#FFFFFF" Text="2"/></Border>
+              <Border Background="{Binding B}"><TextBlock Foreground="#FFFFFF" Text="3"/></Border>
+            </Grid>
+            """);
+        var below = Cli.Run(fx.Root, "--min-coverage", "33.35");
+        Assert.True(below.Exit == 3, below.ToString());
+        Assert.Contains("only 33.3% of colour pairs could be resolved (1 of 3), below the 33.35% floor", below.Out);
+        var at = Cli.Run(fx.Root, "--min-coverage", "33.3");
+        Assert.True(at.Exit == 0, at.ToString());
     }
 
     [Fact] // CHANGELOG 0.6.0 修掉的失效鏈本身：主題檔被搬走 → 色票配對全變 unresolved →

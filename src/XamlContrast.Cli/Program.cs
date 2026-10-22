@@ -156,7 +156,8 @@ if (baselinePath is not null)
     {
         // 壞掉的 baseline 要有好訊息，不是裸拋堆疊
         Console.Error.WriteLine($"baseline is not valid ({baselinePath}): {ex.Message}");
-        Console.Error.WriteLine("regenerate it with --write-baseline");
+        // 例外訊息已經帶了重寫的指引（0.x 的檔、舊的 keyVersion）就不再說一次
+        if (!ex.Message.Contains("--write-baseline")) Console.Error.WriteLine("regenerate it with --write-baseline");
         return 2;
     }
 }
@@ -277,7 +278,7 @@ int DecideExit()
     {
         Console.WriteLine(string.Create(System.Globalization.CultureInfo.InvariantCulture,
             $"exit 3: only {result.CoveragePercent:F1}% of colour pairs could be resolved " +
-            $"({result.Pairs} of {result.Pairs + result.Unresolved}), below the {minCov:F0}% floor — " +
+            $"({result.Pairs} of {result.Pairs + result.Unresolved}), below the {minCov}% floor — " +
             $"this result does not represent the project. See the unresolved breakdown above; " +
             $"pass --min-coverage 0 to proceed anyway."));
 
@@ -321,7 +322,8 @@ int DecideExit()
         Console.WriteLine($"exit 1: {warn} pair(s) below AA");
         return 1;
     }
-    if (warn > 0) Console.WriteLine($"exit 0: no fail, but {warn} pair(s) below AA (--fail-on fail)");
+    // 放寬的 gate 從哪裡來要說對：config 設的不能印成旗標（預設是 warn，走到這裡不是旗標就是 config）
+    if (warn > 0) Console.WriteLine($"exit 0: no fail, but {warn} pair(s) below AA ({(failOnFlag is not null ? "--fail-on fail" : $"\"failOn\": \"fail\" in {ToolConfig.FileName}")})");
     else Console.WriteLine("exit 0: all pairs meet AA");
     return 0;
 
