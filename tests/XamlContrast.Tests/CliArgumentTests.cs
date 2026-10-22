@@ -42,6 +42,37 @@ public class CliArgumentTests
         Assert.DoesNotContain("   at ", r.Err); // 好訊息，不是堆疊
     }
 
+    [Fact] // `--` 結束旗標：之後的字一律是位置參數（審查 1.0 A3）。root 以 - 開頭時沒有別的寫法 ——
+           // 舊版把 `-weird` 當成未知旗標（exit 2），把 `--version` 當成旗標（印版本、exit 0，什麼都沒稽核）
+    public void DoubleDashEndsTheOptions()
+    {
+        using var parent = new Fixture();
+        Directory.CreateDirectory(Path.Combine(parent.Root, "--version"));
+        File.WriteAllText(Path.Combine(parent.Root, "--version", "Main.xaml"), """
+            <Grid Background="#FFFFFF">
+              <TextBlock Foreground="#EEEEEE" Text="fail"/>
+            </Grid>
+            """);
+        var withoutDashes = Cli.RunIn(parent.Root, "--version");
+        Assert.True(withoutDashes.Exit == 0 && !withoutDashes.Out.Contains("pairs"), withoutDashes.ToString()); // 前提：那是旗標
+        var r = Cli.RunIn(parent.Root, "--json", "r.json", "--", "--version");
+        Assert.True(r.Exit == 1, r.ToString()); // 稽核了那個目錄：1 組 fail
+        Assert.Contains("text-on-background pairs 1", r.Out);
+        Assert.Equal(1, Cli.ReadJson(Path.Combine(parent.Root, "r.json")).GetProperty("summary").GetProperty("counts").GetProperty("fail").GetInt32());
+    }
+
+    [Theory] // `--` 之後只能有一個位置參數（root）；`--` 前面已經給了 root 就不能再給
+    [InlineData(new[] { "--", "{root}", "extra" }, "unknown argument: extra")]
+    [InlineData(new[] { "{root}", "--", "{root}" }, "unknown argument: ")]
+    [InlineData(new[] { "--" }, "usage: xamlcontrast")]
+    public void DoubleDashTakesExactlyOneRoot(string[] args, string expectInStderr)
+    {
+        using var fx = CliProjects.Passing();
+        var r = Cli.Run(args.Select(a => a.Replace("{root}", fx.Root)).ToArray());
+        Assert.True(r.Exit == 2, r.ToString());
+        Assert.Contains(expectInStderr, r.Err);
+    }
+
     [Theory] // --json／--sarif／--md 的值必填，而且不能是下一個旗標：舊版只檢查「後面還有沒有字」，
              // `--json --strict-palette` 會寫出一個叫 --strict-palette 的檔、色盤退化保險靜默失效。
              // 以 - 開頭的檔名沒有正當用途（真的要就寫 ./-name）；「-」也不是 stdout，舊版會寫出一個叫 - 的檔

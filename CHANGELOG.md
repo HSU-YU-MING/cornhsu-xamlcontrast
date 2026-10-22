@@ -156,6 +156,8 @@ Forward compatibility is not promised: a config that uses a property added in 1.
 older 1.x (exit 2, naming the property).
 
 ### Added
+- **`--` ends the options**: everything after it is the project root, so a root that starts with `-`
+  can be audited (`xamlcontrast --json r.json -- -legacy-ui`). The Action passes its `root` this way.
 - **JSON**: `toolVersion`, `exitCode`, `summary.failOn` / `minCoverage` / `strictPalette` /
   `invalidIgnoreCount`, `findings[].theme` / `baseline`; the shape is published as
   `docs/report.schema.json`.

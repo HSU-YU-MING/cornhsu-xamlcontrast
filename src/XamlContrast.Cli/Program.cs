@@ -63,6 +63,16 @@ for (var i = 0; i < args.Length; i++)
             if (OutputPath(args, i, "--write-baseline") is not { } wbp) return 2;
             writeBaselinePath = wbp; i++;
             break;
+        // 旗標到此為止：之後的字一律是位置參數（只收一個 root）。root 以 - 開頭時沒有別的寫法 ——
+        // 舊版把 `--version` 這個目錄名當成旗標（印版本、exit 0，什麼都沒稽核）。Action 一律這樣傳 root（審查 1.0 A3）
+        case "--":
+            for (i++; i < args.Length; i++)
+            {
+                if (root is null) { root = args[i]; continue; }
+                Console.Error.WriteLine($"unknown argument: {args[i]}");
+                return 2;
+            }
+            break;
         case "-h" or "--help":
             PrintUsage(Console.Out);
             return 0;
@@ -336,6 +346,7 @@ static void PrintUsage(TextWriter w)
         XamlContrast — static WCAG contrast audit for XAML source
 
         usage: xamlcontrast <project-root> [options]
+               xamlcontrast [options] -- <project-root>     (a root that starts with '-')
 
         options:
           --json <path>            write machine-readable report (summary + findings)
