@@ -170,4 +170,17 @@ public class MarkdownReportTests
         var row = md.Split('\n').First(l => l.Contains("Weird"));
         Assert.Equal(8, row.Count(c => c == '|') - 1);   // 被跳脫的那個不算欄位分隔
     }
+
+    [Fact] // 反引號（審查 1.0 B6）：檔名裡的反引號會提早結束 code span，PR 留言的表格整列走樣。
+           // code span 改用比內容裡最長的反引號串更長的圍欄（CommonMark 的寫法）；一般文字裡的反引號以 \ 跳脫
+    public void BackticksInNamesDoNotBreakTheMarkdown()
+    {
+        using var fx = new Fixture();
+        fx.File("Views/My`View.xaml", """<Grid Background="#FFFFFF"><TextBlock Foreground="#EEEEEE" Text="x"/></Grid>""");
+        fx.File("Views/Bro`ken.xaml", "<Grid><未閉合");
+        var md = Report.ToMarkdown(fx.Run(), 1);
+        Assert.Contains("| `` Views/My`View.xaml:1 `` |", md);
+        Assert.Contains("Views/Bro\\`ken.xaml", md);
+        Assert.DoesNotContain("| `Views/My`View.xaml:1` |", md);
+    }
 }

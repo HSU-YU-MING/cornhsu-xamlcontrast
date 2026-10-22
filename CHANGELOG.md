@@ -335,6 +335,10 @@ older 1.x (exit 2, naming the property).
   usage to stderr, with a note when `--baseline`/`--write-baseline` consumed the project root.
 - The zero-pairs exit also prints the `rootBackground` hint when it applies.
 - Action: the annotation/SARIF path prefix is normalised correctly for `root: .` and `/./` segments.
+- Action annotations escape their values as workflow commands require (`%`, CR and LF in the message;
+  also `:` and `,` in the `file=` property): a comma in a file name cut the property short, and a line break
+  let the rest of the value start a new workflow command. The Markdown report escapes backticks, and its
+  code spans use a longer fence when the text contains one.
 - `scripts/verify-baselines.ps1` follows the CelFlow → ZeroCel rename and keeps going (with a red line)
   when a validation project is missing, instead of aborting under Windows PowerShell 5.1. Its expected
   exit code follows the 1.0 rules, or the snapshot's own `exitCode` when the snapshot has one.

@@ -493,7 +493,7 @@ public static class Report
                 var need = string.Create(inv, $"{f.Need}");
                 if (f.Large) need += " (large)";
                 sb.AppendLine(string.Create(inv,
-                    $"| `{Esc(f.File)}:{f.Line}` | {Esc(f.Element)} | `{Esc(f.Fg)}` → `{Esc(f.Bg)}` | " +
+                    $"| {Code($"{f.File}:{f.Line}")} | {Esc(f.Element)} | {Code(f.Fg)} → {Code(f.Bg)} | " +
                     $"{RatioCell(f, ThemeSide.Dark)} | {RatioCell(f, ThemeSide.Light)} | {need} | {SymmetryLabel(f.Symmetry)} |"));
             }
             sb.AppendLine();
@@ -535,5 +535,23 @@ public static class Report
     }
 
     /// <summary>Markdown 表格用:跳脫會破壞表格/格式的字元。</summary>
-    private static string Esc(string s) => s.Replace("|", "\\|").Replace("\n", " ");
+    /// <summary>Markdown 一般文字：表格的 | 跳脫、換行收成空白、反引號跳脫（不然會開出一段 code span，審查 1.0 B6）。</summary>
+    private static string Esc(string s) => s.Replace("`", "\\`").Replace("|", "\\|").Replace("\r", " ").Replace("\n", " ");
+
+    /// <summary>Markdown 的 code span：圍欄用比內容裡最長的反引號串多一個的反引號（CommonMark），內容裡有反引號時
+    /// 兩邊各墊一個空白。表格裡的 | 照樣要跳脫（GFM），換行收成空白。
+    /// ⚠ 舊版直接用一個反引號包起來，檔名裡一個反引號就提早結束 code span、整列走樣。</summary>
+    private static string Code(string s)
+    {
+        var body = s.Replace("|", "\\|").Replace("\r", " ").Replace("\n", " ");
+        var longest = 0;
+        for (int i = 0, run = 0; i < body.Length; i++)
+        {
+            run = body[i] == '`' ? run + 1 : 0;
+            longest = Math.Max(longest, run);
+        }
+        var fence = new string('`', longest + 1);
+        var pad = longest > 0 ? " " : "";
+        return fence + pad + body + pad + fence;
+    }
 }

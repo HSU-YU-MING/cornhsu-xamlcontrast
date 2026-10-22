@@ -185,13 +185,17 @@ runs:
         [ -f "$report" ] || exit 0
         prefix=$(echo "$XC_WORKDIR/$XC_ROOT" | sed 's|^|/|; s|$|/|; s|//*|/|g; s|/\./|/|g; s|/\./|/|g; s|/\./|/|g; s|^/||; s|/$||')
         if [ -n "$prefix" ]; then prefix="$prefix/"; fi
+        # workflow command 的跳脫（GitHub 規格）：訊息跳脫 % \r \n，屬性值（file=…）另外跳脫 : 與 ,。
+        # 不跳脫的話，檔名裡一個逗號就把 file 屬性切斷、一個換行就讓後面的內容落在行首變成另一個 workflow command
         jq -r --arg root "$prefix" '
+          def esc: gsub("%"; "%25") | gsub("\r"; "%0D") | gsub("\n"; "%0A");
+          def prop: esc | gsub(":"; "%3A") | gsub(","; "%2C");
           .summary.failOn as $gate
           | .findings[]
           | select(.category == "fail" or .category == "warn")
           | (if .baseline == "known" then "notice" elif .category == "fail" or $gate == "warn" then "error" else "warning" end) as $level
           | (if .ratioLight == null then "\(.ratioDark):1 (dark theme only)" elif .ratioDark == null then "\(.ratioLight):1 (light theme only)" else "\(.ratioDark):1 dark / \(.ratioLight):1 light" end) as $ratio
-          | "::\($level) file=\($root)\(.file),line=\(.line)::contrast \($ratio) (need \(.threshold)) — fg=\(.fg) bg=\(.bg) [\(.symmetry)]\(if .baseline == "known" then " — known debt in the baseline" else "" end)"
+          | "::\($level) file=\(($root + .file) | prop),line=\(.line)::\("contrast \($ratio) (need \(.threshold)) — fg=\(.fg) bg=\(.bg) [\(.symmetry)]\(if .baseline == "known" then " — known debt in the baseline" else "" end)" | esc)"
         ' "$report" || true
 
     # SARIF 的路徑是 root 相對 —— 先補上前綴變成 repo 相對，code scanning 才對得上檔案

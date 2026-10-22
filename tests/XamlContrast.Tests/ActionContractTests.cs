@@ -116,7 +116,7 @@ public class ActionContractTests
         // 前綴非空才補 "/"（root 就是 workspace 頂層時前綴是空的，不能接出 "/Views/Main.xaml"），
         // 之後直接接 finding 的 file —— 註記的 jq 與 SARIF 改寫的 jq 都是這樣接
         Assert.Equal(2, Regex.Matches(ActionYml, @"if \[ -n ""\$prefix"" \]; then prefix=""\$prefix/""; fi").Count);
-        Assert.Contains("file=\\($root)\\(.file)", ActionYml);
+        Assert.Contains("file=\\(($root + .file) | prop)", ActionYml);
         Assert.Contains("($root + .)", ActionYml);
 
         var prefix = Sed(sed, $"{workingDirectory}/{root}");
@@ -325,6 +325,47 @@ public class ActionContractTests
         Assert.Equal($"exit={exit}\n", r.Output);
     }
 
+    [Fact] // 註記是 workflow command，值要照 GitHub 的規格跳脫（審查 1.0 B6）：訊息跳脫 % \r \n，屬性值另外跳脫 : 與 ,。
+           // 檔名裡一個逗號會把 file 屬性切斷；一個換行讓後面的內容落在行首，變成另一個 workflow command。
+           // % 要最先跳脫（不然 %2C 的 % 會被再跳一次）。這條不需要 jq，任何機器都跑
+    public void AnnotationValuesAreEscapedPerTheWorkflowCommandSpec()
+    {
+        var program = Regex.Match(ActionYml, """jq -r --arg root "\$prefix" '(?<p>[^']+)'""").Groups["p"].Value;
+        Assert.Contains("""def esc: gsub("%"; "%25") | gsub("\r"; "%0D") | gsub("\n"; "%0A");""", program);
+        Assert.Contains("""def prop: esc | gsub(":"; "%3A") | gsub(","; "%2C");""", program);
+        Assert.Contains("file=\\(($root + .file) | prop),line=", program);
+        Assert.Matches(@"::\\\(""contrast .*"" \| esc\)""", program);
+    }
+
+    [JqFact] // 同一件事實跑一次（GitHub 的 runner 都有 jq；這台機器沒有就略過）：含逗號、換行、% 的檔名與色值
+    public void AnnotationStepEscapesCommasNewlinesAndPercentSigns()
+    {
+        using var fx = new Fixture().File("Views/My,View.xaml", """
+            <Grid Background="#FFFFFF"><TextBlock Foreground="#EEEEEE" Text="x"/></Grid>
+            """);
+        var report = JsonDocument.Parse(Report.ToJson(fx.Run())).RootElement.GetRawText()
+            .Replace("\"Views/My,View.xaml\"", "\"Views/My,Vi\\new.xaml\"")
+            .Replace("\"fg\": \"#EEEEEE\"", "\"fg\": \"50%\\r\\n::error::INJECTED\"");
+        var r = RunStep("Annotate failing pairs", new() { ["root"] = "src" }, prepareTemp: temp =>
+            File.WriteAllText(Path.Combine(temp, "xamlcontrast-report.json"), report));
+        Assert.True(r.Exit == 0, r.ToString());
+        var line = Assert.Single(r.Stdout.Split('\n', StringSplitOptions.RemoveEmptyEntries));
+        Assert.StartsWith("::error file=src/Views/My%2CVi%0Aew.xaml,line=1::contrast ", line);
+        Assert.Contains("fg=50%25%0D%0A::error::INJECTED", line);
+    }
+
+    /// <summary>bash 跑得到 jq 才跑（GitHub 的 Linux／Windows／macOS runner 都有）；沒有就略過並說明。</summary>
+    public sealed class JqFactAttribute : FactAttribute
+    {
+        public JqFactAttribute()
+        {
+            var exe = OperatingSystem.IsWindows() ? "jq.exe" : "jq";
+            if (!(Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries)
+                    .Any(d => File.Exists(Path.Combine(d, exe))))
+                Skip = "這台機器沒有 jq；GitHub 的 runner 有，CI 會跑這條";
+        }
+    }
+
     /// <summary>一個 step（`    - name: …`）到下一個 step 之間的內容。</summary>
     private static string Step(string name)
     {
@@ -363,7 +404,7 @@ public class ActionContractTests
     /// 沒指定的 input 用 action.yml 的預設值（root 給 src/App）。dotnet 與 xamlcontrast 換成 stub，
     /// 把收到的參數一行一筆記到 $RUNNER_TEMP/calls（xamlcontrast 回 <paramref name="stubExit"/>）。
     /// </summary>
-    private static StepRun RunStep(string step, Dictionary<string, string>? inputs = null, int stubExit = 0)
+    private static StepRun RunStep(string step, Dictionary<string, string>? inputs = null, int stubExit = 0, Action<string>? prepareTemp = null)
     {
         var values = Inputs().ToDictionary(kv => kv.Key, kv => kv.Value.Default?.Trim('\'') ?? "");
         values["root"] = "src/App";
@@ -381,6 +422,7 @@ public class ActionContractTests
             """;
         var script = Path.Combine(temp, "step.sh");
         File.WriteAllText(script, stub + RunScript(step));
+        prepareTemp?.Invoke(temp);
 
         var psi = new ProcessStartInfo(BashPath())
         {
