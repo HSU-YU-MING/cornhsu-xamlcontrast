@@ -263,13 +263,15 @@ fail／warn 另標 `symmetry: single-theme`。
 unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)——
 每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。
 
-**依專案型態設定預期。** 應用程式型專案通常解析得很好(1.0 實測:Kindling 95.8%、QuillNest 89.4%、ZeroCel 73.4%;
-第四個 Cornea 是截圖覆蓋視窗,字疊在工具看不到的畫面上 —— 0 組配對、exit 3);
-**控制項函式庫天生解析率低** —— 它們的顏色走 `{TemplateBinding}` / `{Binding}`,
-執行期才存在,這是靜態分析的硬邊界(報成 `bound-or-gradient`),不是能用設定修好的
-問題。公開專案實測:應用程式 26~57%,控制項函式庫(MahApps、MaterialDesign、
-HandyControl)5~19%。稽核函式庫請預期要用 `--min-coverage 0`,並把解析出的部分
-當抽樣看待。
+**第一次跑,多半會停在覆蓋率下限。** 解析得出多少,取決於 App 怎麼給顏色。四個驗證專案是 73~96%
+(1.0 實測:Kindling 95.8%、QuillNest 89.4%、ZeroCel 73.4%;第四個 Cornea 是截圖覆蓋視窗,
+字疊在工具看不到的畫面上 —— 0 組配對、exit 3)。公開專案實測更低:應用程式 26~57%,
+控制項函式庫(MahApps、MaterialDesign、HandyControl)5~19% —— 所以**不少專案開箱就是 exit 3**,
+低於 50% 的 `--min-coverage` 下限。那是下限在說「這份結果不代表整個專案」,不是對比度的判決。
+看 `unresolved by reason`:`no-ancestor-background` 佔大宗,通常是主題函式庫給了視窗底色 —— 用下面的
+`rootBackground` 宣告;`bound-or-gradient` 佔大宗是靜態分析的硬邊界(走 `{TemplateBinding}` / `{Binding}`
+的顏色執行期才存在,這也是控制項函式庫解析率低的原因)—— 把下限調到專案做得到的值
+(`--min-coverage 20`,或 config 的 `"minCoverage"`),並把解析出的部分當抽樣看待。
 
 **建立在主題函式庫上的 App**(MahApps、HandyControl、MaterialDesign…)是可修的特例:
 視窗底色的**鍵**在你 repo 的主題檔裡,但把它連到視窗的隱含樣式住在 NuGet 套件裡,

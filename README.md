@@ -327,15 +327,18 @@ with counts (`summary.unknownKeys`, and the top ones on the console) — each on
 resource reference, a typo, or a palette file detection missed, which makes this a free lint
 even before any contrast math.
 
-**Set expectations by project type.** Application projects typically resolve well
-(measured with 1.0: Kindling 95.8%, QuillNest 89.4%, ZeroCel 73.4%; the fourth, Cornea, is a
-screen-capture overlay whose text sits on nothing the tool can see — 0 pairs, exit 3).
-**Control libraries resolve poorly by nature** —
-their colours flow through `{TemplateBinding}` and `{Binding}`, which only exist at runtime;
-that is a hard boundary of static analysis, reported as `bound-or-gradient`, not a bug to fix
-with configuration. Measured on public projects: applications 26–57%, control libraries
-(MahApps.Metro, MaterialDesignInXaml, HandyControl) 5–19%. If you're auditing a control
-library, expect to lean on `--min-coverage 0` and treat the resolved subset as a sample.
+**Expect the first run to stop at the coverage floor.** How much resolves depends on how the app
+sets its colours. The four validation apps run at 73–96% (measured with 1.0: Kindling 95.8%,
+QuillNest 89.4%, ZeroCel 73.4%; the fourth, Cornea, is a screen-capture overlay whose text sits on
+nothing the tool can see — 0 pairs, exit 3). Public projects measured lower: applications 26–57%,
+control libraries (MahApps.Metro, MaterialDesignInXaml, HandyControl) 5–19% — so **many projects
+exit 3 out of the box**, below the 50% `--min-coverage` floor. That exit is the floor saying the result
+doesn't represent the project, not a contrast verdict. Look at `unresolved by reason`:
+`no-ancestor-background` dominating usually means a theme library supplies the window background —
+declare it with `rootBackground` (below); `bound-or-gradient` dominating is the hard boundary of
+static analysis (colours that flow through `{TemplateBinding}` and `{Binding}` exist only at runtime,
+which is why control libraries resolve poorly) — lower the floor to what the project can reach
+(`--min-coverage 20`, or `"minCoverage"` in the config) and treat the resolved subset as a sample.
 
 **Apps built on a theme library** (MahApps, HandyControl, MaterialDesign…) are a special,
 fixable case: your window background *key* lives in your repo's theme files, but the implicit

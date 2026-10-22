@@ -38,7 +38,7 @@ inputs:
     required: false
     default: 'true'
   upload-report:
-    description: 'Upload the JSON and Markdown reports as the xamlcontrast-report artifact'
+    description: 'Upload the JSON and Markdown reports as an artifact named by artifact-name (default xamlcontrast-report)'
     required: false
     default: 'true'
   sarif:
