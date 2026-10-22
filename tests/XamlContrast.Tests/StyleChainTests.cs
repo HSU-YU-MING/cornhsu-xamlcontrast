@@ -559,6 +559,28 @@ public class StyleChainTests
         Assert.Equal(Symmetry.LightFails, f.Symmetry);
     }
 
+    [Fact] // 色盤字典不只有 Style：DataTemplate／ControlTemplate 也可能跟 keyed brush 住在同一份 ResourceDictionary。
+           // 舊版色盤字典整檔不走樹、也沒有任何計數器 —— 同一份字典只因為多了一個 brush，裡面 1.16:1 的模板就消失
+           // （審查素材 h1dt 對 h1dt2）。色盤字典照樣走樹，只是不算進 files（它不是畫面）
+    public void TemplatesInAPaletteDictionaryAreStillWalked()
+    {
+        using var fx = new Fixture().WithPalette();
+        fx.File("Views/Templates.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="CardAccent" Color="#FF0000"/>
+              <DataTemplate x:Key="Card">
+                <Grid Background="#FFFFFF"><TextBlock Foreground="#EEEEEE" Text="1.16:1"/></Grid>
+              </DataTemplate>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """<Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>""");
+        var r = fx.Run();
+        Assert.Contains(r.Detection.ExcludedFiles, f => f.EndsWith("Templates.xaml")); // 前提：它是色盤字典
+        Assert.Equal(1, r.FileCount);
+        var f = Assert.Single(r.Findings, x => x.File == "Views/Templates.xaml");
+        Assert.Equal(Category.Fail, f.Category);
+    }
+
     [Fact] // 同上，色盤檔解析失敗時不能靜默消失：WalkStyles 要讀它，讀不了就喊 parse failed
     public void UnparseablePaletteDictionaryIsReported()
     {

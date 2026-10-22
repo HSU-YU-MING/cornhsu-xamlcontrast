@@ -220,9 +220,9 @@ public sealed partial class Auditor
         bool IsPaletteFile(string f) => excluded.Contains(Path.GetFullPath(f));
         var files = all.Where(f => !IsPaletteFile(f)).ToList();
 
-        // 色盤檔不是畫面（不走樹、不算進 files），但裡面的 Style 一樣要在定義處檢查：
-        // 鏈路徑看到「字與底出自同一個 Style 節點」就略過、交給 WalkStyles —— 主題字典裡的
-        // 按鈕 Style 若沒有人走 WalkStyles，那組配對就不在 findings、也不在任何計數器裡。
+        // 色盤檔不是畫面（不算進 files），但裡面的東西一樣要稽核：Style 在定義處檢查（鏈路徑看到「字與底出自
+        // 同一個 Style 節點」就略過、交給 WalkStyles），DataTemplate／ControlTemplate 照樣走樹 —— 舊版整檔不走樹，
+        // 同一份字典只因為多了一個 keyed brush，裡面的模板就從報告與所有計數器消失。
         foreach (var f in all)
         {
             var paletteFile = IsPaletteFile(f);
@@ -248,7 +248,7 @@ public sealed partial class Auditor
                 var side = paletteFile ? detection.SideOf(f) : null;
                 auditor._pal = side is { } s ? auditor.SideView(detection.PaletteFor(f), s) : detection.PaletteFor(f);
                 auditor._oneThemeOnly = side is not null;
-                if (!paletteFile) auditor.Walk(doc.Root, null, name, 1.0, suppressed: false);
+                auditor.Walk(doc.Root, null, name, 1.0, suppressed: false);
                 auditor.WalkStyles(doc, name);
             }
         }
