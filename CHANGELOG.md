@@ -10,12 +10,32 @@ fixed only partly — unknown config properties and incomplete baseline entries 
 whether they should become exit-code-2 errors is an open interface decision — and one
 (`translucent-uncomposited`, a reason that was listed but never emitted) is only partly settled: it
 is now emitted for the two new cases below, while the original case still reads
-`no-ancestor-background` pending a decision. Two follow-up reviews of these fixes found regressions
+`no-ancestor-background` pending a decision. Three follow-up reviews of these fixes found regressions
 and leftovers in the same areas; those are fixed here too. The JSON shape is unchanged (`schemaVersion` stays 5), and so are the CLI flags
 and the Action inputs. Several fixes **move counts on real projects** — more pairs found, problems
 that used to be hidden now reported, some confident-but-wrong ratios now honestly `unresolved` — so a
 `--baseline` may show NEW or paid-off entries after upgrading; re-run `--write-baseline` once you
 have reviewed them.
+
+> **Upgrading from 0.6.1 — coverage reads lower, and that can change the exit code.** Pairs that were
+> silently skipped, or graded against a guessed colour, are now counted as `unresolved` (see-through
+> styles nothing grades at a use site, containers whose layout is unknowable, `Opacity` layers over an
+> unknown background, keys only another screen defines, a style key only one theme defines). A project
+> close to `--min-coverage` (default 50%; it applies in `--baseline` mode too) can go from exit 0 to
+> exit 1 on the coverage floor alone. Measured on the four validation projects, 0.6.1 → this version:
+>
+> | project | pairs | unresolved | coverage | fail | exit |
+> |---|---|---|---|---|---|
+> | Kindling | 168 → 182 | 1 → 5 | 99.4% → 97.3% | 0 → 1 | 0 → 1 (a real failure now found) |
+> | QuillNest | 842 → 906 | 38 → 95 | 95.7% → 90.5% | 3 → 2 | 1 → 1 (the third is now `unresolved`) |
+> | ZeroCel | 468 → 518 | 206 → 184 | 69.4% → 73.8% | 0 → 1 | 0 → 1 (a real failure now found) |
+> | Cornea | 0 → 0 | 1 → 2 | — | 0 → 0 | 1 → 1 (nothing audited, as before) |
+>
+> **Baseline keys change for per-theme styles.** A style key defined in both themes' dictionaries is
+> now graded once per theme where it's used, and the element reads `TextBlock⊕Style[Tag]@dark/base`
+> instead of `TextBlock⊕Style[Tag]/base`. The element is part of the baseline key, so an old baseline
+> reports such an entry as paid off and the same pair as a NEW failure — review it and re-run
+> `--write-baseline`.
 
 ### Changed — translucent text colours are graded, not skipped
 - **A translucent foreground is composited onto its resolved background and graded**, like element
@@ -28,12 +48,15 @@ have reviewed them.
 - **A style whose foreground and background share a definition but whose background is transparent or
   translucent is graded where it is used**, against the element's real backdrop — the element path
   used to skip same-source pairs, so these pairs were graded nowhere. The definition site, which has
-  nothing underneath to composite against, now counts the pair as `unresolved`
-  (`translucent-uncomposited`) instead of `skipped`: an implicit style (no `x:Key`) is never graded at
-  a use site, so as `skipped` it vanished from the report with coverage still at 100%.
-- **`skipped` now means only text you cannot see** (transparent, alpha ≈ 0, `Opacity="0"`), and the
-  console/Markdown label says so: `skipped (invisible: transparent or opacity 0)` (was
-  `skipped (translucent, invisible)`). The JSON field is unchanged.
+  nothing underneath to composite against, counts the pair as `unresolved`
+  (`translucent-uncomposited`) instead of `skipped` **when no use site grades it** — an implicit style
+  (no `x:Key`), or a named style no element references with `Style=` (applied from code-behind or
+  `ItemContainerStyle`, or unused); as `skipped` it vanished from the report with coverage still at
+  100%. A style some element uses is graded there and not counted twice.
+- **`skipped` now means only text you cannot see** (transparent, alpha ≈ 0, `Opacity="0"`) —
+  whatever the background, so an `Opacity="0"` toast over a bound background is skipped, not
+  `unresolved` — and the console/Markdown label says so: `skipped (invisible: transparent or opacity 0)`
+  (was `skipped (translucent, invisible)`). The JSON field is unchanged.
 - **Element `Opacity` on the background's owner (or above it) fades the background too.** WPF renders
   an element with `Opacity` as one layer and blends the whole layer; the tool used to fade only the
   text, so white text in a 50%-opaque black `Border` on white was reported 5.32:1 (ok) when it is
@@ -60,13 +83,24 @@ have reviewed them.
   foreground and background come from the same style, expecting the definition-site check to cover
   it — but palette files never got that check, so a 1.2:1 button style in `Themes/Dark.xaml` was in
   no finding and no counter. Palette files now get the style check (they still don't count as screens).
-  When the palette comes from separate dark/light XAML dictionaries, a dictionary whose file name or
-  last folder contains *dark* or *light* as a whole word (`Dark.xaml`, `DarkTheme.xaml`,
-  `Themes/Dark/Styles.xaml` — not `Highlight.xaml` or a `Starlight/` folder) belongs to that theme: its
-  styles are graded against that theme only (single-theme symmetry), and a style key defined in both
-  themes' dictionaries is resolved per theme where it is used (`Button⊕Style[Chip]@dark/base`) —
-  pairing a dark style with light values reported failures for combinations that never exist at
-  runtime. Such findings carry the one theme's ratio in both `ratioDark` and `ratioLight`.
+  When the palette comes from separate dark/light XAML dictionaries, a dictionary belongs to one theme
+  when its file name or last folder contains *dark* or *light* as a whole word (`Dark.xaml`,
+  `DarkTheme.xaml`, `Colors.Dark.xaml` — not `Highlight.xaml` or a `Starlight/` folder) and it defines
+  colours, or when the other theme's counterpart exists (`Themes/Dark/Styles.xaml` ↔
+  `Themes/Light/Styles.xaml`, `darktheme.xaml` ↔ `lighttheme.xaml`); a styles-only `DarkButton.xaml`
+  with no `LightButton.xaml` is shared. Its styles are graded against that theme only (single-theme
+  symmetry), and a style key defined in both themes' dictionaries is resolved per theme where it is
+  used (`Button⊕Style[Chip]@dark/base`) — pairing a dark style with light values reported failures for
+  combinations that never exist at runtime. Such findings carry the one theme's ratio in both
+  `ratioDark` and `ratioLight`; a style key only one theme defines is `unknown-palette-key` (naming the
+  style) for the other theme. Grouping the *palette* into dark and light still uses the looser 0.6.1
+  rule (any part of the path), so `darktheme.xaml`, `Dark2.xaml` or `深色Dark.xaml` still form a pair;
+  when file names can't tell the themes apart at all (`Ocean.xaml` / `Nord.xaml`) and three or more
+  keys are defined with different values, detection is reported as degraded (`--strict-palette`
+  blocks it) instead of silently grading one theme.
+- **An `App.xaml` whose root is an `Application` subclass** (`<prism:PrismApplication>`, or
+  `<local:App>` with `<Application.Resources>`) is the application, not a screen: its resources are
+  global, and it bounds a multi-app scope.
 - **Property-element syntax is read.** `<Border.Background>` / `<TextBlock.Foreground>` /
   `<Setter.Value>` were ignored: a gradient background was graded against the ancestor (confident
   wrong `ok`), and a property-element foreground vanished from every counter. Solid brushes are

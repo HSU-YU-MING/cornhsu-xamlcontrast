@@ -127,11 +127,17 @@ tried in this order, and the one that ran is always named on the first line of t
    as in WPF's resource lookup: there they override the palette (a local brush referencing a `Color`
    is resolved per theme), and a key only some window defines is `unknown-palette-key` everywhere else.
    Dictionary files don't count as screens in `summary.files`, but their styles and templates are
-   still audited. When the palette comes from separate dark/light dictionaries, a dictionary whose
-   file name or last folder contains *dark* or *light* as a whole word (`Dark.xaml`, `DarkTheme.xaml`,
-   `Colors.Dark.xaml`, `Themes/Dark/Styles.xaml` — but not `Highlight.xaml` or `Starlight/`) belongs to
-   that theme: its styles are graded against that theme only, and a style key defined in both themes'
-   dictionaries is resolved per theme where it's used (the element reads `Button⊕Style[Chip]@dark/base`).
+   still audited. Files are grouped into dark and light by *dark* / *light* anywhere in their path
+   (`darktheme.xaml`, `Dark2.xaml` and `Themes/Dark/Colors/Palette.xaml` all count); if no name tells
+   the themes apart (`Ocean.xaml` / `Nord.xaml`) and three or more keys have different values in
+   different dictionaries, detection is reported as degraded rather than grading one theme silently.
+   A dictionary **belongs to one theme only** when its file name or last folder contains *dark* or
+   *light* as a whole word (`Dark.xaml`, `DarkTheme.xaml`, `Colors.Dark.xaml` — not `Highlight.xaml`
+   or `Starlight/`) and it defines colours, or when the other theme's counterpart exists
+   (`Themes/Dark/Styles.xaml` ↔ `Themes/Light/Styles.xaml`); its styles are graded against that theme
+   only, and a style key defined in both themes' dictionaries is resolved per theme where it's used
+   (the element reads `Button⊕Style[Chip]@dark/base`; a key only one theme defines is
+   `unknown-palette-key` for the other).
 2. **Theme pair** — one `DarkTheme.xaml` × one `LightTheme.xaml`, keys overlapping ≥ 50%
 3. **C# source of truth** — `("Key", "#dark", "#light")` tuple arrays
    (beats a single-theme XAML copy: a source that provides both themes wins)
@@ -261,7 +267,7 @@ doesn't tell you whether anything can be done about it:
 | `no-ancestor-background` | nothing up the tree declares a background — often a root container relying on an app-level implicit style, or vector artwork in a resource dictionary |
 | `bound-or-gradient` | the colour comes from `{Binding}` / `{TemplateBinding}` / a gradient or image brush — only knowable at runtime. Also anything else the tool can't read as a colour (every WPF colour literal — `#RGB`, `#ARGB`, `#RRGGBB`, `#AARRGGBB`, the named colours — is read) |
 | `unknown-palette-key` | the resource key isn't in the detected palette — a typo, or palette detection missed a file |
-| `translucent-uncomposited` | a transparent or translucent background with nothing underneath to composite against — a style's own `Background="Transparent"` at its definition (a named style is graded again where it's used; an implicit style is not), or an `Opacity`-faded layer over nothing |
+| `translucent-uncomposited` | a transparent or translucent background with nothing underneath to composite against — a style's own `Background="Transparent"` at its definition when no use site grades it (an implicit style, or a named style no element references with `Style=`; a used style is graded where it's used instead), or an `Opacity`-faded layer over nothing |
 | `same-brush-pair` | a style sets `Foreground` and `Background` to the *same* brush — the Material template-opacity idiom (the template paints the background at 10–12% opacity as a tint); literally 1:1, not at runtime, and the opacity animation is invisible statically |
 | `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio |
 

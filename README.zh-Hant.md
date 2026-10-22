@@ -98,10 +98,14 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
    「挑單一檔」會漏。`Application.Resources` 算字典；視窗自己的區域 brush（`Window.Resources`、
    `UserControl.Resources`）跟 WPF 的資源查找一樣只在那個視窗裡看得到：在那裡蓋過色盤（引用 `Color` 的
    區域 brush 依主題各自解析），只有某個視窗定義的鍵在其他地方一律是 `unknown-palette-key`。字典檔不算進
-   `summary.files` 的畫面數，但裡面的 Style 與模板照樣稽核。色盤來自分開的深／淺字典時，檔名或最後一段
-   資料夾裡有一個完整的詞是 dark 或 light 的字典（`Dark.xaml`、`DarkTheme.xaml`、`Colors.Dark.xaml`、
-   `Themes/Dark/Styles.xaml`；`Highlight.xaml`、`Starlight/` 不算）只屬於那個主題：裡面的 Style 只評那個主題，
-   兩個主題的字典都定義的同 key Style 在使用處依主題各自解析（元素名顯示成 `Button⊕Style[Chip]@dark/base`）
+   `summary.files` 的畫面數，但裡面的 Style 與模板照樣稽核。色盤依路徑裡任何位置的 dark／light 分成深淺兩組
+   （`darktheme.xaml`、`Dark2.xaml`、`Themes/Dark/Colors/Palette.xaml` 都算）；檔名完全看不出主題（`Ocean.xaml`／
+   `Nord.xaml`）、又有三個以上的鍵在不同字典裡值不同時，判成偵測退化，不靜默只評其中一套。
+   字典**只屬於一個主題**的條件：檔名或最後一段資料夾裡有一個完整的詞是 dark 或 light（`Dark.xaml`、
+   `DarkTheme.xaml`、`Colors.Dark.xaml`；`Highlight.xaml`、`Starlight/` 不算）而且定義了色票，或另一個主題的
+   對應檔存在（`Themes/Dark/Styles.xaml` ↔ `Themes/Light/Styles.xaml`）。裡面的 Style 只評那個主題，兩個主題的
+   字典都定義的同 key Style 在使用處依主題各自解析（元素名顯示成 `Button⊕Style[Chip]@dark/base`；只有一個主題
+   定義的 key，另一個主題記 `unknown-palette-key`）
 2. **主題配對** —— 一個 Dark 檔 × 一個 Light 檔，鍵集重疊 ≥ 50%
 3. **C# 真相源** —— 三元組陣列，**提供兩套主題的來源優先於只有一套的**
 4. **合併字典・單一主題** —— 同 (1) 的聯集，但每個鍵只有一套值
@@ -213,7 +217,7 @@ schema 裡沒有逐筆標記。
 | `no-ancestor-background` | 祖先鏈上沒有任何一層宣告背景。常見於根容器靠 App 層隱含樣式給底,或資源字典裡的向量圖 |
 | `bound-or-gradient` | 顏色來自 `{Binding}` / `{TemplateBinding}` / 漸層或圖片 brush —— 執行期才知道。其他工具讀不出顏色的值也歸這裡(WPF 的色彩字面值 —— `#RGB`、`#ARGB`、`#RRGGBB`、`#AARRGGBB`、具名色 —— 都讀得懂) |
 | `unknown-palette-key` | 資源鍵不在偵測到的色盤裡 —— 打字錯誤,或色盤偵測漏了某個檔 |
-| `translucent-uncomposited` | 透明或半透明的背景、底下沒有可疊的顏色 —— Style 定義處自己的 `Background="Transparent"`（具名 Style 會在使用處再評一次；隱含樣式不會），或以 `Opacity` 變淡、底下什麼都沒有的一層 |
+| `translucent-uncomposited` | 透明或半透明的背景、底下沒有可疊的顏色 —— Style 定義處自己的 `Background="Transparent"`，而且沒有任何使用處會評到它（隱含樣式，或沒有元素以 `Style=` 引用的具名 Style；有元素用到的改在使用處評），或以 `Opacity` 變淡、底下什麼都沒有的一層 |
 | `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
 | `over-sibling-content` | 文字墊在同格子的兄弟 `Image`/媒體元素上 —— 真正的底是一張圖,靜態不可知;硬配祖先背景等於編造比值 |
 

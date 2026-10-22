@@ -72,11 +72,18 @@
 6. **無色盤**：退回只算寫死色碼，**大聲喊**（Cornea 形狀；`none`）
 
 被認定為色盤來源（或其靜態複本）、**而且根元素是 `ResourceDictionary`** 的 XAML 檔不算進 `summary.files`
-（字典不是畫面），但裡面的 Style 與模板照樣稽核。色盤來自分開的深／淺 XAML 字典時（1、2 與 `mode: "pair"`），
-檔名（不含副檔名）或最後一段資料夾切成詞後有一個詞恰好是 dark 或 light 的 `ResourceDictionary`
-（`Dark.xaml`、`DarkTheme.xaml`、`Colors.Dark.xaml`、`Themes/Dark/Styles.xaml`；`Highlight.xaml`、`Starlight/` 不算；
-兩者都有就不算），加上 `pair` 模式指定的兩個檔，只屬於那個主題：裡面的 Style 只評那一欄（兩欄同值、對稱標
-single-theme），兩個主題的字典都定義的同 key Style 在使用處依主題各自解析（元素名帶 `@dark`／`@light`）。
+（字典不是畫面），但裡面的 Style 與模板照樣稽核。自動偵測把字典依路徑裡任何位置的 dark／light 分成深淺兩組
+（與 v0.6.1 相同；`darktheme.xaml`、`Dark2.xaml`、`Themes/Dark/Colors/Palette.xaml` 都算）；檔名完全看不出主題、
+又有三個以上的鍵在不同字典裡值不同時，判成偵測退化並點名（`--strict-palette` 擋得住）。
+色盤來自分開的深／淺 XAML 字典時（1、2 與 `mode: "pair"`），下面這些 `ResourceDictionary` **只屬於一個主題**：
+檔名（不含副檔名）或最後一段資料夾切成詞後有一個詞恰好是 dark 或 light、而且定義了色票的
+（`Dark.xaml`、`DarkTheme.xaml`、`Colors.Dark.xaml`；`Highlight.xaml`、`Starlight/` 不算；兩者都有就不算）；
+另一個主題的對應檔（相對路徑某一段 dark↔light 互換）存在的（`Themes/Dark/Styles.xaml` ↔ `Themes/Light/Styles.xaml`；
+只放 Style、沒有對應檔的 `Styles/DarkButton.xaml` 不算）；以及 `pair` 模式指定的兩個檔。裡面的 Style 只評那一欄
+（兩欄同值、對稱標 single-theme），兩個主題的字典都定義的同 key Style 在使用處依主題各自解析（元素名帶
+`@dark`／`@light`），只有一個主題定義的 key 在另一個主題記 unknown-palette-key（點名 Style key）。
+根元素是 `Application` 或它的子類別（`<prism:PrismApplication>`、帶 `<Application.Resources>` 的 `<local:App>`）的
+檔是應用程式，資源是全域的。
 畫面檔（`Window`、`UserControl`…）就算提供了色票也照樣稽核；它們的區域 brush 跟 WPF 的資源查找一樣只在自己那個畫面裡
 看得到：在那裡蓋過色盤（字面值兩欄同值；引用 `Color` 的依主題各自解析；綁 Binding 的記為 bound-or-gradient；
 引用的 `Color` 找不到記為 unknown-palette-key、點名那個 Color），只有某個畫面定義的鍵在其他檔一律是 unknown-palette-key。
