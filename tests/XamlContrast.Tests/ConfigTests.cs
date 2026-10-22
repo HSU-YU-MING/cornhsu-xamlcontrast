@@ -24,6 +24,7 @@ public class ConfigTests
         Assert.Equal("auto", cfg.Palette.Mode);
         Assert.True(cfg.Thresholds.IsDefault);
         Assert.Equal(50, cfg.MinCoverage); // 覆蓋率下限的預設值（README、--help 都寫 50%）
+        Assert.Equal("warn", cfg.FailOn); // 1.0 的預設 gate：沒達到 AA 就算失敗
     }
 
     [Fact] // 強制配對模式：檔名不含 dark/light 提示、自動偵測抓不到 → config 指定就吃得到
@@ -303,12 +304,12 @@ public class ConfigTests
         fx.File(ToolConfig.FileName, """
             {
               // 行註解
-              "FAILON": "warn",   /* 區塊註解 */
+              "FAILON": "fail",   /* 區塊註解 */
               "Thresholds": { "NormalText": 7, },
             }
             """);
         var cfg = ToolConfig.Load(fx.Root);
-        Assert.Equal("warn", cfg.FailOn);
+        Assert.Equal("fail", cfg.FailOn);
         Assert.Equal(7.0, cfg.Thresholds.NormalText);
     }
 

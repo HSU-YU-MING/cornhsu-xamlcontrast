@@ -104,8 +104,8 @@ public class CliArgumentTests
                                          "--min-coverage", "--baseline", "--write-baseline", "--show-ok", "--show-unresolved",
                                          "--version", "-h, --help" })
                 Assert.Contains(flag, r.Out);
-            // --fail-on 吃 fail 與 warn 兩個值 —— 舊版只寫 "--fail-on warn"，讓人以為 fail 不是合法值
-            Assert.Contains("--fail-on <fail|warn>", r.Out);
+            // --fail-on 吃 warn 與 fail 兩個值（warn 是 1.0 的預設）—— 舊版只寫 "--fail-on warn"，讓人以為 fail 不是合法值
+            Assert.Contains("--fail-on <warn|fail>", r.Out);
         }
     }
 

@@ -60,22 +60,24 @@ public class CliExitDecisionTests
         Assert.Contains("exit 1: resolved 0 pairs", r.Out);
     }
 
-    [Theory] // warn 預設不擋；--fail-on warn 或 config failOn:"warn" 才擋。
-             // 旗標只能加嚴：config 寫了 warn，--fail-on fail 放不寬（Program.cs 的 flag || config）
-    [InlineData(null, new string[0], 0)]
-    [InlineData(null, new[] { "--fail-on", "fail" }, 0)]
+    [Theory] // 1.0 的預設 gate 是「沒達到 AA 就算失敗」：warn 預設就擋。--fail-on 是真正的覆寫 ——
+             // 優先序 旗標 > config > 預設，所以 --fail-on fail 能把 config 的 warn 放寬回「只擋 fail」
+             // （0.x 是旗標只能加嚴：預設 fail、flag || config）
+    [InlineData(null, new string[0], 1)]
     [InlineData(null, new[] { "--fail-on", "warn" }, 1)]
-    [InlineData("""{ "failOn": "warn" }""", new string[0], 1)]
-    [InlineData("""{ "failOn": "warn" }""", new[] { "--fail-on", "fail" }, 1)]
-    public void FailOnWarnFlagAndConfigCanOnlyTighten(string? config, string[] flags, int expectedExit)
+    [InlineData(null, new[] { "--fail-on", "fail" }, 0)]
+    [InlineData("""{ "failOn": "fail" }""", new string[0], 0)]
+    [InlineData("""{ "failOn": "fail" }""", new[] { "--fail-on", "warn" }, 1)]
+    [InlineData("""{ "failOn": "warn" }""", new[] { "--fail-on", "fail" }, 0)]
+    public void FailOnDefaultsToWarnAndTheFlagOverridesTheConfig(string? config, string[] flags, int expectedExit)
     {
         using var fx = CliProjects.WarnOnly();
         if (config is not null) fx.File("xamlcontrast.config.json", config);
         var r = Cli.Run([fx.Root, .. flags]);
         Assert.True(r.Exit == expectedExit, r.ToString());
         Assert.Contains(expectedExit == 1
-            ? "exit 1: 1 pair(s) below AA (--fail-on warn)"
-            : "exit 0: no fail, but 1 pair(s) below AA", r.Out);
+            ? "exit 1: 1 pair(s) below AA"
+            : "exit 0: no fail, but 1 pair(s) below AA (--fail-on fail)", r.Out);
     }
 
     [Theory] // 色盤退化：預設只喊（!! palette），--strict-palette 或 config strictPalette 才擋；
@@ -200,7 +202,7 @@ public class CliExitDecisionTests
         var baselineFile = Path.Combine(fx.Root, "baseline.json");
         var write = Cli.Run(fx.Root, "--write-baseline", baselineFile);
         Assert.True(write.Exit == 0, write.ToString());
-        Assert.Contains("(1 known failure pair(s))", write.Out);
+        Assert.Contains("(1 known pair(s) below AA)", write.Out);
 
         Directory.Delete(Path.Combine(fx.Root, "Themes"), recursive: true);
 

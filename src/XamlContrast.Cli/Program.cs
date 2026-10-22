@@ -2,15 +2,14 @@ using XamlContrast.Core;
 
 // XamlContrast CLI — 靜態 XAML 對比度稽核，退出碼給 CI 當守門員。
 //
-// 退出碼政策（規劃書 4.5）：
-//   fail > 0                    → 1
-//   --fail-on warn 且 warn > 0  → 1
+// 退出碼政策（規劃書 4.5；1.0 起的 gate 見 CHANGELOG 1.0.0）：
+//   低於 AA（gate warn，預設）或低於 fail 線（gate fail）的配對 > 0 → 1
 //   配對數 0                    → 1（不可設定 —— 空掃綠燈就是謊報健康）
 //   --strict-palette 且色盤退化 → 1
 
 var showOk = false;
 var showUnresolved = false;
-var failOnWarn = false;
+string? failOnFlag = null;   // null = 用 config／內建預設（warn）
 var strictPalette = false;
 double? minCoverage = null;   // null = 用 config／內建預設
 string? jsonPath = null;
@@ -40,7 +39,7 @@ for (var i = 0; i < args.Length; i++)
         case "--fail-on":
             if (i + 1 >= args.Length || args[i + 1] is not ("warn" or "fail"))
             { Console.Error.WriteLine("--fail-on takes 'warn' or 'fail'"); return 2; }
-            failOnWarn = args[++i] == "warn";
+            failOnFlag = args[++i];
             break;
         case "--json":
             if (OutputPath(args, i, "--json") is not { } jp) return 2;
@@ -127,8 +126,10 @@ if (config.RootBackground is not null)
     }
 }
 
-// 優先序：CLI 旗標 > config > 內建預設（旗標只能加嚴，不能替 config 鬆綁）
-failOnWarn = failOnWarn || config.FailOn == "warn";
+// 優先序：CLI 旗標 > config > 內建預設。
+// gate 是真正的覆寫（1.0）：預設 warn（沒達到 AA 就算失敗），--fail-on fail 可以把 config 的 warn 放寬回「只擋 fail」。
+// ⚠ 0.x 是「旗標只能加嚴」（flag || config）—— 預設改成 warn 之後，那會讓 --fail-on fail 永遠放不寬
+var gateWarn = (failOnFlag ?? config.FailOn) == "warn";
 strictPalette = strictPalette || config.StrictPalette;
 // ⚠ 覆蓋率下限是唯一「旗標可以放寬 config」的項目：它擋的是「工具看不見你的專案」，
 //    不是稽核標準。使用者明確傳 --min-coverage 0 表示「我知道，先讓我跑」是合理的逃生口。
@@ -245,8 +246,9 @@ int DecideExit()
     if (writeBaselinePath is not null)
     {
         // 導入模式第一步：把現況凍成已知債清單（存進 repo）。之後只擋新增與惡化。
+        // 收「低於 AA」的每一組（fail＋warn），不論 gate —— 之後換 gate 也不必重寫
         if (!TryWrite(writeBaselinePath, Baseline.Write(result), "baseline",
-                      $" ({fail} known failure pair(s))")) return 2;
+                      $" ({fail + warn} known pair(s) below AA)")) return 2;
         return 0;
     }
 
@@ -258,7 +260,7 @@ int DecideExit()
             return 2;
         }
         Baseline.ComparisonResult cmp;
-        try { cmp = Baseline.Compare(result, File.ReadAllText(baselinePath)); }
+        try { cmp = Baseline.Compare(result, File.ReadAllText(baselinePath), gateWarn); }
         catch (Exception ex)
         {
             // 壞掉的 baseline 要有好訊息，不是裸拋堆疊
@@ -277,11 +279,8 @@ int DecideExit()
             Console.WriteLine($"exit 1: {cmp.NewFailures.Count} new / {cmp.WorsenedFailures.Count} worsened failure(s) vs baseline");
             return 1;
         }
-        if (failOnWarn && warn > 0)
-        {
-            Console.WriteLine($"exit 1: {warn} pair(s) below AA (--fail-on warn)");
-            return 1;
-        }
+        // warn 也在 ratchet 裡（baseline 收「低於 AA」的每一組）—— 0.x 在這裡另外對「所有」warn 套 --fail-on warn，
+        // 既有的 warn 也擋，預設 gate 改成 warn 之後 baseline 就對 warn 完全沒用了
         Console.WriteLine("exit 0: no new or worsened failures vs baseline");
         return 0;
     }
@@ -294,12 +293,12 @@ int DecideExit()
             $"exit 1: {fail} pair(s) below threshold x {config.Thresholds.FailFactor} ({warn} warn)"));
         return 1;
     }
-    if (failOnWarn && warn > 0)
+    if (gateWarn && warn > 0)
     {
-        Console.WriteLine($"exit 1: {warn} pair(s) below AA (--fail-on warn)");
+        Console.WriteLine($"exit 1: {warn} pair(s) below AA");
         return 1;
     }
-    if (warn > 0) Console.WriteLine($"exit 0: no fail, but {warn} pair(s) below AA");
+    if (warn > 0) Console.WriteLine($"exit 0: no fail, but {warn} pair(s) below AA (--fail-on fail)");
     else Console.WriteLine("exit 0: all pairs meet AA");
     return 0;
 
@@ -317,9 +316,9 @@ static void PrintUsage(TextWriter w)
           --json <path>            write machine-readable report (summary + findings)
           --sarif <path>           write SARIF 2.1.0 (GitHub code scanning; fail/warn only)
           --md <path>              write a Markdown report (suitable for a PR comment)
-          --fail-on <fail|warn>    fail (default): exit 1 on 'fail' pairs; warn: also on 'warn'
-                                   pairs (below AA, above the fail line = threshold x
-                                   fail-factor, default 0.67). Can only tighten the config
+          --fail-on <warn|fail>    warn (default): exit 1 on any pair below AA; fail: only on
+                                   pairs below the fail line (threshold x fail-factor,
+                                   default 0.67). Overrides the config's failOn
           --strict-palette         fail the run when palette detection degrades
           --min-coverage <0-100>   fail when fewer than N% of colour pairs could be
                                    resolved (default 50; a pass over a fraction of the

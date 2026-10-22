@@ -128,7 +128,7 @@ public class CliOutputTests
 
         var write = Cli.RunIn(cwd.Root, proj.Root, "--write-baseline", "--show-ok");
         Assert.True(write.Exit == 0, write.ToString());
-        Assert.Contains("baseline written: xamlcontrast-baseline.json (1 known failure pair(s))", write.Out);
+        Assert.Contains("baseline written: xamlcontrast-baseline.json (1 known pair(s) below AA)", write.Out);
         Assert.Contains("===== ok (0)", write.Out);  // --show-ok 照樣生效，沒被當成路徑
         Assert.True(File.Exists(Path.Combine(cwd.Root, "xamlcontrast-baseline.json")));
         Assert.False(File.Exists(Path.Combine(proj.Root, "xamlcontrast-baseline.json")));
@@ -189,23 +189,49 @@ public class CliOutputTests
         Assert.Contains("baseline: known debt 0, paid off 1 (debt may only shrink)", paid.Out);
     }
 
-    [Fact] // warn 不進 ratchet：--baseline 通過之後，--fail-on warn 仍然對「所有」warn 生效（含既有的）
-    public void FailOnWarnStillGatesInBaselineMode()
+    [Fact] // 1.0 起 gate 預設擋 warn，所以 warn 也是已知債：baseline 收「低於 AA」的每一組（fail＋warn），
+           // ratchet 對 gate 擋的那些生效。0.x 的 baseline 只收 fail，--fail-on warn 會連既有的 warn 一起擋 ——
+           // 預設 gate 改成 warn 之後，那等於 baseline 對 warn 完全沒用
+    public void BelowAaPairsAreKnownDebtToo()
     {
         using var fx = new Fixture().File("Main.xaml", """
             <Grid Background="#FFFFFF">
               <TextBlock Foreground="#EEEEEE" Text="fail (known debt)"/>
-              <TextBlock Foreground="#8A8A8A" Text="warn"/>
+              <TextBlock Foreground="#8A8A8A" Text="warn (known debt)"/>
             </Grid>
             """);
         var baseline = Path.Combine(fx.Root, "baseline.json");
-        Assert.Equal(0, Cli.Run(fx.Root, "--write-baseline", baseline).Exit);
+        var write = Cli.Run(fx.Root, "--write-baseline", baseline);
+        Assert.True(write.Exit == 0, write.ToString());
+        Assert.Contains("(2 known pair(s) below AA)", write.Out);
 
-        var plain = Cli.Run(fx.Root, "--baseline", baseline);
-        Assert.True(plain.Exit == 0, plain.ToString());
+        var known = Cli.Run(fx.Root, "--baseline", baseline);
+        Assert.True(known.Exit == 0, known.ToString());
+        Assert.Contains("baseline: known debt 2, paid off 0", known.Out);
 
-        var strict = Cli.Run(fx.Root, "--baseline", baseline, "--fail-on", "warn");
-        Assert.True(strict.Exit == 1, strict.ToString());
-        Assert.Contains("exit 1: 1 pair(s) below AA (--fail-on warn)", strict.Out);
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <TextBlock Foreground="#EEEEEE" Text="fail (known debt)"/>
+              <TextBlock Foreground="#8A8A8A" Text="warn (known debt)"/>
+              <TextBlock Foreground="#888888" Text="a new warn"/>
+            </Grid>
+            """);
+        var added = Cli.Run(fx.Root, "--baseline", baseline);
+        Assert.True(added.Exit == 1, added.ToString());
+        Assert.Contains("NEW failure: Main.xaml:4 TextBlock fg=#888888", added.Out);
+        // --fail-on fail：只有 fail 算數，新的 warn 不擋
+        var lenient = Cli.Run(fx.Root, "--baseline", baseline, "--fail-on", "fail");
+        Assert.True(lenient.Exit == 0, lenient.ToString());
+
+        // 既有的 warn 惡化成 fail：比值變差 → WORSENED（兩種 gate 都擋）
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <TextBlock Foreground="#EEEEEE" Text="fail (known debt)"/>
+              <TextBlock Foreground="#8A8A8A" Opacity="0.6" Text="the known warn, now faded"/>
+            </Grid>
+            """);
+        var faded = Cli.Run(fx.Root, "--baseline", baseline, "--fail-on", "fail");
+        Assert.True(faded.Exit == 1, faded.ToString());
+        Assert.Contains("1 new", faded.Out); // fg 帶上 ×0.6 是新的鍵
     }
 }

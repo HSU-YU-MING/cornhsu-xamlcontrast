@@ -9,6 +9,10 @@ namespace XamlContrast.Core;
 ///
 /// 鍵不含行號 —— 行號隨編輯漂移，含進去的話每次重排版都會「假性新增」。
 /// 同鍵多筆用計數比較：同一組字底配對從 2 處變 3 處也是惡化。
+///
+/// 收的是「低於 AA」的每一組（fail＋warn），不論寫出時的 gate；比對時只擋目前 gate 會擋的那些
+/// （預設 gate warn：兩者都擋；--fail-on fail：只擋 fail）。⚠ 0.x 只收 fail —— 1.0 的預設 gate 改成 warn 之後，
+/// 那會讓既有的 warn 一個都不算已知債，baseline 對 warn 完全沒用。
 /// </summary>
 public static class Baseline
 {
@@ -36,25 +40,24 @@ public static class Baseline
 
     private static string KeyOf(Finding f) => $"{f.File}|{f.Element}|{f.Fg}|{f.Bg}";
 
-    private static Dictionary<string, int> FailKeys(AuditResult result) =>
-        result.Findings.Where(f => f.Category == Category.Fail)
-            .GroupBy(KeyOf)
-            .ToDictionary(g => g.Key, g => g.Count());
+    private static bool BelowAa(Finding f) => f.Category is Category.Fail or Category.Warn;
 
     public static string Write(AuditResult result)
     {
-        var entries = result.Findings.Where(f => f.Category == Category.Fail)
+        var entries = result.Findings.Where(BelowAa)
             .GroupBy(KeyOf)
             .Select(g =>
             {
                 var f = g.First();
                 return new Entry(f.File, f.Element, f.Fg, f.Bg, g.Count(), g.Min(x => x.Worst));
             })
-            .OrderBy(e => e.File, StringComparer.Ordinal).ThenBy(e => e.Element, StringComparer.Ordinal);
+            .OrderBy(e => e.File, StringComparer.Ordinal).ThenBy(e => e.Element, StringComparer.Ordinal)
+            .ThenBy(e => e.Fg, StringComparer.Ordinal).ThenBy(e => e.Bg, StringComparer.Ordinal);
         return JsonSerializer.Serialize(new { comment = "XamlContrast baseline — known debt; may only shrink", entries }, JsonOpts);
     }
 
-    public static ComparisonResult Compare(AuditResult result, string baselineJson)
+    /// <param name="gateWarn">gate 是 warn（預設）：低於 AA 的都擋；false（--fail-on fail）：只擋 fail。</param>
+    public static ComparisonResult Compare(AuditResult result, string baselineJson, bool gateWarn = true)
     {
         var doc = JsonDocument.Parse(baselineJson);
         var known = new Dictionary<string, Entry>();
@@ -87,21 +90,24 @@ public static class Baseline
             warnings.Add($"{noCount} {(noCount == 1 ? "entry has" : "entries have")} no 'count' — every occurrence " +
                          "counts as worsened; regenerate with --write-baseline");
 
-        var current = FailKeys(result);
+        bool Gating(Finding f) => f.Category == Category.Fail || gateWarn && f.Category == Category.Warn;
+        // 目前低於 AA 的每一組，依鍵分組；處數與最差比值都算整組（warn 惡化成 fail 也是比值變差）
+        var current = result.Findings.Where(BelowAa).GroupBy(KeyOf).ToDictionary(g => g.Key, g => g.ToList());
         var newFailures = new List<Finding>();
         var worsened = new List<Entry>();
         var knownDebt = 0;
 
-        foreach (var (key, count) in current)
+        foreach (var (key, list) in current)
         {
+            var gating = list.Where(Gating).ToList();
+            if (gating.Count == 0) continue; // 這個 gate 不擋的（--fail-on fail 下的 warn）：不判新增或惡化
+            var count = list.Count;
             if (!known.TryGetValue(key, out var entry))
             {
-                newFailures.AddRange(result.Findings.Where(f => f.Category == Category.Fail && KeyOf(f) == key));
+                newFailures.AddRange(gating);
                 continue;
             }
-            var worstNow = result.Findings
-                .Where(f => f.Category == Category.Fail && KeyOf(f) == key)
-                .Min(f => f.Worst);
+            var worstNow = list.Min(f => f.Worst);
             if (count > entry.Count)
             {
                 worsened.Add(entry with { Count = count }); // 同鍵的處數變多也是惡化

@@ -16,7 +16,7 @@ public sealed class ToolConfig
     public PaletteSection Palette { get; init; } = new();
     public ThresholdSection Thresholds { get; init; } = new();
     public ClassificationSection Classification { get; init; } = new();
-    public string FailOn { get; init; } = "fail";
+    public string FailOn { get; init; } = "warn"; // 1.0 的預設 gate：沒達到 AA 就算失敗
     public bool StrictPalette { get; init; }
 
     /// <summary>覆蓋率下限（百分比）。低於此值視為「這份結果不足以代表專案」而 exit 1。

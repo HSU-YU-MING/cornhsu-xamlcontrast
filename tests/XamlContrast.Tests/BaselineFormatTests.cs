@@ -29,15 +29,15 @@ public class BaselineFormatTests
     /// <summary>手寫一份 baseline（數值經 JsonSerializer，不吃 locale）。</summary>
     private static string BaselineJson(params object[] entries) => JsonSerializer.Serialize(new { entries });
 
-    [Fact] // 寫出格式：根只有 comment + entries；欄位 camelCase；只收 fail；同鍵聚合（count／worst=最差）；
-           // 依 file 再依 element 以 ordinal 排序 —— 跨 OS 寫出的檔逐字相同，diff 才看得懂
-    public void WriteEmitsOnlyFailuresAggregatedAndSortedOrdinally()
+    [Fact] // 寫出格式：根只有 comment + entries；欄位 camelCase；收「低於 AA」的每一組（fail＋warn，1.0 起）；同鍵聚合
+           // （count／worst=最差）；依 file、element、fg、bg 以 ordinal 排序 —— 跨 OS 寫出的檔逐字相同，diff 才看得懂
+    public void WriteEmitsBelowAaPairsAggregatedAndSortedOrdinally()
     {
         var r = Run(
             ("a.xaml", OnWhite(
                 """<TextBlock Foreground="#EEEEEE" Text="fail 1"/>""",
                 """<TextBlock Foreground="#EEEEEE" Text="fail 1 again, same key"/>""",
-                """<TextBlock Foreground="#8A8A8A" Text="warn — not debt"/>""",
+                """<TextBlock Foreground="#8A8A8A" Text="warn — debt too since 1.0"/>""",
                 """<TextBlock Foreground="#111111" Text="ok"/>""",
                 """<Label Foreground="#DDDDDD" Content="fail 2"/>""")),
             ("B.xaml", OnWhite(FailText)));
@@ -53,11 +53,12 @@ public class BaselineFormatTests
         // ordinal：大寫 B 排在小寫 a 前面（掃描順序是不分大小寫的 a → B，排序不是照抄掃描順序）；
         // 同檔內 Label 排在 TextBlock 前面（文件順序是 TextBlock 先）
         Assert.Equal(
-            ["B.xaml|TextBlock|#EEEEEE", "a.xaml|Label|#DDDDDD", "a.xaml|TextBlock|#EEEEEE"],
+            ["B.xaml|TextBlock|#EEEEEE", "a.xaml|Label|#DDDDDD", "a.xaml|TextBlock|#8A8A8A", "a.xaml|TextBlock|#EEEEEE"],
             entries.Select(e => $"{e.GetProperty("file").GetString()}|{e.GetProperty("element").GetString()}|{e.GetProperty("fg").GetString()}"));
 
         var aggregated = entries.Single(e => e.GetProperty("file").GetString() == "a.xaml" &&
-                                             e.GetProperty("element").GetString() == "TextBlock");
+                                             e.GetProperty("element").GetString() == "TextBlock" &&
+                                             e.GetProperty("fg").GetString() == "#EEEEEE");
         Assert.Equal(2, aggregated.GetProperty("count").GetInt32());
         var worst = r.Findings.Where(f => f.File == "a.xaml" && f.Fg == "#EEEEEE").Min(f => f.Worst);
         Assert.Equal(worst, aggregated.GetProperty("worst").GetDouble());
