@@ -10,6 +10,12 @@
 #                                                              （行為變更後用；diff 要人工檢視再 commit）
 #
 # 比對項目：summary 全部計數器 + 每筆 fail 的 file:line + 退出碼。
+#
+# ⚠ 絕對不要為了讓它變綠就跑 -Update：快照不一致 = 行為變了。先逐項說明每一個差異是哪個 commit／決定造成的，
+#   給使用者看過、同意之後才重新凍結。
+#
+# 舊快照（schemaVersion 5，0.x 寫的）照樣讀得懂：比對的欄位（summary 的計數器、findings 的 category／file／line）
+# 在 6 都還在。差別只在退出碼的期望 —— 見下面 $expExit。
 
 param([switch]$Update)
 
@@ -67,7 +73,21 @@ foreach ($name in @('kindling', 'quillnest', 'celflow', 'cornea')) {
     $cur = Get-Content $json -Raw -Encoding UTF8 | ConvertFrom-Json
     $exp = Get-Content $snapPath -Raw -Encoding UTF8 | ConvertFrom-Json
     $s = $cur.summary; $e = $exp.summary
-    $expExit = if ($e.counts.fail -gt 0 -or $e.pairs -eq 0) { 1 } else { 0 }
+    # 期望的退出碼：快照有 exitCode（schemaVersion 6 起，CLI 寫進 JSON）就用它。
+    # 舊快照沒有，依 1.0 的規則從快照的計數推：0 組配對或覆蓋率低於下限 → 3；有 fail、或 gate 是 warn（預設）而有 warn → 1；否則 0。
+    # ⚠ 0.x 的推法是「fail > 0 或 0 組 → 1」—— 1.0 拆出 exit 3、預設 gate 改成 warn 之後就不對了
+    if ($null -ne $exp.exitCode) {
+        $expExit = [int]$exp.exitCode
+    } else {
+        $total = $e.pairs + $e.unresolved
+        $cov = if ($total -eq 0) { 0 } else { [math]::Round($e.pairs * 100.0 / $total, 1, [MidpointRounding]::AwayFromZero) }
+        $minCov = if ($null -ne $e.minCoverage) { $e.minCoverage } else { 50 }
+        $gateWarn = $e.failOn -ne 'fail'
+        $expExit = if ($e.pairs -eq 0 -or $cov -lt $minCov) { 3 }
+                   elseif ($e.counts.fail -gt 0 -or ($gateWarn -and $e.counts.warn -gt 0)) { 1 }
+                   else { 0 }
+        Write-Host "[$name] 快照是 schemaVersion $($exp.schemaVersion)（沒有 exitCode）—— 退出碼期望依 1.0 規則從快照的計數推得：$expExit" -ForegroundColor DarkYellow
+    }
 
     $checks = [ordered]@{
         files = @($e.files, $s.files);                    pairs = @($e.pairs, $s.pairs)
