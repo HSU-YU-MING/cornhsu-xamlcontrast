@@ -171,8 +171,9 @@ older 1.x (exit 2, naming the property).
 - **Config `layout`** declares how your own containers lay out their children, so rule 17 doesn't have
   to guess: `"layout": { "overlap": ["MyCardHost"], "sideBySide": ["MyToolbar"] }`. A name in
   `overlap` stacks its children in one cell (the earlier siblings can be the text's backdrop); a name in
-  `sideBySide` places them apart. Declarations win over the built-in rules; a name in both lists is a
-  config error.
+  `sideBySide` places them apart. Declarations win over the built-in rules; a name in both lists, or a
+  name with a namespace prefix (`l:CardGrid` — names are matched without one), is a config error; a
+  declared name that matches no element is named on the console and in the Markdown report.
 
 ### Changed
 - **A composited background has one spelling** in `bg` and in baseline keys: each layer as `{Key}` or

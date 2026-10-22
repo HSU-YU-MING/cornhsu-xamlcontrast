@@ -870,11 +870,35 @@ public class NewRuleTests
     [InlineData("""{ "layout": { "overlap": ["CardGrid"], "sideBySide": ["CardGrid"] } }""", "layout: 'CardGrid' is declared both overlap and sideBySide")]
     [InlineData("""{ "layout": null }""", "layout must be an object, got null")]
     [InlineData("""{ "layout": { "overlap": [""] } }""", "layout.overlap must not contain null or empty element names")]
+    // 比對的是不帶命名空間前綴的元素名：l:CardGrid 永遠不會命中。現在就拒絕（審查 1.0 B8：以後再擋就是收緊）
+    [InlineData("""{ "layout": { "overlap": ["l:CardGrid"] } }""", "layout.overlap: 'l:CardGrid' has a namespace prefix — declare the element name without it ('CardGrid')")]
+    [InlineData("""{ "layout": { "sideBySide": ["x:Bar"] } }""", "layout.sideBySide: 'x:Bar' has a namespace prefix")]
     public void LayoutConfigErrorsAreNamed(string config, string message)
     {
         using var fx = new Fixture();
         fx.File(ToolConfig.FileName, config);
         Assert.Contains(message, Assert.Throws<ConfigException>(() => ToolConfig.Load(fx.Root)).Message);
+    }
+
+    [Fact] // 宣告了但整個專案沒有任何元素叫這個名字：多半是拼錯或大小寫不對 —— 宣告靜默失效（審查 1.0 B8）。
+           // 不是錯誤（可能只是那個容器這次沒在掃描範圍裡），但要點名
+    public void LayoutNamesThatMatchNoElementAreNamed()
+    {
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, """{ "layout": { "overlap": ["CardGrid", "cardgrid"], "sideBySide": ["Toolbar2"] } }""");
+        fx.File("Main.xaml", """
+            <Grid xmlns:l="clr-namespace:App" Background="#FFFFFF">
+              <l:CardGrid><Border Background="#000000"/><TextBlock Foreground="#FFFFFF" Text="x"/></l:CardGrid>
+            </Grid>
+            """);
+        var cfg = ToolConfig.Load(fx.Root);
+        var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
+        Assert.Equal(["cardgrid", "Toolbar2"], r.UnmatchedLayoutNames);
+        var console = Report.ToConsole(r);
+        Assert.Contains("!! config: layout name 'cardgrid' matched no element", console);
+        Assert.Contains("!! config: layout name 'Toolbar2' matched no element", console);
+        Assert.DoesNotContain("'CardGrid' matched no element", console);
+        Assert.Contains("layout name 'Toolbar2' matched no element", Report.ToMarkdown(r, 0));
     }
 
     [Theory] // Canvas 裡有尺寸的純色兄弟也不當背板:Canvas.Left/Top 與文字的實際範圍靜態不可知,

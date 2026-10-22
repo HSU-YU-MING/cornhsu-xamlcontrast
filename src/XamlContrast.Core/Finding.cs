@@ -116,6 +116,9 @@ public sealed class AuditResult
     public int Suppressed { get; init; }
     /// <summary>沒附理由的 ignore（無效，不壓）—— 要警告</summary>
     public required List<string> InvalidIgnores { get; init; }
+    /// <summary>config 的 layout 宣告了、但這次稽核走過的元素沒有一個叫這個名字的（多半是拼錯或大小寫不對）——
+    /// 宣告靜默失效，要點名（審查 1.0 B8）。不是錯誤：那個容器可能只是不在這次的掃描範圍裡。</summary>
+    public IReadOnlyList<string> UnmatchedLayoutNames { get; init; } = [];
     /// <summary>本次生效的設定（分級門檻等；預設值 = 沒有 config 檔）</summary>
     public ToolConfig Config { get; init; } = new();
 

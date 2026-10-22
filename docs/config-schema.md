@@ -132,7 +132,8 @@ WCAG 2.x AA。`failFactor` 是「破」的分界（門檻 × `failFactor`，預�
 | `overlap` | `[]` | 子元素疊在同一格（像 `Grid` 的同一格）：前面佔滿的兄弟是後面文字的背板 |
 | `sideBySide` | `[]` | 子元素排開（像 `StackPanel`）：兄弟不會是背板 |
 
-元素名是完整的 XAML 元素名（不含命名空間前綴、大小寫相符）。宣告優先於內建判斷：內建只認 `Grid`／`Canvas`／`InkCanvas`
+元素名是完整的 XAML 元素名（不含命名空間前綴、大小寫相符）：寫成 `l:CardGrid` 是設定錯誤（exit 2），
+宣告了卻沒有任何元素命中的名字會在 console 與 Markdown 報告點名（`!! config: layout name … matched no element`）。宣告優先於內建判斷：內建只認 `Grid`／`Canvas`／`InkCanvas`
 是疊層、`*StackPanel`／`*WrapPanel`／`*DockPanel` 等是排開；其他名字以 `Panel`／`Canvas`／`Grid` 結尾的自訂容器版面未知，
 可能是背板的兄弟之後的字記 `over-sibling-content`（不猜）。同一個名字同時出現在兩個清單是設定錯誤（exit 2）；
 `null` 或空字串一樣 exit 2。宣告成 `overlap` 的容器所有子元素算同一格（`Grid` 才看 `Grid.Row`／`Grid.Column`）。

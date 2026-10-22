@@ -324,6 +324,8 @@ public static class Report
         sb.AppendLine((r.Detection.IsDegraded ? "!! palette: " : "palette: ") + r.Detection.Description);
         if (r.Config.SourcePath is not null)
             sb.AppendLine($"config: {Path.GetFileName(r.Config.SourcePath)} loaded");
+        foreach (var n in r.UnmatchedLayoutNames)
+            sb.AppendLine($"!! config: layout name '{n}' matched no element — names are matched exactly (case-sensitive, without a namespace prefix)");
         if (!r.Config.Thresholds.IsDefault)
         {
             // 改門檻等於改稽核標準 —— 允許，但要標明，報告的讀者才知道基準不是 WCAG 預設
@@ -457,6 +459,11 @@ public static class Report
         {
             sb.AppendLine($"> ⚠️ **Palette detection degraded** — {Esc(r.Detection.Description)}");
             sb.AppendLine("> Only hard-coded colors were evaluated; theme-driven colors are not covered by this run.");
+            sb.AppendLine();
+        }
+        foreach (var n in r.UnmatchedLayoutNames)
+        {
+            sb.AppendLine($"> ⚠️ **Config: layout name '{Esc(n)}' matched no element** — names are matched exactly (case-sensitive, without a namespace prefix).");
             sb.AppendLine();
         }
         if (!r.Config.Thresholds.IsDefault)

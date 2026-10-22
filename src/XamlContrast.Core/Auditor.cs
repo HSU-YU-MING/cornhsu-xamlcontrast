@@ -93,6 +93,7 @@ public sealed partial class Auditor
     private readonly List<string> _parseErrors = new();
     private readonly List<string> _invalidIgnores = new();
     private int _pairs, _unresolved, _skipped, _deadFg, _suppressed, _disabled, _translucentOverNothing;
+    private readonly HashSet<string> _walkedNames = new(StringComparer.Ordinal); // config 的 layout 宣告有沒有命中
     private StyleIndex _styles = null!;
     private string _curFile = ""; // 具名 Style 查找的「同檔優先」範圍（完整路徑）
     private ThemeSide? _curSide;  // 目前這個檔只屬於哪一個主題（ThemeFileSides；Style 查找依主題解析，見 StyleIndex.Build）
@@ -337,6 +338,8 @@ public sealed partial class Auditor
             Suppressed = auditor._suppressed,
             InvalidIgnores = auditor._invalidIgnores,
             Config = auditor._cfg,
+            UnmatchedLayoutNames = auditor._cfg.Layout.Overlap.Concat(auditor._cfg.Layout.SideBySide)
+                .Where(n => !auditor._walkedNames.Contains(n)).Distinct(StringComparer.Ordinal).ToList(),
         };
         Grader.Grade(result);
         return result;
@@ -381,6 +384,7 @@ public sealed partial class Auditor
 
     private void Walk(XElement el, Backdrop bd, string file, double op, bool suppressed)
     {
+        _walkedNames.Add(el.Name.LocalName);
         if (!suppressed && IsSuppressedByComment(el, file)) suppressed = true;
         var opRaw = el.Attribute("Opacity")?.Value;
         // Opacity 也可能是 Binding；只處理字面數值，其餘維持原值

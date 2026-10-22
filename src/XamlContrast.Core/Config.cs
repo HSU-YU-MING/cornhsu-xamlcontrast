@@ -127,6 +127,11 @@ public sealed class ToolConfig
         if (cfg.Layout is null) throw new ConfigException("layout must be an object, got null");
         RequireNames(cfg.Layout.Overlap, "layout.overlap");
         RequireNames(cfg.Layout.SideBySide, "layout.sideBySide");
+        // 比對的是不帶命名空間前綴的元素名（XElement.Name.LocalName）：l:CardGrid 永遠不會命中，宣告靜默失效。
+        // 現在就拒絕（審查 1.0 B8：1.0 之後再擋就是收緊）
+        foreach (var (names, field) in new[] { (cfg.Layout.Overlap, "layout.overlap"), (cfg.Layout.SideBySide, "layout.sideBySide") })
+            if (names.FirstOrDefault(n => n.Contains(':')) is { } prefixed)
+                throw new ConfigException($"{field}: '{prefixed}' has a namespace prefix — declare the element name without it ('{prefixed[(prefixed.LastIndexOf(':') + 1)..]}')");
         if (cfg.Layout.Overlap.Intersect(cfg.Layout.SideBySide, StringComparer.Ordinal).FirstOrDefault() is { } both)
             throw new ConfigException($"layout: '{both}' is declared both overlap and sideBySide");
         RequireNames(cfg.Classification.ExtraText, "classification.extraText");
@@ -156,9 +161,6 @@ public sealed class ToolConfig
         return cfg;
     }
 
-    /// <summary>元素名清單：不能是 null，也不能含 null／空白名 —— 分類用後綴比對，
-    /// EndsWith("") 恆真：extraNonText 裡一個 "" 會把所有不在內建表的元素都判成裝飾、
-    /// 不受文字門檻檢查（靜默放行），跟 null 一樣當設定錯誤。</summary>
     /// <summary>
     /// 型別錯誤 → 「欄位 must be 期望的型別」；JSON 本身壞掉才說不是合法的 JSON（審查 1.0 C5）。
     /// ⚠ 舊版一律「is not valid JSON: The JSON value could not be converted to System.Boolean. Path: …」——
@@ -180,6 +182,9 @@ public sealed class ToolConfig
         return $"{FileName} is not valid JSON: {ex.Message}";
     }
 
+    /// <summary>元素名清單：不能是 null，也不能含 null／空白名 —— 分類用後綴比對，
+    /// EndsWith("") 恆真：extraNonText 裡一個 "" 會把所有不在內建表的元素都判成裝飾、
+    /// 不受文字門檻檢查（靜默放行），跟 null 一樣當設定錯誤。</summary>
     private static void RequireNames(string[]? names, string field)
     {
         if (names is null) throw new ConfigException($"{field} must be an array of element names, got null");
