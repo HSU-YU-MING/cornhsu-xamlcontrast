@@ -216,13 +216,14 @@ public static partial class PaletteDetector
     }
 
     /// <summary>
-    /// 檔名提示：這個檔只屬於深色或淺色主題嗎？看「檔名（不含副檔名）」與「最後一段目錄」，切成詞
-    /// （與 <see cref="LooksLikeFixture"/> 同一套詞邊界：. - _ 與大小寫轉換），有一個詞恰好是 dark 或 light。
-    /// 兩種都有、或都沒有 → null（不確定歸屬 = 兩個主題共用，兩欄都評）。
+    /// 嚴格的檔名提示（只給「只評單欄」的 <see cref="ThemeSides"/> 用）：這個檔只屬於深色或淺色主題嗎？
+    /// 看「檔名（不含副檔名）」與「最後一段目錄」，切成詞（與 <see cref="LooksLikeFixture"/> 同一套詞邊界：
+    /// . - _ 與大小寫轉換），有一個詞恰好是 dark 或 light。兩種都有、或都沒有 → null。
     /// ⚠ 舊版對整條相對路徑做子字串比對：Highlight、Lightweight、Spotlight 都命中 light，資料夾叫 Starlight/
     ///   的話整個專案每個檔都帶 light 提示 —— 中性檔被當成只屬於淺色主題、只評淺色那欄，深色主題下的真 fail
-    ///   消失（審查素材 b4hl、b4dir）。Dark.xaml、DarkTheme.xaml、ColorsDark.xaml、Theme.Dark.xaml、
-    ///   Themes/Dark/Colors.xaml 照樣認得；全小寫黏在一起的 darktheme.xaml 認不得，退回中性（兩欄都評，不猜）。
+    ///   消失（審查素材 b4hl、b4dir）。認錯一個「只屬於某主題」的檔會藏 fail，所以這裡要嚴。
+    /// ⚠ 色盤分組不能用這個：認不得的寫法（darktheme.xaml、Dark2.xaml、深色Dark.xaml、Themes/Dark/Colors/Palette.xaml）
+    ///   會讓兩個主題的字典都變成中性、整個色盤塌成單一主題（審查最後一輪 1）。分組用寬鬆的 <see cref="GroupHint"/>。
     /// </summary>
     internal static ThemeSide? ThemeHint(string rel)
     {
@@ -240,6 +241,19 @@ public static partial class PaletteDetector
         Scan(Path.GetFileNameWithoutExtension(segments[^1]));
         if (segments.Length >= 2) Scan(segments[^2]);
         return dark == light ? null : dark ? ThemeSide.Dark : ThemeSide.Light;
+    }
+
+    /// <summary>
+    /// 寬鬆的檔名提示（色盤分組、主題配對的候選用）：嚴格提示認得就用它，否則退回 v0.6.1 的子字串比對
+    /// （專案內相對路徑含 dark 或 light、只含其一）。分組認錯的代價是某個鍵只剩一側有值、缺的一側退回另一側
+    /// （v0.6.1 起一直如此）；分組認不得的代價是兩套主題塌成一套、整欄淺色值消失 —— 後者大得多。
+    /// </summary>
+    internal static ThemeSide? GroupHint(string rel)
+    {
+        if (ThemeHint(rel) is { } side) return side;
+        var n = rel.ToLowerInvariant();
+        bool d = n.Contains("dark"), l = n.Contains("light");
+        return d == l ? null : d ? ThemeSide.Dark : ThemeSide.Light;
     }
 
 
@@ -413,7 +427,7 @@ public static partial class PaletteDetector
             // ⚠ 提示只看「專案內的相對路徑」。看完整路徑的話，專案放在
             //   D:\dark-projects\ 底下會讓所有候選都染上 dark 提示、配對整個失效。
             var rel = Path.GetRelativePath(root, f);
-            var hint = ThemeHint(rel);
+            var hint = GroupHint(rel);
             cands.Add(new XamlCandidate(f, rel, brushes, hint == ThemeSide.Dark, hint == ThemeSide.Light));
         }
         return cands;
@@ -487,7 +501,7 @@ public static partial class PaletteDetector
             var rel = Path.GetRelativePath(root, f);
             if (LooksLikeFixture(rel)) continue;
             if (include is not null && !include(f)) continue;
-            var hint = ThemeHint(rel); // 整詞比對，見 ThemeHint
+            var hint = GroupHint(rel); // 寬鬆的分組提示，見 GroupHint
             var isDark = hint == ThemeSide.Dark;
             var isLight = hint == ThemeSide.Light;
 
@@ -776,7 +790,7 @@ public static partial class PaletteDetector
             var rel = Path.GetRelativePath(root, f);
             if (LooksLikeFixture(rel) || IsScreenFile(f)) continue;
             var colors = ParseColorDefs(f, keepInvalid: true);
-            if (colors.Count > 0) files.Add((colors, d.SideOf(f) ?? ThemeHint(rel)));
+            if (colors.Count > 0) files.Add((colors, d.SideOf(f) ?? GroupHint(rel)));
         }
         foreach (var (colors, side) in files.Where(x => x.Side is not null))
             foreach (var (k, v) in colors)
@@ -975,17 +989,30 @@ public static partial class PaletteDetector
             };
 
         // 2.5) 合併式色盤（單一主題）—— 仍優於「挑一個檔」，鍵集是所有字典的聯集
+        // ⚠ 檔名看不出主題（Ocean.xaml／Nord.xaml、純中文檔名）時兩套主題分不了組，同鍵先出現的贏 = 只評其中一套，
+        //   另一套整欄消失（v0.6.1 起一直如此）。同一批鍵（≥ 3，與色盤門檻同一個數）在不同字典裡值不同，就是
+        //   「看不出來的兩套主題」：判成退化並點名，--strict-palette 擋得住。多 App 作用域時各 App 的色盤本來就各自不同，
+        //   全域合併的衝突是預期內的（作用域各自解析），不算
         if (merged is { } ms && ms.Pal.Count > 0)
+        {
+            var indistinct = scopes is null && ms.Conflicts.Count >= 3;
             return new PaletteDetection
             {
                 Palette = ms.Pal,
                 Mode = PaletteMode.Single,
+                IsDegraded = indistinct,
                 ExcludedFiles = UiExclusions(ms.Files),
                 DroppedKeys = ms.Invalid,
                 Scopes = scopes,
                 Description = $"merged colour dictionaries: {ms.Files.Count} file(s), {ms.Pal.Count} keys (single theme)"
-                              + scopeNote + ConflictNote(ms.Conflicts) + InvalidNote(ms.Invalid),
+                              + scopeNote + ConflictNote(ms.Conflicts) + InvalidNote(ms.Invalid)
+                              + (indistinct
+                                  ? "; !! these look like separate themes the file names don't tell apart (no 'dark'/'light' in them)"
+                                    + " — only the first definition of each key is graded; name the files *Dark*/*Light*"
+                                    + " or set palette.mode \"pair\" in xamlcontrast.config.json"
+                                  : ""),
             };
+        }
 
         // 3) 單一 XAML 色盤檔：深淺同值（單一主題專案）
         if (xaml.Count > 0)

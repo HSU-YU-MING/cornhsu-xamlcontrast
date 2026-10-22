@@ -641,6 +641,79 @@ public class PaletteDetectorTests
         Assert.Contains("exit 1: palette detection failed and --strict-palette is set", cli.Out);
     }
 
+    // ── 色盤分組的主題提示要寬鬆（審查最後一輪 1：素材 hint-lowercase、hint-capfirst、hint-digits、hint-chinesemix、hint-deepdir）──
+    //    18575a3 讓合併式色盤也改用整詞的 ThemeHint 分組：認不得的主題檔名讓兩個主題的字典都變成「中性」、先出現的贏，
+    //    整個色盤塌成單一主題（mode=single，淺色 1.36:1 的真 fail 消失、exit 0）—— 而且不算退化，--strict-palette 擋不住。
+    //    v0.6.1 與 02a0e1b 都偵測成 pair。整詞判定只該用在「只評單欄」那張表（認錯會藏 fail），分組要寬鬆
+
+    private static Fixture TwoThemeFiles(string darkFile, string lightFile) => new Fixture()
+        .File(darkFile, """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Muted" Color="#888888"/>
+            </ResourceDictionary>
+            """)
+        .File(lightFile, """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Muted" Color="#DDDDDD"/>
+            </ResourceDictionary>
+            """)
+        .File("Views/Main.xaml", """<Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Muted}" Text="muted"/></Grid>""");
+
+    [Theory]
+    [InlineData("Themes/darktheme.xaml", "Themes/lighttheme.xaml")]
+    [InlineData("Themes/Darktheme.xaml", "Themes/Lighttheme.xaml")]
+    [InlineData("Themes/Dark2.xaml", "Themes/Light2.xaml")]
+    [InlineData("Themes/深色Dark.xaml", "Themes/淺色Light.xaml")]
+    [InlineData("Themes/Dark/Colors/Palette.xaml", "Themes/Light/Colors/Palette.xaml")]
+    public void ThemeFilesTheWholeWordHintCannotNameStillFormAPair(string darkFile, string lightFile)
+    {
+        using var fx = TwoThemeFiles(darkFile, lightFile);
+        var r = fx.Run();
+        Assert.Equal(PaletteMode.Pair, r.Detection.Mode);
+        Assert.Equal(("#888888", "#DDDDDD"), r.Detection.Palette.Entries["Muted"]);
+        var f = Assert.Single(r.Findings, x => x.File == "Views/Main.xaml");
+        Assert.Equal(Wcag.Contrast("#DDDDDD", "#FFFFFF"), f.RatioLight); // 淺色 1.36:1
+        Assert.Equal(Category.Fail, f.Category);
+    }
+
+    [Fact] // 檔名完全看不出主題（Ocean／Nord、純中文檔名）時沒辦法分組 —— 與 v0.6.1 相同。但兩個中性字典以不同值定義
+           // 同一批鍵，就是「看不出來的兩套主題」：先出現的贏等於只評一套。判成退化並點名，--strict-palette 擋得住
+    public void NeutralDictionariesDefiningTheSameKeysDifferentlyAreADegradedDetection()
+    {
+        using var fx = TwoThemeFiles("Themes/Nord.xaml", "Themes/Ocean.xaml");
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(PaletteMode.Single, d.Mode);
+        Assert.True(d.IsDegraded);
+        Assert.Contains("3 key(s) defined with conflicting values", d.Description);
+        Assert.Contains("themes the file names don't tell apart", d.Description);
+
+        var cli = Cli.Run(fx.Root, "--strict-palette");
+        Assert.True(cli.Exit == 1, cli.ToString());
+        Assert.Contains("exit 1: palette detection failed and --strict-palette is set", cli.Out);
+    }
+
+    [Fact] // 反方向：兩個中性字典只是各自定義不同的鍵、或同鍵同值 —— 正常的拆檔，不是退化
+    public void NeutralDictionariesWithoutConflictsAreNotDegraded()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Colors.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/><SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Brushes.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/><SolidColorBrush x:Key="Muted" Color="#888888"/>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.False(d.IsDegraded);
+    }
+
     [Fact] // 同上，字典裡另外有 <Color> 定義：brush 有定義、只是全部讀不懂時不退回 Color 表 —— 那些 brush 才是色盤，
            // 拿 Color 鍵充當色票會讓偵測看起來成功（審查 mutation B3c：「沒有 brush 才用 Color 表」的條件拿掉時存活）
     public void AllBrushesUnreadableDoesNotFallBackToTheColourTable()
@@ -863,7 +936,7 @@ public class PaletteDetectorTests
         var d = PaletteDetector.Detect(fx.Root);
         Assert.Contains($"!! {conflicting} key(s) defined with conflicting values", d.Description);
         Assert.Contains("wins): K1, K2, K3, K4, K5", d.Description);
-        Assert.Equal(truncated, d.Description.EndsWith(", …"));
+        Assert.Equal(truncated, d.Description.Contains("K5, …")); // 衝突提示之後可能還接著「分不出主題」的退化提示
         Assert.DoesNotContain("K6", d.Description);
         Assert.DoesNotContain("Same", d.Description);
         Assert.Equal(("#111111", "#111111"), d.Palette.Entries["K1"]); // 先出現的贏（字典序 A 在 B 前）
