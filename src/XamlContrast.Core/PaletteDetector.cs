@@ -259,16 +259,46 @@ public static partial class PaletteDetector
 
     /// <summary>畫面檔：根元素讀得出來、而且不是 ResourceDictionary 或 Application（App.xaml 的
     /// Application.Resources 是整個 App 的範圍，照全域處理）。它的區域資源只在那個畫面裡生效。</summary>
-    internal static bool IsScreenFile(string file)
+    internal static bool IsScreenFile(string file) => RootKindOf(file) == RootKind.Screen;
+
+    internal enum RootKind { Unreadable, ResourceDictionary, Application, Screen }
+
+    /// <summary>
+    /// XAML 檔的根元素是哪一種。Application 包含它的子類別：根元素名稱以 Application 結尾
+    /// （Prism 的 &lt;prism:PrismApplication&gt;），或根元素底下有 &lt;…Application.Resources&gt;
+    /// （&lt;local:App&gt;&lt;Application.Resources&gt; 這種以自訂子類別當根元素的寫法）。
+    /// ⚠ 舊判定只認名稱恰為 Application：PrismApplication 的 App.xaml 被當成畫面，Application.Resources 的鍵
+    ///   全變成那個「畫面」的區域鍵，其他畫面一律 unknown-palette-key（審查素材 loc-prism2：真 fail 消失、exit 1 → 0）。
+    /// </summary>
+    internal static RootKind RootKindOf(string file)
     {
         try
         {
             using var r = System.Xml.XmlReader.Create(file);
             r.MoveToContent();
-            return r.LocalName is not ("ResourceDictionary" or "Application");
+            if (r.LocalName == "ResourceDictionary") return RootKind.ResourceDictionary;
+            if (r.LocalName.EndsWith("Application", StringComparison.Ordinal)) return RootKind.Application;
+            if (r.IsEmptyElement) return RootKind.Screen;
+            var depth = r.Depth;
+            r.Read();
+            while (!r.EOF && !(r.NodeType == System.Xml.XmlNodeType.EndElement && r.Depth == depth))
+            {
+                if (r.NodeType == System.Xml.XmlNodeType.Element && r.Depth == depth + 1)
+                {
+                    if (r.LocalName.EndsWith("Application.Resources", StringComparison.Ordinal)) return RootKind.Application;
+                    r.Skip();
+                }
+                else r.Read();
+            }
+            return RootKind.Screen;
         }
-        catch { return false; }
+        catch { return RootKind.Unreadable; }
     }
+
+    /// <summary>同 <see cref="RootKindOf(string)"/>，給已經載入的文件用（具名 Style 索引的全域判定）。</summary>
+    internal static bool IsApplicationRoot(System.Xml.Linq.XElement root)
+        => root.Name.LocalName.EndsWith("Application", StringComparison.Ordinal) ||
+           root.Elements().Any(e => e.Name.LocalName.EndsWith("Application.Resources", StringComparison.Ordinal));
 
     /// <summary>畫面檔區域 brush 的值：深淺兩欄。兩欄都是 null 時，<see cref="MissingColor"/> 是 null = 讀不懂
     /// （執行期才知道，例如 Color="{Binding …}"）；不是 null = 引用的 Color 在畫面與全域都找不到（點名它）。</summary>
@@ -466,17 +496,12 @@ public static partial class PaletteDetector
         foreach (var f in EnumerateFiles(root, "*.xaml"))
         {
             if (LooksLikeFixture(Path.GetRelativePath(root, f))) continue;
-            try
-            {
-                using var r = System.Xml.XmlReader.Create(f);
-                r.MoveToContent();
-                // ⚠ 一律 GetFullPath 正規化:GetDirectoryName 會把分隔線轉成反斜線,
-                //   但 EnumerateFiles 的結果沿用呼叫端傳入的 root 寫法(可能是正斜線)。
-                //   混用的話 StartsWith 永遠不成立 → 每個檔都被當共用區 → 作用域
-                //   **靜默**退化成全域色盤 —— 探針實測抓到的,正是本專案最忌諱的形狀。
-                if (r.LocalName == "Application") dirs.Add(Path.GetDirectoryName(Path.GetFullPath(f))!);
-            }
-            catch { /* 解析失敗的檔案由稽核端負責喊,這裡跳過 */ }
+            // ⚠ 一律 GetFullPath 正規化:GetDirectoryName 會把分隔線轉成反斜線,
+            //   但 EnumerateFiles 的結果沿用呼叫端傳入的 root 寫法(可能是正斜線)。
+            //   混用的話 StartsWith 永遠不成立 → 每個檔都被當共用區 → 作用域
+            //   **靜默**退化成全域色盤 —— 探針實測抓到的,正是本專案最忌諱的形狀。
+            // Application 含子類別（PrismApplication 之類），見 RootKindOf；解析失敗的檔案由稽核端負責喊,這裡跳過
+            if (RootKindOf(f) == RootKind.Application) dirs.Add(Path.GetDirectoryName(Path.GetFullPath(f))!);
         }
         return dirs.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
     }

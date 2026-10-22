@@ -1139,6 +1139,48 @@ public class PaletteDetectorTests
         Assert.Equal(Category.Fail, f.Category);
     }
 
+    // ── Application 的子類別也是 App（審查最後一輪 2：素材 loc-prism、loc-prism2）──
+    //    00c18b8 的「畫面檔」判定是「根元素不是 ResourceDictionary 也不是 Application」：Prism 的 <prism:PrismApplication>、
+    //    任何以自訂 Application 子類別當根元素的 App.xaml 被當成畫面，Application.Resources 的鍵全變成那個「畫面」的區域鍵 ——
+    //    其他畫面的使用處一律 unknown-palette-key，訊息還說是「dead reference, typo」；真 fail 消失、exit 1 → 0
+
+    [Theory]
+    [InlineData("""<prism:PrismApplication xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:prism="http://prismlibrary.com/">""", "prism:PrismApplication")]
+    [InlineData("""<local:App xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:Demo">""", "local:App")]
+    public void ApplicationSubclassRootIsTheAppNotAScreen(string open, string close)
+    {
+        using var fx = new Fixture();
+        fx.File("App.xaml", $"""
+            {open}
+              <Application.Resources>
+                <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+                <SolidColorBrush x:Key="Fg" Color="#111111"/>
+                <SolidColorBrush x:Key="Muted" Color="#DDDDDD"/>
+              </Application.Resources>
+            </{close}>
+            """);
+        fx.File("Views/Main.xaml", """
+            <Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Muted}" Text="hint"/></Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.UnresolvedSites);
+        var f = Assert.Single(r.Findings, x => x.File == "Views/Main.xaml");
+        Assert.Equal(Wcag.Contrast("#DDDDDD", "#FFFFFF"), f.RatioDark); // 1.36:1
+        Assert.Equal(Category.Fail, f.Category);
+        Assert.False(PaletteDetector.IsScreenFile(Path.Combine(fx.Root, "App.xaml")));
+    }
+
+    [Fact] // 多 App 作用域的邊界一樣要認得 Application 子類別
+    public void ApplicationSubclassRootsAreScopeBoundaries()
+    {
+        using var fx = new Fixture();
+        foreach (var app in new[] { "A", "B" })
+            fx.File($"{app}/App.xaml", """
+                <prism:PrismApplication xmlns:prism="http://prismlibrary.com/"><Application.Resources/></prism:PrismApplication>
+                """);
+        Assert.Equal(2, PaletteDetector.ApplicationScopeRoots(fx.Root).Count);
+    }
+
     [Fact] // 根部就不是 XML 的檔案（樣板殘骸、編碼壞掉）不能讓偵測整個崩潰（找 <Application> 根元素那一步也要擋）；
            // 它交給稽核端喊 parse failed —— 不是讓檔案從報告裡消失
     public void UnparseableXamlNeitherBreaksDetectionNorDisappears()

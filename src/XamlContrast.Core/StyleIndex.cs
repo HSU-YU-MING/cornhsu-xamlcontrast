@@ -282,7 +282,7 @@ internal sealed partial class StyleIndex
             try { doc = XDocument.Load(f); }
             catch { continue; }
             if (doc.Root is null) continue;
-            var isGlobal = doc.Root.Name.LocalName is "ResourceDictionary" or "Application";
+            var isGlobal = doc.Root.Name.LocalName == "ResourceDictionary" || PaletteDetector.IsApplicationRoot(doc.Root); // 含 Application 子類別
             foreach (var style in doc.Descendants().Where(e => e.Name.LocalName == "Style"))
             {
                 var rec = idx.CreateRecord(style, f);
