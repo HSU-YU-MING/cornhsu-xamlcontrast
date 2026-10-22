@@ -54,7 +54,7 @@ foreach ($name in @('kindling', 'quillnest', 'celflow', 'cornea')) {
 
     if ($Update) {
         Copy-Item $json $snapPath -Force
-        $s = (Get-Content $json -Raw | ConvertFrom-Json).summary
+        $s = (Get-Content $json -Raw -Encoding UTF8 | ConvertFrom-Json).summary
         Write-Host "[$name] 快照已更新（$($s.pairs) 組，fail $($s.counts.fail)，exit=$exit）" -ForegroundColor Cyan
         continue
     }
@@ -64,8 +64,8 @@ foreach ($name in @('kindling', 'quillnest', 'celflow', 'cornea')) {
         $anyFail = $true; continue
     }
 
-    $cur = Get-Content $json -Raw | ConvertFrom-Json
-    $exp = Get-Content $snapPath -Raw | ConvertFrom-Json
+    $cur = Get-Content $json -Raw -Encoding UTF8 | ConvertFrom-Json
+    $exp = Get-Content $snapPath -Raw -Encoding UTF8 | ConvertFrom-Json
     $s = $cur.summary; $e = $exp.summary
     $expExit = if ($e.counts.fail -gt 0 -or $e.pairs -eq 0) { 1 } else { 0 }
 
