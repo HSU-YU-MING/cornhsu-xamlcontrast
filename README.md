@@ -267,7 +267,7 @@ names the input instead of quietly falling back to the default.
 Every field is always present: `null`, `[]` or `{}` when there's nothing to report. Within 1.x,
 fields are only added and `schemaVersion` stays 6 — **ignore fields you don't know**. Some values
 are **open sets** that a 1.x release may extend — the unresolved reasons (`unresolvedBy` keys,
-`unresolvedSites[].reason`) and `paletteMode` — so **accept values you don't know** there too; the schema
+`unresolvedSites[].reason`), `paletteMode`, `summary.failOn` and `findings[].theme` — so **accept values you don't know** there too; the schema
 lists them as strings with the current values in their description.
 
 - Top level: `toolVersion`, `exitCode` (the audit verdict: 0, 1 or 3), `summary`,

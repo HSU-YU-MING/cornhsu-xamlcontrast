@@ -270,8 +270,7 @@ public class JsonReportContractTests
         Assert.Equal(new[] { Category.Ok, Category.Warn, Category.Fail, Category.Decorative }.Select(Report.CategoryLabel), EnumOf(finding.GetProperty("category")));
         IEnumerable<string?> symmetry = [.. new[] { Symmetry.BothLow, Symmetry.DarkFails, Symmetry.LightFails, Symmetry.SingleTheme }.Select(Report.SymmetryLabel), null];
         Assert.Equal(symmetry, EnumOf(finding.GetProperty("symmetry")));
-        IEnumerable<string?> theme = ["dark", "light", null], baseline = ["known", "new", "worsened", null];
-        Assert.Equal(theme, EnumOf(finding.GetProperty("theme")));
+        IEnumerable<string?> baseline = ["known", "new", "worsened", null];
         Assert.Equal(baseline, EnumOf(finding.GetProperty("baseline")));
     }
 
@@ -284,25 +283,31 @@ public class JsonReportContractTests
         return System.Text.RegularExpressions.Regex.Matches(d[at..], "`(?<v>[^`]+)`").Select(m => m.Groups["v"].Value).ToArray();
     }
 
-    [Fact] // 開放集（審查 1.0 A1）：unresolved 原因與 paletteMode 在 1.x 可以加新值 —— schema 不能寫成封閉的 enum，
-           // 不然用 schema 驗證的消費端，在 1.y 加第一個新原因那天就紅。型別是 string、目前的值列在 description，
-           // 實作會輸出的每一個值都要列在文件上（實作 ⊆ 文件）
+    [Fact] // 開放集（審查 1.0 A1、B1）：unresolved 原因、paletteMode、failOn（以後可能有 --fail-on none）、
+           // theme（以後可能有 HighContrast 主題）在 1.x 可以加新值 —— schema 不能寫成封閉的 enum，
+           // 不然用 schema 驗證的消費端，在 1.y 加第一個新值那天就紅。型別是 string、目前的值列在 description，
+           // 實作會輸出的每一個值都要列在文件上（實作 ⊆ 文件）。category、symmetry、baseline 維持封閉
     public void OpenSetsAreStringsThatDocumentTheirCurrentValues()
     {
         var schema = JsonDocument.Parse(File.ReadAllText(Repo.PathOf("docs/report.schema.json"))).RootElement;
-        var reason = schema.GetProperty("$defs").GetProperty("reason");
-        var mode = schema.GetProperty("properties").GetProperty("summary").GetProperty("properties").GetProperty("paletteMode");
-        foreach (var (node, emitted) in new (JsonElement, IEnumerable<string>)[]
+        var summary = schema.GetProperty("properties").GetProperty("summary").GetProperty("properties");
+        var finding = schema.GetProperty("properties").GetProperty("findings").GetProperty("items").GetProperty("properties");
+        foreach (var (node, emitted, nullable) in new (JsonElement, IEnumerable<string>, bool)[]
         {
-            (reason, System.Enum.GetValues<UnresolvedReason>().Select(Report.ReasonLabel)),
-            (mode, System.Enum.GetValues<PaletteMode>().Select(Report.ModeLabel)),
+            (schema.GetProperty("$defs").GetProperty("reason"), System.Enum.GetValues<UnresolvedReason>().Select(Report.ReasonLabel), false),
+            (summary.GetProperty("paletteMode"), System.Enum.GetValues<PaletteMode>().Select(Report.ModeLabel), false),
+            (summary.GetProperty("failOn"), ["warn", "fail"], false),
+            (finding.GetProperty("theme"), System.Enum.GetValues<ThemeSide>().Select(Report.ThemeLabel), true),
         })
         {
             Assert.False(node.TryGetProperty("enum", out _), "開放集不能是 enum");
-            Assert.Equal("string", node.GetProperty("type").GetString());
+            var type = node.GetProperty("type");
+            Assert.Equal(nullable ? "[\"string\",\"null\"]" : "\"string\"", type.GetRawText().Replace(" ", ""));
             Assert.Contains("open set", node.GetProperty("description").GetString());
             Assert.Subset(DocumentedValues(node).ToHashSet(), emitted.ToHashSet());
         }
+        foreach (var closed in new[] { finding.GetProperty("category"), finding.GetProperty("symmetry"), finding.GetProperty("baseline") })
+            Assert.True(closed.TryGetProperty("enum", out _), "封閉集照舊是 enum");
     }
 
     [Fact] // 6：每一個 finding 的每一個欄位都在 —— 沒有值的是 null（symmetry 在 ok／decorative、fontSize 在沒設字級時）。

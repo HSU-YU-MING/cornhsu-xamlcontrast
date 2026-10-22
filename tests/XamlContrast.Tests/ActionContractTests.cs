@@ -61,7 +61,7 @@ public class ActionContractTests
         string?[] EnumOf(JsonElement e) => e.GetProperty("enum").EnumerateArray().Select(x => x.ValueKind == JsonValueKind.Null ? null : x.GetString()).ToArray();
         var gates = Regex.Matches(program, @"\$gate == ""(?<v>\w+)""").Select(m => m.Groups["v"].Value).ToList();
         Assert.NotEmpty(gates);
-        Assert.All(gates, g => Assert.Contains(g, EnumOf(schema.GetProperty("summary").GetProperty("properties").GetProperty("failOn"))));
+        Assert.All(gates, g => Assert.Contains(g, JsonReportContractTests.DocumentedValues(schema.GetProperty("summary").GetProperty("properties").GetProperty("failOn"))));
         var marks = Regex.Matches(program, @"\.baseline == ""(?<v>\w+)""").Select(m => m.Groups["v"].Value).ToList();
         Assert.NotEmpty(marks);
         Assert.All(marks, b => Assert.Contains(b, EnumOf(schema.GetProperty("findings").GetProperty("items").GetProperty("properties").GetProperty("baseline"))));

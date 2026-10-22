@@ -134,7 +134,7 @@ public static class Report
     /// （消費端必須忽略不認得的欄位）；破壞性的改變才遞增，而且只在主版本。形狀見 docs/report.schema.json。</summary>
     public const int JsonSchemaVersion = 6;
 
-    private static string ThemeLabel(ThemeSide s) => s == ThemeSide.Dark ? "dark" : "light";
+    internal static string ThemeLabel(ThemeSide s) => s == ThemeSide.Dark ? "dark" : "light";
 
     /// <summary>一個主題那一欄：有值印「4.5:1」（width 是數字的欄寬），那個主題下不存在的配對印「n/a (dark theme only)」——
     /// 不印一個不存在的主題的比值（審查 1.0 B3）。</summary>

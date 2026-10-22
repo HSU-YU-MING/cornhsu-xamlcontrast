@@ -28,7 +28,7 @@
             "failFactor": { "type": "number" }
           }
         },
-        "failOn": { "enum": ["warn", "fail"], "description": "The gate in effect: warn = every pair below AA fails the run; fail = only pairs below the fail line." },
+        "failOn": { "type": "string", "description": "The gate in effect (flag > config > default): warn = every pair below AA fails the run; fail = only pairs below the fail line. An open set: a 1.x release may add a gate, so consumers must accept values they do not know. Current values: `warn`, `fail`." },
         "minCoverage": { "type": "number", "minimum": 0, "maximum": 100 },
         "strictPalette": { "type": "boolean" },
         "files": { "type": "integer", "minimum": 0 },
@@ -89,7 +89,7 @@
           "isText": { "type": "boolean" },
           "isLargeText": { "type": "boolean" },
           "fontSize": { "type": ["number", "null"], "description": "FontSize in device-independent pixels as written; null when none is set." },
-          "theme": { "enum": ["dark", "light", null], "description": "The one theme this pair exists in (a style in a one-theme dictionary, or a style key resolved per theme); the other theme's ratio is null. null when the pair exists in both." },
+          "theme": { "type": ["string", "null"], "description": "The one theme this pair exists in (a style in a one-theme dictionary, or a style key resolved per theme); the other theme's ratio is null. null when the pair exists in both. An open set: a 1.x release may add a theme (high contrast, say), so consumers must accept values they do not know. Current values: `dark`, `light`." },
           "baseline": { "enum": ["known", "new", "worsened", null], "description": "With --baseline: the ratchet verdict for pairs the gate blocks; null otherwise." }
         }
       }

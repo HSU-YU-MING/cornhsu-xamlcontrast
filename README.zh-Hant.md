@@ -218,7 +218,7 @@ baseline 模式下的既有債是 notice。
 `--json report.json` 產出 `schemaVersion` 6 —— 1.x 凍結，形狀發佈在
 [`docs/report.schema.json`](docs/report.schema.json)。每個欄位一律輸出，沒有值是 `null`、`[]` 或 `{}`。
 1.x 只會新增欄位，`schemaVersion` 維持 6 —— **不認得的欄位請略過**。有些值是 **開放集**，1.x 可能加新值 ——
-unresolved 的原因（`unresolvedBy` 的鍵、`unresolvedSites[].reason`）與 `paletteMode` —— **不認得的值也要容忍**；
+unresolved 的原因（`unresolvedBy` 的鍵、`unresolvedSites[].reason`）、`paletteMode`、`summary.failOn`、`findings[].theme` —— **不認得的值也要容忍**；
 schema 把它們寫成字串，目前的值列在 description。
 
 - 頂層：`toolVersion`、`exitCode`（稽核的判定：0、1 或 3）、`summary`、`unresolvedSites`、`findings`。
