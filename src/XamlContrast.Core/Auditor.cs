@@ -287,7 +287,7 @@ public sealed partial class Auditor
                 // 畫面檔自己的區域 brush 在那個畫面裡蓋過全域（見 MergedXamlPalette 的區域層）
                 if (!paletteFile && PaletteDetector.LocalOverrides(f, basePal) is { Count: > 0 } local)
                     auditor._pal = WithLocalOverrides(auditor._pal, local);
-                auditor.Walk(doc.Root, null, name, 1.0, suppressed: false);
+                auditor.Walk(doc.Root, default, name, 1.0, suppressed: false);
                 auditor.WalkStyles(doc, name);
             }
         }
@@ -346,7 +346,7 @@ public sealed partial class Auditor
             _ => UnresolvedReason.BoundOrGradient,
         }, file, line, r.Kind == ColorKind.UnknownKey && r.Key is not null ? r.Key : raw);
 
-    private void Walk(XElement el, Resolved? bg, string file, double op, bool suppressed)
+    private void Walk(XElement el, Backdrop bd, string file, double op, bool suppressed)
     {
         if (!suppressed && IsSuppressedByComment(el, file)) suppressed = true;
         var opRaw = el.Attribute("Opacity")?.Value;
@@ -363,9 +363,9 @@ public sealed partial class Auditor
         var perSide = splitThemes && (chain?.SideSpecific == true || chainLight?.SideSpecific == true);
         if (!perSide) chainLight = chain;
 
-        // 逐狀態路徑的 alpha 合成要用「更新前」的祖先背景 —— 下面的 bg 更新塊會把
-        // 半透明底先合成一次，逐狀態再合成就是疊兩層
-        var ancestorBg = bg;
+        // 逐狀態路徑的底要畫在「更新前」的祖先底上 —— 下面的更新會把元素自己的底先畫一次，
+        // 逐狀態再畫就是疊兩層
+        var ancestorBd = bd;
 
         var localBgRaw = XamlBrush.Read(el, "Background");
         string? BackgroundOf(StyleIndex.Merged? ch, ThemeSide? side) => localBgRaw
@@ -380,11 +380,11 @@ public sealed partial class Auditor
                     ?? (el.Parent is null ? NormalizedRootBackground : null);
         var bgVal = BackgroundOf(chain, splitThemes ? ThemeSide.Dark : _curSide);
         var bgValLight = splitThemes ? BackgroundOf(chainLight, ThemeSide.Light) : bgVal;
-        bg = bgVal == bgValLight
-            ? NextBackground(bgVal, _pal, bg)
+        bd = bgVal == bgValLight
+            ? NextBackground(bgVal, _pal, bd, op)
             // 兩個主題的底來自不同的 Style（或不同的隱含樣式）：各自在自己的主題視圖裡算，再拼回深淺兩欄
-            : BothThemes(NextBackground(bgVal, SideView(_pal, ThemeSide.Dark), OnSide(bg, ThemeSide.Dark)),
-                         NextBackground(bgValLight, SideView(_pal, ThemeSide.Light), OnSide(bg, ThemeSide.Light)));
+            : BothThemes(NextBackground(bgVal, SideView(_pal, ThemeSide.Dark), OnSide(bd, ThemeSide.Dark), op),
+                         NextBackground(bgValLight, SideView(_pal, ThemeSide.Light), OnSide(bd, ThemeSide.Light), op));
 
         // ── 元素 × Style 鏈的逐狀態檢查（具名 Style 底色盲區）──
         // CelFlow 實證：刪除鈕 Foreground=RedL 配 BasedOn=DarkBtn，DarkBtn 的底是
@@ -395,38 +395,153 @@ public sealed partial class Auditor
         var handledFg = chain is not null || chainLight is not null;
         if (perSide)
         {
-            if (chain is not null) GradeChain(el, chain, ThemeSide.Dark, bg, ancestorBg, localBgRaw, file, op, suppressed);
-            if (chainLight is not null) GradeChain(el, chainLight, ThemeSide.Light, bg, ancestorBg, localBgRaw, file, op, suppressed);
+            if (chain is not null) GradeChain(el, chain, ThemeSide.Dark, bd, ancestorBd, localBgRaw, file, op, suppressed);
+            if (chainLight is not null) GradeChain(el, chainLight, ThemeSide.Light, bd, ancestorBd, localBgRaw, file, op, suppressed);
         }
-        else if (chain is not null) GradeChain(el, chain, null, bg, ancestorBg, localBgRaw, file, op, suppressed);
+        else if (chain is not null) GradeChain(el, chain, null, bd, ancestorBd, localBgRaw, file, op, suppressed);
 
-        WalkForegroundAndChildren(el, bg, file, op, suppressed, handledFg);
+        WalkForegroundAndChildren(el, bd, file, op, suppressed, handledFg);
     }
 
-    /// <summary>元素自己的底（bgVal）套到目前生效的底上。</summary>
-    private static Resolved? NextBackground(string? bgVal, Palette pal, Resolved? bg)
+    // ── 元素 Opacity 的群組 ──
+    //
+    // WPF 的 Opacity 是「整棵子樹先畫成一層、再以那個透明度整層疊到底下」。底（Background）畫在那一層裡時，
+    // 它跟字一起變淡。⚠ 舊版只把字以累乘的 alpha 疊到底上、底仍當不透明 —— Opacity 寫在提供底色的元素上
+    // 或更上層時算錯，而且會藏 fail：白底上 Opacity 0.5 的黑 Border 裡的白字，實際是白字配 #808080（3.95:1），
+    // 報 5.32 ok（審查素材 math 第 6 行）。底只在 Opacity 群組外面（群組只包住字）時，舊算法才是對的。
+
+    /// <summary>一個有畫東西的 Opacity 群組。Ratio：這一層相對上一層的透明度；
+    /// Under：上一層在這一層底下的顏色（null = 上一層那裡還沒畫東西）。</summary>
+    private sealed record OpacityGroup(double Ratio, Resolved? Under, OpacityGroup? Parent);
+
+    /// <summary>目前的底：最內層群組裡畫到的顏色（null = 還沒畫東西），與它所在的群組鏈。
+    /// 群組鏈是 null 時 Bg 就是螢幕上的顏色（與舊版的 bg 相同）。</summary>
+    private readonly record struct Backdrop(Resolved? Bg, OpacityGroup? Group);
+
+    private static double GroupOpacity(OpacityGroup? g)
     {
-        if (bgVal is null) return bg;
-        var r = ColorResolver.Resolve(bgVal, pal);
-        if (r is null) return bg;
-        if (r.Kind == ColorKind.Alpha)
+        var o = 1.0;
+        for (; g is not null; g = g.Parent) o *= g.Ratio;
+        return o;
+    }
+
+    private static bool IsOpaque(Resolved? r) => r is { Kind: ColorKind.Hard or ColorKind.Soft };
+    private static bool IsUnknowable(Resolved? r) => r is { Kind: ColorKind.Other or ColorKind.UnknownKey or ColorKind.SiblingContent };
+    private static string LabelOf(Resolved r) => r.Key is not null ? "{" + r.Key + "}" : r.Dark ?? r.Raw ?? r.Rgb ?? "?";
+
+    /// <summary>一側的像素 (rgb, alpha)；null（沒畫東西）是透明。</summary>
+    private static (string? Rgb, double A) Px(Resolved? r, bool dark) => r switch
+    {
+        null => (null, 0),
+        { Kind: ColorKind.Alpha } => dark ? (r.Rgb, r.Alpha) : (r.RgbLight, r.AlphaLight),
+        _ => dark ? (r.Dark, 1) : (r.Light, 1),
+    };
+
+    /// <summary>top（alpha 已含所有透明度）疊在 bottom 上 —— 標準的 over，sRGB 混合（與 Wcag.Composite 同一套）。</summary>
+    private static (string? Rgb, double A) Over((string? Rgb, double A) top, (string? Rgb, double A) bottom)
+    {
+        if (top.Rgb is null || top.A <= 0) return bottom;
+        if (bottom.Rgb is null || bottom.A <= 0) return (top.Rgb, Math.Min(top.A, 1));
+        if (bottom.A >= 0.999) return (top.A >= 0.999 ? top.Rgb : Wcag.Composite(top.Rgb, top.A, bottom.Rgb), 1);
+        var a = top.A + bottom.A * (1 - top.A);
+        var t = top.Rgb.TrimStart('#');
+        var b = bottom.Rgb.TrimStart('#');
+        if (t.Length == 8) t = t[2..];
+        if (b.Length == 8) b = b[2..];
+        var sb = new System.Text.StringBuilder("#");
+        for (var i = 0; i < 3; i++)
         {
-            // 半透明遮罩：疊在目前生效的背景上算出實際顏色（WPF 以 sRGB 混合；
-            // 半透明「色票」深淺各帶自己的 alpha）
-            // 找不到底色就維持原本的（無法判定，後面會計入 unresolved）
-            return bg is { Dark: not null, Light: not null }
-                ? new Resolved(ColorKind.Hard,
-                    Dark: Wcag.Composite(r.Rgb!, r.Alpha, bg.Dark),
-                    Light: Wcag.Composite(r.RgbLight!, r.AlphaLight, bg.Light),
-                    Key: $"{bgVal} over {(bg.Key is not null ? "{" + bg.Key + "}" : bg.Dark)}")
-                : bg;
+            var ct = Convert.ToInt32(t.Substring(i * 2, 2), 16);
+            var cb = Convert.ToInt32(b.Substring(i * 2, 2), 16);
+            sb.Append(((int)Math.Round((ct * top.A + cb * bottom.A * (1 - top.A)) / a)).ToString("X2", CultureInfo.InvariantCulture));
         }
+        return (sb.ToString(), Math.Min(a, 1));
+    }
+
+    private static Resolved? FromPx((string? Rgb, double A) dark, (string? Rgb, double A) light, string? key)
+    {
+        if (dark.Rgb is null && light.Rgb is null) return null;
+        if (dark.A >= 0.999 && light.A >= 0.999) return new Resolved(ColorKind.Hard, dark.Rgb, light.Rgb, Key: key);
+        return new Resolved(ColorKind.Alpha, Key: key, Alpha: dark.A, Rgb: dark.Rgb ?? light.Rgb,
+            AlphaLight: light.A, RgbLight: light.Rgb ?? dark.Rgb);
+    }
+
+    /// <summary>元素自己的底（bgVal）畫到目前的底上（at = 元素的累乘透明度，含它自己的 Opacity）。</summary>
+    private static Backdrop NextBackground(string? bgVal, Palette pal, Backdrop bd, double at)
+    {
+        if (bgVal is null) return bd;
+        var r = ColorResolver.Resolve(bgVal, pal);
+        if (r is null) return bd;
         // 底色來自 Binding / TemplateBinding / 漸層 —— 執行期才知道實際顏色。
         // 關鍵：不能「往上繼承祖先背景」，那會把子元素的文字色配到錯的底色上
         // （例：標籤徽章的底色綁使用者選的顏色，白字是對的，但繼承祖先會誤判成白配白）。
         // 標記為無法判定，子元素一律跳過。
-        if (r.Kind == ColorKind.Other) return new Resolved(ColorKind.Other, Raw: bgVal);
-        return r.Kind != ColorKind.Transparent ? r : bg;
+        if (r.Kind == ColorKind.Other) r = new Resolved(ColorKind.Other, Raw: bgVal);
+        return Paint(bd, at, r, bgVal);
+    }
+
+    /// <summary>在累乘透明度 at（含畫它的元素自己的 Opacity）的位置畫上 painted（元素的底、Style 狀態的底、兄弟背板）。</summary>
+    private static Backdrop Paint(Backdrop under, double at, Resolved painted, string label)
+    {
+        if (painted.Kind == ColorKind.Transparent) return under; // 穿透
+        var gOp = GroupOpacity(under.Group);
+        if (at < gOp - 0.001)
+            // 畫在新的 Opacity 群組裡：那一層從透明開始畫，整層疊到目前的底上
+            return new Backdrop(IsUnknowable(painted) ? painted : painted with { Raw = label },
+                                new OpacityGroup(at / gOp, under.Bg, under.Group));
+        return new Backdrop(PaintOver(painted, label, under.Bg, inGroup: under.Group is not null), under.Group);
+    }
+
+    /// <summary>同一層裡畫上去：不透明的蓋掉、看不懂的照實帶下去；半透明的疊在那一層已有的顏色上。</summary>
+    private static Resolved? PaintOver(Resolved painted, string label, Resolved? layer, bool inGroup)
+    {
+        if (painted.Kind != ColorKind.Alpha) return painted;
+        // 那一層還沒畫東西：群組裡是透明（整層之後疊出去）；不在群組裡 = 找不到底色，維持原本的（後面計入 unresolved）
+        if (layer is null) return inGroup ? painted with { Raw = label } : null;
+        if (IsUnknowable(layer)) return layer;
+        // 半透明遮罩：疊在目前生效的背景上算出實際顏色（WPF 以 sRGB 混合；半透明「色票」深淺各帶自己的 alpha）
+        if (IsOpaque(layer))
+            return new Resolved(ColorKind.Hard,
+                Dark: Wcag.Composite(painted.Rgb!, painted.Alpha, layer.Dark!),
+                Light: Wcag.Composite(painted.RgbLight!, painted.AlphaLight, layer.Light!),
+                Key: $"{label} over {LabelOf(layer)}");
+        // 那一層本身是半透明的（群組裡、底下還沒有不透明的東西）
+        return FromPx(Over(Px(painted, true), Px(layer, true)), Over(Px(painted, false), Px(layer, false)),
+            $"{label} over {LabelOf(layer)}");
+    }
+
+    /// <summary>一層（群組）裡的像素以群組的透明度疊到上一層的 under 上。</summary>
+    private static Resolved? GroupOver(Resolved? pix, double ratio, Resolved? under)
+    {
+        if (pix is null) return under;         // 這一層那裡沒畫東西：上一層不變
+        if (IsUnknowable(pix)) return pix;
+        if (IsUnknowable(under)) return under; // 疊到看不懂的底上（Binding 的底之類）= 看不懂
+        var (pd, pl) = (Px(pix, true), Px(pix, false));
+        var key = string.Create(CultureInfo.InvariantCulture,
+            $"{pix.Raw ?? LabelOf(pix)} ×{Math.Round(ratio, 2)} over {(under is null ? "nothing" : LabelOf(under))}");
+        return FromPx(Over((pd.Rgb, pd.A * ratio), Px(under, true)), Over((pl.Rgb, pl.A * ratio), Px(under, false)), key);
+    }
+
+    /// <summary>螢幕上實際看到的底：最內層的顏色一層一層疊出去。不透明 = 解得出來；
+    /// 半透明（Alpha）= 最外面沒有不透明的底；看不懂的照實交出。群組鏈是 null 時就是 Bg 本身（舊行為）。</summary>
+    private static Resolved? Screen(Backdrop b)
+    {
+        var pix = b.Bg;
+        for (var g = b.Group; g is not null; g = g.Parent) pix = GroupOver(pix, g.Ratio, g.Under);
+        return pix;
+    }
+
+    /// <summary>字在螢幕上實際的顏色（深淺各自）。底不在任何 Opacity 群組裡時就是 <see cref="EffectiveForeground"/>
+    /// （字以累乘的 alpha 疊在底上）。底在群組裡時，字先在底那一層裡疊 —— 透明度只算底以下那幾層的 Opacity ——
+    /// 再跟底一起一層一層疊出去。呼叫端要先確認 Screen(b) 是不透明的顏色。</summary>
+    private static (string Dark, string Light) TextOnScreen(Resolved fg, double op, Backdrop b)
+    {
+        if (b.Group is null) return EffectiveForeground(fg, op, b.Bg!);
+        var q = Math.Min(1, op / GroupOpacity(b.Group));
+        var (td, tl) = (Px(fg, true), Px(fg, false));
+        var pix = FromPx(Over((td.Rgb, td.A * q), Px(b.Bg, true)), Over((tl.Rgb, tl.A * q), Px(b.Bg, false)), null);
+        for (var g = b.Group; g is not null; g = g.Parent) pix = GroupOver(pix, g.Ratio, g.Under);
+        return pix!.Kind == ColorKind.Alpha ? (pix.Rgb!, pix.RgbLight!) : (pix.Dark!, pix.Light!);
     }
 
     /// <summary>色盤值的單一主題投影：兩欄都用指定主題那一欄（配 <see cref="SideView"/> 用）。</summary>
@@ -434,22 +549,52 @@ public sealed partial class Auditor
         ? r with { Light = r.Dark, RgbLight = r.Rgb, AlphaLight = r.Alpha }
         : r with { Dark = r.Light, Rgb = r.RgbLight, Alpha = r.AlphaLight };
 
-    /// <summary>兩個主題各自算出的底拼回一個深淺兩欄的值。任一側算不出來（沒有底、執行期才知道、不在色盤）
-    /// 就交出那一側的狀態 —— 後面的字計入 unresolved，不拿另一個主題的值補。</summary>
-    private static Resolved? BothThemes(Resolved? dark, Resolved? light)
+    private static OpacityGroup? OnSide(OpacityGroup? g, ThemeSide side)
+        => g is null ? null : g with { Under = OnSide(g.Under, side), Parent = OnSide(g.Parent, side) };
+
+    private static Backdrop OnSide(Backdrop b, ThemeSide side) => new(OnSide(b.Bg, side), OnSide(b.Group, side));
+
+    /// <summary>兩個主題各自算出的底拼回深淺兩欄。兩邊在同一個 op 底下畫，群組鏈的形狀一樣；唯一可能的差別是
+    /// 一邊沒畫（透明）、另一邊在新的 Opacity 群組裡畫了 —— 先替沒畫的那邊補一層空群組，再逐層拼。</summary>
+    private static Backdrop BothThemes(Backdrop dark, Backdrop light)
     {
-        if (dark is null || light is null) return null;
-        if (dark.Kind is not (ColorKind.Hard or ColorKind.Soft)) return dark;
-        if (light.Kind is not (ColorKind.Hard or ColorKind.Soft)) return light;
-        var same = dark.Kind == ColorKind.Hard && light.Kind == ColorKind.Hard && dark.Dark == light.Light;
-        return new Resolved(same ? ColorKind.Hard : ColorKind.Soft, Dark: dark.Dark, Light: light.Light,
-            Key: dark.Key == light.Key ? dark.Key : $"{dark.Key ?? dark.Dark} (dark) / {light.Key ?? light.Light} (light)");
+        static int Depth(OpacityGroup? g) { var n = 0; for (; g is not null; g = g.Parent) n++; return n; }
+        if (Depth(dark.Group) == Depth(light.Group) + 1)
+            light = new Backdrop(null, new OpacityGroup(dark.Group!.Ratio, light.Bg, light.Group));
+        else if (Depth(light.Group) == Depth(dark.Group) + 1)
+            dark = new Backdrop(null, new OpacityGroup(light.Group!.Ratio, dark.Bg, dark.Group));
+        return new Backdrop(BothThemes(dark.Bg, light.Bg, inGroup: dark.Group is not null), BothThemes(dark.Group, light.Group));
+    }
+
+    private static OpacityGroup? BothThemes(OpacityGroup? dark, OpacityGroup? light)
+        => dark is null || light is null ? null
+         : new OpacityGroup(dark.Ratio, BothThemes(dark.Under, light.Under, inGroup: dark.Parent is not null),
+                            BothThemes(dark.Parent, light.Parent));
+
+    /// <summary>兩個主題各自的一個顏色拼回深淺兩欄。不在群組裡時，任一側算不出來（沒有底、執行期才知道、
+    /// 不在色盤、半透明沒得疊）就交出那一側的狀態 —— 後面的字計入 unresolved，不拿另一個主題的值補；
+    /// 群組裡「沒畫東西」是透明，跟半透明一樣以 alpha 表示。</summary>
+    private static Resolved? BothThemes(Resolved? dark, Resolved? light, bool inGroup)
+    {
+        if (!inGroup && (dark is null || light is null)) return null;
+        if (IsUnknowable(dark)) return dark;
+        if (IsUnknowable(light)) return light;
+        if (dark is null && light is null) return null;
+        var key = dark?.Key == light?.Key ? dark?.Key
+            : $"{dark?.Key ?? dark?.Dark ?? dark?.Rgb ?? "nothing"} (dark) / {light?.Key ?? light?.Light ?? light?.RgbLight ?? "nothing"} (light)";
+        if (IsOpaque(dark) && IsOpaque(light))
+        {
+            var same = dark!.Kind == ColorKind.Hard && light!.Kind == ColorKind.Hard && dark.Dark == light.Light;
+            return new Resolved(same ? ColorKind.Hard : ColorKind.Soft, Dark: dark.Dark, Light: light!.Light, Key: key);
+        }
+        if (!inGroup) return !IsOpaque(dark) ? dark : light;
+        return FromPx(Px(dark, true), Px(light, false), key);
     }
 
     /// <summary>元素 × Style 鏈的逐狀態檢查。<paramref name="side"/> 不是 null 時只評那一個主題
     /// （同 key 的 Style 依主題各自解析、兩個主題解析到不同的鏈）：色盤用那個主題的視圖、finding 標 OneThemeOnly，
     /// 元素名的 Style 標籤帶 @dark／@light。</summary>
-    private void GradeChain(XElement el, StyleIndex.Merged chain, ThemeSide? side, Resolved? bg, Resolved? ancestorBg,
+    private void GradeChain(XElement el, StyleIndex.Merged chain, ThemeSide? side, Backdrop bd, Backdrop ancestorBd,
         string? localBgRaw, string file, double op, bool suppressed)
     {
         var pal = _pal;
@@ -458,8 +603,8 @@ public sealed partial class Auditor
         if (side is { } s)
         {
             pal = SideView(_pal, s);
-            bg = OnSide(bg, s);
-            ancestorBg = OnSide(ancestorBg, s);
+            bd = OnSide(bd, s);
+            ancestorBd = OnSide(ancestorBd, s);
             label += s == ThemeSide.Dark ? "@dark" : "@light";
             oneThemeOnly = true;
         }
@@ -510,28 +655,27 @@ public sealed partial class Auditor
                 { Unres(fgR, file, LineOf(el), fgV); continue; }
                 if (fgR.Kind is ColorKind.Transparent) { _skipped++; continue; } // 半透明字色往下疊到底上評分（見 EffectiveForeground）
 
-                Resolved? bgObj;
+                Backdrop stateBd;
                 var bgOwnRaw = bgV; // 卡住時要點名的底：透明的 Setter 只是穿透，卡住的是祖先那一層
                 if (bgV is not null)
                 {
                     var rb = ColorResolver.Resolve(bgV, pal);
                     if (rb is null) continue;
-                    if (rb.Kind == ColorKind.Transparent) { bgObj = bg; bgOwnRaw = null; }
-                    else if (rb.Kind == ColorKind.Alpha)
-                    {
-                        bgObj = ancestorBg is { Dark: not null, Light: not null }
-                            ? new Resolved(ColorKind.Hard,
-                                Dark: Wcag.Composite(rb.Rgb!, rb.Alpha, ancestorBg.Dark),
-                                Light: Wcag.Composite(rb.RgbLight!, rb.AlphaLight, ancestorBg.Light),
-                                Key: $"{bgV} over {(ancestorBg.Key is not null ? "{" + ancestorBg.Key + "}" : ancestorBg.Dark)}")
-                            : null;
-                    }
+                    if (rb.Kind == ColorKind.Transparent) { stateBd = bd; bgOwnRaw = null; }
                     else if (rb.Kind is ColorKind.Other or ColorKind.UnknownKey) { Unres(rb, file, LineOf(el), bgV!); continue; }
-                    else bgObj = rb;
+                    // 這個狀態的底畫在元素自己身上：半透明的疊在祖先的底上；元素有 Opacity 時連底一起變淡
+                    else stateBd = Paint(ancestorBd, op, rb, bgV);
                 }
-                else bgObj = bg; // Style 鏈沒設底 → 退回祖先背景
+                else stateBd = bd; // Style 鏈沒設底 → 退回祖先背景
+                var bgObj = Screen(stateBd);
                 if (bgObj is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgV); continue; }
-                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bgObj, file, LineOf(el), bgOwnRaw ?? bgObj.Key ?? bgObj.Raw ?? fgV); continue; }
+                // 看不懂的底一定來自祖先或兄弟（這個狀態自己的看不懂的底上面已經記過）：點名卡住的那個值
+                // （半透明的 hover 底疊在 Background="{Binding …}" 的祖先上 → 點名那個 Binding，不是 hover 的色碼）
+                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent)
+                {
+                    Unres(bgObj, file, LineOf(el), IsUnknowable(bgObj) ? bgObj.Raw ?? bgObj.Key ?? fgV : bgOwnRaw ?? bgObj.Key ?? bgObj.Raw ?? fgV);
+                    continue;
+                }
                 if (op * VisibleAlpha(fgR) < 0.01) { _skipped++; continue; }
 
                 var isTextC = !IsNonTextElement(el.Name.LocalName);
@@ -547,7 +691,7 @@ public sealed partial class Auditor
                 var isLargeC = ptC >= 18 || (boldC && ptC >= 14);
                 var needC = NeedFor(isTextC, isLargeC);
 
-                var (fgDC, fgLC) = EffectiveForeground(fgR, op, bgObj);
+                var (fgDC, fgLC) = TextOnScreen(fgR, op, stateBd);
 
                 // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複。
                 // ⚠ 鍵是兩個主題合成後的實際顏色（加上門檻）：舊版只看深色值，hover 換成「深色同值、淺色不同」的色票時，
@@ -578,8 +722,9 @@ public sealed partial class Auditor
     }
 
     /// <summary>元素自己的 Foreground／Fill（沒有 Style 鏈接手時）與子元素（含規則 17 的兄弟背板）。</summary>
-    private void WalkForegroundAndChildren(XElement el, Resolved? bg, string file, double op, bool suppressed, bool handledFg)
+    private void WalkForegroundAndChildren(XElement el, Backdrop bd, string file, double op, bool suppressed, bool handledFg)
     {
+        var bg = Screen(bd); // 螢幕上實際看到的底（Opacity 群組一層一層疊出去之後）
         foreach (var attrName in (ReadOnlySpan<string>)["Foreground", "Fill"])
         {
             if (attrName == "Foreground" && handledFg) continue;
@@ -623,7 +768,8 @@ public sealed partial class Auditor
             var need = NeedFor(isText, isLarge);
 
             // Opacity < 1 或字色本身半透明時，螢幕上看到的是「文字色以 alpha 疊在背景上」的混色結果
-            var (fgD, fgL) = EffectiveForeground(fg, op, bg);
+            // （底也在 Opacity 群組裡時，連底一起一層一層疊出去，見 TextOnScreen）
+            var (fgD, fgL) = TextOnScreen(fg, op, bd);
 
             _findings.Add(new Finding
             {
@@ -654,26 +800,27 @@ public sealed partial class Auditor
         //   Canvas 只套 (b):它不把子元素撐滿,(a) 的「佔滿格子」前提不成立。
         var layout = LayoutOf(el.Name.LocalName);
         var overlap = layout != PanelLayout.SideBySide;
-        Dictionary<(int Row, int Col), Resolved>? cellBg = overlap ? new() : null;
+        Dictionary<(int Row, int Col), Backdrop>? cellBg = overlap ? new() : null;
         foreach (var child in el.Elements())
         {
             // Style / Setter / Trigger 這些不是視覺樹，個別處理（WalkStyles），這裡跳過
             if (StyleishEls.Contains(child.Name.LocalName)) continue;
             // <Border.Background> 之類是屬性值（上面已由 XamlBrush 讀進來），不是視覺子樹
             if (XamlBrush.IsColorPropertyElement(el, child)) continue;
-            var childBg = bg;
+            var childBd = bd;
             (int, int) cell = default;
             if (overlap)
             {
                 cell = CellOf(child, el.Name.LocalName == "Grid");
-                if (cellBg!.TryGetValue(cell, out var sb)) childBg = sb;
+                if (cellBg!.TryGetValue(cell, out var sb)) childBd = sb;
             }
-            Walk(child, childBg, file, op, suppressed);
-            if (overlap && SiblingBackdrop(child, stretches: el.Name.LocalName != "Canvas", under: childBg) is { } backdrop)
+            Walk(child, childBd, file, op, suppressed);
+            // 兄弟背板畫在容器那一層（容器的累乘透明度）；它自己的 Opacity 已折進 alpha（見 SiblingBackdrop）
+            if (overlap && SiblingBackdrop(child, stretches: el.Name.LocalName != "Canvas") is { } backdrop)
                 cellBg![cell] = layout == PanelLayout.Unknown
                     // 版面未知的自訂面板：它若是疊層，這就是後面兄弟的背板；若是排開，就不是 —— 靜態不可知，不猜
-                    ? new Resolved(ColorKind.SiblingContent, Raw: $"<{child.Name.LocalName}> in <{el.Name.LocalName}>")
-                    : backdrop;
+                    ? Paint(childBd, op, new Resolved(ColorKind.SiblingContent, Raw: $"<{child.Name.LocalName}> in <{el.Name.LocalName}>"), "")
+                    : Paint(childBd, op, backdrop, backdrop.Raw ?? "");
         }
     }
 
@@ -699,9 +846,9 @@ public sealed partial class Auditor
         return (P("Grid.Row"), P("Grid.Column"));
     }
 
-    /// <summary>這個兄弟元素會不會成為「後面同格子兄弟」的背板。
-    /// 回傳 null = 不影響(既非佔滿格子的底、也非內容元素)。</summary>
-    private Resolved? SiblingBackdrop(XElement child, bool stretches, Resolved? under)
+    /// <summary>這個兄弟元素會不會成為「後面同格子兄弟」的背板（Raw 帶著它的原始寫法，合成時當標籤）。
+    /// 回傳 null = 不影響(既非佔滿格子的底、也非內容元素)。半透明的由呼叫端疊到底下那層（Paint）。</summary>
+    private Resolved? SiblingBackdrop(XElement child, bool stretches)
     {
         var name = child.Name.LocalName;
         // (b) 內容元素:底變成一張圖,不可知
@@ -747,15 +894,10 @@ public sealed partial class Auditor
         switch (r?.Kind)
         {
             case ColorKind.Hard or ColorKind.Soft:
-                return r;
+                return r with { Raw = raw };
             case ColorKind.Alpha:
-                // 半透明:疊在它底下那層上合成;底下沒有可疊的顏色就維持原判定(同巢狀,不猜)
-                return under is { Dark: not null, Light: not null }
-                    ? new Resolved(ColorKind.Hard,
-                        Dark: Wcag.Composite(r.Rgb!, r.Alpha, under.Dark),
-                        Light: Wcag.Composite(r.RgbLight!, r.AlphaLight, under.Light),
-                        Key: $"{raw} over {(under.Key is not null ? "{" + under.Key + "}" : under.Dark)}")
-                    : null;
+                // 半透明:呼叫端疊在它底下那層上合成(Paint);底下沒有可疊的顏色就維持原判定(同巢狀,不猜)
+                return r with { Raw = raw };
             case ColorKind.Other:
                 return new Resolved(ColorKind.Other, Raw: raw); // Binding／漸層:執行期才知道 → 後面的字計入 unresolved
             case ColorKind.UnknownKey:

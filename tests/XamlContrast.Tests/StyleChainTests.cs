@@ -260,6 +260,26 @@ public class StyleChainTests
         Assert.Equal("{Binding NoteColour}", site.Value);
     }
 
+    [Fact] // 半透明的狀態底（hover 的 #22000000）疊在 Binding 的祖先底上：卡住的是那個 Binding —— 不是「找不到祖先底」
+           // （QuillNest StickyNoteWindow 的標題列按鈕就是這個形狀：便利貼底色綁使用者選的顏色）
+    public void TranslucentStateBackgroundOverABoundBackgroundNamesTheBoundValue()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Grid.Resources>
+                <Style x:Key="Title" TargetType="Button">
+                  <Setter Property="Background" Value="#22000000"/>
+                </Style>
+              </Grid.Resources>
+              <Border Background="{Binding NoteColour}"><Button Style="{StaticResource Title}" Foreground="#333333" Content="x"/></Border>
+            </Grid>
+            """);
+        var site = Assert.Single(fx.Run().UnresolvedSites);
+        Assert.Equal(UnresolvedReason.BoundOrGradient, site.Reason);
+        Assert.Equal("{Binding NoteColour}", site.Value);
+    }
+
     // ── Style 定義處（WalkStyles）也要合併同條件的觸發器、看 BasedOn ──
     //    舊版每個觸發器各自跟基礎值合併：style trigger 設字色、同條件的 template trigger 設模板根的底，
     //    被拆成兩個各缺一半的幻影組合各報一筆假 fail（實際 hover 是 21:1）；衍生 Style 重新套模板時，

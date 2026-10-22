@@ -149,6 +149,80 @@ public class ParseRuleTests
         Assert.Equal(UnresolvedReason.NoAncestorBackground, Assert.Single(r.UnresolvedSites).Reason);
     }
 
+    // ── 元素 Opacity 在提供底色的元素上或更上層（審查素材 math 第 6 行）──
+    //    WPF 的 Opacity 是整棵子樹先畫成一層、再整層疊到底下。底畫在那一層裡時，底也跟著變淡：白底上
+    //    Opacity 0.5 的黑 Border 裡的白字，實際是白字配 #808080（3.95:1）。舊版只把字疊上去、底仍當純黑，
+    //    報 5.32 ok —— 真的不合格被藏掉
+
+    [Theory]
+    [InlineData("""<Grid Background="#FFFFFF"><Border Background="#000000" Opacity="0.5"><TextBlock Foreground="#FFFFFF" Text="x"/></Border></Grid>""")]
+    [InlineData("""<Grid Background="#FFFFFF"><StackPanel Opacity="0.5"><Border Background="#000000"><TextBlock Foreground="#FFFFFF" Text="x"/></Border></StackPanel></Grid>""")]
+    [InlineData("""<Grid Background="#FFFFFF"><Grid Opacity="0.5"><Border Background="#000000"/><TextBlock Foreground="#FFFFFF" Text="x"/></Grid></Grid>""")] // 兄弟背板
+    public void OpacityOnOrAboveTheBackgroundOwnerFadesTheBackgroundToo(string xaml)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", xaml);
+        var f = Assert.Single(fx.Run().Findings);
+        var bg = Wcag.Composite("#000000", 0.5, "#FFFFFF");
+        Assert.Equal(Wcag.Contrast("#FFFFFF", bg), f.RatioDark); // 3.95，不是 5.32
+        Assert.Equal(f.RatioDark, f.RatioLight);
+        Assert.Equal(Category.Warn, f.Category);
+    }
+
+    [Fact] // 字自己也有 Opacity：先在那一層裡疊到黑底上，再整層疊到白底上
+    public void TextOpacityInsideAFadedLayerIsCompositedLayerByLayer()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF"><Border Background="#000000" Opacity="0.5">
+              <TextBlock Foreground="#FFFFFF" Opacity="0.5" Text="x"/>
+            </Border></Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+        var text = Wcag.Composite(Wcag.Composite("#FFFFFF", 0.5, "#000000"), 0.5, "#FFFFFF");
+        Assert.Equal(Wcag.Contrast(text, Wcag.Composite("#000000", 0.5, "#FFFFFF")), f.RatioDark);
+    }
+
+    [Fact] // Style 給的底、元素自己有 Opacity（鏈路徑）：一樣整層變淡
+    public void OpacityOnAStyledElementFadesTheStyleBackground()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Dark" TargetType="Button"><Setter Property="Background" Value="#000000"/></Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Dark}" Foreground="#FFFFFF" Opacity="0.5" Content="x"/>
+            </Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+        Assert.Equal(Wcag.Contrast("#FFFFFF", Wcag.Composite("#000000", 0.5, "#FFFFFF")), f.RatioDark);
+    }
+
+    [Theory] // 變淡的那一層底下是什麼不知道：沒有底 → translucent-uncomposited；綁定的底 → bound-or-gradient
+    [InlineData("""<Grid><Border Background="#000000" Opacity="0.5"><TextBlock Foreground="#FFFFFF" Text="x"/></Border></Grid>""", UnresolvedReason.TranslucentUncomposited)]
+    [InlineData("""<Grid Background="{Binding X}"><Border Background="#000000" Opacity="0.5"><TextBlock Foreground="#FFFFFF" Text="x"/></Border></Grid>""", UnresolvedReason.BoundOrGradient)]
+    public void FadedLayerOverAnUnknownBackgroundIsUnresolved(string xaml, UnresolvedReason reason)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", xaml);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Equal(reason, Assert.Single(r.UnresolvedSites).Reason);
+    }
+
+    [Fact] // 底在 Opacity 群組外面（群組只包住字）：維持原本的算法 —— 字以累乘的 alpha 疊在底上
+    public void OpacityBelowTheBackgroundOwnerOnlyFadesTheText()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#000000"><StackPanel Opacity="0.5"><TextBlock Foreground="#FFFFFF" Text="x"/></StackPanel></Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+        Assert.Equal(Wcag.Contrast(Wcag.Composite("#FFFFFF", 0.5, "#000000"), "#000000"), f.RatioDark);
+        Assert.Equal("#000000", f.Bg);
+    }
+
     [Fact] // 規則 5：ControlTemplate 自成子樹（模板根的背景管到模板內的文字）
     public void ControlTemplateRootGovernsItsSubtree()
     {
