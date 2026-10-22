@@ -75,6 +75,15 @@ public class LandmineTests
                   <Setter Property="Foreground" Value="#949494"/>
                   <Setter Property="FontSize" Value="18PT"/>
                 </Style>
+                <Style x:Key="Hover" TargetType="Button">
+                  <Setter Property="Background" Value="#FFFFFF"/>
+                  <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter Property="FontSize" Value="0.25in"/>
+                      <Setter Property="Background" Value="#FEFEFE"/>
+                    </Trigger>
+                  </Style.Triggers>
+                </Style>
               </StackPanel.Resources>
               <TextBlock Foreground="#949494" FontSize="18pt" Text="18pt = 24 DIP"/>
               <TextBlock Foreground="#949494" FontSize="0.25in" Text="0.25in = 24 DIP"/>
@@ -82,6 +91,7 @@ public class LandmineTests
               <TextBlock Foreground="#949494" FontSize="12 px" Text="12px"/>
               <TextBlock Foreground="#949494" FontSize="{StaticResource Big}" Text="unknowable"/>
               <Button Style="{StaticResource Pt}" Foreground="#949494" Content="18pt from the Style, chain path"/>
+              <Button Style="{StaticResource Hover}" Foreground="#949494" Content="0.25in from a trigger setter"/>
             </StackPanel>
             """);
         var r = fx.Run();
@@ -97,8 +107,13 @@ public class LandmineTests
         var style = Assert.Single(r.Findings, f => f.Element.StartsWith("Style[Pt]"));
         Assert.Equal(24, style.FontSize!.Value, 6);
         Assert.True(style.Large);
-        var use = Assert.Single(r.Findings, f => f.Element.StartsWith("Button⊕"));
+        var use = Assert.Single(r.Findings, f => f.Element.StartsWith("Button⊕Style[Pt]"));
         Assert.True(use.Large);
+        // 觸發器 setter 帶單位（審查 1.0 最終驗證 S5，C4-4）：hover 狀態 0.25in = 24 DIP → 大字級；基礎狀態沒設字級
+        var hover = Assert.Single(r.Findings, f => f.Element == "Button⊕Style[Hover]/trigger");
+        Assert.Equal(24, hover.FontSize!.Value, 6);
+        Assert.True(hover.Large);
+        Assert.False(Assert.Single(r.Findings, f => f.Element == "Button⊕Style[Hover]/base").Large);
     }
 
     [Fact] // Style 鏈逐狀態路徑的第三個 FontSize 來源：觸發器（hover 放大字）—— 一樣要換算

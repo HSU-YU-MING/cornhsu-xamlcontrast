@@ -412,12 +412,27 @@ public class ActionContractTests
         var report = JsonDocument.Parse(Report.ToJson(fx.Run())).RootElement.GetRawText()
             .Replace("\"Views/My,View.xaml\"", "\"Views/My,Vi\\new.xaml\"")
             .Replace("\"fg\": \"#EEEEEE\"", "\"fg\": \"50%\\r\\n::error::INJECTED\"");
+        // 只存在於一個主題的 finding（審查 1.0 最終驗證 S5，B3-3）：另一個主題的比值是 null，註記只印那一個主題，
+        // 不印「null:1」也不印另一個主題
+        var node = System.Text.Json.Nodes.JsonNode.Parse(report)!;
+        var oneTheme = node["findings"]![0]!.DeepClone();
+        oneTheme["file"] = "Themes/Dark.xaml";
+        oneTheme["theme"] = "dark";
+        oneTheme["ratioLight"] = null;
+        node["findings"]!.AsArray().Add(oneTheme);
+        report = node.ToJsonString();
         var r = RunStep("Annotate failing pairs", new() { ["root"] = "src" }, prepareTemp: temp =>
             File.WriteAllText(Path.Combine(temp, "xamlcontrast-report.json"), report));
         Assert.True(r.Exit == 0, r.ToString());
-        var line = Assert.Single(r.Stdout.Split('\n', StringSplitOptions.RemoveEmptyEntries));
-        Assert.StartsWith("::error file=src/Views/My%2CVi%0Aew.xaml,line=1::contrast ", line);
-        Assert.Contains("fg=50%25%0D%0A::error::INJECTED", line);
+        var lines = r.Stdout.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(l => l.TrimEnd('\r')).ToList();
+        Assert.Equal(2, lines.Count);
+        Assert.StartsWith("::error file=src/Views/My%2CVi%0Aew.xaml,line=1::contrast ", lines[0]);
+        Assert.Contains("fg=50%25%0D%0A::error::INJECTED", lines[0]);
+        Assert.Contains(":1 dark / ", lines[0]);
+        Assert.StartsWith("::error file=src/Themes/Dark.xaml,line=1::contrast ", lines[1]);
+        Assert.Contains(":1 (dark theme only) (need 4.5)", lines[1]);
+        Assert.DoesNotContain("null", lines[1]);
+        Assert.DoesNotContain("light", lines[1].Replace("(dark theme only)", ""));
     }
 
     /// <summary>bash 跑得到 jq 才跑（GitHub 的 Linux／Windows／macOS runner 都有）；沒有就略過並說明。</summary>
