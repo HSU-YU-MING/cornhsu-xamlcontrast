@@ -153,9 +153,9 @@ an empty map `{}` (5 omitted some and printed others).
 
 **Audit semantics — not frozen, improved in minor releases** (rule 3 below): which pairs exist and what
 they are graded against — the parsing rules, palette detection (including which files count as test
-or sample paths: today a path segment containing the whole word `test`, `sample`, `demo` or `example`,
-singular or plural, or `fixture`/`mock` below the first level — so `MyApp.Tests` and `UnitTests` count,
-`Contoso.Demographics` and `Testimonials` don't), which dictionaries are palette sources or belong to
+or sample paths: today a folder or file named exactly `test`, `sample`, `demo`, `example` or `spec`,
+singular or plural, digits allowed, or whose last word is `Tests`/`Test`/`Specs` — so `MyApp.Tests`,
+`UnitTests` and `Tests2` count, `ExampleCorp.Core`, `TestRunner.UI` and `Contoso.Demographics` don't), which dictionaries are palette sources or belong to
 one theme, how an unresolved pair is classified, and the text of element labels and composite
 backgrounds.
 
@@ -303,9 +303,13 @@ older 1.x (exit 2, naming the property).
   starting with `//`); an old value in a comment used to override the live one.
 - **Test projects can't hijack the palette.** C# tuple detection now skips test/sample paths like the
   XAML side does (`[InlineData("Bg", "#..", "#..")]` matched the tuple format and produced 1:1 false
-  fails while making detection look healthy), and the path rule now matches whole words — `MyApp.Tests`,
-  `UnitTests`, `Foo_IntegrationTests` count; `Contoso.Demographics` and `Testimonials.Module` don't (0.6.1
-  excluded them as samples, so a project whose only palette lived there audited 0 pairs).
+  fails while making detection look healthy), and the path rule now looks at whole folder names — exactly `test`, `sample`, `demo`,
+  `example` or `spec` (plural and digits allowed), or a last word `Tests`/`Test`/`Specs` — so `MyApp.Tests`,
+  `UnitTests`, `Foo_IntegrationTests`, `MyApp.Specs` and `Tests2` count, while `Contoso.Demographics`,
+  `Testimonials.Module`, `ExampleCorp.Core`, `TestRunner.UI`, `DemoScene` and `SampleRate` don't (0.6.1
+  excluded those as samples, so a project whose only palette lived there audited 0 pairs). When no palette
+  is found, the palette line names the candidate files skipped this way and how to name them in the config
+  (it used to say "no ResourceDictionary color keys").
 - **`DataTrigger` disabled-state exemption is no longer a substring match.** `{Binding IsEnabledByLicense}`
   or a converter named `IsEnabledConverter` counted as WCAG 1.4.3 "disabled". The binding's path must
   now be exactly `IsEnabled` (or `(IsEnabled)` / `(UIElement.IsEnabled)`), point at the element itself, its templated

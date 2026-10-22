@@ -444,12 +444,15 @@ public static partial class PaletteDetector
     /// <c>ILSpy.BamlDecompiler.Tests.Windows\Cases\…</c> —— 一個反編譯測試的假資料檔。
     /// 只影響「能不能當色盤候選」（XAML 與 C# 兩條路都套用），不影響這些檔案本身要不要被稽核。
     ///
-    /// ⚠ 判準是「路徑段切成詞、**整詞**比對」，不是「路徑段以 test 開頭」：.NET 的測試專案慣用
-    ///   <c>MyApp.Tests</c>／<c>UnitTests</c> 命名，舊判準對不上（那一段以 myapp／unit 開頭），
-    ///   放在那裡的假色盤照樣被選中。詞的邊界是 . - _ 與大小寫轉換（UnitTests → Unit + Tests），
-    ///   所以 Contest、LatestNews 這種「詞中間剛好有 test」的名字不受影響。
-    /// ⚠ 也不能比詞的前綴：<c>Contoso.Demographics</c>、<c>Testimonials.Module</c> 以 demo／test 開頭，
-    ///   被當成範例路徑之後唯一的色盤被排除，整個專案 0 組配對、exit 3（審查 1.0 A2）。
+    /// ⚠ 判準只看**整段**路徑名（目錄名，以及不含副檔名的檔名）：
+    ///   - 整段就是 test(s)／sample(s)／demo(s)／example(s)／spec(s)，可帶數字（Test1、Tests2）；
+    ///   - 或切成詞之後**最後一個詞**是 test(s)／spec(s) —— .NET 的測試專案命名：MyApp.Tests、MyApp.Specs、
+    ///     UnitTests、MyApp_IntegrationTests、e2e-tests（詞的邊界是 . - _ 空白與大小寫轉換）；
+    ///   - 第二層以下另外認 fixture(s)／mock(s)（整段，或最後一個詞：TestFixtures）。
+    /// ⚠ 舊判準「路徑段裡有這個詞」太寬：ExampleCorp.Core、LabSampleTracker、TestRunner.UI、DemoScene、SampleRate
+    ///   被當成範例路徑，唯一的色盤被排除，整個專案 0 組配對、exit 3（審查 1.0 最終驗證 S4）；更早的「詞以 test 開頭」
+    ///   連 Contoso.Demographics、Testimonials.Module 都中。漏判（測試檔被當成色盤）有 --strict-palette 與描述點名兜底，
+    ///   誤判（真的色盤被排除）只剩一行描述 —— 所以寧可窄。
     /// 這是稽核語意（1.0 凍結宣告的演進規則 3），不是凍結的語法：判準改進屬 minor。
     /// </summary>
     internal static bool LooksLikeFixture(string rel)
@@ -457,16 +460,46 @@ public static partial class PaletteDetector
         var segments = rel.Replace('\\', '/').Split('/', StringSplitOptions.RemoveEmptyEntries);
         for (var i = 0; i < segments.Length; i++)
         {
-            foreach (var w in WordBoundary().Split(segments[i]))
-            {
-                var word = w.ToLowerInvariant();
-                if (word is "test" or "tests" or "sample" or "samples" or "demo" or "demos" or "example" or "examples")
-                    return true;
-                // fixture／mock 只看第二層以下（沿用舊判準）
-                if (i > 0 && word is "fixture" or "fixtures" or "mock" or "mocks") return true;
-            }
+            var seg = i == segments.Length - 1 ? Path.GetFileNameWithoutExtension(segments[i]) : segments[i];
+            if (FixtureSegment().IsMatch(seg)) return true;
+            var words = WordBoundary().Split(seg).Where(w => w.Length > 0).ToList();
+            if (words.Count >= 2 && FixtureSuffixWord().IsMatch(words[^1])) return true;
+            if (i > 0 && (FixtureDataSegment().IsMatch(seg) || words.Count >= 2 && FixtureDataSegment().IsMatch(words[^1])))
+                return true;
         }
         return false;
+    }
+
+    [GeneratedRegex(@"^(tests?|samples?|demos?|examples?|specs?)\d*$", RegexOptions.IgnoreCase)]
+    private static partial Regex FixtureSegment();
+
+    [GeneratedRegex(@"^(tests?|specs?)\d*$", RegexOptions.IgnoreCase)]
+    private static partial Regex FixtureSuffixWord();
+
+    [GeneratedRegex(@"^(fixtures?|mocks?)\d*$", RegexOptions.IgnoreCase)]
+    private static partial Regex FixtureDataSegment();
+
+    /// <summary>因為在測試／範例路徑裡而沒當成色盤候選的檔（定義了具 x:Key 的顏色的 XAML、有 C# 三元組的 .cs），
+    /// root 相對、正斜線。找不到色盤時點名它們 —— 不然描述說「no ResourceDictionary color keys」，
+    /// 使用者看著自己的 Dark.xaml 不知道為什麼（審查 1.0 最終驗證 S4）。</summary>
+    internal static List<string> SkippedFixtureCandidates(string root)
+    {
+        var skipped = new List<string>();
+        foreach (var f in EnumerateFiles(root, "*.xaml"))
+        {
+            var rel = Path.GetRelativePath(root, f);
+            if (!LooksLikeFixture(rel)) continue;
+            var (lit, refs) = ParseBrushDefs(f, keepInvalid: true);
+            if (ParseColorDefs(f, keepInvalid: true).Count > 0 || lit.Count > 0 || refs.Count > 0) skipped.Add(rel.Replace('\\', '/'));
+        }
+        foreach (var f in EnumerateFiles(root, "*.cs"))
+        {
+            var rel = Path.GetRelativePath(root, f);
+            if (!LooksLikeFixture(rel)) continue;
+            try { if (File.ReadLines(f).Count(l => CsTuple().IsMatch(l)) >= 3) skipped.Add(rel.Replace('\\', '/')); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        }
+        return skipped;
     }
 
     [GeneratedRegex(@"[._\-\s]+|(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])")]
@@ -1097,14 +1130,19 @@ public static partial class PaletteDetector
             };
         }
 
-        // 4) 什麼都沒找到 → 退回只算寫死色碼。這是退化，要喊。
+        // 4) 什麼都沒找到 → 退回只算寫死色碼。這是退化，要喊。色盤候選若是因為在測試／範例路徑裡才被排除，點名並說怎麼指定
+        var skipped = SkippedFixtureCandidates(root);
         return new PaletteDetection
         {
             Palette = new Palette(),
             Mode = PaletteMode.None,
             IsDegraded = true,
             ExcludedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase),
-            Description = "no palette found (no ResourceDictionary color keys, no C# tuples) — auditing hardcoded colors only",
+            Description = skipped.Count == 0
+                ? "no palette found (no ResourceDictionary color keys, no C# tuples) — auditing hardcoded colors only"
+                : $"no palette found outside test/sample paths — skipped {skipped.Count} candidate file(s) under test/sample paths: " +
+                  $"{string.Join(", ", skipped.Take(5))}{(skipped.Count > 5 ? ", …" : "")}. If they are the app's palette, name them in " +
+                  $"{ToolConfig.FileName} (palette.mode \"pair\" with darkFile/lightFile, or \"single\" with darkFile) — auditing hardcoded colors only",
         };
     }
 }

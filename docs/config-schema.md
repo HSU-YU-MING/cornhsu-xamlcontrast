@@ -93,10 +93,11 @@
 畫面檔（`Window`、`UserControl`…）就算提供了色票也照樣稽核；它們的區域 brush 跟 WPF 的資源查找一樣只在自己那個畫面裡
 看得到：在那裡蓋過色盤（字面值兩欄同值；引用 `Color` 的依主題各自解析；綁 Binding 的記為 bound-or-gradient；
 引用的 `Color` 找不到記為 unknown-palette-key、點名那個 Color），只有某個畫面定義的鍵在其他檔一律是 unknown-palette-key。
-反過來，路徑（相對掃描根目錄）中有**整個詞**是 `test`／`sample`／`demo`／`example`（單複數皆可）的
-（第二層以下另含 `fixture`／`mock`；詞依 `.` `-` `_` 與大小寫轉換切開，`MyApp.Tests`、`UnitTests` 都算，
-`Contoso.Demographics`、`Testimonials` 不算）
-檔案不當色盤候選（XAML 字典與 C# 三元組檔都一樣）、也不算應用程式根元素，但其中的 XAML 照樣受稽核。
+反過來，路徑（相對掃描根目錄）中有資料夾（或檔名）**整段**就是 `test`／`sample`／`demo`／`example`／`spec`
+（單複數皆可、可帶數字），或最後一個詞是 `Tests`／`Test`／`Specs`（`MyApp.Tests`、`UnitTests`、`e2e-tests`；
+第二層以下另含 `Fixtures`／`Mocks`）的；`ExampleCorp.Core`、`TestRunner.UI`、`DemoScene` 不算。
+這些檔案不當色盤候選（XAML 字典與 C# 三元組檔都一樣）、也不算應用程式根元素，但其中的 XAML 照樣受稽核。
+其他地方都找不到色盤時，描述點名這些被略過的候選檔 —— 用 `mode: "pair"`（`darkFile`／`lightFile`）或 `"single"` 指定就會採用。
 多 App 的 repo 裡，不屬於任何 App 的檔案只用共用區自己的字典；只有某個 App 定義的鍵在那裡是
 `unknown-palette-key`（值取決於執行期的宿主，不猜）。
 

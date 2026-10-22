@@ -153,10 +153,13 @@ more `<Application>` roots (typically `App.xaml`), the merged paths (1) and (4) 
 resolve each application subtree against its own palette; files outside every application use only
 the shared area's own dictionaries (a key that only an application defines is reported as
 `unknown-palette-key` there — its value depends on the host app). A path below the scanned root
-containing the whole word `test`, `sample`, `demo` or `example`, singular or plural (or, below the top
-level, `fixture` / `mock`) — words split on `.` `-` `_` and case changes, so `MyApp.Tests` and
-`UnitTests` count while `Contoso.Demographics` and `Testimonials` don't — is never taken as a palette source (XAML dictionary or C# tuple file) or an application
-root; its XAML is still audited.
+with a folder (or file) named exactly `test`, `sample`, `demo`, `example` or `spec` — singular or
+plural, digits allowed (`Tests2`) — or one whose last word is `Tests`/`Test`/`Specs` (`MyApp.Tests`,
+`UnitTests`, `e2e-tests`; below the top level also `Fixtures`/`Mocks`) is never taken as a palette
+source (XAML dictionary or C# tuple file) or an application root; its XAML is still audited.
+`ExampleCorp.Core`, `TestRunner.UI`, `DemoScene` or `Contoso.Demographics` don't count. When nothing
+else is found, the palette line names the files it skipped this way and how to point the config at
+them.
 
 Wrong guess? Override with `xamlcontrast.config.json` —
 [schema](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/docs/config-schema.md) (zh-Hant; the JSON example at the top is self-explanatory).

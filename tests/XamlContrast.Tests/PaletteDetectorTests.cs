@@ -307,29 +307,47 @@ public class PaletteDetectorTests
         Assert.Equal(Category.Ok, Assert.Single(r.Findings).Category); // 不是 1:1 的假 fail
     }
 
-    [Theory] // 測試／範例路徑的判準：路徑段依 . - _ 與大小寫邊界切成詞，**整詞**比對 —— .NET 的測試專案慣用
-             // MyApp.Tests／UnitTests 命名，舊版的「路徑段以 test 開頭」對不上，放在那裡的假色盤照樣被選中。
-             // ⚠ 也不能是「詞以 test 開頭」：Contoso.Demographics、Testimonials.Module 會被當成範例路徑，
-             //   唯一的色盤被排除，整個專案 0 組配對、exit 3（審查 1.0 A2）
+    [Theory] // 測試／範例路徑的判準（審查 1.0 A2、最終驗證 S4）：只看**整段**路徑名 ——
+             // 整段就是 test(s)／sample(s)／demo(s)／example(s)／spec(s)（可帶數字：Test1、Tests2），
+             // 或最後一個詞是 test(s)／spec(s)（.NET 的測試專案：MyApp.Tests、MyApp.Specs、UnitTests、e2e-tests）。
+             // ⚠ 「路徑裡有這個詞」太寬：ExampleCorp.Core、LabSampleTracker、TestRunner.UI、DemoScene、SampleRate
+             //   都被當成範例路徑，唯一的色盤被排除，整個專案 0 組配對、exit 3
     [InlineData("src/MyApp.Tests/Themes/Theme.xaml", true)]
+    [InlineData("src/MyApp.Test/Theme.xaml", true)]
+    [InlineData("src/MyApp.Specs/Theme.xaml", true)]
     [InlineData("src/UnitTests/Theme.xaml", true)]
     [InlineData("MyApp_IntegrationTests/Theme.xaml", true)]
-    [InlineData("src/App-Samples/Theme.xaml", true)]
-    [InlineData("Tests/Theme.xaml", true)]                  // 舊判準本來就涵蓋的形狀照舊
+    [InlineData("e2e-tests/Theme.xaml", true)]
+    [InlineData("Tests/Theme.xaml", true)]
+    [InlineData("TESTS/Theme.xaml", true)]
     [InlineData("test/Theme.xaml", true)]
+    [InlineData("Test1/Theme.xaml", true)]
+    [InlineData("Tests2/Theme.xaml", true)]
+    [InlineData("specs/Theme.xaml", true)]
     [InlineData("samples/Gallery/Theme.xaml", true)]
-    [InlineData("DemoApp/Theme.xaml", true)]
+    [InlineData("SAMPLES/Theme.xaml", true)]
+    [InlineData("Demos/Theme.xaml", true)]
     [InlineData("docs/Examples/Theme.xaml", true)]
-    [InlineData("src/TestData/Theme.xaml", true)]
-    [InlineData("Views/Mocks/Theme.xaml", true)]
+    [InlineData("Views/Mocks/Theme.xaml", true)]            // fixture／mock：第二層以下，整段（或最後一個詞）
     [InlineData("App/Fixtures/Theme.xaml", true)]
+    [InlineData("src/TestFixtures/Theme.xaml", true)]
     [InlineData("src/MyApp/Themes/Theme.xaml", false)]
-    [InlineData("src/Contest/Theme.xaml", false)]           // 詞中間的 test 不算
+    [InlineData("src/Contest/Theme.xaml", false)]
     [InlineData("src/LatestNews/Theme.xaml", false)]
-    [InlineData("Contoso.Demographics/Themes/Theme.xaml", false)] // 以 demo 開頭的詞不算
-    [InlineData("Testimonials.Module/Themes/Theme.xaml", false)]  // 以 test 開頭的詞不算
+    [InlineData("Contoso.Demographics/Themes/Theme.xaml", false)]
+    [InlineData("Testimonials.Module/Themes/Theme.xaml", false)]
+    [InlineData("ExampleCorp.Core/Themes/Theme.xaml", false)]
+    [InlineData("LabSampleTracker/Theme.xaml", false)]
+    [InlineData("TestRunner.UI/Theme.xaml", false)]
+    [InlineData("DemoScene/Theme.xaml", false)]
+    [InlineData("SampleRate/Theme.xaml", false)]
+    [InlineData("SampleData/Theme.xaml", false)]
+    [InlineData("src/App-Samples/Theme.xaml", false)]
+    [InlineData("DemoApp/Theme.xaml", false)]
+    [InlineData("Testing/Theme.xaml", false)]
     [InlineData("src/Examplar/Theme.xaml", false)]
     [InlineData("src/Mockups/Theme.xaml", false)]
+    [InlineData("src/MockData/Theme.xaml", false)]
     [InlineData("Mocks/Theme.xaml", false)]                 // fixture／mock 只看第二層以下（沿用）
     public void TestAndSamplePathsAreRecognisedWordByWord(string path, bool isFixture)
     {
@@ -345,9 +363,14 @@ public class PaletteDetectorTests
         Assert.Equal(isFixture, d.IsDegraded); // 唯一的色盤在測試路徑裡 → 沒有色盤（退化要喊）
     }
 
-    [Theory] // 審查者的 fixture：模組名剛好以 Demo／Test 開頭的專案，色盤照常偵測、照常稽核（不是 0 組、exit 3）
+    [Theory] // 審查者的 fixture：模組名剛好含 Demo／Test／Sample／Example 的專案，色盤照常偵測、照常稽核（不是 0 組、exit 3）
     [InlineData("Contoso.Demographics")]
     [InlineData("Testimonials.Module")]
+    [InlineData("ExampleCorp.Core")]
+    [InlineData("LabSampleTracker")]
+    [InlineData("TestRunner.UI")]
+    [InlineData("DemoScene")]
+    [InlineData("SampleRate")]
     public void ModuleNamesThatOnlyStartWithTestOrDemoAreAudited(string module)
     {
         using var fx = new Fixture();
@@ -365,6 +388,26 @@ public class PaletteDetectorTests
         Assert.Equal(PaletteMode.Pair, r.Detection.Mode);
         Assert.Equal(1, r.Pairs);
         Assert.Equal(Category.Ok, Assert.Single(r.Findings).Category);
+    }
+
+    [Fact] // 色盤候選全在測試／範例路徑裡：描述要說實話（審查 1.0 最終驗證 S4）—— 舊版說「no ResourceDictionary color keys」，
+           // 使用者看著自己的 Dark.xaml 不知道為什麼。點名被排除的檔，並說怎麼用設定檔指定它們
+    public void PaletteOnlyUnderATestPathIsNamedWhenNothingElseIsFound()
+    {
+        using var fx = new Fixture();
+        foreach (var side in new[] { "Dark", "Light" })
+            fx.File($"UI.Tests/Themes/{side}.xaml", """
+                <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                  <SolidColorBrush x:Key="Bg" Color="#111111"/><SolidColorBrush x:Key="Fg" Color="#EEEEEE"/><SolidColorBrush x:Key="Dim" Color="#777777"/>
+                </ResourceDictionary>
+                """);
+        fx.File("Views/Main.xaml", """<Grid Background="#FFFFFF"><TextBlock Foreground="#000000"/></Grid>""");
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(PaletteMode.None, d.Mode);
+        Assert.True(d.IsDegraded);
+        Assert.DoesNotContain("no ResourceDictionary color keys", d.Description);
+        Assert.Contains("skipped 2 candidate file(s) under test/sample paths: UI.Tests/Themes/Dark.xaml, UI.Tests/Themes/Light.xaml", d.Description);
+        Assert.Contains("palette.mode", d.Description);
     }
 
     [Fact] // 帶點的色票鍵（Panel.Background）是 WPF 最普遍的命名慣例。
