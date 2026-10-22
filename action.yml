@@ -45,6 +45,10 @@ inputs:
     description: 'Upload SARIF to GitHub code scanning (requires security-events: write, plus GitHub Advanced Security or a public repo)'
     required: false
     default: 'false'
+  artifact-name:
+    description: 'Name of the uploaded report artifact. It also keys the PR comment: each name keeps its own comment. Give every call its own name when the action runs more than once in a workflow run (a matrix, or two calls in one job). Letters, digits, ".", "_" and "-" only, 1-100 characters, not starting with "-" and not only dots'
+    required: false
+    default: 'xamlcontrast-report'
 
 runs:
   using: 'composite'
@@ -67,6 +71,7 @@ runs:
         XC_COMMENT: ${{ inputs.comment }}
         XC_UPLOAD_REPORT: ${{ inputs.upload-report }}
         XC_SARIF: ${{ inputs.sarif }}
+        XC_ARTIFACT_NAME: ${{ inputs.artifact-name }}
       run: |
         # 同一個 job 前一次呼叫留下的報告（$RUNNER_TEMP 共用）不能被這一次的註記與上傳撿去
         rm -f -- "$RUNNER_TEMP/xamlcontrast-report.json" "$RUNNER_TEMP/xamlcontrast-report.md" "$RUNNER_TEMP/xamlcontrast.sarif"
@@ -87,6 +92,11 @@ runs:
         esac
         # 範圍（0-100）交給 CLI 驗：超出範圍是 exit 2 並說明
         [[ "$XC_MIN_COVERAGE" =~ ^([0-9]+(\.[0-9]+)?)?$ ]] || refuse "min-coverage must be a number between 0 and 100, or empty"
+        # artifact-name 會成為 artifact 名稱與 PR 留言標記的一部分（標記又拼進 jq 字串），只收安全的字元（比照 Parity）。
+        # bash 的 =~ 是整串比對，換行過不了
+        if ! [[ "$XC_ARTIFACT_NAME" =~ ^[A-Za-z0-9._-]{1,100}$ ]] || [[ "$XC_ARTIFACT_NAME" =~ ^-|^\.+$ ]]; then
+          refuse "artifact-name must be 1-100 characters of A-Z, a-z, 0-9, '.', '_' or '-', not starting with '-' and not only dots"
+        fi
         for pair in "strict-palette=$XC_STRICT_PALETTE" "comment=$XC_COMMENT" "upload-report=$XC_UPLOAD_REPORT" "sarif=$XC_SARIF"; do
           case "${pair#*=}" in
             true | false) ;;
@@ -154,20 +164,23 @@ runs:
       env:
         GH_TOKEN: ${{ github.token }}
         XC_PR: ${{ github.event.pull_request.number }}
+        XC_ARTIFACT_NAME: ${{ inputs.artifact-name }}
       run: |
         report="$RUNNER_TEMP/xamlcontrast-report.md"
         out="$RUNNER_TEMP/xamlcontrast-comment.md"
         [ -f "$report" ] || { echo "no report to post"; exit 0; }
-        marker='<!-- xamlcontrast-report -->'
+        # 標記以 artifact-name 區分：每個名稱各自一則留言。預設名稱的標記與 1.0 之前相同，既有的留言照樣被更新。
+        # 名稱已在 Validate inputs 限定成 [A-Za-z0-9._-]，拼進 jq 字串是安全的
+        marker="<!-- $XC_ARTIFACT_NAME -->"
         # GitHub 留言上限 ~65536 字，超過就截斷並附提示（完整內容在 artifact）
         if [ "$(wc -c < "$report")" -gt 60000 ]; then
-          { echo "$marker"; head -c 60000 "$report"; printf '\n\n<sub>⚠️ Report truncated because it exceeds the comment size limit — see the xamlcontrast-report artifact on this workflow run for the full version.</sub>\n'; } > "$out"
+          { echo "$marker"; head -c 60000 "$report"; printf '\n\n<sub>⚠️ Report truncated because it exceeds the comment size limit — see the %s artifact on this workflow run for the full version.</sub>\n' "$XC_ARTIFACT_NAME"; } > "$out"
         else
           { echo "$marker"; cat "$report"; } > "$out"
         fi
         pr="$XC_PR"
         existing=$(gh api "repos/$GITHUB_REPOSITORY/issues/$pr/comments" \
-          --jq 'map(select(.body | startswith("<!-- xamlcontrast-report -->"))) | .[0].id // empty')
+          --jq "map(select(.body | startswith(\"$marker\"))) | .[0].id // empty")
         if [ -n "$existing" ]; then
           gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing" -F body=@"$out" >/dev/null
         else
@@ -233,7 +246,7 @@ runs:
       if: ${{ always() && inputs.upload-report == 'true' }}
       uses: actions/upload-artifact@v7
       with:
-        name: xamlcontrast-report
+        name: ${{ inputs.artifact-name }}
         path: |
           ${{ runner.temp }}/xamlcontrast-report.json
           ${{ runner.temp }}/xamlcontrast-report.md

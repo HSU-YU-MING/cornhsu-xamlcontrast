@@ -210,8 +210,11 @@ baseline 模式下的既有債是 notice。
 輸入：`root`（必填）、`working-directory`、`version`（留空 = 最新的 1.x）、`fail-on`
 （`warn`／`fail`；留空 = config 的 `failOn`，沒有就是 `warn`）、`min-coverage`（留空 = config 的
 `minCoverage`，沒有就是 50）、`baseline`、`strict-palette`、`comment`（關掉 PR 留言）、
-`upload-report`、`sarif`。開關類只收 `true` 或 `false`；不認得的值會讓 job 失敗並點名是哪個 input，
-不會悄悄退回預設值。
+`upload-report`、`sarif`、`artifact-name`（預設 `xamlcontrast-report`）。開關類只收 `true` 或 `false`；
+不認得的值會讓 job 失敗並點名是哪個 input，不會悄悄退回預設值。`root` 與 `baseline` 不能以 `-` 開頭（寫成 `./-name`）。
+
+**同一個 workflow run 裡用到兩次以上**（matrix，或同一個 job 呼叫兩次）？每一次給不同的 `artifact-name` ——
+它是上傳的 artifact 名稱，也是 PR 留言的標記，各名稱各自一則留言。同一個名稱用兩次，第二次上傳會撞名、留言會互相蓋掉。
 
 ## JSON 輸出
 

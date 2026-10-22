@@ -257,8 +257,14 @@ are warnings, and known debt in baseline mode is a notice.
 Inputs: `root` (required), `working-directory`, `version` (empty = the latest 1.x), `fail-on`
 (`warn` / `fail`; empty = the config's `failOn`, else `warn`), `min-coverage` (empty = the config's
 `minCoverage`, else 50), `baseline`, `strict-palette`, `comment` (turn off the PR comment),
-`upload-report`, `sarif`. The switches take `true` or `false`; an unknown value fails the job and
-names the input instead of quietly falling back to the default.
+`upload-report`, `sarif`, `artifact-name` (default `xamlcontrast-report`). The switches take `true` or
+`false`; an unknown value fails the job and names the input instead of quietly falling back to the
+default. `root` and `baseline` must not start with `-` (write `./-name`).
+
+**Running the action more than once in a workflow run** (a matrix, or two calls in one job)? Give
+each call its own `artifact-name` — it names the uploaded artifact and keys the PR comment, so each
+name keeps its own comment. Same name twice means the second upload collides and the comments
+overwrite each other.
 
 ## JSON output
 

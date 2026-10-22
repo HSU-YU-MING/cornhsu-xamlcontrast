@@ -189,7 +189,49 @@ public class ActionContractTests
             ["comment"] = ("false", "'true'"),
             ["upload-report"] = ("false", "'true'"),
             ["sarif"] = ("false", "'false'"),
+            ["artifact-name"] = ("false", "'xamlcontrast-report'"),
         }, Inputs());
+    }
+
+    [Theory] // artifact-name（審查 1.0 B7，比照 Parity）：同一個 workflow run 用兩次時 artifact 名稱與 PR 留言標記會互撞。
+             // 名稱會成為 artifact 名稱與留言標記的一部分（標記又拼進 jq 字串），所以只收 [A-Za-z0-9._-]、1～100 字、
+             // 不能全是 .、不能以 - 開頭
+    [InlineData("my report")]
+    [InlineData("a/b")]
+    [InlineData("...")]
+    [InlineData("-x")]
+    [InlineData("")]
+    [InlineData("x\"y")]
+    [InlineData("name\n::error::INJECTED")]
+    public void ArtifactNameOutsideTheSafeCharsetIsRefused(string name)
+    {
+        var r = RunStep("Validate inputs", new() { ["artifact-name"] = name });
+        Assert.True(r.Exit == 2, r.ToString());
+        Assert.Contains("artifact-name must be", r.Stdout);
+        Assert.DoesNotContain("INJECTED", r.Stdout + r.Stderr);
+    }
+
+    [Fact]
+    public void ArtifactNameLengthIsCapped()
+    {
+        Assert.Equal(0, RunStep("Validate inputs", new() { ["artifact-name"] = new string('a', 100) }).Exit);
+        Assert.Equal(2, RunStep("Validate inputs", new() { ["artifact-name"] = new string('a', 101) }).Exit);
+        Assert.Equal(0, RunStep("Validate inputs", new() { ["artifact-name"] = ".hidden_v2-1" }).Exit);
+    }
+
+    [Fact] // artifact-name 也是 PR 留言的標記：各名稱各自一則留言，同一個名稱反覆更新同一則。預設名稱的標記與 1.0 之前相同，
+           // 既有的留言照樣被更新
+    public void ArtifactNameKeysTheArtifactAndTheComment()
+    {
+        Assert.Matches(new Regex(@"^        name: \$\{\{ inputs\.artifact-name \}\}$", RegexOptions.Multiline), Step("Upload report"));
+        var r = RunStep("Comment report on PR", new() { ["artifact-name"] = "app-dark.v2" }, prepareTemp: temp =>
+            File.WriteAllText(Path.Combine(temp, "xamlcontrast-report.md"), "## report\n"));
+        Assert.True(r.Exit == 0, r.ToString());
+        Assert.Contains("""--jq|map(select(.body | startswith("<!-- app-dark.v2 -->"))) | .[0].id // empty|""", r.Calls);
+        Assert.Contains("api|-X|POST|", r.Calls);
+        var defaults = RunStep("Comment report on PR", prepareTemp: temp =>
+            File.WriteAllText(Path.Combine(temp, "xamlcontrast-report.md"), "## report\n"));
+        Assert.Contains("""startswith("<!-- xamlcontrast-report -->")""", defaults.Calls);
     }
 
     [Fact] // 沒有 outputs（凍結的現況）。新增 output 是 1.x 的 minor —— 退出碼只是內部的 step output
@@ -427,6 +469,7 @@ public class ActionContractTests
         File.WriteAllText(output, "");
         var stub = $$"""
             dotnet() { printf '%s|' "$@" >> "$RUNNER_TEMP/calls"; printf '\n' >> "$RUNNER_TEMP/calls"; }
+            gh() { printf '%s|' "$@" >> "$RUNNER_TEMP/calls"; printf '\n' >> "$RUNNER_TEMP/calls"; }
             xamlcontrast() { printf '%s|' "$@" >> "$RUNNER_TEMP/calls"; printf '\n' >> "$RUNNER_TEMP/calls"; return {{stubExit}}; }
 
             """;
