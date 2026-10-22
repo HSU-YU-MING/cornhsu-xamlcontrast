@@ -31,6 +31,8 @@ public sealed class Finding
     public double Need { get; init; }
     public string Size { get; init; } = "";
     public bool Large { get; init; }
+    /// <summary>只屬於一個主題的配對（Dark.xaml 裡的 Style 之類）：兩欄都是那個主題的值，對稱欄標 single-theme</summary>
+    public bool OneThemeOnly { get; init; }
 
     // 分級後填入
     public Category Category { get; set; }

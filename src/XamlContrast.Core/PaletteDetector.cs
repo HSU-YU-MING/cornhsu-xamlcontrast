@@ -4,6 +4,9 @@ namespace XamlContrast.Core;
 
 public enum PaletteMode { Pair, CSharp, Single, None }
 
+/// <summary>主題字典屬於哪一個主題（色盤來自分開的深／淺 XAML 字典時才有意義）。</summary>
+public enum ThemeSide { Dark, Light }
+
 /// <summary>一個應用程式作用域：RootDir 是 App.xaml 所在目錄（"" = 共用區），
 /// Palette 是「該目錄子樹 ∪ 共用區」合併出來的色盤。</summary>
 public sealed record PaletteScope(string RootDir, Palette Palette);
@@ -46,6 +49,20 @@ public sealed class PaletteDetection
         return best?.Palette ?? EmptyPalette;
     }
     private static readonly Palette EmptyPalette = new();
+
+    /// <summary>
+    /// 只屬於一個主題的字典檔（完整路徑 → 深或淺）：色盤來自分開的深／淺 XAML 字典（合併式 pair、主題配對、
+    /// config 強制 pair）時，Dark.xaml 裡的 Style 只在深色主題下存在。
+    /// ⚠ 拿 Dark.xaml 的 Style 配淺色色票算出的那一欄是執行期不存在的組合 —— Dark.xaml 與 Light.xaml 各定義
+    ///   一個 Chip 時，舊版各報一筆編造的 fail（light=1.16、dark=1.1）。C#／單一主題模式沒有這張表：
+    ///   那裡的 XAML 主題檔是兩個主題共用的（Kindling 的 DarkTheme.xaml 是 C# 色盤的靜態複本）。
+    /// </summary>
+    public IReadOnlyDictionary<string, ThemeSide> ThemeFileSides { get; init; } =
+        new Dictionary<string, ThemeSide>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>檔案只屬於哪一個主題（比對前 GetFullPath）；兩個主題共用回傳 null。</summary>
+    public ThemeSide? SideOf(string file)
+        => ThemeFileSides.Count > 0 && ThemeFileSides.TryGetValue(Path.GetFullPath(file), out var s) ? s : null;
 
     /// <summary>被認定為色盤檔、且根元素是 ResourceDictionary 的 XAML（不進 UI 掃描 —— 字典檔不是畫面）。
     /// 色盤來源是畫面檔（Window.Resources 裡的區域 brush）時照樣稽核，見 <see cref="PaletteDetector.IsResourceDictionaryFile"/>。</summary>
@@ -170,6 +187,30 @@ public static partial class PaletteDetector
             return r.LocalName == "ResourceDictionary";
         }
         catch { return false; }
+    }
+
+    /// <summary>主題字典的歸屬：用與合併式色盤同一套檔名提示（專案內相對路徑含 dark 或 light、只含其一），
+    /// 只收根元素是 ResourceDictionary 的檔（畫面檔不是「某個主題的字典」）。</summary>
+    private static Dictionary<string, ThemeSide> ThemeSides(string root, IEnumerable<string> files)
+    {
+        var sides = new Dictionary<string, ThemeSide>(StringComparer.OrdinalIgnoreCase);
+        foreach (var f in files)
+        {
+            if (!IsResourceDictionaryFile(f)) continue;
+            var n = Path.GetRelativePath(root, f).ToLowerInvariant();
+            bool d = n.Contains("dark"), l = n.Contains("light");
+            if (d ^ l) sides[Path.GetFullPath(f)] = d ? ThemeSide.Dark : ThemeSide.Light;
+        }
+        return sides;
+    }
+
+    /// <summary>明確指定深／淺的兩個字典檔（主題配對、config 強制 pair）。</summary>
+    private static Dictionary<string, ThemeSide> ThemeSides(string darkFile, string lightFile)
+    {
+        var sides = new Dictionary<string, ThemeSide>(StringComparer.OrdinalIgnoreCase);
+        if (IsResourceDictionaryFile(darkFile)) sides[Path.GetFullPath(darkFile)] = ThemeSide.Dark;
+        if (IsResourceDictionaryFile(lightFile)) sides[Path.GetFullPath(lightFile)] = ThemeSide.Light;
+        return sides;
     }
 
     /// <summary>色盤來源檔 → 不進 UI 掃描的檔（只留根元素是 ResourceDictionary 的）。</summary>
@@ -622,6 +663,7 @@ public static partial class PaletteDetector
                         Palette = pal,
                         Mode = PaletteMode.Pair,
                         ExcludedFiles = UiExclusions([dFile, lFile]),
+                        ThemeFileSides = ThemeSides(dFile, lFile),
                         Description = $"config-forced theme pair: {config.Palette.DarkFile} + {config.Palette.LightFile} ({pal.Count} keys)",
                     };
                 }
@@ -724,6 +766,7 @@ public static partial class PaletteDetector
                 Palette = mp.Pal,
                 Mode = PaletteMode.Pair,
                 ExcludedFiles = UiExclusions(mp.Files),
+                ThemeFileSides = ThemeSides(root, mp.Files),
                 Scopes = scopes,
                 Description = $"merged colour dictionaries: {mp.Files.Count} file(s), {mp.Pal.Count} keys (dark + light)"
                               + scopeNote + ConflictNote(mp.Conflicts) + InvalidNote(mp.Invalid),
@@ -750,6 +793,7 @@ public static partial class PaletteDetector
                 Palette = pal,
                 Mode = PaletteMode.Pair,
                 ExcludedFiles = UiExclusions([p.D.File, p.L.File]),
+                ThemeFileSides = ThemeSides(p.D.File, p.L.File),
                 Description = $"auto-detected theme pair: {p.D.Rel} + {p.L.Rel} ({pal.Count} keys)",
             };
         }

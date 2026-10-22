@@ -88,6 +88,8 @@ public sealed partial class Auditor
     private int _pairs, _unresolved, _skipped, _deadFg, _suppressed, _disabled;
     private StyleIndex _styles = null!;
     private string _curFile = ""; // 具名 Style 查找的「同檔優先」範圍（完整路徑）
+    private bool _oneThemeOnly;   // 目前這個檔只屬於一個主題（ThemeFileSides）
+    private readonly Dictionary<(Palette, ThemeSide), Palette> _sideViews = new();
 
     [GeneratedRegex(@"^\s*xamlcontrast-ignore(?:\s*:\s*(?<reason>.*\S))?\s*$")]
     private static partial Regex IgnoreComment();
@@ -166,6 +168,16 @@ public sealed partial class Auditor
         _nonTextEls = new HashSet<string>(NonTextEls.Concat(cfg.Classification.ExtraNonText));
     }
 
+    /// <summary>色盤的「單一主題視圖」：每個鍵兩欄都用指定主題的值（給只屬於那個主題的字典檔用）。</summary>
+    private Palette SideView(Palette pal, ThemeSide side)
+    {
+        if (_sideViews.TryGetValue((pal, side), out var view)) return view;
+        view = new Palette();
+        foreach (var (k, (d, l)) in pal.Entries)
+            view.Entries[k] = side == ThemeSide.Dark ? (d, d) : (l, l);
+        return _sideViews[(pal, side)] = view;
+    }
+
     private double NeedFor(bool isText, bool isLarge) =>
         !isText ? 0.0 : isLarge ? _cfg.Thresholds.LargeText : _cfg.Thresholds.NormalText;
 
@@ -231,7 +243,11 @@ public sealed partial class Auditor
                 auditor._curFile = f;
                 // 多 App repo:這個檔案屬於哪個 App,就用哪個 App 的色盤
                 // (單 App 或無作用域資訊時 PaletteFor 回傳全域色盤,行為不變)
-                auditor._pal = detection.PaletteFor(f);
+                // 只屬於一個主題的字典（色盤來自分開的深／淺 XAML 字典時）：兩欄都用那個主題的色票，
+                // findings 標 OneThemeOnly —— 拿 Dark.xaml 的 Style 配淺色色票是執行期不存在的組合
+                var side = paletteFile ? detection.SideOf(f) : null;
+                auditor._pal = side is { } s ? auditor.SideView(detection.PaletteFor(f), s) : detection.PaletteFor(f);
+                auditor._oneThemeOnly = side is not null;
                 if (!paletteFile) auditor.Walk(doc.Root, null, name, 1.0, suppressed: false);
                 auditor.WalkStyles(doc, name);
             }
@@ -462,6 +478,7 @@ public sealed partial class Auditor
                     Need = needC,
                     Size = fsC > 0 ? $"{(int)Math.Round(fsC, MidpointRounding.ToEven)}px" : "",
                     Large = isLargeC,
+                    OneThemeOnly = _oneThemeOnly,
                 });
             }
         }
@@ -525,6 +542,7 @@ public sealed partial class Auditor
                 Need = need,
                 Size = fs > 0 ? $"{(int)Math.Round(fs, MidpointRounding.ToEven)}px" : "",
                 Large = isLarge,
+                OneThemeOnly = _oneThemeOnly,
             });
         }
 
@@ -730,6 +748,7 @@ public sealed partial class Auditor
                     Need = need,
                     Size = fs > 0 ? $"{(int)Math.Round(fs, MidpointRounding.ToEven)}px" : "",
                     Large = isLarge,
+                    OneThemeOnly = _oneThemeOnly,
                 });
             }
         }

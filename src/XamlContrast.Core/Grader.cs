@@ -38,7 +38,7 @@ public static class Grader
             // 這種自相矛盾的輸出。人看的報告只印 fail/warn 所以看不到，但 JSON 全印。
             f.Symmetry =
                 f.Category is not (Category.Fail or Category.Warn) ? Symmetry.NotApplicable :
-                singleTheme ? Symmetry.SingleTheme :
+                singleTheme || f.OneThemeOnly ? Symmetry.SingleTheme :
                 f.Gap < 1.5 ? Symmetry.BothLow :
                 f.RatioLight < f.RatioDark ? Symmetry.LightFails :
                 Symmetry.DarkFails;

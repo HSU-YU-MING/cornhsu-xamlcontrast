@@ -473,6 +473,92 @@ public class StyleChainTests
         Assert.Equal(1, r.FileCount); // 主題檔仍不算畫面檔
     }
 
+    // ── 色盤來自分開的深／淺 XAML 字典時，主題檔裡的 Style 只屬於那一個主題 ──
+    //    Dark.xaml 與 Light.xaml 各定義一個 Chip：Dark.xaml 的 Chip 只在深色主題下存在，拿它配淺色色票算出的
+    //    「light=1.16:1」是執行期不存在的組合（反之亦然）—— 審查素材 h3pair，報出兩筆編造的 fail
+
+    private static Fixture ThemePairWithChips(string darkChipFg, string lightChipFg) => new Fixture()
+        .File("Themes/Dark.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Line" Color="#333333"/>
+              <Style x:Key="Chip" TargetType="Button">
+                <Setter Property="Background" Value="{"{"}DynamicResource Bg{"}"}"/>
+                <Setter Property="Foreground" Value="{darkChipFg}"/>
+              </Style>
+            </ResourceDictionary>
+            """)
+        .File("Themes/Light.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Line" Color="#CCCCCC"/>
+              <Style x:Key="Chip" TargetType="Button">
+                <Setter Property="Background" Value="{"{"}DynamicResource Bg{"}"}"/>
+                <Setter Property="Foreground" Value="{lightChipFg}"/>
+              </Style>
+            </ResourceDictionary>
+            """)
+        .File("Views/Main.xaml", """
+            <Grid Background="{DynamicResource Bg}"><Button Style="{StaticResource Chip}" Content="x"/></Grid>
+            """);
+
+    [Fact]
+    public void StyleInAOneThemeDictionaryIsGradedAgainstThatThemeOnly()
+    {
+        using var fx = ThemePairWithChips("#EEEEEE", "#1B1B1B");
+        var r = fx.Run();
+        Assert.Equal(PaletteMode.Pair, r.Detection.Mode);
+        Assert.Equal(0, r.CountOf(Category.Fail)); // 沒有 Light.xaml 的 dark=1.1、Dark.xaml 的 light=1.16 兩筆編造
+        var dark = Assert.Single(r.Findings, f => f.File == "Themes/Dark.xaml");
+        Assert.Equal(Wcag.Contrast("#EEEEEE", "#111111"), dark.RatioDark);
+        Assert.Equal(dark.RatioDark, dark.RatioLight);              // 只有深色主題這一欄
+        var light = Assert.Single(r.Findings, f => f.File == "Themes/Light.xaml");
+        Assert.Equal(Wcag.Contrast("#1B1B1B", "#FFFFFF"), light.RatioLight);
+        Assert.Equal(light.RatioLight, light.RatioDark);
+    }
+
+    [Fact] // 真的不合格照樣報，而且標 single-theme（只屬於一個主題，「換主題救不救得回來」不適用）
+    public void OneThemeDictionaryFailureIsStillReported()
+    {
+        using var fx = ThemePairWithChips("#333333", "#1B1B1B");
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings, x => x.Category == Category.Fail);
+        Assert.Equal("Themes/Dark.xaml", f.File);
+        Assert.Equal(Wcag.Contrast("#333333", "#111111"), f.RatioDark);
+        Assert.Equal(Symmetry.SingleTheme, f.Symmetry);
+    }
+
+    [Fact] // C# 真相源時，XAML 主題檔是兩個主題共用的靜態複本（Kindling 形狀）—— 裡面的 Style 兩欄都要評，
+           // Kindling DarkTheme.xaml:149 DarkBtn 按下態的淺色 2.49:1 就是這樣抓到的，不能因為檔名有 Dark 就只評深色
+    public void StyleInACSharpPaletteStaticCopyIsGradedForBothThemes()
+    {
+        using var fx = new Fixture();
+        fx.File("Services/ThemeService.cs", """
+            ("Bg3", "#2A2A2A", "#F0F0F0"),
+            ("Fg0", "#EEEEEE", "#1B1B1B"),
+            ("PurpleD", "#534AB7", "#534AB7"),
+            """);
+        fx.File("Themes/DarkTheme.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg3" Color="#2A2A2A"/>
+              <SolidColorBrush x:Key="Fg0" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="PurpleD" Color="#534AB7"/>
+              <Style x:Key="Pressed" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource PurpleD}"/>
+                <Setter Property="Foreground" Value="{DynamicResource Fg0}"/>
+              </Style>
+            </ResourceDictionary>
+            """);
+        var r = fx.Run();
+        Assert.Equal(PaletteMode.CSharp, r.Detection.Mode);
+        var f = Assert.Single(r.Findings);
+        Assert.Equal(Wcag.Contrast("#1B1B1B", "#534AB7"), f.RatioLight); // 淺色主題 2.49:1
+        Assert.Equal(Category.Fail, f.Category);
+        Assert.Equal(Symmetry.LightFails, f.Symmetry);
+    }
+
     [Fact] // 同上，色盤檔解析失敗時不能靜默消失：WalkStyles 要讀它，讀不了就喊 parse failed
     public void UnparseablePaletteDictionaryIsReported()
     {
