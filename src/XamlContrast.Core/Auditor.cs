@@ -868,6 +868,10 @@ public sealed partial class Auditor
         var raw = XamlBrush.Read(child, name == "Rectangle" ? "Fill" : "Background");
         if (raw is null) return null;
         var r = ColorResolver.Resolve(raw, _pal);
+        // 透明（含 alpha 0 的色碼）的兄弟不管 Opacity 是多少都看不見 —— 先排除，再看 Opacity。
+        // ⚠ 上一版先看 Opacity：<Border Background="Transparent" Opacity="{Binding Fade}"/> 讓後面的字全變成
+        //   bound-or-gradient，exit 由 0 變 1（審查素材 m4t）
+        if (r is null || r.Kind == ColorKind.Transparent || r.Kind == ColorKind.Alpha && VisibleAlpha(r) < 0.01) return null;
         // 背板元素自己的 Opacity 讓它變半透明（<Rectangle Fill="#000000" Opacity="0.2"/> 的遮罩寫法）——
         // 舊版當成不透明，20% 黑的遮罩被當成純黑。Opacity 與 brush 的 alpha 相乘；讀不懂的 Opacity（Binding）
         // = 執行期才知道；幾乎為 0 = 看不見，不影響

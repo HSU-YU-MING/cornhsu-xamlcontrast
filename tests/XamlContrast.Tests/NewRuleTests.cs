@@ -852,6 +852,24 @@ public class NewRuleTests
         Assert.Equal(UnresolvedReason.BoundOrGradient, Assert.Single(r.UnresolvedSites).Reason);
     }
 
+    [Theory] // 透明（或沒有底）的兄弟不管 Opacity 是什麼都看不見：不能因為 Opacity 是 Binding 就讓後面的字變成
+             // bound-or-gradient（審查素材 m4t：exit 0 → 1 的小回歸）
+    [InlineData("""<Border Background="Transparent" Opacity="{Binding Fade}"/>""")]
+    [InlineData("""<Border Background="#00000000" Opacity="{Binding Fade}"/>""")]
+    public void TransparentSiblingWithBoundOpacityIsNotABackdrop(string sibling)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              {sibling}
+              <TextBlock Foreground="#000000" Text="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.UnresolvedSites);
+        Assert.Equal(21, Assert.Single(r.Findings).RatioDark);
+    }
+
     [Theory] // 兄弟背板是 Binding／漸層／不在色盤的鍵:底是執行期才知道的顏色 —— 依「Binding 底不可往上繼承」
              // 同一條原則計入 unresolved,不是配祖先的底給出篤定比值(舊版 Binding 兄弟照報 21:1)
     [InlineData("""<Border Background="{Binding OverlayBrush}"/>""", UnresolvedReason.BoundOrGradient)]
