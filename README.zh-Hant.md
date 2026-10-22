@@ -259,8 +259,8 @@ fail／warn 另標 `symmetry: single-theme`。
 unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)——
 每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。
 
-**依專案型態設定預期。** 應用程式型專案通常解析得很好(四個驗證專案中三個 88~99%,
-第四個幾乎沒有可配對的文字);
+**依專案型態設定預期。** 應用程式型專案通常解析得很好(1.0 實測:Kindling 97.3%、QuillNest 90.5%、ZeroCel 73.8%;
+第四個 Cornea 是截圖覆蓋視窗,字疊在工具看不到的畫面上 —— 0 組配對、exit 3);
 **控制項函式庫天生解析率低** —— 它們的顏色走 `{TemplateBinding}` / `{Binding}`,
 執行期才存在,這是靜態分析的硬邊界(報成 `bound-or-gradient`),不是能用設定修好的
 問題。公開專案實測:應用程式 26~57%,控制項函式庫(MahApps、MaterialDesign、

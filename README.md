@@ -323,7 +323,8 @@ resource reference, a typo, or a palette file detection missed, which makes this
 even before any contrast math.
 
 **Set expectations by project type.** Application projects typically resolve well
-(three of the four validation apps run at 88–99%; the fourth has almost no text to pair).
+(measured with 1.0: Kindling 97.3%, QuillNest 90.5%, ZeroCel 73.8%; the fourth, Cornea, is a
+screen-capture overlay whose text sits on nothing the tool can see — 0 pairs, exit 3).
 **Control libraries resolve poorly by nature** —
 their colours flow through `{TemplateBinding}` and `{Binding}`, which only exist at runtime;
 that is a hard boundary of static analysis, reported as `bound-or-gradient`, not a bug to fix
