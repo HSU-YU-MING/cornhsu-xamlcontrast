@@ -290,9 +290,16 @@ public static class Report
             // 這對開發者是免費的 lint,可能比對比度本身更常派上用場
             var unknown = TopUnknownKeys(r).ToList();
             if (unknown.Count > 0)
+            {
+                // 偵測時因為定義讀不懂而剔除的鍵另外標明 —— 原因不是打字錯誤或死引用，看偵測那一行
+                var dropped = r.Detection.DroppedKeys;
                 sb.AppendLine("  unknown palette keys (top): " +
-                    string.Join(", ", unknown.Select(kv => string.Create(inv, $"{kv.Key} x{kv.Value}"))) +
-                    " — dead reference, typo, or a palette file detection missed");
+                    string.Join(", ", unknown.Select(kv => string.Create(inv,
+                        $"{kv.Key} x{kv.Value}{(dropped.Contains(kv.Key) ? " (dropped: unreadable definition)" : "")}"))) +
+                    (unknown.All(kv => dropped.Contains(kv.Key))
+                        ? " — see the palette line for the definitions the tool could not read"
+                        : " — dead reference, typo, or a palette file detection missed"));
+            }
         }
         if (r.DeadForeground > 0)
         {

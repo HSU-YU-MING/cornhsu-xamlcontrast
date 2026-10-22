@@ -50,6 +50,10 @@ public sealed class PaletteDetection
     }
     private static readonly Palette EmptyPalette = new();
 
+    /// <summary>合併式色盤因為定義讀不懂（或那個主題找不到引用的 Color）而剔除的鍵 —— 使用處是
+    /// unknown-palette-key，但原因不是打字錯誤或死引用，報告點名時要分開講。</summary>
+    public IReadOnlySet<string> DroppedKeys { get; init; } = new HashSet<string>();
+
     /// <summary>
     /// 只屬於一個主題的字典檔（完整路徑 → 深或淺）：色盤來自分開的深／淺 XAML 字典（合併式 pair、主題配對、
     /// config 強制 pair）時，Dark.xaml 裡的 Style 只在深色主題下存在。
@@ -211,6 +215,33 @@ public static partial class PaletteDetector
         if (IsResourceDictionaryFile(darkFile)) sides[Path.GetFullPath(darkFile)] = ThemeSide.Dark;
         if (IsResourceDictionaryFile(lightFile)) sides[Path.GetFullPath(lightFile)] = ThemeSide.Light;
         return sides;
+    }
+
+    /// <summary>畫面檔：根元素讀得出來、而且不是 ResourceDictionary 或 Application（App.xaml 的
+    /// Application.Resources 是整個 App 的範圍，照全域處理）。它的區域資源只在那個畫面裡生效。</summary>
+    internal static bool IsScreenFile(string file)
+    {
+        try
+        {
+            using var r = System.Xml.XmlReader.Create(file);
+            r.MoveToContent();
+            return r.LocalName is not ("ResourceDictionary" or "Application");
+        }
+        catch { return false; }
+    }
+
+    /// <summary>
+    /// 畫面檔自己的區域 brush 在那個畫面裡蓋過全域色盤（WPF 的資源查找先找近的）。
+    /// 回傳 鍵 → 字面色（深淺同值）或 null（讀不懂 = 執行期才知道，例如 Color="{Binding …}"）。
+    /// 引用 Color 鍵的區域 brush 不列（它解出的顏色跟著主題走，沿用全域那一層的解析）。
+    /// </summary>
+    internal static Dictionary<string, string?> LocalOverrides(string file)
+    {
+        var overrides = new Dictionary<string, string?>();
+        if (!IsScreenFile(file)) return overrides;
+        var (lit, _) = ParseBrushDefs(file, keepInvalid: true);
+        foreach (var (k, v) in lit) overrides[k] = v is InvalidValue ? null : v;
+        return overrides;
     }
 
     /// <summary>色盤來源檔 → 不進 UI 掃描的檔（只留根元素是 ResourceDictionary 的）。</summary>
@@ -406,6 +437,9 @@ public static partial class PaletteDetector
         var invalid = new SortedSet<string>(StringComparer.Ordinal);
         var colorFiles = new List<(string File, Dictionary<string, string> Colors, bool D, bool L)>();
         var brushFiles = new List<(string File, Dictionary<string, string> Lit, Dictionary<string, string> Ref, bool D, bool L)>();
+        // 畫面檔（Window／UserControl…）的區域定義另成最低一層，見下面「區域層」
+        var localColorFiles = new List<(string File, Dictionary<string, string> Colors)>();
+        var localBrushFiles = new List<(string File, Dictionary<string, string> Lit, Dictionary<string, string> Ref)>();
 
         foreach (var f in EnumerateFiles(root, "*.xaml"))
         {
@@ -417,12 +451,19 @@ public static partial class PaletteDetector
             var isLight = n.Contains("light");
 
             var colors = ParseColorDefs(f, keepInvalid: true);
-            if (colors.Count > 0) colorFiles.Add((f, colors, isDark, isLight));
-
             var (lit, refs) = ParseBrushDefs(f, keepInvalid: true);
+            if (IsScreenFile(f))
+            {
+                if (colors.Count > 0) localColorFiles.Add((f, colors));
+                if (lit.Count + refs.Count > 0) localBrushFiles.Add((f, lit, refs));
+                continue;
+            }
+            if (colors.Count > 0) colorFiles.Add((f, colors, isDark, isLight));
             if (lit.Count + refs.Count > 0) brushFiles.Add((f, lit, refs, isDark, isLight));
         }
-        if (colorFiles.Count == 0 && brushFiles.Count == 0) return null;
+        if (colorFiles.Count + brushFiles.Count + localColorFiles.Count + localBrushFiles.Count == 0) return null;
+        IEnumerable<string> SourceFiles() => colorFiles.Select(c => c.File).Concat(brushFiles.Select(b => b.File))
+            .Concat(localColorFiles.Select(c => c.File)).Concat(localBrushFiles.Select(b => b.File));
 
         // ── Color 表：主題檔先進（各佔自己那側），中性檔補洞、兩側都給 ──
         var darkColors = new Dictionary<string, string>();
@@ -469,6 +510,24 @@ public static partial class PaletteDetector
             foreach (var (k, c) in b.Ref) { Put(darkR, k, c, conflicts); Put(lightR, k, c, conflicts); }
         }
 
+        // ── 區域層：畫面檔的 Window.Resources／UserControl.Resources 只補「字典與 App 都沒定義的鍵」──
+        // ⚠ 區域定義只在那個畫面裡生效（那個畫面自己的覆蓋由稽核端的 LocalOverrides 處理）。舊版把它當成
+        //   中性檔灌進全域：區域的字面值蓋掉主題用 Color 引用定義的同名鍵（字面值優先），讀不懂的區域值
+        //   （Color="{Binding …}"）更把整個專案的同名鍵剔除 —— 一個畫面的區域 brush 污染了全部畫面。
+        //   讀不懂的區域值不進全域；同鍵的區域定義之間不算衝突（各管各的畫面），先出現的補洞
+        bool DefinedGlobally(string k) => darkB.ContainsKey(k) || lightB.ContainsKey(k) || darkR.ContainsKey(k) || lightR.ContainsKey(k);
+        foreach (var c in localColorFiles)
+            foreach (var (k, v) in c.Colors)
+                if (v is not InvalidValue && !darkColors.ContainsKey(k) && !lightColors.ContainsKey(k))
+                { darkColors[k] = v; lightColors[k] = v; }
+        foreach (var b in localBrushFiles)
+        {
+            foreach (var (k, v) in b.Lit)
+                if (v is not InvalidValue && !DefinedGlobally(k)) { darkB[k] = v; lightB[k] = v; }
+            foreach (var (k, c) in b.Ref)
+                if (!DefinedGlobally(k)) { darkR[k] = c; lightR[k] = c; }
+        }
+
         var pal = new Palette();
         foreach (var k in darkB.Keys.Concat(lightB.Keys).Concat(darkR.Keys).Concat(lightR.Keys).Distinct())
         {
@@ -500,13 +559,13 @@ public static partial class PaletteDetector
         //   一個鍵都沒剩（全部讀不懂）才放棄：剩下的路只會喊「找不到色盤」，不會編
         if (pal.Count == 0 && invalid.Count >= minKeys)
             // 定義了夠多的鍵、卻一個都讀不懂：回傳空色盤＋點名，讓 Detect 判成退化，而不是交給「挑一個檔」去編
-            return (pal, false, new HashSet<string>(colorFiles.Select(c => c.File).Concat(brushFiles.Select(b => b.File)), StringComparer.OrdinalIgnoreCase),
+            return (pal, false, new HashSet<string>(SourceFiles(), StringComparer.OrdinalIgnoreCase),
                     new SortedSet<string>(StringComparer.Ordinal), invalid);
         if (pal.Count == 0 || pal.Count + invalid.Count < minKeys) return null;
         var anyDark = colorFiles.Any(c => c.D && !c.L) || brushFiles.Any(b => b.D && !b.L);
         var anyLight = colorFiles.Any(c => c.L && !c.D) || brushFiles.Any(b => b.L && !b.D);
         var files = new HashSet<string>(
-            colorFiles.Select(c => c.File).Concat(brushFiles.Select(b => b.File)),
+            SourceFiles(),
             StringComparer.OrdinalIgnoreCase);
         conflicts.UnionWith(colorConflicts);
         return (pal, anyDark && anyLight || !pal.IsSingleTheme, files, conflicts, invalid);
@@ -769,6 +828,7 @@ public static partial class PaletteDetector
                 Mode = PaletteMode.Pair,
                 ExcludedFiles = UiExclusions(mp.Files),
                 ThemeFileSides = ThemeSides(root, mp.Files),
+                DroppedKeys = mp.Invalid,
                 Scopes = scopes,
                 Description = $"merged colour dictionaries: {mp.Files.Count} file(s), {mp.Pal.Count} keys (dark + light)"
                               + scopeNote + ConflictNote(mp.Conflicts) + InvalidNote(mp.Invalid),
@@ -829,6 +889,7 @@ public static partial class PaletteDetector
                 Mode = PaletteMode.None,
                 IsDegraded = true,
                 ExcludedFiles = UiExclusions(mi.Files),
+                DroppedKeys = mi.Invalid,
                 Description = "no usable palette — every colour key the dictionaries define has a value the tool cannot read; auditing hardcoded colors only"
                               + InvalidNote(mi.Invalid),
             };
@@ -840,6 +901,7 @@ public static partial class PaletteDetector
                 Palette = ms.Pal,
                 Mode = PaletteMode.Single,
                 ExcludedFiles = UiExclusions(ms.Files),
+                DroppedKeys = ms.Invalid,
                 Scopes = scopes,
                 Description = $"merged colour dictionaries: {ms.Files.Count} file(s), {ms.Pal.Count} keys (single theme)"
                               + scopeNote + ConflictNote(ms.Conflicts) + InvalidNote(ms.Invalid),

@@ -9,4 +9,8 @@ public sealed class Palette
     public bool IsSingleTheme => Entries.Values.All(v => v.Dark == v.Light);
 
     public int Count => Entries.Count;
+
+    /// <summary>值在執行期才知道的鍵（畫面的區域 brush 綁 Binding 之類）—— 解析成 bound-or-gradient，
+    /// 不是 unknown-palette-key（那會被讀成打字錯誤或死引用）。</summary>
+    public HashSet<string> RuntimeKeys { get; } = new();
 }

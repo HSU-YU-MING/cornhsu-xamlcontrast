@@ -406,6 +406,10 @@ public class PaletteDetectorTests
         var site = Assert.Single(r.UnresolvedSites);
         Assert.Equal(UnresolvedReason.UnknownPaletteKey, site.Reason);
         Assert.Equal("Fg", site.Value);
+        // console 點名時要說清楚是「定義讀不懂而剔除」，不是叫人去找打字錯誤或死引用
+        var console = Report.ToConsole(r);
+        Assert.Contains("unknown palette keys (top): Fg x1 (dropped: unreadable definition)", console);
+        Assert.DoesNotContain("typo", console);
     }
 
     [Fact] // 色盤檔是用正則掃原始文字的：註解掉的舊定義也被收進色盤，還蓋掉現役值（同鍵後者覆蓋前者）——
@@ -807,6 +811,63 @@ public class PaletteDetectorTests
         Assert.DoesNotContain("K6", d.Description);
         Assert.DoesNotContain("Same", d.Description);
         Assert.Equal(("#111111", "#111111"), d.Palette.Entries["K1"]); // 先出現的贏（字典序 A 在 B 前）
+    }
+
+    [Fact] // 畫面檔的區域定義只是那個畫面的：Badge.xaml 的 UserControl.Resources 把 Fg 綁到 Binding，舊版當成
+           // 中性的字面值灌進全域色盤，蓋掉主題用 Color 引用定義的同名鍵 —— 整個專案的 Fg 都變成 unknown-palette-key，
+           // 提示還說是「dead reference, typo」（審查素材 h4poison）。全域色盤只讓畫面檔補「字典沒定義的鍵」，
+           // 讀不懂的區域值不進全域；在那個畫面裡，區域定義蓋過全域（綁定的就是執行期才知道）
+    public void ScreenLocalDefinitionsDoNotPolluteTheGlobalPalette()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="FgColor">#EEEEEE</Color>
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="{StaticResource FgColor}"/>
+              <SolidColorBrush x:Key="Line" Color="#333333"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="FgColor">#1B1B1B</Color>
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="{StaticResource FgColor}"/>
+              <SolidColorBrush x:Key="Line" Color="#CCCCCC"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Badge.xaml", """
+            <UserControl xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <UserControl.Resources>
+                <SolidColorBrush x:Key="Fg" Color="{Binding BadgeColor}"/>
+                <SolidColorBrush x:Key="Line" Color="#FF0000"/>
+                <SolidColorBrush x:Key="BadgeOnly" Color="#000000"/>
+              </UserControl.Resources>
+              <StackPanel Background="#FFFFFF">
+                <TextBlock Foreground="{DynamicResource Fg}" Text="local Fg is bound"/>
+                <TextBlock Foreground="{DynamicResource Line}" Text="local Line wins here"/>
+              </StackPanel>
+            </UserControl>
+            """);
+        fx.File("Views/Main.xaml", """
+            <StackPanel Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Fg}" Text="theme Fg"/>
+              <TextBlock Foreground="{DynamicResource Line}" Text="theme Line"/>
+              <TextBlock Foreground="{DynamicResource BadgeOnly}" Text="key only a screen defines"/>
+            </StackPanel>
+            """);
+        var r = fx.Run();
+        Assert.Equal(("#EEEEEE", "#1B1B1B"), r.Detection.Palette.Entries["Fg"]);   // 沒被區域的 Binding 蓋掉
+        Assert.Equal(("#333333", "#CCCCCC"), r.Detection.Palette.Entries["Line"]); // 也沒被區域的字面值蓋掉
+        Assert.Equal(("#000000", "#000000"), r.Detection.Palette.Entries["BadgeOnly"]); // 字典沒定義的鍵照樣補
+        Assert.DoesNotContain("dropped", r.Detection.Description);
+
+        Assert.Equal(3, r.Findings.Count(f => f.File == "Views/Main.xaml"));
+        var badgeLine = Assert.Single(r.Findings, f => f.File == "Views/Badge.xaml");
+        Assert.Equal(Wcag.Contrast("#FF0000", "#FFFFFF"), badgeLine.RatioDark);     // 畫面裡區域定義蓋過全域
+        var bound = Assert.Single(r.UnresolvedSites);
+        Assert.Equal("Views/Badge.xaml", bound.File);
+        Assert.Equal(UnresolvedReason.BoundOrGradient, bound.Reason);              // 不是 unknown-palette-key（不是打字錯誤）
     }
 
     [Fact] // 「當色盤來源」與「排除出 UI 掃描」是兩件事：畫面檔在 UserControl.Resources 放一個區域 brush，

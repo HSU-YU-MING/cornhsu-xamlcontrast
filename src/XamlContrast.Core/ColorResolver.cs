@@ -143,6 +143,7 @@ public static partial class ColorResolver
         if (m.Success)
         {
             var key = m.Groups["k"].Value;
+            if (palette.RuntimeKeys.Contains(key)) return new Resolved(ColorKind.Other, Key: key, Raw: v);
             if (palette.Entries.TryGetValue(key, out var e))
             {
                 // 色票鍵的值同理：#FF... 是不透明色票，不是半透明疊層

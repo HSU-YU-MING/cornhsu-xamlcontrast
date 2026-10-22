@@ -168,6 +168,20 @@ public sealed partial class Auditor
         _nonTextEls = new HashSet<string>(NonTextEls.Concat(cfg.Classification.ExtraNonText));
     }
 
+    /// <summary>畫面檔的區域 brush 疊在全域色盤上：字面色兩欄同值；讀不懂的（Binding）記成執行期才知道。</summary>
+    private static Palette WithLocalOverrides(Palette global, Dictionary<string, string?> local)
+    {
+        var pal = new Palette();
+        foreach (var (k, v) in global.Entries) pal.Entries[k] = v;
+        pal.RuntimeKeys.UnionWith(global.RuntimeKeys);
+        foreach (var (k, v) in local)
+        {
+            if (v is null) { pal.Entries.Remove(k); pal.RuntimeKeys.Add(k); }
+            else { pal.Entries[k] = (v, v); pal.RuntimeKeys.Remove(k); }
+        }
+        return pal;
+    }
+
     /// <summary>色盤的「單一主題視圖」：每個鍵兩欄都用指定主題的值（給只屬於那個主題的字典檔用）。</summary>
     private Palette SideView(Palette pal, ThemeSide side)
     {
@@ -248,6 +262,9 @@ public sealed partial class Auditor
                 var side = paletteFile ? detection.SideOf(f) : null;
                 auditor._pal = side is { } s ? auditor.SideView(detection.PaletteFor(f), s) : detection.PaletteFor(f);
                 auditor._oneThemeOnly = side is not null;
+                // 畫面檔自己的區域 brush 在那個畫面裡蓋過全域（全域色盤只讓它們補洞，見 MergedXamlPalette 的區域層）
+                if (!paletteFile && PaletteDetector.LocalOverrides(f) is { Count: > 0 } local)
+                    auditor._pal = WithLocalOverrides(auditor._pal, local);
                 auditor.Walk(doc.Root, null, name, 1.0, suppressed: false);
                 auditor.WalkStyles(doc, name);
             }
