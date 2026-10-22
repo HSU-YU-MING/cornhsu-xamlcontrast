@@ -20,7 +20,9 @@ xamlcontrast path/to/your/wpf/project
 ```
 
 > Requires the **.NET 10 runtime** (the analysis itself is pure XML — runs on Linux CI too).
-> 0.x: pin exact versions (`--version 0.6.1`). Interfaces freeze at 1.0.
+> **1.x interfaces are frozen**: the CLI flags, exit codes, JSON report, config and baseline files,
+> and Action inputs change only by addition until 2.0. Coming from 0.x? The
+> [1.0.0 notes](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/CHANGELOG.md) list what you have to change.
 
 ## What it looks like
 
@@ -81,13 +83,14 @@ run on every change, red when broken, pointing at the exact line.
 
 Two independent dimensions per finding:
 
-- **grade** (absolute contrast): `fail` < threshold×0.67 (≈2/3), `warn` in between, `ok`, `decorative`
+- **grade** (absolute contrast): `fail` < threshold×0.67 (≈2/3), `warn` in between, `ok`, `decorative`.
+  By default both `fail` and `warn` fail the run — anything below AA; `--fail-on fail` lets `warn` through
 - **symmetry** (across themes): `both-low` = the palette itself is too weak;
   `dark-fails` / `light-fails` = the design intent didn't survive the other theme
 
 Symmetry only answers "would switching theme rescue this?", so it is carried **only by
-`fail` and `warn` findings** — the JSON omits the field entirely on `ok` and `decorative`
-ones (as of `schemaVersion` 2). A passing pair has no problem to rescue, and labelling a
+`fail` and `warn` findings** — the JSON's `symmetry` is `null` on `ok` and `decorative`
+ones. A passing pair has no problem to rescue, and labelling a
 21:1 pair `both-low` — "the palette is too weak" — would be nonsense.
 
 Symmetry is **never** used to hide a finding. "Both themes are equally bad" is not evidence
@@ -157,8 +160,8 @@ root; its XAML is still audited.
 
 Wrong guess? Override with `xamlcontrast.config.json` —
 [schema](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/docs/config-schema.md) (zh-Hant; the JSON example at the top is self-explanatory).
-A property name the tool doesn't know (a typo such as `strictPallete`) is named in the report
-(`!! config: unknown property …`) rather than silently ignored.
+A property name the tool doesn't know (a typo such as `strictPallete`) is a config error
+(exit 2) that names it, rather than silently ignored.
 If your app is built on a theme library (MahApps, HandyControl, MaterialDesign…), the palette
 is usually found fine but the window background isn't — see
 [`rootBackground`](#json-output) below; the tool tells you this when it happens.
@@ -166,31 +169,38 @@ is usually found fine but the window background isn't — see
 ## CI
 
 ```bash
-xamlcontrast src/MyApp --json report.json          # exit 1 on any fail
-xamlcontrast src/MyApp --fail-on warn              # strict: everything must meet AA
+xamlcontrast src/MyApp --json report.json          # exit 1 on any pair below AA
+xamlcontrast src/MyApp --fail-on fail              # looser: only pairs below the fail line block
 xamlcontrast src/MyApp --sarif audit.sarif         # GitHub code scanning format
 xamlcontrast src/MyApp --md report.md              # Markdown report (for a PR comment)
 ```
 
-Exit codes: `1` on failure — any `fail` (or `warn` with `--fail-on warn`), new or worsened
-failures vs `--baseline`, coverage below `--min-coverage`, a degraded palette with
-`--strict-palette` — and `1` when **zero pairs resolved** (an empty scan is not a pass);
-`2` on usage or configuration errors (bad flags, invalid config, a report or baseline file
-that can't be written or read); `0` otherwise.
+Exit codes:
+
+| code | meaning |
+|---|---|
+| `0` | pass |
+| `1` | pairs below the gate — any `fail` or `warn` by default (only `fail` with `--fail-on fail`), or new / worsened pairs vs `--baseline` |
+| `2` | usage, configuration or input-file error — bad flags, invalid config, a report or baseline file that can't be written or read |
+| `3` | **the result can't be trusted** — zero pairs resolved (an empty scan is not a pass), coverage below `--min-coverage`, or a degraded palette with `--strict-palette` |
+
+The gate is `--fail-on`, else the config's `failOn`, else `warn`. The three trust checks run before
+either baseline mode, so a broken palette can't pass itself off as paid-off debt.
 
 ### Adopting on an existing project (baseline ratchet)
 
-A gate that's red on day one gets turned off. Freeze the current debt once, then only
-block new or worsened failures — debt may only shrink:
+A gate that's red on day one gets turned off. Freeze the current debt once — every pair below
+AA — then only block new or worsened pairs; debt may only shrink:
 
 ```bash
 xamlcontrast src/MyApp --write-baseline xamlcontrast-baseline.json   # once; commit the file
 xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # in CI
 ```
 
-Baseline keys contain no line numbers (lines drift) but do record the worst ratio
-(so palette drift — same key, darker value — still gets caught). A hand-edited baseline whose
-entries lack `count` or `worst` is still read, with a warning that names what is no longer checked.
+Both flags take a path, and they can't be combined. Baseline keys contain no line numbers (lines
+drift) but do record the worst ratio (so palette drift — same key, darker value — still gets
+caught). The file carries a `schemaVersion`; one with a missing field, or one written by 0.x, is
+refused (exit 2) with a note to regenerate it.
 
 ### Suppressing intentional low contrast
 
@@ -203,8 +213,9 @@ The reason is **required** — a bare `<!-- xamlcontrast-ignore -->` is invalid 
 (the pair is still reported). The marker has to be exact — lowercase, a colon, the reason on the
 same line. A misspelled one (wrong case, a colon with nothing after it, a missing colon, a reason
 that wraps onto a second line) does not suppress anything and is warned about the same way
-(`summary.invalidIgnores`). Suppressed pairs are counted in `summary.suppressed`; nothing
-disappears silently.
+(`summary.invalidIgnores`). On a container, the marker covers everything inside it — its elements
+and the `Style` definitions in its `Resources`. Suppressed pairs are counted in
+`summary.suppressed`; nothing disappears silently.
 
 ### GitHub Action
 
@@ -221,10 +232,10 @@ jobs:
       # security-events: write    # only if you also pass `sarif: true`
     steps:
       - uses: actions/checkout@v4
-      - uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.6.1   # 0.x: pin exact version
+      - uses: HSU-YU-MING/cornhsu-xamlcontrast@v1   # follows the latest 1.x
         with:
           root: src/MyApp
-          version: 0.6.1          # pins the tool too — without it the action installs the latest release
+          # version: 1.0.0        # optional: pin the tool exactly; empty installs the latest 1.x
 ```
 
 > **`pull-requests: write` is what makes the PR comment work.** Without it that step gets a 403.
@@ -238,24 +249,39 @@ lists what was **not** evaluated — exemptions, suppressions, parse failures, d
 detection — because the real risk with an audit tool is not missing a finding, it is falsely
 reporting health.
 
-Inputs: `root` (required), `working-directory`, `version`, `fail-on`, `baseline`,
-`strict-palette`, `comment` (turn off the PR comment), `upload-report`, `sarif`.
+Annotations follow the gate: pairs it blocks are errors, warns it lets through (`fail-on: fail`)
+are warnings, and known debt in baseline mode is a notice.
+
+Inputs: `root` (required), `working-directory`, `version` (empty = the latest 1.x), `fail-on`
+(`warn` / `fail`; empty = the config's `failOn`, else `warn`), `min-coverage` (empty = the config's
+`minCoverage`, else 50), `baseline`, `strict-palette`, `comment` (turn off the PR comment),
+`upload-report`, `sarif`. The switches take `true` or `false`; an unknown value fails the job and
+names the input instead of quietly falling back to the default.
 
 ## JSON output
 
-`--json report.json` writes a two-layer report: `findings` (one entry per pair) plus a
-`summary` block carrying every degradation counter — `paletteSource`, `coverage`, `unresolved`
-(with `unresolvedBy`), `skipped`, `deadForeground`, `disabledExempt`, `suppressed`, `parseErrors`,
-plus `unknownKeys`, `parseErrorFiles` and `invalidIgnores` when non-empty. If the tool couldn't see
-something, that fact is machine-readable. Consumers should check `schemaVersion`.
-Each finding carries `file`, `line`, `element`, `fg`, `bg`, `ratioDark`, `ratioLight`, `threshold`,
-`category`, `isText` and `largeText`, plus `symmetry` (fail/warn only) and `fontSize` (when one is
-set); suppressed pairs are counted in `summary`, not listed.
+`--json report.json` writes `schemaVersion` 6 — frozen for 1.x, with the shape published as
+[`docs/report.schema.json`](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/docs/report.schema.json).
+Every field is always present: `null`, `[]` or `{}` when there's nothing to report. Within 1.x,
+fields are only added and `schemaVersion` stays 6 — **ignore fields you don't know**.
+
+- Top level: `toolVersion`, `exitCode` (the audit verdict: 0, 1 or 3), `summary`,
+  `unresolvedSites`, `findings`.
+- `summary` carries the gate in effect (`failOn`, `minCoverage`, `strictPalette`) and every
+  degradation counter — `coverage`, `unresolved` (with `unresolvedBy`), `skipped`,
+  `deadForeground`, `disabledExempt`, `suppressed`, `parseErrors` / `parseErrorFiles`,
+  `invalidIgnoreCount` / `invalidIgnores`, `unknownKeys`. If the tool couldn't see something, that
+  fact is machine-readable.
+- Each finding carries `file`, `line`, `element`, `fg`, `bg`, `ratioDark`, `ratioLight`,
+  `threshold`, `category`, `symmetry` (fail/warn; `null` otherwise), `isText`, `isLargeText`,
+  `fontSize` (DIP, or `null`), `theme` and `baseline` (`known` / `new` / `worsened` for the pairs
+  the gate blocks in `--baseline` mode). Suppressed pairs are counted in `summary`, not listed.
+
 A pair that exists in **one theme only** (a style in a one-theme dictionary, or a use site whose
 style resolves differently per theme — see palette detection above) carries that theme's ratio in
 *both* `ratioDark` and `ratioLight`: the `ratioLight` of a `Dark.xaml` style is the dark-theme ratio.
-Failing and warning ones say so with `symmetry: single-theme`; ok and decorative ones carry no
-per-finding marker in this schema version.
+Its `theme` says which (`"dark"` / `"light"`; `null` for pairs that exist in both), and failing and
+warning ones also read `symmetry: single-theme`.
 `skipped` counts only text you cannot see (transparent, alpha ≈ 0, `Opacity="0"`); a translucent
 colour is composited and graded.
 
@@ -267,20 +293,20 @@ doesn't tell you whether anything can be done about it:
 | `no-ancestor-background` | nothing up the tree declares a background — often a root container relying on an app-level implicit style, or vector artwork in a resource dictionary |
 | `bound-or-gradient` | the colour comes from `{Binding}` / `{TemplateBinding}` / a gradient or image brush — only knowable at runtime. Also anything else the tool can't read as a colour (every WPF colour literal — `#RGB`, `#ARGB`, `#RRGGBB`, `#AARRGGBB`, the named colours — is read) |
 | `unknown-palette-key` | the resource key isn't in the detected palette — a typo, or palette detection missed a file |
-| `translucent-uncomposited` | a transparent or translucent background with nothing underneath to composite against — a style's own `Background="Transparent"` at its definition when no use site grades it (an implicit style, or a named style no element references with `Style=`; a used style is graded where it's used instead), or an `Opacity`-faded layer over nothing |
+| `translucent-uncomposited` | a transparent or translucent background with nothing underneath to composite against — a translucent `Background` with no background above it, a style's own `Background="Transparent"` at its definition when no use site grades it (an implicit style, or a named style no element references with `Style=`; a used style is graded where it's used instead), or an `Opacity`-faded layer over nothing. `rootBackground` (below) fixes the first kind |
 | `same-brush-pair` | a style sets `Foreground` and `Background` to the *same* brush — the Material template-opacity idiom (the template paints the background at 10–12% opacity as a tint); literally 1:1, not at runtime, and the opacity animation is invisible statically |
 | `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio |
 
 `summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
-(default 50%) fails**, because a pass over a fraction of the project is not a pass — the same
+(default 50%) exits 3**, because a pass over a fraction of the project is not a pass — the same
 principle as the non-configurable zero-pairs rule, which it generalises. Use
-`--min-coverage 0` to opt out (the GitHub Action has no input for it — set `"minCoverage": 0`
-in `xamlcontrast.config.json` instead).
+`--min-coverage 0` to opt out (`min-coverage: 0` in the Action, or `"minCoverage": 0` in
+`xamlcontrast.config.json`).
 
 Every unresolved pair is listed with its location: `--show-unresolved` prints
 `file:line · reason · the value it got stuck on` (the background's value when the background is
-what couldn't be resolved), and the JSON carries the same list in a top-level
-`unresolved` array (`file`, `line`, `reason`, `value`). Unknown keys are additionally named
+what couldn't be resolved), and the JSON carries the same list in the top-level
+`unresolvedSites` array (`file`, `line`, `reason`, `value`). Unknown keys are additionally named
 with counts (`summary.unknownKeys`, and the top ones on the console) — each one is a dead
 resource reference, a typo, or a palette file detection missed, which makes this a free lint
 even before any contrast math.
@@ -323,9 +349,10 @@ fixes — July 2026, the v0.1.0-era tool):
 | Kindling | 41 fail / 14 warn | **0 real** (3 remaining, all verified false alarms of known classes) |
 | QuillNest | 13 fail / 31 warn | **0 real** (7 fail / 1 warn remaining, same) |
 
-The "after" column is a record of that moment, not a live figure. The current frozen snapshots
-(`baselines/*.json`, audited by the v0.6 tool) read CelFlow 0 fail / 0 warn, Kindling 0 fail /
-1 warn, QuillNest 3 fail / 1 warn.
+The "after" column is a record of that moment, not a live figure. Audited by the 1.0 tool
+(October 2026) the three read ZeroCel (formerly CelFlow) 1 fail / 6 warn, Kindling 1 fail / 1 warn,
+QuillNest 2 fail / 1 warn — the new failures are real ones the earlier tool couldn't see, and the
+one that disappeared had been graded against the wrong background (details in the CHANGELOG).
 
 How that trust was earned — the highlights, with the full story in the
 [development retrospective](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/docs/開發歷程回顧.md) (zh-Hant):
@@ -359,7 +386,8 @@ Honest list — full blind-spot table with per-case evidence in the
   or gradient ones reported as unresolved), and text over a sibling `Image` is honestly
   `over-sibling-content`. In a custom `*Panel`, or a derived `*Canvas` / `*Grid`, whose layout the
   tool can't know, text after a possible backdrop is `over-sibling-content` too (`InkCanvas` overlaps
-  like `Canvas`). Partial-coverage siblings (including anything in a `Canvas`, where nothing stretches)
+  like `Canvas`) — unless you declare the container in the config's `layout`
+  (`"overlap": [...]` or `"sideBySide": [...]`). Partial-coverage siblings (including anything in a `Canvas`, where nothing stretches)
   and images nested inside a backdrop element are still invisible
 - Implicit styles (beyond the document root's background) — e.g. a button inside a `DataGrid` row
   is graded against the grid's background, not the selected row's highlight that the implicit

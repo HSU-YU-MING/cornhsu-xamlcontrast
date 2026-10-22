@@ -14,7 +14,8 @@ xamlcontrast 你的專案路徑
 ```
 
 > 需要 **.NET 10 執行環境**（解析本身是純 XML —— Linux CI 也跑得動）。
-> 0.x 期間請 pin 確切版本（`--version 0.6.1`）；1.0 後介面凍結。
+> **1.x 介面凍結**：CLI 旗標、退出碼、JSON 報告、config 與 baseline 檔、Action inputs 到 2.0 之前只增不改。
+> 從 0.x 升級？先看 [CHANGELOG 的 1.0.0](CHANGELOG.md)，裡面列了必須改的地方。
 
 ## 實際跑起來長這樣
 
@@ -65,12 +66,13 @@ exit 1: 3 pair(s) below threshold x 0.67 (0 warn)
 
 每筆結果有兩個**獨立**維度：
 
-- **等級**（絕對對比）：`fail`（< 門檻×0.67，約 2/3）／`warn`／`ok`／`decorative`
+- **等級**（絕對對比）：`fail`（< 門檻×0.67，約 2/3）／`warn`／`ok`／`decorative`。
+  預設 `fail` 與 `warn` 都讓 CI 失敗（沒達到 AA 就算）；`--fail-on fail` 讓 `warn` 通過
 - **對稱**（跨主題）：`both-low`＝色票本身不夠，換主題救不了；
   `dark-fails`／`light-fails`＝設計意圖沒跨主題保住
 
 對稱只回答「換個主題救不救得回來」，所以**只有 `fail` 與 `warn` 帶這個維度** ——
-`ok` 與 `decorative` 在 JSON 裡整個不輸出這個欄位（`schemaVersion` 2 起）。
+`ok` 與 `decorative` 在 JSON 裡的 `symmetry` 是 `null`。
 合格的配對沒有問題要救，把 21:1 標成 `both-low`（＝色票太弱）是胡說。
 
 對稱**永遠不會**被拿來藏結果 ——「兩邊一樣糟」不是刻意的證據，只是糟兩次。
@@ -121,25 +123,32 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
 不會被當成色盤來源（XAML 字典或 C# 三元組檔）或應用程式根元素；其中的 XAML 照樣受稽核。
 
 猜錯可用 `xamlcontrast.config.json` 指定（[schema](docs/config-schema.md)）。
-工具不認得的屬性名（例如拼錯的 `strictPallete`）會在報告裡點名（`!! config: unknown property …`），不會被靜默忽略。
+工具不認得的屬性名（例如拼錯的 `strictPallete`）是設定錯誤（exit 2）並點名，不會被靜默忽略。
 若你的 App 建在主題函式庫上（MahApps、HandyControl、MaterialDesign⋯），通常色盤找得到、
 但**視窗底色找不到** —— 用 `rootBackground` 一行宣告即可，工具在覆蓋率不足時會主動提示。
 
 ## 進 CI
 
 ```bash
-xamlcontrast src/MyApp --json report.json    # 有 fail 就 exit 1
-xamlcontrast src/MyApp --fail-on warn        # 嚴格模式：全部要過 AA
+xamlcontrast src/MyApp --json report.json    # 有任何一組沒達到 AA 就 exit 1
+xamlcontrast src/MyApp --fail-on fail        # 放寬：只有低於 fail 線的才擋
 xamlcontrast src/MyApp --sarif audit.sarif   # GitHub code scanning 格式
 xamlcontrast src/MyApp --md report.md        # Markdown 報告（可貼 PR 留言）
 ```
 
-退出碼：失敗 `1`（有 fail、`--fail-on warn` 時有 warn、`--baseline` 下有新增或惡化、
-覆蓋率低於 `--min-coverage`、`--strict-palette` 下色盤退化）、**解析出 0 組配對也是 `1`**
-（空掃不是通過）、用法或設定錯誤 `2`（旗標錯、config 不合法、報告或 baseline 檔寫不出／讀不到）、
-其餘 `0`。
+退出碼：
 
-**既有專案導入（baseline ratchet）**：第一天全紅的門會被關掉。先凍結既有債，
+| 碼 | 意思 |
+|---|---|
+| `0` | 通過 |
+| `1` | 有配對低於 gate —— 預設是任何 `fail` 或 `warn`（`--fail-on fail` 時只看 `fail`），或 `--baseline` 下有新增或惡化 |
+| `2` | 用法、設定或輸入檔錯誤 —— 旗標錯、config 不合法、報告或 baseline 檔寫不出／讀不到 |
+| `3` | **這份結果不可信** —— 解析出 0 組配對（空掃不是通過）、覆蓋率低於 `--min-coverage`、`--strict-palette` 下色盤退化 |
+
+gate 的優先序：`--fail-on` > config 的 `failOn` > 預設 `warn`。三道「不可信」的檢查排在兩個 baseline 模式之前，
+弄壞的色盤不會被當成「債還清了」。
+
+**既有專案導入（baseline ratchet）**：第一天全紅的門會被關掉。先凍結既有債（每一組沒達到 AA 的），
 之後只擋新增與惡化 —— 債只准減不准增：
 
 ```bash
@@ -147,8 +156,9 @@ xamlcontrast src/MyApp --write-baseline xamlcontrast-baseline.json   # 跑一次
 xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # CI 裡
 ```
 
-baseline 的鍵不含行號（行號會漂），但會記錄最差比值（同一個鍵、色值被調暗的色盤漂移照樣抓得到）。
-手改過、entry 缺 `count` 或 `worst` 的 baseline 仍讀得進來，但會警告並說明哪一項檢查因此失效。
+兩個旗標都要給路徑，而且不能同時用。baseline 的鍵不含行號（行號會漂），但會記錄最差比值
+（同一個鍵、色值被調暗的色盤漂移照樣抓得到）。檔案帶 `schemaVersion`；缺欄位的、或 0.x 寫的
+baseline 會被拒絕（exit 2），並提示重跑 `--write-baseline`。
 
 **刻意低對比的標記**（理由必填；壓掉的計入 `summary.suppressed`，不會靜默消失）：
 
@@ -159,7 +169,8 @@ baseline 的鍵不含行號（行號會漂），但會記錄最差比值（同�
 
 完全沒寫理由的 `<!-- xamlcontrast-ignore -->` 視為無效並警告（配對照報）。標記要一字不差 ——
 小寫、有冒號、理由寫在同一行；寫錯的變體（大小寫不同、冒號後沒有理由、漏冒號、理由換到第二行）
-不會壓掉任何配對，並以同樣方式警告（`summary.invalidIgnores`）。
+不會壓掉任何配對，並以同樣方式警告（`summary.invalidIgnores`）。標記寫在容器上時，涵蓋容器裡的
+一切 —— 元素，以及容器 `Resources` 裡的 `Style` 定義。
 
 ### GitHub Action
 
@@ -176,10 +187,10 @@ jobs:
       # security-events: write    # 只有在同時開 `sarif: true` 時才需要
     steps:
       - uses: actions/checkout@v4
-      - uses: HSU-YU-MING/cornhsu-xamlcontrast@v0.6.1   # 0.x 期間 pin 確切版本
+      - uses: HSU-YU-MING/cornhsu-xamlcontrast@v1   # 跟隨最新的 1.x
         with:
           root: src/MyApp
-          version: 0.6.1          # 工具本身也要 pin —— 省略的話 action 會裝最新版
+          # version: 1.0.0        # 選填：把工具釘在確切版本；留空裝最新的 1.x
 ```
 
 > **`pull-requests: write` 是 PR 留言能不能貼的關鍵。** 沒有它那一步會 403。
@@ -191,23 +202,33 @@ jobs:
 留言裡除了落差表，也會列出「沒被評估到的東西」——豁免、壓掉、解析失敗、色盤偵測退化，
 因為這個工具最大的風險不是漏報，是謊報健康。
 
-輸入：`root`（必填）、`working-directory`、`version`、`fail-on`、`baseline`、
-`strict-palette`、`comment`（關掉 PR 留言）、`upload-report`、`sarif`。
+行內註記跟著 gate 走：gate 擋的是 error，gate 放行的 warn（`fail-on: fail`）是 warning，
+baseline 模式下的既有債是 notice。
+
+輸入：`root`（必填）、`working-directory`、`version`（留空 = 最新的 1.x）、`fail-on`
+（`warn`／`fail`；留空 = config 的 `failOn`，沒有就是 `warn`）、`min-coverage`（留空 = config 的
+`minCoverage`，沒有就是 50）、`baseline`、`strict-palette`、`comment`（關掉 PR 留言）、
+`upload-report`、`sarif`。開關類只收 `true` 或 `false`；不認得的值會讓 job 失敗並點名是哪個 input，
+不會悄悄退回預設值。
 
 ## JSON 輸出
 
-`--json report.json` 產出兩層報告：`findings`（每組配對一筆）加一個 `summary` 區塊，
-裡面有**全部的退化計數** —— `paletteSource`、`coverage`、`unresolved`（含 `unresolvedBy`）、
-`skipped`、`deadForeground`、`disabledExempt`、`suppressed`、`parseErrors`，
-有內容時另有 `unknownKeys`、`parseErrorFiles`、`invalidIgnores`。工具沒看到的東西，都是機器可讀的。
-消費端請檢查 `schemaVersion`。
-每筆 finding 帶 `file`、`line`、`element`、`fg`、`bg`、`ratioDark`、`ratioLight`、`threshold`、
-`category`、`isText`、`largeText`，`fail`／`warn` 另帶 `symmetry`、有設字級時另帶 `fontSize`；
-被壓掉的配對只計入 `summary`，不列出。
+`--json report.json` 產出 `schemaVersion` 6 —— 1.x 凍結，形狀發佈在
+[`docs/report.schema.json`](docs/report.schema.json)。每個欄位一律輸出，沒有值是 `null`、`[]` 或 `{}`。
+1.x 只會新增欄位，`schemaVersion` 維持 6 —— **不認得的欄位請略過**。
+
+- 頂層：`toolVersion`、`exitCode`（稽核的判定：0、1 或 3）、`summary`、`unresolvedSites`、`findings`。
+- `summary` 帶實際生效的 gate（`failOn`、`minCoverage`、`strictPalette`）與**全部的退化計數** ——
+  `coverage`、`unresolved`（含 `unresolvedBy`）、`skipped`、`deadForeground`、`disabledExempt`、`suppressed`、
+  `parseErrors`／`parseErrorFiles`、`invalidIgnoreCount`／`invalidIgnores`、`unknownKeys`。工具沒看到的東西，都是機器可讀的。
+- 每筆 finding 帶 `file`、`line`、`element`、`fg`、`bg`、`ratioDark`、`ratioLight`、`threshold`、`category`、
+  `symmetry`（fail／warn；其餘 `null`）、`isText`、`isLargeText`、`fontSize`（DIP，沒設是 `null`）、`theme`、
+  `baseline`（`--baseline` 模式下 gate 擋的那些：`known`／`new`／`worsened`）。被壓掉的配對只計入 `summary`，不列出。
+
 **只存在於一個主題**的配對（只屬於一個主題的字典裡的 Style，或使用處的 Style 依主題解析到不同的鏈，
 見上面的色盤偵測）`ratioDark` 與 `ratioLight` **兩欄都是那個主題的比值**：`Dark.xaml` 裡的 Style，
-`ratioLight` 其實是深色主題的值。fail／warn 會標 `symmetry: single-theme`；ok／decorative 在這一版的
-schema 裡沒有逐筆標記。
+`ratioLight` 其實是深色主題的值。`theme` 標出是哪一個（`"dark"`／`"light"`；兩個主題都有的是 `null`），
+fail／warn 另標 `symmetry: single-theme`。
 `skipped` 只計看不見的字（透明、alpha ≈ 0、`Opacity="0"`）；半透明的字色會合成後評分。
 
 `unresolved` 在 `summary.unresolvedBy` 裡有原因細目 —— 光看總數看不出「補不補得回來」:
@@ -217,17 +238,17 @@ schema 裡沒有逐筆標記。
 | `no-ancestor-background` | 祖先鏈上沒有任何一層宣告背景。常見於根容器靠 App 層隱含樣式給底,或資源字典裡的向量圖 |
 | `bound-or-gradient` | 顏色來自 `{Binding}` / `{TemplateBinding}` / 漸層或圖片 brush —— 執行期才知道。其他工具讀不出顏色的值也歸這裡(WPF 的色彩字面值 —— `#RGB`、`#ARGB`、`#RRGGBB`、`#AARRGGBB`、具名色 —— 都讀得懂) |
 | `unknown-palette-key` | 資源鍵不在偵測到的色盤裡 —— 打字錯誤,或色盤偵測漏了某個檔 |
-| `translucent-uncomposited` | 透明或半透明的背景、底下沒有可疊的顏色 —— Style 定義處自己的 `Background="Transparent"`，而且沒有任何使用處會評到它（隱含樣式，或沒有元素以 `Style=` 引用的具名 Style；有元素用到的改在使用處評），或以 `Opacity` 變淡、底下什麼都沒有的一層 |
+| `translucent-uncomposited` | 透明或半透明的背景、底下沒有可疊的顏色 —— 半透明的 `Background`、上面的祖先都沒有底；Style 定義處自己的 `Background="Transparent"`，而且沒有任何使用處會評到它（隱含樣式，或沒有元素以 `Style=` 引用的具名 Style；有元素用到的改在使用處評）；或以 `Opacity` 變淡、底下什麼都沒有的一層。第一種用下面的 `rootBackground` 補得回來 |
 | `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
 | `over-sibling-content` | 文字墊在同格子的兄弟 `Image`/媒體元素上 —— 真正的底是一張圖,靜態不可知;硬配祖先背景等於編造比值 |
 
-`summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 1** ——
-只掃到一小部分的「通過」不算通過,這是「0 組配對即 exit 1」那條不可設定規則的推廣。
-要關掉用 `--min-coverage 0`(GitHub Action 沒有對應的 input,改在 `xamlcontrast.config.json`
+`summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 3** ——
+只掃到一小部分的「通過」不算通過,這是「0 組配對不算通過」那條不可設定規則的推廣。
+要關掉用 `--min-coverage 0`(Action 用 `min-coverage: 0`,或在 `xamlcontrast.config.json`
 設 `"minCoverage": 0`)。
 
 每一筆無法解析的配對都有位置可查:`--show-unresolved` 逐筆列出
-`file:line · 原因 · 卡住的值`(卡在背景時放背景的值),JSON 頂層的 `unresolved` 陣列帶同一份清單(`file`、`line`、`reason`、`value`)。
+`file:line · 原因 · 卡住的值`(卡在背景時放背景的值),JSON 頂層的 `unresolvedSites` 陣列帶同一份清單(`file`、`line`、`reason`、`value`)。
 unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)——
 每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。
 
@@ -264,8 +285,9 @@ HandyControl)5~19%。稽核函式庫請預期要用 `--min-coverage 0`,並把解
 | Kindling | 破 41／偏低 14 | **真實問題 0**（餘 3 筆皆為已記錄假警報類） |
 | QuillNest | 破 13／偏低 31 | **真實問題 0**（餘 破 7／偏低 1，同上） |
 
-「修正後」一欄是當時的紀錄，不是即時數字。目前凍結的快照（`baselines/*.json`，以 v0.6 的工具稽核）
-是 CelFlow 破 0／偏低 0、Kindling 破 0／偏低 1、QuillNest 破 3／偏低 1。
+「修正後」一欄是當時的紀錄，不是即時數字。以 1.0 的工具重新稽核（2026 年 10 月）是
+ZeroCel（原 CelFlow）破 1／偏低 6、Kindling 破 1／偏低 1、QuillNest 破 2／偏低 1 ——
+新出現的 fail 是先前的工具看不到的真問題，消失的那一筆原本是拿錯的底色來比（詳見 CHANGELOG）。
 
 信任是怎麼掙來的（完整故事見[開發歷程回顧](docs/開發歷程回顧.md)）：
 
@@ -291,7 +313,8 @@ TargetName 指向模板**內部**元素（指向根的已解析）、跨元素�
 實測一個報 ok 的 ghost 按鈕在選取列上是 4.06:1）;sibling 背景已解析 `Grid` 格子裡「佔滿格子的兄弟」(純色直接用;
 半透明的 —— 不論來自 brush 的 alpha 或元素自己的 `Opacity` —— 合成;Binding／漸層計入無法解析),
 文字疊兄弟 Image 誠實歸 `over-sibling-content`;版面無法得知的自訂 `*Panel`、衍生命名的 `*Canvas`／`*Grid` 裡,
-可能是背板的兄弟之後的字也歸 `over-sibling-content`(`InkCanvas` 與 `Canvas` 一樣疊層)——
+可能是背板的兄弟之後的字也歸 `over-sibling-content`(`InkCanvas` 與 `Canvas` 一樣疊層;
+在 config 的 `layout` 宣告那個容器是 `overlap` 或 `sideBySide` 就不必猜)——
 但部分覆蓋的兄弟(含 `Canvas` 裡的一切,Canvas 不撐滿子元素)、
 藏在背板元素**裡面**的圖片仍看不到;Binding 來的顏色標「無法解析」而不猜 ——
 猜了就是拿誠實的不確定去換錯誤的信心。
