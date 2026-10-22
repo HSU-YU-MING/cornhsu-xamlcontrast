@@ -518,7 +518,8 @@ public static class Report
                 var need = string.Create(inv, $"{f.Need}");
                 if (f.Large) need += " (large)";
                 sb.AppendLine(string.Create(inv,
-                    $"| {Code($"{f.File}:{f.Line}")} | {Esc(f.Element)} | {Code(f.Fg)} → {Code(f.Bg)} | " +
+                    // Element 也是 code span：標籤含 XAML 的鍵，鍵裡的 [文字](網址)、@帳號 在 PR 留言裡會被渲染
+                    $"| {Code($"{f.File}:{f.Line}")} | {Code(f.Element)} | {Code(f.Fg)} → {Code(f.Bg)} | " +
                     $"{RatioCell(f, ThemeSide.Dark)} | {RatioCell(f, ThemeSide.Light)} | {need} | {SymmetryLabel(f.Symmetry)} |"));
             }
             sb.AppendLine();

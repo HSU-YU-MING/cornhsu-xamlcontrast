@@ -171,6 +171,20 @@ public class MarkdownReportTests
         Assert.Equal(8, row.Count(c => c == '|') - 1);   // 被跳脫的那個不算欄位分隔
     }
 
+    [Fact] // Element 欄也是 code span（審查 1.0 最終驗證，可接受項）：元素標籤含 XAML 的鍵，鍵裡的 [文字](網址) 或 @帳號
+           // 在 PR 留言裡會被渲染成連結、或去 @ 某個人
+    public void ElementLabelsAreCodeSpansSoKeysAreNotRendered()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources><Style x:Key="Tag @team [docs](https://x.example)" TargetType="TextBlock"><Setter Property="Foreground" Value="#EEEEEE"/><Setter Property="Background" Value="#FFFFFF"/></Style></Grid.Resources>
+            </Grid>
+            """);
+        var row = Assert.Single(Report.ToMarkdown(fx.Run(), 1).Split('\n'), l => l.Contains("@team"));
+        Assert.Contains("| `Style[Tag @team [docs](https://x.example)]/base` |", row);
+    }
+
     [Fact] // 反引號（審查 1.0 B6）：檔名裡的反引號會提早結束 code span，PR 留言的表格整列走樣。
            // code span 改用比內容裡最長的反引號串更長的圍欄（CommonMark 的寫法）；一般文字裡的反引號以 \ 跳脫
     public void BackticksInNamesDoNotBreakTheMarkdown()
