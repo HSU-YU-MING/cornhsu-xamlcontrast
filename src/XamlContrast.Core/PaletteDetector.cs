@@ -256,17 +256,32 @@ public static partial class PaletteDetector
         catch { return false; }
     }
 
+    /// <summary>畫面檔區域 brush 的值：深淺兩欄。兩欄都是 null 時，<see cref="MissingColor"/> 是 null = 讀不懂
+    /// （執行期才知道，例如 Color="{Binding …}"）；不是 null = 引用的 Color 在畫面與全域都找不到（點名它）。</summary>
+    internal sealed record LocalBrush(string? Dark, string? Light, string? MissingColor = null);
+
     /// <summary>
     /// 畫面檔自己的區域 brush 在那個畫面裡蓋過全域色盤（WPF 的資源查找先找近的）。
-    /// 回傳 鍵 → 字面色（深淺同值）或 null（讀不懂 = 執行期才知道，例如 Color="{Binding …}"）。
-    /// 引用 Color 鍵的區域 brush 不列（它解出的顏色跟著主題走，沿用全域那一層的解析）。
+    /// 字面色深淺同值；引用 Color 鍵的對 <paramref name="global"/> 的 Color 表逐側解析（跟著主題走）。
     /// </summary>
-    internal static Dictionary<string, string?> LocalOverrides(string file)
+    internal static Dictionary<string, LocalBrush> LocalOverrides(string file, Palette global)
     {
-        var overrides = new Dictionary<string, string?>();
+        var overrides = new Dictionary<string, LocalBrush>();
         if (!IsScreenFile(file)) return overrides;
-        var (lit, _) = ParseBrushDefs(file, keepInvalid: true);
-        foreach (var (k, v) in lit) overrides[k] = v is InvalidValue ? null : v;
+        var own = ParseColorDefs(file, keepInvalid: true);
+        var (lit, refs) = ParseBrushDefs(file, keepInvalid: true);
+        foreach (var (k, v) in lit) overrides[k] = v is InvalidValue ? new LocalBrush(null, null) : new LocalBrush(v, v);
+        foreach (var (k, c) in refs)
+        {
+            // Color 引用對「這個畫面自己的 Color ∪ 全域 Color 表」逐側解析（畫面自己的優先）。
+            // ⚠ 舊版只收字面值：區域 Accent 引用 WarnColor（黃），報告卻用全域 Accent 的藍（審查素材 m3）
+            var d = ResolveRef(c, key => own.GetValueOrDefault(key) ?? global.DarkColors.GetValueOrDefault(key));
+            var l = ResolveRef(c, key => own.GetValueOrDefault(key) ?? global.LightColors.GetValueOrDefault(key));
+            overrides[k] =
+                d is InvalidValue || l is InvalidValue ? new LocalBrush(null, null) :          // 讀不懂
+                d is null || l is null ? new LocalBrush(null, null, c.Split('@')[0]) :         // 找不到那個 Color（任一主題）
+                new LocalBrush(d, l);
+        }
         return overrides;
     }
 
@@ -536,22 +551,32 @@ public static partial class PaletteDetector
             foreach (var (k, c) in b.Ref) { Put(darkR, k, c, conflicts); Put(lightR, k, c, conflicts); }
         }
 
-        // ── 區域層：畫面檔的 Window.Resources／UserControl.Resources 只補「字典與 App 都沒定義的鍵」──
-        // ⚠ 區域定義只在那個畫面裡生效（那個畫面自己的覆蓋由稽核端的 LocalOverrides 處理）。舊版把它當成
-        //   中性檔灌進全域：區域的字面值蓋掉主題用 Color 引用定義的同名鍵（字面值優先），讀不懂的區域值
-        //   （Color="{Binding …}"）更把整個專案的同名鍵剔除 —— 一個畫面的區域 brush 污染了全部畫面。
-        //   讀不懂的區域值不進全域；同鍵的區域定義之間不算衝突（各管各的畫面），先出現的補洞
+        // ── 區域層：畫面檔的 Window.Resources／UserControl.Resources 只在那個畫面裡生效 ──
+        // ⚠ 第一版把它當成中性檔灌進全域：區域的字面值蓋掉主題用 Color 引用定義的同名鍵（字面值優先），讀不懂的
+        //   區域值（Color="{Binding …}"）更把整個專案的同名鍵剔除 —— 一個畫面的區域 brush 污染了全部畫面。
+        // ⚠ 第二版改成「只補字典沒定義的鍵」，仍是全域可見：B.xaml 自己的區域 Badge 拿到的是 A 畫面的 Badge，
+        //   只有 Badge.xaml 定義的鍵在 Main.xaml 也評得出比值（執行期 Main 查不到它）；區域 brush 引用外部函式庫的
+        //   Color 時更被描述成「主題定義了讀不懂的值」（審查素材 m3、m3lib）。
+        // 現在：區域定義一律不進全域的 Color／brush 表。字典沒定義、只有畫面定義的鍵記下「誰定義了它」（LocalOnly）：
+        //   照樣算進偵測（只在畫面裡放色票的專案照樣偵測得到色盤），稽核端只讓定義它的畫面看得到；
+        //   畫面自己的值（字面值與 Color 引用）由 LocalOverrides 對「這個畫面的 Color ∪ 全域 Color 表」逐側解析
         bool DefinedGlobally(string k) => darkB.ContainsKey(k) || lightB.ContainsKey(k) || darkR.ContainsKey(k) || lightR.ContainsKey(k);
-        foreach (var c in localColorFiles)
-            foreach (var (k, v) in c.Colors)
-                if (v is not InvalidValue && !darkColors.ContainsKey(k) && !lightColors.ContainsKey(k))
-                { darkColors[k] = v; lightColors[k] = v; }
+        var localOnly = new Dictionary<string, HashSet<string>>();
+        var localEntries = new Dictionary<string, (string Dark, string Light)>();
         foreach (var b in localBrushFiles)
         {
-            foreach (var (k, v) in b.Lit)
-                if (v is not InvalidValue && !DefinedGlobally(k)) { darkB[k] = v; lightB[k] = v; }
-            foreach (var (k, c) in b.Ref)
-                if (!DefinedGlobally(k)) { darkR[k] = c; lightR[k] = c; }
+            var own = localColorFiles.Where(c => c.File == b.File).Select(c => c.Colors).FirstOrDefault();
+            foreach (var k in b.Lit.Keys.Concat(b.Ref.Keys).Where(k => !DefinedGlobally(k)))
+            {
+                if (!localOnly.TryGetValue(k, out var defs)) localOnly[k] = defs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                defs.Add(Path.GetFullPath(b.File));
+                // 偵測用的代表值：第一個定義它的畫面（稽核時每個畫面用自己的，見 LocalOverrides）
+                if (localEntries.ContainsKey(k)) continue;
+                if (b.Lit.TryGetValue(k, out var lv)) { if (lv is not InvalidValue) localEntries[k] = (lv, lv); continue; }
+                var d = ResolveRef(b.Ref[k], c => own?.GetValueOrDefault(c) ?? darkColors.GetValueOrDefault(c));
+                var l = ResolveRef(b.Ref[k], c => own?.GetValueOrDefault(c) ?? lightColors.GetValueOrDefault(c));
+                if (d is not (null or InvalidValue) && l is not (null or InvalidValue)) localEntries[k] = (d, l);
+            }
         }
 
         var pal = new Palette();
@@ -567,6 +592,10 @@ public static partial class PaletteDetector
             if (d is null && l is null) continue;
             pal.Entries.TryAdd(k, (d ?? l!, l ?? d!)); // 缺的一側（沒有定義）退回另一側
         }
+        foreach (var (k, v) in localEntries) pal.Entries.TryAdd(k, v);
+        foreach (var (k, v) in localOnly) pal.LocalOnly[k] = v;
+        foreach (var (k, v) in darkColors) pal.DarkColors[k] = v;
+        foreach (var (k, v) in lightColors) pal.LightColors[k] = v;
         // 沒有任何 brush 字典 → 直接把 Color 鍵當色票（有些專案就這樣用）
         // （brush 有定義、只是全部讀不懂時不退回 Color 表：那些 brush 才是色盤，讀不懂要照實喊出來）
         if (pal.Count == 0 && invalid.Count == 0)
@@ -728,7 +757,32 @@ public static partial class PaletteDetector
         var readErrors = new List<string>();
         var d = DetectCore(root, config, readErrors);
         d.ReadErrors.AddRange(readErrors);
+        FillColorTables(root, d);
         return d;
+    }
+
+    /// <summary>
+    /// 全域 Color 表（深淺各一，畫面的區域 brush 引用 Color 時用）。合併式色盤自己建好了；其他模式在這裡補：
+    /// 主題字典（<see cref="PaletteDetection.SideOf"/>，沒有就看 <see cref="ThemeHint"/>）各佔自己那側、中性檔補洞，
+    /// 先出現的贏。畫面檔（區域定義只在那個畫面裡生效）與測試素材不算。
+    /// </summary>
+    private static void FillColorTables(string root, PaletteDetection d)
+    {
+        var pal = d.Palette;
+        if (pal.DarkColors.Count > 0 || pal.LightColors.Count > 0) return;
+        var files = new List<(Dictionary<string, string> Colors, ThemeSide? Side)>();
+        foreach (var f in EnumerateFiles(root, "*.xaml"))
+        {
+            var rel = Path.GetRelativePath(root, f);
+            if (LooksLikeFixture(rel) || IsScreenFile(f)) continue;
+            var colors = ParseColorDefs(f, keepInvalid: true);
+            if (colors.Count > 0) files.Add((colors, d.SideOf(f) ?? ThemeHint(rel)));
+        }
+        foreach (var (colors, side) in files.Where(x => x.Side is not null))
+            foreach (var (k, v) in colors)
+                (side == ThemeSide.Dark ? pal.DarkColors : pal.LightColors).TryAdd(k, v);
+        foreach (var (colors, _) in files.Where(x => x.Side is null))
+            foreach (var (k, v) in colors) { pal.DarkColors.TryAdd(k, v); pal.LightColors.TryAdd(k, v); }
     }
 
     private static PaletteDetection DetectCore(string root, ToolConfig? config, List<string> readErrors)

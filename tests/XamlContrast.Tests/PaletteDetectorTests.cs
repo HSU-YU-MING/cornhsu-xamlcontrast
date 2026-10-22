@@ -859,15 +859,103 @@ public class PaletteDetectorTests
         var r = fx.Run();
         Assert.Equal(("#EEEEEE", "#1B1B1B"), r.Detection.Palette.Entries["Fg"]);   // 沒被區域的 Binding 蓋掉
         Assert.Equal(("#333333", "#CCCCCC"), r.Detection.Palette.Entries["Line"]); // 也沒被區域的字面值蓋掉
-        Assert.Equal(("#000000", "#000000"), r.Detection.Palette.Entries["BadgeOnly"]); // 字典沒定義的鍵照樣補
         Assert.DoesNotContain("dropped", r.Detection.Description);
 
-        Assert.Equal(3, r.Findings.Count(f => f.File == "Views/Main.xaml"));
+        Assert.Equal(2, r.Findings.Count(f => f.File == "Views/Main.xaml"));
         var badgeLine = Assert.Single(r.Findings, f => f.File == "Views/Badge.xaml");
         Assert.Equal(Wcag.Contrast("#FF0000", "#FFFFFF"), badgeLine.RatioDark);     // 畫面裡區域定義蓋過全域
-        var bound = Assert.Single(r.UnresolvedSites);
-        Assert.Equal("Views/Badge.xaml", bound.File);
+        var bound = Assert.Single(r.UnresolvedSites, u => u.File == "Views/Badge.xaml");
         Assert.Equal(UnresolvedReason.BoundOrGradient, bound.Reason);              // 不是 unknown-palette-key（不是打字錯誤）
+        // 只有 Badge.xaml 定義的鍵，執行期 Main.xaml 看不到（DynamicResource 找不到資源）—— 不能拿 Badge 的值去評
+        // （舊版把它寫成預期：Main.xaml 的 BadgeOnly 報 #000000 的比值，等於把猜測寫進規格）
+        var foreign = Assert.Single(r.UnresolvedSites, u => u.File == "Views/Main.xaml");
+        Assert.Equal(UnresolvedReason.UnknownPaletteKey, foreign.Reason);
+        Assert.Equal("BadgeOnly", foreign.Value);
+    }
+
+    // ── 畫面的區域 brush 引用 Color（審查素材 m3、m3lib）──
+    //    舊版的區域覆蓋只收字面值：A.xaml 的區域 Accent 引用 WarnColor（黃），報告卻用全域 Accent 的藍，
+    //    白底上實際 1.2:1 給 8.63 ok；B.xaml 自己的區域 Badge 拿到的是 A 畫面的 Badge（區域層的引用補進了全域）。
+    //    引用外部函式庫 Color 的區域 brush（MahApps.Colors.Accent）更被描述成「主題定義了讀不懂的值」
+
+    private static Fixture ScreensWithLocalColorReferences() => new Fixture()
+        .File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="AccentColor">#0D47A1</Color>
+              <Color x:Key="WarnColor">#FFEB3B</Color>
+              <SolidColorBrush x:Key="Accent" Color="{StaticResource AccentColor}"/>
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Line" Color="#333333"/>
+            </ResourceDictionary>
+            """)
+        .File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Color x:Key="AccentColor">#0D47A1</Color>
+              <Color x:Key="WarnColor">#FFEB3B</Color>
+              <SolidColorBrush x:Key="Accent" Color="{StaticResource AccentColor}"/>
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Line" Color="#333333"/>
+            </ResourceDictionary>
+            """)
+        .File("Views/A.xaml", """
+            <UserControl xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <UserControl.Resources>
+                <SolidColorBrush x:Key="Accent" Color="{StaticResource WarnColor}"/>
+                <SolidColorBrush x:Key="Badge" Color="{StaticResource AccentColor}"/>
+              </UserControl.Resources>
+              <Grid Background="{DynamicResource Bg}">
+                <TextBlock Foreground="{DynamicResource Accent}" Text="yellow on white"/>
+                <TextBlock Foreground="{DynamicResource Badge}" Text="blue on white"/>
+              </Grid>
+            </UserControl>
+            """)
+        .File("Views/B.xaml", """
+            <UserControl xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <UserControl.Resources>
+                <SolidColorBrush x:Key="Badge" Color="{StaticResource WarnColor}"/>
+              </UserControl.Resources>
+              <Grid Background="{DynamicResource Bg}">
+                <TextBlock Foreground="{DynamicResource Badge}" Text="yellow on white"/>
+              </Grid>
+            </UserControl>
+            """);
+
+    [Fact]
+    public void LocalColorReferenceBrushesAreResolvedInTheirOwnScreen()
+    {
+        using var fx = ScreensWithLocalColorReferences();
+        var r = fx.Run();
+        Assert.Equal(("#0D47A1", "#0D47A1"), r.Detection.Palette.Entries["Accent"]); // 全域的 Accent 沒被畫面的引用蓋掉
+        Assert.DoesNotContain("dropped", r.Detection.Description);
+        var yellow = Wcag.Contrast("#FFEB3B", "#FFFFFF");
+        var blue = Wcag.Contrast("#0D47A1", "#FFFFFF");
+        var a = r.Findings.Where(f => f.File == "Views/A.xaml").ToList();
+        Assert.Equal(yellow, Assert.Single(a, f => f.Fg == "{DynamicResource Accent}").RatioDark); // 區域引用蓋過全域
+        Assert.Equal(blue, Assert.Single(a, f => f.Fg == "{DynamicResource Badge}").RatioDark);
+        Assert.Equal(yellow, Assert.Single(r.Findings, f => f.File == "Views/B.xaml").RatioDark);  // B 用自己的 Badge
+        Assert.Equal(2, r.CountOf(Category.Fail));
+    }
+
+    [Fact] // 區域 brush 引用的 Color 在畫面與專案裡都找不到（外部函式庫的 MahApps.Colors.Accent）：使用處記
+           // unknown-palette-key、點名的是找不到的那個 Color；偵測描述不能說成「主題定義了讀不懂的值」
+    public void LocalBrushReferencingALibraryColourNamesTheMissingColour()
+    {
+        using var fx = ScreensWithLocalColorReferences();
+        fx.File("Views/C.xaml", """
+            <UserControl xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <UserControl.Resources>
+                <SolidColorBrush x:Key="Halo" Color="{StaticResource MahApps.Colors.Accent}"/>
+              </UserControl.Resources>
+              <Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Halo}" Text="lib ref"/></Grid>
+            </UserControl>
+            """);
+        var r = fx.Run();
+        Assert.DoesNotContain("dropped", r.Detection.Description);
+        Assert.Empty(r.Detection.DroppedKeys);
+        var u = Assert.Single(r.UnresolvedSites, x => x.File == "Views/C.xaml");
+        Assert.Equal(UnresolvedReason.UnknownPaletteKey, u.Reason);
+        Assert.Equal("MahApps.Colors.Accent", u.Value);
+        Assert.DoesNotContain(r.Findings, f => f.File == "Views/C.xaml");
     }
 
     [Fact] // 「當色盤來源」與「排除出 UI 掃描」是兩件事：畫面檔在 UserControl.Resources 放一個區域 brush，

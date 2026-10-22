@@ -169,28 +169,43 @@ public sealed partial class Auditor
         _nonTextEls = new HashSet<string>(NonTextEls.Concat(cfg.Classification.ExtraNonText));
     }
 
-    /// <summary>畫面檔的區域 brush 疊在全域色盤上：字面色兩欄同值；讀不懂的（Binding）記成執行期才知道。</summary>
-    private static Palette WithLocalOverrides(Palette global, Dictionary<string, string?> local)
+    /// <summary>畫面檔的區域 brush 疊在全域色盤上：值深淺兩欄（字面色同值、Color 引用逐側解析）；
+    /// 讀不懂的（Binding）記成執行期才知道；引用的 Color 找不到記成 unknown-palette-key（點名那個 Color）。</summary>
+    private static Palette WithLocalOverrides(Palette global, Dictionary<string, PaletteDetector.LocalBrush> local)
     {
-        var pal = new Palette();
-        foreach (var (k, v) in global.Entries) pal.Entries[k] = v;
-        pal.RuntimeKeys.UnionWith(global.RuntimeKeys);
-        foreach (var (k, v) in local)
+        var pal = global.Clone();
+        foreach (var (k, b) in local)
         {
-            if (v is null) { pal.Entries.Remove(k); pal.RuntimeKeys.Add(k); }
-            else { pal.Entries[k] = (v, v); pal.RuntimeKeys.Remove(k); }
+            pal.RuntimeKeys.Remove(k);
+            pal.MissingRefs.Remove(k);
+            if (b.Dark is not null) { pal.Entries[k] = (b.Dark, b.Light!); continue; }
+            pal.Entries.Remove(k);
+            if (b.MissingColor is not null) pal.MissingRefs[k] = b.MissingColor;
+            else pal.RuntimeKeys.Add(k);
         }
         return pal;
+    }
+
+    /// <summary>只有別的畫面定義的區域鍵，這個檔看不到（執行期查不到）—— 從視圖拿掉，使用處走 unknown-palette-key。
+    /// ⚠ 舊版讓它們補全域的洞：只有 Badge.xaml 定義的鍵，Main.xaml 用了也評得出比值（審查素材 m3）。</summary>
+    private static Palette VisibleIn(Palette pal, string file)
+    {
+        if (pal.LocalOnly.Count == 0) return pal;
+        var full = Path.GetFullPath(file);
+        var hidden = pal.LocalOnly.Where(kv => !kv.Value.Contains(full)).Select(kv => kv.Key).ToList();
+        if (hidden.Count == 0) return pal;
+        var view = pal.Clone();
+        foreach (var k in hidden) view.Entries.Remove(k);
+        return view;
     }
 
     /// <summary>色盤的「單一主題視圖」：每個鍵兩欄都用指定主題的值（給只屬於那個主題的字典檔用）。</summary>
     private Palette SideView(Palette pal, ThemeSide side)
     {
         if (_sideViews.TryGetValue((pal, side), out var view)) return view;
-        view = new Palette();
+        view = pal.Clone(); // 執行期才知道的鍵在哪個主題都一樣不知道
         foreach (var (k, (d, l)) in pal.Entries)
             view.Entries[k] = side == ThemeSide.Dark ? (d, d) : (l, l);
-        view.RuntimeKeys.UnionWith(pal.RuntimeKeys); // 執行期才知道的鍵在哪個主題都一樣不知道
         return _sideViews[(pal, side)] = view;
     }
 
@@ -264,11 +279,13 @@ public sealed partial class Auditor
                 // findings 標 OneThemeOnly —— 拿 Dark.xaml 的 Style 配淺色色票是執行期不存在的組合。
                 // 不限色盤檔：不含色票的主題檔（Themes/Dark/Styles.xaml）一樣只屬於那個主題
                 var side = detection.SideOf(f);
-                auditor._pal = side is { } s ? auditor.SideView(detection.PaletteFor(f), s) : detection.PaletteFor(f);
+                // 只有別的畫面定義的區域鍵，這個檔看不到
+                var basePal = VisibleIn(detection.PaletteFor(f), f);
+                auditor._pal = side is { } s ? auditor.SideView(basePal, s) : basePal;
                 auditor._oneThemeOnly = side is not null;
                 auditor._curSide = side;
-                // 畫面檔自己的區域 brush 在那個畫面裡蓋過全域（全域色盤只讓它們補洞，見 MergedXamlPalette 的區域層）
-                if (!paletteFile && PaletteDetector.LocalOverrides(f) is { Count: > 0 } local)
+                // 畫面檔自己的區域 brush 在那個畫面裡蓋過全域（見 MergedXamlPalette 的區域層）
+                if (!paletteFile && PaletteDetector.LocalOverrides(f, basePal) is { Count: > 0 } local)
                     auditor._pal = WithLocalOverrides(auditor._pal, local);
                 auditor.Walk(doc.Root, null, name, 1.0, suppressed: false);
                 auditor.WalkStyles(doc, name);

@@ -144,6 +144,8 @@ public static partial class ColorResolver
         {
             var key = m.Groups["k"].Value;
             if (palette.RuntimeKeys.Contains(key)) return new Resolved(ColorKind.Other, Key: key, Raw: v);
+            // 畫面的區域 brush 引用了找不到的 Color：點名那個 Color（使用處的 brush 鍵本身是有定義的）
+            if (palette.MissingRefs.TryGetValue(key, out var missingColor)) return new Resolved(ColorKind.UnknownKey, Key: missingColor, Raw: v);
             if (palette.Entries.TryGetValue(key, out var e))
             {
                 // 色票鍵的值同理：#FF... 是不透明色票，不是半透明疊層
