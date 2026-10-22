@@ -34,6 +34,8 @@ internal sealed partial class StyleIndex
     {
         public required int Id;
         public required string File;
+        /// <summary>定義它的檔只屬於一個主題（Dark.xaml 之類）時是那個主題；兩個主題共用為 null</summary>
+        public ThemeSide? Side;
         public string? Key;
         public string? BasedOn;
         public Dictionary<string, string> Setters = new();
@@ -52,6 +54,8 @@ internal sealed partial class StyleIndex
         /// <summary>生效模板的根元素背景（衍生自帶模板時整個換掉，含根背景）</summary>
         public string? TemplateRootBg;
         public required string Label;
+        /// <summary>鏈上有任何一層定義在只屬於一個主題的字典檔裡 —— 另一個主題下解析到的是別的 Style（或沒有）</summary>
+        public bool SideSpecific;
     }
 
     [GeneratedRegex(@"^\{(Dynamic|Static)Resource\s+(?<k>[\w\.]+)\}$")]
@@ -68,7 +72,20 @@ internal sealed partial class StyleIndex
     /// ⚠ 範圍刻意極窄：只給「檔案根元素的背景」用，見 <see cref="ImplicitRootBackground"/>。</summary>
     private readonly Dictionary<string, Dictionary<string, Record>> _implicitByFile = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Record> _implicitGlobal = new(StringComparer.Ordinal);
+    // 依主題的全域查找表：只收兩個主題共用的檔與那個主題自己的檔（先出現的贏，與 _global 同一個順序）
+    private readonly Dictionary<ThemeSide, Dictionary<string, Record>> _globalBySide = new()
+    {
+        [ThemeSide.Dark] = new(), [ThemeSide.Light] = new(),
+    };
+    private readonly Dictionary<ThemeSide, Dictionary<string, Record>> _implicitBySide = new()
+    {
+        [ThemeSide.Dark] = new(StringComparer.Ordinal), [ThemeSide.Light] = new(StringComparer.Ordinal),
+    };
+    private Func<string, ThemeSide?>? _sideOf;
     private int _seq;
+
+    /// <summary>有沒有「只屬於一個主題」的字典檔（色盤來自分開的深／淺 XAML 字典時才有）。</summary>
+    public bool HasThemeSides { get; private set; }
 
     [GeneratedRegex(@"(?<t>\w+)\s*\}?\s*$")]
     private static partial Regex TargetTypeName();
@@ -188,7 +205,7 @@ internal sealed partial class StyleIndex
 
     internal Record CreateRecord(XElement style, string file)
     {
-        var rec = new Record { Id = ++_seq, File = file };
+        var rec = new Record { Id = ++_seq, File = file, Side = _sideOf?.Invoke(file) };
         foreach (var s in style.Elements().Where(e => e.Name.LocalName == "Setter"))
         {
             var p = s.Attribute("Property")?.Value;
@@ -249,10 +266,14 @@ internal sealed partial class StyleIndex
     /// 「排除出 UI 掃描」不等於「排除出索引」）。查找時同檔優先於全域，
     /// 模擬 WPF 的資源查找順序（CelFlow 的對話框有自己的 DarkBtn，
     /// 與 DarkTheme.xaml 的全域 DarkBtn 同名不同值）。
+    ///
+    /// <paramref name="sideOf"/>：檔案只屬於哪一個主題（<see cref="PaletteDetection.SideOf"/>）。給了的話，
+    /// 全域查找另外依主題各建一張表 —— Dark.xaml 與 Light.xaml 各定義一個 Chip 時，深色主題下只看得到
+    /// Dark 的、淺色主題下只看得到 Light 的（執行期一次只載入一個主題字典）。
     /// </summary>
-    public static StyleIndex Build(string root)
+    public static StyleIndex Build(string root, Func<string, ThemeSide?>? sideOf = null)
     {
-        var idx = new StyleIndex();
+        var idx = new StyleIndex { _sideOf = sideOf };
         foreach (var f in PaletteDetector.EnumerateFiles(root, "*.xaml"))
         {
             XDocument doc;
@@ -275,32 +296,45 @@ internal sealed partial class StyleIndex
                         idx._implicitByFile[f] = imap = new Dictionary<string, Record>(StringComparer.Ordinal);
                     imap[typeName] = rec;
                     if (isGlobal && !idx._implicitGlobal.ContainsKey(typeName)) idx._implicitGlobal[typeName] = rec;
+                    if (isGlobal) idx.AddBySide(idx._implicitBySide, typeName, rec);
                     continue;
                 }
                 if (!idx._byFile.TryGetValue(f, out var map))
                     idx._byFile[f] = map = new Dictionary<string, Record>();
                 map[rec.Key] = rec;
                 if (isGlobal && !idx._global.ContainsKey(rec.Key)) idx._global[rec.Key] = rec;
+                if (isGlobal) idx.AddBySide(idx._globalBySide, rec.Key, rec);
             }
         }
         return idx;
     }
 
-    private Record? Find(string key, string file)
+    private void AddBySide(Dictionary<ThemeSide, Dictionary<string, Record>> tables, string key, Record rec)
     {
-        if (_byFile.TryGetValue(file, out var map) && map.TryGetValue(key, out var rec)) return rec;
-        return _global.GetValueOrDefault(key);
+        if (rec.Side is not null) HasThemeSides = true;
+        foreach (var (side, table) in tables)
+            if ((rec.Side is null || rec.Side == side) && !table.ContainsKey(key)) table[key] = rec;
     }
 
-    private Merged MergeChain(Record rec, HashSet<string> seen, string label)
+    /// <summary>同檔優先，其次全域；指定主題時全域只看那個主題看得到的（共用檔 ∪ 那個主題自己的檔）。</summary>
+    private Record? Find(string key, string file, ThemeSide? side)
     {
-        var merged = new Merged { Label = label };
+        if (_byFile.TryGetValue(file, out var map) && map.TryGetValue(key, out var rec)) return rec;
+        return side is { } s ? _globalBySide[s].GetValueOrDefault(key) : _global.GetValueOrDefault(key);
+    }
+
+    private Merged MergeChain(Record rec, HashSet<string> seen, string label, ThemeSide? side)
+    {
+        // 定義在主題檔裡的 Style，BasedOn 一律在那個主題裡找
+        side = rec.Side ?? side;
+        var merged = new Merged { Label = label, SideSpecific = rec.Side is not null };
         if (rec.BasedOn is not null && seen.Add(rec.BasedOn))
         {
-            var baseRec = Find(rec.BasedOn, rec.File);
+            var baseRec = Find(rec.BasedOn, rec.File, side);
             if (baseRec is not null)
             {
-                var m = MergeChain(baseRec, seen, label);
+                var m = MergeChain(baseRec, seen, label, side);
+                merged.SideSpecific |= m.SideSpecific;
                 foreach (var (k, v) in m.Props) merged.Props[k] = v;
                 foreach (var s in m.States)
                 {
@@ -394,12 +428,12 @@ internal sealed partial class StyleIndex
     /// 只補「根元素」這一格：一個檔案最多影響一個值，不碰繼承語意，
     /// 拿到大部分的覆蓋率而不引入完整解析的雜訊風險。
     /// </summary>
-    public string? ImplicitRootBackground(string typeName, string file)
+    public string? ImplicitRootBackground(string typeName, string file, ThemeSide? side = null)
     {
         var rec = (_implicitByFile.TryGetValue(file, out var map) && map.TryGetValue(typeName, out var r))
-            ? r : _implicitGlobal.GetValueOrDefault(typeName);
+            ? r : side is { } s ? _implicitBySide[s].GetValueOrDefault(typeName) : _implicitGlobal.GetValueOrDefault(typeName);
         if (rec is null) return null;
-        var merged = MergeChain(rec, new HashSet<string>(), $"Style[implicit {typeName}]");
+        var merged = MergeChain(rec, new HashSet<string>(), $"Style[implicit {typeName}]", side);
         return merged.Props.TryGetValue("Background", out var v) ? v.V : merged.TemplateRootBg;
     }
 
@@ -415,13 +449,14 @@ internal sealed partial class StyleIndex
         var rec = CreateRecord(style, file);
         var seen = new HashSet<string>();
         if (rec.Key is not null) seen.Add(rec.Key);
-        var merged = MergeChain(rec, seen, "");
+        var merged = MergeChain(rec, seen, "", null);
         merged.States = MergeSameCondition(merged.States);
         return (merged, rec.Id);
     }
 
-    /// <summary>元素套用的 Style（Style="{StaticResource X}" 或 &lt;X.Style&gt; 行內）。</summary>
-    public Merged? GetElementChain(XElement el, string file)
+    /// <summary>元素套用的 Style（Style="{StaticResource X}" 或 &lt;X.Style&gt; 行內）。
+    /// <paramref name="side"/>：在哪一個主題下解析（null = 不分主題，全域先出現的贏）。</summary>
+    public Merged? GetElementChain(XElement el, string file, ThemeSide? side = null)
     {
         var sAttr = el.Attribute("Style")?.Value;
         if (sAttr is not null)
@@ -429,9 +464,9 @@ internal sealed partial class StyleIndex
             var m = ResourceRef().Match(sAttr);
             if (!m.Success) return null;
             var key = m.Groups["k"].Value;
-            var rec = Find(key, file);
+            var rec = Find(key, file, side);
             if (rec is null) return null;
-            var merged = MergeChain(rec, new HashSet<string> { key }, $"Style[{key}]");
+            var merged = MergeChain(rec, new HashSet<string> { key }, $"Style[{key}]", side);
             merged.States = MergeSameCondition(merged.States);
             return merged;
         }
@@ -440,7 +475,7 @@ internal sealed partial class StyleIndex
         if (styleEl is null) return null;
         var inline = CreateRecord(styleEl, file);
         var label = inline.BasedOn is not null ? $"Style[→{inline.BasedOn}]" : "Style[inline]";
-        var mergedInline = MergeChain(inline, new HashSet<string>(), label);
+        var mergedInline = MergeChain(inline, new HashSet<string>(), label, side);
         mergedInline.States = MergeSameCondition(mergedInline.States);
         return mergedInline;
     }

@@ -615,6 +615,127 @@ public class StyleChainTests
     public void ThemeHintOfAPath(string rel, ThemeSide? expected)
         => Assert.Equal(expected, PaletteDetector.ThemeHint(rel));
 
+    // ── 使用處：同 key 的 Style 依主題各自解析（審查素材 b4use）──
+    //    Dark.xaml 與 Light.xaml 各定義一個 Chip（Background=Transparent，定義處沒有底可疊、交給使用處評）。
+    //    舊版使用處的 Style 查找是「全專案先出現的贏」：解析到 Dark 的 Chip，再拿淺色欄去評 —— 報出
+    //    light=1.16 的 fail，這個組合在執行期不存在。只設 Foreground 的 Tag Style 同樣形狀
+
+    private static Fixture ThemePairWithTransparentChips(string darkChipFg) => new Fixture()
+        .File("Themes/Dark.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Line" Color="#333333"/>
+              <Style x:Key="Chip" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{darkChipFg}"/>
+              </Style>
+              <Style x:Key="Tag" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#EEEEEE"/>
+              </Style>
+            </ResourceDictionary>
+            """)
+        .File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Line" Color="#CCCCCC"/>
+              <Style x:Key="Chip" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="#1B1B1B"/>
+              </Style>
+              <Style x:Key="Tag" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#1B1B1B"/>
+              </Style>
+            </ResourceDictionary>
+            """)
+        .File("Views/Main.xaml", """
+            <Grid Background="{DynamicResource Bg}"><StackPanel>
+              <Button Style="{StaticResource Chip}" Content="x"/>
+              <TextBlock Style="{StaticResource Tag}" Text="y"/>
+            </StackPanel></Grid>
+            """);
+
+    [Fact]
+    public void SameKeyStylesInThemeDictionariesAreResolvedPerThemeWhereUsed()
+    {
+        using var fx = ThemePairWithTransparentChips("#EEEEEE");
+        var r = fx.Run();
+        Assert.Equal(0, r.CountOf(Category.Fail)); // 沒有 Dark 的 Chip／Tag 配淺色底的 1.16:1
+        var uses = r.Findings.Where(f => f.File == "Views/Main.xaml").ToList();
+        Assert.Equal(4, uses.Count); // Chip、Tag 各在深淺兩個主題下評一次
+        Assert.All(uses, f => Assert.True(f.OneThemeOnly));
+        Assert.All(uses, f => Assert.Equal(f.RatioDark, f.RatioLight));
+        var dark = Wcag.Contrast("#EEEEEE", "#111111");
+        var light = Wcag.Contrast("#1B1B1B", "#FFFFFF");
+        Assert.Equal(dark, Assert.Single(uses, f => f.Element == "Button⊕Style[Chip]@dark/base").RatioDark);
+        Assert.Equal(light, Assert.Single(uses, f => f.Element == "Button⊕Style[Chip]@light/base").RatioDark);
+        Assert.Equal(dark, Assert.Single(uses, f => f.Element == "TextBlock⊕Style[Tag]@dark/base").RatioDark);
+        Assert.Equal(light, Assert.Single(uses, f => f.Element == "TextBlock⊕Style[Tag]@light/base").RatioDark);
+    }
+
+    [Fact] // 真的不合格照樣報：只報那一個主題的那一筆，標 single-theme
+    public void PerThemeStyleFailureAtTheUseSiteIsReportedForItsThemeOnly()
+    {
+        using var fx = ThemePairWithTransparentChips("#333333");
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings, x => x.Category == Category.Fail);
+        Assert.Equal("Button⊕Style[Chip]@dark/base", f.Element);
+        Assert.Equal(Wcag.Contrast("#333333", "#111111"), f.RatioDark);
+        Assert.Equal(Symmetry.SingleTheme, f.Symmetry);
+    }
+
+    [Fact] // 中性檔的 Style BasedOn 主題檔的 Style：基底依主題各自解析
+    public void NeutralStyleBasedOnAPerThemeStyleIsResolvedPerTheme()
+    {
+        using var fx = ThemePairWithTransparentChips("#EEEEEE");
+        fx.File("Views/Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{DynamicResource Bg}">
+              <Grid.Resources>
+                <Style x:Key="BigChip" TargetType="Button" BasedOn="{StaticResource Chip}">
+                  <Setter Property="FontSize" Value="20"/>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource BigChip}" Content="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.CountOf(Category.Fail));
+        var uses = r.Findings.Where(f => f.File == "Views/Main.xaml").ToList();
+        Assert.Equal(Wcag.Contrast("#EEEEEE", "#111111"), Assert.Single(uses, f => f.Element.Contains("@dark")).RatioDark);
+        Assert.Equal(Wcag.Contrast("#1B1B1B", "#FFFFFF"), Assert.Single(uses, f => f.Element.Contains("@light")).RatioDark);
+    }
+
+    [Fact] // 根元素的隱含樣式背景（地板）也一樣：Dark.xaml 與 Light.xaml 各自的隱含 UserControl 樣式只在自己的主題下生效
+    public void ImplicitRootBackgroundFromThemeDictionariesIsResolvedPerTheme()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="A" Color="#111111"/>
+              <SolidColorBrush x:Key="B" Color="#222222"/>
+              <Style TargetType="UserControl"><Setter Property="Background" Value="#111111"/></Style>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="A" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="B" Color="#EEEEEE"/>
+              <Style TargetType="UserControl"><Setter Property="Background" Value="#FFFFFF"/></Style>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """
+            <UserControl><TextBlock Foreground="{DynamicResource Fg}" Text="x"/></UserControl>
+            """);
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings, x => x.File == "Views/Main.xaml");
+        Assert.Equal(Wcag.Contrast("#EEEEEE", "#111111"), f.RatioDark);
+        Assert.Equal(Wcag.Contrast("#1B1B1B", "#FFFFFF"), f.RatioLight);
+        Assert.Equal(Category.Ok, f.Category);
+    }
+
     [Fact] // C# 真相源時，XAML 主題檔是兩個主題共用的靜態複本（Kindling 形狀）—— 裡面的 Style 兩欄都要評，
            // Kindling DarkTheme.xaml:149 DarkBtn 按下態的淺色 2.49:1 就是這樣抓到的，不能因為檔名有 Dark 就只評深色
     public void StyleInACSharpPaletteStaticCopyIsGradedForBothThemes()

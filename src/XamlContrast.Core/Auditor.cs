@@ -89,6 +89,7 @@ public sealed partial class Auditor
     private StyleIndex _styles = null!;
     private string _curFile = ""; // 具名 Style 查找的「同檔優先」範圍（完整路徑）
     private bool _oneThemeOnly;   // 目前這個檔只屬於一個主題（ThemeFileSides）
+    private ThemeSide? _curSide;  // 同上，是哪一個主題（Style 查找依主題解析，見 StyleIndex.Build）
     private readonly Dictionary<(Palette, ThemeSide), Palette> _sideViews = new();
 
     [GeneratedRegex(@"^\s*xamlcontrast-ignore(?:\s*:\s*(?<reason>.*\S))?\s*$")]
@@ -189,6 +190,7 @@ public sealed partial class Auditor
         view = new Palette();
         foreach (var (k, (d, l)) in pal.Entries)
             view.Entries[k] = side == ThemeSide.Dark ? (d, d) : (l, l);
+        view.RuntimeKeys.UnionWith(pal.RuntimeKeys); // 執行期才知道的鍵在哪個主題都一樣不知道
         return _sideViews[(pal, side)] = view;
     }
 
@@ -224,7 +226,8 @@ public sealed partial class Auditor
     {
         var auditor = new Auditor(detection.Palette, config ?? new ToolConfig());
         // 具名 Style 索引含色盤／主題字典 ——「排除出 UI 掃描」不等於「排除出索引」
-        auditor._styles = StyleIndex.Build(root);
+        // 主題字典的歸屬一併交給索引：同 key 的 Style 依主題各自解析
+        auditor._styles = StyleIndex.Build(root, detection.ThemeFileSides.Count > 0 ? detection.SideOf : null);
         auditor._parseErrors.AddRange(detection.ReadErrors); // 偵測時讀不到的檔（被鎖住的 .cs 之類）一樣要喊
         var all = PaletteDetector.EnumerateFiles(root, "*.xaml").ToList();
         // ⚠ 兩邊都 GetFullPath 再比：config 強制模式的色盤檔是 GetFullPath 過的，EnumerateFiles 卻沿用 root 的
@@ -262,6 +265,7 @@ public sealed partial class Auditor
                 var side = paletteFile ? detection.SideOf(f) : null;
                 auditor._pal = side is { } s ? auditor.SideView(detection.PaletteFor(f), s) : detection.PaletteFor(f);
                 auditor._oneThemeOnly = side is not null;
+                auditor._curSide = side;
                 // 畫面檔自己的區域 brush 在那個畫面裡蓋過全域（全域色盤只讓它們補洞，見 MergedXamlPalette 的區域層）
                 if (!paletteFile && PaletteDetector.LocalOverrides(f) is { Count: > 0 } local)
                     auditor._pal = WithLocalOverrides(auditor._pal, local);
@@ -331,65 +335,117 @@ public sealed partial class Auditor
         // Opacity 也可能是 Binding；只處理字面數值，其餘維持原值
         if (opRaw is not null && ParseDouble(opRaw, out var opVal)) op *= opVal;
 
-        // 元素套用的 Style（具名引用或 <X.Style> 行內）：底色與觸發態的另一個來源
-        var chain = _styles.GetElementChain(el, _curFile);
+        // 元素套用的 Style（具名引用或 <X.Style> 行內）：底色與觸發態的另一個來源。
+        // 色盤來自分開的深／淺字典時，同 key 的 Style 依主題各自解析（StyleIndex.Build 的 sideOf）：Dark.xaml 與
+        // Light.xaml 各定義一個 Chip，深色主題下用的是 Dark 的、淺色主題下是 Light 的 —— 拿 Dark 的 Chip 配淺色
+        // 色票是執行期不存在的組合（審查素材 b4use）。兩個主題解析到不同的鏈時（perSide），各自只評自己那一側
+        var splitThemes = _styles.HasThemeSides && _curSide is null;
+        var chain = _styles.GetElementChain(el, _curFile, splitThemes ? ThemeSide.Dark : _curSide);
+        var chainLight = splitThemes ? _styles.GetElementChain(el, _curFile, ThemeSide.Light) : chain;
+        var perSide = splitThemes && (chain?.SideSpecific == true || chainLight?.SideSpecific == true);
+        if (!perSide) chainLight = chain;
 
         // 逐狀態路徑的 alpha 合成要用「更新前」的祖先背景 —— 下面的 bg 更新塊會把
         // 半透明底先合成一次，逐狀態再合成就是疊兩層
         var ancestorBg = bg;
 
         var localBgRaw = XamlBrush.Read(el, "Background");
-        var bgVal = localBgRaw
-                    ?? (chain is not null && chain.Props.TryGetValue("Background", out var chainBg) ? chainBg.V : null)
-                    ?? chain?.TemplateRootBg // 模板根的背景管到內容
-                                             // 「地板」：根元素沒寫 Background 時，查該型別的隱含樣式（僅此一格，
-                                             // 不是完整的隱含樣式解析 —— 理由見 StyleIndex.ImplicitRootBackground）
-                    ?? (el.Parent is null ? _styles.ImplicitRootBackground(el.Name.LocalName, _curFile) : null)
+        string? BackgroundOf(StyleIndex.Merged? ch, ThemeSide? side) => localBgRaw
+                    ?? (ch is not null && ch.Props.TryGetValue("Background", out var chainBg) ? chainBg.V : null)
+                    ?? ch?.TemplateRootBg // 模板根的背景管到內容
+                                          // 「地板」：根元素沒寫 Background 時，查該型別的隱含樣式（僅此一格，
+                                          // 不是完整的隱含樣式解析 —— 理由見 StyleIndex.ImplicitRootBackground）
+                    ?? (el.Parent is null ? _styles.ImplicitRootBackground(el.Name.LocalName, _curFile, side) : null)
                     // 最後一層地板：config 的 rootBackground —— 主題函式庫使用者的逃生口
                     // （視窗底色鍵在 repo、把它連到視窗的隱含樣式在 NuGet 套件裡:
                     //   工具看不到、使用者知道。使用者宣告的就是事實）
                     ?? (el.Parent is null ? NormalizedRootBackground : null);
-        if (bgVal is not null)
-        {
-            var r = ColorResolver.Resolve(bgVal, _pal);
-            if (r is not null)
-            {
-                if (r.Kind == ColorKind.Alpha)
-                {
-                    // 半透明遮罩：疊在目前生效的背景上算出實際顏色（WPF 以 sRGB 混合；
-                    // 半透明「色票」深淺各帶自己的 alpha）
-                    if (bg is { Dark: not null, Light: not null })
-                    {
-                        bg = new Resolved(ColorKind.Hard,
-                            Dark: Wcag.Composite(r.Rgb!, r.Alpha, bg.Dark),
-                            Light: Wcag.Composite(r.RgbLight!, r.AlphaLight, bg.Light),
-                            Key: $"{bgVal} over {(bg.Key is not null ? "{" + bg.Key + "}" : bg.Dark)}");
-                    }
-                    // 找不到底色就維持原本的（無法判定，後面會計入 unresolved）
-                }
-                else if (r.Kind == ColorKind.Other)
-                {
-                    // 底色來自 Binding / TemplateBinding / 漸層 —— 執行期才知道實際顏色。
-                    // 關鍵：不能「往上繼承祖先背景」，那會把子元素的文字色配到錯的底色上
-                    // （例：標籤徽章的底色綁使用者選的顏色，白字是對的，但繼承祖先會誤判成白配白）。
-                    // 標記為無法判定，子元素一律跳過。
-                    bg = new Resolved(ColorKind.Other, Raw: bgVal);
-                }
-                else if (r.Kind != ColorKind.Transparent)
-                {
-                    bg = r;
-                }
-            }
-        }
+        var bgVal = BackgroundOf(chain, splitThemes ? ThemeSide.Dark : _curSide);
+        var bgValLight = splitThemes ? BackgroundOf(chainLight, ThemeSide.Light) : bgVal;
+        bg = bgVal == bgValLight
+            ? NextBackground(bgVal, _pal, bg)
+            // 兩個主題的底來自不同的 Style（或不同的隱含樣式）：各自在自己的主題視圖裡算，再拼回深淺兩欄
+            : BothThemes(NextBackground(bgVal, SideView(_pal, ThemeSide.Dark), OnSide(bg, ThemeSide.Dark)),
+                         NextBackground(bgValLight, SideView(_pal, ThemeSide.Light), OnSide(bg, ThemeSide.Light)));
 
         // ── 元素 × Style 鏈的逐狀態檢查（具名 Style 底色盲區）──
         // CelFlow 實證：刪除鈕 Foreground=RedL 配 BasedOn=DarkBtn，DarkBtn 的底是
         // Bg3、hover Bg4 —— 樹走訪看不到 Style 的底色會誤落到祖先卡片的 Bg2，
         // 低估實況；「忽略」鈕（Fg1 疊 Border0/Border1）則整組漏掉。
-        var handledFg = false;
-        if (chain is not null)
+        // Foreground 一律由這裡接手，避免與下面的舊路徑重複輸出。perSide 時某一個主題下沒有這個 Style
+        // （StaticResource 在那個主題下根本解析不到）＝那個主題下這組不存在，不評
+        var handledFg = chain is not null || chainLight is not null;
+        if (perSide)
         {
-            handledFg = true; // Foreground 一律由這裡接手，避免與下面的舊路徑重複輸出
+            if (chain is not null) GradeChain(el, chain, ThemeSide.Dark, bg, ancestorBg, localBgRaw, file, op, suppressed);
+            if (chainLight is not null) GradeChain(el, chainLight, ThemeSide.Light, bg, ancestorBg, localBgRaw, file, op, suppressed);
+        }
+        else if (chain is not null) GradeChain(el, chain, null, bg, ancestorBg, localBgRaw, file, op, suppressed);
+
+        WalkForegroundAndChildren(el, bg, file, op, suppressed, handledFg);
+    }
+
+    /// <summary>元素自己的底（bgVal）套到目前生效的底上。</summary>
+    private static Resolved? NextBackground(string? bgVal, Palette pal, Resolved? bg)
+    {
+        if (bgVal is null) return bg;
+        var r = ColorResolver.Resolve(bgVal, pal);
+        if (r is null) return bg;
+        if (r.Kind == ColorKind.Alpha)
+        {
+            // 半透明遮罩：疊在目前生效的背景上算出實際顏色（WPF 以 sRGB 混合；
+            // 半透明「色票」深淺各帶自己的 alpha）
+            // 找不到底色就維持原本的（無法判定，後面會計入 unresolved）
+            return bg is { Dark: not null, Light: not null }
+                ? new Resolved(ColorKind.Hard,
+                    Dark: Wcag.Composite(r.Rgb!, r.Alpha, bg.Dark),
+                    Light: Wcag.Composite(r.RgbLight!, r.AlphaLight, bg.Light),
+                    Key: $"{bgVal} over {(bg.Key is not null ? "{" + bg.Key + "}" : bg.Dark)}")
+                : bg;
+        }
+        // 底色來自 Binding / TemplateBinding / 漸層 —— 執行期才知道實際顏色。
+        // 關鍵：不能「往上繼承祖先背景」，那會把子元素的文字色配到錯的底色上
+        // （例：標籤徽章的底色綁使用者選的顏色，白字是對的，但繼承祖先會誤判成白配白）。
+        // 標記為無法判定，子元素一律跳過。
+        if (r.Kind == ColorKind.Other) return new Resolved(ColorKind.Other, Raw: bgVal);
+        return r.Kind != ColorKind.Transparent ? r : bg;
+    }
+
+    /// <summary>色盤值的單一主題投影：兩欄都用指定主題那一欄（配 <see cref="SideView"/> 用）。</summary>
+    private static Resolved? OnSide(Resolved? r, ThemeSide side) => r is null ? null : side == ThemeSide.Dark
+        ? r with { Light = r.Dark, RgbLight = r.Rgb, AlphaLight = r.Alpha }
+        : r with { Dark = r.Light, Rgb = r.RgbLight, Alpha = r.AlphaLight };
+
+    /// <summary>兩個主題各自算出的底拼回一個深淺兩欄的值。任一側算不出來（沒有底、執行期才知道、不在色盤）
+    /// 就交出那一側的狀態 —— 後面的字計入 unresolved，不拿另一個主題的值補。</summary>
+    private static Resolved? BothThemes(Resolved? dark, Resolved? light)
+    {
+        if (dark is null || light is null) return null;
+        if (dark.Kind is not (ColorKind.Hard or ColorKind.Soft)) return dark;
+        if (light.Kind is not (ColorKind.Hard or ColorKind.Soft)) return light;
+        var same = dark.Kind == ColorKind.Hard && light.Kind == ColorKind.Hard && dark.Dark == light.Light;
+        return new Resolved(same ? ColorKind.Hard : ColorKind.Soft, Dark: dark.Dark, Light: light.Light,
+            Key: dark.Key == light.Key ? dark.Key : $"{dark.Key ?? dark.Dark} (dark) / {light.Key ?? light.Light} (light)");
+    }
+
+    /// <summary>元素 × Style 鏈的逐狀態檢查。<paramref name="side"/> 不是 null 時只評那一個主題
+    /// （同 key 的 Style 依主題各自解析、兩個主題解析到不同的鏈）：色盤用那個主題的視圖、finding 標 OneThemeOnly，
+    /// 元素名的 Style 標籤帶 @dark／@light。</summary>
+    private void GradeChain(XElement el, StyleIndex.Merged chain, ThemeSide? side, Resolved? bg, Resolved? ancestorBg,
+        string? localBgRaw, string file, double op, bool suppressed)
+    {
+        var pal = _pal;
+        var label = chain.Label;
+        var oneThemeOnly = _oneThemeOnly;
+        if (side is { } s)
+        {
+            pal = SideView(_pal, s);
+            bg = OnSide(bg, s);
+            ancestorBg = OnSide(ancestorBg, s);
+            label += s == ThemeSide.Dark ? "@dark" : "@light";
+            oneThemeOnly = true;
+        }
+        {
             var localFgRaw = XamlBrush.Read(el, "Foreground");
             var emitted = new HashSet<string>();
             var allStates = new List<StyleIndex.State> { new() };
@@ -424,11 +480,11 @@ public sealed partial class Auditor
                 // ⚠ 例外：底是透明／半透明時定義處沒有底下那層可疊（只能記 skipped），這組要在使用處
                 //   對著祖先的底評 —— 否則它在哪裡都沒被評分，也不在覆蓋率裡
                 if (fgSrc is int fi && bgSrc is int bi && fi == bi &&
-                    ColorResolver.Resolve(bgV, _pal) is not { Kind: ColorKind.Transparent or ColorKind.Alpha }) continue;
+                    ColorResolver.Resolve(bgV, pal) is not { Kind: ColorKind.Transparent or ColorKind.Alpha }) continue;
                 // 停用態：WCAG 1.4.3 豁免，計數回報、不評分
                 if (st.Disabled) { _disabled++; continue; }
 
-                var fgR = ColorResolver.Resolve(fgV, _pal);
+                var fgR = ColorResolver.Resolve(fgV, pal);
                 if (fgR is null) continue;
                 // 字色是 Binding／漸層／未知鍵 = 工具看不懂 → unresolved（盲區要誠實計數，
                 // 之前全塞 skipped，把盲區藏進「合法豁免」桶）；透明字才是合法跳過
@@ -440,7 +496,7 @@ public sealed partial class Auditor
                 var bgOwnRaw = bgV; // 卡住時要點名的底：透明的 Setter 只是穿透，卡住的是祖先那一層
                 if (bgV is not null)
                 {
-                    var rb = ColorResolver.Resolve(bgV, _pal);
+                    var rb = ColorResolver.Resolve(bgV, pal);
                     if (rb is null) continue;
                     if (rb.Kind == ColorKind.Transparent) { bgObj = bg; bgOwnRaw = null; }
                     else if (rb.Kind == ColorKind.Alpha)
@@ -485,7 +541,7 @@ public sealed partial class Auditor
                 {
                     File = file,
                     Line = lineC,
-                    Element = $"{el.Name.LocalName}⊕{chain.Label}/{(st.Cond is null && st.Set.Count == 0 ? "base" : "trigger")}",
+                    Element = $"{el.Name.LocalName}⊕{label}/{(st.Cond is null && st.Set.Count == 0 ? "base" : "trigger")}",
                     Fg = op < 0.999 ? WithOpacityNote(fgV, op) : fgV,
                     Bg = bgObj.Key is not null ? "{" + bgObj.Key + "}" : bgObj.Dark!,
                     Mixed = fgR.Kind != bgObj.Kind,
@@ -495,11 +551,15 @@ public sealed partial class Auditor
                     Need = needC,
                     Size = fsC > 0 ? $"{(int)Math.Round(fsC, MidpointRounding.ToEven)}px" : "",
                     Large = isLargeC,
-                    OneThemeOnly = _oneThemeOnly,
+                    OneThemeOnly = oneThemeOnly,
                 });
             }
         }
+    }
 
+    /// <summary>元素自己的 Foreground／Fill（沒有 Style 鏈接手時）與子元素（含規則 17 的兄弟背板）。</summary>
+    private void WalkForegroundAndChildren(XElement el, Resolved? bg, string file, double op, bool suppressed, bool handledFg)
+    {
         foreach (var attrName in (ReadOnlySpan<string>)["Foreground", "Fill"])
         {
             if (attrName == "Foreground" && handledFg) continue;
