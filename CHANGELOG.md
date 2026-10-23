@@ -5,7 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
-## 1.0.0 — 2026-10-22
+## 1.0.0 — 2026-10-23
 
 **1.0 freezes the public interface.** From this release on, the nine surfaces listed under
 *Interface freeze* below change only in the ways the 1.x compatibility rules allow; anything else
