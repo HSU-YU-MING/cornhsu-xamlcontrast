@@ -1,8 +1,10 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
+  "toolVersion": "0.0.0-dev",
+  "exitCode": 3,
   "summary": {
-    "paletteSource": "none",
     "paletteMode": "none",
+    "paletteDegraded": true,
     "paletteDetail": "no palette found (no ResourceDictionary color keys, no C# tuples) \u2014 auditing hardcoded colors only",
     "paletteKeys": 0,
     "singleTheme": true,
@@ -12,18 +14,26 @@
       "largeText": 3,
       "failFactor": 0.67
     },
+    "failOn": "warn",
+    "minCoverage": 50,
+    "strictPalette": false,
     "files": 5,
     "pairs": 0,
     "coverage": 0,
-    "unresolved": 1,
+    "unresolved": 2,
     "unresolvedBy": {
-      "no-ancestor-background": 1
+      "no-ancestor-background": 1,
+      "translucent-uncomposited": 1
     },
-    "skipped": 2,
+    "unknownKeys": {},
+    "skipped": 1,
     "deadForeground": 0,
     "disabledExempt": 0,
     "parseErrors": 0,
+    "parseErrorFiles": [],
     "suppressed": 0,
+    "invalidIgnoreCount": 0,
+    "invalidIgnores": [],
     "counts": {
       "fail": 0,
       "warn": 0,
@@ -31,12 +41,18 @@
       "decorative": 0
     }
   },
-  "unresolved": [
+  "unresolvedSites": [
+    {
+      "file": "Capture/SelectionOverlayWindow.xaml",
+      "line": 18,
+      "reason": "no-ancestor-background",
+      "value": "#66000000"
+    },
     {
       "file": "Capture/SelectionOverlayWindow.xaml",
       "line": 33,
-      "reason": "no-ancestor-background",
-      "value": "White"
+      "reason": "translucent-uncomposited",
+      "value": "#CC1E1E1E"
     }
   ],
   "findings": []

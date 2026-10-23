@@ -1,8 +1,10 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
+  "toolVersion": "0.0.0-dev",
+  "exitCode": 1,
   "summary": {
-    "paletteSource": "project",
     "paletteMode": "csharp",
+    "paletteDegraded": false,
     "paletteDetail": "auto-detected C# source of truth: Services\\SystemThemeService.cs (38 keys; assuming tuple = key, dark, light)",
     "paletteKeys": 38,
     "singleTheme": false,
@@ -12,34 +14,306 @@
       "largeText": 3,
       "failFactor": 0.67
     },
+    "failOn": "warn",
+    "minCoverage": 50,
+    "strictPalette": false,
     "files": 15,
-    "pairs": 168,
-    "coverage": 99.4,
-    "unresolved": 1,
+    "pairs": 182,
+    "coverage": 95.8,
+    "unresolved": 8,
     "unresolvedBy": {
-      "over-sibling-content": 1
+      "in-style-template": 3,
+      "translucent-uncomposited": 3,
+      "over-sibling-content": 2
     },
-    "skipped": 3,
-    "deadForeground": 0,
-    "disabledExempt": 2,
+    "unknownKeys": {},
+    "skipped": 1,
+    "deadForeground": 2,
+    "disabledExempt": 6,
     "parseErrors": 0,
+    "parseErrorFiles": [],
     "suppressed": 0,
+    "invalidIgnoreCount": 0,
+    "invalidIgnores": [],
     "counts": {
-      "fail": 0,
+      "fail": 1,
       "warn": 1,
-      "ok": 164,
+      "ok": 177,
       "decorative": 3
     }
   },
-  "unresolved": [
+  "unresolvedSites": [
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 82,
+      "reason": "in-style-template",
+      "value": "{DynamicResource InfoBarWarningIcon}"
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 247,
+      "reason": "in-style-template",
+      "value": "{DynamicResource Fg1}"
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 300,
+      "reason": "translucent-uncomposited",
+      "value": "Transparent"
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 322,
+      "reason": "translucent-uncomposited",
+      "value": "Transparent"
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 349,
+      "reason": "in-style-template",
+      "value": "{DynamicResource Fg1}"
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 333,
+      "reason": "translucent-uncomposited",
+      "value": "Transparent"
+    },
+    {
+      "file": "Views/RegenerateWorkspaceWindow.xaml",
+      "line": 240,
+      "reason": "over-sibling-content",
+      "value": "\u003CImage\u003E"
+    },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 333,
       "reason": "over-sibling-content",
-      "value": "{DynamicResource Fg1}"
+      "value": "\u003CImage\u003E"
     }
   ],
   "findings": [
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 96,
+      "element": "Style[Window]/base",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg1}",
+      "ratioDark": 15,
+      "ratioLight": 15.52,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "baseline": null
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 149,
+      "element": "Style[DarkBtn]/base",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg3}",
+      "ratioDark": 11.7,
+      "ratioLight": 14.19,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 149,
+      "element": "Style[DarkBtn]/trigger",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg4}",
+      "ratioDark": 10.11,
+      "ratioLight": 12.93,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 149,
+      "element": "Style[DarkBtn]/trigger",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{PurpleD}",
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
+      "threshold": 4.5,
+      "category": "fail",
+      "symmetry": "light-fails",
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 183,
+      "element": "Style[AccentBtn]/base",
+      "fg": "White",
+      "bg": "{PurpleD}",
+      "ratioDark": 6.93,
+      "ratioLight": 6.93,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 183,
+      "element": "Style[AccentBtn]/trigger",
+      "fg": "White",
+      "bg": "{PurpleDHover}",
+      "ratioDark": 5.7,
+      "ratioLight": 5.7,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 202,
+      "element": "Style[DangerBtn]/base",
+      "fg": "{DynamicResource DangerFg}",
+      "bg": "{DangerBg}",
+      "ratioDark": 6.84,
+      "ratioLight": 5.72,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 202,
+      "element": "Style[DangerBtn]/trigger",
+      "fg": "{DynamicResource DangerFg}",
+      "bg": "{DangerBgHover}",
+      "ratioDark": 5.84,
+      "ratioLight": 4.87,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 202,
+      "element": "Style[DangerBtn]/trigger",
+      "fg": "White",
+      "bg": "{DangerSolid}",
+      "ratioDark": 4.96,
+      "ratioLight": 4.93,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 225,
+      "element": "Style[ComboBox]/base",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg2}",
+      "ratioDark": 13.38,
+      "ratioLight": 16.65,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 280,
+      "element": "Style[ComboBoxItem]/trigger",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg3}",
+      "ratioDark": 11.7,
+      "ratioLight": 14.19,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 333,
+      "element": "Style[MenuItem]/trigger",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg3}",
+      "ratioDark": 5.19,
+      "ratioLight": 5.68,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
+    },
+    {
+      "file": "Themes/DarkTheme.xaml",
+      "line": 394,
+      "element": "Style[ToolTip]/base",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg2}",
+      "ratioDark": 13.38,
+      "ratioLight": 16.65,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
+    },
     {
       "file": "Views/ApiKeyDialog.xaml",
       "line": 23,
@@ -50,9 +324,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ApiKeyDialog.xaml",
@@ -64,9 +341,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ApiKeyDialog.xaml",
@@ -78,8 +358,12 @@
       "ratioLight": 16.65,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ApiKeyDialog.xaml",
@@ -91,9 +375,12 @@
       "ratioLight": 15.52,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ApiKeyDialog.xaml",
@@ -105,9 +392,12 @@
       "ratioLight": 15.52,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ApiKeyDialog.xaml",
@@ -119,9 +409,12 @@
       "ratioLight": 15.52,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ApiKeyDialog.xaml",
@@ -133,9 +426,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ApiKeyDialog.xaml",
@@ -147,9 +443,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ApiKeyDialog.xaml",
@@ -161,9 +460,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ChoiceDialog.xaml",
@@ -175,9 +477,12 @@
       "ratioLight": 15.52,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "13px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ClipLibraryView.xaml",
@@ -189,9 +494,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ClipLibraryView.xaml",
@@ -203,9 +511,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ClipLibraryView.xaml",
@@ -217,9 +528,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ClipLibraryView.xaml",
@@ -231,9 +545,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ClipLibraryView.xaml",
@@ -245,9 +562,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ClipLibraryView.xaml",
@@ -259,9 +579,12 @@
       "ratioLight": 5.85,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "9px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 9,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ClipLibraryView.xaml",
@@ -273,9 +596,12 @@
       "ratioLight": 5.72,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "9px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 9,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ClipLibraryView.xaml",
@@ -287,9 +613,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "9px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 9,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ClipLibraryView.xaml",
@@ -301,9 +630,12 @@
       "ratioLight": 14.32,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ClipLibraryView.xaml",
@@ -315,9 +647,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -329,9 +664,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -343,9 +681,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -357,9 +698,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -371,8 +715,12 @@
       "ratioLight": 15.52,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -384,8 +732,12 @@
       "ratioLight": 15.52,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -397,9 +749,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -411,9 +766,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -425,9 +783,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -439,8 +800,12 @@
       "ratioLight": 15.52,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -452,8 +817,12 @@
       "ratioLight": 15.52,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -465,9 +834,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -479,9 +851,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -493,8 +868,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -506,8 +885,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -519,8 +902,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -532,8 +919,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -545,8 +936,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -558,8 +953,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -571,8 +970,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ExportSettingsDialog.xaml",
@@ -584,8 +987,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -597,9 +1004,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -611,9 +1021,12 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -625,9 +1038,12 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -639,9 +1055,12 @@
       "ratioLight": 5.43,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "20px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 20,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -653,9 +1072,12 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -667,9 +1089,12 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -681,9 +1106,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -695,9 +1123,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -709,9 +1140,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -723,9 +1157,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -737,9 +1174,12 @@
       "ratioLight": 5.43,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "13px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -751,9 +1191,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -765,9 +1208,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -779,9 +1225,12 @@
       "ratioLight": 4.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -793,9 +1242,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -807,9 +1259,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -821,9 +1276,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -835,9 +1293,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -849,8 +1310,12 @@
       "ratioLight": 15.65,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -862,9 +1327,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -876,8 +1344,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -889,8 +1361,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -902,8 +1378,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/GenerateDialog.xaml",
@@ -915,8 +1395,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/MessageDialog.xaml",
@@ -928,9 +1412,12 @@
       "ratioLight": 15.52,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "15px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 15,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/MessageDialog.xaml",
@@ -942,9 +1429,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12.5,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/PreviewView.xaml",
@@ -956,9 +1446,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "13px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/PreviewView.xaml",
@@ -970,23 +1463,29 @@
       "ratioLight": 8.03,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/PreviewView.xaml",
       "line": 34,
       "element": "TextBlock",
       "fg": "White",
-      "bg": "{#CC000000 over #000000}",
+      "bg": "#CC000000 over #000000",
       "ratioDark": 21,
       "ratioLight": 21,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ProjectWallView.xaml",
@@ -998,9 +1497,12 @@
       "ratioLight": 5.43,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "18px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 18,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ProjectWallView.xaml",
@@ -1012,9 +1514,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "13px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ProjectWallView.xaml",
@@ -1026,9 +1531,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "14px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 14,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ProjectWallView.xaml",
@@ -1040,9 +1548,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ProjectWallView.xaml",
@@ -1054,9 +1565,12 @@
       "ratioLight": 16.65,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "13px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ProjectWallView.xaml",
@@ -1068,9 +1582,12 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ProjectWallView.xaml",
@@ -1082,35 +1599,63 @@
       "ratioLight": 6.66,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ProjectWallView.xaml",
       "line": 152,
       "element": "Button\u2295Style[CardEditButton]/base",
       "fg": "{DynamicResource Fg1}",
-      "bg": "{{DynamicResource CardScrim} over {Bg1}}",
+      "bg": "{CardScrim} over {Bg1}",
       "ratioDark": 6.98,
       "ratioLight": 4.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ProjectWallView.xaml",
       "line": 156,
       "element": "Button\u2295Style[CardDeleteButton]/base",
       "fg": "{DynamicResource Fg1}",
-      "bg": "{{DynamicResource CardScrim} over {Bg1}}",
+      "bg": "{CardScrim} over {Bg1}",
       "ratioDark": 6.98,
       "ratioLight": 4.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/ProjectWallView.xaml",
+      "line": 156,
+      "element": "Button\u2295Style[CardDeleteButton]/trigger",
+      "fg": "#FFD0D0",
+      "bg": "#C0402020 over {Bg1}",
+      "ratioDark": 11.02,
+      "ratioLight": 5.01,
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/ProjectWallView.xaml",
@@ -1122,8 +1667,12 @@
       "ratioLight": 6.8,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1135,9 +1684,12 @@
       "ratioLight": 15.52,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "15px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 15,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1149,9 +1701,12 @@
       "ratioLight": 6.02,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1163,9 +1718,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1177,9 +1735,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1191,9 +1752,12 @@
       "ratioLight": 5.85,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "9px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 9,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1205,9 +1769,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1219,9 +1786,12 @@
       "ratioLight": 5.01,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1233,9 +1803,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1247,9 +1820,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1261,9 +1837,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1275,9 +1854,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1289,9 +1871,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1303,9 +1888,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1317,9 +1905,12 @@
       "ratioLight": 4.77,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1331,9 +1922,12 @@
       "ratioLight": 4.94,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1345,9 +1939,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1359,9 +1956,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1373,9 +1973,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1387,9 +1990,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1401,9 +2007,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1415,9 +2024,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1429,9 +2041,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1443,9 +2058,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1457,9 +2075,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1471,9 +2092,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1485,9 +2109,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1499,9 +2126,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1513,9 +2143,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1527,8 +2160,12 @@
       "ratioLight": 17.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1540,9 +2177,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1554,9 +2194,12 @@
       "ratioLight": 5.43,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1568,23 +2211,29 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 477,
       "element": "TextBlock",
       "fg": "White",
-      "bg": "{#99000000 over {Bg1}}",
+      "bg": "#99000000 over {Bg1}",
       "ratioDark": 19.8,
       "ratioLight": 6.19,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "13px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1596,8 +2245,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
@@ -1609,8 +2262,12 @@
       "ratioLight": 17.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/SequenceTrackView.xaml",
@@ -1622,9 +2279,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/SequenceTrackView.xaml",
@@ -1638,8 +2298,10 @@
       "category": "warn",
       "symmetry": "light-fails",
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/SequenceTrackView.xaml",
@@ -1651,9 +2313,12 @@
       "ratioLight": 6.7,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/SequenceTrackView.xaml",
@@ -1665,9 +2330,12 @@
       "ratioLight": 16.65,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TextInputDialog.xaml",
@@ -1679,9 +2347,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TextInputDialog.xaml",
@@ -1693,9 +2364,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1707,9 +2381,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1721,9 +2398,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1735,9 +2415,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1749,9 +2432,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1763,9 +2449,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "13px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1777,9 +2466,12 @@
       "ratioLight": 6.02,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "13px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1791,9 +2483,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "13px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1805,9 +2500,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "13px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1819,9 +2517,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1833,9 +2534,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1847,9 +2551,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1861,9 +2568,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1875,9 +2585,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1889,9 +2602,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1903,9 +2619,12 @@
       "ratioLight": 6.82,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1917,9 +2636,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1931,9 +2653,12 @@
       "ratioLight": 17.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1945,9 +2670,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1959,9 +2687,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1973,9 +2704,12 @@
       "ratioLight": 5.62,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -1987,9 +2721,12 @@
       "ratioLight": 5.12,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2001,9 +2738,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2015,9 +2755,12 @@
       "ratioLight": 5.56,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2029,9 +2772,12 @@
       "ratioLight": 5.78,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2043,9 +2789,12 @@
       "ratioLight": 5.27,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2057,9 +2806,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2071,9 +2823,12 @@
       "ratioLight": 5.56,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2085,9 +2840,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "9px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 9,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2099,9 +2857,12 @@
       "ratioLight": 7.46,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "9px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 9,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2113,8 +2874,12 @@
       "ratioLight": 4.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2126,9 +2891,12 @@
       "ratioLight": 6.72,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2140,9 +2908,12 @@
       "ratioLight": 4.84,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "10px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 10,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2154,8 +2925,12 @@
       "ratioLight": 4.71,
       "threshold": 0,
       "category": "decorative",
+      "symmetry": null,
       "isText": false,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2167,8 +2942,12 @@
       "ratioLight": 4.71,
       "threshold": 0,
       "category": "decorative",
+      "symmetry": null,
       "isText": false,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/TimelineView.xaml",
@@ -2180,8 +2959,12 @@
       "ratioLight": 5.66,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/WorkspaceView.xaml",
@@ -2193,9 +2976,12 @@
       "ratioLight": 5.01,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "13px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/WorkspaceView.xaml",
@@ -2207,9 +2993,12 @@
       "ratioLight": 5.73,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "12px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/WorkspaceView.xaml",
@@ -2221,9 +3010,12 @@
       "ratioLight": 6.7,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/WorkspaceView.xaml",
@@ -2235,9 +3027,12 @@
       "ratioLight": 6.93,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/WorkspaceView.xaml",
@@ -2249,9 +3044,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/WorkspaceView.xaml",
@@ -2263,9 +3061,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/WorkspaceView.xaml",
@@ -2277,9 +3078,12 @@
       "ratioLight": 15.52,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/WorkspaceView.xaml",
@@ -2291,9 +3095,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/WorkspaceView.xaml",
@@ -2305,9 +3112,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/WorkspaceView.xaml",
@@ -2319,9 +3129,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/WorkspaceView.xaml",
@@ -2333,9 +3146,12 @@
       "ratioLight": 6.22,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/WorkspaceView.xaml",
@@ -2347,8 +3163,12 @@
       "ratioLight": 4.96,
       "threshold": 0,
       "category": "decorative",
+      "symmetry": null,
       "isText": false,
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "baseline": null
     },
     {
       "file": "Views/WorkspaceView.xaml",
@@ -2360,9 +3180,12 @@
       "ratioLight": 6.9,
       "threshold": 4.5,
       "category": "ok",
+      "symmetry": null,
       "isText": true,
-      "fontSize": "11px",
-      "largeText": false
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "baseline": null
     }
   ]
 }

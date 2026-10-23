@@ -275,19 +275,14 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 
 ## 技術債（留帳）
 
-- **四份 `baselines/*.json` 在 1.0 都是紅的，而且刻意還沒重凍**（2026-10-22）。每一個差異都歸因到 commit
-  （逐 commit 重播 v0.6.1 之後的 70 個 src commit），寫在
-  `D:/擴充功能/nuget/稽核-2026-10-22/XamlContrast-快照變動說明.md`，等維護者同意後才跑 `-Update`。
-  舊快照（schemaVersion 5）照樣讀得懂；`verify-baselines.ps1` 的退出碼期望改成 1.0 規則，快照有 `exitCode` 就用它。
-- **`baselines/celflow.json` 早在 1.0 之前就是紅的**（2026-08-26 實跑：`pairs` 期望 363 實得 353、
-  `ok` 期望 346 實得 336，`fail` 仍是 0）。**不是 XamlContrast 的回歸**——`src/` 最後一次
-  變動是 2026-08-12，而 CelFlow.WPF 有四個 XAML 檔在 2026-08-18 被改過。
+- **四份 `baselines/*.json` 已在 2026-10-23 依 1.0 重凍**（schemaVersion 6，帶 `exitCode`）。
+  重凍前四份都是紅的，每一個差異都歸因到 commit（逐 commit 重播 v0.6.1 之後的 82 個 src commit），
+  寫在 `D:/擴充功能/nuget/稽核-2026-10-22/XamlContrast-快照變動說明.md`，維護者逐項看過、同意之後才跑 `-Update`。
+  其中 `celflow.json` 早在 1.0 之前就是紅的（2026-08-26 實跑：`pairs` 期望 363 實得 353），
+  原因是 CelFlow.WPF 在 2026-08-18 改過四個 XAML 檔，不是工具的回歸；這次重凍一併吸收。
   2026-08-28 CelFlow 改名 ZeroCel，腳本已改指 `D:\應用程式\ZeroCel\frontend\ZeroCel.WPF`
-  （快照名稱沿用 `celflow.json`）；之前路徑消失時腳本在 Windows PowerShell 5.1 下整支中斷、
-  cornea 沒比對到，現在找不到專案會紅字點名並繼續。2026-10-22 那批產品 bug 修正又刻意改變了
-  三個專案的計數（逐項解釋在那批修正各自的 commit 訊息裡，CHANGELOG 只記行為），快照尚未重凍 ——
-  逐項看過差異之後才由維護者決定是否 `-Update`。
-  這暴露了 `verify-baselines.ps1` 的結構性弱點：**受測對象是四個活在 repo 外、會自己演化的
+  （快照名稱沿用 `celflow.json`）；找不到專案時會紅字點名並繼續。
+  這段歷史暴露了 `verify-baselines.ps1` 的結構性弱點：**受測對象是四個活在 repo 外、會自己演化的
   專案**，紅燈分不出「工具行為變了」與「被稽核的 App 改了」。目前只能靠人工看 diff 判斷。
   修法有兩條（都還沒做）：把四個專案的 XAML 快照複製進 repo 當固定素材，
   或在快照裡記下受測專案的 commit／檔案雜湊，讓腳本自己說「對象變了」。
