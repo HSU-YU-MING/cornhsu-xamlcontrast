@@ -383,6 +383,10 @@ older 1.x (exit 2, naming the property).
 - `scripts/verify-baselines.ps1` follows the CelFlow → ZeroCel rename and keeps going (with a red line)
   when a validation project is missing, instead of aborting under Windows PowerShell 5.1. Its expected
   exit code follows the 1.0 rules, or the snapshot's own `exitCode` when the snapshot has one.
+- Action: the actions it calls (`actions/setup-dotnet`, `actions/upload-artifact`,
+  `github/codeql-action/upload-sarif`) are pinned to full commit SHAs instead of moving major tags, so a
+  retagged or compromised upstream release can't change what runs in your workflow. Dependabot keeps
+  the pins current.
 - The tool package no longer ships `System.IO.Hashing.dll`. Nothing used it; it came in through the
   SourceLink build package's dependencies. The package now contains only XamlContrast's own assemblies.
 
