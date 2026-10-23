@@ -192,7 +192,7 @@ jobs:
       pull-requests: write        # 讓 action 把稽核報告貼成 PR 留言
       # security-events: write    # 只有在同時開 `sarif: true` 時才需要
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: HSU-YU-MING/cornhsu-xamlcontrast@v1   # 跟隨最新的 1.x
         with:
           root: src/MyApp

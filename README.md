@@ -240,7 +240,7 @@ jobs:
       pull-requests: write        # lets the action post the audit report as a PR comment
       # security-events: write    # only if you also pass `sarif: true`
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: HSU-YU-MING/cornhsu-xamlcontrast@v1   # follows the latest 1.x
         with:
           root: src/MyApp
