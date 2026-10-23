@@ -8,7 +8,7 @@ namespace XamlContrast.Core;
 ///   但對稱不是意圖的證據 —— 兩邊一樣糟就只是兩邊都糟。
 ///   「這是不是刻意的裝飾」只有看它在畫什麼才知道，工具不猜 —— 一律報出來由人判斷。
 ///
-///   等級（絕對對比）：fail &lt; 門檻×2/3 ／ warn 其間 ／ ok ≥ 門檻 ／ decorative 不設限
+///   等級（絕對對比）：fail &lt; 門檻×failFactor（預設 0.67）／ warn 其間 ／ ok ≥ 門檻 ／ decorative 不設限
 ///   對稱（跨主題）  ：single-theme ／ both-low（色票本身不夠，換主題救不了）
 ///                     dark-fails / light-fails（設計意圖沒跨主題保住）
 /// </summary>
@@ -21,8 +21,9 @@ public static class Grader
 
         foreach (var f in result.Findings)
         {
-            var worst = Math.Min(f.RatioDark, f.RatioLight);
-            var best = Math.Max(f.RatioDark, f.RatioLight);
+            // 只存在於一個主題的配對沒有「另一個主題」可比：落差 0
+            var worst = f.Worst;
+            var best = f.Theme is null ? Math.Max(f.RatioDark, f.RatioLight) : worst;
             f.Gap = Math.Round(best - worst, 2);
 
             // 門檻依元素而異：一般文字 4.5、大字級 3.0、裝飾元素不設限（Need = 0）；
@@ -38,7 +39,7 @@ public static class Grader
             // 這種自相矛盾的輸出。人看的報告只印 fail/warn 所以看不到，但 JSON 全印。
             f.Symmetry =
                 f.Category is not (Category.Fail or Category.Warn) ? Symmetry.NotApplicable :
-                singleTheme ? Symmetry.SingleTheme :
+                singleTheme || f.OneThemeOnly ? Symmetry.SingleTheme :
                 f.Gap < 1.5 ? Symmetry.BothLow :
                 f.RatioLight < f.RatioDark ? Symmetry.LightFails :
                 Symmetry.DarkFails;

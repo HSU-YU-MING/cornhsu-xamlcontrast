@@ -75,7 +75,8 @@ public class MarkdownReportTests
             </Grid>
             """);
         var r = fx.Run();
-        if (!r.Detection.IsDegraded) return;   // 偵測策略若改變,這條測試自動讓路
+        // 前提要斷言而不是「不成立就默默讓路」—— 偵測策略一變，這條會靜默通過、什麼都沒測
+        Assert.True(r.Detection.IsDegraded, "前提：沒有主題字典時偵測是退化的");
 
         var md = Report.ToMarkdown(r, exitCode: 1);
         Assert.Contains("Palette detection degraded", md);
@@ -84,13 +85,51 @@ public class MarkdownReportTests
             "退化警告必須排在落差表之前");
     }
 
+    [Fact] // 對照組：偵測到色盤就不能掛退化警告 —— 狼來了的警告跟沒有警告一樣沒用
+    public void HealthyPaletteIsNotAnnouncedAsDegraded()
+    {
+        using var fx = new Fixture().WithPalette().File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Dim}" Text="太淡"/>
+            </Grid>
+            """);
+        var md = Report.ToMarkdown(fx.Run(), exitCode: 1);
+        Assert.Contains("| Location", md);
+        Assert.DoesNotContain("degraded", md);
+    }
+
+    [Fact] // 大字級的門檻是 3.0 —— 兩份人看的報告都要標明「這筆是用大字級標準評的」，
+           // 否則讀者看到 2.61:1 列在 warn 而不是 fail，會以為工具算錯
+    public void LargeTextIsMarkedInBothHumanReports()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <TextBlock Foreground="#A0A0A0" FontSize="24" Text="24px = 18pt 大字級，2.61:1"/>
+              <TextBlock Foreground="#EEEEEE" FontSize="12" Text="一般字級"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(1, r.CountOf(Category.Warn));
+        Assert.Equal(1, r.CountOf(Category.Fail));
+
+        var console = Report.ToConsole(r);
+        Assert.Contains("need 3 large-text 24px", console);
+        Assert.Contains("need 4.5 12px", console);
+        Assert.DoesNotContain("large-text 12px", console);
+
+        var md = Report.ToMarkdown(r, exitCode: 1);
+        Assert.Contains("| 2.61:1 | 2.61:1 | 3 (large) |", md);
+        Assert.Contains("| 1.16:1 | 1.16:1 | 4.5 |", md);
+    }
+
     [Fact] // 0 配對:空掃不是通過,Markdown 也要說清楚
     public void ZeroPairsIsCalledOut()
     {
         using var fx = new Fixture();
         fx.File("Main.xaml", "<Grid/>");
         var r = fx.Run();
-        if (r.Pairs != 0) return;
+        Assert.Equal(0, r.Pairs); // 前提斷言，不是不成立就默默讓路
 
         var md = Report.ToMarkdown(r, exitCode: 1);
         Assert.Contains("Zero pairs resolved", md);
@@ -130,5 +169,32 @@ public class MarkdownReportTests
         // 跳脫後每一列的欄位數不變(7 欄 → 8 個分隔線)
         var row = md.Split('\n').First(l => l.Contains("Weird"));
         Assert.Equal(8, row.Count(c => c == '|') - 1);   // 被跳脫的那個不算欄位分隔
+    }
+
+    [Fact] // Element 欄也是 code span（審查 1.0 最終驗證，可接受項）：元素標籤含 XAML 的鍵，鍵裡的 [文字](網址) 或 @帳號
+           // 在 PR 留言裡會被渲染成連結、或去 @ 某個人
+    public void ElementLabelsAreCodeSpansSoKeysAreNotRendered()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources><Style x:Key="Tag @team [docs](https://x.example)" TargetType="TextBlock"><Setter Property="Foreground" Value="#EEEEEE"/><Setter Property="Background" Value="#FFFFFF"/></Style></Grid.Resources>
+            </Grid>
+            """);
+        var row = Assert.Single(Report.ToMarkdown(fx.Run(), 1).Split('\n'), l => l.Contains("@team"));
+        Assert.Contains("| `Style[Tag @team [docs](https://x.example)]/base` |", row);
+    }
+
+    [Fact] // 反引號（審查 1.0 B6）：檔名裡的反引號會提早結束 code span，PR 留言的表格整列走樣。
+           // code span 改用比內容裡最長的反引號串更長的圍欄（CommonMark 的寫法）；一般文字裡的反引號以 \ 跳脫
+    public void BackticksInNamesDoNotBreakTheMarkdown()
+    {
+        using var fx = new Fixture();
+        fx.File("Views/My`View.xaml", """<Grid Background="#FFFFFF"><TextBlock Foreground="#EEEEEE" Text="x"/></Grid>""");
+        fx.File("Views/Bro`ken.xaml", "<Grid><未閉合");
+        var md = Report.ToMarkdown(fx.Run(), 1);
+        Assert.Contains("| `` Views/My`View.xaml:1 `` |", md);
+        Assert.Contains("Views/Bro\\`ken.xaml", md);
+        Assert.DoesNotContain("| `Views/My`View.xaml:1` |", md);
     }
 }

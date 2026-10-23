@@ -10,7 +10,7 @@ public enum Category { Ok, Warn, Fail, Decorative }
 ///
 /// ⚠ 這個維度只在「沒過」的配對上有意義：BothLow 的語意是「色票本身不夠亮，
 /// 換主題救不了」，套在 21:1 的合格配對上是胡說。ok/decorative 一律 NotApplicable，
-/// JSON 直接不輸出該欄位 —— 人看的報告本來就只印 fail/warn，錯的標籤只會流到
+/// JSON 輸出 null —— 人看的報告本來就只印 fail/warn，錯的標籤只會流到
 /// 吃 JSON 的下游手上。
 /// </summary>
 public enum Symmetry { BothLow, DarkFails, LightFails, SingleTheme, NotApplicable }
@@ -24,20 +24,42 @@ public sealed class Finding
     public required string Bg { get; init; }
     /// <summary>字與底一個是色票一個是寫死（跨主題時寫死那邊不會跟著換）</summary>
     public bool Mixed { get; init; }
+    /// <summary>深色主題下的比值。⚠ 只存在於淺色主題的配對（<see cref="Theme"/> 是 Light），這一欄內部填的是淺色的值 ——
+    /// 對外一律經 <see cref="RatioIn"/>，不印一個不存在的主題的比值。</summary>
     public double RatioDark { get; init; }
+    /// <summary>淺色主題下的比值（只存在於深色主題的配對，同上）。</summary>
     public double RatioLight { get; init; }
+
+    /// <summary>那個主題下的比值；這組配對在那個主題不存在（<see cref="Theme"/> 是另一個主題）時是 null。
+    /// JSON、console、Markdown、SARIF 都經這裡（審查 1.0 B3：1.0 之前兩欄都填那個主題的值，讀的人會以為另一個主題也量過）。</summary>
+    public double? RatioIn(ThemeSide side) => Theme is { } t && t != side ? null
+        : side == ThemeSide.Dark ? RatioDark : RatioLight;
     public bool IsText { get; init; }
     /// <summary>門檻：一般文字 4.5、大字級 3.0、裝飾 0</summary>
     public double Need { get; init; }
+    /// <summary>給人看的字級標籤（"12px"，取整；沒設是空字串）—— console 用。JSON 用 <see cref="FontSize"/>。</summary>
     public string Size { get; init; } = "";
+    /// <summary>FontSize（DIP），照寫的值不取整；沒設字級是 null。</summary>
+    public double? FontSize { get; init; }
     public bool Large { get; init; }
+    /// <summary>這組配對只存在於哪一個主題（Dark.xaml 裡的 Style、依主題解析到的 @dark／@light 鏈）；兩個主題都有是 null。
+    /// 不是 null 時另一個主題的比值不存在（<see cref="RatioIn"/> 是 null），對稱欄標 single-theme。</summary>
+    public ThemeSide? Theme { get; init; }
+    /// <summary>只屬於一個主題的配對（<see cref="Theme"/> 不是 null）</summary>
+    public bool OneThemeOnly => Theme is not null;
 
     // 分級後填入
     public Category Category { get; set; }
     public Symmetry Symmetry { get; set; }
     public double Gap { get; set; }
 
-    public double Worst => Math.Min(RatioDark, RatioLight);
+    /// <summary>最差比值：只存在於一個主題的配對就是那個主題的比值（baseline 的 worst、分級都用它）。</summary>
+    public double Worst => Theme switch
+    {
+        ThemeSide.Dark => RatioDark,
+        ThemeSide.Light => RatioLight,
+        _ => Math.Min(RatioDark, RatioLight),
+    };
 }
 
 /// <summary>
@@ -62,6 +84,10 @@ public enum UnresolvedReason
     /// <summary>文字墊在同格子的兄弟「內容」元素上（Image 等）—— 實際背景是圖片，
     /// 靜態不可知；配祖先背景會產生假警報。</summary>
     OverSiblingContent,
+    /// <summary>Style 的 Template setter 裡（&lt;Setter.Value&gt;&lt;ControlTemplate&gt;）自己帶 Foreground 的文字元素 ——
+    /// 樹走訪不進 Style，這些從來沒有被評過，也不在任何計數器裡（審查 1.0 最終驗證 S3）。完整稽核屬稽核語意、留到 1.x；
+    /// 1.0 先讓它不靜默：計入 unresolved、點名位置與那個 Foreground。</summary>
+    InStyleTemplate,
 }
 
 /// <summary>一筆無法解析的配對「在哪裡、為什麼、卡在哪個值」。
@@ -80,6 +106,9 @@ public sealed class AuditResult
     public required Dictionary<UnresolvedReason, int> UnresolvedBy { get; init; }
     /// <summary>逐筆的無法解析位置（file:line＋卡住的值）。</summary>
     public required List<UnresolvedSite> UnresolvedSites { get; init; }
+    /// <summary>translucent-uncomposited 裡「半透明的一層、底下什麼都沒有」的那些（不含 Style 定義處的透明底）——
+    /// rootBackground 救得回來，求救指引要算進去。</summary>
+    internal int TranslucentOverNothing { get; init; }
     public required int Skipped { get; init; }
     /// <summary>死 setter 過濾排除的 Style 配對數（過濾不靜默）</summary>
     public required int DeadForeground { get; init; }
@@ -91,6 +120,9 @@ public sealed class AuditResult
     public int Suppressed { get; init; }
     /// <summary>沒附理由的 ignore（無效，不壓）—— 要警告</summary>
     public required List<string> InvalidIgnores { get; init; }
+    /// <summary>config 的 layout 宣告了、但這次稽核走過的元素沒有一個叫這個名字的（多半是拼錯或大小寫不對）——
+    /// 宣告靜默失效，要點名（審查 1.0 B8）。不是錯誤：那個容器可能只是不在這次的掃描範圍裡。</summary>
+    public IReadOnlyList<string> UnmatchedLayoutNames { get; init; } = [];
     /// <summary>本次生效的設定（分級門檻等；預設值 = 沒有 config 檔）</summary>
     public ToolConfig Config { get; init; } = new();
 
@@ -105,4 +137,7 @@ public sealed class AuditResult
     /// 「幾乎什麼都沒看」和「看過了都沒問題」在退出碼上分不出來，等於同一種謊報。
     /// </summary>
     public double Coverage => Pairs + Unresolved == 0 ? 0 : (double)Pairs / (Pairs + Unresolved);
+
+    /// <summary>覆蓋率百分比，四捨五入到一位（.5 進位）—— console、JSON、Markdown 印的與覆蓋率下限比的都是這一個值。</summary>
+    public double CoveragePercent => Math.Round(Coverage * 100, 1, MidpointRounding.AwayFromZero);
 }

@@ -20,6 +20,22 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\XamlContrast.Core\XamlContrast.Core.csproj" />
+    <!-- CLI 契約測試（Cli*Tests）以子行程跑真的 xamlcontrast.dll，斷言退出碼與輸出 ——
+         旗標解析與 DecideExit 的判定順序只存在於 Program.cs，Core 的單元測試碰不到。
+         ReferenceOutputAssembly=false：只確保建置順序，不把 exe 當組件引用；
+         OutputItemType：拿到 CLI 實際的輸出路徑，下面的 target 寫進測試組件的中繼資料。 -->
+    <ProjectReference Include="..\..\src\XamlContrast.Cli\XamlContrast.Cli.csproj"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="XamlContrastCliOutput" />
   </ItemGroup>
+
+  <Target Name="EmbedXamlContrastCliPath" AfterTargets="ResolveProjectReferences" BeforeTargets="GetAssemblyAttributes">
+    <ItemGroup>
+      <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+        <_Parameter1>XamlContrastCliDll</_Parameter1>
+        <_Parameter2>@(XamlContrastCliOutput->'%(FullPath)')</_Parameter2>
+      </AssemblyAttribute>
+    </ItemGroup>
+  </Target>
 
 </Project>

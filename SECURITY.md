@@ -60,9 +60,31 @@ didn't.
 
 ## Supported versions
 
-The latest 0.x release only. The project is pre-1.0 and interfaces are not frozen yet;
-fixes ship forward, not as patches to older versions. Pin an exact version and upgrade
-deliberately — see [RELEASING.md](RELEASING.md).
+| Version | Supported |
+|---|---|
+| The latest `1.x` release | ✅ |
+| `0.x` and anything older | ❌ |
+
+Fixes land on the newest release only — there are no patch branches for older versions, and no
+further 0.x releases. Upgrading to the newest `1.x` is always the fix.
+
+What a 1.x upgrade keeps and what it may change (the declaration and the 1.x rules are in the
+CHANGELOG's 1.0.0 entry):
+
+- **Frozen syntax** — CLI flags and exit codes, the JSON report's fields, the Action inputs, the config
+  file, the baseline file format, the SARIF rule, the suppression comment and the hard audit-scope
+  rules change only by addition until 2.0.
+- **Audit semantics may change in a minor release** — more pairs found, different counts, a build that
+  turns red. Each such release says so in the *Upgrading* note at the top of its CHANGELOG entry.
+- **Baselines** — if a release changes how baseline keys are spelled, it bumps `keyVersion`: an older
+  baseline is then refused (exit 2) with a note to regenerate it, rather than reporting every known pair
+  as new.
+
+Coming from 0.x, work through the 1.0.0 entry's **Upgrading from 0.6.1** list first.
+
+If you reference the Action as `@v1`, you receive new 1.x releases automatically — and only 1.x: with
+`version` left empty it installs the newest 1.x tool, never 2.0. Pin `version:` to an exact release to
+upgrade on your own schedule.
 
 ## Supply chain
 

@@ -76,6 +76,7 @@ Two things every change needs:
 ### Running the checks
 
 ```bash
+dotnet format XamlContrast.slnx --verify-no-changes
 dotnet test XamlContrast.slnx -c Release
 ```
 
@@ -83,12 +84,14 @@ dotnet test XamlContrast.slnx -c Release
 pwsh scripts/verify-readme-sample.ps1
 ```
 
-The second one re-runs `samples/demo` and diffs it against the sample output in both
-READMEs. If you changed console output, run it with `-Update` to re-paste, and include that
-in your PR.
+The format check is its own CI job: a formatting difference turns the PR red even when every
+test passes. Drop `--verify-no-changes` to have it fix the formatting for you.
 
-There is a third script, `scripts/verify-baselines.ps1`. **You cannot run it** — it audits
-four unreleased applications on the maintainer's machine and compares against frozen
+The script re-runs `samples/demo` and diffs it against the sample output in both READMEs.
+If you changed console output, run it with `-Update` to re-paste, and include that in your PR.
+
+There is one more script, `scripts/verify-baselines.ps1`. **You cannot run it** — it audits
+four closed-source applications on the maintainer's machine and compares against frozen
 snapshots. It runs before every release. If your change moves those numbers I will see it
 there, so don't be surprised if I come back with questions about a project you can't see.
 
@@ -118,9 +121,37 @@ one and would be willing to be the guinea pig, say so in an issue — that unblo
 
 ## Interfaces and versions
 
-The project stays on 0.x until its interfaces freeze — CLI flags, the JSON schema
-(including `summary`), and the Action inputs. Pin an exact version while it does.
-The JSON `schemaVersion` increments whenever the shape changes; consumers should check it.
+1.0 froze the public interface's **syntax** — nine surfaces that change only by addition within 1.x:
+
+1. CLI flags (names, value forms, defaults) and `--` before the project root
+2. exit codes (`0` pass, `1` below the gate, `2` usage/config/input error, `3` result can't be trusted) and the order they are decided in
+3. the JSON report (`schemaVersion` 6, [`docs/report.schema.json`](docs/report.schema.json)); `category`, `symmetry` and `baseline` are closed sets, the unresolved reasons, `paletteMode`, `failOn` and `theme` are open sets
+4. the Action inputs
+5. the config file, including its defaults
+6. the baseline file's format: `schemaVersion`, `keyVersion`, the fields and the `file|element|fg|bg` key
+7. the SARIF `wcag-contrast` rule and its level mapping (more rules may be added)
+8. the `xamlcontrast-ignore` comment syntax
+9. the hard scope rules, as default behaviour: `*.xaml` under the root, `bin`/`obj` skipped, `*.cs` read only for a C# palette, the config read from the root only (opt-in extensions such as extra exclude paths are minor; changing the default scope is 2.0)
+
+The console and Markdown output are presentation, not frozen — programs should read the JSON report.
+
+What is **not** frozen is the **audit semantics**: which pairs exist and what they are graded against —
+the parsing rules, palette detection (including the test/sample-path heuristic), the classification of
+unresolved pairs, and the text inside baseline keys (element labels, composite background
+descriptions). The full declaration and the evolution rules are in the
+[CHANGELOG's 1.0.0 entry](CHANGELOG.md). What that means for a pull request:
+
+- **Additions are minor and welcome** — a new flag, Action input, config property, JSON field, or a
+  new value in an open set (an `unresolved` reason, a palette mode). Adding a JSON field does **not**
+  change `schemaVersion`; consumers are required to ignore fields and open-set values they don't know.
+- **Renaming, removing, changing a default, or tightening what is accepted** on any of the nine
+  surfaces is a 2.0 change, however small it looks. It waits. (Changing a default is 2.0 on purpose:
+  a default is the gate itself. An audit-semantics improvement can still turn a build red in a minor;
+  its *Upgrading* note says so.)
+- **A change to audit semantics** — more pairs found, a confident ratio turned into an honest
+  `unresolved`, a better heuristic — is a minor release, never a patch. It needs an *Upgrading* note at
+  the top of the CHANGELOG entry with the measured effect; if it changes how baseline keys are spelled,
+  it bumps `Baseline.KeyVersion` so old baselines are refused with a clear message.
 
 ## License
 

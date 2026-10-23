@@ -9,6 +9,10 @@ namespace XamlContrast.Core;
 ///
 /// 鍵不含行號 —— 行號隨編輯漂移，含進去的話每次重排版都會「假性新增」。
 /// 同鍵多筆用計數比較：同一組字底配對從 2 處變 3 處也是惡化。
+///
+/// 收的是「低於 AA」的每一組（fail＋warn），不論寫出時的 gate；比對時只擋目前 gate 會擋的那些
+/// （預設 gate warn：兩者都擋；--fail-on fail：只擋 fail）。⚠ 0.x 只收 fail —— 1.0 的預設 gate 改成 warn 之後，
+/// 那會讓既有的 warn 一個都不算已知債，baseline 對 warn 完全沒用。
 /// </summary>
 public static class Baseline
 {
@@ -22,6 +26,9 @@ public static class Baseline
         public required List<Entry> WorsenedFailures { get; init; }
         public required int KnownDebt { get; init; }
         public required int PaidDebt { get; init; }
+        /// <summary>gate 擋的每一筆 finding 的判定：known／new／worsened（JSON 的 findings[].baseline）。
+        /// 鍵惡化時那個鍵底下 gate 擋的每一筆都標 worsened —— 鍵不含行號，分不出「多出來的是哪一處」。</summary>
+        public IReadOnlyDictionary<Finding, string> Status { get; init; } = new Dictionary<Finding, string>();
         public bool Passes => NewFailures.Count == 0 && WorsenedFailures.Count == 0;
     }
 
@@ -34,60 +41,163 @@ public static class Baseline
 
     private static string KeyOf(Finding f) => $"{f.File}|{f.Element}|{f.Fg}|{f.Bg}";
 
-    private static Dictionary<string, int> FailKeys(AuditResult result) =>
-        result.Findings.Where(f => f.Category == Category.Fail)
-            .GroupBy(KeyOf)
-            .ToDictionary(g => g.Key, g => g.Count());
+    private static bool BelowAa(Finding f) => f.Category is Category.Fail or Category.Warn;
+
+    /// <summary>baseline 檔格式的版本。1.0 起寫進檔裡、讀取時必須認得 ——
+    /// 沒有它就無法在 1.x 演進格式，舊格式的檔也分辨不出來（0.x 的檔沒有這一欄）。</summary>
+    public const int SchemaVersion = 1;
+
+    /// <summary>鍵的產生方式的版本（審查 1.0 A2）。鍵的文字（element 的標籤、fg 的寫法、bg 的合成描述）屬稽核語意，
+    /// 1.x 的 minor 可以改 —— 改的那一版遞增這個數字。讀到舊的就明確叫人重寫，不要冒出一整排假的 NEW 加 paid off
+    /// （凍結宣告的演進規則 5）。檔案沒寫這一欄視為 1。</summary>
+    public const int KeyVersion = 1;
 
     public static string Write(AuditResult result)
     {
-        var entries = result.Findings.Where(f => f.Category == Category.Fail)
+        var entries = result.Findings.Where(BelowAa)
             .GroupBy(KeyOf)
             .Select(g =>
             {
                 var f = g.First();
                 return new Entry(f.File, f.Element, f.Fg, f.Bg, g.Count(), g.Min(x => x.Worst));
             })
-            .OrderBy(e => e.File, StringComparer.Ordinal).ThenBy(e => e.Element, StringComparer.Ordinal);
-        return JsonSerializer.Serialize(new { comment = "XamlContrast baseline — known debt; may only shrink", entries }, JsonOpts);
+            .OrderBy(e => e.File, StringComparer.Ordinal).ThenBy(e => e.Element, StringComparer.Ordinal)
+            .ThenBy(e => e.Fg, StringComparer.Ordinal).ThenBy(e => e.Bg, StringComparer.Ordinal);
+        return JsonSerializer.Serialize(new { schemaVersion = SchemaVersion, keyVersion = KeyVersion, comment = "XamlContrast baseline — known debt; may only shrink", entries }, JsonOpts);
     }
 
-    public static ComparisonResult Compare(AuditResult result, string baselineJson)
-    {
-        var doc = JsonDocument.Parse(baselineJson);
-        var known = new Dictionary<string, Entry>();
-        foreach (var el in doc.RootElement.GetProperty("entries").EnumerateArray())
-        {
-            var e = el.Deserialize<Entry>(JsonOpts)!;
-            known[$"{e.File}|{e.Element}|{e.Fg}|{e.Bg}"] = e;
-        }
+    /// <param name="gateWarn">gate 是 warn（預設）：低於 AA 的都擋；false（--fail-on fail）：只擋 fail。</param>
+    public static ComparisonResult Compare(AuditResult result, string baselineJson, bool gateWarn = true)
+        => Compare(result, Parse(baselineJson), gateWarn);
 
-        var current = FailKeys(result);
+    /// <summary>讀進來的 baseline：鍵 → entry。</summary>
+    public sealed class Known
+    {
+        public required Dictionary<string, Entry> Entries { get; init; }
+    }
+
+    /// <summary>
+    /// 解析 baseline 檔。格式錯誤擲例外（CLI 轉成 exit 2、提示重跑 --write-baseline）—— 在稽核之前就驗，輸入錯了後面都沒有意義。
+    /// 1.0 起嚴格（決策檔 H17）：
+    /// - 必須有 schemaVersion 而且是這個版本認得的。沒有 = 0.x 寫的檔：1.0 改了 baseline 收的東西（低於 AA 的每一組，
+    ///   不只 fail），照讀的話所有 warn 都會變成 NEW —— 大聲失敗並說出怎麼辦，比一牆的假 NEW 好。
+    /// - 每筆都要有 file／element／fg／bg／count／worst。⚠ 0.x 缺欄時補 0：缺 worst → 色盤漂移檢查靜默失效
+    ///   （比值再差也不會 &lt; 0 − 0.01）；缺 count → 每一處都算惡化。
+    /// 頂層與每筆的欄位名都不分大小寫。
+    /// </summary>
+    public static Known Parse(string baselineJson) => Parse(baselineJson, KeyVersion);
+
+    /// <param name="currentKeyVersion">這個版本產生鍵的方式（測試用來模擬「之後的版本」）。</param>
+    internal static Known Parse(string baselineJson, int currentKeyVersion)
+    {
+        using var doc = JsonDocument.Parse(baselineJson);
+        var root = doc.RootElement;
+        if (root.ValueKind != JsonValueKind.Object) throw new FormatException("the file is not a JSON object");
+        JsonElement? Prop(JsonElement obj, string name)
+            => obj.EnumerateObject().Where(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                  .Select(p => (JsonElement?)p.Value).FirstOrDefault();
+
+        if (Prop(root, "schemaVersion") is not { } ver)
+            throw new FormatException("the file has no schemaVersion — it was written by XamlContrast 0.x. " +
+                                      "1.0 changed what a baseline holds (every pair below AA, not only fails), " +
+                                      "so regenerate it with --write-baseline");
+        if (ver.ValueKind == JsonValueKind.Number && ver.TryGetInt32(out var newer) && newer > SchemaVersion)
+            throw new FormatException($"schemaVersion {newer} was written by a newer XamlContrast (this version reads {SchemaVersion}) — " +
+                                      "upgrade XamlContrast to read it");
+        if (ver.ValueKind != JsonValueKind.Number || !ver.TryGetInt32(out var v) || v != SchemaVersion)
+            throw new FormatException($"schemaVersion {ver.GetRawText()} is not supported (this version reads {SchemaVersion})");
+        var keyVersion = 1;
+        if (Prop(root, "keyVersion") is { } kv)
+        {
+            if (kv.ValueKind != JsonValueKind.Number || !kv.TryGetInt32(out keyVersion) || keyVersion < 1)
+                throw new FormatException($"keyVersion {kv.GetRawText()} is not a positive integer");
+        }
+        // 比這個版本新：該做的是升級工具。叫人重寫的話，是用舊工具把新工具寫的債清單蓋掉（審查 1.0 最終驗證 S7）
+        if (keyVersion > currentKeyVersion)
+            throw new FormatException($"keyVersion {keyVersion} was written by a newer XamlContrast (this version generates {currentKeyVersion}) — " +
+                                      "upgrade XamlContrast to read it");
+        if (keyVersion < currentKeyVersion)
+            throw new FormatException($"the file's keys were generated by an older XamlContrast (keyVersion {keyVersion}; " +
+                                      $"this version generates keyVersion {currentKeyVersion}), so every known pair would show up as NEW — " +
+                                      "regenerate it with --write-baseline");
+        if (Prop(root, "entries") is not { ValueKind: JsonValueKind.Array } entries)
+            throw new FormatException("the file has no 'entries' array");
+
+        var known = new Dictionary<string, Entry>();
+        var firstSeen = new Dictionary<string, int>();
+        var i = 0;
+        foreach (var el in entries.EnumerateArray())
+        {
+            i++;
+            if (el.ValueKind != JsonValueKind.Object) throw new FormatException($"entry {i} is not an object");
+            foreach (var field in (ReadOnlySpan<string>)["file", "element", "fg", "bg", "count", "worst"])
+            {
+                if (Prop(el, field) is not { } fv || fv.ValueKind == JsonValueKind.Null)
+                    throw new FormatException($"entry {i} has no '{field}'");
+                // 型別錯誤點名欄位與期望的型別（舊版是 .NET 的「could not be converted to XamlContrast.Core.Baseline+Entry」）
+                var expected = field switch
+                {
+                    "count" => fv.ValueKind == JsonValueKind.Number && fv.TryGetInt32(out _) ? null : "a whole number",
+                    "worst" => fv.ValueKind == JsonValueKind.Number ? null : "a number",
+                    _ => fv.ValueKind == JsonValueKind.String ? null : "a string",
+                };
+                if (expected is not null) throw new FormatException($"entry {i} has '{field}' {fv.GetRawText()} — it must be {expected}");
+            }
+            var e = el.Deserialize<Entry>(JsonOpts)!;
+            // 值的範圍（審查 1.0 C7）：count 0 讓每一處都算惡化；worst ≤ 0 讓色盤漂移永遠抓不到 —— 跟缺欄同一類
+            if (e.Count < 1) throw new FormatException($"entry {i} has 'count' {e.Count} — it must be at least 1");
+            if (!double.IsFinite(e.Worst) || e.Worst < 1 || e.Worst > 21)
+                throw new FormatException(string.Create(System.Globalization.CultureInfo.InvariantCulture,
+                    $"entry {i} has 'worst' {e.Worst} — a contrast ratio is between 1 and 21"));
+            var key = $"{e.File}|{e.Element}|{e.Fg}|{e.Bg}";
+            // 同一個鍵兩次：手改或合併衝突的痕跡。0.x 後者勝、前者靜默消失
+            if (firstSeen.TryGetValue(key, out var first))
+                throw new FormatException($"entries {first} and {i} have the same key ({key}) — one of them is stale");
+            firstSeen[key] = i;
+            known[key] = e;
+        }
+        return new Known { Entries = known };
+    }
+
+    public static ComparisonResult Compare(AuditResult result, Known baseline, bool gateWarn = true)
+    {
+        var known = baseline.Entries;
+
+        bool Gating(Finding f) => f.Category == Category.Fail || gateWarn && f.Category == Category.Warn;
+        // 目前低於 AA 的每一組，依鍵分組；處數與最差比值都算整組（warn 惡化成 fail 也是比值變差）
+        var current = result.Findings.Where(BelowAa).GroupBy(KeyOf).ToDictionary(g => g.Key, g => g.ToList());
         var newFailures = new List<Finding>();
         var worsened = new List<Entry>();
+        var status = new Dictionary<Finding, string>(ReferenceEqualityComparer.Instance);
         var knownDebt = 0;
+        void Mark(List<Finding> gating, string s) { foreach (var f in gating) status[f] = s; }
 
-        foreach (var (key, count) in current)
+        foreach (var (key, list) in current)
         {
+            var gating = list.Where(Gating).ToList();
+            if (gating.Count == 0) continue; // 這個 gate 不擋的（--fail-on fail 下的 warn）：不判新增或惡化
+            var count = list.Count;
             if (!known.TryGetValue(key, out var entry))
             {
-                newFailures.AddRange(result.Findings.Where(f => f.Category == Category.Fail && KeyOf(f) == key));
+                newFailures.AddRange(gating);
+                Mark(gating, "new");
                 continue;
             }
-            var worstNow = result.Findings
-                .Where(f => f.Category == Category.Fail && KeyOf(f) == key)
-                .Min(f => f.Worst);
+            var worstNow = list.Min(f => f.Worst);
             if (count > entry.Count)
             {
                 worsened.Add(entry with { Count = count }); // 同鍵的處數變多也是惡化
+                Mark(gating, "worsened");
             }
             else if (worstNow < entry.Worst - 0.01)
             {
                 worsened.Add(entry with { Worst = worstNow }); // 色盤漂移：鍵沒變但比值更差
+                Mark(gating, "worsened");
             }
             else
             {
                 knownDebt += count;
+                Mark(gating, "known");
             }
         }
 
@@ -101,6 +211,8 @@ public static class Baseline
             WorsenedFailures = worsened,
             KnownDebt = knownDebt,
             PaidDebt = paid,
+            Status = status,
         };
     }
+
 }

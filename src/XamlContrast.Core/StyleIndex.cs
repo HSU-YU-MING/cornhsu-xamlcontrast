@@ -34,6 +34,8 @@ internal sealed partial class StyleIndex
     {
         public required int Id;
         public required string File;
+        /// <summary>定義它的檔只屬於一個主題（Dark.xaml 之類）時是那個主題；兩個主題共用為 null</summary>
+        public ThemeSide? Side;
         public string? Key;
         public string? BasedOn;
         public Dictionary<string, string> Setters = new();
@@ -52,6 +54,8 @@ internal sealed partial class StyleIndex
         /// <summary>生效模板的根元素背景（衍生自帶模板時整個換掉，含根背景）</summary>
         public string? TemplateRootBg;
         public required string Label;
+        /// <summary>鏈上有任何一層定義在只屬於一個主題的字典檔裡 —— 另一個主題下解析到的是別的 Style（或沒有）</summary>
+        public bool SideSpecific;
     }
 
     [GeneratedRegex(@"^\{(Dynamic|Static)Resource\s+(?<k>[\w\.]+)\}$")]
@@ -68,7 +72,32 @@ internal sealed partial class StyleIndex
     /// ⚠ 範圍刻意極窄：只給「檔案根元素的背景」用，見 <see cref="ImplicitRootBackground"/>。</summary>
     private readonly Dictionary<string, Dictionary<string, Record>> _implicitByFile = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Record> _implicitGlobal = new(StringComparer.Ordinal);
+    // 依主題的全域查找表：只收兩個主題共用的檔與那個主題自己的檔（先出現的贏，與 _global 同一個順序）
+    private readonly Dictionary<ThemeSide, Dictionary<string, Record>> _globalBySide = new()
+    {
+        [ThemeSide.Dark] = new(),
+        [ThemeSide.Light] = new(),
+    };
+    private readonly Dictionary<ThemeSide, Dictionary<string, Record>> _implicitBySide = new()
+    {
+        [ThemeSide.Dark] = new(StringComparer.Ordinal),
+        [ThemeSide.Light] = new(StringComparer.Ordinal),
+    };
+    private Func<string, ThemeSide?>? _sideOf;
     private int _seq;
+
+    /// <summary>有沒有「只屬於一個主題」的字典檔（色盤來自分開的深／淺 XAML 字典時才有）。</summary>
+    public bool HasThemeSides { get; private set; }
+
+    // 有元素以 Style="{…Resource K}" 引用的 Style 鍵（含經 BasedOn 間接用到的基底）
+    private readonly HashSet<string> _usedKeys = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// 這個具名 Style 會不會在某個使用處被評到：有元素以 Style= 引用它，或它是這種 Style（或行內 Style）的 BasedOn 基底。
+    /// 會的話，Style 定義處評不了的組合（透明底）交給使用處，不在定義處另外計 —— 否則同一組算兩次。
+    /// 只透過 ItemContainerStyle 之類套用、或根本沒用到的，使用處評不到。
+    /// </summary>
+    public bool IsUsedByAnElement(string key) => _usedKeys.Contains(key);
 
     [GeneratedRegex(@"(?<t>\w+)\s*\}?\s*$")]
     private static partial Regex TargetTypeName();
@@ -87,14 +116,77 @@ internal sealed partial class StyleIndex
         {
             var b = t.Attribute("Binding")?.Value;
             var v = t.Attribute("Value")?.Value;
-            return b is not null && v == "False" && b.Contains("IsEnabled");
+            return b is not null && v == "False" && IsOwnIsEnabledBinding(b);
         }
         if (t.Name.LocalName is "MultiTrigger" or "MultiDataTrigger")
             return ConditionsOf(t).Any(c =>
                 c.Attribute("Value")?.Value == "False" &&
                 (c.Attribute("Property")?.Value is { } p && IsEnabledProp().IsMatch(p) ||
-                 c.Attribute("Binding")?.Value is { } b && b.Contains("IsEnabled")));
+                 c.Attribute("Binding")?.Value is { } b && IsOwnIsEnabledBinding(b)));
         return false;
+    }
+
+    /// <summary>
+    /// DataTrigger 的 Binding 是不是「這個控制項自己（或模板宿主、祖先）的 IsEnabled」。
+    ///
+    /// ⚠ 舊版是子字串比對 b.Contains("IsEnabled")：{Binding IsEnabledByLicense}、
+    ///   {Binding ViewModel.CanSave, Converter={StaticResource IsEnabledConverter}} 都被當成停用態豁免 ——
+    ///   真實的 fail 歸 0、exit 0，計數器標示的豁免原因是錯的。WCAG 1.4.3 豁免的是「停用中的控制項」，
+    ///   放行憑據要是條文本身，所以：
+    ///   - Path 恰為 IsEnabled、(IsEnabled) 或 (UIElement.IsEnabled)（帶點的路徑是別的物件的屬性）
+    ///   - 來源是元素自己、模板宿主或祖先（RelativeSource Self／TemplatedParent／FindAncestor —— 祖先停用時
+    ///     WPF 會把子元素一併停用）。沒有 RelativeSource 就是 DataContext 上的 view model 旗標，
+    ///     不保證控制項真的停用；ElementName／Source 指向別的物件 —— 都不猜
+    ///   - 沒有 Converter（可能是反相的，Value="False" 不再代表停用）
+    /// </summary>
+    internal static bool IsOwnIsEnabledBinding(string binding)
+    {
+        var b = binding.Trim();
+        if (!b.StartsWith("{Binding", StringComparison.Ordinal) || !b.EndsWith('}')) return false;
+        string? path = null, relativeSource = null;
+        var args = SplitTopLevel(b["{Binding".Length..^1]);
+        for (var i = 0; i < args.Count; i++)
+        {
+            var a = args[i].Trim();
+            if (a.Length == 0) continue;
+            var eq = a.IndexOf('=');
+            var brace = a.IndexOf('{');
+            if (eq < 0 || (brace >= 0 && brace < eq))
+            {
+                if (i == 0) path = a; // 第一個位置參數就是 Path
+                continue;
+            }
+            var name = a[..eq].Trim();
+            var value = a[(eq + 1)..].Trim();
+            switch (name)
+            {
+                case "Path": path = value; break;
+                case "RelativeSource": relativeSource = value; break;
+                case "Converter" or "ElementName" or "Source": return false;
+            }
+        }
+        if (path is null || relativeSource is null) return false;
+        // Path 要恰好是 IsEnabled 本身（含附加屬性寫法）。⚠ 只看最後一段的話，DataContext.IsEnabled、
+        // Owner.IsEnabled 這種「別的物件的 IsEnabled」也會被豁免 —— 那是 view model 的旗標，不是控制項停用
+        return path.Trim() is "IsEnabled" or "(IsEnabled)" or "(UIElement.IsEnabled)" &&
+               (relativeSource.Contains("Self") || relativeSource.Contains("TemplatedParent") ||
+                relativeSource.Contains("FindAncestor") || relativeSource.Contains("AncestorType"));
+    }
+
+    /// <summary>markup extension 的參數清單：只在最外層（不在 {…} 裡）的逗號切開。</summary>
+    private static List<string> SplitTopLevel(string s)
+    {
+        var parts = new List<string>();
+        var depth = 0;
+        var start = 0;
+        for (var i = 0; i < s.Length; i++)
+        {
+            if (s[i] == '{') depth++;
+            else if (s[i] == '}') depth--;
+            else if (s[i] == ',' && depth == 0) { parts.Add(s[start..i]); start = i + 1; }
+        }
+        parts.Add(s[start..]);
+        return parts;
     }
 
     private static IEnumerable<XElement> ConditionsOf(XElement t)
@@ -125,18 +217,18 @@ internal sealed partial class StyleIndex
 
     internal Record CreateRecord(XElement style, string file)
     {
-        var rec = new Record { Id = ++_seq, File = file };
+        var rec = new Record { Id = ++_seq, File = file, Side = _sideOf?.Invoke(file) };
         foreach (var s in style.Elements().Where(e => e.Name.LocalName == "Setter"))
         {
             var p = s.Attribute("Property")?.Value;
-            var v = s.Attribute("Value")?.Value;
+            var v = XamlBrush.SetterValue(s);
             if (p is not null && v is not null) rec.Setters[p] = v;
         }
         var tmplEl = style.Descendants().FirstOrDefault(e => e.Name.LocalName == "ControlTemplate");
         rec.HasTemplate = tmplEl is not null;
         // 模板根＝第一個視覺元素（跳過 <ControlTemplate.Resources> 之類的屬性元素）
         var tmplRoot = tmplEl?.Elements().FirstOrDefault(e => !e.Name.LocalName.Contains('.'));
-        rec.TemplateRootBg = tmplRoot?.Attribute("Background")?.Value;
+        rec.TemplateRootBg = tmplRoot is null ? null : XamlBrush.Read(tmplRoot, "Background");
         // 模板根的名字：規則 13 —— 觸發器裡「TargetName=模板根」的 Setter 等同
         // 直接設在宿主上（Kindling CellDeleteBtn hover 換底、QuillNest RadioButton
         // 選取態換底，共六筆假警報全是這形狀）。指向內部元素的 TargetName 仍不做。
@@ -149,7 +241,7 @@ internal sealed partial class StyleIndex
             foreach (var s in t.Elements().Where(e => e.Name.LocalName == "Setter"))
             {
                 var p = s.Attribute("Property")?.Value;
-                var v = s.Attribute("Value")?.Value;
+                var v = XamlBrush.SetterValue(s);
                 if (p is null || v is null) continue;
                 var tn = s.Attribute("TargetName")?.Value;
                 // 無 TargetName＝套宿主；TargetName=模板根＝實質也是宿主的視覺（規則 13）
@@ -186,17 +278,21 @@ internal sealed partial class StyleIndex
     /// 「排除出 UI 掃描」不等於「排除出索引」）。查找時同檔優先於全域，
     /// 模擬 WPF 的資源查找順序（CelFlow 的對話框有自己的 DarkBtn，
     /// 與 DarkTheme.xaml 的全域 DarkBtn 同名不同值）。
+    ///
+    /// <paramref name="sideOf"/>：檔案只屬於哪一個主題（<see cref="PaletteDetection.SideOf"/>）。給了的話，
+    /// 全域查找另外依主題各建一張表 —— Dark.xaml 與 Light.xaml 各定義一個 Chip 時，深色主題下只看得到
+    /// Dark 的、淺色主題下只看得到 Light 的（執行期一次只載入一個主題字典）。
     /// </summary>
-    public static StyleIndex Build(string root)
+    public static StyleIndex Build(string root, Func<string, ThemeSide?>? sideOf = null)
     {
-        var idx = new StyleIndex();
+        var idx = new StyleIndex { _sideOf = sideOf };
         foreach (var f in PaletteDetector.EnumerateFiles(root, "*.xaml"))
         {
             XDocument doc;
             try { doc = XDocument.Load(f); }
             catch { continue; }
             if (doc.Root is null) continue;
-            var isGlobal = doc.Root.Name.LocalName is "ResourceDictionary" or "Application";
+            var isGlobal = doc.Root.Name.LocalName == "ResourceDictionary" || PaletteDetector.IsApplicationRoot(doc.Root); // 含 Application 子類別
             foreach (var style in doc.Descendants().Where(e => e.Name.LocalName == "Style"))
             {
                 var rec = idx.CreateRecord(style, f);
@@ -212,32 +308,64 @@ internal sealed partial class StyleIndex
                         idx._implicitByFile[f] = imap = new Dictionary<string, Record>(StringComparer.Ordinal);
                     imap[typeName] = rec;
                     if (isGlobal && !idx._implicitGlobal.ContainsKey(typeName)) idx._implicitGlobal[typeName] = rec;
+                    if (isGlobal) idx.AddBySide(idx._implicitBySide, typeName, rec);
                     continue;
                 }
                 if (!idx._byFile.TryGetValue(f, out var map))
                     idx._byFile[f] = map = new Dictionary<string, Record>();
                 map[rec.Key] = rec;
                 if (isGlobal && !idx._global.ContainsKey(rec.Key)) idx._global[rec.Key] = rec;
+                if (isGlobal) idx.AddBySide(idx._globalBySide, rec.Key, rec);
+            }
+            foreach (var el in doc.Descendants())
+            {
+                if (el.Attribute("Style")?.Value is { } s && ResourceRef().Match(s.Trim()) is { Success: true } m)
+                    idx._usedKeys.Add(m.Groups["k"].Value);
+                // 行內 Style 一定被那個元素用到 —— 它的 BasedOn 基底也在使用處評
+                if (el.Name.LocalName == "Style" && el.Parent?.Name.LocalName.EndsWith(".Style", StringComparison.Ordinal) == true &&
+                    el.Attribute("BasedOn")?.Value is { } bo && ResourceRef().Match(bo.Trim()) is { Success: true } bm)
+                    idx._usedKeys.Add(bm.Groups["k"].Value);
             }
         }
+        // BasedOn 的閉包：用到的 Style 的基底也會在使用處的合併鏈裡被評到
+        var basesOf = idx._byFile.Values.SelectMany(map => map.Values)
+            .Where(r => r.Key is not null && r.BasedOn is not null)
+            .GroupBy(r => r.Key!, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Select(r => r.BasedOn!).ToList(), StringComparer.Ordinal);
+        var queue = new Queue<string>(idx._usedKeys);
+        while (queue.Count > 0)
+            if (basesOf.TryGetValue(queue.Dequeue(), out var bases))
+                foreach (var b in bases)
+                    if (idx._usedKeys.Add(b)) queue.Enqueue(b);
         return idx;
     }
 
-    private Record? Find(string key, string file)
+    private void AddBySide(Dictionary<ThemeSide, Dictionary<string, Record>> tables, string key, Record rec)
     {
-        if (_byFile.TryGetValue(file, out var map) && map.TryGetValue(key, out var rec)) return rec;
-        return _global.GetValueOrDefault(key);
+        if (rec.Side is not null) HasThemeSides = true;
+        foreach (var (side, table) in tables)
+            if ((rec.Side is null || rec.Side == side) && !table.ContainsKey(key)) table[key] = rec;
     }
 
-    private Merged MergeChain(Record rec, HashSet<string> seen, string label)
+    /// <summary>同檔優先，其次全域；指定主題時全域只看那個主題看得到的（共用檔 ∪ 那個主題自己的檔）。</summary>
+    private Record? Find(string key, string file, ThemeSide? side)
     {
-        var merged = new Merged { Label = label };
+        if (_byFile.TryGetValue(file, out var map) && map.TryGetValue(key, out var rec)) return rec;
+        return side is { } s ? _globalBySide[s].GetValueOrDefault(key) : _global.GetValueOrDefault(key);
+    }
+
+    private Merged MergeChain(Record rec, HashSet<string> seen, string label, ThemeSide? side)
+    {
+        // 定義在主題檔裡的 Style，BasedOn 一律在那個主題裡找
+        side = rec.Side ?? side;
+        var merged = new Merged { Label = label, SideSpecific = rec.Side is not null };
         if (rec.BasedOn is not null && seen.Add(rec.BasedOn))
         {
-            var baseRec = Find(rec.BasedOn, rec.File);
+            var baseRec = Find(rec.BasedOn, rec.File, side);
             if (baseRec is not null)
             {
-                var m = MergeChain(baseRec, seen, label);
+                var m = MergeChain(baseRec, seen, label, side);
+                merged.SideSpecific |= m.SideSpecific;
                 foreach (var (k, v) in m.Props) merged.Props[k] = v;
                 foreach (var s in m.States)
                 {
@@ -331,17 +459,35 @@ internal sealed partial class StyleIndex
     /// 只補「根元素」這一格：一個檔案最多影響一個值，不碰繼承語意，
     /// 拿到大部分的覆蓋率而不引入完整解析的雜訊風險。
     /// </summary>
-    public string? ImplicitRootBackground(string typeName, string file)
+    public string? ImplicitRootBackground(string typeName, string file, ThemeSide? side = null)
     {
         var rec = (_implicitByFile.TryGetValue(file, out var map) && map.TryGetValue(typeName, out var r))
-            ? r : _implicitGlobal.GetValueOrDefault(typeName);
+            ? r : side is { } s ? _implicitBySide[s].GetValueOrDefault(typeName) : _implicitGlobal.GetValueOrDefault(typeName);
         if (rec is null) return null;
-        var merged = MergeChain(rec, new HashSet<string>(), $"Style[implicit {typeName}]");
+        var merged = MergeChain(rec, new HashSet<string>(), $"Style[implicit {typeName}]", side);
         return merged.Props.TryGetValue("Background", out var v) ? v.V : merged.TemplateRootBg;
     }
 
-    /// <summary>元素套用的 Style（Style="{StaticResource X}" 或 &lt;X.Style&gt; 行內）。</summary>
-    public Merged? GetElementChain(XElement el, string file)
+    /// <summary>
+    /// Style 定義處（Auditor.WalkStyles）用的合併鏈：這個 Style 連同 BasedOn 逐層合併、同條件觸發器合併 ——
+    /// 與元素端的鏈路徑同一套規則。回傳的 Id 是這個 Style 自己的來源編號：字與底都出自它的配對才在
+    /// 定義處報，任一半來自 BasedOn 基底的組合由使用處（元素 × Style 鏈）評，兩邊不重複。
+    /// ⚠ 舊版定義處每個觸發器各自跟基礎值合併、也不看 BasedOn：style trigger 設字色＋同條件 template trigger
+    ///   設模板根底的同一個 hover 狀態被拆成兩個各缺一半的幻影組合，各報一筆假 fail。
+    /// </summary>
+    public (Merged Chain, int Id) DefinitionChain(XElement style, string file)
+    {
+        var rec = CreateRecord(style, file);
+        var seen = new HashSet<string>();
+        if (rec.Key is not null) seen.Add(rec.Key);
+        var merged = MergeChain(rec, seen, "", null);
+        merged.States = MergeSameCondition(merged.States);
+        return (merged, rec.Id);
+    }
+
+    /// <summary>元素套用的 Style（Style="{StaticResource X}" 或 &lt;X.Style&gt; 行內）。
+    /// <paramref name="side"/>：在哪一個主題下解析（null = 不分主題，全域先出現的贏）。</summary>
+    public Merged? GetElementChain(XElement el, string file, ThemeSide? side = null)
     {
         var sAttr = el.Attribute("Style")?.Value;
         if (sAttr is not null)
@@ -349,9 +495,9 @@ internal sealed partial class StyleIndex
             var m = ResourceRef().Match(sAttr);
             if (!m.Success) return null;
             var key = m.Groups["k"].Value;
-            var rec = Find(key, file);
+            var rec = Find(key, file, side);
             if (rec is null) return null;
-            var merged = MergeChain(rec, new HashSet<string> { key }, $"Style[{key}]");
+            var merged = MergeChain(rec, new HashSet<string> { key }, $"Style[{key}]", side);
             merged.States = MergeSameCondition(merged.States);
             return merged;
         }
@@ -360,7 +506,7 @@ internal sealed partial class StyleIndex
         if (styleEl is null) return null;
         var inline = CreateRecord(styleEl, file);
         var label = inline.BasedOn is not null ? $"Style[→{inline.BasedOn}]" : "Style[inline]";
-        var mergedInline = MergeChain(inline, new HashSet<string>(), label);
+        var mergedInline = MergeChain(inline, new HashSet<string>(), label, side);
         mergedInline.States = MergeSameCondition(mergedInline.States);
         return mergedInline;
     }

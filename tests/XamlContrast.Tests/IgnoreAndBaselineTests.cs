@@ -27,6 +27,32 @@ public class IgnoreAndBaselineTests
         Assert.Contains("\"suppressed\": 1", Report.ToJson(r));
     }
 
+    [Fact] // 「下一個元素連同整個子樹」也包含子樹裡的 Style 定義（盤點 10.3 第 2 點，1.0 前要定）。0.x 只看緊鄰 <Style> 的註解：
+           // 容器上的 ignore 壓得到容器內「元素 × Style 鏈」的配對，卻壓不到容器 Resources 裡 Style 定義處的配對 ——
+           // 同一個註解、同一個子樹，一半壓一半不壓
+    public void ContainerIgnoreCoversStyleDefinitionsInsideIt()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <!-- xamlcontrast-ignore: legacy panel, redesign tracked elsewhere -->
+              <Grid Background="#FFFFFF">
+                <Grid.Resources>
+                  <Style x:Key="Faint" TargetType="Button">
+                    <Setter Property="Background" Value="#FFFFFF"/>
+                    <Setter Property="Foreground" Value="#EEEEEE"/>
+                  </Style>
+                </Grid.Resources>
+                <TextBlock Foreground="#EEEEEE" Text="also inside"/>
+              </Grid>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Equal(2, r.Suppressed); // Style 定義處那一組＋TextBlock
+        Assert.Empty(r.InvalidIgnores);
+    }
+
     [Fact] // 理由必填 —— 沒理由的 ignore 無效、不壓、要警告
     public void IgnoreWithoutReasonIsInvalidAndDoesNotSuppress()
     {
@@ -42,6 +68,48 @@ public class IgnoreAndBaselineTests
         Assert.Single(r.Findings);                        // 照報
         Assert.Single(r.InvalidIgnores);
         Assert.Contains("without a reason", Report.ToConsole(r));
+    }
+
+    [Theory] // 寫錯的變體：舊版整段認不出來 —— 不壓（方向安全），但也不警告，使用者看不出自己的註解沒生效。
+             // 現在一律不壓、記進 invalidIgnores 並說明正確寫法。多行理由維持不接受（接受等於放寬、會讓
+             // 既有註解開始壓掉配對），只是不再沉默
+    [InlineData("xamlcontrast-ignore:")]                                    // 冒號後沒有理由
+    [InlineData("xamlcontrast-ignore:   ")]
+    [InlineData("xamlcontrast-ignore: watermark text,\n  intentionally faint")] // 理由換到第二行
+    [InlineData("XamlContrast-Ignore: watermark")]                          // 大小寫不同
+    [InlineData("xamlcontrast-ignore 浮水印")]                               // 漏了冒號
+    public void MalformedIgnoreCommentIsWarnedAboutAndDoesNotSuppress(string comment)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              <!-- {comment} -->
+              {LowContrastText}
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Suppressed);
+        Assert.Single(r.Findings);                        // 照報
+        var w = Assert.Single(r.InvalidIgnores);
+        Assert.StartsWith("Main.xaml:2: ", w);
+        Assert.Contains("malformed xamlcontrast-ignore", w);
+        Assert.Contains("not suppressed", w);
+    }
+
+    [Theory] // 對照組：不是 ignore 標記的註解不能誤報（標記要在註解開頭、而且是整個字）
+    [InlineData("TODO: xamlcontrast-ignore: later")]
+    [InlineData("xamlcontrast-ignored by design")]
+    [InlineData("an ordinary comment")]
+    public void OrdinaryCommentsAreNotTreatedAsMalformedIgnores(string comment)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              <!-- {comment} -->
+              {LowContrastText}
+            </Grid>
+            """);
+        Assert.Empty(fx.Run().InvalidIgnores);
     }
 
     [Fact] // ignore 也能壓 Style 配對
@@ -62,6 +130,49 @@ public class IgnoreAndBaselineTests
         var r = fx.Run();
         Assert.Equal(1, r.Suppressed);
         Assert.Empty(r.Findings);
+    }
+
+    [Fact] // 「下一個元素」含整個子樹：容器上的 ignore 壓掉裡面每一組，每一組都計數；容器之後的兄弟不受影響
+    public void IgnoreCoversTheWholeSubtreeAndCountsEachPair()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <!-- xamlcontrast-ignore: 浮水印區塊，刻意低對比 -->
+              <Border>
+                <TextBlock Foreground="#EEEEEE" Text="直接子元素"/>
+                <StackPanel><TextBlock Foreground="#DDDDDD" Text="孫元素"/></StackPanel>
+              </Border>
+              <TextBlock Foreground="#CCCCCC" Text="區塊之後的兄弟，要報"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(3, r.Pairs);
+        Assert.Equal(2, r.Suppressed);
+        Assert.Equal("#CCCCCC", Assert.Single(r.Findings).Fg);
+    }
+
+    [Theory] // 只有「緊鄰的前一個節點」是 ignore 註解才算數；一般註解、提到關鍵字的註解、
+             // 中間隔了別的註解或元素，都不能壓 —— 範圍一放寬，ignore 就是新的靜默退化通道
+    [InlineData("<!-- 一般註解 -->", false)]
+    [InlineData("<!-- TODO: xamlcontrast-ignore: 之後再說 -->", false)] // 錨定在註解開頭，不是子字串
+    [InlineData("<!-- xamlcontrast-ignore: 浮水印 -->\n<!-- 另一個註解 -->", false)]
+    [InlineData("<!-- xamlcontrast-ignore: 浮水印 -->\n<Border/>", false)]  // 被上面的 Border 用掉了
+    [InlineData("<!-- xamlcontrast-ignore:浮水印 -->", true)]              // 冒號後不必空白
+    [InlineData("<!--   xamlcontrast-ignore :  浮水印  -->", true)]        // 前後與冒號兩側的空白都容忍
+    public void OnlyAnAdjacentIgnoreCommentSuppresses(string before, bool suppressed)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              {before}
+              {LowContrastText}
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(suppressed ? 1 : 0, r.Suppressed);
+        Assert.Equal(suppressed ? 0 : 1, r.Findings.Count);
+        Assert.Empty(r.InvalidIgnores); // 這幾種都不是「沒附理由的 ignore」
     }
 
     // ── baseline ratchet：承認既有債、只擋新增與惡化 ──

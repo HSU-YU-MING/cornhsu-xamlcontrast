@@ -78,6 +78,63 @@ public class NewRuleTests
         Assert.Contains("exempted 1 disabled-state", Report.ToConsole(r));
     }
 
+    [Theory] // 停用態豁免的範圍要窄：只有「IsEnabled 為 False」才放行（Trigger 的 Property 可帶型別前綴；
+             // DataTrigger 看 Binding 的 Path）。範圍一放寬，真實的觸發態問題就會被當成豁免藏起來。
+             // DataTrigger／MultiDataTrigger 的 Binding 曾是子字串比對（b.Contains("IsEnabled")）：
+             //   {Binding IsEnabledByLicense}、Converter={StaticResource IsEnabledConverter} 都被當成停用態豁免，
+             //   fail 歸 0、exit 0，計數器標示的豁免原因是錯的。現在要求 Path 的最後一段恰為 IsEnabled、
+             //   來源是元素自己／模板宿主／祖先（RelativeSource Self／TemplatedParent／FindAncestor —— 祖先停用，
+             //   子元素一併停用），且沒有 Converter（可能反相）。DataContext 上的 IsEnabled 是 view model 的旗標，
+             //   不保證控制項真的停用 —— 不猜，照常評分
+    [InlineData("""<Trigger Property="IsEnabled" Value="False">""", "Trigger", true)]
+    [InlineData("""<DataTrigger Binding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsEnabled}" Value="False">""", "DataTrigger", true)]
+    [InlineData("""<DataTrigger Binding="{Binding Path=(UIElement.IsEnabled), RelativeSource={RelativeSource AncestorType={x:Type Button}}}" Value="False">""", "DataTrigger", true)]
+    [InlineData("""<DataTrigger Binding="{Binding (IsEnabled), RelativeSource={RelativeSource Self}}" Value="False">""", "DataTrigger", true)]
+    // Path 要恰好是 IsEnabled 本身：帶點的路徑是別的物件的屬性 —— 這裡是祖先 Window 的 DataContext（view model）上的
+    // IsEnabled，不是控制項停用（審查素材 h10a：舊版只看最後一段，照樣豁免）
+    [InlineData("""<DataTrigger Binding="{Binding DataContext.IsEnabled, RelativeSource={RelativeSource AncestorType=Window}}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding Path=Owner.IsEnabled, RelativeSource={RelativeSource Self}}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabledByLicense}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabledByLicense, RelativeSource={RelativeSource Self}}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding ViewModel.CanSave, Converter={StaticResource IsEnabledConverter}}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}, Converter={StaticResource Invert}}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabled, ElementName=OtherButton}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabled}" Value="False">""", "DataTrigger", false)] // DataContext 的旗標
+    [InlineData("""<MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding IsEnabledByLicense}" Value="False"/></MultiDataTrigger.Conditions>""", "MultiDataTrigger", false)]
+    [InlineData("""<Trigger Property="UIElement.IsEnabled" Value="False">""", "Trigger", true)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="False">""", "DataTrigger", true)]
+    [InlineData("""<Trigger Property="IsEnabled" Value="True">""", "Trigger", false)]
+    [InlineData("""<Trigger Property="IsReadOnly" Value="False">""", "Trigger", false)]
+    [InlineData("""<Trigger Property="IsEnabledByLicense" Value="False">""", "Trigger", false)] // 自訂屬性：整字比對，不是子字串
+    [InlineData("""<Trigger Property="ParentIsEnabled" Value="False">""", "Trigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding IsBusy}" Value="False">""", "DataTrigger", false)]
+    [InlineData("""<DataTrigger Binding="{Binding IsEnabled}" Value="True">""", "DataTrigger", false)]
+    [InlineData("""<MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="False"/><Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/></MultiDataTrigger.Conditions>""", "MultiDataTrigger", true)]
+    [InlineData("""<MultiDataTrigger><MultiDataTrigger.Conditions><Condition Binding="{Binding IsBusy}" Value="False"/></MultiDataTrigger.Conditions>""", "MultiDataTrigger", false)]
+    public void DisabledExemptionCoversOnlyIsEnabledFalse(string open, string close, bool exempted)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Grid.Resources>
+                <Style x:Key="Btn" TargetType="Button">
+                  <Setter Property="Background" Value="#000000"/>
+                  <Setter Property="Foreground" Value="#FFFFFF"/>
+                  <Style.Triggers>
+                    {open}
+                      <Setter Property="Foreground" Value="#303030"/>
+                    </{close}>
+                  </Style.Triggers>
+                </Style>
+              </Grid.Resources>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(exempted ? 1 : 0, r.DisabledExempt);
+        Assert.Equal(exempted ? 1 : 2, r.Findings.Count);   // 沒豁免的觸發態照常評分（#303030 疊黑 → fail）
+        Assert.Equal(exempted ? 0 : 1, r.CountOf(Category.Fail));
+    }
+
     [Fact] // 半透明色票：#AARRGGBB 的 palette 鍵要疊底合成，不能剝掉 alpha 當不透明色
     public void TranslucentPaletteKeyCompositesOverBackground()
     {
@@ -102,6 +159,135 @@ public class NewRuleTests
         var effective = Wcag.Composite("#378ADD", 0x29 / 255.0, "#111111");
         Assert.Equal(Wcag.Contrast("#EEEEEE", effective), f.RatioDark); // 疊底合成
         Assert.NotEqual(Wcag.Contrast("#EEEEEE", "#378ADD"), f.RatioDark); // 不是純藍
+    }
+
+    [Fact] // 只有一個主題半透明的色票當「字色」：舊版整組歸 skipped —— 另一側（不透明那側）真實的 fail 也跟著消失，
+           // 而 skipped 不進覆蓋率分母（覆蓋率照樣 100%、exit 0）。兩側各自疊到自己的底上評分
+    public void TranslucentOnOneSideForegroundIsGradedOnBothSides()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#121212"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Secondary" Color="#3A3A3A"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Secondary" Color="#99000000"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """
+            <Grid Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Secondary}" Text="secondary"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Skipped);
+        var f = Assert.Single(r.Findings);
+        Assert.Equal(Wcag.Contrast("#3A3A3A", "#121212"), f.RatioDark);                                       // 深色 1.65:1
+        Assert.Equal(Wcag.Contrast(Wcag.Composite("#000000", 0x99 / 255.0, "#FFFFFF"), "#FFFFFF"), f.RatioLight);
+        Assert.Equal(Category.Fail, f.Category);
+    }
+
+    [Fact] // 只有一個主題完全透明的色票：另一個主題看得見，就不是「隱形、合法跳過」—— 兩欄照評，透明那側 1:1
+           // （審查 mutation F4b：VisibleAlpha 取兩側較小的那個時存活，這組整個變成 skipped）
+    public void ForegroundInvisibleInOneThemeOnlyIsStillGraded()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#121212"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Hint" Color="#00FFFFFF"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Hint" Color="#1B1B1B"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """
+            <Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Hint}" Text="hint"/></Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Skipped);
+        var f = Assert.Single(r.Findings);
+        Assert.Equal(1, f.RatioDark);
+        Assert.Equal(Wcag.Contrast("#1B1B1B", "#FFFFFF"), f.RatioLight);
+    }
+
+    [Fact] // 元素 × Style 鏈與 Style 定義處：半透明字色一樣疊到底上評分（三條路徑同一套）
+    public void TranslucentForegroundIsCompositedOnTheStylePathsToo()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <StackPanel xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#000000">
+              <StackPanel.Resources>
+                <Style x:Key="Pad" TargetType="Button"><Setter Property="Padding" Value="4"/></Style>
+                <Style x:Key="Faded" TargetType="Button">
+                  <Setter Property="Background" Value="#000000"/>
+                  <Setter Property="Foreground" Value="#33FFFFFF"/>
+                </Style>
+              </StackPanel.Resources>
+              <Button Style="{StaticResource Pad}" Foreground="#33FFFFFF" Content="chain"/>
+            </StackPanel>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Skipped);
+        var expected = Wcag.Contrast(Wcag.Composite("#FFFFFF", 0x33 / 255.0, "#000000"), "#000000");
+        var chain = Assert.Single(r.Findings, f => f.Element == "Button⊕Style[Pad]/base");
+        var definition = Assert.Single(r.Findings, f => f.Element == "Style[Faded]/base");
+        Assert.Equal(expected, chain.RatioDark);
+        Assert.Equal(expected, definition.RatioDark);
+        // 淺色欄一樣要合成（審查 mutation F5b：定義處淺色欄沒合成時存活 —— 只斷言了深色欄）
+        Assert.Equal(expected, chain.RatioLight);
+        Assert.Equal(expected, definition.RatioLight);
+    }
+
+    [Theory] // 只有一個主題是半透明的色票（合併式色盤裡只有一個主題用半透明遮罩，是實際會出現的形狀）。
+             // 舊版只看深色那側的長度決定走不走 alpha：深色半透明時把 7 碼的淺色值切成 "#E0E0" → 算對比時
+             // ArgumentOutOfRangeException、整支崩潰（退出碼跳出契約）；淺色半透明時 alpha 被剝掉、
+             // 當成不透明黑 → ratioLight 報 1.3（實際約 3.91）。兩側各帶自己的 alpha（7 碼那側 alpha = 1）
+    [InlineData("#80000000", "#E0E0E0")]
+    [InlineData("#202020", "#80000000")]
+    [InlineData("#FF202020", "#80000000")]
+    public void TranslucentOnOneSideOnlyCompositesEachSideOnItsOwn(string darkScrim, string lightScrim)
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/DarkTheme.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#121212"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Scrim" Color="{darkScrim}"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/LightTheme.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FAFAFA"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              <SolidColorBrush x:Key="Scrim" Color="{lightScrim}"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}">
+              <Border Background="{DynamicResource Scrim}">
+                <TextBlock Foreground="{DynamicResource Fg}" Text="x"/>
+              </Border>
+            </Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+
+        static string Effective(string scrim, string under) => scrim.Length == 9 && !scrim.StartsWith("#FF")
+            ? Wcag.Composite("#" + scrim[3..], Convert.ToInt32(scrim[1..3], 16) / 255.0, under)
+            : "#" + scrim[^6..];
+        Assert.Equal(Wcag.Contrast("#EEEEEE", Effective(darkScrim, "#121212")), f.RatioDark);
+        Assert.Equal(Wcag.Contrast("#1B1B1B", Effective(lightScrim, "#FAFAFA")), f.RatioLight);
     }
 
     [Fact] // 規則 12：模板根元素自帶背景 —— Style 層沒 Background setter 時的真正底色
@@ -208,6 +394,42 @@ public class NewRuleTests
         Assert.All(r.Findings, f => Assert.Equal("#000000", f.Bg));
     }
 
+    [Theory] // 規則 13 的模板根名字有 x:Name 與 Name 兩種寫法（FrameworkElement 都認）——
+             // Style 定義處（WalkStyles）與元素 × Style 鏈（StyleIndex）兩條路都要認得，
+             // 認不得就退回「hover 白字疊模板根原本的淺底」，報 1.16:1 的假 fail
+    [InlineData("x:Name")]
+    [InlineData("Name")]
+    public void RootTargetedTriggerWorksWithEitherNameAttribute(string nameAttr)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $$"""
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Btn" TargetType="Button">
+                  <Setter Property="Foreground" Value="#111111"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Border {{nameAttr}}="bg" Background="#EEEEEE"><ContentPresenter/></Border>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="#CC3A3A"/>
+                            <Setter Property="Foreground" Value="#FFFFFF"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Btn}" Content="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal("#CC3A3A", Assert.Single(r.Findings, f => f.Fg == "#FFFFFF").Bg); // 定義處的 hover 配對
+        Assert.DoesNotContain(r.Findings, f => f.Fg == "#FFFFFF" && f.Bg == "#EEEEEE"); // 鏈路徑沒有幻影組合
+    }
+
     [Fact] // 分工：字與底同出一個 Style 節點 → WalkStyles 定義處已檢，元素端不重複
     public void SameStyleNodePairIsNotDoubleCounted()
     {
@@ -263,8 +485,64 @@ public class NewRuleTests
             """);
         var r = fx.Run();
         Assert.Empty(r.Findings);
-        Assert.Equal(1, r.Unresolved); // Binding 字色 = 看不懂
-        Assert.Equal(1, r.Skipped);    // Transparent 底 = 合法跳過
+        Assert.Equal(2, r.Unresolved); // Binding 字色 = 看不懂；Transparent 底 = 定義處沒有底下那層可疊
+        Assert.Equal(0, r.Skipped);    // 不是合法跳過（skipped 不進覆蓋率分母）
+        var seeThrough = Assert.Single(r.UnresolvedSites, s => s.Value == "Transparent");
+        Assert.Equal(UnresolvedReason.TranslucentUncomposited, seeThrough.Reason);
+    }
+
+    [Fact] // 隱含樣式（沒有 x:Key）的透明底不會在使用處補評：定義處記 skipped 的話這組整個消失、覆蓋率照樣 100%
+           // （審查素材 use：白底上的 ToggleButton 實際 1.16:1）。記成 unresolved，覆蓋率照實掉下來
+    public void ImplicitStyleWithASeeThroughBackgroundIsUnresolvedNotSkipped()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Grid.Resources>
+                <Style TargetType="ToggleButton">
+                  <Setter Property="Background" Value="Transparent"/>
+                  <Setter Property="Foreground" Value="#EEEEEE"/>
+                </Style>
+              </Grid.Resources>
+              <ToggleButton Content="x"/>
+              <TextBlock Foreground="#000000" Text="ok"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Skipped);
+        var site = Assert.Single(r.UnresolvedSites);
+        Assert.Equal(UnresolvedReason.TranslucentUncomposited, site.Reason);
+        Assert.Equal("Main.xaml", site.File);
+        Assert.Equal(0.5, r.Coverage);
+    }
+
+    [Fact] // 上一條的另一半：看不懂的是「底」時要點名底的值（unknownKeys 靠它當死引用偵測器）；
+           // 半透明的是「字」時疊到 Style 自己的不透明底上照常評分（不是合法跳過）
+    public void StyleDefinitionNamesTheSideItCouldNotResolve()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Grid.Resources>
+                <Style x:Key="DeadBg" TargetType="Button">
+                  <Setter Property="Background" Value="{DynamicResource Typo}"/>
+                  <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Style>
+                <Style x:Key="FadedFg" TargetType="Button">
+                  <Setter Property="Background" Value="#000000"/>
+                  <Setter Property="Foreground" Value="#80FFFFFF"/>
+                </Style>
+              </Grid.Resources>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var site = Assert.Single(r.UnresolvedSites);
+        Assert.Equal(UnresolvedReason.UnknownPaletteKey, site.Reason);
+        Assert.Equal("Typo", site.Value);
+        Assert.Equal(0, r.Skipped);
+        var faded = Assert.Single(r.Findings);
+        Assert.Equal("Style[FadedFg]/base", faded.Element);
+        Assert.Equal(Wcag.Contrast(Wcag.Composite("#FFFFFF", 0x80 / 255.0, "#000000"), "#000000"), faded.RatioDark);
     }
 
     [Fact] // MultiTrigger 曾是黑洞：跳過清單認得它、收集處不認得，組合條件狀態整批沒被檢查
@@ -349,6 +627,35 @@ public class NewRuleTests
         Assert.Equal(0, r.Unresolved);
     }
 
+    [Fact] // 地板的另一種寫法：隱含樣式不設 Background setter，而是把底畫在模板根上
+    public void ImplicitStyleTemplateRootBackgroundIsAlsoTheFloor()
+    {
+        using var fx = new Fixture();
+        fx.File("App.xaml", """
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Application.Resources>
+                <Style TargetType="{x:Type Window}">
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Window">
+                        <Border Background="#111111"><ContentPresenter/></Border>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Application.Resources>
+            </Application>
+            """);
+        fx.File("Main.xaml", """
+            <Window>
+              <TextBlock Foreground="#FFFFFF" Text="底色來自隱含樣式的模板根"/>
+            </Window>
+            """);
+        var r = fx.Run();
+        Assert.Equal("#111111", Assert.Single(r.Findings).Bg);
+        Assert.Equal(0, r.Unresolved);
+    }
+
     [Fact] // 界線要守住：隱含樣式只補「根元素」一格，不是完整的隱含樣式解析。
            // 非根元素照舊沿樹往上找 —— 否則 Foreground 的繼承語意會把配對數炸開。
     public void ImplicitStyleIsNotAppliedToNonRootElements()
@@ -427,6 +734,441 @@ public class NewRuleTests
         var f = Assert.Single(r.Findings);
         Assert.Equal("#000000", f.Bg);   // 不是紅色條,也不是排在後面的淺色 Border
         Assert.Equal(21.0, f.RatioDark);
+    }
+
+    [Theory] // 規則 17(a) 只在子元素會重疊、而且背板會被撐滿的容器裡成立:Grid 是疊層,
+             // StackPanel 系與各種排開的 Panel 不是 —— 在那裡把前一個兄弟當背板,就是把旁邊的方塊當成字的底。
+             // Canvas 子元素會重疊、但不會被撐滿:Canvas 不套 Stretch,沒尺寸的 Border 實際是 0×0。舊版照樣套 17(a),
+             // 把一塊不存在的背板捏造出來(白字白底 1:1 報成 21:1 合格)。Canvas 只套 17(b),見下兩條
+    [InlineData("Canvas", false)]
+    [InlineData("Grid", true)]
+    [InlineData("VirtualizingWrapPanel", false)] // 衍生的 WrapPanel 一樣排開(審查素材 h14wrap:舊版當成疊層、捏造背板)
+    [InlineData("MyDockPanel", false)]
+    [InlineData("StackPanel", false)]
+    [InlineData("VirtualizingStackPanel", false)]
+    [InlineData("MyStackPanel", false)]          // 衍生的 StackPanel 一樣排開
+    [InlineData("DockPanel", false)]
+    [InlineData("WrapPanel", false)]
+    [InlineData("UniformGrid", false)]
+    [InlineData("ToolBarPanel", false)]
+    [InlineData("TabPanel", false)]
+    public void OnlyOverlappingContainersHaveSiblingBackdrops(string container, bool overlaps)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              <{container}>
+                <Border Background="#000000"/>
+                <TextBlock Foreground="#FFFFFF" Text="x"/>
+              </{container}>
+            </Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+        Assert.Equal(overlaps ? "#000000" : "#FFFFFF", f.Bg);
+    }
+
+    [Fact] // 版面未知的自訂 *Panel：子元素疊不疊在一起靜態不可知 —— 舊版「保守視為疊層」，排開的面板裡就是捏造背板；
+           // 當成排開也一樣是猜。前面有可能是背板的兄弟時，後面的字計入 over-sibling-content（不猜），並點名是哪個面板
+    public void CustomPanelOfUnknownLayoutMakesTheSiblingBackdropUnknowable()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <LayeredPanel>
+                <Border Background="#000000"/>
+                <TextBlock Foreground="#FFFFFF" Text="x"/>
+              </LayeredPanel>
+              <LayeredPanel>
+                <TextBlock Foreground="#000000" Text="nothing before me — the ancestor background is fine"/>
+              </LayeredPanel>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var site = Assert.Single(r.UnresolvedSites);
+        Assert.Equal(UnresolvedReason.OverSiblingContent, site.Reason);
+        Assert.Equal("<Border> in <LayeredPanel>", site.Value);
+        Assert.Equal("#FFFFFF", Assert.Single(r.Findings).Bg);
+    }
+
+    // ── 名稱結尾不是 Panel 的容器（審查素材 m7）──
+    //    InkCanvas 與衍生的 *Canvas 舊版落到「排開」：疊在 Image 上的字報 21:1 ok；衍生的 Grid（CardGrid）
+    //    也落到「排開」，黑色方塊旁（其實疊在上面）的白字配祖先的白底，編出 1:1 fail
+
+    [Fact] // InkCanvas 是 WPF 內建、跟 Canvas 一樣把子元素疊在一起
+    public void InkCanvasOverlapsLikeACanvas()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <InkCanvas><Image/><TextBlock Foreground="#000000" Text="over the image"/></InkCanvas>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Equal(UnresolvedReason.OverSiblingContent, Assert.Single(r.UnresolvedSites).Reason);
+    }
+
+    [Theory] // 衍生命名的 *Canvas／*Grid：版面靜態不可知（是不是真的衍生自 Canvas／Grid、Grid 的格子怎麼切都不知道）——
+             // 與自訂 *Panel 同一個處理：前面有可能是背板的兄弟時，後面的字計入 over-sibling-content
+    [InlineData("l:ZoomCanvas", "<Image/>", "<Image> in <ZoomCanvas>")]
+    [InlineData("l:CardGrid", """<Border Background="#000000"/>""", "<Border> in <CardGrid>")]
+    [InlineData("l:CardGrid", "<Image/>", "<Image> in <CardGrid>")]
+    public void DerivedCanvasAndGridLayoutsAreUnknowable(string container, string sibling, string value)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid xmlns:l="clr-namespace:App" Background="#FFFFFF">
+              <{container}>{sibling}<TextBlock Foreground="#FFFFFF" Text="x"/></{container}>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        var site = Assert.Single(r.UnresolvedSites);
+        Assert.Equal(UnresolvedReason.OverSiblingContent, site.Reason);
+        Assert.Equal(value, site.Value);
+    }
+
+    [Theory] // 已知會排開的 *Grid 不受影響：UniformGrid（含衍生命名）、DataGrid
+    [InlineData("MyUniformGrid")]
+    [InlineData("UniformGrid")]
+    [InlineData("DataGrid")]
+    public void KnownSideBySideGridsAreNotUnknowable(string container)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              <{container}><Border Background="#000000"/><TextBlock Foreground="#000000" Text="x"/></{container}>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.UnresolvedSites);
+        Assert.Equal("#FFFFFF", Assert.Single(r.Findings).Bg);
+    }
+
+    // ── 版面的逃生口：config 的 layout（決策檔 m7，比照 classification 的形狀）──
+    //    自訂容器的版面靜態不可知 → over-sibling-content。使用者知道自己的容器是疊層還是排開：宣告的就是事實
+
+    [Theory]
+    [InlineData("""{ "layout": { "overlap": ["CardGrid"] } }""", "l:CardGrid", 21.0)]        // 疊層：黑色方塊是白字的底
+    [InlineData("""{ "layout": { "sideBySide": ["LayeredPanel"] } }""", "l:LayeredPanel", 1.0)] // 排開：白字配祖先的白底
+    public void ConfigDeclaresTheLayoutOfCustomContainers(string config, string container, double ratio)
+    {
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, config);
+        fx.File("Main.xaml", $"""
+            <Grid xmlns:l="clr-namespace:App" Background="#FFFFFF">
+              <{container}><Border Background="#000000"/><TextBlock Foreground="#FFFFFF" Text="x"/></{container}>
+            </Grid>
+            """);
+        var cfg = ToolConfig.Load(fx.Root);
+        var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
+        Assert.Empty(r.UnresolvedSites);
+        Assert.Equal(ratio, Assert.Single(r.Findings).RatioDark);
+    }
+
+    [Theory] // 寫錯要說：同一個名字不能兩邊都宣告、不能是 null 或空白
+    [InlineData("""{ "layout": { "overlap": ["CardGrid"], "sideBySide": ["CardGrid"] } }""", "layout: 'CardGrid' is declared both overlap and sideBySide")]
+    [InlineData("""{ "layout": null }""", "layout must be an object, got null")]
+    [InlineData("""{ "layout": { "overlap": [""] } }""", "layout.overlap must not contain null or empty element names")]
+    // 比對的是不帶命名空間前綴的元素名：l:CardGrid 永遠不會命中。現在就拒絕（審查 1.0 B8：以後再擋就是收緊）
+    [InlineData("""{ "layout": { "overlap": ["l:CardGrid"] } }""", "layout.overlap: 'l:CardGrid' has a namespace prefix — declare the element name without it ('CardGrid')")]
+    [InlineData("""{ "layout": { "sideBySide": ["x:Bar"] } }""", "layout.sideBySide: 'x:Bar' has a namespace prefix")]
+    public void LayoutConfigErrorsAreNamed(string config, string message)
+    {
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, config);
+        Assert.Contains(message, Assert.Throws<ConfigException>(() => ToolConfig.Load(fx.Root)).Message);
+    }
+
+    // ── Style 的 Template setter 裡的 ControlTemplate（審查 1.0 最終驗證 S3）──
+    //    樹走訪不進 Style（Setter.Value 是屬性值），模板裡自己帶 Foreground 的文字元素從來沒有被評過，
+    //    也不在任何計數器裡 —— 靜默退化。完整稽核屬稽核語意、留到 1.x；1.0 先讓它不靜默：
+    //    計入 unresolved（in-style-template），點名位置與那個 Foreground，覆蓋率照實反映
+
+    [Fact]
+    public void TextInsideAStyleTemplateIsCountedAsUnresolved()
+    {
+        using var fx = new Fixture();
+        fx.File("Views/Main.xaml", """
+            <UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+            <UserControl.Resources><Style x:Key="S" TargetType="ContentControl"><Setter Property="Template"><Setter.Value>
+            <ControlTemplate TargetType="ContentControl"><Grid Background="#000000">
+              <TextBlock Foreground="#111111" Text="own foreground: never graded"/>
+              <TextBlock Foreground="{TemplateBinding Foreground}" Text="the host's foreground: graded through the style chain"/>
+              <ContentPresenter/>
+            </Grid></ControlTemplate>
+            </Setter.Value></Setter></Style></UserControl.Resources>
+            <Grid Background="#FFFFFF"><TextBlock Foreground="#000000" Text="x"/></Grid></UserControl>
+            """);
+        var r = fx.Run();
+        Assert.Equal(1, r.Pairs);
+        var site = Assert.Single(r.UnresolvedSites);
+        Assert.Equal(UnresolvedReason.InStyleTemplate, site.Reason);
+        Assert.Equal(("Views/Main.xaml", 4, "#111111"), (site.File, site.Line, site.Value));
+        Assert.Equal(1, r.UnresolvedBy[UnresolvedReason.InStyleTemplate]);
+        Assert.Equal(50.0, r.CoveragePercent);
+        Assert.Equal("in-style-template", Report.ReasonLabel(UnresolvedReason.InStyleTemplate));
+    }
+
+    [Fact] // 模板裡再套模板（ComboBox 的 ToggleButton.Template）：裡面那個字只算一次
+    public void NestedTemplatesInsideAStyleTemplateCountEachTextOnce()
+    {
+        using var fx = new Fixture();
+        fx.File("Views/Main.xaml", """
+            <UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+            <UserControl.Resources><Style TargetType="ComboBox"><Setter Property="Template"><Setter.Value>
+            <ControlTemplate TargetType="ComboBox"><Grid><ToggleButton><ToggleButton.Template>
+              <ControlTemplate TargetType="ToggleButton"><Border Background="#222222"><TextBlock Foreground="#444444" Text="▾"/></Border></ControlTemplate>
+            </ToggleButton.Template></ToggleButton></Grid></ControlTemplate>
+            </Setter.Value></Setter></Style></UserControl.Resources>
+            <Grid Background="#FFFFFF"><TextBlock Foreground="#000000" Text="x"/></Grid></UserControl>
+            """);
+        var r = fx.Run();
+        var site = Assert.Single(r.UnresolvedSites);
+        Assert.Equal((UnresolvedReason.InStyleTemplate, 4), (site.Reason, site.Line));
+    }
+
+    [Fact] // 樹裡（Resources 裡獨立的 ControlTemplate、元素自己的 Template 屬性元素）照舊會走，不另外計
+    public void ControlTemplatesOutsideStylesAreStillWalked()
+    {
+        using var fx = new Fixture();
+        fx.File("Views/Main.xaml", """
+            <UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+            <UserControl.Resources><ControlTemplate x:Key="T" TargetType="ContentControl"><Grid><Border Background="#000000"/><TextBlock Foreground="#111111" Text="t"/></Grid></ControlTemplate></UserControl.Resources>
+            <Grid Background="#FFFFFF"><TextBlock Foreground="#000000" Text="x"/></Grid></UserControl>
+            """);
+        var r = fx.Run();
+        Assert.Equal(2, r.Pairs);
+        Assert.DoesNotContain(r.UnresolvedSites, s => s.Reason == UnresolvedReason.InStyleTemplate);
+    }
+
+    [Fact] // layout 宣告的名稱只出現在 Style 的模板裡：那個元素存在，不能報「matched no element」（審查 1.0 最終驗證 S3 對 B8 的連帶）
+    public void LayoutNamesUsedOnlyInsideStyleTemplatesAreNotReportedAsUnmatched()
+    {
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, """{ "layout": { "overlap": ["TemplHost"] } }""");
+        fx.File("Themes/Generic.xaml", """
+            <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:l="clr-namespace:App">
+              <Style x:Key="Card" TargetType="ContentControl"><Setter Property="Template"><Setter.Value>
+                <ControlTemplate TargetType="ContentControl"><l:TemplHost><Border Background="#000000"/><TextBlock Foreground="#EEEEEE" Text="t"/></l:TemplHost></ControlTemplate>
+              </Setter.Value></Setter></Style>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """<Grid Background="#FFFFFF"><TextBlock Foreground="#000000" Text="x"/></Grid>""");
+        var cfg = ToolConfig.Load(fx.Root);
+        var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
+        Assert.Empty(r.UnmatchedLayoutNames);
+        Assert.Equal(1, r.UnresolvedBy[UnresolvedReason.InStyleTemplate]);
+    }
+
+    [Fact] // 宣告了但整個專案沒有任何元素叫這個名字：多半是拼錯或大小寫不對 —— 宣告靜默失效（審查 1.0 B8）。
+           // 不是錯誤（可能只是那個容器這次沒在掃描範圍裡），但要點名
+    public void LayoutNamesThatMatchNoElementAreNamed()
+    {
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, """{ "layout": { "overlap": ["CardGrid", "cardgrid"], "sideBySide": ["Toolbar2"] } }""");
+        fx.File("Main.xaml", """
+            <Grid xmlns:l="clr-namespace:App" Background="#FFFFFF">
+              <l:CardGrid><Border Background="#000000"/><TextBlock Foreground="#FFFFFF" Text="x"/></l:CardGrid>
+            </Grid>
+            """);
+        var cfg = ToolConfig.Load(fx.Root);
+        var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
+        Assert.Equal(["cardgrid", "Toolbar2"], r.UnmatchedLayoutNames);
+        var console = Report.ToConsole(r);
+        Assert.Contains("!! config: layout name 'cardgrid' matched no element", console);
+        Assert.Contains("!! config: layout name 'Toolbar2' matched no element", console);
+        Assert.DoesNotContain("'CardGrid' matched no element", console);
+        Assert.Contains("layout name 'Toolbar2' matched no element", Report.ToMarkdown(r, 0));
+    }
+
+    [Theory] // Canvas 裡有尺寸的純色兄弟也不當背板:Canvas.Left/Top 與文字的實際範圍靜態不可知,
+             // 它在不在字底下沒辦法判定 —— 與 Grid 裡「有明確尺寸 = 不是佔滿」的強調色條同一個處理
+    [InlineData("""<Border Background="#000000"/>""")]
+    [InlineData("""<Border Background="#000000" Width="200" Height="40"/>""")]
+    [InlineData("""<Rectangle Fill="#000000" Width="200" Height="40" Canvas.Left="10"/>""")]
+    public void CanvasSolidSiblingIsNotABackdrop(string sibling)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              <Canvas>
+                {sibling}
+                <TextBlock Foreground="#FFFFFF" Text="x"/>
+              </Canvas>
+            </Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings, x => x.Element == "TextBlock");
+        Assert.Equal("#FFFFFF", f.Bg);              // 字真正疊在祖先的白上
+        Assert.Equal(Category.Fail, f.Category);
+    }
+
+    [Fact] // Canvas 的子元素一律疊在 (0,0),所以它是重疊容器 —— 規則 17(b) 照樣成立:圖片墊底的字底不可知
+    public void CanvasSiblingImageMakesTheBackdropUnknowable()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Canvas>
+                <Image Source="a.png"/>
+                <TextBlock Foreground="#FFFFFF" Text="x"/>
+              </Canvas>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);   // 不是白配白 1:1(那是把 Canvas 當成排開的容器、配祖先)
+        Assert.Equal(UnresolvedReason.OverSiblingContent, Assert.Single(r.UnresolvedSites).Reason);
+    }
+
+    [Theory] // 規則 17 的背板判定:只收「佔滿同一格、確定的純色」;內容元素(圖片/影片)讓底變成不可知
+    [InlineData("""<Rectangle Fill="#000000"/>""", "#000000")]                                         // Rectangle 的底是 Fill
+    [InlineData("""<Border Background="#000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>""", "#000000")]
+    [InlineData("""<Border Background="#000000" Height="20"/>""", "#FFFFFF")]                          // 有明確尺寸 = 不是佔滿
+    [InlineData("""<Border Background="#000000" Width="20"/>""", "#FFFFFF")]                           // 寬、高各自單獨就足以排除
+    [InlineData("""<Border Background="#000000" VerticalAlignment="Top"/>""", "#FFFFFF")]              // 非 Stretch = 不是佔滿
+    [InlineData("""<Border Background="#000000" HorizontalAlignment="Left"/>""", "#FFFFFF")]           // 水平、垂直各自單獨就足以排除
+    [InlineData("""<Border Grid.Column="1" Background="#000000"/>""", "#FFFFFF")]                      // 不同欄 = 不同格
+    [InlineData("""<MediaElement Source="intro.mp4"/>""", null)]                                     // 影片上的字
+    [InlineData("""<CachedImage Source="a.png"/>""", null)]                                          // 衍生命名的 *Image
+    public void SiblingBackdropCandidates(string sibling, string? expectedBg)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              {sibling}
+              <TextBlock Foreground="#FFFFFF" Text="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var text = r.Findings.Where(f => f.Element == "TextBlock").ToList();
+        if (expectedBg is null)
+        {
+            Assert.Empty(text);
+            Assert.Equal(UnresolvedReason.OverSiblingContent, Assert.Single(r.UnresolvedSites).Reason);
+        }
+        else Assert.Equal(expectedBg, Assert.Single(text).Bg);
+    }
+
+    [Fact] // 佔滿格子的兄弟背板是半透明:比照巢狀,疊在它底下的那層上合成。舊版只收不透明的背板,其餘回傳 null,
+           // 字改配祖先的底 —— 白 Grid 裡 #CC000000 的兄弟加黑字報 21:1 ok,同樣的顏色寫成巢狀是 1.66:1 fail
+    public void TranslucentSiblingBackdropIsCompositedLikeANestedOne()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Border Background="#CC000000"/>
+              <TextBlock Foreground="#000000" Text="sibling"/>
+            </Grid>
+            """);
+        fx.File("Nested.xaml", """
+            <Grid Background="#FFFFFF">
+              <Border Background="#CC000000"><TextBlock Foreground="#000000" Text="nested"/></Border>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var sibling = Assert.Single(r.Findings, f => f.File == "Main.xaml");
+        var nested = Assert.Single(r.Findings, f => f.File == "Nested.xaml");
+        Assert.Equal("#CC000000 over #FFFFFF", sibling.Bg);
+        Assert.Equal(nested.Bg, sibling.Bg);
+        Assert.Equal(nested.RatioDark, sibling.RatioDark);  // 1.66:1,不是配祖先白的 21:1
+        Assert.Equal(Category.Fail, sibling.Category);
+    }
+
+    [Fact] // 兄弟背板靠元素自己的 Opacity 變半透明（<Rectangle Fill="#000000" Opacity="0.2"/> 的遮罩寫法）：
+           // 舊版仍當成不透明黑，白字報 21:1，實際是 20% 黑疊白 = #CCCCCC 上的白字 ≈ 1.61:1（審查素材 h15op）
+    public void SiblingBackdropWithElementOpacityIsComposited()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Rectangle Fill="#000000" Opacity="0.2"/>
+              <TextBlock Foreground="#FFFFFF" Text="over scrim"/>
+            </Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings, x => x.Element == "TextBlock");
+        Assert.Equal(Wcag.Contrast("#FFFFFF", Wcag.Composite("#000000", 0.2, "#FFFFFF")), f.RatioDark);
+        Assert.Equal(Category.Fail, f.Category);
+    }
+
+    [Fact] // 背板 brush 本身半透明、元素又有 Opacity：兩個 alpha 相乘（審查 mutation M4c：半透明 brush 不乘 Opacity 時存活）
+    public void TranslucentSiblingBrushIsMultipliedByElementOpacity()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Border Background="#80000000" Opacity="0.5"/>
+              <TextBlock Foreground="#000000" Text="over a light scrim"/>
+            </Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+        Assert.Equal(Wcag.Contrast("#000000", Wcag.Composite("#000000", 0x80 / 255.0 * 0.5, "#FFFFFF")), f.RatioDark);
+    }
+
+    [Fact] // 背板的 Opacity 是 Binding：執行期才知道 → 後面的字計入 unresolved，不是當成不透明
+    public void SiblingBackdropWithBoundOpacityIsUnresolved()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Border Background="#000000" Opacity="{Binding ScrimOpacity}"/>
+              <TextBlock Foreground="#FFFFFF" Text="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.DoesNotContain(r.Findings, f => f.Element == "TextBlock");
+        Assert.Equal(UnresolvedReason.BoundOrGradient, Assert.Single(r.UnresolvedSites).Reason);
+    }
+
+    [Theory] // 透明（或沒有底）的兄弟不管 Opacity 是什麼都看不見：不能因為 Opacity 是 Binding 就讓後面的字變成
+             // bound-or-gradient（審查素材 m4t：exit 0 → 1 的小回歸）
+    [InlineData("""<Border Background="Transparent" Opacity="{Binding Fade}"/>""")]
+    [InlineData("""<Border Background="#00000000" Opacity="{Binding Fade}"/>""")]
+    public void TransparentSiblingWithBoundOpacityIsNotABackdrop(string sibling)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              {sibling}
+              <TextBlock Foreground="#000000" Text="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.UnresolvedSites);
+        Assert.Equal(21, Assert.Single(r.Findings).RatioDark);
+    }
+
+    [Theory] // 兄弟背板是 Binding／漸層／不在色盤的鍵:底是執行期才知道的顏色 —— 依「Binding 底不可往上繼承」
+             // 同一條原則計入 unresolved,不是配祖先的底給出篤定比值(舊版 Binding 兄弟照報 21:1)
+    [InlineData("""<Border Background="{Binding OverlayBrush}"/>""", UnresolvedReason.BoundOrGradient)]
+    [InlineData("""<Border><Border.Background><LinearGradientBrush/></Border.Background></Border>""", UnresolvedReason.BoundOrGradient)]
+    [InlineData("""<Border Background="{DynamicResource NoSuchKey}"/>""", UnresolvedReason.UnknownPaletteKey)]
+    public void UnknowableSiblingBackdropIsUnresolved(string sibling, UnresolvedReason reason)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              {sibling}
+              <TextBlock Foreground="#000000" Text="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.DoesNotContain(r.Findings, f => f.Element == "TextBlock");
+        Assert.Equal(reason, Assert.Single(r.UnresolvedSites).Reason);
+    }
+
+    [Fact] // 半透明兄弟底下沒有可疊的顏色:跟巢狀一樣,不猜 —— 1.0 起兩者都記 translucent-uncomposited(決策檔 L2 選項 A)
+    public void TranslucentSiblingWithNothingUnderneathIsLikeTheNestedCase()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid>
+              <Border Background="#CC000000"/>
+              <TextBlock Foreground="#000000" Text="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Equal(UnresolvedReason.TranslucentUncomposited, Assert.Single(r.UnresolvedSites).Reason);
     }
 
     [Fact] // 同 brush 配對 = 模板不透明度慣用手法(MaterialDesign 實證):字面 1:1、
@@ -604,9 +1346,11 @@ public class NewRuleTests
         var bad = Assert.Single(r.Findings, f => f.Category == Category.Fail);
         Assert.NotEqual(Symmetry.NotApplicable, bad.Symmetry); // 沒過的照分類
 
-        var json = Report.ToJson(r);
-        // 合格那筆整個沒有 symmetry 欄位 —— 給錯值不如不給
-        Assert.Equal(1, json.Split("\"symmetry\"").Length - 1);
+        // 合格那筆的 symmetry 是 null —— 給錯值不如不給（6 起欄位一律輸出，0.x 是整個省略）
+        var symmetries = System.Text.Json.JsonDocument.Parse(Report.ToJson(r)).RootElement.GetProperty("findings")
+            .EnumerateArray().Select(f => (f.GetProperty("category").GetString(), f.GetProperty("symmetry").ValueKind)).ToList();
+        Assert.Contains(("ok", System.Text.Json.JsonValueKind.Null), symmetries);
+        Assert.Contains(("fail", System.Text.Json.JsonValueKind.String), symmetries);
     }
 
     [Fact] // WCAG 大字級的「粗體」是 weight ≥ 700：SemiBold(600) 不算 —— 舊版子字串匹配誤放寬到 3:1

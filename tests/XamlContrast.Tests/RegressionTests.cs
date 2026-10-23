@@ -66,6 +66,24 @@ public class RegressionTests
         var f = Assert.Single(r.Findings);
         Assert.Equal(Category.Fail, f.Category);         // gap=0 不是放行理由
         Assert.Equal(Symmetry.SingleTheme, f.Symmetry);
+        // 報告要明講「對稱欄不適用、只看絕對對比」—— 讀者才不會把 gap=0 讀成「兩主題一致所以沒事」
+        Assert.Contains("single-theme palette detected: symmetry column not applicable", Report.ToConsole(r));
+    }
+
+    [Fact] // 上一條那行說明只屬於「偵測到的單一主題色盤」：有兩套值、或根本沒有色盤（寫死色碼）時印出來就是亂講
+    public void SingleThemeNoteIsNotPrintedForPairOrMissingPalettes()
+    {
+        using var pair = new Fixture().WithPalette().File("Main.xaml", """
+            <Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>
+            """);
+        Assert.DoesNotContain("single-theme palette detected", Report.ToConsole(pair.Run()));
+
+        using var none = new Fixture().File("Main.xaml", """
+            <Grid Background="#000000"><TextBlock Foreground="#FFFFFF"/></Grid>
+            """);
+        var r = none.Run();
+        Assert.True(r.Detection.Palette.IsSingleTheme); // 前提：空色盤在「深淺同值」的意義上也是單一主題
+        Assert.DoesNotContain("single-theme palette detected", Report.ToConsole(r));
     }
 
     // 8.1 #3：ProgressBar 的 Foreground 是進度條填色不是文字，
@@ -121,6 +139,31 @@ public class RegressionTests
         var f = Assert.Single(r.Findings);
         Assert.Equal(Category.Fail, f.Category);         // 不是 Decorative —— 那是 bug #5 的形狀
         Assert.Equal(4.5, f.Need);
+    }
+
+    // 同一條修正的分類規則：只有 TargetType「確定是」非文字控制項才免檢（{x:Type …} 寫法與衍生命名一樣認得）；
+    // 匿名、沒有 TargetType 的 Style 不確定套在誰身上 —— 當文字報出來，不替使用者放過
+    [Theory]
+    [InlineData("", "Style[(anonymous)]/base", Category.Fail)]
+    [InlineData("""TargetType="{x:Type ProgressBar}" """, "Style[{x:Type ProgressBar}]/base", Category.Decorative)]
+    [InlineData("""TargetType="{x:Type local:MetroProgressBar}" """, "Style[{x:Type local:MetroProgressBar}]/base", Category.Decorative)]
+    [InlineData("""TargetType="{x:Type TextBlock}" """, "Style[{x:Type TextBlock}]/base", Category.Fail)]
+    public void StyleDefinitionIsTextUnlessItsTargetTypeIsKnownDecorative(string targetType, string element, Category expected)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Grid.Resources>
+                <Style {targetType}>
+                  <Setter Property="Background" Value="#303030"/>
+                  <Setter Property="Foreground" Value="#404040"/>
+                </Style>
+              </Grid.Resources>
+            </Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+        Assert.Equal(element, f.Element);
+        Assert.Equal(expected, f.Category);
     }
 
     // 8.2 #6：「低於 AA」曾把裝飾算進去（CelFlow 報 80 = 破1+偏低1+裝飾78）
@@ -198,7 +241,7 @@ public class RegressionTests
         Assert.Equal(2, doc.RootElement.GetProperty("runs")[0].GetProperty("results").GetArrayLength());
     }
 
-    // 4.5 輸出合約：退化要機器可讀 —— summary 區塊要有 paletteSource / unresolved / skipped
+    // 4.5 輸出合約：退化要機器可讀 —— summary 區塊要有 paletteMode / unresolved / skipped
     [Fact]
     public void JsonSummaryCarriesDegradationCounters()
     {
@@ -210,7 +253,7 @@ public class RegressionTests
             """);
         var r = fx.Run();
         var json = Report.ToJson(r);
-        Assert.Contains("\"paletteSource\": \"none\"", json);
+        Assert.Contains("\"paletteMode\": \"none\"", json); // 6 拿掉 paletteSource（由 paletteMode 推得）
         Assert.Contains("\"unresolved\": 1", json);
         Assert.Contains("\"pairs\": 0", json);
         // 退化計數要能行動：光知道「漏了 1 組」不夠，要知道是哪一類漏
