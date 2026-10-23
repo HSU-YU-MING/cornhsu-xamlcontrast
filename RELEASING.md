@@ -69,8 +69,24 @@ git tag v1 v1.0.0 && git push origin v1      # @v1 的使用者從這裡開始�
 
 `v1.1.0-rc.1` 之類的預覽版 tag 會被 `release.yml` 擋下：觸發條件是三段式 `v[0-9]*.[0-9]*.[0-9]*`（`-rc.1` 結尾照樣符合），
 但「CHANGELOG 頂端版號 = tag」的守門只取三段式的版號（`1.1.0`），與 `1.1.0-rc.1` 不相等 → 失敗、不發佈。
-這是刻意的現狀（Parity 也沒有預覽版路徑）：要試新版就從原始碼 build，或在本機 `dotnet pack -p:Version=1.1.0-rc.1`
-後用 `--add-source` 安裝。真的需要發預覽版到 nuget.org 時，要一起改的是：守門接受「CHANGELOG 頂端 = tag 去掉
+這是刻意的現狀（Parity 也沒有預覽版路徑）：要試新版就從原始碼 build，或在本機打包一份預覽版來裝：
+
+```bash
+dotnet pack src/XamlContrast.Cli/XamlContrast.Cli.csproj -c Release -p:Version=1.1.0-rc.1 -o /tmp/xc-rc-pkg
+dotnet tool install Cornhsu.XamlContrast --tool-path /tmp/xc-rc-tool --add-source /tmp/xc-rc-pkg --version 1.1.0-rc.1
+/tmp/xc-rc-tool/xamlcontrast --version     # 應該印 1.1.0-rc.1
+```
+
+三個坑：
+
+- **安裝一定要帶 `--version 1.1.0-rc.1`。** 不指定版本時 NuGet 不選預覽版，會裝到 nuget.org 上的正式版 ——
+  `--add-source` 只是多一個來源，不會讓預覽版優先。
+- **每次重新打包都換一個版本號**（`-rc.2`、`-rc.3`…）。同一個版本號第二次 pack，install 會拿
+  `~/.nuget/packages` 裡快取的上一份，看起來裝好了、其實是舊內容。
+- **用 `--tool-path` 裝到暫存資料夾，不要 `--global`。** 全域已經裝了正式版時 `--global` 會失敗
+  （同一個工具在全域只能有一份）；暫存資料夾用完整個刪掉即可，全域的正式版不受影響。
+
+真的需要發預覽版到 nuget.org 時，要一起改的是：守門接受「CHANGELOG 頂端 = tag 去掉
 預發行標籤」、GitHub Release 標成 prerelease、而且**不前移 `v1`**（`@v1` 只能指向正式版；`action.yml` 的
 `[1.*,2.0.0)` 本來就不會裝到預覽版）。
 
