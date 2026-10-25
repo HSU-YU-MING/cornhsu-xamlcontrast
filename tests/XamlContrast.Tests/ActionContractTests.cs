@@ -189,8 +189,33 @@ public class ActionContractTests
             ["comment"] = ("false", "'true'"),
             ["upload-report"] = ("false", "'true'"),
             ["sarif"] = ("false", "'false'"),
+            ["share-stats"] = ("false", "'true'"), // 1.1：'true' = 不表態（照工具的預設）；預設哪天改成主動同意，這一格不必跟著改
             ["artifact-name"] = ("false", "'xamlcontrast-report'"),
         }, Inputs());
+    }
+
+    [Fact] // 1.1 的 share-stats（PROTOCOL.md 第 3 節第 4 條）：false → 對 CLI 設 XAMLCONTRAST_SHARE_STATS=false，job summary 寫一行「關了」。
+           // true（預設）什麼都不設 —— 呼叫端在 workflow／job 層設的 DO_NOT_TRACK、XAMLCONTRAST_SHARE_STATS 照樣傳到 CLI
+           // （step 的 env: 會蓋掉同名的變數，所以那一行寫在 script 裡、只在 false 時 export）。input 的值不進 GITHUB_OUTPUT／ENV／PATH
+    public void ShareStatsFalseTurnsTheToolsStatisticsOff()
+    {
+        Assert.Matches(new Regex(@"^        XC_SHARE_STATS: \$\{\{ inputs\.share-stats \}\}$", RegexOptions.Multiline), Step("Validate inputs"));
+        Assert.Matches(new Regex(@"^        XC_SHARE_STATS: \$\{\{ inputs\.share-stats \}\}$", RegexOptions.Multiline), Step("Run audit"));
+        Assert.DoesNotMatch(new Regex(@"^        XAMLCONTRAST_SHARE_STATS:", RegexOptions.Multiline), ActionYml);
+
+        var off = RunStep("Run audit", new() { ["share-stats"] = "false" });
+        Assert.True(off.Exit == 0, off.ToString());
+        Assert.Equal("XAMLCONTRAST_SHARE_STATS=false DO_NOT_TRACK=<unset>\n", off.XcEnv);
+        Assert.Equal("**XamlContrast** — anonymous usage statistics turned off (`share-stats: false`)\n", off.Summary);
+        Assert.Equal("exit=0\n", off.Output);
+
+        var on = RunStep("Run audit");
+        Assert.Equal("XAMLCONTRAST_SHARE_STATS=<unset> DO_NOT_TRACK=<unset>\n", on.XcEnv);
+        Assert.Equal("", on.Summary); // 送了的那一行由 CLI 寫（只有它知道送了沒），stub 不寫
+
+        var inherited = RunStep("Run audit", jobEnv: new() { ["XAMLCONTRAST_SHARE_STATS"] = "false", ["DO_NOT_TRACK"] = "1" });
+        Assert.Equal("XAMLCONTRAST_SHARE_STATS=false DO_NOT_TRACK=1\n", inherited.XcEnv);
+        Assert.Equal("exit=0\n", inherited.Output);
     }
 
     [Theory] // artifact-name（審查 1.0 B7，比照 Parity）：同一個 workflow run 用兩次時 artifact 名稱與 PR 留言標記會互撞。
@@ -335,6 +360,9 @@ public class ActionContractTests
     [InlineData("sarif", "yes", "sarif must be")]
     [InlineData("comment", "1", "comment must be")]
     [InlineData("upload-report", "", "upload-report must be")]
+    [InlineData("share-stats", "False", "share-stats must be")]
+    [InlineData("share-stats", "no", "share-stats must be")]
+    [InlineData("share-stats", "", "share-stats must be")]
     [InlineData("min-coverage", "50%", "min-coverage must be")]
     [InlineData("min-coverage", "-1", "min-coverage must be")]
     [InlineData("version", "1.*\n::error title=x::INJECTED", "line break")]
@@ -364,6 +392,7 @@ public class ActionContractTests
     [InlineData("strict-palette", "true")]
     [InlineData("sarif", "true")]
     [InlineData("comment", "false")]
+    [InlineData("share-stats", "false")]
     [InlineData("version", "1.0.0")]
     public void ValidInputValuesPass(string input, string value)
     {
