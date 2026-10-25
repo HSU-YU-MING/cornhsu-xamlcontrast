@@ -306,6 +306,7 @@ public class CliPushTests
     [InlineData(new[] { "--json", "{root}/out.json" }, "--json")]
     [InlineData(new[] { "--sarif", "{root}/out.sarif" }, "--sarif")]
     [InlineData(new[] { "--md", "{root}/out.md" }, "--md")]
+    [InlineData(new[] { "--html", "{root}/out.html" }, "--html")]
     [InlineData(new[] { "--baseline", "{root}/b.json" }, "--baseline")]
     [InlineData(new[] { "--write-baseline", "{root}/b.json" }, "--write-baseline")]
     [InlineData(new[] { "--fail-on", "fail" }, "--fail-on")]

@@ -23,9 +23,9 @@ public sealed record ReportContext
 /// <summary>
 /// 輸出合約（規劃書 4.5）。JSON 分兩層：summary 讓退化資訊機器可讀
 /// （CI 只消費 findings 的話，「退化要用喊的」等於不存在），findings 是逐筆結果。
-/// 文案一律英文 —— JSON 的 category 是給 CI 腳本 match 的。
+/// 文案一律英文 —— JSON 的 category 是給 CI 腳本 match 的。HTML 報告在 Report.Html.cs。
 /// </summary>
-public static class Report
+public static partial class Report
 {
     public static string CategoryLabel(Category c) => c switch
     {

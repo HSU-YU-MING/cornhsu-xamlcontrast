@@ -38,7 +38,7 @@ inputs:
     required: false
     default: 'true'
   upload-report:
-    description: 'Upload the JSON and Markdown reports as an artifact named by artifact-name (default xamlcontrast-report)'
+    description: 'Upload the JSON, Markdown and HTML reports as an artifact named by artifact-name (default xamlcontrast-report)'
     required: false
     default: 'true'
   sarif:
@@ -74,7 +74,7 @@ runs:
         XC_ARTIFACT_NAME: ${{ inputs.artifact-name }}
       run: |
         # 同一個 job 前一次呼叫留下的報告（$RUNNER_TEMP 共用）不能被這一次的註記與上傳撿去
-        rm -f -- "$RUNNER_TEMP/xamlcontrast-report.json" "$RUNNER_TEMP/xamlcontrast-report.md" "$RUNNER_TEMP/xamlcontrast.sarif"
+        rm -f -- "$RUNNER_TEMP/xamlcontrast-report.json" "$RUNNER_TEMP/xamlcontrast-report.md" "$RUNNER_TEMP/xamlcontrast-report.html" "$RUNNER_TEMP/xamlcontrast.sarif"
         bad=0
         refuse() { echo "::error title=XamlContrast action::$1"; bad=1; }
         # 帶換行的值一律拒絕：CLI／dotnet 的錯誤訊息會把它原樣印出，換行後的內容落在行首就成了
@@ -141,6 +141,8 @@ runs:
         set +e
         args=(--json "$RUNNER_TEMP/xamlcontrast-report.json")
         args+=(--md "$RUNNER_TEMP/xamlcontrast-report.md")
+        # 單檔 HTML（1.1）：色塊與比值，跟 JSON、Markdown 一起上傳成 artifact（落點固定，不收 input）
+        args+=(--html "$RUNNER_TEMP/xamlcontrast-report.html")
         [ "$XC_SARIF" = "true" ] && args+=(--sarif "$RUNNER_TEMP/xamlcontrast.sarif")
         # gate 與覆蓋率下限：空白就不傳，交給 config（沒有就是內建預設）—— 旗標 > config > 預設
         [ -n "$XC_FAIL_ON" ] && args+=(--fail-on "$XC_FAIL_ON")
@@ -263,6 +265,7 @@ runs:
         path: |
           ${{ runner.temp }}/xamlcontrast-report.json
           ${{ runner.temp }}/xamlcontrast-report.md
+          ${{ runner.temp }}/xamlcontrast-report.html
         if-no-files-found: ignore
 
     # 報告與註記都出去了，現在才依 gate 結論決定 job 成敗

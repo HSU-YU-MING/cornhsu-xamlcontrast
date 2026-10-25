@@ -178,7 +178,7 @@ public class CliArgumentTests
         {
             Assert.Contains("usage: xamlcontrast <project-root> [options]", r.Out);
             // help 要列出每一個旗標 —— 凍結面（CLI 旗標）的對外說明
-            foreach (var flag in new[] { "--json", "--sarif", "--md", "--fail-on", "--strict-palette",
+            foreach (var flag in new[] { "--json", "--sarif", "--md", "--html", "--fail-on", "--strict-palette",
                                          "--min-coverage", "--baseline", "--write-baseline", "--show-ok", "--show-unresolved",
                                          "--version", "-h, --help" })
                 Assert.Contains(flag, r.Out);

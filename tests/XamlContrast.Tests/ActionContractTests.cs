@@ -255,16 +255,35 @@ public class ActionContractTests
         Assert.False(string.IsNullOrEmpty(script), "action.yml 的 Run audit 步驟找不到了");
         var flags = Regex.Matches(script, @"--[a-z][a-z-]*").Select(m => m.Value).ToHashSet();
         // 新增 input → 新的旗標 → 這裡要同步（並在下面的實跑裡加上它）
-        Assert.Equal(new HashSet<string> { "--json", "--md", "--sarif", "--fail-on", "--min-coverage", "--strict-palette", "--baseline" }, flags);
+        Assert.Equal(new HashSet<string> { "--json", "--md", "--html", "--sarif", "--fail-on", "--min-coverage", "--strict-palette", "--baseline" }, flags);
 
         using var fx = CliProjects.Passing().WithPalette();
         fx.File("baseline.json", """{ "schemaVersion": 1, "entries": [] }""");
         string P(string name) => Path.Combine(fx.Root, name);
         // 照 Action 的順序：旗標在前，root 接在 -- 後面
-        var r = Cli.Run("--json", P("report.json"), "--md", P("report.md"), "--sarif", P("report.sarif"),
+        var r = Cli.Run("--json", P("report.json"), "--md", P("report.md"), "--html", P("report.html"), "--sarif", P("report.sarif"),
                         "--fail-on", "warn", "--min-coverage", "0", "--strict-palette", "--baseline", P("baseline.json"), "--", fx.Root);
         Assert.True(r.Exit == 0, r.ToString());
-        Assert.True(File.Exists(P("report.json")) && File.Exists(P("report.md")) && File.Exists(P("report.sarif")));
+        Assert.True(File.Exists(P("report.json")) && File.Exists(P("report.md")) && File.Exists(P("report.html")) && File.Exists(P("report.sarif")));
+    }
+
+    [Fact] // 1.1：HTML 報告與 JSON、Markdown 一樣寫在固定的 $RUNNER_TEMP 落點（不收 input、不拼使用者給的值），
+           // 一起上傳成 artifact；同一個 job 前一次呼叫留下的那份先刪掉，不會被這一次的上傳撿去
+    public void HtmlReportIsWrittenToTheFixedTempPathAndUploaded()
+    {
+        var audit = RunStep("Run audit");
+        Assert.True(audit.Exit == 0, audit.ToString());
+        Assert.Matches(new Regex(@"\|--html\|[^|]*/_temp/xamlcontrast-report\.html\|"), audit.Calls);
+        Assert.Matches(new Regex(@"^          \$\{\{ runner\.temp \}\}/xamlcontrast-report\.html$", RegexOptions.Multiline), Step("Upload report"));
+
+        var left = new List<string>();
+        var validate = RunStep("Validate inputs", prepareTemp: t =>
+        {
+            foreach (var stale in new[] { "xamlcontrast-report.json", "xamlcontrast-report.md", "xamlcontrast-report.html", "xamlcontrast.sarif" })
+                File.WriteAllText(Path.Combine(t, stale), "from an earlier call");
+        }, inspectTemp: t => left.AddRange(Directory.EnumerateFiles(t, "xamlcontrast*")));
+        Assert.True(validate.Exit == 0, validate.ToString());
+        Assert.Empty(left);
     }
 
     // ---------- 1.0：input 一律經 env、先驗再用；工具版本跟著 action 的 major（照 Parity 的 ActionYmlTests）----------
@@ -486,17 +505,22 @@ public class ActionContractTests
         return File.Exists(fallback) ? fallback : throw new InvalidOperationException("找不到 Git Bash，這條測試需要它");
     }
 
-    private sealed record StepRun(int Exit, string Stdout, string Stderr, string Output, string Calls)
+    /// <summary>XcEnv：xamlcontrast 的 stub 被呼叫時看到的統計開關（每次一行）；Summary：$GITHUB_STEP_SUMMARY 的內容。</summary>
+    private sealed record StepRun(int Exit, string Stdout, string Stderr, string Output, string Calls, string XcEnv = "", string Summary = "")
     {
-        public override string ToString() => $"exit {Exit}\n--- stdout\n{Stdout}\n--- stderr\n{Stderr}\n--- calls\n{Calls}";
+        public override string ToString() => $"exit {Exit}\n--- stdout\n{Stdout}\n--- stderr\n{Stderr}\n--- calls\n{Calls}\n--- xamlcontrast env\n{XcEnv}\n--- summary\n{Summary}";
     }
 
     /// <summary>
     /// 用 runner 的方式（bash -eo pipefail）跑一個 step 的 run 區塊。env 照那個 step 的 env: 區塊給：
     /// 沒指定的 input 用 action.yml 的預設值（root 給 src/App）。dotnet 與 xamlcontrast 換成 stub，
-    /// 把收到的參數一行一筆記到 $RUNNER_TEMP/calls（xamlcontrast 回 <paramref name="stubExit"/>）。
+    /// 把收到的參數一行一筆記到 $RUNNER_TEMP/calls（xamlcontrast 回 <paramref name="stubExit"/>），
+    /// xamlcontrast 另外記下它看到的 XAMLCONTRAST_SHARE_STATS／DO_NOT_TRACK（$RUNNER_TEMP/xc-env）。
+    /// <paramref name="jobEnv"/>：呼叫端在 workflow／job 層設的環境變數（composite 的 step 會繼承）。
+    /// <paramref name="inspectTemp"/>：bash 結束之後、暫存目錄刪掉之前看一眼 $RUNNER_TEMP。
     /// </summary>
-    private static StepRun RunStep(string step, Dictionary<string, string>? inputs = null, int stubExit = 0, Action<string>? prepareTemp = null)
+    private static StepRun RunStep(string step, Dictionary<string, string>? inputs = null, int stubExit = 0, Action<string>? prepareTemp = null,
+        Action<string>? inspectTemp = null, Dictionary<string, string>? jobEnv = null)
     {
         var values = Inputs().ToDictionary(kv => kv.Key, kv => kv.Value.Default?.Trim('\'') ?? "");
         values["root"] = "src/App";
@@ -510,7 +534,11 @@ public class ActionContractTests
         var stub = $$"""
             dotnet() { printf '%s|' "$@" >> "$RUNNER_TEMP/calls"; printf '\n' >> "$RUNNER_TEMP/calls"; }
             gh() { printf '%s|' "$@" >> "$RUNNER_TEMP/calls"; printf '\n' >> "$RUNNER_TEMP/calls"; }
-            xamlcontrast() { printf '%s|' "$@" >> "$RUNNER_TEMP/calls"; printf '\n' >> "$RUNNER_TEMP/calls"; return {{stubExit}}; }
+            xamlcontrast() {
+              printf '%s|' "$@" >> "$RUNNER_TEMP/calls"; printf '\n' >> "$RUNNER_TEMP/calls"
+              printf 'XAMLCONTRAST_SHARE_STATS=%s DO_NOT_TRACK=%s\n' "${XAMLCONTRAST_SHARE_STATS-<unset>}" "${DO_NOT_TRACK-<unset>}" >> "$RUNNER_TEMP/xc-env"
+              return {{stubExit}}
+            }
 
             """;
         var script = Path.Combine(temp, "step.sh");
@@ -529,14 +557,21 @@ public class ActionContractTests
         psi.Environment["GITHUB_OUTPUT"] = Unix(output);
         psi.Environment["GITHUB_PATH"] = Unix(Path.Combine(temp, "github_path"));
         psi.Environment["HOME"] = Unix(dir.Root);
+        var summary = Path.Combine(temp, "step_summary");
+        File.WriteAllText(summary, "");
+        psi.Environment["GITHUB_STEP_SUMMARY"] = Unix(summary);
+        // 跑測試的機器自己的開關不能漏進來（runner 上 CI=true；開發者的 shell 可能設了 DO_NOT_TRACK）
+        foreach (var name in new[] { "XAMLCONTRAST_SHARE_STATS", "CORNHSU_SHARE_STATS", "DO_NOT_TRACK" }) psi.Environment.Remove(name);
+        foreach (var (k, v) in jobEnv ?? []) psi.Environment[k] = v;
         foreach (Match m in Regex.Matches(Step(step), @"^        (?<v>[A-Z_]+): \$\{\{ inputs\.(?<i>[a-z-]+) \}\}$", RegexOptions.Multiline))
             psi.Environment[m.Groups["v"].Value] = values[m.Groups["i"].Value];
         using var p = Process.Start(psi)!;
         var stdout = p.StandardOutput.ReadToEndAsync();
         var stderr = p.StandardError.ReadToEndAsync();
         Assert.True(p.WaitForExit(30_000), "bash 沒有在 30 秒內結束");
-        var calls = Path.Combine(temp, "calls");
+        inspectTemp?.Invoke(temp);
+        string Text(string name) => Path.Combine(temp, name) is var f && File.Exists(f) ? File.ReadAllText(f).Replace("\r\n", "\n") : "";
         return new StepRun(p.ExitCode, stdout.Result, stderr.Result, File.ReadAllText(output).Replace("\r\n", "\n"),
-            File.Exists(calls) ? File.ReadAllText(calls).Replace("\r\n", "\n") : "");
+            Text("calls"), Text("xc-env"), Text("step_summary"));
     }
 }
