@@ -74,7 +74,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["file", "line", "element", "fg", "bg", "ratioDark", "ratioLight", "threshold", "category", "symmetry", "isText", "isLargeText", "fontSize", "theme", "baseline"],
+        "required": ["file", "line", "element", "fg", "bg", "ratioDark", "ratioLight", "colors", "threshold", "category", "symmetry", "isText", "isLargeText", "fontSize", "theme", "baseline"],
         "properties": {
           "file": { "type": "string" },
           "line": { "type": "integer", "minimum": 0 },
@@ -83,6 +83,15 @@
           "bg": { "type": "string", "description": "The resolved backdrop: '{Key}', '#RRGGBB', or a composite description." },
           "ratioDark": { "type": ["number", "null"], "description": "Contrast ratio in the dark theme; null when the pair exists in the light theme only (theme is \"light\")." },
           "ratioLight": { "type": ["number", "null"], "description": "Contrast ratio in the light theme; null when the pair exists in the dark theme only (theme is \"dark\")." },
+          "colors": {
+            "type": "object",
+            "required": ["dark", "light"],
+            "description": "Added in 1.1 (schemaVersion stays 6). The two opaque colours each theme's ratio was computed on: the foreground already composited over the backdrop with its own alpha and the accumulated Opacity, the backdrop with its translucent layers composited — what is on screen. A theme is null exactly when its ratio is null.",
+            "properties": {
+              "dark": { "$ref": "#/$defs/colorPair" },
+              "light": { "$ref": "#/$defs/colorPair" }
+            }
+          },
           "threshold": { "type": "number", "description": "0 for decorative elements, largeText or normalText otherwise." },
           "category": { "enum": ["ok", "warn", "fail", "decorative"] },
           "symmetry": { "enum": ["both-low", "dark-fails", "light-fails", "single-theme", null], "description": "Only for fail and warn; null otherwise." },
@@ -96,6 +105,14 @@
     }
   },
   "$defs": {
+    "colorPair": {
+      "type": ["object", "null"],
+      "required": ["fg", "bg"],
+      "properties": {
+        "fg": { "type": "string", "pattern": "^#[0-9A-F]{6}$", "description": "The text colour on screen, #RRGGBB in upper case." },
+        "bg": { "type": "string", "pattern": "^#[0-9A-F]{6}$", "description": "The backdrop colour on screen, #RRGGBB in upper case." }
+      }
+    },
     "reason": { "type": "string", "description": "Why a pair could not be resolved. An open set: a 1.x release may add a reason (a newly named blind spot), so consumers must accept values they do not know; existing values keep their spelling. Current values: `no-ancestor-background`, `bound-or-gradient`, `unknown-palette-key`, `translucent-uncomposited`, `same-brush-pair`, `over-sibling-content`, `in-style-template`." }
   }
 }

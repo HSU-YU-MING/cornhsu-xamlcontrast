@@ -15,6 +15,14 @@ public enum Category { Ok, Warn, Fail, Decorative }
 /// </summary>
 public enum Symmetry { BothLow, DarkFails, LightFails, SingleTheme, NotApplicable }
 
+/// <summary>
+/// 一個主題下「比值是拿哪兩個顏色算的」：都是不透明的 #RRGGBB（大寫）。字色已經以自己的 alpha 與累乘的 Opacity
+/// 疊到底上，底已經把半透明的層、Opacity 群組一層一層合成完 —— 也就是螢幕上實際看到的字色與底色。
+/// <see cref="Wcag.Contrast"/> 拿這兩個值算出來的就是 finding 的比值（逐位相同，測試釘住）。
+/// ⚠ 只放算過的值：fg／bg 欄（原始寫法）讀不出顏色的配對根本不會成為 finding，這裡不編造。
+/// </summary>
+public sealed record ContrastColors(string Fg, string Bg);
+
 public sealed class Finding
 {
     public required string File { get; init; }
@@ -34,6 +42,17 @@ public sealed class Finding
     /// JSON、console、Markdown、SARIF 都經這裡（審查 1.0 B3：1.0 之前兩欄都填那個主題的值，讀的人會以為另一個主題也量過）。</summary>
     public double? RatioIn(ThemeSide side) => Theme is { } t && t != side ? null
         : side == ThemeSide.Dark ? RatioDark : RatioLight;
+
+    /// <summary>深色主題下算出 <see cref="RatioDark"/> 的那一對顏色（同 RatioDark：只存在於淺色主題的配對，內部填的是淺色的值 ——
+    /// 對外一律經 <see cref="ColorsIn"/>）。稽核產的 finding 一律有；函式庫呼叫端自己建的可以沒有（null）。</summary>
+    public ContrastColors? ColorsDark { get; init; }
+    /// <summary>淺色主題下算出 <see cref="RatioLight"/> 的那一對顏色（同上）。</summary>
+    public ContrastColors? ColorsLight { get; init; }
+
+    /// <summary>那個主題下算比值的那一對顏色；這組配對在那個主題不存在時是 null —— 與 <see cref="RatioIn"/> 同一套規則，
+    /// 不印一個不存在的主題的顏色。JSON 的 findings[].colors 與 HTML 報告的色塊都經這裡。</summary>
+    public ContrastColors? ColorsIn(ThemeSide side) => Theme is { } t && t != side ? null
+        : side == ThemeSide.Dark ? ColorsDark : ColorsLight;
     public bool IsText { get; init; }
     /// <summary>門檻：一般文字 4.5、大字級 3.0、裝飾 0</summary>
     public double Need { get; init; }

@@ -173,6 +173,10 @@ public static class Report
         ? string.Create(CultureInfo.InvariantCulture, $"{f.RatioIn(t)}:1 ({ThemeLabel(t)} theme only)")
         : string.Create(CultureInfo.InvariantCulture, $"{f.RatioDark}:1 dark / {f.RatioLight}:1 light");
 
+    /// <summary>findings[].colors 的一個主題：{ fg, bg }；那個主題下不存在的配對（或函式庫呼叫端沒給顏色）是 null。</summary>
+    private static object? ColorsJson(Finding f, ThemeSide side)
+        => f.ColorsIn(side) is { } c ? new { fg = c.Fg, bg = c.Bg } : null;
+
     public static string ToJson(AuditResult r, ReportContext? context = null)
     {
         var ctx = context ?? new ReportContext();
@@ -257,6 +261,13 @@ public static class Report
                 // 只存在於一個主題的配對：另一個主題的比值不存在 → null（1.0 之前兩欄都填那個主題的值）
                 ratioDark = f.RatioIn(ThemeSide.Dark),
                 ratioLight = f.RatioIn(ThemeSide.Light),
+                // 1.1 新增（不遞增 schemaVersion）：比值是拿哪兩個顏色算的 —— 半透明的層已經合成，是螢幕上的顏色。
+                // 讀報告的人不必自己重做一次合成才知道「1.6:1 是什麼配什麼」。那個主題下不存在的配對是 null（同 ratioDark／ratioLight）
+                colors = new
+                {
+                    dark = ColorsJson(f, ThemeSide.Dark),
+                    light = ColorsJson(f, ThemeSide.Light),
+                },
                 threshold = f.Need,
                 category = CategoryLabel(f.Category),
                 // 合格的配對沒有「換主題救不救得回來」可言 —— null，
