@@ -8,6 +8,7 @@ using XamlContrast.Core;
 //   （0 組配對、--strict-palette 且色盤退化、覆蓋率低於下限 —— 「工具沒看到」與「看到了有問題」
 //   在 CI 上的處置不同：前者要修設定，後者要修顏色。比照 Parity 的 exit 3）
 // --push（實驗性，不在凍結面內）另有自己的兩個碼：0 送出、2 其他一切（見 Push.cs）
+// 匿名使用統計（1.1，Stats.cs）在判定與所有輸出之後才送，送不出去不改退出碼、不改任何輸出
 
 var showOk = false;
 var showUnresolved = false;
@@ -22,6 +23,7 @@ string? baselinePath = null;
 string? writeBaselinePath = null;
 string? root = null;
 var doubleDash = false;
+var statsPreview = false; // --stats-preview：印出這次會送的匿名統計、什麼都不送（Stats.cs）
 // --push（實驗性）：上傳既有的報告，不稽核
 string? pushPath = null;
 string? server = null;
@@ -35,6 +37,7 @@ for (var i = 0; i < args.Length; i++)
         case "--show-ok": showOk = true; break;
         case "--show-unresolved": showUnresolved = true; break;
         case "--strict-palette": strictPalette = true; break;
+        case "--stats-preview": statsPreview = true; break;
         case "--min-coverage":
             if (i + 1 >= args.Length ||
                 !double.TryParse(args[i + 1], System.Globalization.NumberStyles.Float,
@@ -128,6 +131,7 @@ if (pushPath is not null)
         (baselinePath is not null, "--baseline"), (writeBaselinePath is not null, "--write-baseline"),
         (failOnFlag is not null, "--fail-on"), (minCoverage is not null, "--min-coverage"),
         (strictPalette, "--strict-palette"), (showOk, "--show-ok"), (showUnresolved, "--show-unresolved"),
+        (statsPreview, "--stats-preview"),
     }.Where(x => x.Given).Select(x => x.Name).ToArray();
     if (auditInputs.Length > 0)
     {
@@ -275,6 +279,10 @@ if (mdPath is not null && !TryWrite(mdPath, Report.ToMarkdown(result, exitCode),
 
 // 單檔 HTML（1.1）：與 --json 同一份 context（判定、gate、baseline 逐筆結果）；寫不出去一樣是 2
 if (htmlPath is not null && !TryWrite(htmlPath, Report.ToHtml(result, context), "html")) return 2;
+
+// 匿名使用統計（1.1，PROTOCOL.md）：稽核得出判定、輸出檔都寫完之後才送 —— 用法、設定、寫檔錯誤（2）、--push、--help、
+// --version 都在上面 return 了。送不出去什麼都不改（最多多花 3 秒）；說明只在 stderr；--stats-preview 只印不送
+Stats.AfterAudit(result, config, exitCode, gateWarn ? "warn" : "fail", ToolVersion(), statsPreview);
 
 return exitCode;
 
@@ -446,8 +454,15 @@ static void PrintUsage(TextWriter w)
           --show-ok                list passing pairs, grouped
           --show-unresolved        list every pair the tool could NOT resolve, with
                                    file:line, reason and the offending value/key
+          --stats-preview          print the anonymous usage statistics this run would send, and
+                                   whether they would be sent, to stderr; sends nothing
           --version                print the tool version
           -h, --help               print this help
+
+        anonymous usage statistics (on by default): after an audit, one request with counts
+        and ratio ranges only (no names, paths or colours) goes to https://stats.cornhsu.com/
+        for a master's thesis; --stats-preview shows it. Turn it off with DO_NOT_TRACK=1,
+        XAMLCONTRAST_SHARE_STATS=false or "stats": { "share": false } in xamlcontrast.config.json.
 
         push options (experimental: may change in a minor release until the dashboard
         is publicly deployed). Uploads a report to a Parity dashboard; never audits:
