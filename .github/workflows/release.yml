@@ -7,6 +7,11 @@ on:
     # （Parity 2026-08-26 發 1.0.0 與 1.1.0 時各踩一次）
     tags: ['v[0-9]*.[0-9]*.[0-9]*']
 
+# 研究資料的保護：release 用真的版號（-p:Version=<tag>）建置，再跑測試與 demo 守門 —— 那是一個「正式版」在跑稽核，
+# 沒有這一行就會往 stats.cornhsu.com 送出真的匿名統計（1.1 起預設會送），每發一次版就混進幾筆維護者自己的資料
+env:
+  DO_NOT_TRACK: '1'
+
 jobs:
   release:
     runs-on: ubuntu-latest

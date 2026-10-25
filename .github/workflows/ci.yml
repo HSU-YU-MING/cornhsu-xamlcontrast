@@ -9,6 +9,11 @@ on:
 permissions:
   contents: read
 
+# 研究資料的保護：1.1 起工具預設會送匿名使用統計（PROTOCOL.md），維護者自己的 CI 不能混進論文的資料。
+# 這裡建的是 0.0.0-dev（本來就不送），但 pack-smoke 裝的是 0.0.0-ci —— 哪天它多跑一次稽核就會送出去。全部關掉，不靠記得
+env:
+  DO_NOT_TRACK: '1'
+
 jobs:
   # 排版守門（對齊 PolyMigrate 的 CI 形狀）。風格規則見 .editorconfig。
   format:
