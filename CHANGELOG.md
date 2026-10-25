@@ -5,7 +5,56 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+> **⚠️ This release sends anonymous usage statistics by default.** After every audit that reaches a
+> verdict (exit 0, 1 or 3) the tool sends one request to `https://stats.cornhsu.com/v1/xamlcontrast` with
+> counts and ratio ranges only — no file names, paths, element or resource names, colours, report
+> contents, or repository, user or machine names, and no ID unless you add one. It supports the author's
+> master's thesis; what is sent and why: <https://stats.cornhsu.com/>, and README *Anonymous usage
+> statistics*. **To turn it off**, any one of: `DO_NOT_TRACK=1`, `XAMLCONTRAST_SHARE_STATS=false` (or
+> `CORNHSU_SHARE_STATS=false`), `"stats": { "share": false }` in `xamlcontrast.config.json`, or
+> `share-stats: false` in the Action. `--stats-preview` prints exactly what a run would send and sends
+> nothing. It never changes the exit code or any output, and gives up silently after at most 3 seconds.
+
 ### Added
+- **Anonymous usage statistics** (see the notice above; the protocol is shared with Parity 2.1 and the
+  collector). Sent once per audit with a verdict — never for `--push`, `--help`, `--version` or any exit 2
+  (usage, config or output-file error). The fields: `schema`, `tool`, `toolVersion`, `os`, `ci`,
+  `projectId` (null unless set in the config) and `data` — `exitCode`, `failOn`, `paletteMode`,
+  `paletteDegraded`, `files`, `pairs`, `coverage`, `counts`, `unresolvedBy` (per reason; a reason a later
+  1.x adds is sent as `other`) and `ratios` (non-decorative pairs by worst ratio in six ranges: < 1.5,
+  1.5–2, 2–3, 3–4.5, 4.5–7, ≥ 7). The switches are checked in order and the first that says no wins:
+  `DO_NOT_TRACK` (any value but `0` / `false`), `CORNHSU_SHARE_STATS` and `XAMLCONTRAST_SHARE_STATS` (any
+  non-empty value but `1` / `true` / `yes` / `on`, so a typo turns it off), the config's `stats.share`,
+  and development builds (any version starting with `0.0.0-`: `0.0.0-dev` from source, CI and local test
+  packages), which never send. A notice goes to stderr only: in full the first
+  time on a machine (then a marker file in the user config folder, `cornhsu/xamlcontrast-stats-notice`,
+  stops it), one line on every CI run, plus one line in the GitHub Actions job summary; nothing at all
+  when nothing is sent. The request has a 1.5-second connect and 3-second total limit, is never retried
+  or redirected, carries no User-Agent, cookies or custom headers, and any failure is ignored.
+- **`--stats-preview`**: runs the audit as usual, sends nothing, and prints to stderr the exact JSON the
+  run would send and whether — or why not — it would be sent. Exit code and every other output unchanged.
+- **Config: `stats`** — `"share": false` turns the statistics off; `"projectId"` is an optional ID of your
+  own (16–64 characters of `A-Z a-z 0-9 _ -`) that groups your project's runs. A malformed `projectId`,
+  or a `share` that isn't `true` / `false`, is a config error (exit 2) that names the field. Leaving
+  `share` out (or `true`) leaves the default.
+- **Action input `share-stats`** (default `'true'`): `false` sets `XAMLCONTRAST_SHARE_STATS=false` for the
+  tool and writes one line in the job summary. Only `true` / `false`, checked before anything is
+  installed. With `true` the action sets nothing, so `DO_NOT_TRACK` or `XAMLCONTRAST_SHARE_STATS` from
+  your workflow still reach the tool.
+- **`--html <path>`**: a self-contained HTML report — inline CSS, no scripts, no external files, readable
+  in light and dark mode. Verdict and why, every degradation warning, a summary with every
+  not-evaluated counter (zeros included), one card per `fail` and `warn` pair with swatches of the text
+  colour and backdrop, a sample in those colours, the ratio and threshold for each theme, the unresolved
+  pairs with reason and value, and the `ok` / `decorative` pairs in collapsed sections. Everything from
+  the scanned XAML is escaped and the page's Content-Security-Policy forbids scripts. A file it can't
+  write is exit 2, like `--json` and `--md`. Its layout is presentation, not a frozen interface.
+  The Action writes it to `$RUNNER_TEMP/xamlcontrast-report.html` and includes it in the uploaded
+  report artifact.
+- **JSON: `findings[].colors`** — `{ "dark": { "fg": "#RRGGBB", "bg": "#RRGGBB" } | null, "light": … }`, the
+  two opaque colours each theme's ratio was computed on (text composited over the backdrop with its
+  alpha and the accumulated `Opacity`, translucent backdrop layers composited). Recomputing the
+  contrast from them gives exactly `ratioDark` / `ratioLight`, and a theme is `null` exactly when its ratio
+  is. An addition: `schemaVersion` stays 6 and `docs/report.schema.json` describes the new field.
 - **Experimental: `--push <report.json>`** uploads a report written by `--json` to a
   [Parity](https://github.com/HSU-YU-MING/cornhsu-parity) team dashboard (`Parity.Server`): one
   `POST {server}/api/runs` whose body is the file, unchanged. It never audits — combined with a project
@@ -18,8 +67,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   dashboard* shows a workflow step to run after the action; the action itself gets no new input.
   **Not covered by the 1.x freeze yet:** until the dashboard is publicly deployed, the push flags, the
   environment variables, push-mode exit codes and the server protocol may change in a minor release.
-  Nothing else changes — the audit's flags, exit codes, JSON and console output are as in 1.0.0, and the
-  audit still makes no network requests.
+  `--push` itself changes nothing about the audit, and the report only leaves the machine when you
+  push it (the audit's own request is the anonymous usage statistics above, which carry no report data).
 
 ## 1.0.0 — 2026-10-23
 
