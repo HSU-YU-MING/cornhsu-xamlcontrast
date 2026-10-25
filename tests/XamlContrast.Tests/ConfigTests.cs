@@ -123,6 +123,10 @@ public class ConfigTests
     [InlineData("""{ "classification": { "extraText": "TextBlock" } }""", "classification.extraText must be an array of strings")]
     [InlineData("""{ "layout": { "overlap": [1] } }""", "layout.overlap[0] must be a string")]
     [InlineData("""{ "ignore": { "requireReason": "no" } }""", "ignore.requireReason must be true or false")]
+    [InlineData("""{ "stats": { "share": "false" } }""", "stats.share must be true or false")] // 字串的 "false" 不算：型別錯就是設定錯誤
+    [InlineData("""{ "stats": { "share": 0 } }""", "stats.share must be true or false")]
+    [InlineData("""{ "stats": { "projectId": 1234567890123456 } }""", "stats.projectId must be a string")]
+    [InlineData("""{ "stats": true }""", "stats must be an object")]
     public void TypeErrorsNameTheFieldAndTheExpectedType(string json, string expected)
     {
         using var fx = new Fixture();
@@ -255,6 +259,40 @@ public class ConfigTests
         fx.File(ToolConfig.FileName, json);
         var ex = Assert.Throws<ConfigException>(() => ToolConfig.Load(fx.Root));
         Assert.Contains(expectInMessage, ex.Message);
+    }
+
+    [Theory] // 1.1 的 stats（匿名使用統計，PROTOCOL.md 第 3、7.1 節）：share 只收布林；projectId 16–64 個 A-Z a-z 0-9 _ -，
+             // 格式不對是設定錯誤（exit 2）—— 不是安靜丟掉（使用者以為帶了 ID，資料卻對不起來），也不是照送（收集站拒收整筆）
+    [InlineData("""{ "stats": { "projectId": "too-short" } }""", "stats.projectId must be 16-64 characters, got 9")]
+    [InlineData("""{ "stats": { "projectId": "0123456789012345678901234567890123456789012345678901234567890123x" } }""", "must be 16-64 characters, got 65")]
+    [InlineData("""{ "stats": { "projectId": "my project id 2026" } }""", "may only contain A-Z, a-z, 0-9, '_' and '-', got U+0020 at position 3")]
+    [InlineData("""{ "stats": { "projectId": "acme/desktop-app-01" } }""", "got '/' at position 5")]
+    [InlineData("""{ "stats": { "projectId": "abcdefghijklmnop\n" } }""", "got U+000A at position 17")] // 結尾的換行：正則的 $ 會放行
+    [InlineData("""{ "stats": { "projectId": "ünicode-project-01" } }""", "got 'ü' at position 1")]
+    [InlineData("""{ "stats": null }""", "stats must be an object, got null")]
+    [InlineData("""{ "stats": { "shares": false } }""", "unknown property 'stats.shares'")]
+    public void InvalidStatsSectionIsAConfigError(string json, string expectInMessage)
+    {
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, json);
+        var ex = Assert.Throws<ConfigException>(() => ToolConfig.Load(fx.Root));
+        Assert.Contains(expectInMessage, ex.Message);
+    }
+
+    [Theory] // 合法的 stats：share 沒寫是 null（不表態，不是 true —— 預設值哪天改成主動同意，這一格的意思不必跟著改）
+    [InlineData("{}", null, null)]
+    [InlineData("""{ "stats": {} }""", null, null)]
+    [InlineData("""{ "stats": { "share": false } }""", false, null)]
+    [InlineData("""{ "stats": { "share": true, "projectId": null } }""", true, null)]
+    [InlineData("""{ "Stats": { "Share": false, "ProjectId": "acme_Desktop-App-2026" } }""", false, "acme_Desktop-App-2026")] // 屬性名不分大小寫（同其他欄位）
+    [InlineData("""{ "stats": { "projectId": "0123456789abcdef" } }""", null, "0123456789abcdef")]                             // 恰好 16
+    public void ValidStatsSectionLoads(string json, bool? share, string? projectId)
+    {
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, json);
+        var cfg = ToolConfig.Load(fx.Root);
+        Assert.Equal(share, cfg.Stats.Share);
+        Assert.Equal(projectId, cfg.Stats.ProjectId);
     }
 
     [Fact] // 強制模式指到不存在的檔 → 錯誤而不是退化
