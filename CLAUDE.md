@@ -14,7 +14,7 @@
 
 ```bash
 dotnet build XamlContrast.slnx -c Release
-dotnet test  XamlContrast.slnx -c Release          # 2026-10-23 實跑：767 綠、1 略過（沒有 jq 的機器略過 Action 註記的實跑）
+dotnet test  XamlContrast.slnx -c Release          # 2026-10-26 實跑：838 綠、1 略過（沒有 jq 的機器略過 Action 註記的實跑）
 dotnet format XamlContrast.slnx --verify-no-changes # CI 第一關，不過直接紅
 
 # 示範專案（刻意做壞的，exit 1 才是對的）
@@ -87,6 +87,16 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
     稽核語意的改進仍可能讓 build 變紅，會寫在 Upgrading）。
   - 第 9 面凍的是**預設行為**：opt-in 的範圍擴充（`--config`、額外排除路徑、`.axaml`）= minor；改內建範圍 = 2.0。
     console 與 Markdown 的輸出屬 presentation、不凍結，機器讀取請用 JSON。
+  - **`--push`（實驗性）不在凍結面內**，直到 Parity.Server 儀表板公開上線：`--push`／`--server`／`--commit`／`--branch`、
+    `XAMLCONTRAST_SERVER`／`XAMLCONTRAST_TOKEN`、push 模式的退出碼（0 送出、2 其他一切）與伺服器協定
+    （`POST {server}/api/runs`、`X-Parity-*` 標頭、201 回應的形狀）都可以在 minor 改。上線後併入凍結（旗標進第 1 面、退出碼進第 2 面），
+    CHANGELOG、README 兩份、SECURITY、CONTRIBUTING 的「實驗性」字樣一起拿掉。比照 Parity 的 `parity push`（伺服器上線前不凍結）。
+    - 用旗標不用 `push` 子指令：`xamlcontrast push` 今天是「稽核名叫 push 的目錄」，子指令會打破第 1 面。
+    - **不加 Action input**：input 一加就凍結（第 4 面）。README 教使用者在 action 之後自己接一步
+      `xamlcontrast --push "$RUNNER_TEMP/xamlcontrast-report.json"`。⚠ 那一步靠 `action.yml` 的兩件事：Install 那步把
+      `~/.dotnet/tools` 寫進 `GITHUB_PATH`、Run audit 的 `--json` 落點固定在 `$RUNNER_TEMP/xamlcontrast-report.json`。
+      改了任何一個，README 的那一步就安靜失效。
+    - 協定跟 Parity repo 的伺服器端一起定，**不要單方面改**（伺服器照這個形狀實作，`CliPushTests` 釘住線上的樣子）。
   - 對外的說法（README 兩份、SECURITY、CONTRIBUTING、RELEASING）一律是「語法凍結；稽核語意與 baseline 鍵的寫法可以在 minor 改變，
     Upgrading 會說明，keyVersion 遞增時舊 baseline 被拒並提示重寫」。⚠ 不要寫成「1.x 升級不會打壞任何東西」。
   - SARIF 的等級表示嚴重度、不表示 gate（預設 gate warn 時 warn 讓 CI 失敗，SARIF 裡照樣是 warning）；
@@ -166,6 +176,9 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
 | 15 | 判定之後寫 `--json`／`--sarif`／baseline／`--md`，任何一個寫不出去 | 2 |
 
 JSON 的 `exitCode` 記的是判定（0／1／3）；第 15 列的 2 發生時，JSON 已經寫出去了。
+
+**`--push`（實驗性）不走這張表**：旗標解析完就分流（帶了任何稽核輸入 → 2），之後只有 0（送出）與 2（其他一切）。
+不借用 1／3 —— 那是稽核的判定，上傳失敗長得像「有違規」的話，CI 分不出來。
 
 ⚠ **`--strict-palette` 與覆蓋率下限必須留在模式分支（`--baseline` / `--write-baseline`）
 之前。** 這兩個檢查原本擺在 `DecideExit()` 尾端，而 baseline 兩個分支都會直接 return，
@@ -257,6 +270,19 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 —— 照讀的話既有的 warn 全部會變成 NEW。
 **`keyVersion`（`Baseline.KeyVersion`，缺省視為 1）**：鍵的文字（`element` 的標籤、`fg` 的寫法、`bg` 的合成描述）屬稽核語意，
 1.x 的 minor 可以改 —— **改了產生鍵的方式就要遞增 `KeyVersion`**，舊檔會被拒絕並叫人重寫，不然使用者會看到一整排假的 NEW。
+
+### `--push`（實驗性，`Push.cs`）
+
+- **空字串一律當沒設**（`Push.Env`）：push 事件的 `GITHUB_HEAD_REF` 是空字串，用 `??` 接的話分支會送 `""`、
+  永遠退不到 `GITHUB_REF_NAME`。`--server`／`--commit`／`--branch` 的空值也是用法錯誤。
+- **伺服器回的文字是不可信的輸入**：錯誤訊息、專案名、網址印出來一律經 `Report.ConsoleSafe`，job summary 那行也是 ——
+  跟稽核的 console 輸出同一條規矩（審查 1.0 最終驗證 S2）。push 不在 Action 的 `::stop-commands::` 裡面，只有這一道。
+- **不跟轉址**（`AllowAutoRedirect = false`）：跟了的話 POST 變 GET、本文丟掉、.NET 拿掉 Authorization，
+  使用者只看到莫名的 401／405；token 也只該送到使用者指名的伺服器。
+- **標頭只帶可見 ASCII**：中文分支名 .NET 直接拒送（整次推送失敗），所以那一欄不送、stderr 說明。
+- 本文是檔案原樣（只拿掉 BOM），不重新序列化；schemaVersion 比對 `Report.JsonSchemaVersion`，不寫死 6。
+- 測試的環境變數只設在子行程（`Cli.RunEnv`）：CI 的 runner 自己帶著 `GITHUB_SHA`、`GITHUB_STEP_SUMMARY`，
+  測試行程的環境變數又是平行測試共用的。stub 用 `TcpListener`（`HttpListener` 在 Windows 走 http.sys，非管理員綁不上 127.0.0.1）。
 
 ### 守門腳本自身
 
