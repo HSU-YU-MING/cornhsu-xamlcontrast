@@ -1,3 +1,4 @@
+using XamlContrast.Cli;
 using XamlContrast.Core;
 
 // XamlContrast CLI — 靜態 XAML 對比度稽核，退出碼給 CI 當守門員。
@@ -6,6 +7,7 @@ using XamlContrast.Core;
 //   0 通過 ／ 1 找到違規（低於 gate 的配對）／ 2 用法、設定或輸入檔錯誤 ／ 3 結果不可信
 //   （0 組配對、--strict-palette 且色盤退化、覆蓋率低於下限 —— 「工具沒看到」與「看到了有問題」
 //   在 CI 上的處置不同：前者要修設定，後者要修顏色。比照 Parity 的 exit 3）
+// --push（實驗性，不在凍結面內）另有自己的兩個碼：0 送出、2 其他一切（見 Push.cs）
 
 var showOk = false;
 var showUnresolved = false;
@@ -18,6 +20,12 @@ string? mdPath = null;
 string? baselinePath = null;
 string? writeBaselinePath = null;
 string? root = null;
+var doubleDash = false;
+// --push（實驗性）：上傳既有的報告，不稽核
+string? pushPath = null;
+string? server = null;
+string? commit = null;
+string? branch = null;
 
 for (var i = 0; i < args.Length; i++)
 {
@@ -63,9 +71,27 @@ for (var i = 0; i < args.Length; i++)
             if (OutputPath(args, i, "--write-baseline") is not { } wbp) return 2;
             writeBaselinePath = wbp; i++;
             break;
+        // 報告路徑的驗法與 --json 相同（必填、不得以 - 開頭）
+        case "--push":
+            if (OutputPath(args, i, "--push") is not { } pp) return 2;
+            pushPath = pp; i++;
+            break;
+        case "--server":
+            if (FlagValue(args, i, "--server", "a URL") is not { } sv) return 2;
+            server = sv; i++;
+            break;
+        case "--commit":
+            if (FlagValue(args, i, "--commit", "a commit SHA") is not { } cv) return 2;
+            commit = cv; i++;
+            break;
+        case "--branch":
+            if (FlagValue(args, i, "--branch", "a branch name") is not { } bv) return 2;
+            branch = bv; i++;
+            break;
         // 旗標到此為止：之後的字一律是位置參數（只收一個 root）。root 以 - 開頭時沒有別的寫法 ——
         // 舊版把 `--version` 這個目錄名當成旗標（印版本、exit 0，什麼都沒稽核）。Action 一律這樣傳 root（審查 1.0 A3）
         case "--":
+            doubleDash = true;
             for (i++; i < args.Length; i++)
             {
                 if (root is null) { root = args[i]; continue; }
@@ -84,6 +110,33 @@ for (var i = 0; i < args.Length; i++)
             Say(Console.Error, $"unknown argument: {args[i]}");
             return 2;
     }
+}
+
+// --push 只上傳、不稽核：任何稽核的輸入都是用法錯誤。默默忽略的話，`--push r.json --fail-on fail` 看起來像
+// 「套用 gate 再上傳」，實際上什麼都沒稽核、上傳的是檔案裡原本的判定
+if (pushPath is not null)
+{
+    var auditInputs = new (bool Given, string Name)[]
+    {
+        (root is not null, $"the project root '{root}'"), (doubleDash && root is null, "--"),
+        (jsonPath is not null, "--json"), (sarifPath is not null, "--sarif"), (mdPath is not null, "--md"),
+        (baselinePath is not null, "--baseline"), (writeBaselinePath is not null, "--write-baseline"),
+        (failOnFlag is not null, "--fail-on"), (minCoverage is not null, "--min-coverage"),
+        (strictPalette, "--strict-palette"), (showOk, "--show-ok"), (showUnresolved, "--show-unresolved"),
+    }.Where(x => x.Given).Select(x => x.Name).ToArray();
+    if (auditInputs.Length > 0)
+    {
+        Say(Console.Error, $"--push uploads an existing report and does not audit — drop {string.Join(", ", auditInputs)} " +
+                           "(run the audit with --json <file> first, then --push <file>)");
+        return 2;
+    }
+    return Push.Run(pushPath, server, commit, branch);
+}
+if ((server, commit, branch) is not (null, null, null))
+{
+    Console.Error.WriteLine($"{(server is not null ? "--server" : commit is not null ? "--commit" : "--branch")} " +
+                            "only works with --push <report.json> (experimental)");
+    return 2;
 }
 
 // 兩個 baseline 模式並用沒有意義（寫出新的已知債，同時又跟舊的比？）—— 0.x 是 --write-baseline 勝、--baseline 被靜默忽略
@@ -238,6 +291,17 @@ static string? OutputPath(string[] args, int i, string flag)
     return null;
 }
 
+// --server／--commit／--branch 的值：必填、不能是空字串，也不能長得像旗標（同 OutputPath：`--branch --push r.json` 不吃掉 --push）。
+// 網址、commit SHA、git 的分支名都不會以 - 開頭
+static string? FlagValue(string[] args, int i, string flag, string what)
+{
+    if (i + 1 < args.Length && !string.IsNullOrWhiteSpace(args[i + 1]) && !args[i + 1].StartsWith('-')) return args[i + 1];
+    Say(Console.Error, i + 1 >= args.Length || string.IsNullOrWhiteSpace(args[i + 1])
+        ? $"{flag} takes {what}"
+        : $"{flag} takes {what}, got '{args[i + 1]}' (an option?)");
+    return null;
+}
+
 // 輸出寫檔失敗要落在 0/1/2 的退出碼契約內，並給人話 —— 之前是裸 File.WriteAllText，
 // `--json out/report.json` 而 out/ 不存在就噴 .NET 堆疊、exit 127（未處理例外的退出碼，
 // 契約外的值）。baseline 讀取失敗早就有友善訊息了，輸出端不該是另一套標準。
@@ -353,6 +417,7 @@ static void PrintUsage(TextWriter w)
 
         usage: xamlcontrast <project-root> [options]
                xamlcontrast [options] -- <project-root>     (a root that starts with '-')
+               xamlcontrast --push <report.json> [push options]   (experimental)
 
         options:
           --json <path>            write machine-readable report (summary + findings)
@@ -374,8 +439,19 @@ static void PrintUsage(TextWriter w)
           --version                print the tool version
           -h, --help               print this help
 
+        push options (experimental: may change in a minor release until the dashboard
+        is publicly deployed). Uploads a report to a Parity dashboard; never audits:
+          --push <path>            (experimental) upload a report written by --json
+          --server <url>           (experimental) dashboard URL; else XAMLCONTRAST_SERVER
+          --commit <sha>           (experimental) commit to record; else GITHUB_SHA
+          --branch <name>          (experimental) branch to record; else GITHUB_HEAD_REF,
+                                   then GITHUB_REF_NAME
+          The project token is read from XAMLCONTRAST_TOKEN only (no flag: flag values
+          end up in shell history and CI logs).
+
         exit codes: 0 pass; 1 pairs below the gate; 2 usage, config or input-file error;
                     3 the result cannot be trusted (0 pairs, degraded palette with
                     --strict-palette, coverage below --min-coverage)
+                    --push: 0 uploaded; 2 anything else (never 1 or 3)
         """);
 }
