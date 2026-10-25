@@ -22,7 +22,8 @@ xamlcontrast path/to/your/wpf/project
 > Requires the **.NET 10 runtime** (the analysis itself is pure XML — runs on Linux CI too).
 > **1.x freezes the syntax, not the findings.** The CLI flags, exit codes, JSON report, Action inputs,
 > config file, baseline file format, SARIF rule, suppression comment and audit scope change only by
-> addition until 2.0 ([the full list](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/CHANGELOG.md)). What the audit *finds* can improve in a minor release —
+> addition until 2.0 ([the full list](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/CHANGELOG.md)); the experimental `--push` mode is not covered yet
+> ([below](#push-to-a-parity-dashboard-experimental)). What the audit *finds* can improve in a minor release —
 > counts may move and a build may turn red; each such release says so in its CHANGELOG *Upgrading*
 > note. If a release changes how baseline keys are spelled, it bumps `keyVersion` and an older baseline
 > is refused with a note to regenerate it. Coming from 0.x? The [1.0.0 notes](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/CHANGELOG.md) list what you
@@ -273,6 +274,59 @@ each call its own `artifact-name` — it names the uploaded artifact and keys th
 name keeps its own comment. With `sarif: true`, a non-default name is also passed as the code-scanning
 `category`, so the two analyses don't replace each other. Same name twice means the second upload
 collides and the comments (and SARIF analyses) overwrite each other.
+
+### Push to a Parity dashboard (experimental)
+
+`--push` uploads a report the audit already wrote to a [Parity](https://github.com/HSU-YU-MING/cornhsu-parity)
+team dashboard (`Parity.Server`, which you host). It never audits — run the audit with `--json <file>`
+first, then push that file:
+
+```bash
+xamlcontrast src/MyApp --json report.json                              # the audit — never touches the network
+xamlcontrast --push report.json --server https://dashboard.example.com  # needs XAMLCONTRAST_TOKEN in the environment
+```
+
+- **What it sends:** one `POST {server}/api/runs` whose body is the report file exactly as `--json`
+  wrote it — file paths relative to the scanned root, line numbers, element names, colour values and
+  keys, counts. Look at the file before your first push if that matters to you. As headers: the token,
+  the commit (`--commit`, else `GITHUB_SHA`), the branch (`--branch`, else `GITHUB_HEAD_REF`, else
+  `GITHUB_REF_NAME`), the actor and repository URL on GitHub Actions, and the gate from the report's
+  `exitCode` (0 = pass, 1 or 3 = fail).
+- **Environment:** `XAMLCONTRAST_SERVER` (or `--server`) is the dashboard's absolute `http`/`https`
+  URL; `XAMLCONTRAST_TOKEN` is the project token the server's `create-project` command printed. There
+  is deliberately no `--token` flag — flag values end up in shell history and CI logs.
+- **Opt-in:** nothing leaves the machine unless you run `--push`; the audit itself never touches the
+  network. The request goes only to the server you name and redirects are not followed, so the token
+  is never forwarded elsewhere. Use `https`: over plain `http` the token travels unencrypted.
+- **Exit codes:** `0` uploaded, `2` anything else — no token, a file that isn't an XamlContrast
+  `schemaVersion` 6 report (checked before anything is sent), an unreachable server (60-second
+  timeout) or an error reply. Never `1` or `3`; those are audit verdicts. `--push` together with a
+  project root or any audit flag is a usage error.
+- **Experimental:** the dashboard is not publicly deployed yet, so these flags, the environment
+  variables, push-mode exit codes and the server protocol are outside the 1.x freeze and may change in
+  a minor release. They join the freeze once the dashboard ships.
+
+In a workflow, push after the action. The action leaves the tool on `PATH` and writes its JSON
+report to `$RUNNER_TEMP/xamlcontrast-report.json` whenever the audit reaches a verdict (not on a usage
+or configuration error, exit 2):
+
+```yaml
+      - uses: HSU-YU-MING/cornhsu-xamlcontrast@v1
+        with:
+          root: src/MyApp
+      - name: Push to the dashboard (experimental)
+        if: always()                # after a red gate too — that is the run worth seeing
+        continue-on-error: true     # a dashboard outage, or a fork PR without secrets, doesn't fail the build
+        shell: bash
+        run: xamlcontrast --push "$RUNNER_TEMP/xamlcontrast-report.json"
+        env:
+          XAMLCONTRAST_SERVER: https://dashboard.example.com
+          XAMLCONTRAST_TOKEN: ${{ secrets.XAMLCONTRAST_TOKEN }}
+```
+
+On GitHub Actions the step also appends a dashboard link to the job summary. On `pull_request` events
+`GITHUB_SHA` is the merge commit, not the PR head; pass `--commit` to record another one. Calling the
+action more than once in a job? Push after each call — the next call replaces the report file.
 
 ## JSON output
 

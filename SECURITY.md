@@ -2,10 +2,14 @@
 
 ## What this tool does, and what that means
 
-XamlContrast **reads** XAML and C# files as text and writes a report. It does not load
+XamlContrast **reads** XAML and C# files as text and writes a report. The audit does not load
 assemblies, instantiate XAML, execute anything from the project it scans, make network
 requests, or read credentials. There is no server, no daemon, and no persistent state
 beyond the files you ask it to write.
+
+The one exception is the experimental `--push` mode, and only when you invoke it: it does not
+audit; it reads the `XAMLCONTRAST_TOKEN` environment variable and sends an existing report file,
+in one request, to the server you name — see *`--push`* below.
 
 That narrows the realistic threat surface to one thing: **it parses input it does not
 trust.** People run it in CI, on pull requests, on branches pushed by strangers. A crafted
@@ -36,6 +40,21 @@ Nothing in the scanned project can influence those paths. If you find a way for 
 content to redirect or inject into an output file, that is a vulnerability — SARIF and
 Markdown reports get consumed by other tools and rendered into PR comments, so content
 that escapes its encoding there is worth reporting.
+
+### `--push` (experimental)
+
+- It contacts only the server you name — `--server`, else `XAMLCONTRAST_SERVER` — with one
+  `POST {server}/api/runs`. Redirects are not followed, so the token is never forwarded to another
+  host.
+- The token comes from `XAMLCONTRAST_TOKEN` only (there is no flag, so it never lands in shell
+  history or a CI log), travels only in the `Authorization` header, and is never printed.
+- The body is the report file unchanged; nothing else from the machine is read or sent.
+- The server's reply is untrusted input: whatever of it reaches the console or the GitHub job summary
+  is escaped like scanned content, so it cannot start a workflow command.
+- Over plain `http` the token travels unencrypted — use `https` for anything but a local server.
+
+If you find a way for `--push` to send the token or the report anywhere other than the server you
+named, or for a server reply to inject a workflow command, that is a vulnerability.
 
 ### What is *not* a security issue
 
@@ -73,7 +92,8 @@ CHANGELOG's 1.0.0 entry):
 
 - **Frozen syntax** — CLI flags and exit codes, the JSON report's fields, the Action inputs, the config
   file, the baseline file format, the SARIF rule, the suppression comment and the hard audit-scope
-  rules change only by addition until 2.0.
+  rules change only by addition until 2.0. The experimental `--push` mode is not covered until the
+  dashboard it talks to is publicly deployed.
 - **Audit semantics may change in a minor release** — more pairs found, different counts, a build that
   turns red. Each such release says so in the *Upgrading* note at the top of its CHANGELOG entry.
 - **Baselines** — if a release changes how baseline keys are spelled, it bumps `keyVersion`: an older

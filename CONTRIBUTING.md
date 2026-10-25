@@ -134,6 +134,9 @@ one and would be willing to be the guinea pig, say so in an issue — that unblo
 9. the hard scope rules, as default behaviour: `*.xaml` under the root, `bin`/`obj` skipped, `*.cs` read only for a C# palette, the config read from the root only (opt-in extensions such as extra exclude paths are minor; changing the default scope is 2.0)
 
 The console and Markdown output are presentation, not frozen — programs should read the JSON report.
+The experimental `--push` mode (its flags, `XAMLCONTRAST_SERVER` / `XAMLCONTRAST_TOKEN`, its exit codes
+and the server protocol) is not covered yet: it may change in a minor release until the Parity
+dashboard is publicly deployed.
 
 What is **not** frozen is the **audit semantics**: which pairs exist and what they are graded against —
 the parsing rules, palette detection (including the test/sample-path heuristic), the classification of
