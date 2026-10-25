@@ -232,16 +232,17 @@ public class CliStatsTests
         Assert.Equal("http://stats.example.invalid/v1/xamlcontrast", req.Target); // 經 proxy 的請求帶完整網址
     }
 
-    [DevBuildFact] // 第 3 節第 5 條：從原始碼建出來的（0.0.0-dev）不送，除非設了 CORNHSU_STATS_URL —— 維護者自己的建置不混進研究資料。
+    [DevBuildFact] // 第 3 節第 5 條，真的 CLI：從原始碼建出來的（0.0.0-dev）不送，除非設了 CORNHSU_STATS_URL —— 維護者自己的建置不混進研究資料。
                    // 這條拿掉了 DO_NOT_TRACK、也沒有 stub 網址：真的出錯的話，請求會落到 egress（proxy），不會出這台機器
     public void DevelopmentBuildDoesNotSendWithoutAStatsUrl()
     {
         using var egress = new PushStub(502, null, "Bad Gateway");
         using var fx = CliProjects.Passing();
+        var version = ToolVersion();
         var preview = Cli.RunEnv(Env(null, egress), fx.Root, "--stats-preview");
         Assert.True(preview.Exit == 0, preview.ToString());
-        Assert.Contains("would not be sent: this is a development build (0.0.0-dev); set CORNHSU_STATS_URL to send from one", preview.Err);
-        Assert.Contains("\"toolVersion\": \"0.0.0-dev\"", preview.Err);
+        Assert.Contains($"would not be sent: this is a development build ({version}); set CORNHSU_STATS_URL to send from one", preview.Err);
+        Assert.Contains($"\"toolVersion\": \"{version}\"", preview.Err);
 
         var run = Cli.RunEnv(Env(null, egress), fx.Root);
         Assert.True(run.Exit == 0, run.ToString());
@@ -471,6 +472,51 @@ public class CliStatsTests
 
     // ── data 的計算（Core 的 UsageStats；不經子行程）──
 
+    [Theory] // 第 3 節第 5 條（2026-10-26 放寬）：版本以 0.0.0- 開頭都是開發版 —— 0.0.0-dev（原始碼）、0.0.0-ci（CI 的 pack-smoke）、
+             // 0.0.0-local.*（本機乾跑）不送，除非設了 CORNHSU_STATS_URL；發行版（含預覽版）照預設送。子行程只測得到這次建置的版本，
+             // 其他版本在這裡直接餵給 Decide
+    [InlineData("0.0.0-dev", false)]
+    [InlineData("0.0.0-ci", false)]
+    [InlineData("0.0.0-local.1761400000", false)]
+    [InlineData(null, false)]                // 讀不到版本：當開發版
+    [InlineData("1.1.0", true)]
+    [InlineData("1.1.0-rc.1", true)]
+    [InlineData("0.0.1", true)]
+    [InlineData("10.0.0-dev", true)]          // 前綴是 "0.0.0-"，不是「含 0.0.0-」
+    [InlineData("0.0.0", true)]               // 沒有 - 的 0.0.0 不是開發版的寫法（發行版也不會是它）；照字面
+    public void DevelopmentVersionsNeverSendWithoutAStatsUrl(string? version, bool sends)
+    {
+        var none = UsageStats.Decide(_ => null, new ToolConfig(), version, shareByDefault: true);
+        Assert.Equal(sends, none.Send);
+        if (!sends) Assert.Equal($"this is a development build ({version ?? "no version"}); set CORNHSU_STATS_URL to send from one", none.Reason);
+        Assert.Equal("https://stats.cornhsu.com/v1/xamlcontrast", none.Endpoint.ToString());
+
+        var withUrl = UsageStats.Decide(n => n == "CORNHSU_STATS_URL" ? "http://127.0.0.1:5555/" : null, new ToolConfig(), version, shareByDefault: true);
+        Assert.True(withUrl.Send);
+        Assert.Equal("http://127.0.0.1:5555/v1/xamlcontrast", withUrl.Endpoint.ToString());
+        // 說不送的開關對開發版照樣優先
+        Assert.False(UsageStats.Decide(n => n switch { "CORNHSU_STATS_URL" => "http://127.0.0.1:5555", "DO_NOT_TRACK" => "1", _ => null },
+            new ToolConfig(), version, shareByDefault: true).Send);
+    }
+
+    [Theory] // 那一個常數（Stats.ShareByDefault）改成 false —— 倫理審查要求主動同意時 —— 不表態就不送；明確說好（*_SHARE_STATS 是
+             // 1／true／yes／on，或 config 的 share: true）才送；說不送的開關照樣優先。config 與 Action input 的預設值不必跟著改
+    [InlineData(null, null, false)]
+    [InlineData("XAMLCONTRAST_SHARE_STATS=yes", null, true)]
+    [InlineData("CORNHSU_SHARE_STATS=1", null, true)]
+    [InlineData(null, true, true)]
+    [InlineData("DO_NOT_TRACK=1", true, false)]
+    [InlineData("XAMLCONTRAST_SHARE_STATS=yes", false, false)]
+    [InlineData("XAMLCONTRAST_SHARE_STATS=nope", true, false)]
+    public void WithTheDefaultTurnedOffOnlyAnExplicitYesSends(string? env, bool? share, bool sends)
+    {
+        var (name, value) = env is null ? ("", "") : (env[..env.IndexOf('=')], env[(env.IndexOf('=') + 1)..]);
+        var config = new ToolConfig { Stats = new ToolConfig.StatsSection { Share = share } };
+        var d = UsageStats.Decide(n => n == name ? value : null, config, "1.1.0", shareByDefault: false);
+        Assert.Equal(sends, d.Send);
+        if (env is null && share is null) Assert.StartsWith("sharing is off by default; set XAMLCONTRAST_SHARE_STATS=true", d.Reason);
+    }
+
     [Theory] // 分桶邊界左閉右開：1.5、2、3、4.5、7 —— 恰好落在邊界上的進上面那一桶
     [InlineData(1.0, 0)]
     [InlineData(1.49, 0)]
@@ -516,14 +562,16 @@ public class CliStatsTests
         }
     }
 
-    /// <summary>測的 CLI 是從原始碼建的 0.0.0-dev 才執行。release.yml 用真的版號建置再跑測試 —— 那時這條沒有意義
-    /// （而且那個建置本來就會送，所以 workflow 層設了 DO_NOT_TRACK，這裡的其他測試則一律指到 stub）。</summary>
+    /// <summary>測的 CLI 是開發版（0.0.0- 開頭，平常是從原始碼建的 0.0.0-dev）才執行。release.yml 用真的版號建置再跑測試 ——
+    /// 那時這條沒有意義（而且那個建置本來就會送，所以 workflow 層設了 DO_NOT_TRACK，這裡的其他測試則一律指到 stub）。
+    /// 其他開發版的版本（0.0.0-ci、0.0.0-local.*）由 <see cref="DevelopmentVersionsNeverSendWithoutAStatsUrl"/> 直接驗。</summary>
     public sealed class DevBuildFactAttribute : FactAttribute
     {
         public DevBuildFactAttribute()
         {
             var version = FileVersionInfo.GetVersionInfo(Cli.DllPath).ProductVersion?.Split('+')[0];
-            if (version != "0.0.0-dev") Skip = $"這次建置的版本是 {version}，不是開發版 0.0.0-dev";
+            if (version?.StartsWith(UsageStats.DevVersionPrefix, StringComparison.Ordinal) != true)
+                Skip = $"這次建置的版本是 {version}，不是開發版（{UsageStats.DevVersionPrefix}*）";
         }
     }
 }

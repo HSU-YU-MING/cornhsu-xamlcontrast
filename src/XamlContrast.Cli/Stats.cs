@@ -9,8 +9,8 @@ namespace XamlContrast.Cli;
 /// <summary>
 /// 匿名使用統計（1.1）：稽核得出判定之後，送一筆只有計數與分桶的 JSON 到 stats.cornhsu.com —— 碩士論文
 /// 「XAML App 的對比度問題長什麼樣」的補充證據。唯一真相源是 stats-collector 的 PROTOCOL.md（Parity 2.1 與收集站照同一份做）：
-/// 什麼時候送（第 2 節）、開關與順序（第 3 節）、告知（第 4 節）、預覽（第 5 節）、傳輸（第 6 節）、外層欄位（第 7.1 節）。
-/// data 本身在 Core 的 <see cref="UsageStats"/>。**改任何一條先改協定**，三邊一起改。
+/// 這裡是什麼時候送（第 2 節）、告知（第 4 節）、預覽（第 5 節）、傳輸（第 6 節）、外層欄位（第 7.1 節）；
+/// 開關與順序（第 3 節）與 data（第 7.3 節）是純函式，在 Core 的 <see cref="UsageStats"/>。**改任何一條先改協定**，三邊一起改。
 ///
 /// 鐵則：不影響結果。送不出去就算了 —— 不重試、不印錯誤、不改退出碼、不改任何其他輸出（stdout 一個字都不多）。
 /// 說明只印在 stderr；不送的時候什麼都不印。
@@ -26,10 +26,7 @@ internal static class Stats
     internal const bool ShareByDefault = true;
 
     private const string Tool = "xamlcontrast";
-    private const string DefaultRoot = "https://stats.cornhsu.com";
     private const string InfoUrl = "https://stats.cornhsu.com/";
-    /// <summary>開發版（從原始碼建出來的）：不送，除非設了 CORNHSU_STATS_URL（協定第 3 節第 5 條 —— 維護者自己的測試與本機建置不混進研究資料）。</summary>
-    private const string DevVersion = "0.0.0-dev";
 
     // 協定第 6 節：連線 1.5 秒、整體 3 秒
     private static readonly TimeSpan ConnectTimeout = TimeSpan.FromSeconds(1.5);
@@ -50,9 +47,6 @@ internal static class Stats
     /// <summary>協定第 4 節的 CI 一行（CI 機器每次都是新的：每次都印、不寫標記）。</summary>
     private const string CiNotice = "xamlcontrast: anonymous usage statistics sent (counts only) - https://stats.cornhsu.com/ - turn off with DO_NOT_TRACK=1";
 
-    /// <summary>送不送、為什麼、送到哪裡。Reason 是給 --stats-preview 看的人話（不送的時候說是哪一個開關）。</summary>
-    internal sealed record Decision(bool Send, string Reason, Uri Endpoint);
-
     /// <summary>
     /// 稽核得出判定（0／1／3）、輸出檔都寫完之後呼叫一次。用法錯誤、設定錯誤、寫檔失敗（2）、--push、--help、--version
     /// 都走不到這裡（Program.cs 在那之前就 return 了）。preview：什麼都不送，在 stderr 印出這次會送的 JSON 與會不會送、為什麼。
@@ -60,7 +54,7 @@ internal static class Stats
     public static void AfterAudit(AuditResult result, ToolConfig config, int exitCode, string failOn, string? toolVersion, bool preview)
     {
         byte[] body;
-        Decision decision;
+        UsageStats.Decision decision;
         try
         {
             decision = Decide(toolVersion, config);
@@ -90,42 +84,10 @@ internal static class Stats
         Post(decision.Endpoint, body);
     }
 
-    /// <summary>協定第 3 節，依序檢查，第一個說不送的就不送。值的比對刻意不 Trim、不寬鬆：開關寫錯時往「不送」那邊錯。</summary>
-    internal static Decision Decide(string? toolVersion, ToolConfig config)
-    {
-        var url = StatsUrl();
-        var endpoint = new Uri(new Uri((url ?? DefaultRoot).TrimEnd('/') + "/"), $"v1/{Tool}");
-        Decision Off(string why) => new(false, why, endpoint);
-
-        // 1. DO_NOT_TRACK：有值而且不是 0／false（不分大小寫）→ 不送。永遠優先
-        if (Env("DO_NOT_TRACK") is { } dnt && !dnt.Equals("0", StringComparison.Ordinal) && !dnt.Equals("false", StringComparison.OrdinalIgnoreCase))
-            return Off("DO_NOT_TRACK is set");
-
-        // 2.（4. 的 Action input share-stats: false 就是設這裡的 XAMLCONTRAST_SHARE_STATS=false）
-        //    1／true／yes／on = 不表態（預設關閉時 = 同意）；其他任何非空值都是不送，打錯字也是
-        var consent = false;
-        foreach (var name in (ReadOnlySpan<string>)["CORNHSU_SHARE_STATS", "XAMLCONTRAST_SHARE_STATS"])
-        {
-            if (Env(name) is not { } v) continue;
-            if (v.ToLowerInvariant() is not ("1" or "true" or "yes" or "on"))
-                return Off($"{name} is '{v}' (only 1, true, yes or on leave sharing on)");
-            consent = true;
-        }
-
-        // 3. 設定檔
-        if (config.Stats.Share == false)
-            return Off($"\"stats\": {{ \"share\": false }} in {ToolConfig.FileName}");
-        consent |= config.Stats.Share == true;
-
-        // 5. 開發版：版本是 0.0.0-dev（或讀不到版本）就不送，除非設了 CORNHSU_STATS_URL
-        if ((toolVersion is null || toolVersion == DevVersion) && url is null)
-            return Off($"this is a development build ({toolVersion ?? "no version"}); set CORNHSU_STATS_URL to send from one");
-
-        if (!ShareByDefault && !consent)
-            return Off("sharing is off by default; set XAMLCONTRAST_SHARE_STATS=true or \"stats\": { \"share\": true } to share");
-
-        return new(true, url is not null ? "CORNHSU_STATS_URL is set" : ShareByDefault ? "sharing is on by default" : "you turned sharing on", endpoint);
-    }
+    /// <summary>協定第 3 節的開關（順序、值的比對、開發版 0.0.0-*）在 Core 的 <see cref="UsageStats.Decide"/> —— 純函式，
+    /// 單元測試餵得進任何版本字串（0.0.0-ci 之類，子行程測不到）。這裡只接上真的環境變數與那一個常數。</summary>
+    internal static UsageStats.Decision Decide(string? toolVersion, ToolConfig config)
+        => UsageStats.Decide(Environment.GetEnvironmentVariable, config, toolVersion, ShareByDefault, Tool);
 
     /// <summary>協定第 7.1 節的外層 + 第 7.3 節的 data，UTF-8、不帶 BOM、縮排（--stats-preview 印的就是送出去的那幾個位元組）。</summary>
     internal static byte[] Payload(AuditResult result, ToolConfig config, int exitCode, string failOn, string? toolVersion)
@@ -134,7 +96,7 @@ internal static class Stats
         {
             ["schema"] = 1,
             ["tool"] = Tool,
-            ["toolVersion"] = toolVersion ?? DevVersion,
+            ["toolVersion"] = toolVersion ?? "0.0.0-dev", // 讀不到版本（不會發生）時 Decide 已經當開發版、不送；預覽照樣印得出來
             ["os"] = OperatingSystem.IsWindows() ? "windows" : OperatingSystem.IsLinux() ? "linux" : OperatingSystem.IsMacOS() ? "macos" : "other",
             ["ci"] = IsCi(),
             // 專案 ID 只來自設定檔（格式在載入時驗過）；沒有就是 null —— 不從 repo、路徑或機器資訊算
@@ -208,10 +170,6 @@ internal static class Stats
         // ⚠ 刻意全接：DNS、連不上、TLS、逾時、proxy、任何意外 —— 統計失敗絕不能讓稽核的退出碼或輸出變樣（協定第 1 節）
         catch (Exception) { }
     }
-
-    /// <summary>CORNHSU_STATS_URL：換掉根網址（測試與本機驗證用，路徑照舊加 /v1/xamlcontrast）。不是絕對的 http／https 網址就當作沒設。</summary>
-    private static string? StatsUrl()
-        => Env("CORNHSU_STATS_URL") is { } u && Uri.TryCreate(u, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https" ? u : null;
 
     private static bool IsCi()
         => string.Equals(Env("CI"), "true", StringComparison.OrdinalIgnoreCase) ||

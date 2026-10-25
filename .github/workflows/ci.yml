@@ -10,7 +10,8 @@ permissions:
   contents: read
 
 # 研究資料的保護：1.1 起工具預設會送匿名使用統計（PROTOCOL.md），維護者自己的 CI 不能混進論文的資料。
-# 這裡建的是 0.0.0-dev（本來就不送），但 pack-smoke 裝的是 0.0.0-ci —— 哪天它多跑一次稽核就會送出去。全部關掉，不靠記得
+# 這裡的建置都是開發版（0.0.0-dev、pack-smoke 的 0.0.0-ci，工具本來就不送）；這一行是第二道 —— 哪天有人在這裡用真的版號打包、
+# 或設了 CORNHSU_STATS_URL，也不會送。全部關掉，不靠記得
 env:
   DO_NOT_TRACK: '1'
 

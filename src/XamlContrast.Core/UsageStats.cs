@@ -26,6 +26,60 @@ public static class UsageStats
     private static readonly HashSet<string> KnownModes = ["pair", "csharp", "single", "none"];
     private static readonly HashSet<string> KnownGates = ["warn", "fail"];
 
+    /// <summary>收集站的根網址（協定第 6 節）；CORNHSU_STATS_URL 換掉它（測試與本機驗證用），路徑照舊加 /v1/&lt;tool&gt;。</summary>
+    public const string DefaultRoot = "https://stats.cornhsu.com";
+
+    /// <summary>開發版的版本前綴（協定第 3 節第 5 條，2026-10-26 放寬）：從原始碼建的 0.0.0-dev、CI 冒煙測試的 0.0.0-ci、
+    /// 本機乾跑的 0.0.0-local.* —— 發行版永遠不會是 0.0.0。這些不送，除非設了 CORNHSU_STATS_URL。
+    /// ⚠ 初稿只認 0.0.0-dev：RELEASING／skill 的乾跑拿去跑稽核就會送出真的統計。</summary>
+    public const string DevVersionPrefix = "0.0.0-";
+
+    /// <summary>送不送、為什麼（給 --stats-preview 看的人話；不送時點名是哪一個開關）、送到哪裡。</summary>
+    public sealed record Decision(bool Send, string Reason, Uri Endpoint);
+
+    /// <summary>
+    /// 協定第 3 節：依序檢查，第一個說不送的就不送。<paramref name="env"/> 讀環境變數（空字串當沒設）；
+    /// <paramref name="shareByDefault"/> 是 CLI 的那一個常數（Stats.ShareByDefault）—— 傳進來而不是寫死在這裡，預設關閉的路徑才測得到。
+    /// 值的比對刻意不 Trim、不寬鬆：開關寫錯時往「不送」那邊錯。
+    /// </summary>
+    public static Decision Decide(Func<string, string?> env, ToolConfig config, string? toolVersion, bool shareByDefault, string tool = "xamlcontrast")
+    {
+        string? Env(string name) => env(name) is { Length: > 0 } v ? v : null;
+        // CORNHSU_STATS_URL：必須是絕對的 http／https 網址，否則當作沒設
+        var url = Env("CORNHSU_STATS_URL") is { } u && Uri.TryCreate(u, UriKind.Absolute, out var parsed) && parsed.Scheme is "http" or "https" ? u : null;
+        var endpoint = new Uri(new Uri((url ?? DefaultRoot).TrimEnd('/') + "/"), $"v1/{tool}");
+        Decision Off(string why) => new(false, why, endpoint);
+
+        // 1. DO_NOT_TRACK：有值而且不是 0／false（不分大小寫）→ 不送。永遠優先
+        if (Env("DO_NOT_TRACK") is { } dnt && !dnt.Equals("0", StringComparison.Ordinal) && !dnt.Equals("false", StringComparison.OrdinalIgnoreCase))
+            return Off("DO_NOT_TRACK is set");
+
+        // 2.（4. 的 Action input share-stats: false 就是設這裡的 XAMLCONTRAST_SHARE_STATS=false）
+        //    1／true／yes／on = 不表態（預設關閉時 = 同意）；其他任何非空值都是不送，打錯字也是
+        var consent = false;
+        foreach (var name in new[] { "CORNHSU_SHARE_STATS", $"{tool.ToUpperInvariant()}_SHARE_STATS" })
+        {
+            if (Env(name) is not { } v) continue;
+            if (v.ToLowerInvariant() is not ("1" or "true" or "yes" or "on"))
+                return Off($"{name} is '{v}' (only 1, true, yes or on leave sharing on)");
+            consent = true;
+        }
+
+        // 3. 設定檔
+        if (config.Stats.Share == false)
+            return Off($"\"stats\": {{ \"share\": false }} in {ToolConfig.FileName}");
+        consent |= config.Stats.Share == true;
+
+        // 5. 開發版：0.0.0- 開頭（或讀不到版本）就不送，除非設了 CORNHSU_STATS_URL
+        if ((toolVersion is null || toolVersion.StartsWith(DevVersionPrefix, StringComparison.Ordinal)) && url is null)
+            return Off($"this is a development build ({toolVersion ?? "no version"}); set CORNHSU_STATS_URL to send from one");
+
+        if (!shareByDefault && !consent)
+            return Off($"sharing is off by default; set {tool.ToUpperInvariant()}_SHARE_STATS=true or \"stats\": {{ \"share\": true }} to share");
+
+        return new(true, url is not null ? "CORNHSU_STATS_URL is set" : shareByDefault ? "sharing is on by default" : "you turned sharing on", endpoint);
+    }
+
     /// <summary>一個比值落在哪一桶（0–5）。</summary>
     public static int RatioBucket(double ratio)
     {
