@@ -8,8 +8,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 > **⚠️ This release sends anonymous usage statistics by default.** After every audit that reaches a
 > verdict (exit 0, 1 or 3) the tool sends one request to `https://stats.cornhsu.com/v1/xamlcontrast` with
 > counts and ratio ranges only — no file names, paths, element or resource names, colours, report
-> contents, or repository, user or machine names, and no ID unless you add one. It supports the author's
-> master's thesis; what is sent and why: <https://stats.cornhsu.com/>, and README *Anonymous usage
+> contents, or repository, user or machine names, and no ID unless you add one. It is used for academic
+> research, and only aggregate results are published; what is sent and why: <https://stats.cornhsu.com/>, and README *Anonymous usage
 > statistics*. **To turn it off**, any one of: `DO_NOT_TRACK=1`, `XAMLCONTRAST_SHARE_STATS=false` (or
 > `CORNHSU_SHARE_STATS=false`), `"stats": { "share": false }` in `xamlcontrast.config.json`, or
 > `share-stats: false` in the Action. `--stats-preview` prints exactly what a run would send and sends

@@ -7,8 +7,8 @@ using XamlContrast.Core;
 namespace XamlContrast.Cli;
 
 /// <summary>
-/// 匿名使用統計（1.1）：稽核得出判定之後，送一筆只有計數與分桶的 JSON 到 stats.cornhsu.com —— 碩士論文
-/// 「XAML App 的對比度問題長什麼樣」的補充證據。唯一真相源是 stats-collector 的 PROTOCOL.md（Parity 2.1 與收集站照同一份做）：
+/// 匿名使用統計（1.1）：稽核得出判定之後，送一筆只有計數與分桶的 JSON 到 stats.cornhsu.com —— 學術研究
+/// 「XAML App 的對比度問題長什麼樣」的補充證據，只公開彙總後的結果（對外文字不寫學位或研究者身分，見協定開頭）。唯一真相源是 stats-collector 的 PROTOCOL.md（Parity 2.1 與收集站照同一份做）：
 /// 這裡是什麼時候送（第 2 節）、告知（第 4 節）、預覽（第 5 節）、傳輸（第 6 節）、外層欄位（第 7.1 節）；
 /// 開關與順序（第 3 節）與 data（第 7.3 節）是純函式，在 Core 的 <see cref="UsageStats"/>。**改任何一條先改協定**，三邊一起改。
 ///
@@ -35,8 +35,8 @@ internal static class Stats
     /// <summary>協定第 4 節的本機說明（第一次在這台機器上要送的時候印一次）。</summary>
     private const string FirstNotice = """
         XamlContrast sends anonymous usage statistics: counts and score ranges only - no URLs, names,
-        selectors, file paths, colours or screenshots, and no IP address is stored. They support a
-        master's thesis on contrast in XAML apps.
+        selectors, file paths, colours or screenshots, and no IP address is stored. They are used for
+        academic research on contrast in XAML apps; only aggregate results are published.
         What is sent and why: https://stats.cornhsu.com/
         Preview it:  xamlcontrast ... --stats-preview   (sends nothing)
         Turn it off: "stats": { "share": false } in xamlcontrast.config.json, or XAMLCONTRAST_SHARE_STATS=false,

@@ -21,7 +21,7 @@ xamlcontrast 你的專案路徑
 > 舊的 baseline 會被拒並提示重寫。從 0.x 升級？先看 [CHANGELOG 的 1.0.0](CHANGELOG.md)，裡面列了必須改的地方。
 
 > **匿名使用統計預設打開**（1.1 起）：每次稽核之後送一筆只有計數與比值區間的資料 —— 沒有檔名、路徑、元素名稱或顏色 ——
-> 做為碩士論文的補充證據。[送什麼、怎麼關](#匿名使用統計)（設 `DO_NOT_TRACK=1` 就夠了）。
+> 做為學術研究的補充證據。[送什麼、怎麼關](#匿名使用統計)（設 `DO_NOT_TRACK=1` 就夠了）。
 
 ## 實際跑起來長這樣
 
@@ -371,8 +371,8 @@ unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)—
 ## 匿名使用統計
 
 1.1 起，每次稽核得出判定（exit 0、1 或 3）之後，XamlContrast 會送**一筆**很小的請求到
-`https://stats.cornhsu.com/v1/xamlcontrast`。**預設打開，CI 也送**，一個設定就能關。它是作者碩士論文
-「真實 XAML App 的對比度問題長什麼樣」的補充證據；[stats.cornhsu.com](https://stats.cornhsu.com/) 說明收什麼、做什麼用、保存多久。
+`https://stats.cornhsu.com/v1/xamlcontrast`。**預設打開，CI 也送**，一個設定就能關。它是學術研究
+「真實 XAML App 的對比度問題長什麼樣」的補充證據，只公開彙總後的結果；[stats.cornhsu.com](https://stats.cornhsu.com/) 說明收什麼、做什麼用、保存多久。
 
 **送什麼** —— 只有計數與區間：
 

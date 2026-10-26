@@ -30,7 +30,7 @@ xamlcontrast path/to/your/wpf/project
 > have to change.
 
 > **Anonymous usage statistics are on by default** (from 1.1): after each audit, one request with counts
-> and ratio ranges only — no file names, paths, element names or colours — supports a master's thesis.
+> and ratio ranges only — no file names, paths, element names or colours — for academic research.
 > [What is sent, and how to turn it off](#anonymous-usage-statistics) (`DO_NOT_TRACK=1` is enough).
 
 ## What it looks like
@@ -463,8 +463,8 @@ should read the JSON.
 
 From 1.1, after each audit that reaches a verdict (exit 0, 1 or 3), XamlContrast sends **one** small
 request to `https://stats.cornhsu.com/v1/xamlcontrast`. It is **on by default — in CI too** — and one
-setting turns it off. It supports the author's master's thesis on what contrast problems in real XAML
-apps look like; [stats.cornhsu.com](https://stats.cornhsu.com/) explains what is collected, what it is
+setting turns it off. It is used for academic research on what contrast problems in real XAML
+apps look like, and only aggregate results are published; [stats.cornhsu.com](https://stats.cornhsu.com/) explains what is collected, what it is
 used for and how long it is kept.
 
 **What is sent** — counts and ranges, nothing else:

@@ -461,7 +461,7 @@ static void PrintUsage(TextWriter w)
 
         anonymous usage statistics (on by default): after an audit, one request with counts
         and ratio ranges only (no names, paths or colours) goes to https://stats.cornhsu.com/
-        for a master's thesis; --stats-preview shows it. Turn it off with DO_NOT_TRACK=1,
+        for academic research; --stats-preview shows it. Turn it off with DO_NOT_TRACK=1,
         XAMLCONTRAST_SHARE_STATS=false or "stats": { "share": false } in xamlcontrast.config.json.
 
         push options (experimental: may change in a minor release until the dashboard
