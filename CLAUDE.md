@@ -281,6 +281,9 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 —— 照讀的話既有的 warn 全部會變成 NEW。
 **`keyVersion`（`Baseline.KeyVersion`，缺省視為 1）**：鍵的文字（`element` 的標籤、`fg` 的寫法、`bg` 的合成描述）屬稽核語意，
 1.x 的 minor 可以改 —— **改了產生鍵的方式就要遞增 `KeyVersion`**，舊檔會被拒絕並叫人重寫，不然使用者會看到一整排假的 NEW。
+⚠ **Parity 的儀表板照這個鍵與 `Compare` 的比法手刻了一份**（Parity repo 的 `ContrastCompare`，「跟上次比」用；2026-10-28）：
+伺服器不引用這裡的組件，JSON 報告裡也沒有 keyVersion。遞增 `KeyVersion` 或改 `Compare` 的判定時，那邊要一起改，
+不然儀表板上跨版本的兩筆 run 會冒出一排假的「新增」與「修好」（那邊只在兩筆的 toolVersion 不同時提醒）。
 
 ### `--push`（實驗性，`Push.cs`）
 
