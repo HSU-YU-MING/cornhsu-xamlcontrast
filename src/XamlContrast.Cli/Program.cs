@@ -8,6 +8,7 @@ using XamlContrast.Core;
 //   （0 組配對、--strict-palette 且色盤退化、覆蓋率低於下限 —— 「工具沒看到」與「看到了有問題」
 //   在 CI 上的處置不同：前者要修設定，後者要修顏色。比照 Parity 的 exit 3）
 // --push（實驗性，不在凍結面內）另有自己的兩個碼：0 送出、2 其他一切（見 Push.cs）
+// 匿名使用統計（1.1，Stats.cs）在判定與所有輸出之後才送，送不出去不改退出碼、不改任何輸出
 
 var showOk = false;
 var showUnresolved = false;
@@ -17,10 +18,12 @@ double? minCoverage = null;   // null = 用 config／內建預設
 string? jsonPath = null;
 string? sarifPath = null;
 string? mdPath = null;
+string? htmlPath = null;
 string? baselinePath = null;
 string? writeBaselinePath = null;
 string? root = null;
 var doubleDash = false;
+var statsPreview = false; // --stats-preview：印出這次會送的匿名統計、什麼都不送（Stats.cs）
 // --push（實驗性）：上傳既有的報告，不稽核
 string? pushPath = null;
 string? server = null;
@@ -34,6 +37,7 @@ for (var i = 0; i < args.Length; i++)
         case "--show-ok": showOk = true; break;
         case "--show-unresolved": showUnresolved = true; break;
         case "--strict-palette": strictPalette = true; break;
+        case "--stats-preview": statsPreview = true; break;
         case "--min-coverage":
             if (i + 1 >= args.Length ||
                 !double.TryParse(args[i + 1], System.Globalization.NumberStyles.Float,
@@ -60,6 +64,10 @@ for (var i = 0; i < args.Length; i++)
         case "--md":
             if (OutputPath(args, i, "--md") is not { } mp) return 2;
             mdPath = mp; i++;
+            break;
+        case "--html":
+            if (OutputPath(args, i, "--html") is not { } hp) return 2;
+            htmlPath = hp; i++;
             break;
         // 路徑必填（1.0）。⚠ 0.x 可省略（預設 xamlcontrast-baseline.json）：下一個字不以 - 開頭就被吃成路徑，
         //   `--baseline src/MyApp` 把 root 吃掉、root 落空，看起來只是 usage 錯誤
@@ -119,10 +127,11 @@ if (pushPath is not null)
     var auditInputs = new (bool Given, string Name)[]
     {
         (root is not null, $"the project root '{root}'"), (doubleDash && root is null, "--"),
-        (jsonPath is not null, "--json"), (sarifPath is not null, "--sarif"), (mdPath is not null, "--md"),
+        (jsonPath is not null, "--json"), (sarifPath is not null, "--sarif"), (mdPath is not null, "--md"), (htmlPath is not null, "--html"),
         (baselinePath is not null, "--baseline"), (writeBaselinePath is not null, "--write-baseline"),
         (failOnFlag is not null, "--fail-on"), (minCoverage is not null, "--min-coverage"),
         (strictPalette, "--strict-palette"), (showOk, "--show-ok"), (showUnresolved, "--show-unresolved"),
+        (statsPreview, "--stats-preview"),
     }.Where(x => x.Given).Select(x => x.Name).ToArray();
     if (auditInputs.Length > 0)
     {
@@ -268,6 +277,13 @@ if (writeBaselinePath is not null && exitCode == 0 &&
 
 if (mdPath is not null && !TryWrite(mdPath, Report.ToMarkdown(result, exitCode), "markdown")) return 2;
 
+// 單檔 HTML（1.1）：與 --json 同一份 context（判定、gate、baseline 逐筆結果）；寫不出去一樣是 2
+if (htmlPath is not null && !TryWrite(htmlPath, Report.ToHtml(result, context), "html")) return 2;
+
+// 匿名使用統計（1.1，PROTOCOL.md）：稽核得出判定、輸出檔都寫完之後才送 —— 用法、設定、寫檔錯誤（2）、--push、--help、
+// --version 都在上面 return 了。送不出去什麼都不改（最多多花 3 秒）；說明只在 stderr；--stats-preview 只印不送
+Stats.AfterAudit(result, config, exitCode, gateWarn ? "warn" : "fail", ToolVersion(), statsPreview);
+
 return exitCode;
 
 // 版本字串（不含 +build metadata）；組件沒帶版本時 null
@@ -279,7 +295,7 @@ static string? ToolVersion() => typeof(Program).Assembly
 // 換行後的內容落在行首就成了 runner 會解析的 workflow command（審查 1.0 最終驗證 S2）
 static void Say(TextWriter w, string line) => w.WriteLine(Report.ConsoleSafe(line));
 
-// --json／--sarif／--md／--baseline／--write-baseline 的值：必填，而且不能長得像旗標。舊版只檢查「後面還有沒有字」，
+// --json／--sarif／--md／--html／--baseline／--write-baseline 的值：必填，而且不能長得像旗標。舊版只檢查「後面還有沒有字」，
 // `--json --strict-palette` 會寫出一個叫 --strict-palette 的檔、把保險旗標靜默吃掉。
 // 以 - 開頭的檔名沒有正當用途（真的要就寫 ./-name）；「-」也不代表 stdout。
 static string? OutputPath(string[] args, int i, string flag)
@@ -423,6 +439,8 @@ static void PrintUsage(TextWriter w)
           --json <path>            write machine-readable report (summary + findings)
           --sarif <path>           write SARIF 2.1.0 (GitHub code scanning; fail/warn only)
           --md <path>              write a Markdown report (suitable for a PR comment)
+          --html <path>            write a self-contained HTML report: colour swatches and ratios
+                                   per theme for every failing pair (no scripts, no external files)
           --fail-on <warn|fail>    warn (default): exit 1 on any pair below AA; fail: only on
                                    pairs below the fail line (threshold x fail-factor,
                                    default 0.67). Overrides the config's failOn
@@ -436,8 +454,15 @@ static void PrintUsage(TextWriter w)
           --show-ok                list passing pairs, grouped
           --show-unresolved        list every pair the tool could NOT resolve, with
                                    file:line, reason and the offending value/key
+          --stats-preview          print the anonymous usage statistics this run would send, and
+                                   whether they would be sent, to stderr; sends nothing
           --version                print the tool version
           -h, --help               print this help
+
+        anonymous usage statistics (on by default): after an audit, one request with counts
+        and ratio ranges only (no names, paths or colours) goes to https://stats.cornhsu.com/
+        for academic research; --stats-preview shows it. Turn it off with DO_NOT_TRACK=1,
+        XAMLCONTRAST_SHARE_STATS=false or "stats": { "share": false } in xamlcontrast.config.json.
 
         push options (experimental: may change in a minor release until the dashboard
         is publicly deployed). Uploads a report to a Parity dashboard; never audits:

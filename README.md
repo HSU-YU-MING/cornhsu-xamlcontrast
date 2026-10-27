@@ -29,6 +29,10 @@ xamlcontrast path/to/your/wpf/project
 > is refused with a note to regenerate it. Coming from 0.x? The [1.0.0 notes](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/CHANGELOG.md) list what you
 > have to change.
 
+> **Anonymous usage statistics are on by default** (from 1.1): after each audit, one request with counts
+> and ratio ranges only — no file names, paths, element names or colours — for academic research.
+> [What is sent, and how to turn it off](#anonymous-usage-statistics) (`DO_NOT_TRACK=1` is enough).
+
 ## What it looks like
 
 Run against [`samples/demo`](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/tree/main/samples/demo) (intentionally broken):
@@ -181,6 +185,7 @@ xamlcontrast src/MyApp --json report.json          # exit 1 on any pair below AA
 xamlcontrast src/MyApp --fail-on fail              # looser: only pairs below the fail line block
 xamlcontrast src/MyApp --sarif audit.sarif         # GitHub code scanning format
 xamlcontrast src/MyApp --md report.md              # Markdown report (for a PR comment)
+xamlcontrast src/MyApp --html report.html          # self-contained HTML report with colour swatches
 ```
 
 Exit codes:
@@ -262,10 +267,15 @@ reporting health.
 Annotations follow the gate: pairs it blocks are errors, warns it lets through (`fail-on: fail`)
 are warnings, and known debt in baseline mode is a notice.
 
+The JSON, Markdown and HTML reports are uploaded as the run's `xamlcontrast-report` artifact — open
+`xamlcontrast-report.html` from it for colour swatches of every failing pair ([HTML report](#html-report)).
+
 Inputs: `root` (required), `working-directory`, `version` (empty = the latest 1.x), `fail-on`
 (`warn` / `fail`; empty = the config's `failOn`, else `warn`), `min-coverage` (empty = the config's
 `minCoverage`, else 50), `baseline`, `strict-palette`, `comment` (turn off the PR comment),
-`upload-report`, `sarif`, `artifact-name` (default `xamlcontrast-report`). The switches take `true` or
+`upload-report`, `sarif`, `share-stats` (default `true`; `false` sends no
+[anonymous usage statistics](#anonymous-usage-statistics) and says so in the job summary), `artifact-name`
+(default `xamlcontrast-report`). The switches take `true` or
 `false`; an unknown value fails the job and names the input instead of quietly falling back to the
 default. `root` and `baseline` must not start with `-` (write `./-name`).
 
@@ -282,7 +292,7 @@ team dashboard (`Parity.Server`, which you host). It never audits — run the au
 first, then push that file:
 
 ```bash
-xamlcontrast src/MyApp --json report.json                              # the audit — never touches the network
+xamlcontrast src/MyApp --json report.json                              # the audit — the report stays on this machine
 xamlcontrast --push report.json --server https://dashboard.example.com  # needs XAMLCONTRAST_TOKEN in the environment
 ```
 
@@ -295,8 +305,9 @@ xamlcontrast --push report.json --server https://dashboard.example.com  # needs 
 - **Environment:** `XAMLCONTRAST_SERVER` (or `--server`) is the dashboard's absolute `http`/`https`
   URL; `XAMLCONTRAST_TOKEN` is the project token the server's `create-project` command printed. There
   is deliberately no `--token` flag — flag values end up in shell history and CI logs.
-- **Opt-in:** nothing leaves the machine unless you run `--push`; the audit itself never touches the
-  network. The request goes only to the server you name and redirects are not followed, so the token
+- **Opt-in:** the report never leaves the machine unless you run `--push`; the audit's only request is
+  the [anonymous usage statistics](#anonymous-usage-statistics) (counts only, and easy to turn off). The
+  push goes only to the server you name and redirects are not followed, so the token
   is never forwarded elsewhere. Use `https`: over plain `http` the token travels unencrypted.
 - **Exit codes:** `0` uploaded, `2` anything else — no token, a file that isn't an XamlContrast
   `schemaVersion` 6 report (checked before anything is sent), an unreachable server (60-second
@@ -345,16 +356,28 @@ lists them as strings with the current values in their description.
   `deadForeground`, `disabledExempt`, `suppressed`, `parseErrors` / `parseErrorFiles`,
   `invalidIgnoreCount` / `invalidIgnores`, `unknownKeys`. If the tool couldn't see something, that
   fact is machine-readable.
-- Each finding carries `file`, `line`, `element`, `fg`, `bg`, `ratioDark`, `ratioLight`,
+- Each finding carries `file`, `line`, `element`, `fg`, `bg`, `ratioDark`, `ratioLight`, `colors`,
   `threshold`, `category`, `symmetry` (fail/warn; `null` otherwise), `isText`, `isLargeText`,
   `fontSize` (DIP, or `null`), `theme` and `baseline` (`known` / `new` / `worsened` for the pairs
   the gate blocks in `--baseline` mode). Suppressed pairs are counted in `summary`, not listed.
+- `colors` (added in 1.1; `schemaVersion` stays 6) is what each ratio was computed on — the two opaque
+  colours on screen, after compositing: the text colour already blended over its backdrop with its own
+  alpha and the accumulated `Opacity`, the backdrop with its translucent layers blended. `fg` / `bg` say
+  how the colours are *written*; `colors` says what they *are*:
+
+  ```json
+  "fg": "#FFFFFF ×0.5", "bg": "{Surface}", "ratioDark": 5.09, "ratioLight": 1,
+  "colors": { "dark": { "fg": "#8E8E8E", "bg": "#1E1E1E" }, "light": { "fg": "#FFFFFF", "bg": "#FFFFFF" } }
+  ```
+
+  Recomputing the contrast of `colors.dark.fg` on `colors.dark.bg` gives exactly `ratioDark`. A theme is
+  `null` exactly when its ratio is.
 
 A pair that exists in **one theme only** (a style in a one-theme dictionary, or a use site whose
 style resolves differently per theme — see palette detection above) has a ratio for that theme only:
 `theme` says which (`"dark"` / `"light"`; `null` for pairs that exist in both), the other theme's
-ratio is `null`, and the console, Markdown, SARIF and Action annotations print `n/a (dark theme only)`
-instead of a number. Failing and warning ones also read `symmetry: single-theme`.
+ratio and `colors` entry are `null`, and the console, Markdown, HTML, SARIF and Action annotations print
+`n/a (dark theme only)` instead of a number. Failing and warning ones also read `symmetry: single-theme`.
 `skipped` counts only text you cannot see (transparent, alpha ≈ 0, `Opacity="0"`); a translucent
 colour is composited and graded.
 
@@ -414,6 +437,88 @@ never a silent no-op.
 
 `--md report.md` writes the human-readable Markdown version — this is what the Action posts as a
 PR comment, and you can use it directly too.
+
+### HTML report
+
+`--html report.html` writes one self-contained page — inline CSS, no scripts, no external files — that
+opens straight from a CI artifact (the Action uploads it as `xamlcontrast-report.html`). It shows:
+
+- the verdict and why (exit 0, 1 or 3), and every degradation warning first — degraded palette
+  detection, zero pairs, non-default thresholds, parse failures, invalid ignore comments;
+- a summary: counts, coverage, the gate, palette mode and detection detail, and every not-evaluated
+  counter (unresolved by reason, skipped, excluded, exempted, suppressed, parse errors) — zeros included;
+- one card per `fail` and `warn` pair: location, element, foreground and background as written, and for
+  each theme a swatch of the text colour and of the backdrop, a sample set in those two colours, the
+  ratio, the hex values and whether it meets the threshold (category and pass/fail are always spelled
+  out, never shown by colour alone);
+- every unresolved pair with its reason and the value it got stuck on;
+- the `ok` and `decorative` pairs, all of them, in collapsed sections.
+
+The swatches are the JSON's `colors`. Everything taken from the scanned XAML is escaped, and the page's
+Content-Security-Policy forbids scripts and external resources. It follows your light/dark setting. Like
+the console and Markdown output, its layout is presentation rather than a frozen interface — programs
+should read the JSON.
+
+## Anonymous usage statistics
+
+From 1.1, after each audit that reaches a verdict (exit 0, 1 or 3), XamlContrast sends **one** small
+request to `https://stats.cornhsu.com/v1/xamlcontrast`. It is **on by default — in CI too** — and one
+setting turns it off. It is used for academic research on what contrast problems in real XAML
+apps look like, and only aggregate results are published; [stats.cornhsu.com](https://stats.cornhsu.com/) explains what is collected, what it is
+used for and how long it is kept.
+
+**What is sent** — counts and ranges, nothing else:
+
+| field | what it is |
+|---|---|
+| `schema`, `tool`, `toolVersion` | `1`, `"xamlcontrast"`, the tool version (no build metadata) |
+| `os` | `windows`, `linux`, `macos` or `other` |
+| `ci` | whether `CI` or `GITHUB_ACTIONS` is `true` |
+| `projectId` | `null` — unless *you* add one (below) |
+| `data.exitCode` | the audit verdict: 0, 1 or 3 |
+| `data.failOn` | the gate in effect: `warn` or `fail` |
+| `data.paletteMode`, `data.paletteDegraded` | which palette detection path ran, and whether it degraded |
+| `data.files`, `data.pairs`, `data.coverage` | how many files and pairs, and the coverage percentage |
+| `data.counts` | how many pairs are `fail`, `warn`, `ok` and `decorative` |
+| `data.unresolvedBy` | how many pairs are unresolved, per reason (the reasons in the table above) |
+| `data.ratios` | non-decorative pairs counted by their worst ratio in six ranges: < 1.5, 1.5–2, 2–3, 3–4.5, 4.5–7, ≥ 7 |
+
+**What is never sent:** file names or paths, element, style or resource names, colour values, the report,
+your config, repository, user or machine names, or anything else from your project. The request carries
+no User-Agent, cookies or custom headers. The collector stores no IP address (Cloudflare, which hosts it,
+sees the connection the way any network provider does), keeps only the date it arrived, and rejects any
+request with a field it doesn't expect.
+
+**There is no ID unless you add one.** Without it, nothing links one run to another or to you — which
+also means there is no way to find or delete "your" data individually. If you want your project's runs
+grouped together, invent an ID (16–64 characters of `A-Z a-z 0-9 _ -`; don't derive it from your
+repository's name) and put it in the config — a malformed one is a config error, exit 2:
+
+```json
+{ "stats": { "projectId": "pick-your-own-random-id-2026" } }
+```
+
+**Turn it off** — any one of these is enough:
+
+- `DO_NOT_TRACK=1` — any value except `0` / `false`; it always wins
+- `XAMLCONTRAST_SHARE_STATS=false`, or `CORNHSU_SHARE_STATS=false` (also covers the sibling tool
+  Parity). Any value other than `1`, `true`, `yes` or `on` turns it off, so a typo errs toward not sending
+- `"stats": { "share": false }` in `xamlcontrast.config.json`
+- in the GitHub Action, `share-stats: false`
+
+**See it before it's sent:** `xamlcontrast <root> --stats-preview` runs the audit as usual, sends
+nothing, and prints to stderr the exact JSON it would send and whether — or why not — it would be sent
+(`would not be sent: DO_NOT_TRACK is set`).
+
+**What you'll see:** on your machine, a short notice on stderr the first time it sends (a marker file,
+`cornhsu/xamlcontrast-stats-notice` in your user config folder — `%APPDATA%` on Windows, `~/.config` on
+Linux — keeps it from repeating); in CI, one line on stderr on every run, and on GitHub Actions one line
+in the job summary. Nothing goes to stdout, and nothing at all is printed when it doesn't send.
+
+**It never changes your run.** The request waits at most 3 seconds (1.5 to connect), is never retried or
+redirected, and any failure is ignored silently — the exit code and every output are exactly what they
+would be without it. Development builds — any version starting with `0.0.0-`, such as `0.0.0-dev` when you
+build from source — never send.
 
 ## Validated against real products
 

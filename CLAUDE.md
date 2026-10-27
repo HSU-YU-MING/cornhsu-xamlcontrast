@@ -14,7 +14,7 @@
 
 ```bash
 dotnet build XamlContrast.slnx -c Release
-dotnet test  XamlContrast.slnx -c Release          # 2026-10-26 實跑：838 綠、1 略過（沒有 jq 的機器略過 Action 註記的實跑）
+dotnet test  XamlContrast.slnx -c Release          # 2026-10-26 實跑（Windows）：946 綠、2 略過（沒有 jq 的機器略過 Action 註記的實跑；非 Linux 略過統計說明的標記檔）
 dotnet format XamlContrast.slnx --verify-no-changes # CI 第一關，不過直接紅
 
 # 示範專案（刻意做壞的，exit 1 才是對的）
@@ -87,7 +87,7 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
     稽核語意的改進仍可能讓 build 變紅，會寫在 Upgrading）。
   - 第 9 面凍的是**預設行為**：opt-in 的範圍擴充（`--config`、額外排除路徑、`.axaml`）= minor；改內建範圍 = 2.0。
     console 與 Markdown 的輸出屬 presentation、不凍結，機器讀取請用 JSON。
-  - **`--push`（實驗性）不在凍結面內**，直到 Parity.Server 儀表板公開上線：`--push`／`--server`／`--commit`／`--branch`、
+  - **`--push`（實驗性）不在凍結面內**（`--push` 不送匿名統計，`--stats-preview` 與它並用是用法錯誤），直到 Parity.Server 儀表板公開上線：`--push`／`--server`／`--commit`／`--branch`、
     `XAMLCONTRAST_SERVER`／`XAMLCONTRAST_TOKEN`、push 模式的退出碼（0 送出、2 其他一切）與伺服器協定
     （`POST {server}/api/runs`、`X-Parity-*` 標頭、201 回應的形狀）都可以在 minor 改。上線後併入凍結（旗標進第 1 面、退出碼進第 2 面），
     CHANGELOG、README 兩份、SECURITY、CONTRIBUTING 的「實驗性」字樣一起拿掉。比照 Parity 的 `parity push`（伺服器上線前不凍結）。
@@ -97,6 +97,17 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
       `~/.dotnet/tools` 寫進 `GITHUB_PATH`、Run audit 的 `--json` 落點固定在 `$RUNNER_TEMP/xamlcontrast-report.json`。
       改了任何一個，README 的那一步就安靜失效。
     - 協定跟 Parity repo 的伺服器端一起定，**不要單方面改**（伺服器照這個形狀實作，`CliPushTests` 釘住線上的樣子）。
+  - **1.1 的新增（凍結面，minor）**：`--html`、`--stats-preview`（第 1 面）、`findings[].colors`（第 3 面）、Action input `share-stats`
+    （第 4 面）、config 的 `stats.share`／`stats.projectId`（第 5 面）。HTML 的**版面**跟 console、Markdown 一樣是 presentation、不凍結。
+    **匿名統計送出去的 JSON 不是凍結面**：它的真相源是 `D:\擴充功能\nuget\stats-collector\PROTOCOL.md`，跟收集站與 Parity 一起演進
+    （改欄位先改協定、收集站先上線，工具才能送新欄位 —— 收集站多一個欄位就整筆拒收）。
+  - **1.1.0 的發版條件**：研究倫理對「預設打開」的確認**已取得（2026-10-28，維護者確認）**；收集站 stats.cornhsu.com
+    也已上線（2026-10-28）；發版前確認說明頁上的 stats@cornhsu.com 收得到信（`稽核-2026-10-22/統計功能規劃.md`）。
+    預設送不送是**一個常數** `Stats.ShareByDefault`（`src/XamlContrast.Cli/Stats.cs`）：審查要求主動同意就改成 `false` ——
+    之後只有使用者明確說好（`*_SHARE_STATS` 是 1／true／yes／on，或 `"stats": { "share": true }`）才送；config 的 `stats.share`
+    不寫與 Action 的 `share-stats: 'true'` 本來就是「不表態」，預設值不必跟著改。協定說的「第一次在終端機詢問」那時才做，
+    README 兩份、CHANGELOG 的提示、SECURITY 的「預設送」字樣一起改。
+    發版之後才改成預設不送：凍結規則沒寫到「只會送得更少」的預設變更，要不要算 2.0 由維護者決定（建議在 1.1.0 的 CHANGELOG 先講明）。
   - 對外的說法（README 兩份、SECURITY、CONTRIBUTING、RELEASING）一律是「語法凍結；稽核語意與 baseline 鍵的寫法可以在 minor 改變，
     Upgrading 會說明，keyVersion 遞增時舊 baseline 被拒並提示重寫」。⚠ 不要寫成「1.x 升級不會打壞任何東西」。
   - SARIF 的等級表示嚴重度、不表示 gate（預設 gate warn 時 warn 讓 CI 失敗，SARIF 裡照樣是 warning）；
@@ -173,9 +184,10 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
 | 12 | fail > 0 | 1 |
 | 13 | gate 是 warn（預設）且 warn > 0 | 1 |
 | 14 | 其餘 | 0 |
-| 15 | 判定之後寫 `--json`／`--sarif`／baseline／`--md`，任何一個寫不出去 | 2 |
+| 15 | 判定之後寫 `--json`／`--sarif`／baseline／`--md`／`--html`，任何一個寫不出去 | 2 |
+| 16 | 全部寫完之後送匿名統計（`Stats.AfterAudit`）—— **不改退出碼**，送不出去最多多花 3 秒 | 同 11–14 |
 
-JSON 的 `exitCode` 記的是判定（0／1／3）；第 15 列的 2 發生時，JSON 已經寫出去了。
+JSON 的 `exitCode` 記的是判定（0／1／3）；第 15 列的 2 發生時，JSON 已經寫出去了，統計不送（只有 0／1／3 才送）。
 
 **`--push`（實驗性）不走這張表**：旗標解析完就分流（帶了任何稽核輸入 → 2），之後只有 0（送出）與 2（其他一切）。
 不借用 1／3 —— 那是稽核的判定，上傳失敗長得像「有違規」的話，CI 分不出來。
@@ -270,6 +282,9 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 —— 照讀的話既有的 warn 全部會變成 NEW。
 **`keyVersion`（`Baseline.KeyVersion`，缺省視為 1）**：鍵的文字（`element` 的標籤、`fg` 的寫法、`bg` 的合成描述）屬稽核語意，
 1.x 的 minor 可以改 —— **改了產生鍵的方式就要遞增 `KeyVersion`**，舊檔會被拒絕並叫人重寫，不然使用者會看到一整排假的 NEW。
+⚠ **Parity 的儀表板照這個鍵與 `Compare` 的比法手刻了一份**（Parity repo 的 `ContrastCompare`，「跟上次比」用；2026-10-28）：
+伺服器不引用這裡的組件，JSON 報告裡也沒有 keyVersion。遞增 `KeyVersion` 或改 `Compare` 的判定時，那邊要一起改，
+不然儀表板上跨版本的兩筆 run 會冒出一排假的「新增」與「修好」（那邊只在兩筆的 toolVersion 不同時提醒）。
 
 ### `--push`（實驗性，`Push.cs`）
 
@@ -283,6 +298,41 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - 本文是檔案原樣（只拿掉 BOM），不重新序列化；schemaVersion 比對 `Report.JsonSchemaVersion`，不寫死 6。
 - 測試的環境變數只設在子行程（`Cli.RunEnv`）：CI 的 runner 自己帶著 `GITHUB_SHA`、`GITHUB_STEP_SUMMARY`，
   測試行程的環境變數又是平行測試共用的。stub 用 `TcpListener`（`HttpListener` 在 Windows 走 http.sys，非管理員綁不上 127.0.0.1）。
+
+### HTML 報告（`Report.Html.cs`）
+
+- **裡面的文字全部不可信，而且會從 CI 的 artifact 直接在瀏覽器打開**：一律經 `Report.H`（控制字元、U+2028／2029 與 Cf 類格式字元
+  —— 雙向覆寫 U+202E 能讓檔名倒著顯示 —— 換成看得見的 `\uXXXX`，再跳脫 `& < > " '`）；掃描內容**不進任何屬性**，
+  `style` 只放 `Report.CssHex` 驗過的 `#RRGGBB`。CSP（`default-src 'none'; style-src 'unsafe-inline'`）是第二道。
+  `HtmlReportTests` 用標籤與屬性的白名單驗整份輸出 —— 加新標籤或屬性要一起加進白名單，不是放寬檢查。
+- `Card` 的兩欄是 **HTML**（呼叫端跳脫），標題與說明是純文字。來自掃描內容的標籤先經 `H`。
+- 色塊就是 `Finding.ColorsIn` —— 跟 JSON 的 `colors` 同一份；函式庫呼叫端自己建、沒有顏色的 finding 不畫色塊、比值照印。
+- ⚠ 寫測試時 `Assert.DoesNotContain(string, string)` 預設是文化比較，**格式字元（U+202E）會被忽略、恆為「找到」** —— 要加 `StringComparison.Ordinal`。
+
+### 匿名使用統計（`Stats.cs`、Core 的 `UsageStats.cs`）
+
+協定是 `D:\擴充功能\nuget\stats-collector\PROTOCOL.md`，**不要單方面改**；收集站的 `src/validate.ts` 是實際驗的那一份（多一個欄位就整筆拒收）。
+
+- **研究資料的保護（測試）**：`Cli.Start` 對每個子行程預設 `DO_NOT_TRACK=1`；要測統計的測試在 env 裡明確給 `DO_NOT_TRACK`（null = 拿掉）。
+  `CliStatsTests` 的收集站是 127.0.0.1 的 stub（`CORNHSU_STATS_URL`），另外把 `HTTP(S)_PROXY`（大小寫都設）指到第二個 stub、
+  `NO_PROXY` 只放行 127.0.0.1 —— 哪條路徑出錯往外送也只會落到它（`TheEgressGuardCatchesEveryNonLoopbackRequest` 證明這張網接得住）。
+  兩個 workflow 在最上層設 `DO_NOT_TRACK: '1'`（`WorkflowsTurnStatisticsOffForTheMaintainersOwnRuns` 守著）—— release 用真的版號跑測試與 demo。
+- **標記檔在 Windows 測不了**：`Environment.SpecialFolder.ApplicationData` 在 Windows 走 Shell API，**不吃 `APPDATA`／`USERPROFILE` 環境變數**
+  （2026-10-26 實測），測試寫下去就是開發者真的設定目錄。所以本機說明＋標記檔只在 Linux 測（`XDG_CONFIG_HOME` 指到暫存目錄），
+  其他統計測試一律 `CI=true`（CI 模式不讀不寫標記）。
+- **開發版是 `0.0.0-` 開頭的任何版本**（`UsageStats.DevVersionPrefix`；協定 2026-10-26 從「只有 `0.0.0-dev`」放寬）：原始碼的 `0.0.0-dev`、
+  CI pack-smoke 的 `0.0.0-ci`、`nuget-packages` skill 乾跑的 `0.0.0-local.*` 都不送。⚠ `RELEASING.md` 的本機預覽版（`1.1.0-rc.1`）**不是**
+  開發版 —— 拿它跑稽核會送出真的統計，要自己設 `DO_NOT_TRACK=1`。子行程只測得到這次建置的版本，其他版本字串由
+  `DevelopmentVersionsNeverSendWithoutAStatsUrl` 直接餵 `UsageStats.Decide`；子行程那條（`DevBuildFact`）在真版號的建置上略過。
+- 開關的值比對**不 Trim、不寬鬆**（`" true"`、`ture` 都是不送）：協定要「寫錯往不送那邊錯」。`DO_NOT_TRACK` 只有 `0`／`false` 不算。
+- 傳輸：`SocketsHttpHandler` 的 `ActivityHeadersPropagator = null`（不然有 listener 時會帶 traceparent）、`UseCookies = false`、
+  `AllowAutoRedirect = false`；`HttpClient` 預設不帶 User-Agent。**全部例外都吞**（`catch (Exception)`）是刻意的 —— 統計失敗絕不能改退出碼。
+- 預覽印的就是送出去的位元組：`NewLine = "\n"` 固定（`WriteIndented` 預設用 `Environment.NewLine`，兩個平台會不一樣）。
+  說明的 raw string 在 CRLF checkout 下帶 `\r\n`，印之前正規化。
+- job summary：送了的那一行由 CLI 寫（只有它知道到底送了沒 —— DO_NOT_TRACK、設定檔也關得掉），`share-stats: false` 那一行由 action.yml 寫。
+- Action 的 `share-stats: false` 在 Run audit 的 script 裡 `export`，**不寫進 step 的 `env:`** —— step 的 env 會蓋掉呼叫端 workflow／job 層的
+  同名變數，`true` 時呼叫端的 `XAMLCONTRAST_SHARE_STATS=false` 就失效了。
+- `stats.projectId` 逐字檢查，不用正則的 `$`（它在結尾的換行前也成立）。
 
 ### 守門腳本自身
 

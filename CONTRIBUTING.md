@@ -133,7 +133,11 @@ one and would be willing to be the guinea pig, say so in an issue — that unblo
 8. the `xamlcontrast-ignore` comment syntax
 9. the hard scope rules, as default behaviour: `*.xaml` under the root, `bin`/`obj` skipped, `*.cs` read only for a C# palette, the config read from the root only (opt-in extensions such as extra exclude paths are minor; changing the default scope is 2.0)
 
-The console and Markdown output are presentation, not frozen — programs should read the JSON report.
+The console, Markdown and HTML output are presentation, not frozen — programs should read the JSON report.
+The anonymous usage statistics payload is not one of the nine surfaces either: it follows the shared
+statistics protocol and changes together with its collector (the switches that turn it off — the
+`stats` config property, the `share-stats` input, `--stats-preview` — are frozen like any other flag,
+input or property).
 The experimental `--push` mode (its flags, `XAMLCONTRAST_SERVER` / `XAMLCONTRAST_TOKEN`, its exit codes
 and the server protocol) is not covered yet: it may change in a minor release until the Parity
 dashboard is publicly deployed.

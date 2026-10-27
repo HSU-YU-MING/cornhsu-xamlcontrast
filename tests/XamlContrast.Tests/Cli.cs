@@ -47,6 +47,10 @@ internal static class Cli
             CreateNoWindow = true,
         };
         if (workingDirectory is not null) psi.WorkingDirectory = workingDirectory;
+        // 研究資料的保護（1.1 的匿名統計預設會送）：每一次跑 CLI 預設 DO_NOT_TRACK=1，測試永遠不送到真的收集站。
+        // 測試建的是 0.0.0-dev，本來就不送；這是第二道 —— 開發者的 shell 或 CI 設了 CORNHSU_STATS_URL 也一樣。
+        // 要測統計的測試在 env 裡明確給 DO_NOT_TRACK（null = 拿掉）並把 CORNHSU_STATS_URL 指到 127.0.0.1 的 stub（CliStatsTests）
+        psi.Environment["DO_NOT_TRACK"] = "1";
         foreach (var (name, value) in env ?? new Dictionary<string, string?>())
             if (value is null) psi.Environment.Remove(name); else psi.Environment[name] = value;
         psi.ArgumentList.Add(DllPath);

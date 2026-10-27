@@ -5,13 +5,32 @@ using XamlContrast.Core;
 namespace XamlContrast.Tests;
 
 /// <summary>
-/// --json 的形狀是 1.0 凍結面之一（CLAUDE.md：「JSON 形狀變了就遞增 Report.cs 的 schemaVersion」）。
-/// 這裡把每個 schemaVersion 的形狀登記下來：形狀一變、或 schemaVersion 一變，這裡一定紅 ——
-/// 逼改的人做兩件事：遞增 schemaVersion、在 <see cref="ShapeBySchemaVersion"/> 新增一列
-/// （並確認 action.yml 那幾段 jq 還讀得到欄位，見 ActionContractTests）。
+/// --json 的形狀是 1.0 凍結面之一。這裡把每個 schemaVersion 的形狀登記下來：形狀一變、或 schemaVersion 一變，這裡一定紅。
+/// 1.x 只新增（CLAUDE.md：新增欄位不遞增 schemaVersion）—— 新增的欄位登記在 <see cref="AddedInMinor"/>（記是哪一版加的），
+/// 已發佈的列不動；改名、刪除要等 2.0：遞增 schemaVersion、在 <see cref="ShapeBySchemaVersion"/> 新增一列。
+/// 兩種改法都要確認 action.yml 那幾段 jq 還讀得到欄位（見 ActionContractTests）。
 /// </summary>
 public class JsonReportContractTests
 {
+    /// <summary>
+    /// schemaVersion 6 在 1.x 的新增欄位，依加入的版本登記（路徑格式同 <see cref="ShapeBySchemaVersion"/>）。
+    /// 實際輸出 = 6 那一列 ∪ 這裡全部 —— 新增欄位卻沒登記、或登記了卻沒輸出，形狀測試都會紅。
+    /// </summary>
+    private static readonly Dictionary<string, string[]> AddedInMinor = new()
+    {
+        // 1.1：findings[].colors —— 每個主題算比值的那一對不透明顏色（合成之後）；那個主題下不存在的配對是 null
+        ["1.1"] =
+        [
+            "findings[].colors:Object",
+            "findings[].colors.dark:Object",
+            "findings[].colors.dark.bg:String",
+            "findings[].colors.dark.fg:String",
+            "findings[].colors.light:Object",
+            "findings[].colors.light.bg:String",
+            "findings[].colors.light.fg:String",
+        ],
+    };
+
     /// <summary>
     /// ⚠ 已發佈的列不可改寫 —— 那等於默默改了已發佈的格式。形狀變了就新增一列。
     /// 路徑格式：物件屬性用「.」、陣列元素用「[]」、動態鍵的字典（unresolvedBy、unknownKeys）
@@ -238,7 +257,7 @@ public class JsonReportContractTests
 
         var actual = new SortedSet<string>(StringComparer.Ordinal);
         Flatten(root, "", actual);
-        Assert.Equal(expected.OrderBy(s => s, StringComparer.Ordinal), actual);
+        Assert.Equal(expected.Concat(AddedInMinor.Values.SelectMany(v => v)).Distinct().OrderBy(s => s, StringComparer.Ordinal), actual);
     }
 
     [Fact] // docs/report.schema.json 與實際輸出一致：每一層物件的欄位一個不多一個不少、全部 required，列舉值與工具的標籤相同。
@@ -263,6 +282,10 @@ public class JsonReportContractTests
         Same(p.GetProperty("summary").GetProperty("properties").GetProperty("counts"), root.GetProperty("summary").GetProperty("counts"), "counts");
         Same(p.GetProperty("unresolvedSites").GetProperty("items"), root.GetProperty("unresolvedSites")[0], "unresolvedSites[]");
         Same(p.GetProperty("findings").GetProperty("items"), root.GetProperty("findings")[0], "findings[]");
+        var colors = root.GetProperty("findings")[0].GetProperty("colors");
+        Same(p.GetProperty("findings").GetProperty("items").GetProperty("properties").GetProperty("colors"), colors, "findings[].colors");
+        Same(schema.GetProperty("$defs").GetProperty("colorPair"), colors.GetProperty("dark"), "colorPair");
+        Same(schema.GetProperty("$defs").GetProperty("colorPair"), colors.GetProperty("light"), "colorPair");
 
         string?[] EnumOf(JsonElement e) => e.GetProperty("enum").EnumerateArray()
             .Select(x => x.ValueKind == JsonValueKind.Null ? null : x.GetString()).ToArray();
@@ -316,7 +339,7 @@ public class JsonReportContractTests
     {
         using var fx = Everything();
         var findings = JsonOf(fx).GetProperty("findings").EnumerateArray().ToList();
-        string[] fields = ["file", "line", "element", "fg", "bg", "ratioDark", "ratioLight", "threshold", "category",
+        string[] fields = ["file", "line", "element", "fg", "bg", "ratioDark", "ratioLight", "colors", "threshold", "category",
                            "symmetry", "isText", "isLargeText", "fontSize", "theme", "baseline"];
         foreach (var f in findings)
         {
@@ -411,6 +434,88 @@ public class JsonReportContractTests
         var findings = JsonOf(fx).GetProperty("findings").EnumerateArray().ToList();
         Assert.Equal("dark", Assert.Single(findings, f => f.GetProperty("file").GetString() == "Themes/Dark.xaml").GetProperty("theme").GetString());
         Assert.Equal(JsonValueKind.Null, Assert.Single(findings, f => f.GetProperty("file").GetString() == "Views/Main.xaml").GetProperty("theme").ValueKind);
+    }
+
+    [Fact] // 1.1 的 colors：一個主題的比值不存在（只屬於另一個主題的配對），那個主題的顏色也是 null —— 不印一個不存在的主題的顏色
+    public void ColorsAreNullExactlyWhereTheRatioIsNull()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/><SolidColorBrush x:Key="Fg" Color="#EEEEEE"/><SolidColorBrush x:Key="Line" Color="#333333"/>
+              <Style x:Key="Chip" TargetType="Button"><Setter Property="Background" Value="{DynamicResource Bg}"/><Setter Property="Foreground" Value="#EEEEEE"/></Style>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/><SolidColorBrush x:Key="Fg" Color="#1B1B1B"/><SolidColorBrush x:Key="Line" Color="#CCCCCC"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """<Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}"/></Grid>""");
+        var findings = JsonOf(fx).GetProperty("findings").EnumerateArray().ToList();
+        Assert.Equal(2, findings.Count);
+        foreach (var f in findings)
+            foreach (var theme in new[] { "dark", "light" })
+            {
+                var ratio = f.GetProperty(theme == "dark" ? "ratioDark" : "ratioLight");
+                Assert.Equal(ratio.ValueKind == JsonValueKind.Null, f.GetProperty("colors").GetProperty(theme).ValueKind == JsonValueKind.Null);
+            }
+        var dark = Assert.Single(findings, f => f.GetProperty("file").GetString() == "Themes/Dark.xaml").GetProperty("colors");
+        Assert.Equal(JsonValueKind.Null, dark.GetProperty("light").ValueKind);
+        Assert.Equal("#EEEEEE", dark.GetProperty("dark").GetProperty("fg").GetString());
+        Assert.Equal("#111111", dark.GetProperty("dark").GetProperty("bg").GetString());
+        var main = Assert.Single(findings, f => f.GetProperty("file").GetString() == "Views/Main.xaml").GetProperty("colors");
+        Assert.Equal("#1B1B1B", main.GetProperty("light").GetProperty("fg").GetString());
+        Assert.Equal("#FFFFFF", main.GetProperty("light").GetProperty("bg").GetString());
+    }
+
+    [Fact] // 1.1 的 colors 是「比值拿什麼算的」：半透明字色、元素 Opacity、半透明的底、Opacity 群組都合成完，#RRGGBB 大寫。
+           // 拿這兩個顏色重算一次一定等於報告的比值 —— 對不上就是報告在講另一對顏色（三條建立 finding 的路徑都在這個素材裡）
+    public void ColorsAreTheOpaqueValuesEachRatioWasComputedOn()
+    {
+        using var fx = new Fixture().WithPalette();
+        fx.File("Main.xaml", """
+            <StackPanel xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <StackPanel.Resources>
+                <Style x:Key="Btn" TargetType="Button">
+                  <Setter Property="Background" Value="{DynamicResource Bg}"/>
+                  <Setter Property="Foreground" Value="#80FFFFFF"/>
+                  <Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Foreground" Value="{DynamicResource Dim}"/></Trigger></Style.Triggers>
+                </Style>
+              </StackPanel.Resources>
+              <TextBlock Foreground="#000000" Opacity="0.5" Text="element opacity: #808080 on #FFFFFF"/>
+              <Border Background="#000000" Opacity="0.5"><TextBlock Foreground="#FFFFFF" Text="opacity group: #FFFFFF on #808080"/></Border>
+              <Border Background="#80000000"><TextBlock Foreground="#ffffff" Text="translucent backdrop over white"/></Border>
+              <Grid Background="{DynamicResource Bg}"><TextBlock Foreground="{DynamicResource Fg}" Text="palette keys, per theme"/></Grid>
+              <Button Style="{StaticResource Btn}" Foreground="#40000000" Content="style chain, translucent local foreground"/>
+            </StackPanel>
+            """);
+        var findings = JsonOf(fx).GetProperty("findings").EnumerateArray().ToList();
+        Assert.True(findings.Count >= 6, string.Join("\n", findings));
+        foreach (var f in findings)
+            foreach (var (theme, ratioField) in new[] { ("dark", "ratioDark"), ("light", "ratioLight") })
+            {
+                var c = f.GetProperty("colors").GetProperty(theme);
+                var fg = c.GetProperty("fg").GetString()!;
+                var bg = c.GetProperty("bg").GetString()!;
+                Assert.Matches("^#[0-9A-F]{6}$", fg);
+                Assert.Matches("^#[0-9A-F]{6}$", bg);
+                Assert.Equal(f.GetProperty(ratioField).GetDouble(), Wcag.Contrast(fg, bg));
+            }
+
+        (string Fg, string Bg) DarkOf(string element, string bgLabel)
+        {
+            var c = Assert.Single(findings, f => f.GetProperty("element").GetString() == element && f.GetProperty("bg").GetString() == bgLabel)
+                .GetProperty("colors").GetProperty("dark");
+            return (c.GetProperty("fg").GetString()!, c.GetProperty("bg").GetString()!);
+        }
+        Assert.Equal(("#808080", "#FFFFFF"), DarkOf("TextBlock", "#FFFFFF"));   // 黑字以 0.5 疊在白底上
+        // Opacity 是群組：底跟字一起變淡（3.95:1，不是 5.32）—— 報告的底是螢幕上的 #808080，不是寫的 #000000
+        Assert.Equal(("#FFFFFF", "#808080"), DarkOf("TextBlock", "#000000 ×0.5 over #FFFFFF"));
+        // 半透明的底先合成到白底上：#80 是 128/255，黑疊白 = #7F7F7F；字色寫小寫，報告是大寫
+        Assert.Equal(("#FFFFFF", "#7F7F7F"), DarkOf("TextBlock", "#80000000 over #FFFFFF"));
+        // 半透明的字色疊在色票的底上，深淺各自合成（Style 定義處那條路徑）
+        Assert.Equal(("#888888", "#111111"), DarkOf("Style[Btn]/base", "{Bg}"));
     }
 
     [Fact] // --baseline 模式下，gate 擋的每一筆帶 known／new／worsened（Action 的註記才分得出既有債與新問題）

@@ -762,6 +762,8 @@ public sealed partial class Auditor
                 _pairs++;
                 if (suppressed) { _suppressed++; continue; }
                 var lineC = el is IXmlLineInfo cli && cli.HasLineInfo() ? cli.LineNumber : 0;
+                var (ratioDC, colorsDC) = Wcag.Measure(fgDC, bgObj.Dark!);
+                var (ratioLC, colorsLC) = Wcag.Measure(fgLC, bgObj.Light!);
                 _findings.Add(new Finding
                 {
                     File = file,
@@ -770,8 +772,10 @@ public sealed partial class Auditor
                     Fg = op < 0.999 ? WithOpacityNote(fgV, op) : fgV,
                     Bg = LabelOf(bgObj),
                     Mixed = fgR.Kind != bgObj.Kind,
-                    RatioDark = Wcag.Contrast(fgDC, bgObj.Dark!),
-                    RatioLight = Wcag.Contrast(fgLC, bgObj.Light!),
+                    RatioDark = ratioDC,
+                    RatioLight = ratioLC,
+                    ColorsDark = colorsDC,
+                    ColorsLight = colorsLC,
                     IsText = isTextC,
                     Need = needC,
                     Size = fsC > 0 ? $"{(int)Math.Round(fsC, MidpointRounding.ToEven)}px" : "",
@@ -833,6 +837,9 @@ public sealed partial class Auditor
             // Opacity < 1 或字色本身半透明時，螢幕上看到的是「文字色以 alpha 疊在背景上」的混色結果
             // （底也在 Opacity 群組裡時，連底一起一層一層疊出去，見 TextOnScreen）
             var (fgD, fgL) = TextOnScreen(fg, op, bd);
+            // 比值與報告的 colors 出自同一組輸入（合成之後的字色、螢幕上的底）
+            var (ratioD, colorsD) = Wcag.Measure(fgD, bg.Dark!);
+            var (ratioL, colorsL) = Wcag.Measure(fgL, bg.Light!);
 
             _findings.Add(new Finding
             {
@@ -842,8 +849,10 @@ public sealed partial class Auditor
                 Fg = op < 0.999 ? WithOpacityNote(fgRaw, op) : fgRaw,
                 Bg = LabelOf(bg),
                 Mixed = fg.Kind != bg.Kind,
-                RatioDark = Wcag.Contrast(fgD, bg.Dark!),
-                RatioLight = Wcag.Contrast(fgL, bg.Light!),
+                RatioDark = ratioD,
+                RatioLight = ratioL,
+                ColorsDark = colorsD,
+                ColorsLight = colorsL,
                 IsText = isText,
                 Need = need,
                 Size = fs > 0 ? $"{(int)Math.Round(fs, MidpointRounding.ToEven)}px" : "",
@@ -1126,6 +1135,9 @@ public sealed partial class Auditor
 
                 _pairs++;
                 if (styleSuppressed) { _suppressed++; continue; }
+                var (fgOnD, fgOnL) = EffectiveForeground(fg, 1.0, bgr);
+                var (ratioD, colorsD) = Wcag.Measure(fgOnD, bgr.Dark!);
+                var (ratioL, colorsL) = Wcag.Measure(fgOnL, bgr.Light!);
                 _findings.Add(new Finding
                 {
                     File = file,
@@ -1134,8 +1146,10 @@ public sealed partial class Auditor
                     Fg = fgv,
                     Bg = LabelOf(bgr),
                     Mixed = fg.Kind != bgr.Kind,
-                    RatioDark = Wcag.Contrast(EffectiveForeground(fg, 1.0, bgr).Dark, bgr.Dark!),
-                    RatioLight = Wcag.Contrast(EffectiveForeground(fg, 1.0, bgr).Light, bgr.Light!),
+                    RatioDark = ratioD,
+                    RatioLight = ratioL,
+                    ColorsDark = colorsD,
+                    ColorsLight = colorsL,
                     IsText = isText,
                     Need = need,
                     Size = fs > 0 ? $"{(int)Math.Round(fs, MidpointRounding.ToEven)}px" : "",

@@ -306,6 +306,7 @@ public class CliPushTests
     [InlineData(new[] { "--json", "{root}/out.json" }, "--json")]
     [InlineData(new[] { "--sarif", "{root}/out.sarif" }, "--sarif")]
     [InlineData(new[] { "--md", "{root}/out.md" }, "--md")]
+    [InlineData(new[] { "--html", "{root}/out.html" }, "--html")]
     [InlineData(new[] { "--baseline", "{root}/b.json" }, "--baseline")]
     [InlineData(new[] { "--write-baseline", "{root}/b.json" }, "--write-baseline")]
     [InlineData(new[] { "--fail-on", "fail" }, "--fail-on")]
@@ -452,6 +453,9 @@ internal sealed class PushStub : IDisposable
 
     public string Url => $"http://127.0.0.1:{((IPEndPoint)listener.LocalEndpoint).Port}";
 
+    /// <summary>true：收下請求、記下來，然後一直不回（逾時測試用：統計的整體上限 3 秒）。</summary>
+    public bool Hang { get; init; }
+
     public IReadOnlyList<Request> Requests => requests.ToArray();
 
     private async Task AcceptLoopAsync()
@@ -499,6 +503,11 @@ internal sealed class PushStub : IDisposable
                 }
                 var requestBody = received.GetBuffer().AsSpan(headerEnd + 4, (int)Math.Min(length, received.Length - (headerEnd + 4))).ToArray();
                 requests.Enqueue(new Request(requestLine[0], requestLine.Length > 1 ? requestLine[1] : "", headers, requestBody));
+                if (Hang)
+                {
+                    await Task.Delay(Timeout.Infinite, stop.Token);
+                    return;
+                }
 
                 var payload = body is null ? [] : Encoding.UTF8.GetBytes(body);
                 var response = new StringBuilder($"HTTP/1.1 {status} {reason}\r\n");

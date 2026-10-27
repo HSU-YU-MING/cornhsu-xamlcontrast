@@ -3,11 +3,16 @@
 ## What this tool does, and what that means
 
 XamlContrast **reads** XAML and C# files as text and writes a report. The audit does not load
-assemblies, instantiate XAML, execute anything from the project it scans, make network
-requests, or read credentials. There is no server, no daemon, and no persistent state
-beyond the files you ask it to write.
+assemblies, instantiate XAML, execute anything from the project it scans, or read credentials.
+There is no server and no daemon.
 
-The one exception is the experimental `--push` mode, and only when you invoke it: it does not
+It makes **one outgoing network request by default**: after an audit that reaches a verdict, the
+anonymous usage statistics — counts and ratio ranges only, nothing from the project's files, sent to
+`https://stats.cornhsu.com/v1/xamlcontrast` — see *Anonymous usage statistics* below, including how to
+turn it off (`DO_NOT_TRACK=1` is enough). Its only persistent state beyond the files you ask it to write
+is the marker file that records the statistics notice was shown on a machine.
+
+The other request is the experimental `--push` mode, and only when you invoke it: it does not
 audit; it reads the `XAMLCONTRAST_TOKEN` environment variable and sends an existing report file,
 in one request, to the server you name — see *`--push`* below.
 
@@ -35,11 +40,39 @@ scanned root, or hang on a crafted input, that is a vulnerability. Please report
 
 ### File writes
 
-`--json`, `--sarif`, `--md` and `--write-baseline` write exactly where you point them.
+`--json`, `--sarif`, `--md`, `--html` and `--write-baseline` write exactly where you point them.
 Nothing in the scanned project can influence those paths. If you find a way for scanned
 content to redirect or inject into an output file, that is a vulnerability — SARIF and
 Markdown reports get consumed by other tools and rendered into PR comments, so content
 that escapes its encoding there is worth reporting.
+
+The HTML report is opened in a browser straight from a CI artifact, so it gets the same care: every
+piece of text from the scanned project is escaped (control and bidirectional-override characters are
+shown as `\uXXXX`), none of it is placed in an attribute, the only inline styles are validated
+`#RRGGBB` colours, and a Content-Security-Policy forbids scripts and every external resource. Content
+from a scanned project that runs script, loads anything, or changes the page's structure is a
+vulnerability.
+
+### Anonymous usage statistics
+
+- One `POST https://stats.cornhsu.com/v1/xamlcontrast` per audit that reaches a verdict (exit 0, 1 or 3);
+  none for `--push`, `--help`, `--version` or exit 2. The body is a small JSON document of counts and
+  ranges — the tool version, OS, whether it runs in CI, the verdict and gate, the palette mode, file and
+  pair counts, coverage, counts per category and per unresolved reason, and the worst ratios in six
+  ranges — plus a project ID only if you put one in the config. `--stats-preview` prints the exact body.
+- Never sent: file names or paths, element, style or resource names, colour values, report contents,
+  credentials, environment variables, or repository, user or machine names. No User-Agent, cookies or
+  custom headers.
+- Off with any one of `DO_NOT_TRACK=1`, `XAMLCONTRAST_SHARE_STATS=false`, `CORNHSU_SHARE_STATS=false`,
+  `"stats": { "share": false }` in the config, or `share-stats: false` in the Action. Builds from source
+  and other development builds (any version starting with `0.0.0-`) never send.
+- At most 3 seconds (1.5 to connect), no retries, no redirects; a failure is ignored silently and never
+  changes the exit code or any output. Notices go to stderr (and, on GitHub Actions, one line in the job
+  summary); the marker file is `cornhsu/xamlcontrast-stats-notice` in the user config folder.
+
+If you find a way for anything from the scanned project to reach the statistics request, for the
+request to go anywhere but the collector (or the `CORNHSU_STATS_URL` you set), or for it to be sent
+when one of the switches above says not to, that is a vulnerability.
 
 ### `--push` (experimental)
 

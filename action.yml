@@ -38,13 +38,17 @@ inputs:
     required: false
     default: 'true'
   upload-report:
-    description: 'Upload the JSON and Markdown reports as an artifact named by artifact-name (default xamlcontrast-report)'
+    description: 'Upload the JSON, Markdown and HTML reports as an artifact named by artifact-name (default xamlcontrast-report)'
     required: false
     default: 'true'
   sarif:
     description: 'Upload SARIF to GitHub code scanning (requires security-events: write, plus GitHub Advanced Security or a public repo)'
     required: false
     default: 'false'
+  share-stats:
+    description: 'true (default): the tool sends one anonymous usage statistics request per audit, counts and ratio ranges only, no names, paths or colours (what is sent and why: https://stats.cornhsu.com/). false: nothing is sent (the action sets XAMLCONTRAST_SHARE_STATS=false for the tool). DO_NOT_TRACK=1 and the tool''s other switches apply either way'
+    required: false
+    default: 'true'
   artifact-name:
     description: 'Name of the uploaded report artifact. It also keys the PR comment: each name keeps its own comment. Give every call its own name when the action runs more than once in a workflow run (a matrix, or two calls in one job). Letters, digits, ".", "_" and "-" only, 1-100 characters, not starting with "-" and not only dots'
     required: false
@@ -71,10 +75,11 @@ runs:
         XC_COMMENT: ${{ inputs.comment }}
         XC_UPLOAD_REPORT: ${{ inputs.upload-report }}
         XC_SARIF: ${{ inputs.sarif }}
+        XC_SHARE_STATS: ${{ inputs.share-stats }}
         XC_ARTIFACT_NAME: ${{ inputs.artifact-name }}
       run: |
         # 同一個 job 前一次呼叫留下的報告（$RUNNER_TEMP 共用）不能被這一次的註記與上傳撿去
-        rm -f -- "$RUNNER_TEMP/xamlcontrast-report.json" "$RUNNER_TEMP/xamlcontrast-report.md" "$RUNNER_TEMP/xamlcontrast.sarif"
+        rm -f -- "$RUNNER_TEMP/xamlcontrast-report.json" "$RUNNER_TEMP/xamlcontrast-report.md" "$RUNNER_TEMP/xamlcontrast-report.html" "$RUNNER_TEMP/xamlcontrast.sarif"
         bad=0
         refuse() { echo "::error title=XamlContrast action::$1"; bad=1; }
         # 帶換行的值一律拒絕：CLI／dotnet 的錯誤訊息會把它原樣印出，換行後的內容落在行首就成了
@@ -97,7 +102,7 @@ runs:
         if ! [[ "$XC_ARTIFACT_NAME" =~ ^[A-Za-z0-9._-]{1,100}$ ]] || [[ "$XC_ARTIFACT_NAME" =~ ^-|^\.+$ ]]; then
           refuse "artifact-name must be 1-100 characters of A-Z, a-z, 0-9, '.', '_' or '-', not starting with '-' and not only dots"
         fi
-        for pair in "strict-palette=$XC_STRICT_PALETTE" "comment=$XC_COMMENT" "upload-report=$XC_UPLOAD_REPORT" "sarif=$XC_SARIF"; do
+        for pair in "strict-palette=$XC_STRICT_PALETTE" "comment=$XC_COMMENT" "upload-report=$XC_UPLOAD_REPORT" "sarif=$XC_SARIF" "share-stats=$XC_SHARE_STATS"; do
           case "${pair#*=}" in
             true | false) ;;
             *) refuse "${pair%%=*} must be 'true' or 'false'" ;;
@@ -137,10 +142,17 @@ runs:
         XC_BASELINE: ${{ inputs.baseline }}
         XC_STRICT_PALETTE: ${{ inputs.strict-palette }}
         XC_SARIF: ${{ inputs.sarif }}
+        XC_SHARE_STATS: ${{ inputs.share-stats }}
       run: |
         set +e
+        # share-stats: false → 這一次的 CLI 不送匿名統計（等於使用者自己設 XAMLCONTRAST_SHARE_STATS=false，PROTOCOL.md 第 3 節第 4 條）。
+        # 刻意在這裡 export、不寫進上面的 env:：step 的 env 會蓋掉呼叫端在 workflow／job 層設的同名變數 ——
+        # true（預設）時什麼都不設，呼叫端的 DO_NOT_TRACK、XAMLCONTRAST_SHARE_STATS 照樣生效
+        if [ "$XC_SHARE_STATS" = "false" ]; then export XAMLCONTRAST_SHARE_STATS=false; fi
         args=(--json "$RUNNER_TEMP/xamlcontrast-report.json")
         args+=(--md "$RUNNER_TEMP/xamlcontrast-report.md")
+        # 單檔 HTML（1.1）：色塊與比值，跟 JSON、Markdown 一起上傳成 artifact（落點固定，不收 input）
+        args+=(--html "$RUNNER_TEMP/xamlcontrast-report.html")
         [ "$XC_SARIF" = "true" ] && args+=(--sarif "$RUNNER_TEMP/xamlcontrast.sarif")
         # gate 與覆蓋率下限：空白就不傳，交給 config（沒有就是內建預設）—— 旗標 > config > 預設
         [ -n "$XC_FAIL_ON" ] && args+=(--fail-on "$XC_FAIL_ON")
@@ -157,6 +169,11 @@ runs:
         code=$?
         echo "::$token::"
         echo "exit=$code" >> "$GITHUB_OUTPUT"
+        # job summary 的統計那一行（PROTOCOL.md 第 4 節）：share-stats: false 在這裡寫；送了的那一行由 CLI 自己寫 ——
+        # 只有它知道到底送了沒（DO_NOT_TRACK、設定檔也關得掉）。內容是固定字串，不含任何 input 的值
+        if [ "$XC_SHARE_STATS" = "false" ] && [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+          echo '**XamlContrast** — anonymous usage statistics turned off (`share-stats: false`)' >> "$GITHUB_STEP_SUMMARY"
+        fi
 
     # 把稽核報告貼成 PR 留言（同一則反覆更新，不洗版）。
     # 行內註記只標在出問題的那一行，PR 上沒有總覽 —— reviewer 看不到「總共破幾組、
@@ -263,6 +280,7 @@ runs:
         path: |
           ${{ runner.temp }}/xamlcontrast-report.json
           ${{ runner.temp }}/xamlcontrast-report.md
+          ${{ runner.temp }}/xamlcontrast-report.html
         if-no-files-found: ignore
 
     # 報告與註記都出去了，現在才依 gate 結論決定 job 成敗

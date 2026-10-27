@@ -20,6 +20,9 @@ xamlcontrast 你的專案路徑
 > 計數會動、build 可能因此變紅，每一版都會寫在 CHANGELOG 的 Upgrading。baseline 鍵的寫法改變時遞增 `keyVersion`，
 > 舊的 baseline 會被拒並提示重寫。從 0.x 升級？先看 [CHANGELOG 的 1.0.0](CHANGELOG.md)，裡面列了必須改的地方。
 
+> **匿名使用統計預設打開**（1.1 起）：每次稽核之後送一筆只有計數與比值區間的資料 —— 沒有檔名、路徑、元素名稱或顏色 ——
+> 做為學術研究的補充證據。[送什麼、怎麼關](#匿名使用統計)（設 `DO_NOT_TRACK=1` 就夠了）。
+
 ## 實際跑起來長這樣
 
 對 [`samples/demo`](samples/demo)（刻意做壞的示範）跑一次：
@@ -140,6 +143,7 @@ xamlcontrast src/MyApp --json report.json    # 有任何一組沒達到 AA 就 e
 xamlcontrast src/MyApp --fail-on fail        # 放寬：只有低於 fail 線的才擋
 xamlcontrast src/MyApp --sarif audit.sarif   # GitHub code scanning 格式
 xamlcontrast src/MyApp --md report.md        # Markdown 報告（可貼 PR 留言）
+xamlcontrast src/MyApp --html report.html    # 單檔 HTML 報告，附色塊
 ```
 
 退出碼：
@@ -212,10 +216,14 @@ jobs:
 行內註記跟著 gate 走：gate 擋的是 error，gate 放行的 warn（`fail-on: fail`）是 warning，
 baseline 模式下的既有債是 notice。
 
+JSON、Markdown、HTML 三份報告會上傳成這次 run 的 `xamlcontrast-report` artifact —— 打開裡面的
+`xamlcontrast-report.html` 就看得到每一筆 fail 的色塊（見 [HTML 報告](#html-報告)）。
+
 輸入：`root`（必填）、`working-directory`、`version`（留空 = 最新的 1.x）、`fail-on`
 （`warn`／`fail`；留空 = config 的 `failOn`，沒有就是 `warn`）、`min-coverage`（留空 = config 的
 `minCoverage`，沒有就是 50）、`baseline`、`strict-palette`、`comment`（關掉 PR 留言）、
-`upload-report`、`sarif`、`artifact-name`（預設 `xamlcontrast-report`）。開關類只收 `true` 或 `false`；
+`upload-report`、`sarif`、`share-stats`（預設 `true`；`false` 不送[匿名使用統計](#匿名使用統計)，並在 job summary 註明）、
+`artifact-name`（預設 `xamlcontrast-report`）。開關類只收 `true` 或 `false`；
 不認得的值會讓 job 失敗並點名是哪個 input，不會悄悄退回預設值。`root` 與 `baseline` 不能以 `-` 開頭（寫成 `./-name`）。
 
 **同一個 workflow run 裡用到兩次以上**（matrix，或同一個 job 呼叫兩次）？每一次給不同的 `artifact-name` ——
@@ -228,7 +236,7 @@ code scanning 的 `category` 傳出去，兩份分析不會互相取代。同一
 （`Parity.Server`，自己架設）。它**不稽核** —— 先用 `--json <file>` 跑稽核，再推那個檔：
 
 ```bash
-xamlcontrast src/MyApp --json report.json                              # 稽核：完全不碰網路
+xamlcontrast src/MyApp --json report.json                              # 稽核：報告留在這台機器上
 xamlcontrast --push report.json --server https://dashboard.example.com  # 環境裡要有 XAMLCONTRAST_TOKEN
 ```
 
@@ -238,7 +246,8 @@ xamlcontrast --push report.json --server https://dashboard.example.com  # 環境
   再否則 `GITHUB_REF_NAME`）、GitHub Actions 上的觸發者與 repo 網址，以及報告 `exitCode` 對應的 gate（0 = pass，1 或 3 = fail）。
 - **環境變數**：`XAMLCONTRAST_SERVER`（或 `--server`）是儀表板的絕對 `http`／`https` 網址；`XAMLCONTRAST_TOKEN`
   是伺服器 `create-project` 指令印出的專案 token。刻意沒有 `--token` 旗標 —— 旗標值會留在 shell 歷史與 CI log 裡。
-- **選擇性加入**：不跑 `--push` 就什麼都不會離開這台機器；稽核本身從不碰網路。請求只送到你指名的伺服器，
+- **選擇性加入**：不跑 `--push`，報告就不會離開這台機器；稽核本身唯一的對外請求是[匿名使用統計](#匿名使用統計)
+  （只有計數，隨時可以關）。推送只送到你指名的伺服器，
   而且不跟轉址，token 不會被轉送到別處。請用 `https`：走 `http` 時 token 是明文。
 - **退出碼**：`0` 送出，`2` 其他一切 —— 沒有 token、檔案不是 XamlContrast `schemaVersion` 6 的報告（送出前就先驗）、
   連不上伺服器（逾時 60 秒）或伺服器回錯誤。不會是 `1` 或 `3`：那是稽核的判定。`--push` 與專案根目錄或任何稽核旗標並用是用法錯誤。
@@ -277,13 +286,23 @@ schema 把它們寫成字串，目前的值列在 description。
 - `summary` 帶實際生效的 gate（`failOn`、`minCoverage`、`strictPalette`）與**全部的退化計數** ——
   `paletteDegraded`、`coverage`、`unresolved`（含 `unresolvedBy`）、`skipped`、`deadForeground`、`disabledExempt`、`suppressed`、
   `parseErrors`／`parseErrorFiles`、`invalidIgnoreCount`／`invalidIgnores`、`unknownKeys`。工具沒看到的東西，都是機器可讀的。
-- 每筆 finding 帶 `file`、`line`、`element`、`fg`、`bg`、`ratioDark`、`ratioLight`、`threshold`、`category`、
+- 每筆 finding 帶 `file`、`line`、`element`、`fg`、`bg`、`ratioDark`、`ratioLight`、`colors`、`threshold`、`category`、
   `symmetry`（fail／warn；其餘 `null`）、`isText`、`isLargeText`、`fontSize`（DIP，沒設是 `null`）、`theme`、
   `baseline`（`--baseline` 模式下 gate 擋的那些：`known`／`new`／`worsened`）。被壓掉的配對只計入 `summary`，不列出。
+- `colors`（1.1 新增；`schemaVersion` 維持 6）是比值實際拿來算的那兩個顏色 —— 合成之後、螢幕上的不透明顏色：
+  字色已經以自己的 alpha 與累乘的 `Opacity` 疊到底上，底已經把半透明的層合成完。`fg`／`bg` 說顏色是**怎麼寫的**，
+  `colors` 說它們**實際是什麼**：
+
+  ```json
+  "fg": "#FFFFFF ×0.5", "bg": "{Surface}", "ratioDark": 5.09, "ratioLight": 1,
+  "colors": { "dark": { "fg": "#8E8E8E", "bg": "#1E1E1E" }, "light": { "fg": "#FFFFFF", "bg": "#FFFFFF" } }
+  ```
+
+  拿 `colors.dark.fg` 對 `colors.dark.bg` 重算對比，結果就是 `ratioDark`。某個主題是 `null`，恰好就是那個主題的比值是 `null` 的時候。
 
 **只存在於一個主題**的配對（只屬於一個主題的字典裡的 Style，或使用處的 Style 依主題解析到不同的鏈，
 見上面的色盤偵測）**只有那個主題的比值**：`theme` 標出是哪一個（`"dark"`／`"light"`；兩個主題都有的是 `null`），
-另一個主題的比值是 `null`，console、Markdown、SARIF 與 Action 註記印 `n/a (dark theme only)` 而不是一個數字。
+另一個主題的比值與 `colors` 是 `null`，console、Markdown、HTML、SARIF 與 Action 註記印 `n/a (dark theme only)` 而不是一個數字。
 fail／warn 另標 `symmetry: single-theme`。
 `skipped` 只計看不見的字（透明、alpha ≈ 0、`Opacity="0"`）；半透明的字色會合成後評分。
 
@@ -332,6 +351,74 @@ unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)—
 不會靜默沒作用。
 
 `--md report.md` 則產出給人讀的 Markdown（Action 用它貼 PR 留言，也可以自己拿去用）。
+
+### HTML 報告
+
+`--html report.html` 寫出一個單檔網頁 —— 樣式內嵌、沒有 script、不載入任何外部檔案 —— 從 CI 的 artifact 直接打開就能看
+（Action 會把它上傳成 `xamlcontrast-report.html`）。內容：
+
+- 結論與理由（exit 0、1 或 3），所有退化警告排在最前面 —— 色盤偵測退化、0 組配對、非預設門檻、解析失敗、無效的 ignore 註解；
+- 摘要：計數、覆蓋率、gate、色盤模式與偵測描述，以及所有「沒評到的東西」的計數器（unresolved 依原因、skipped、excluded、
+  exempted、suppressed、parse errors）—— 是 0 也印；
+- 每一筆 `fail` 與 `warn` 一張卡：位置、元素、原始寫法的字色與底色，以及每個主題各自的字色色塊、底色色塊、用那兩個顏色寫的樣字、
+  比值、色碼、有沒有達到門檻（等級與達標與否一律有文字，不只靠顏色表示）；
+- 每一筆 unresolved 的原因與卡住的值；
+- `ok` 與 `decorative` 全部列出，收在預設收合的區塊裡。
+
+色塊就是 JSON 的 `colors`。來自被稽核 XAML 的文字一律跳脫，網頁的 Content-Security-Policy 禁止 script 與外部資源。
+深淺色跟著系統設定。版面跟 console、Markdown 一樣屬於呈現、不在凍結面內 —— 程式請讀 JSON。
+
+## 匿名使用統計
+
+1.1 起，每次稽核得出判定（exit 0、1 或 3）之後，XamlContrast 會送**一筆**很小的請求到
+`https://stats.cornhsu.com/v1/xamlcontrast`。**預設打開，CI 也送**，一個設定就能關。它是學術研究
+「真實 XAML App 的對比度問題長什麼樣」的補充證據，只公開彙總後的結果；[stats.cornhsu.com](https://stats.cornhsu.com/) 說明收什麼、做什麼用、保存多久。
+
+**送什麼** —— 只有計數與區間：
+
+| 欄位 | 內容 |
+|---|---|
+| `schema`、`tool`、`toolVersion` | `1`、`"xamlcontrast"`、工具版本（不含 build metadata） |
+| `os` | `windows`、`linux`、`macos` 或 `other` |
+| `ci` | `CI` 或 `GITHUB_ACTIONS` 是不是 `true` |
+| `projectId` | `null` —— 除非**你自己**加一個（見下） |
+| `data.exitCode` | 稽核的判定：0、1 或 3 |
+| `data.failOn` | 實際生效的 gate：`warn` 或 `fail` |
+| `data.paletteMode`、`data.paletteDegraded` | 走了哪一條色盤偵測路徑、有沒有退化 |
+| `data.files`、`data.pairs`、`data.coverage` | 檔案數、配對數、覆蓋率 |
+| `data.counts` | `fail`、`warn`、`ok`、`decorative` 各幾組 |
+| `data.unresolvedBy` | 無法解析的配對依原因的組數（原因見上面那張表） |
+| `data.ratios` | 非裝飾配對依最差比值分成六個區間的組數：< 1.5、1.5–2、2–3、3–4.5、4.5–7、≥ 7 |
+
+**一律不送**：檔名或路徑、元素／Style／資源的名稱、色碼、報告本身、你的設定檔、repo 名稱、使用者名稱、機器名稱，
+或任何其他來自你專案的東西。請求不帶 User-Agent、cookie 或任何自訂標頭。收集站不存 IP
+（代管它的 Cloudflare 跟任何網路服務商一樣看得到連線），只記收到的日期，多一個不認得的欄位就整筆拒收。
+
+**沒有 ID，除非你自己加。** 沒有 ID 的時候，沒有任何東西能把兩次執行連在一起、或連到你身上 —— 這也表示
+沒辦法找出或個別刪除「你的」資料。想讓同一個專案的多次執行歸在一起，就自己編一個 ID（16–64 個 `A-Z a-z 0-9 _ -`；
+不要從 repo 名稱推出來）寫進設定檔 —— 格式不對是設定錯誤，exit 2：
+
+```json
+{ "stats": { "projectId": "pick-your-own-random-id-2026" } }
+```
+
+**怎麼關** —— 任何一個就夠：
+
+- `DO_NOT_TRACK=1` —— `0`／`false` 以外的任何值都算；永遠優先
+- `XAMLCONTRAST_SHARE_STATS=false`，或 `CORNHSU_SHARE_STATS=false`（姊妹工具 Parity 也一起關）。
+  `1`、`true`、`yes`、`on` 以外的任何值都是關 —— 打錯字也往「不送」那邊錯
+- `xamlcontrast.config.json` 裡寫 `"stats": { "share": false }`
+- GitHub Action 用 `share-stats: false`
+
+**送之前先看**：`xamlcontrast <root> --stats-preview` 照常稽核、什麼都不送，在 stderr 印出這次會送的完整 JSON，
+以及會不會送、為什麼（`would not be sent: DO_NOT_TRACK is set`）。
+
+**你會看到什麼**：本機上，第一次要送的時候在 stderr 印一段說明（使用者設定目錄裡的標記檔
+`cornhsu/xamlcontrast-stats-notice` —— Windows 是 `%APPDATA%`、Linux 是 `~/.config` —— 讓它不再重複）；
+CI 上每次在 stderr 印一行，GitHub Actions 另外在 job summary 寫一行。stdout 一個字都不碰；不送的時候什麼都不印。
+
+**不影響你的結果。** 請求最多等 3 秒（連線 1.5 秒），不重試、不跟轉址，任何失敗都安靜略過 —— 退出碼與所有輸出
+都跟沒有它的時候一模一樣。開發版 —— 版本以 `0.0.0-` 開頭的，例如從原始碼建出來的 `0.0.0-dev` —— 永遠不送。
 
 ## 實戰成績
 

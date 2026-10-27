@@ -46,6 +46,10 @@
   "rootBackground": null,
   "ignore": {
     "requireReason": true
+  },
+  "stats": {
+    "share": null,
+    "projectId": null
   }
 }
 ```
@@ -174,6 +178,19 @@ ratchet 會把「不見了」讀成「還清了」而放行 —— 弄壞主題�
 標記要一字不差（小寫、有冒號、理由在同一行）：寫錯的變體（大小寫不同、冒號後沒有理由、漏冒號、
 理由換到第二行）不壓，同樣記入 `summary.invalidIgnores` 並警告，配對照報。
 被壓掉的項目計入 `summary.suppressed`。
+
+### stats（1.1 新增）
+
+匿名使用統計（README「Anonymous usage statistics」；協定是 stats-collector 的 `PROTOCOL.md`）。
+
+| 欄位 | 預設 | 說明 |
+|---|---|---|
+| `share` | 不寫（`null`） | `false` = 不送。不寫或 `true` = 不表態，照工具的預設（1.1 預設會送）。只收 `true`／`false`：`"false"`（字串）、`0` 是設定錯誤（exit 2，`stats.share must be true or false`） |
+| `projectId` | 不寫（`null`） | 你自己編的專案 ID，讓同一個專案的多次執行歸在一起：16–64 個 `A-Z` `a-z` `0-9` `_` `-`。工具不會從 repo 名稱、路徑或機器資訊算出 ID —— 不寫就沒有 ID，資料對應不到任何人。格式不對是設定錯誤（exit 2），點名長度或哪一個字元（`stats.projectId must be 16-64 characters, got 9`） |
+
+`share: false` 只是關掉統計的其中一個開關：環境變數 `DO_NOT_TRACK=1`、`XAMLCONTRAST_SHARE_STATS=false`、
+`CORNHSU_SHARE_STATS=false` 與 Action 的 `share-stats: false` 一樣有效，任何一個說不送就不送（DO_NOT_TRACK 最優先）。
+`"stats": null` 是設定錯誤；`"stats": {}` 等於沒寫。用到 `stats` 的設定檔在 1.0.x 上會因為「不認得的屬性」exit 2（見文件開頭）。
 
 ## CLI 對應
 

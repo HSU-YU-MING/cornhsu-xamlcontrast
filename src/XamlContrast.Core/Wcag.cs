@@ -30,6 +30,18 @@ public static class Wcag
         return Math.Round((hi + 0.05) / (lo + 0.05), 2);
     }
 
+    /// <summary>算比值時實際讀的那六位：#RRGGBB（大寫）。#AARRGGBB 剝掉 alpha —— 與 <see cref="Luminance"/> 讀的是同一段，
+    /// 所以 Contrast(Opaque(a), Opaque(b)) == Contrast(a, b)。報告的 colors 用它（呼叫端要先合成，同 Luminance）。</summary>
+    public static string Opaque(string hex)
+    {
+        var h = hex.TrimStart('#');
+        return "#" + (h.Length == 8 ? h[2..] : h).ToUpperInvariant();
+    }
+
+    /// <summary>finding 的一個主題：比值與算它的那一對顏色，出自同一組輸入。</summary>
+    internal static (double Ratio, ContrastColors Colors) Measure(string fg, string bg)
+        => (Contrast(fg, bg), new ContrastColors(Opaque(fg), Opaque(bg)));
+
     /// <summary>半透明色 fg（不含 alpha 的 RGB）以 alpha 疊在不透明底色 bg 上（WPF 以 sRGB 混合）。</summary>
     public static string Composite(string fg, double alpha, string bg)
     {

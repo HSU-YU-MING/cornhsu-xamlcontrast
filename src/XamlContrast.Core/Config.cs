@@ -40,6 +40,8 @@ public sealed class ToolConfig
     /// </summary>
     public string? RootBackground { get; init; }
     public IgnoreSection Ignore { get; init; } = new();
+    /// <summary>匿名使用統計（1.1，協定在 stats-collector 的 PROTOCOL.md）：share 寫 false 就不送；projectId 是使用者自己決定要不要加的專案 ID。</summary>
+    public StatsSection Stats { get; init; } = new();
 
     /// <summary>載入來源路徑；null = 沒有 config 檔（純預設值）</summary>
     [JsonIgnore] public string? SourcePath { get; private set; }
@@ -81,6 +83,28 @@ public sealed class ToolConfig
     public sealed class IgnoreSection
     {
         public bool RequireReason { get; init; } = true;
+    }
+
+    public sealed class StatsSection
+    {
+        /// <summary>false = 不送（協定第 3 節第 3 條）。沒寫（null）與 true = 不表態，照工具的預設 ——
+        /// 刻意不是「預設 true」：預設值哪天因倫理審查改成主動同意（CLI 的 Stats.ShareByDefault），這一格的意思不必跟著改。</summary>
+        public bool? Share { get; init; }
+        /// <summary>專案 ID：只來自這裡，16–64 個 A-Z a-z 0-9 _ -。不能、也不會從 repo 名稱、路徑或機器資訊算出來 ——
+        /// 沒有它的資料對應不到任何人。格式不對是設定錯誤（exit 2），不是安靜丟掉。</summary>
+        public string? ProjectId { get; init; }
+    }
+
+    /// <summary>projectId 的格式（協定第 7.1 節）。⚠ 不用正則的 <c>$</c>：它在結尾的換行前面也成立，
+    /// "…\n" 會被放行，而收集站拒收整筆。逐字檢查。</summary>
+    internal static string? ProjectIdProblem(string id)
+    {
+        if (id.Length is < 16 or > 64)
+            return $"must be 16-64 characters, got {id.Length}";
+        for (var i = 0; i < id.Length; i++)
+            if (!(char.IsAsciiLetterOrDigit(id[i]) || id[i] is '_' or '-'))
+                return $"may only contain A-Z, a-z, 0-9, '_' and '-', got {(char.IsControl(id[i]) || char.IsWhiteSpace(id[i]) ? $"U+{(int)id[i]:X4}" : $"'{id[i]}'")} at position {i + 1}";
+        return null;
     }
 
     private static readonly JsonSerializerOptions JsonOpts = new()
@@ -125,6 +149,9 @@ public sealed class ToolConfig
         if (cfg.Classification is null) throw new ConfigException("classification must be an object, got null");
         if (cfg.Ignore is null) throw new ConfigException("ignore must be an object, got null");
         if (cfg.Layout is null) throw new ConfigException("layout must be an object, got null");
+        if (cfg.Stats is null) throw new ConfigException("stats must be an object, got null");
+        if (cfg.Stats.ProjectId is { } projectId && ProjectIdProblem(projectId) is { } problem)
+            throw new ConfigException($"stats.projectId {problem} — it is your own anonymous project ID (or leave it out)");
         RequireNames(cfg.Layout.Overlap, "layout.overlap");
         RequireNames(cfg.Layout.SideBySide, "layout.sideBySide");
         // 比對的是不帶命名空間前綴的元素名（XElement.Name.LocalName）：l:CardGrid 永遠不會命中，宣告靜默失效。

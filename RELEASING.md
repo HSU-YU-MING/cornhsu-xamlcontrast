@@ -9,6 +9,10 @@
    - 改過 console 輸出的話，`scripts/verify-readme-sample.ps1` 也要綠（CI 會擋，但發版前先看一眼比較快；
      確認新輸出是對的之後才跑 `-Update` 重貼）
    - 兩份 README 引用的是移動式 `@v1`、引言寫的是 1.x —— 1.x 期間發版**不必**改 README 的版號
+   - ⚠ **1.1.0（第一個送匿名統計的版本）**：研究倫理對「預設打開」的確認已取得、收集站 `https://stats.cornhsu.com/`
+     已上線（都是 2026-10-28）。發版前還要確認說明頁上的刪除聯絡地址 `stats@cornhsu.com` 收得到信。日後要再驗正式站：
+     打得開資料說明頁；對 `POST /v1/xamlcontrast` 送故意不合法的 `{}` 回 400 —— 不要拿合法資料試正式站，那一筆會混進研究資料。
+     日後審查若改要求主動同意，只改 `Stats.ShareByDefault` 這一個常數（細節在 CLAUDE.md 的凍結段落）
 2. 推版號 tag：
 
 ```bash
@@ -77,7 +81,10 @@ dotnet tool install Cornhsu.XamlContrast --tool-path /tmp/xc-rc-tool --add-sourc
 /tmp/xc-rc-tool/xamlcontrast --version     # 應該印 1.1.0-rc.1
 ```
 
-三個坑：
+四個坑：
+
+- **試裝的版本會送匿名統計。** `1.1.0-rc.1` 這種版號不是開發版（只有 `0.0.0-` 開頭的才是），拿它跑稽核就會往
+  stats.cornhsu.com 送一筆真的統計、混進研究資料 —— 試之前先 `export DO_NOT_TRACK=1`（PowerShell：`$env:DO_NOT_TRACK = '1'`）。
 
 - **安裝一定要帶 `--version 1.1.0-rc.1`。** 不指定版本時 NuGet 不選預覽版，會裝到 nuget.org 上的正式版 ——
   `--add-source` 只是多一個來源，不會讓預覽版優先。
