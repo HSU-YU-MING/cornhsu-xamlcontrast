@@ -101,8 +101,8 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
     （第 4 面）、config 的 `stats.share`／`stats.projectId`（第 5 面）。HTML 的**版面**跟 console、Markdown 一樣是 presentation、不凍結。
     **匿名統計送出去的 JSON 不是凍結面**：它的真相源是 `D:\擴充功能\nuget\stats-collector\PROTOCOL.md`，跟收集站與 Parity 一起演進
     （改欄位先改協定、收集站先上線，工具才能送新欄位 —— 收集站多一個欄位就整筆拒收）。
-  - **1.1.0 的發版條件**：研究倫理對「預設打開」的確認**已取得（2026-10-28，維護者確認）**；收集站 stats.cornhsu.com
-    也已上線（2026-10-28）；發版前確認說明頁上的 stats@cornhsu.com 收得到信（`稽核-2026-10-22/統計功能規劃.md`）。
+  - **1.1.0 已發佈（2026-10-28）**：發版前研究倫理對「預設打開」的確認已取得、收集站 stats.cornhsu.com 已上線、
+    說明頁上的 stats@cornhsu.com 收得到信（`稽核-2026-10-22/統計功能規劃.md`）。
     預設送不送是**一個常數** `Stats.ShareByDefault`（`src/XamlContrast.Cli/Stats.cs`）：審查要求主動同意就改成 `false` ——
     之後只有使用者明確說好（`*_SHARE_STATS` 是 1／true／yes／on，或 `"stats": { "share": true }`）才送；config 的 `stats.share`
     不寫與 Action 的 `share-stats: 'true'` 本來就是「不表態」，預設值不必跟著改。協定說的「第一次在終端機詢問」那時才做，
