@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
-## [Unreleased]
+## 1.1.0 — 2026-10-28
 
 > **⚠️ This release sends anonymous usage statistics by default.** After every audit that reaches a
 > verdict (exit 0, 1 or 3) the tool sends one request to `https://stats.cornhsu.com/v1/xamlcontrast` with
