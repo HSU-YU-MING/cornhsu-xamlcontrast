@@ -5,6 +5,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## [Unreleased]
 
+### Added
+- **Experimental: `--push <report.json>`** uploads a report written by `--json` to a
+  [Parity](https://github.com/HSU-YU-MING/cornhsu-parity) team dashboard (`Parity.Server`): one
+  `POST {server}/api/runs` whose body is the file, unchanged. It never audits — combined with a project
+  root or any audit flag it is a usage error (exit 2). The server comes from `--server`, else
+  `XAMLCONTRAST_SERVER`; the token from `XAMLCONTRAST_TOKEN` only (deliberately no `--token` flag);
+  `--commit` and `--branch` override `GITHUB_SHA` and `GITHUB_HEAD_REF` / `GITHUB_REF_NAME`. The file is
+  checked before anything is sent: an XamlContrast `schemaVersion` 6 report, not a Parity `report.json`
+  or a newer format. Exit codes in push mode are 0 (uploaded) and 2 (anything else), never 1 or 3. On
+  GitHub Actions it appends a dashboard link to the job summary. The README's *Push to a Parity
+  dashboard* shows a workflow step to run after the action; the action itself gets no new input.
+  **Not covered by the 1.x freeze yet:** until the dashboard is publicly deployed, the push flags, the
+  environment variables, push-mode exit codes and the server protocol may change in a minor release.
+  Nothing else changes — the audit's flags, exit codes, JSON and console output are as in 1.0.0, and the
+  audit still makes no network requests.
+
 ## 1.0.0 — 2026-10-23
 
 **1.0 freezes the public interface.** From this release on, the nine surfaces listed under

@@ -29,7 +29,15 @@ internal static class Cli
     public static Result Run(params string[] args) => RunIn(null, args);
 
     /// <summary>workingDirectory：--json／--baseline 等輸出路徑與 baseline 預設檔名都相對 CWD。</summary>
-    public static Result RunIn(string? workingDirectory, params string[] args)
+    public static Result RunIn(string? workingDirectory, params string[] args) => Start(workingDirectory, null, args);
+
+    /// <summary>
+    /// 環境變數只設在子行程上（值為 null 的拿掉）：測試平行跑，改測試行程自己的環境變數會互相干擾。
+    /// --push 讀 XAMLCONTRAST_*／GITHUB_*，而 CI 的 runner 本身就帶著 GITHUB_SHA、GITHUB_STEP_SUMMARY…… —— 要一律蓋掉。
+    /// </summary>
+    public static Result RunEnv(IReadOnlyDictionary<string, string?> env, params string[] args) => Start(null, env, args);
+
+    private static Result Start(string? workingDirectory, IReadOnlyDictionary<string, string?>? env, string[] args)
     {
         var psi = new ProcessStartInfo(DotnetHost)
         {
@@ -39,6 +47,8 @@ internal static class Cli
             CreateNoWindow = true,
         };
         if (workingDirectory is not null) psi.WorkingDirectory = workingDirectory;
+        foreach (var (name, value) in env ?? new Dictionary<string, string?>())
+            if (value is null) psi.Environment.Remove(name); else psi.Environment[name] = value;
         psi.ArgumentList.Add(DllPath);
         foreach (var a in args) psi.ArgumentList.Add(a);
 

@@ -15,7 +15,8 @@ xamlcontrast 你的專案路徑
 
 > 需要 **.NET 10 執行環境**（解析本身是純 XML —— Linux CI 也跑得動）。
 > **1.x 凍結的是語法，不是稽核結果。** CLI 旗標、退出碼、JSON 報告、Action inputs、config 檔、baseline 檔的格式、
-> SARIF 規則、壓抑註解、稽核範圍在 2.0 之前只增不改（[完整清單](CHANGELOG.md)）。稽核**找到什麼**可以在 minor 改進 ——
+> SARIF 規則、壓抑註解、稽核範圍在 2.0 之前只增不改（[完整清單](CHANGELOG.md)）；實驗性的 `--push` 還不在內
+> （見下方「推送到 Parity 儀表板」）。稽核**找到什麼**可以在 minor 改進 ——
 > 計數會動、build 可能因此變紅，每一版都會寫在 CHANGELOG 的 Upgrading。baseline 鍵的寫法改變時遞增 `keyVersion`，
 > 舊的 baseline 會被拒並提示重寫。從 0.x 升級？先看 [CHANGELOG 的 1.0.0](CHANGELOG.md)，裡面列了必須改的地方。
 
@@ -220,6 +221,49 @@ baseline 模式下的既有債是 notice。
 **同一個 workflow run 裡用到兩次以上**（matrix，或同一個 job 呼叫兩次）？每一次給不同的 `artifact-name` ——
 它是上傳的 artifact 名稱，也是 PR 留言的標記，各名稱各自一則留言。開 `sarif: true` 時，不是預設值的名稱也會當成
 code scanning 的 `category` 傳出去，兩份分析不會互相取代。同一個名稱用兩次，第二次上傳會撞名、留言（與 SARIF 分析）會互相蓋掉。
+
+### 推送到 Parity 儀表板（實驗性）
+
+`--push` 把稽核已經寫好的報告上傳到 [Parity](https://github.com/HSU-YU-MING/cornhsu-parity) 的團隊儀表板
+（`Parity.Server`，自己架設）。它**不稽核** —— 先用 `--json <file>` 跑稽核，再推那個檔：
+
+```bash
+xamlcontrast src/MyApp --json report.json                              # 稽核：完全不碰網路
+xamlcontrast --push report.json --server https://dashboard.example.com  # 環境裡要有 XAMLCONTRAST_TOKEN
+```
+
+- **送出什麼**：一個 `POST {server}/api/runs`，本文就是 `--json` 寫出的那個報告檔、原樣不動 ——
+  相對於掃描根目錄的檔案路徑、行號、元素名稱、顏色值與色票鍵、計數。在意的話，第一次推送前先看一眼那個檔。
+  另外以標頭帶上：token、commit（`--commit`，否則 `GITHUB_SHA`）、分支（`--branch`，否則 `GITHUB_HEAD_REF`，
+  再否則 `GITHUB_REF_NAME`）、GitHub Actions 上的觸發者與 repo 網址，以及報告 `exitCode` 對應的 gate（0 = pass，1 或 3 = fail）。
+- **環境變數**：`XAMLCONTRAST_SERVER`（或 `--server`）是儀表板的絕對 `http`／`https` 網址；`XAMLCONTRAST_TOKEN`
+  是伺服器 `create-project` 指令印出的專案 token。刻意沒有 `--token` 旗標 —— 旗標值會留在 shell 歷史與 CI log 裡。
+- **選擇性加入**：不跑 `--push` 就什麼都不會離開這台機器；稽核本身從不碰網路。請求只送到你指名的伺服器，
+  而且不跟轉址，token 不會被轉送到別處。請用 `https`：走 `http` 時 token 是明文。
+- **退出碼**：`0` 送出，`2` 其他一切 —— 沒有 token、檔案不是 XamlContrast `schemaVersion` 6 的報告（送出前就先驗）、
+  連不上伺服器（逾時 60 秒）或伺服器回錯誤。不會是 `1` 或 `3`：那是稽核的判定。`--push` 與專案根目錄或任何稽核旗標並用是用法錯誤。
+- **實驗性**：儀表板還沒公開上線，這些旗標、環境變數、push 模式的退出碼與伺服器協定不在 1.x 凍結面內，
+  可能在 minor 改變；儀表板上線後併入凍結。
+
+在 workflow 裡接在 action 之後。action 會把工具留在 `PATH` 上，稽核得出判定時一律把 JSON 報告寫到
+`$RUNNER_TEMP/xamlcontrast-report.json`（用法或設定錯誤、exit 2 時不會寫）：
+
+```yaml
+      - uses: HSU-YU-MING/cornhsu-xamlcontrast@v1
+        with:
+          root: src/MyApp
+      - name: Push to the dashboard (experimental)
+        if: always()                # gate 紅了也推 —— 那正是最值得看的一次
+        continue-on-error: true     # 儀表板掛掉、或拿不到 secret 的 fork PR，不讓 build 失敗
+        shell: bash
+        run: xamlcontrast --push "$RUNNER_TEMP/xamlcontrast-report.json"
+        env:
+          XAMLCONTRAST_SERVER: https://dashboard.example.com
+          XAMLCONTRAST_TOKEN: ${{ secrets.XAMLCONTRAST_TOKEN }}
+```
+
+GitHub Actions 上這一步也會在 job summary 加一行儀表板連結。`pull_request` 事件的 `GITHUB_SHA` 是 merge commit、
+不是 PR 的 head，要記別的就用 `--commit`。同一個 job 呼叫 action 兩次以上？每次呼叫之後各推一次 —— 下一次呼叫會換掉報告檔。
 
 ## JSON 輸出
 
