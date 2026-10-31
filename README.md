@@ -354,8 +354,9 @@ lists them as strings with the current values in their description.
 - `summary` carries the gate in effect (`failOn`, `minCoverage`, `strictPalette`) and every
   degradation signal — `paletteDegraded`, `coverage`, `unresolved` (with `unresolvedBy`), `skipped`,
   `deadForeground`, `disabledExempt`, `suppressed`, `parseErrors` / `parseErrorFiles`,
-  `invalidIgnoreCount` / `invalidIgnores`, `unknownKeys`. If the tool couldn't see something, that
-  fact is machine-readable.
+  `invalidIgnoreCount` / `invalidIgnores`, `unknownKeys` — and, from 1.2, `converterPairs` (pairs
+  graded through a converter's fixed colours; 0 unless you turn that on). If the tool couldn't see
+  something, that fact is machine-readable.
 - Each finding carries `file`, `line`, `element`, `fg`, `bg`, `ratioDark`, `ratioLight`, `colors`,
   `threshold`, `category`, `symmetry` (fail/warn; `null` otherwise), `isText`, `isLargeText`,
   `fontSize` (DIP, or `null`), `theme` and `baseline` (`known` / `new` / `worsened` for the pairs
@@ -434,6 +435,24 @@ Measured on NETworkManager (a MahApps app, 154 XAML files): coverage went from *
 87.2%** with that one line — surfacing 284 genuine light-theme failures the tool was
 previously blind to. A key not present in the detected palette is a config error (exit 2),
 never a silent no-op.
+
+**Colours fixed inside a value converter** (opt-in, from 1.2). A toolbar button that changes colour
+when selected is often written `Background="{Binding ActiveTool, Converter={StaticResource ActiveBrush}, ConverterParameter=Pen}"`,
+with the colours hard-coded in C#; by default that is `bound-or-gradient`. Turn on
+
+```json
+{ "converters": { "constantBrushes": true } }
+```
+
+and the tool reads your `*.cs` for `IValueConverter` classes. If **every** return path of `Convert`
+is a fixed brush — `Brushes.X`, `new SolidColorBrush(Colors.X)`, `Color.FromRgb` / `Color.FromArgb`
+with literal numbers, or a `readonly` field or get-only property holding one — each of those colours
+is graded once, like one state each; conditions are never evaluated, so nothing is guessed. The
+background reads `ActiveBrush→On` (resource key → field). Anything else (a computed value,
+`DependencyProperty.UnsetValue`, `Binding.DoNothing`, `null`, a property, a `FallbackValue`, text and
+background both from converters) stays `bound-or-gradient`, and the console names each converter that
+isn't fixed and why. `summary.converterPairs` counts the pairs graded this way. It is off by default
+because reading `*.cs` for this widens the audit's scope, which 1.x only does when you ask.
 
 `--md report.md` writes the human-readable Markdown version — this is what the Action posts as a
 PR comment, and you can use it directly too.

@@ -285,7 +285,8 @@ schema 把它們寫成字串，目前的值列在 description。
 - 頂層：`toolVersion`、`exitCode`（稽核的判定：0、1 或 3）、`summary`、`unresolvedSites`、`findings`。
 - `summary` 帶實際生效的 gate（`failOn`、`minCoverage`、`strictPalette`）與**全部的退化計數** ——
   `paletteDegraded`、`coverage`、`unresolved`（含 `unresolvedBy`）、`skipped`、`deadForeground`、`disabledExempt`、`suppressed`、
-  `parseErrors`／`parseErrorFiles`、`invalidIgnoreCount`／`invalidIgnores`、`unknownKeys`。工具沒看到的東西，都是機器可讀的。
+  `parseErrors`／`parseErrorFiles`、`invalidIgnoreCount`／`invalidIgnores`、`unknownKeys`，以及 1.2 起的 `converterPairs`
+  （經轉換器的固定顏色評出來的配對數；沒打開是 0）。工具沒看到的東西，都是機器可讀的。
 - 每筆 finding 帶 `file`、`line`、`element`、`fg`、`bg`、`ratioDark`、`ratioLight`、`colors`、`threshold`、`category`、
   `symmetry`（fail／warn；其餘 `null`）、`isText`、`isLargeText`、`fontSize`（DIP，沒設是 `null`）、`theme`、
   `baseline`（`--baseline` 模式下 gate 擋的那些：`known`／`new`／`worsened`）。被壓掉的配對只計入 `summary`，不列出。
@@ -349,6 +350,21 @@ unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)—
 實測(NETworkManager,MahApps 系 App、154 個 XAML):一行設定,覆蓋率 **8.8% → 87.2%**,
 浮出 284 筆先前完全看不到的淺色主題真實問題。鍵不在偵測到的色盤裡是設定錯誤(exit 2),
 不會靜默沒作用。
+
+**顏色寫死在轉換器裡**（要自己打開，1.2 起）。「選到時會變色」的工具列按鈕常寫成
+`Background="{Binding ActiveTool, Converter={StaticResource ActiveBrush}, ConverterParameter=Pen}"`，顏色寫死在 C# 裡；
+預設算 `bound-or-gradient`。打開：
+
+```json
+{ "converters": { "constantBrushes": true } }
+```
+
+工具會讀專案的 `*.cs`，找實作 `IValueConverter` 的類別。`Convert` 的**每一條**回傳路徑都是固定的 Brush ——
+`Brushes.X`、`new SolidColorBrush(Colors.X)`、數字寫死的 `Color.FromRgb`／`Color.FromArgb`，或裝著這種值的 `readonly` 欄位、
+只有 `get` 的屬性 —— 時，每個顏色各評一次（等於每個狀態各一組）；條件一律不評估，所以沒有猜。底寫成 `ActiveBrush→On`
+（資源鍵→欄位名）。其他寫法（算出來的值、`DependencyProperty.UnsetValue`、`Binding.DoNothing`、`null`、讀屬性、`FallbackValue`、
+字與底都來自轉換器）照舊是 `bound-or-gradient`，console 會點名每個不是固定顏色的轉換器與原因。`summary.converterPairs`
+是這樣評出來的配對數。預設關，因為為了這個去讀 `*.cs` 是擴大稽核範圍 —— 1.x 只在你要求時才這樣做。
 
 `--md report.md` 則產出給人讀的 Markdown（Action 用它貼 PR 留言，也可以自己拿去用）。
 

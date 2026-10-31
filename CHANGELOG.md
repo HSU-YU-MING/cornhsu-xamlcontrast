@@ -3,6 +3,38 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Upgrading
+- Nothing changes unless you turn on the new `converters.constantBrushes`. If you do, pairs whose
+  colour went through a value converter with fixed colours move from `unresolved` (`bound-or-gradient`)
+  to graded pairs — one per colour — so `pairs`, coverage and possibly `fail` / `warn` go up. A baseline
+  written before you turned it on lists none of them, so `--baseline` reports any that are below the
+  gate as NEW; run `--write-baseline` again after turning it on if you want to take them as known debt.
+  Baseline keys of everything else are unchanged (`keyVersion` stays 1).
+
+### Added
+- **Config `converters.constantBrushes`** (default `false`): read the project's `*.cs` for
+  `IValueConverter` classes and, when **every** return path of `Convert` is a fixed brush, grade each
+  of those colours once wherever a `{Binding …, Converter={StaticResource K}}` supplies a `Background`,
+  `Foreground` or `Fill` — on the element, in a style setter, or for the text inside it. Recognised:
+  `Brushes.X`, `new SolidColorBrush(Colors.X)`, `new SolidColorBrush(Color.FromRgb(…))` /
+  `Color.FromArgb(…)` with literal numbers, and `readonly` fields or get-only properties of the
+  converter holding one; conditions (`?:`, `if`/`return`, `switch` expressions) are not evaluated —
+  every branch is a candidate. Anything else (a computed value, `DependencyProperty.UnsetValue`,
+  `Binding.DoNothing`, `null`, a property, an object initializer, a `partial` class, two classes with
+  the same name), a binding with `FallbackValue` / `TargetNullValue`, text and background both from
+  converters, or a translucent layer over the converter's colour stays `bound-or-gradient`. Translucent
+  and `Transparent` candidates are composited over what is behind them, and `Opacity` applies as usual.
+  The colour reads `K→Field` in reports and baseline keys (`ActiveBrush→On`), so darkening it in C#
+  shows as worsened, not as a new key. Off by default because reading `*.cs` for this widens the
+  audit's scope (frozen surface 9: opt-in only). A `"converters": null` or a non-boolean
+  `constantBrushes` is a config error (exit 2).
+- **JSON: `summary.converterPairs`** — how many pairs were graded through a converter's fixed colours
+  (included in `pairs`; 0 when the option is off). An addition: `schemaVersion` stays 6.
+- Console: with the option on, one line with the count and the converters used, and one line per
+  converter that is not fixed, naming why (it stays unresolved).
+
 ## 1.1.0 — 2026-10-28
 
 > **⚠️ This release sends anonymous usage statistics by default.** After every audit that reaches a

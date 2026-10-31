@@ -50,6 +50,9 @@
   "stats": {
     "share": null,
     "projectId": null
+  },
+  "converters": {
+    "constantBrushes": false
   }
 }
 ```
@@ -191,6 +194,28 @@ ratchet 會把「不見了」讀成「還清了」而放行 —— 弄壞主題�
 `share: false` 只是關掉統計的其中一個開關：環境變數 `DO_NOT_TRACK=1`、`XAMLCONTRAST_SHARE_STATS=false`、
 `CORNHSU_SHARE_STATS=false` 與 Action 的 `share-stats: false` 一樣有效，任何一個說不送就不送（DO_NOT_TRACK 最優先）。
 `"stats": null` 是設定錯誤；`"stats": {}` 等於沒寫。用到 `stats` 的設定檔在 1.0.x 上會因為「不認得的屬性」exit 2（見文件開頭）。
+
+### converters（1.2 新增）
+
+| 欄位 | 預設 | 說明 |
+|---|---|---|
+| `constantBrushes` | `false` | `true` = 讀專案裡的 `*.cs`，找實作 `IValueConverter` 的類別；`Convert` 的**每一條**回傳路徑都是固定 Brush 字面值的，經過它的顏色每個候選各評一次 |
+
+「選到時會變色」的按鈕常寫成 `Background="{Binding ActiveTool, Converter={StaticResource ActiveBrush}, ConverterParameter=Pen}"`，
+顏色寫死在 C# 裡，1.1 一律算 `bound-or-gradient`。打開之後：
+
+- **不猜條件、每一種都評**：`a ? On : Off`、`if … return On; return Off;`、switch 運算式的每一臂都是候選；一個候選一組配對（跟觸發態一樣，
+  一個狀態一組），報告的底（或字色）寫成「資源鍵→欄位名」（`ActiveBrush→On`），也是 baseline 鍵的一部分 —— C# 裡把顏色調暗，
+  鍵不變，`worst` 抓得到惡化。
+- **認得的字面值**：`Brushes.X`、`new SolidColorBrush(Colors.X)`、`new SolidColorBrush(Color.FromRgb(r, g, b))`、`Color.FromArgb(a, r, g, b)`
+  （整數字面值 0–255），以及同一個類別裡只指派一次的 `readonly` 欄位、只有 `get` 的屬性（例：`static readonly SolidColorBrush On = new(Color.FromRgb(0x53, 0x4A, 0xB7))`）。
+- **照舊看不懂（`bound-or-gradient`）**：任何一條回傳路徑不是固定字面值（算出來的、`DependencyProperty.UnsetValue`、`Binding.DoNothing`、`null`、
+  讀屬性或外部的值、物件初始設定式）；同名的類別不只一個；`partial` 類別；Binding 帶 `FallbackValue`／`TargetNullValue`；
+  字與底都來自轉換器（哪個配哪個不知道）；半透明的一層疊在轉換器的底上。半透明、`Transparent` 的候選會疊在後面的底上評；元素的 `Opacity` 照算。
+- **計數**：`summary.converterPairs` 是這樣評出來的配對數（含在 `pairs` 裡）；console 列出用到的轉換器，不是固定顏色的點名原因。
+- 這是讀 `*.cs` 的文字分析（不編譯、不執行）：看不懂的寫法一律「不是固定的」，往 unresolved 那邊錯。
+- ⚠ 預設關：讀 `*.cs` 找轉換器是擴大稽核範圍（1.x 凍結面第 9 面），改預設要等 2.0。`"converters": null` 是設定錯誤；
+  用到 `converters` 的設定檔在 1.1.x 以前會因為「不認得的屬性」exit 2。
 
 ## CLI 對應
 

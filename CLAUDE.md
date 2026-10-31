@@ -271,6 +271,20 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   `MetroProgressBar` 對不上 `ProgressBar`，進度條填色會被當文字用 4.5 要求。
   兩邊都中時取最長的後綴（名字愈長愈具體）。
 
+### 轉換器的固定顏色（1.2，`ConverterIndex.cs`、config 的 `converters.constantBrushes`，預設關）
+
+- **預設關是凍結規則，不是保守**：讀 `*.cs` 找轉換器是擴大稽核範圍（第 9 面），改成預設開要等 2.0。關的時候 `_converters` 是 null，
+  `ResolveColour` 等於 `ColorResolver.Resolve`，行為與 1.1 完全相同（測試釘住）。
+- **不猜**：`Convert` 的每一條回傳路徑都要是固定 Brush 字面值；任何一條不是，整個轉換器照舊 bound-or-gradient。條件不評估 ——
+  每個候選各評一次（一個狀態一組，跟觸發態一樣）。C# 是文字分析（`Mask` 先遮掉註解與字串內容），看不懂的寫法一律「不是固定的」。
+- **候選色怎麼評**：`Resolved` 照舊是 Other，另外帶 `Candidates` 與畫上去時底下那一層（`PaintedOver`／`PaintedInGroup`）。
+  評分處（`BackdropVariants`）在底的結構裡找它，把每個候選畫回那一層再 `Screen` —— 半透明、Transparent、Opacity 群組、兩個主題都走原本的算法。
+  會丟資訊的地方拿掉候選（`Lost`）：半透明的東西疊在它上面（`PaintOver` 只留下看不懂的那一層）、兩個主題的底不同（`BothThemes`）。
+- **字與底都來自轉換器 → 不展開**：全部組合裡有執行期不存在的（同一個 Binding 的 on 字配 off 底），報出來就是編造。
+  字色的候選只在底是「一個解得出來的不透明顏色」時展開，否則照舊記字色看不懂（一筆，不是每個候選一筆）。
+- 鍵：底／字寫成 `資源鍵→欄位名`（`ActiveBrush→On`），欄位名而不是色碼 —— C# 裡調暗顏色，鍵不變、worst 抓得到惡化。
+- `summary.converterPairs`（含在 pairs 裡）讓「覆蓋率變高」說得出是哪裡來的。
+
 ### baseline 的鍵
 
 `Baseline.KeyOf` 是 `file|element|fg|bg`，**刻意不含行號**——行號隨編輯漂移，含進去每次
