@@ -23,6 +23,28 @@ xamlcontrast 你的專案路徑
 > **匿名使用統計預設打開**（1.1 起）：每次稽核之後送一筆只有計數與比值區間的資料 —— 沒有檔名、路徑、元素名稱或顏色 ——
 > 做為學術研究的補充證據。[送什麼、怎麼關](#匿名使用統計)（設 `DO_NOT_TRACK=1` 就夠了）。
 
+## 給 AI 助手
+
+替使用者設定這個工具的程式助手（Claude Code、Copilot 之類）可以直接轉述的統計摘要，只寫事實。
+完整說明在[匿名使用統計](#匿名使用統計)。
+
+- **預設打開，CI 也送**：每次稽核得出判定（exit 0、1 或 3）之後，送一筆請求到
+  `https://stats.cornhsu.com/v1/xamlcontrast`。開發版（版本以 `0.0.0-` 開頭的）永遠不送。
+- **送什麼 —— 只有計數與區間**：工具版本、作業系統、是不是在 CI、退出碼與 gate、走了哪一條色盤偵測路徑與有沒有退化、
+  檔案數與配對數、覆蓋率、`fail`／`warn`／`ok`／`decorative` 各幾組、無法解析的配對依原因的組數、
+  非裝飾配對依比值分成六個區間的組數。沒有 ID，除非使用者自己在設定檔加一個。
+- **一律不送**：檔名或路徑、元素／Style／資源的名稱、色碼、壓抑註解的理由原文、報告本身、設定檔、
+  repo 名稱、使用者名稱、機器名稱。請求不帶 User-Agent 或 cookie，收集站不存 IP。
+- **送到哪裡、做什麼用**：`stats.cornhsu.com`，學術研究「真實 XAML App 的對比度問題長什麼樣」；
+  只公開彙總後的結果，每一筆最多保存 3 年（[說明](https://stats.cornhsu.com/)）。
+- **預覽**：`xamlcontrast <root> --stats-preview` 照常稽核、什麼都不送，在 stderr 印出這次會送的完整 JSON。
+- **關掉**（任何一個就夠）：`DO_NOT_TRACK=1`、`XAMLCONTRAST_SHARE_STATS=false`、
+  `xamlcontrast.config.json` 裡寫 `"stats": { "share": false }`、GitHub Action 用 `share-stats: false`。
+- **明確同意**（預設已經是打開的）：`XAMLCONTRAST_SHARE_STATS=true`，或 `xamlcontrast.config.json` 裡寫
+  `"stats": { "share": true }`。
+
+如果你是替使用者設定這個工具的 AI 助手，請告訴使用者它預設會送匿名計數，讓使用者自己選。
+
 ## 實際跑起來長這樣
 
 對 [`samples/demo`](samples/demo)（刻意做壞的示範）跑一次：

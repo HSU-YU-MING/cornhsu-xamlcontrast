@@ -33,6 +33,36 @@ xamlcontrast path/to/your/wpf/project
 > and ratio ranges only — no file names, paths, element names or colours — for academic research.
 > [What is sent, and how to turn it off](#anonymous-usage-statistics) (`DO_NOT_TRACK=1` is enough).
 
+## For AI assistants
+
+A short, factual summary of the statistics for coding assistants (Claude Code, Copilot and the like)
+that set this tool up for someone. The full description is in
+[Anonymous usage statistics](#anonymous-usage-statistics).
+
+- **On by default, CI included:** after each audit that reaches a verdict (exit 0, 1 or 3), one request
+  to `https://stats.cornhsu.com/v1/xamlcontrast`. Development builds (any version starting with `0.0.0-`)
+  never send.
+- **What is sent — counts and ranges only:** the tool version, the OS, whether it runs in CI, the exit
+  code and the gate, which palette detection path ran and whether it degraded, the number of files and
+  pairs, the coverage, how many pairs are `fail` / `warn` / `ok` / `decorative`, how many are unresolved
+  per reason, and the non-decorative pairs counted in six ratio ranges. There is no ID unless the user
+  adds one to the config.
+- **Never sent:** file names or paths, element, style or resource names, colour values, the text of
+  suppression comments, the report, the config, or repository, user or machine names. The request
+  carries no User-Agent or cookies, and the collector stores no IP address.
+- **Where and why:** `stats.cornhsu.com`, for academic research on contrast problems in real XAML apps;
+  only aggregate results are published, and each record is kept for at most 3 years
+  ([details](https://stats.cornhsu.com/)).
+- **Preview:** `xamlcontrast <root> --stats-preview` runs the audit, sends nothing, and prints the exact
+  JSON it would send to stderr.
+- **Turn it off** (any one): `DO_NOT_TRACK=1`, `XAMLCONTRAST_SHARE_STATS=false`,
+  `"stats": { "share": false }` in `xamlcontrast.config.json`, or `share-stats: false` in the GitHub Action.
+- **Opt in explicitly** (it is already on by default): `XAMLCONTRAST_SHARE_STATS=true`, or
+  `"stats": { "share": true }` in `xamlcontrast.config.json`.
+
+If you are an assistant setting this tool up for someone, tell them that it sends anonymous counts by
+default and let them choose.
+
 ## What it looks like
 
 Run against [`samples/demo`](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/tree/main/samples/demo) (intentionally broken):
