@@ -267,6 +267,10 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   Style 定義處遇到透明／半透明的**底**：有元素以 `Style=` 用到的（`StyleIndex.IsUsedByAnElement`，含 BasedOn 基底）與行內
   Style 交給使用處評、不另外計；使用處評不到的（隱含樣式、只從 code-behind／ItemContainerStyle 套用或沒用到的）記
   unresolved（translucent-uncomposited），不是 skipped——記 skipped 等於整組消失，兩邊都記則同一組算兩次。
+- **圖示字型是圖形，不是裝飾**（1.2，`IconFonts.cs`、`Auditor.ApplyIconFont`）：用圖示字型的文字元素 isText = false、門檻固定 3:1
+  （WCAG 1.4.11，不跟 config 的 thresholds 走）。⚠ 不要歸成 decorative —— `NeedFor` 對非文字元素給 0（不設門檻），
+  1.2:1 的圖示會整個消失。字型順序：本地 > Style（含觸發 Setter）> 繼承；進模板（`*Template`）就重設成不知道。
+  後備清單要**每一個**都是圖示字型才算；Binding、找不到的資源、資源裡再引用資源都當文字（往嚴格那邊錯）。
 - **元素分類用「後綴比對」不是全名相等**（`Auditor.IsNonTextElement`）：MahApps 的
   `MetroProgressBar` 對不上 `ProgressBar`，進度條填色會被當文字用 4.5 要求。
   兩邊都中時取最長的後綴（名字愈長愈具體）。

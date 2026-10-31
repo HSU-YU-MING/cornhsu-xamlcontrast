@@ -96,6 +96,9 @@ public sealed partial class Auditor
     private readonly HashSet<string> _walkedNames = new(StringComparer.Ordinal); // config 的 layout 宣告有沒有命中
     private StyleIndex _styles = null!;
     private string _curFile = ""; // 具名 Style 查找的「同檔優先」範圍（完整路徑）
+    /// <summary>目前這個元素從祖先繼承到的 FontFamily（原始寫法；null = 沒有或不知道）。FontFamily 是繼承屬性：
+    /// TextBlock 裡的 Run、Button 裡的 TextBlock 跟著外層的字型走。只給圖示字型的判斷用（<see cref="IconFonts"/>）。</summary>
+    private string? _inheritedFont;
     private ThemeSide? _curSide;  // 目前這個檔只屬於哪一個主題（ThemeFileSides；Style 查找依主題解析，見 StyleIndex.Build）
     private readonly Dictionary<(Palette, ThemeSide), Palette> _sideViews = new();
 
@@ -242,6 +245,29 @@ public sealed partial class Auditor
     private double NeedFor(bool isText, bool isLarge) =>
         !isText ? 0.0 : isLarge ? _cfg.Thresholds.LargeText : _cfg.Thresholds.NormalText;
 
+    /// <summary>WCAG 1.4.11 非文字對比：看懂畫面要用到的圖形（圖示字型畫的圖示）3:1。條文沒有 AAA 的版本，
+    /// 所以不跟 config 的 thresholds 走（largeText 是大字級文字的門檻，不是圖形的）。</summary>
+    internal const double NonTextGraphic = 3.0;
+
+    /// <summary>
+    /// 用圖示字型的文字元素是圖形：isText = false、不算大字級、門檻 3:1（1.2；之前當文字用 4.5:1）。
+    /// 只在原本當文字時改：本來就是非文字（Rectangle、ProgressBar…）的照舊是 decorative。
+    /// 字型認不出來（Binding、找不到的資源、混了一般字型的後備清單）照舊當文字 —— 往嚴格那邊錯。
+    /// </summary>
+    private void ApplyIconFont(string? font, ref bool isText, ref bool isLarge, ref double need)
+    {
+        if (!isText || !IconFonts.IsIconFont(font, _styles.FontFamilies)) return;
+        (isText, isLarge, need) = (false, false, NonTextGraphic);
+    }
+
+    /// <summary>元素自己寫的 FontFamily：屬性，或附加屬性的寫法（TextElement.FontFamily、TextBlock.FontFamily…）。</summary>
+    private static string? LocalFontFamily(XElement el)
+        => el.Attribute("FontFamily")?.Value
+           ?? el.Attributes().FirstOrDefault(a => a.Name.LocalName.EndsWith(".FontFamily", StringComparison.Ordinal))?.Value;
+
+    private static string? ChainFont(StyleIndex.Merged? chain)
+        => chain is not null && chain.Props.TryGetValue("FontFamily", out var f) ? f.V : null;
+
     /// <summary>config 的 rootBackground 正規化成 ColorResolver 認得的值：
     /// 色碼／具名色／markup 原樣通過，裸鍵名包成 {DynamicResource X}。</summary>
     public static string? NormalizeRootBackground(string? raw)
@@ -385,6 +411,9 @@ public sealed partial class Auditor
     private void Walk(XElement el, Backdrop bd, string file, double op, bool suppressed)
     {
         _walkedNames.Add(el.Name.LocalName);
+        // 模板（DataTemplate、ControlTemplate…）的內容繼承的是「套用它的地方」的字型，不是定義處的祖先 —— 進模板就從不知道開始
+        var outerFont = _inheritedFont;
+        if (el.Name.LocalName.EndsWith("Template", StringComparison.Ordinal) && !el.Name.LocalName.Contains('.')) _inheritedFont = null;
         if (!suppressed && IsSuppressedByComment(el, file)) suppressed = true;
         var opRaw = el.Attribute("Opacity")?.Value;
         // Opacity 也可能是 Binding；只處理字面數值，其餘維持原值
@@ -441,7 +470,10 @@ public sealed partial class Auditor
         }
         else if (chain is not null) GradeChain(el, chain, null, bd, ancestorBd, localBgRaw, file, op, suppressed);
 
-        WalkForegroundAndChildren(el, bd, file, op, suppressed, handledFg);
+        // 這個元素的字型（WPF 優先序：本地 > Style > 繼承）—— 它自己的 Foreground／Fill 用它評，子元素繼承它
+        var elementFont = LocalFontFamily(el) ?? ChainFont(chain) ?? ChainFont(chainLight) ?? _inheritedFont;
+        WalkForegroundAndChildren(el, bd, file, op, suppressed, handledFg, elementFont);
+        _inheritedFont = outerFont;
     }
 
     // ── 元素 Opacity 的群組 ──
@@ -751,6 +783,12 @@ public sealed partial class Auditor
                 var ptC = fsC * 0.75;
                 var isLargeC = ptC >= 18 || (boldC && ptC >= 14);
                 var needC = NeedFor(isTextC, isLargeC);
+                // 圖示字型：本地 > 這個狀態的觸發 Setter > Style Setter > 繼承
+                var fontC = LocalFontFamily(el)
+                            ?? (st.Set.TryGetValue("FontFamily", out var sff) ? sff : null)
+                            ?? ChainFont(chain)
+                            ?? _inheritedFont;
+                ApplyIconFont(fontC, ref isTextC, ref isLargeC, ref needC);
 
                 var (fgDC, fgLC) = TextOnScreen(fgR, op, stateBd);
 
@@ -788,7 +826,7 @@ public sealed partial class Auditor
     }
 
     /// <summary>元素自己的 Foreground／Fill（沒有 Style 鏈接手時）與子元素（含規則 17 的兄弟背板）。</summary>
-    private void WalkForegroundAndChildren(XElement el, Backdrop bd, string file, double op, bool suppressed, bool handledFg)
+    private void WalkForegroundAndChildren(XElement el, Backdrop bd, string file, double op, bool suppressed, bool handledFg, string? font)
     {
         var bg = Screen(bd); // 螢幕上實際看到的底（Opacity 群組一層一層疊出去之後）
         foreach (var attrName in (ReadOnlySpan<string>)["Foreground", "Fill"])
@@ -833,6 +871,7 @@ public sealed partial class Auditor
             var pt = fs * 0.75;
             var isLarge = pt >= 18 || (bold && pt >= 14);
             var need = NeedFor(isText, isLarge);
+            ApplyIconFont(font, ref isText, ref isLarge, ref need);
 
             // Opacity < 1 或字色本身半透明時，螢幕上看到的是「文字色以 alpha 疊在背景上」的混色結果
             // （底也在 Opacity 群組裡時，連底一起一層一層疊出去，見 TextOnScreen）
@@ -874,6 +913,8 @@ public sealed partial class Auditor
         var layout = LayoutOf(el.Name.LocalName);
         var overlap = layout != PanelLayout.SideBySide;
         Dictionary<(int Row, int Col), Backdrop>? cellBg = overlap ? new() : null;
+        var parentFont = _inheritedFont;
+        _inheritedFont = font; // 子元素繼承這個元素的字型
         foreach (var child in el.Elements())
         {
             // Style / Setter / Trigger 這些不是視覺樹，個別處理（WalkStyles），這裡跳過
@@ -895,6 +936,7 @@ public sealed partial class Auditor
                     ? Paint(childBd, op, new Resolved(ColorKind.SiblingContent, Raw: $"<{child.Name.LocalName}> in <{el.Name.LocalName}>"), "")
                     : Paint(childBd, op, backdrop, backdrop.Raw ?? "");
         }
+        _inheritedFont = parentFont;
     }
 
     private enum PanelLayout { SideBySide, Overlap, Unknown }
@@ -1132,6 +1174,8 @@ public sealed partial class Auditor
                 var pt = fs * 0.75; // WPF FontSize 是 DIP，換 point 要 ×0.75（規劃書 4.3）
                 var isLarge = pt >= 18 || (bold && pt >= 14);
                 var need = NeedFor(isText, isLarge);
+                // Style 自己（含這個狀態的觸發 Setter、BasedOn 基底）設的圖示字型；定義處沒有祖先可以繼承
+                ApplyIconFont(Prop("FontFamily", out _), ref isText, ref isLarge, ref need);
 
                 _pairs++;
                 if (styleSuppressed) { _suppressed++; continue; }

@@ -73,6 +73,11 @@ exit 1: 3 pair(s) below threshold x 0.67 (0 warn)
 每筆結果有兩個**獨立**維度：
 
 - **等級**（絕對對比）：`fail`（< 門檻×0.67，約 2/3）／`warn`／`ok`／`decorative`。
+  門檻看畫的是什麼：文字 **4.5:1**、大字級（≥ 18pt，或 ≥ 14pt 粗體）**3:1**、**用圖示字型畫的圖示 3:1** ——
+  Segoe MDL2 Assets、Segoe Fluent Icons、Segoe UI Symbol、Material Icons、Material Symbols、Font Awesome；
+  圖示是圖形，照 WCAG 1.4.11 非文字對比（JSON 的 `isText` 是 `false`，1.2 起）—— 裝飾元素（當分隔線的 `Rectangle`、
+  進度條的填色）不設門檻。字型從元素自己、它的 Style 或父元素讀（`FontFamily="Segoe MDL2 Assets"`、`"/Fonts/#…"`、
+  `"pack://…#…"`，或指到 `<FontFamily>` 資源的 `{StaticResource …}`）；後備清單裡混了一般字型、或讀不懂的字型，照文字評。
   預設 `fail` 與 `warn` 都讓 CI 失敗（沒達到 AA 就算）；`--fail-on fail` 讓 `warn` 通過
 - **對稱**（跨主題）：`both-low`＝色票本身不夠，換主題救不了；
   `dark-fails`／`light-fails`＝設計意圖沒跨主題保住
@@ -457,6 +462,8 @@ ZeroCel（原 CelFlow）破 1／偏低 6、Kindling 破 1／偏低 1、QuillNest
 Style 的 `Template` setter 裡自己帶 `Foreground` 的文字元素**還沒有評分**（樹走訪不進 Style）——
 計入 unresolved（`in-style-template`，點名 `file:line` 與那個字色），覆蓋率照實反映；模板經 `{TemplateBinding Foreground}`
 或 `ContentPresenter` 顯示的宿主字色照舊由 Style 鏈評分。
+觸發態一次評一個、不組合：`IsMouseOver` 觸發換字色、`IsPressed` 觸發換底色的 Style，評的是「按下的底配平常的字色」
+（用鍵盤按下時看到的），不是滑鼠按下時同時有的 hover 字色。
 TargetName 指向模板**內部**元素（指向根的已解析）、跨元素同條件觸發器、
 隱含樣式（根元素背景以外;例:`DataGrid` 列裡的按鈕是配表格的底評,不是隱含 `DataGridRow` 樣式畫的選取列底 ——
 實測一個報 ok 的 ghost 按鈕在選取列上是 4.06:1）;sibling 背景已解析 `Grid` 格子裡「佔滿格子的兄弟」(純色直接用;

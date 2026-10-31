@@ -92,10 +92,10 @@
               "light": { "$ref": "#/$defs/colorPair" }
             }
           },
-          "threshold": { "type": "number", "description": "0 for decorative elements, largeText or normalText otherwise." },
+          "threshold": { "type": "number", "description": "0 for decorative elements, 3 for text drawn in an icon font (a graphic: WCAG 1.4.11 non-text contrast, from 1.2), largeText or normalText otherwise." },
           "category": { "enum": ["ok", "warn", "fail", "decorative"] },
           "symmetry": { "enum": ["both-low", "dark-fails", "light-fails", "single-theme", null], "description": "Only for fail and warn; null otherwise." },
-          "isText": { "type": "boolean" },
+          "isText": { "type": "boolean", "description": "false for decorative elements and, from 1.2, for text elements drawn in a recognised icon font (Segoe MDL2 Assets, Segoe Fluent Icons, Segoe UI Symbol, Material Icons, Material Symbols, Font Awesome)." },
           "isLargeText": { "type": "boolean" },
           "fontSize": { "type": ["number", "null"], "description": "FontSize in device-independent pixels (1/96 inch), converted the way WPF's FontSizeConverter does: a plain number is DIP; a unit suffix px, in (96), cm (96/2.54) or pt (96/72) is converted. Not rounded. null when no FontSize is set or it cannot be read statically (a resource reference, a binding)." },
           "theme": { "type": ["string", "null"], "description": "The one theme this pair exists in (a style in a one-theme dictionary, or a style key resolved per theme); the other theme's ratio is null. null when the pair exists in both. An open set: a 1.x release may add a theme (high contrast, say), so consumers must accept values they do not know. Current values: `dark`, `light`." },

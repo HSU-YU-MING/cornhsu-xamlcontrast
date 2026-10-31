@@ -97,6 +97,15 @@ Two independent dimensions per finding:
 - **symmetry** (across themes): `both-low` = the palette itself is too weak;
   `dark-fails` / `light-fails` = the design intent didn't survive the other theme
 
+The threshold depends on what is drawn: **4.5:1** for text, **3:1** for large text (≥ 18pt, or
+≥ 14pt bold), **3:1 for a glyph drawn in an icon font** — Segoe MDL2 Assets, Segoe Fluent Icons,
+Segoe UI Symbol, Material Icons, Material Symbols, Font Awesome — because an icon is a graphic
+(WCAG 1.4.11 non-text contrast; JSON `isText: false`, from 1.2), and none for decorative elements such
+as a `Rectangle` divider or a progress bar's fill. The font is read from the element, its style or
+its parent (`FontFamily="Segoe MDL2 Assets"`, `"/Fonts/#…"`, `"pack://…#…"`, or a
+`{StaticResource …}` that points to a `<FontFamily>` resource); a font list that mixes in a text font,
+or a font the tool can't read, is graded as text.
+
 Symmetry only answers "would switching theme rescue this?", so it is carried **only by
 `fail` and `warn` findings** — the JSON's `symmetry` is `null` on `ok` and `decorative`
 ones. A passing pair has no problem to rescue, and labelling a
@@ -564,6 +573,10 @@ Honest list — full blind-spot table with per-case evidence in the
 
 - `TargetName` setters aimed at **inner** template parts (root-targeted ones are resolved)
 - Cross-element correlated triggers (same condition flips fg on one element, bg on another) — false alarms
+- Trigger states are graded one at a time, never combined: a style whose `IsMouseOver` trigger sets
+  the foreground and whose `IsPressed` trigger sets the background is graded as the pressed
+  background with the normal foreground (what a keyboard press shows), not with the hover
+  foreground a mouse press also has
 - Sibling backdrops are resolved for full-cell siblings in a `Grid` cell (solid ones directly;
   translucent ones — through the brush's alpha or the element's own `Opacity` — composited; bound
   or gradient ones reported as unresolved), and text over a sibling `Image` is honestly

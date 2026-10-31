@@ -290,7 +290,7 @@ public static partial class Report
     }
 
     private static string NeedText(Finding f)
-        => f.Need <= 0 ? "—" : string.Create(CultureInfo.InvariantCulture, $"{f.Need}:1{(f.Large ? " (large)" : "")}");
+        => f.Need <= 0 ? "—" : string.Create(CultureInfo.InvariantCulture, $"{f.Need}:1{(f.Large ? " (large)" : !f.IsText ? " (non-text)" : "")}");
 
     /// <summary>只收 #RRGGBB（<see cref="Wcag.Opaque"/> 的輸出）；其他一律 null —— 進 style 屬性的值不能是任意字串。</summary>
     internal static string? CssHex(string? hex)

@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Upgrading
+- **Icons drawn in an icon font are graded at 3:1 instead of 4.5:1, so counts move.** A `TextBlock`,
+  `Run`, `Button` (or any text element) whose font is a recognised icon font is a graphic, not text:
+  WCAG 1.4.11 asks 3:1 of it. Its finding now has `isText: false`, `isLargeText: false` and
+  `threshold: 3`; the console tags it `non-text`. An icon between 3:1 and 4.5:1 moves from `warn` (or
+  `fail` below 3.01:1) to `ok`; one between 2.01:1 and 3:1 is now `warn` instead of `fail`. Icons are
+  **not** made `decorative` — an icon below 3:1 is still reported. If such an icon is in your
+  baseline, `--baseline` may count it as paid off. Baseline keys are unchanged (`keyVersion` stays 1).
+  The font is read from the element (`FontFamily`, or `TextElement.FontFamily` and the like), its
+  style's `FontFamily` setter, or its parent (a `Run` in a `TextBlock`, a `TextBlock` in a `Button`);
+  a template's content does not inherit from where the template is defined. Recognised: Segoe MDL2
+  Assets, Segoe Fluent Icons, Segoe UI Symbol, Material Icons\*, Material Symbols\*, Font Awesome\* and
+  FontAwesome\*, written as the name, `/Fonts/#Name`, `pack://…#Name`, or a `{StaticResource}` /
+  `{DynamicResource}` to a `<FontFamily x:Key>` resource. Every font in a fallback list has to be an
+  icon font; anything the tool can't read stays text at 4.5:1.
+
+### Added
+- README *Known limitations*: trigger states are graded one at a time. A style whose `IsMouseOver`
+  trigger sets the foreground and whose `IsPressed` trigger sets the background is graded as the
+  pressed background with the normal foreground — what a keyboard press shows — not with the hover
+  foreground that a mouse press also has. This is unchanged; a test now pins it.
+
 ## 1.1.0 — 2026-10-28
 
 > **⚠️ This release sends anonymous usage statistics by default.** After every audit that reaches a
