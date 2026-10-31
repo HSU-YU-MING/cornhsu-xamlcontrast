@@ -251,7 +251,10 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   那些檔用單一主題視圖評（對稱標 single-theme；`Finding.Theme` 記是哪個主題，另一個主題的比值經 `Finding.RatioIn` 是 null ——
   ⚠ `RatioDark`／`RatioLight` 內部兩欄都填那個主題的值，對外輸出一律走 `RatioIn`，不然會印出不存在的主題的比值）；`StyleIndex.Build(sideOf)` 讓同 key 的 Style 在使用處依主題
   各自解析，兩個主題解析到不同的鏈時各評各的（`@dark`／`@light`），只有一個主題解析得到時另一側記 unknown-palette-key。
-  拿 Dark 的 Style 配淺色色票是執行期不存在的組合。C#／單一主題模式不建這張表——Kindling 的 `DarkTheme.xaml`
+  拿 Dark 的 Style 配淺色色票是執行期不存在的組合。另一側記的原因是 `unknown-style-key`（1.2；之前是 unknown-palette-key，
+  還混進 `summary.unknownKeys`）。**BasedOn 也一樣**（1.2）：鏈上的基底「這個主題找不到、另一個主題找得到」時那一側不評
+  （`StyleIndex.Merged.MissingBase`、`Auditor.OnlyInOtherTheme`）—— 之前缺基底的鏈照樣評，字配到祖先的底，是編出來的比值。
+  兩個主題都找不到的基底（函式庫樣式）照舊略過那一層，不然用函式庫的專案覆蓋率會整片掉。C#／單一主題模式不建這張表——Kindling 的 `DarkTheme.xaml`
   是 C# 色盤的靜態複本，兩個主題共用。
 - **Application 含子類別**（`PaletteDetector.RootKindOf`）：根元素名稱以 Application 結尾（Prism 的 `PrismApplication`），
   或根元素底下有 `<…Application.Resources>`。只認 `Application` 的話，Prism 的 App.xaml 被當成畫面、全域鍵全變成區域鍵。
@@ -333,6 +336,11 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - Action 的 `share-stats: false` 在 Run audit 的 script 裡 `export`，**不寫進 step 的 `env:`** —— step 的 env 會蓋掉呼叫端 workflow／job 層的
   同名變數，`true` 時呼叫端的 `XAMLCONTRAST_SHARE_STATS=false` 就失效了。
 - `stats.projectId` 逐字檢查，不用正則的 `$`（它在結尾的換行前也成立）。
+- **1.2 的 data 多三欄**（收集站 2026-10-31 起收）：`symmetry`（fail／warn 依對稱分四類，四個鍵都送，加總 = fail + warn）、
+  `suppressedBy`（ignore 理由的第一個詞對到 `icon`／`state-only`／`watermark`／`decorative`，其他 `other`；只列 > 0，加總 = suppressed）、
+  `disabledExempt`。兩個加總都有測試釘住。理由原文只存在 `AuditResult.SuppressedReasons`（internal，記憶體裡）給
+  `UsageStats.SuppressionKind` 分類 —— **不進任何報告、不送**。一組配對歸給「壓掉它的那個註解」：樹走訪一進入被壓掉的子樹就不再看
+  裡面的註解，所以是最外層那一個；`WalkStyles` 照這個規則取（祖先優先於 Style 自己的註解）。
 
 ### 守門腳本自身
 

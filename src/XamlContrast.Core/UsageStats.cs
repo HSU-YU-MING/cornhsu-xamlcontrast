@@ -3,7 +3,8 @@ using System.Text.Json.Nodes;
 namespace XamlContrast.Core;
 
 /// <summary>
-/// 匿名使用統計的 data（XamlContrast 1.1；協定是 stats-collector 的 PROTOCOL.md 第 7.3 節，收集站的 validate.ts 逐欄驗）。
+/// 匿名使用統計的 data（XamlContrast 1.1；1.2 起多送 symmetry、suppressedBy、disabledExempt；協定是 stats-collector 的
+/// PROTOCOL.md 第 7.3 節，收集站的 validate.ts 逐欄驗）。
 /// 只有計數與分桶：檔名、路徑、元素名、色票鍵、色碼、設定檔內容一個都不進來 —— 那些只在報告裡，報告不離開這台機器。
 /// 收集站對多一個欄位、少一個欄位、型別或範圍不對一律拒收整筆，所以這裡的形狀與協定逐欄一致；**要改先改協定**，
 /// 收集站先上線新版，工具才能送新欄位。外層（schema、tool、toolVersion、os、ci、projectId）、開關、告知與傳輸在 CLI 的 Stats.cs。
@@ -22,9 +23,17 @@ public static class UsageStats
     [
         "no-ancestor-background", "bound-or-gradient", "unknown-palette-key", "translucent-uncomposited",
         "same-brush-pair", "over-sibling-content", "in-style-template",
+        "unknown-style-key", // 1.2
     ];
     private static readonly HashSet<string> KnownModes = ["pair", "csharp", "single", "none"];
     private static readonly HashSet<string> KnownGates = ["warn", "fail"];
+
+    /// <summary>suppressedBy 的鍵（協定 1.2）：理由的第一個詞**完全等於**前四個之一就歸那一類，其他一律 other。
+    /// 協定只收這五個鍵 —— 這裡多一個，收集站就整筆拒收。</summary>
+    public static IReadOnlyList<string> SuppressionKinds { get; } = ["icon", "state-only", "watermark", "decorative", "other"];
+
+    /// <summary>理由的第一個詞在這些字元的前面截斷（另外還有任何空白）。連字號不在裡面：state-only 是一個詞。</summary>
+    private static readonly char[] ReasonWordEnd = [',', '，', ':', '：', ';', '；', '—', '–', '(', '（'];
 
     /// <summary>收集站的根網址（協定第 6 節）；CORNHSU_STATS_URL 換掉它（測試與本機驗證用），路徑照舊加 /v1/&lt;tool&gt;。</summary>
     public const string DefaultRoot = "https://stats.cornhsu.com";
@@ -80,6 +89,36 @@ public static class UsageStats
         return new(true, url is not null ? "CORNHSU_STATS_URL is set" : shareByDefault ? "sharing is on by default" : "you turned sharing on", endpoint);
     }
 
+    /// <summary>
+    /// ignore 註解的理由歸哪一類（<see cref="SuppressionKinds"/> 之一）：取第一個詞 —— 遇到空白或 , ， : ： ; ； — – ( （ 就截斷 ——
+    /// 轉小寫（invariant），完全等於 icon、state-only、watermark、decorative 就是那一類，否則是 other（含沒寫理由、
+    /// 中文開頭、「icon播放鈕」這種沒斷開的）。只回傳這五個固定的字串之一 —— 理由原文絕對不會從這裡流出去。
+    /// </summary>
+    public static string SuppressionKind(string? reason)
+    {
+        var text = reason?.TrimStart() ?? "";
+        var end = 0;
+        while (end < text.Length && !char.IsWhiteSpace(text[end]) && Array.IndexOf(ReasonWordEnd, text[end]) < 0) end++;
+        var word = text[..end].ToLowerInvariant();
+        return word is "icon" or "state-only" or "watermark" or "decorative" ? word : "other";
+    }
+
+    /// <summary>協定 1.2 的 suppressedBy：壓掉的配對依理由的類別計數，只列 &gt; 0 的（照 <see cref="SuppressionKinds"/> 的順序）；
+    /// 沒有壓掉任何東西是空物件。總和 = summary.suppressed（測試釘住）。</summary>
+    public static JsonObject SuppressedBy(AuditResult r)
+    {
+        var byKind = new Dictionary<string, long>(StringComparer.Ordinal);
+        foreach (var (reason, n) in r.SuppressedReasons)
+        {
+            var kind = SuppressionKind(reason);
+            byKind[kind] = byKind.GetValueOrDefault(kind) + n;
+        }
+        var obj = new JsonObject();
+        foreach (var kind in SuppressionKinds)
+            if (byKind.GetValueOrDefault(kind) is > 0 and var n) obj[kind] = Count(n);
+        return obj;
+    }
+
     /// <summary>一個比值落在哪一桶（0–5）。</summary>
     public static int RatioBucket(double ratio)
     {
@@ -130,8 +169,24 @@ public static class UsageStats
             },
             ["unresolvedBy"] = unresolvedBy,
             ["ratios"] = new JsonArray([.. ratios.Select(n => (JsonNode)Count(n))]),
+            // 1.2：fail／warn 依對稱分類（Grader 算的，就是 console 印的那一欄）—— 四個鍵都送，總和 = fail + warn。
+            // fail／warn 一定有對稱（ok／decorative 才是 NotApplicable），測試釘住總和
+            ["symmetry"] = new JsonObject
+            {
+                ["bothLow"] = Count(FailOrWarn(r, Symmetry.BothLow)),
+                ["darkFails"] = Count(FailOrWarn(r, Symmetry.DarkFails)),
+                ["lightFails"] = Count(FailOrWarn(r, Symmetry.LightFails)),
+                ["singleTheme"] = Count(FailOrWarn(r, Symmetry.SingleTheme)),
+            },
+            // 1.2：只有類別的計數，不送理由原文
+            ["suppressedBy"] = SuppressedBy(r),
+            // 1.2：與報告的 summary.disabledExempt 同一個數
+            ["disabledExempt"] = Count(r.DisabledExempt),
         };
     }
+
+    private static int FailOrWarn(AuditResult r, Symmetry s)
+        => r.Findings.Count(f => f.Category is Category.Fail or Category.Warn && f.Symmetry == s);
 
     private static int Count(long n) => (int)Math.Clamp(n, 0, MaxCount);
 }

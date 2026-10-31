@@ -174,9 +174,16 @@ xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # CI 裡
 **刻意低對比的標記**（理由必填；壓掉的計入 `summary.suppressed`，不會靜默消失）：
 
 ```xml
-<!-- xamlcontrast-ignore: 浮水印，刻意低對比 -->
+<!-- xamlcontrast-ignore: watermark 浮水印，刻意低對比 -->
 <TextBlock Opacity="0.4" Text="草稿" ... />
+<!-- xamlcontrast-ignore: icon 播放鈕 -->
+<TextBlock Text="▶" ... />
 ```
+
+理由合適的話，**用一個關鍵字開頭**：`icon`、`state-only`、`watermark` 或 `decorative`，其他一律算 `other`。
+只讀第一個詞（遇到空白或 `,` `，` `:` `：` `;` `；` `(` `（` 或破折號就截斷），不分大小寫，而且要整個詞相同
+（`icons` 算 `other`）。寫不寫關鍵字都不影響壓掉什麼；1.2 起[匿名使用統計](#匿名使用統計)依關鍵字計算壓掉的組數 ——
+理由原文一律不送。
 
 完全沒寫理由的 `<!-- xamlcontrast-ignore -->` 視為無效並警告（配對照報）。標記要一字不差 ——
 小寫、有冒號、理由寫在同一行；寫錯的變體（大小寫不同、冒號後沒有理由、漏冒號、理由換到第二行）
@@ -317,6 +324,7 @@ fail／warn 另標 `symmetry: single-theme`。
 | `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
 | `over-sibling-content` | 文字墊在同格子的兄弟 `Image`/媒體元素上 —— 真正的底是一張圖,靜態不可知;硬配祖先背景等於編造比值 |
 | `in-style-template` | Style 的 `Template` setter（`<Setter Property="Template"><Setter.Value><ControlTemplate>`）裡自己帶 `Foreground` 的文字元素 —— 還沒有評分（見已知限制），計入這裡讓覆蓋率反映這個缺口 |
+| `unknown-style-key` | 色盤來自分開的深／淺字典，而元素的 Style —— `Style="{StaticResource K}"`，或它鏈上的 `BasedOn` —— 只在其中一個字典裡定義，另一個主題下這個元素長什麼樣不知道；值是那個 Style 的鍵。1.2 之前算成 `unknown-palette-key`（`BasedOn` 的那一種則是拿元素後面的底去評） |
 
 `summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 3** ——
 只掃到一小部分的「通過」不算通過,這是「0 組配對不算通過」那條不可設定規則的推廣。
@@ -326,7 +334,8 @@ fail／warn 另標 `symmetry: single-theme`。
 每一筆無法解析的配對都有位置可查:`--show-unresolved` 逐筆列出
 `file:line · 原因 · 卡住的值`(卡在背景時放背景的值),JSON 頂層的 `unresolvedSites` 陣列帶同一份清單(`file`、`line`、`reason`、`value`)。
 unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)——
-每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。
+每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。Style 的鍵不是色票的鍵：
+1.2 起記成 `unknown-style-key`，不再列在 `summary.unknownKeys`。
 
 **第一次跑,多半會停在覆蓋率下限。** 解析得出多少,取決於 App 怎麼給顏色。四個驗證專案是 73~96%
 (1.0 實測:Kindling 95.8%、QuillNest 89.4%、ZeroCel 73.4%;第四個 Cornea 是截圖覆蓋視窗,
@@ -389,8 +398,11 @@ unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)—
 | `data.counts` | `fail`、`warn`、`ok`、`decorative` 各幾組 |
 | `data.unresolvedBy` | 無法解析的配對依原因的組數（原因見上面那張表） |
 | `data.ratios` | 非裝飾配對依最差比值分成六個區間的組數：< 1.5、1.5–2、2–3、3–4.5、4.5–7、≥ 7 |
+| `data.symmetry` | 1.2 起：`fail` 與 `warn` 依對稱分類的組數 —— `bothLow`（兩邊都低）、`darkFails`（深色才壞）、`lightFails`（淺色才壞）、`singleTheme`（單一主題）；四個加起來 = `fail` + `warn` |
+| `data.suppressedBy` | 1.2 起：被 `xamlcontrast-ignore` 壓掉的配對，依理由的第一個詞分類的組數 —— `icon`、`state-only`、`watermark`、`decorative` 或 `other`（見上面「刻意低對比的標記」）；只有組數，不送理由 |
+| `data.disabledExempt` | 1.2 起：以停用態豁免的組數（就是 `summary.disabledExempt`） |
 
-**一律不送**：檔名或路徑、元素／Style／資源的名稱、色碼、報告本身、你的設定檔、repo 名稱、使用者名稱、機器名稱，
+**一律不送**：檔名或路徑、元素／Style／資源的名稱、色碼、`xamlcontrast-ignore` 的理由原文、報告本身、你的設定檔、repo 名稱、使用者名稱、機器名稱，
 或任何其他來自你專案的東西。請求不帶 User-Agent、cookie 或任何自訂標頭。收集站不存 IP
 （代管它的 Cloudflare 跟任何網路服務商一樣看得到連線），只記收到的日期，多一個不認得的欄位就整筆拒收。
 

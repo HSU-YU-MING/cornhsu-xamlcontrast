@@ -39,7 +39,7 @@
             <Rectangle Fill="{DynamicResource Divider}" Height="1" Margin="0,12"/>
 
             <!-- ignore 註解：理由必填，壓掉會計入 suppressed（suppression needs a reason） -->
-            <!-- xamlcontrast-ignore: 浮水印，刻意低對比 watermark, intentionally faint -->
+            <!-- xamlcontrast-ignore: watermark 浮水印，刻意低對比 intentionally faint -->
             <TextBlock Foreground="{DynamicResource DimText}" FontSize="12" Text="草稿 DRAFT"/>
         </StackPanel>
     </Grid>

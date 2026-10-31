@@ -1,3 +1,4 @@
+using System.Text.Json;
 using XamlContrast.Core;
 
 namespace XamlContrast.Tests;
@@ -819,7 +820,8 @@ public class StyleChainTests
 
     // ── 只在一個主題定義的 Style key（審查最後一輪 5：素材 per-onlydark_dyn、per-onlydark_fg）──
     //    92520b2 之後另一個主題解析不到這個 Style，那一側整組靜默消失 —— 沒評分、也不在任何計數器裡
-    //    （舊版拿 Dark 的 Style 配淺色欄，報出淺色 fail）。缺的那一側記 unknown-palette-key，點名 Style key
+    //    （舊版拿 Dark 的 Style 配淺色欄，報出淺色 fail）。缺的那一側記 unknown-style-key（1.2 之前是 unknown-palette-key ——
+    //    K 是 Style 的鍵，不是色票的鍵，還混進 summary.unknownKeys），點名 Style key
     [Theory]
     [InlineData("""<Style x:Key="OnlyDark" TargetType="Button"><Setter Property="Background" Value="Transparent"/></Style>""",
                 """<Button Style="{DynamicResource OnlyDark}" Foreground="{DynamicResource Muted}" Content="x"/>""", "Button")]
@@ -848,8 +850,91 @@ public class StyleChainTests
         var dark = Assert.Single(r.Findings, f => f.File == "Views/Main.xaml");
         Assert.Equal($"{element}⊕Style[OnlyDark]@dark/base", dark.Element);
         var light = Assert.Single(r.UnresolvedSites, u => u.File == "Views/Main.xaml");
-        Assert.Equal(UnresolvedReason.UnknownPaletteKey, light.Reason);
+        Assert.Equal(UnresolvedReason.UnknownStyleKey, light.Reason);
         Assert.Equal("OnlyDark", light.Value);
+        Assert.Equal("unknown-style-key", Report.ReasonLabel(light.Reason));
+        // 不是色票的鍵：不進 summary.unknownKeys（那裡點名的是死引用、打字錯誤、偵測漏掉的色盤檔）
+        using var json = JsonDocument.Parse(Report.ToJson(r));
+        Assert.Empty(json.RootElement.GetProperty("summary").GetProperty("unknownKeys").EnumerateObject());
+        Assert.Equal(1, json.RootElement.GetProperty("summary").GetProperty("unresolvedBy").GetProperty("unknown-style-key").GetInt32());
+    }
+
+    // ── 同一件事的 BasedOn 形狀（1.2）：行內 Style BasedOn 一個只在深色字典定義的 Style ──
+    //    舊版淺色那一側照樣評：缺基底的鏈沒有底，自己的字色配到祖先的底 —— 淺色主題下根本不存在的組合，
+    //    一個編出來的比值（維護者回報「用 BasedOn 的反而看得懂」，其實是這樣「看懂」的）。改成跟直接引用一樣：
+    //    淺色那一側記 unknown-style-key、點名基底的鍵、不評
+    [Fact]
+    public void InlineStyleBasedOnAStyleDefinedInOneThemeOnlyCountsTheOtherThemeAsUnresolved()
+    {
+        using var fx = OnlyDarkStyle("""<Style x:Key="OnlyDark" TargetType="Button"><Setter Property="Background" Value="{DynamicResource BtnBg}"/></Style>""");
+        fx.File("Views/Main.xaml", """
+            <Grid Background="{DynamicResource Bg}">
+              <Button Content="x">
+                <Button.Style><Style TargetType="Button" BasedOn="{StaticResource OnlyDark}"><Setter Property="Foreground" Value="#E05555"/></Style></Button.Style>
+              </Button>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var dark = Assert.Single(r.Findings, f => f.File == "Views/Main.xaml");
+        Assert.Equal("Button⊕Style[→OnlyDark]@dark/base", dark.Element);
+        Assert.Equal(ThemeSide.Dark, dark.Theme);
+        Assert.Equal(Wcag.Contrast("#E05555", "#333333"), dark.RatioDark); // 深色：配基底的底，不是祖先的 Bg
+        var light = Assert.Single(r.UnresolvedSites, u => u.File == "Views/Main.xaml");
+        Assert.Equal(UnresolvedReason.UnknownStyleKey, light.Reason);
+        Assert.Equal("OnlyDark", light.Value);
+    }
+
+    [Fact] // 鏈更深一層也一樣：具名 Style 在共用字典、它的 BasedOn 基底只在深色字典
+    public void SharedStyleBasedOnAStyleDefinedInOneThemeOnlyCountsTheOtherThemeAsUnresolved()
+    {
+        using var fx = OnlyDarkStyle("""<Style x:Key="OnlyDark" TargetType="Button"><Setter Property="Background" Value="{DynamicResource BtnBg}"/></Style>""");
+        fx.File("Themes/Styles.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Style x:Key="RedBtn" TargetType="Button" BasedOn="{StaticResource OnlyDark}"><Setter Property="Foreground" Value="#E05555"/></Style>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """<Grid Background="{DynamicResource Bg}"><Button Style="{StaticResource RedBtn}" Content="x"/></Grid>""");
+        var r = fx.Run();
+        Assert.Equal("Button⊕Style[RedBtn]@dark/base", Assert.Single(r.Findings, f => f.File == "Views/Main.xaml").Element);
+        var light = Assert.Single(r.UnresolvedSites, u => u.File == "Views/Main.xaml");
+        Assert.Equal(UnresolvedReason.UnknownStyleKey, light.Reason);
+        Assert.Equal("OnlyDark", light.Value);
+    }
+
+    [Fact] // 對照組：哪個主題都找不到的基底（外部函式庫的 MahApps.Styles.Button 之類）照舊略過那一層、兩個主題各自評 ——
+           // 只有「這個主題找不到、另一個主題找得到」才是 unknown-style-key，不然每個用函式庫樣式的專案覆蓋率都會掉一截
+    public void ABaseMissingInEveryThemeIsStillSkippedAsBefore()
+    {
+        const string chip = """<Style x:Key="Chip" TargetType="Button" BasedOn="{StaticResource Library.Button}"><Setter Property="Background" Value="{DynamicResource BtnBg}"/></Style>""";
+        using var fx = OnlyDarkStyle(chip, chip);
+        fx.File("Views/Main.xaml", """<Grid Background="{DynamicResource Bg}"><Button Style="{StaticResource Chip}" Foreground="#E05555" Content="x"/></Grid>""");
+        var r = fx.Run();
+        Assert.Empty(r.UnresolvedSites);
+        Assert.Equal(["Button⊕Style[Chip]@dark/base", "Button⊕Style[Chip]@light/base"],
+            r.Findings.Where(f => f.File == "Views/Main.xaml").Select(f => f.Element).Order(StringComparer.Ordinal));
+    }
+
+    /// <summary>深淺兩個主題字典：Bg、BtnBg、Fg 兩邊都有（色盤偵測要三個鍵才成對）；<paramref name="darkStyle"/> 只放進深色（<paramref name="lightStyle"/> 給了才放進淺色）。</summary>
+    private static Fixture OnlyDarkStyle(string darkStyle, string lightStyle = "")
+    {
+        var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="BtnBg" Color="#333333"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              {darkStyle}
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+              <SolidColorBrush x:Key="BtnBg" Color="#DDDDDD"/>
+              <SolidColorBrush x:Key="Fg" Color="#1B1B1B"/>
+              {lightStyle}
+            </ResourceDictionary>
+            """);
+        return fx;
     }
 
     [Fact] // 中性檔的 Style BasedOn 主題檔的 Style：基底依主題各自解析
