@@ -92,6 +92,7 @@ public sealed partial class Auditor
     private readonly List<Finding> _findings = new();
     private readonly List<string> _parseErrors = new();
     private readonly List<string> _invalidIgnores = new();
+    private readonly Dictionary<string, int> _suppressedReasons = new(StringComparer.Ordinal);
     private int _pairs, _unresolved, _skipped, _deadFg, _suppressed, _disabled, _translucentOverNothing;
     private readonly HashSet<string> _walkedNames = new(StringComparer.Ordinal); // config 的 layout 宣告有沒有命中
     private StyleIndex _styles = null!;
@@ -106,35 +107,45 @@ public sealed partial class Auditor
     /// ignore 註解（規劃書 4.6）：&lt;!-- xamlcontrast-ignore: 理由 --&gt; 管下一個元素（含子樹）。
     /// 理由必填 —— 沒理由的 ignore 視為無效並警告；被壓掉的計入 suppressed。
     /// 否則 ignore 就是新開的一條靜默退化通道。
+    /// 回傳壓掉這個元素（含子樹）的註解的理由原文（requireReason 關掉、沒寫理由時是空字串）；沒被壓掉是 null。
     /// </summary>
-    private bool IsSuppressedByComment(XElement el, string file)
+    private string? SuppressionOf(XElement el, string file)
     {
-        var (suppressed, invalid) = IgnoreStateOf(el, file);
+        var (reason, invalid) = IgnoreStateOf(el, file);
         if (invalid is not null) _invalidIgnores.Add(invalid);
-        return suppressed;
+        return reason;
     }
 
-    /// <summary>同上，不記錄無效的註解（給「祖先有沒有被壓掉」這種重複查詢用 —— 那些註解在樹走訪時已經記過）。</summary>
-    private (bool Suppressed, string? Invalid) IgnoreStateOf(XElement el, string file)
+    /// <summary>同上，不記錄無效的註解（給「祖先有沒有被壓掉」這種重複查詢用 —— 那些註解在樹走訪時已經記過）。
+    /// Reason 不是 null = 壓掉（值是理由原文，沒寫理由時是空字串）。</summary>
+    private (string? Reason, string? Invalid) IgnoreStateOf(XElement el, string file)
     {
         // 往前找最近的非空白節點；只有「緊鄰的前一個註解」才算數
         var prev = el.PreviousNode;
         while (prev is XText t && string.IsNullOrWhiteSpace(t.Value)) prev = prev.PreviousNode;
-        if (prev is not XComment c) return (false, null);
+        if (prev is not XComment c) return (null, null);
         var m = IgnoreComment().Match(c.Value);
         if (!m.Success)
         {
             // ⚠ 寫錯的變體（大小寫不同、冒號後沒有理由、漏冒號、理由換到第二行）舊版整段認不出來：
             //   不壓（方向安全），但也不警告 —— 使用者看不出自己的註解沒生效。看起來像標記就要講出來。
             //   多行理由維持不接受：接受等於放寬，會讓既有的這類註解開始壓掉配對
-            return (false, IgnoreCommentLenient().IsMatch(c.Value)
+            return (null, IgnoreCommentLenient().IsMatch(c.Value)
                 ? $"{file}:{LineOfComment(c)}: malformed xamlcontrast-ignore comment (not suppressed)" +
                   " — write it as 'xamlcontrast-ignore: reason', lowercase, with the reason on the same line"
                 : null);
         }
         if (!m.Groups["reason"].Success && _cfg.Ignore.RequireReason)
-            return (false, $"{file}:{LineOfComment(c)}: xamlcontrast-ignore without a reason is invalid (not suppressed)");
-        return (true, null);
+            return (null, $"{file}:{LineOfComment(c)}: xamlcontrast-ignore without a reason is invalid (not suppressed)");
+        return (m.Groups["reason"].Success ? m.Groups["reason"].Value : "", null);
+    }
+
+    /// <summary>一組配對被 ignore 壓掉：計數，並記在壓掉它的那個註解的理由底下（總和 = _suppressed）。
+    /// 理由原文只留在記憶體裡給統計分類（<see cref="UsageStats.SuppressedBy"/>），不進任何報告、也不送出去。</summary>
+    private void Suppress(string reason)
+    {
+        _suppressed++;
+        _suppressedReasons[reason] = _suppressedReasons.GetValueOrDefault(reason) + 1;
     }
 
     /// <summary>「看起來像 ignore 標記」：註解開頭、不分大小寫、整個字（xamlcontrast-ignored 不算）。</summary>
@@ -316,7 +327,7 @@ public sealed partial class Auditor
                 // 畫面檔自己的區域 brush 在那個畫面裡蓋過全域（見 MergedXamlPalette 的區域層）
                 if (!paletteFile && PaletteDetector.LocalOverrides(f, basePal) is { Count: > 0 } local)
                     auditor._pal = WithLocalOverrides(auditor._pal, local);
-                auditor.Walk(doc.Root, default, name, 1.0, suppressed: false);
+                auditor.Walk(doc.Root, default, name, 1.0, suppressedBy: null);
                 auditor.WalkStyles(doc, name);
             }
         }
@@ -336,6 +347,7 @@ public sealed partial class Auditor
             DisabledExempt = auditor._disabled,
             ParseErrors = auditor._parseErrors,
             Suppressed = auditor._suppressed,
+            SuppressedReasons = auditor._suppressedReasons,
             InvalidIgnores = auditor._invalidIgnores,
             Config = auditor._cfg,
             UnmatchedLayoutNames = auditor._cfg.Layout.Overlap.Concat(auditor._cfg.Layout.SideBySide)
@@ -382,10 +394,11 @@ public sealed partial class Auditor
         }, file, line, r.Kind == ColorKind.UnknownKey && r.Key is not null ? r.Key : raw);
     }
 
-    private void Walk(XElement el, Backdrop bd, string file, double op, bool suppressed)
+    private void Walk(XElement el, Backdrop bd, string file, double op, string? suppressedBy)
     {
         _walkedNames.Add(el.Name.LocalName);
-        if (!suppressed && IsSuppressedByComment(el, file)) suppressed = true;
+        // 歸給「壓掉它的那個註解」：一進入被壓掉的子樹就不再看裡面的註解，所以是最外層那一個
+        if (suppressedBy is null && SuppressionOf(el, file) is { } reason) suppressedBy = reason;
         var opRaw = el.Attribute("Opacity")?.Value;
         // Opacity 也可能是 Binding；只處理字面數值，其餘維持原值
         if (opRaw is not null && ParseDouble(opRaw, out var opVal)) op *= opVal;
@@ -432,17 +445,27 @@ public sealed partial class Auditor
         var handledFg = chain is not null || chainLight is not null;
         if (perSide)
         {
-            if (chain is not null) GradeChain(el, chain, ThemeSide.Dark, bd, ancestorBd, localBgRaw, file, op, suppressed);
-            if (chainLight is not null) GradeChain(el, chainLight, ThemeSide.Light, bd, ancestorBd, localBgRaw, file, op, suppressed);
             // 只在一個主題定義的 Style key：另一個主題下這個元素的樣子工具不知道（StaticResource 會丟例外、
-            // DynamicResource 退回預設樣式）—— 不評，但要計數。⚠ 92520b2 那一側整組靜默消失（審查最後一輪 5）
-            if ((chain is null || chainLight is null) && StyleKeyOf(el) is { } styleKey)
-                Unres(UnresolvedReason.UnknownPaletteKey, file, LineOf(el), styleKey);
+            // DynamicResource 退回預設樣式）—— 不評，但要計數。⚠ 92520b2 那一側整組靜默消失（審查最後一輪 5）。
+            // 兩種形狀：Style="{StaticResource K}" 的 K 在那個主題找不到（鏈是 null），或鏈上的 BasedOn 在那個主題找不到、
+            // 在另一個主題找得到（行內 Style BasedOn K）。⚠ 1.2 之前後者照樣評：缺基底的鏈沒有底，字配到祖先的底 ——
+            // 那個主題下根本不存在的組合。1.2 之前前者記 unknown-palette-key（K 不是色票的鍵）
+            var missingDark = chain is null ? StyleKeyOf(el) : OnlyInOtherTheme(chain, chainLight);
+            var missingLight = chainLight is null ? StyleKeyOf(el) : OnlyInOtherTheme(chainLight, chain);
+            if (chain is not null && missingDark is null) GradeChain(el, chain, ThemeSide.Dark, bd, ancestorBd, localBgRaw, file, op, suppressedBy);
+            if (chainLight is not null && missingLight is null) GradeChain(el, chainLight, ThemeSide.Light, bd, ancestorBd, localBgRaw, file, op, suppressedBy);
+            if ((missingDark ?? missingLight) is { } styleKey)
+                Unres(UnresolvedReason.UnknownStyleKey, file, LineOf(el), styleKey);
         }
-        else if (chain is not null) GradeChain(el, chain, null, bd, ancestorBd, localBgRaw, file, op, suppressed);
+        else if (chain is not null) GradeChain(el, chain, null, bd, ancestorBd, localBgRaw, file, op, suppressedBy);
 
-        WalkForegroundAndChildren(el, bd, file, op, suppressed, handledFg);
+        WalkForegroundAndChildren(el, bd, file, op, suppressedBy, handledFg);
     }
+
+    /// <summary>這一側的鏈缺了一個 BasedOn 基底，而另一側找得到它（另一側沒缺、或缺的是別的）—— 那個基底只定義在另一個主題。
+    /// 兩側缺同一個（外部函式庫的基底之類，哪個主題都找不到）不算：照舊略過缺的那一層。</summary>
+    private static string? OnlyInOtherTheme(StyleIndex.Merged mine, StyleIndex.Merged? other)
+        => mine.MissingBase is { } k && other is not null && other.MissingBase != k ? k : null;
 
     // ── 元素 Opacity 的群組 ──
     //
@@ -656,7 +679,7 @@ public sealed partial class Auditor
     /// （同 key 的 Style 依主題各自解析、兩個主題解析到不同的鏈）：色盤用那個主題的視圖、finding 標那個主題（Theme），
     /// 元素名的 Style 標籤帶 @dark／@light。</summary>
     private void GradeChain(XElement el, StyleIndex.Merged chain, ThemeSide? side, Backdrop bd, Backdrop ancestorBd,
-        string? localBgRaw, string file, double op, bool suppressed)
+        string? localBgRaw, string file, double op, string? suppressedBy)
     {
         var pal = _pal;
         var label = chain.Label;
@@ -760,7 +783,7 @@ public sealed partial class Auditor
                 if (!emitted.Add($"{fgDC}|{fgLC}|{bgObj.Dark}|{bgObj.Light}|{needC}")) continue;
 
                 _pairs++;
-                if (suppressed) { _suppressed++; continue; }
+                if (suppressedBy is not null) { Suppress(suppressedBy); continue; }
                 var lineC = el is IXmlLineInfo cli && cli.HasLineInfo() ? cli.LineNumber : 0;
                 var (ratioDC, colorsDC) = Wcag.Measure(fgDC, bgObj.Dark!);
                 var (ratioLC, colorsLC) = Wcag.Measure(fgLC, bgObj.Light!);
@@ -788,7 +811,7 @@ public sealed partial class Auditor
     }
 
     /// <summary>元素自己的 Foreground／Fill（沒有 Style 鏈接手時）與子元素（含規則 17 的兄弟背板）。</summary>
-    private void WalkForegroundAndChildren(XElement el, Backdrop bd, string file, double op, bool suppressed, bool handledFg)
+    private void WalkForegroundAndChildren(XElement el, Backdrop bd, string file, double op, string? suppressedBy, bool handledFg)
     {
         var bg = Screen(bd); // 螢幕上實際看到的底（Opacity 群組一層一層疊出去之後）
         foreach (var attrName in (ReadOnlySpan<string>)["Foreground", "Fill"])
@@ -812,7 +835,7 @@ public sealed partial class Auditor
             _pairs++;
 
             // ignore 壓掉的不進 findings，但一定要計數 —— 靜默退化等於謊報
-            if (suppressed) { _suppressed++; continue; }
+            if (suppressedBy is not null) { Suppress(suppressedBy); continue; }
 
             var line = el is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
 
@@ -887,7 +910,7 @@ public sealed partial class Auditor
                 cell = CellOf(child, el.Name.LocalName == "Grid");
                 if (cellBg!.TryGetValue(cell, out var sb)) childBd = sb;
             }
-            Walk(child, childBd, file, op, suppressed);
+            Walk(child, childBd, file, op, suppressedBy);
             // 兄弟背板畫在容器那一層（容器的累乘透明度）；它自己的 Opacity 已折進 alpha（見 SiblingBackdrop）
             if (overlap && SiblingBackdrop(child, stretches: StretchesChildren(el.Name.LocalName)) is { } backdrop)
                 cellBg![cell] = layout == PanelLayout.Unknown
@@ -1028,8 +1051,13 @@ public sealed partial class Auditor
         {
             // ignore 管「下一個元素連同整個子樹」—— 子樹裡的 Style 定義也算（1.0）。⚠ 0.x 只看緊鄰 <Style> 的註解：
             //   容器上的 ignore 壓得到容器內元素 × Style 鏈的配對，卻壓不到容器 Resources 裡 Style 定義處的配對
-            var styleSuppressed = IsSuppressedByComment(style, file) ||
-                                  style.Ancestors().Any(a => IgnoreStateOf(a, file).Suppressed);
+            //   歸給哪一個註解：與樹走訪一致，是最外層那一個（樹走訪一進入被壓掉的子樹就不再看裡面的註解）。
+            //   自己的註解照舊先讀（無效的要記下來），祖先有壓掉的就歸祖先
+            var ownSuppressedBy = SuppressionOf(style, file);
+            var styleSuppressedBy = style.Ancestors().Reverse()
+                                        .Select(a => IgnoreStateOf(a, file).Reason)
+                                        .FirstOrDefault(r => r is not null)
+                                    ?? ownSuppressedBy;
 
             CountStyleTemplateText(style, file);
 
@@ -1134,7 +1162,7 @@ public sealed partial class Auditor
                 var need = NeedFor(isText, isLarge);
 
                 _pairs++;
-                if (styleSuppressed) { _suppressed++; continue; }
+                if (styleSuppressedBy is not null) { Suppress(styleSuppressedBy); continue; }
                 var (fgOnD, fgOnL) = EffectiveForeground(fg, 1.0, bgr);
                 var (ratioD, colorsD) = Wcag.Measure(fgOnD, bgr.Dark!);
                 var (ratioL, colorsL) = Wcag.Measure(fgOnL, bgr.Light!);

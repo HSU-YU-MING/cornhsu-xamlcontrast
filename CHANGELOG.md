@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Upgrading
+- **Counts can move if your palette comes from separate dark and light XAML dictionaries and a style is
+  defined in only one of them.** An element whose `Style="{StaticResource K}"` is found in one theme
+  only was already unresolved in the other theme; it is now counted as the new reason
+  **`unknown-style-key`** instead of `unknown-palette-key`, and `K` is no longer listed in
+  `summary.unknownKeys` (those are palette keys: dead references, typos, missed palette files). The same
+  shape through `BasedOn` — an inline style, or a shared style, based on a style that only one theme
+  defines — used to be graded in the other theme anyway: the chain lost its base, so the text was paired
+  with whatever background was behind the element, a combination that doesn't exist in that theme. That
+  theme's pairs are now `unknown-style-key` too, so `pairs` and coverage can go down and a `fail` or
+  `warn` that was never real disappears. If such a pair is in your baseline, `--baseline` counts it as
+  paid off; rewrite the baseline with `--write-baseline` to drop it. Baseline keys are unchanged
+  (`keyVersion` stays 1). A base that no theme defines (a library style such as
+  `MahApps.Styles.Button`) is skipped as before.
+
+### Added
+- **Anonymous usage statistics send three more counts** (the collector accepts them from 1.2):
+  `data.symmetry` — `fail` and `warn` pairs by symmetry, `{ "bothLow", "darkFails", "lightFails",
+  "singleTheme" }`, always all four, adding up to `fail` + `warn`; `data.suppressedBy` — pairs
+  suppressed by `xamlcontrast-ignore`, by the first word of the reason: `icon`, `state-only`,
+  `watermark`, `decorative`, or `other` for anything else (only keys above 0; `{}` when nothing was
+  suppressed; adding up to `summary.suppressed`); `data.disabledExempt` — `summary.disabledExempt`.
+  The reason text itself is never sent, and nothing else is added. `--stats-preview` shows the new
+  fields. `data.unresolvedBy` sends `unknown-style-key` under its own name.
+- **Suppression reasons can start with a keyword** — `icon`, `state-only`, `watermark` or `decorative`
+  (`<!-- xamlcontrast-ignore: icon play button -->`). The first word is read up to a space or
+  `,` `，` `:` `：` `;` `；` `—` `–` `(` `（`, in any case, and must match exactly; anything else is `other`.
+  The comment syntax and what it suppresses are unchanged — the keyword only feeds `data.suppressedBy`.
+  A suppressed pair counts under the comment that suppressed it: on a container, the container's.
+- **Unresolved reason `unknown-style-key`** (the reasons are an open set; `docs/report.schema.json`
+  lists it). The demo's ignore comment now starts with `watermark`.
+
 ## 1.1.0 — 2026-10-28
 
 > **⚠️ This release sends anonymous usage statistics by default.** After every audit that reaches a

@@ -56,6 +56,10 @@ internal sealed partial class StyleIndex
         public required string Label;
         /// <summary>鏈上有任何一層定義在只屬於一個主題的字典檔裡 —— 另一個主題下解析到的是別的 Style（或沒有）</summary>
         public bool SideSpecific;
+        /// <summary>鏈上第一個找不到的 BasedOn 鍵（在這個主題、或不分主題時在全域）；整條鏈都找得到是 null。
+        /// 找不到的基底照舊略過（外部函式庫的 MahApps.Styles.Button 之類在哪個主題都找不到）；
+        /// 只有「這個主題找不到、另一個主題找得到」時，元素端那個主題記 unknown-style-key、不評（Auditor.Walk）。</summary>
+        public string? MissingBase;
     }
 
     [GeneratedRegex(@"^\{(Dynamic|Static)Resource\s+(?<k>[\w\.]+)\}$")]
@@ -362,10 +366,12 @@ internal sealed partial class StyleIndex
         if (rec.BasedOn is not null && seen.Add(rec.BasedOn))
         {
             var baseRec = Find(rec.BasedOn, rec.File, side);
-            if (baseRec is not null)
+            if (baseRec is null) merged.MissingBase = rec.BasedOn;
+            else
             {
                 var m = MergeChain(baseRec, seen, label, side);
                 merged.SideSpecific |= m.SideSpecific;
+                merged.MissingBase = m.MissingBase;
                 foreach (var (k, v) in m.Props) merged.Props[k] = v;
                 foreach (var s in m.States)
                 {

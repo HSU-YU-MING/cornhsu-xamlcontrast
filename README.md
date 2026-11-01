@@ -252,7 +252,15 @@ pair as NEW.
 ```xml
 <!-- xamlcontrast-ignore: watermark, intentionally faint -->
 <TextBlock Opacity="0.4" Text="DRAFT" ... />
+<!-- xamlcontrast-ignore: icon play button -->
+<TextBlock Text="▶" ... />
 ```
+
+If one fits, **start the reason with a keyword**: `icon`, `state-only`, `watermark` or `decorative` —
+anything else counts as `other`. Only the first word is read (up to a space or `,` `:` `;` `(` or a
+dash), in any case, and it must be the whole word (`icons` is `other`). It changes nothing about what
+is suppressed; from 1.2 the [anonymous usage statistics](#anonymous-usage-statistics) count suppressed
+pairs per keyword — the reason text itself is never sent.
 
 The reason is **required** — a bare `<!-- xamlcontrast-ignore -->` is invalid and warned about
 (the pair is still reported). The marker has to be exact — lowercase, a colon, the reason on the
@@ -423,6 +431,7 @@ doesn't tell you whether anything can be done about it:
 | `same-brush-pair` | a style sets `Foreground` and `Background` to the *same* brush — the Material template-opacity idiom (the template paints the background at 10–12% opacity as a tint); literally 1:1, not at runtime, and the opacity animation is invisible statically |
 | `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio |
 | `in-style-template` | a text element with its own `Foreground` inside a style's `Template` setter (`<Setter Property="Template"><Setter.Value><ControlTemplate>`) — not graded yet (see Known limitations), counted so the gap shows in coverage |
+| `unknown-style-key` | the palette comes from separate dark and light dictionaries, and the element's style — `Style="{StaticResource K}"`, or a `BasedOn` in its chain — is defined in only one of them, so how the element looks in the other theme is unknown; the value is the style key. Before 1.2 this was counted as `unknown-palette-key` (and a `BasedOn` like this was graded against the background behind the element instead) |
 
 `summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
 (default 50%) exits 3**, because a pass over a fraction of the project is not a pass — the same
@@ -436,7 +445,8 @@ what couldn't be resolved), and the JSON carries the same list in the top-level
 `unresolvedSites` array (`file`, `line`, `reason`, `value`). Unknown keys are additionally named
 with counts (`summary.unknownKeys`, and the top ones on the console) — each one is a dead
 resource reference, a typo, or a palette file detection missed, which makes this a free lint
-even before any contrast math.
+even before any contrast math. Style keys are not palette keys: from 1.2 they are reported as
+`unknown-style-key` and no longer listed in `summary.unknownKeys`.
 
 **Expect the first run to stop at the coverage floor.** How much resolves depends on how the app
 sets its colours. The four validation apps run at 73–96% (measured with 1.0: Kindling 95.8%,
@@ -512,8 +522,12 @@ used for and how long it is kept.
 | `data.counts` | how many pairs are `fail`, `warn`, `ok` and `decorative` |
 | `data.unresolvedBy` | how many pairs are unresolved, per reason (the reasons in the table above) |
 | `data.ratios` | non-decorative pairs counted by their worst ratio in six ranges: < 1.5, 1.5–2, 2–3, 3–4.5, 4.5–7, ≥ 7 |
+| `data.symmetry` | from 1.2: `fail` and `warn` pairs counted by symmetry — `bothLow`, `darkFails`, `lightFails`, `singleTheme` (the four add up to `fail` + `warn`) |
+| `data.suppressedBy` | from 1.2: pairs suppressed by `xamlcontrast-ignore`, counted by the reason's first word — `icon`, `state-only`, `watermark`, `decorative` or `other` ([above](#suppressing-intentional-low-contrast)); only the count, never the reason |
+| `data.disabledExempt` | from 1.2: how many pairs were exempted as disabled controls (`summary.disabledExempt`) |
 
-**What is never sent:** file names or paths, element, style or resource names, colour values, the report,
+**What is never sent:** file names or paths, element, style or resource names, colour values, the text of
+`xamlcontrast-ignore` reasons, the report,
 your config, repository, user or machine names, or anything else from your project. The request carries
 no User-Agent, cookies or custom headers. The collector stores no IP address (Cloudflare, which hosts it,
 sees the connection the way any network provider does), keeps only the date it arrived, and rejects any

@@ -107,6 +107,12 @@ public enum UnresolvedReason
     /// 樹走訪不進 Style，這些從來沒有被評過，也不在任何計數器裡（審查 1.0 最終驗證 S3）。完整稽核屬稽核語意、留到 1.x；
     /// 1.0 先讓它不靜默：計入 unresolved、點名位置與那個 Foreground。</summary>
     InStyleTemplate,
+    /// <summary>元素引用的 Style（<c>Style="{StaticResource K}"</c>，或行內 Style 的 BasedOn 鏈上的 K）在某一個主題找不到、
+    /// 在另一個主題找得到 —— 色盤來自分開的深／淺字典、K 只定義在其中一個主題的字典裡。那個主題下這個元素長什麼樣，
+    /// 工具不知道（StaticResource 在執行期會丟例外、DynamicResource 退回預設樣式），不評、點名 K。
+    /// ⚠ 1.2 之前算成 unknown-palette-key（K 是 Style 的鍵，不是色票的鍵），還混進 summary.unknownKeys；
+    ///   BasedOn 的那一種甚至不計：缺基底的鏈照樣評，字配到祖先的底 —— 一個編出來的比值。</summary>
+    UnknownStyleKey,
 }
 
 /// <summary>一筆無法解析的配對「在哪裡、為什麼、卡在哪個值」。
@@ -137,6 +143,10 @@ public sealed class AuditResult
     public required List<string> ParseErrors { get; init; }
     /// <summary>ignore 註解壓掉的數量 —— 壓掉不進 findings，但一定要計數</summary>
     public int Suppressed { get; init; }
+    /// <summary>壓掉的配對依「壓掉它的那個註解」的理由原文計數（總和 = <see cref="Suppressed"/>；requireReason 關掉、
+    /// 沒寫理由的是空字串）。只給匿名統計分類用（<see cref="UsageStats.SuppressedBy"/> 只取第一個詞、對到固定的五個鍵）——
+    /// 理由原文不進報告、也絕對不送出去。</summary>
+    internal IReadOnlyDictionary<string, int> SuppressedReasons { get; init; } = new Dictionary<string, int>();
     /// <summary>沒附理由的 ignore（無效，不壓）—— 要警告</summary>
     public required List<string> InvalidIgnores { get; init; }
     /// <summary>config 的 layout 宣告了、但這次稽核走過的元素沒有一個叫這個名字的（多半是拼錯或大小寫不對）——

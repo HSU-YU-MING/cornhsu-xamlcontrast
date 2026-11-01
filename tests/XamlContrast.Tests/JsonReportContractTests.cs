@@ -693,7 +693,8 @@ public class JsonReportContractTests
                 .Select(Report.SymmetryLabel));
         Assert.Equal(
             ["no-ancestor-background", "bound-or-gradient", "unknown-palette-key",
-             "translucent-uncomposited", "same-brush-pair", "over-sibling-content", "in-style-template"],
+             "translucent-uncomposited", "same-brush-pair", "over-sibling-content", "in-style-template",
+             "unknown-style-key"],
             Enum.GetValues<UnresolvedReason>().Select(Report.ReasonLabel));
     }
 

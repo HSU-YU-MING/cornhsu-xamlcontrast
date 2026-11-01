@@ -113,6 +113,6 @@
         "bg": { "type": "string", "pattern": "^#[0-9A-F]{6}$", "description": "The backdrop colour on screen, #RRGGBB in upper case." }
       }
     },
-    "reason": { "type": "string", "description": "Why a pair could not be resolved. An open set: a 1.x release may add a reason (a newly named blind spot), so consumers must accept values they do not know; existing values keep their spelling. Current values: `no-ancestor-background`, `bound-or-gradient`, `unknown-palette-key`, `translucent-uncomposited`, `same-brush-pair`, `over-sibling-content`, `in-style-template`." }
+    "reason": { "type": "string", "description": "Why a pair could not be resolved. An open set: a 1.x release may add a reason (a newly named blind spot), so consumers must accept values they do not know; existing values keep their spelling. Current values: `no-ancestor-background`, `bound-or-gradient`, `unknown-palette-key`, `translucent-uncomposited`, `same-brush-pair`, `over-sibling-content`, `in-style-template`, `unknown-style-key` (1.2: a style key — `Style=\"{StaticResource K}\"`, or a `BasedOn` in its chain — defined in one theme's dictionary only; before 1.2 counted as `unknown-palette-key`)." }
   }
 }
