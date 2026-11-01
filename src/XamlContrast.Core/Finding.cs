@@ -115,6 +115,9 @@ public enum UnresolvedReason
     UnknownStyleKey,
 }
 
+/// <summary>XAML 裡以資源鍵 Key 用到的轉換器，與它的分析結果。</summary>
+public sealed record ConverterUse(string Key, ConverterInfo Info);
+
 /// <summary>一筆無法解析的配對「在哪裡、為什麼、卡在哪個值」。
 /// 只有原因分類還不夠 —— 使用者知道「57 組找不到底色」,但不知道在哪幾個檔;
 /// unknown-key 更是只要點名鍵就是免費的死引用/打字錯誤偵測器。</summary>
@@ -152,6 +155,11 @@ public sealed class AuditResult
     /// <summary>config 的 layout 宣告了、但這次稽核走過的元素沒有一個叫這個名字的（多半是拼錯或大小寫不對）——
     /// 宣告靜默失效，要點名（審查 1.0 B8）。不是錯誤：那個容器可能只是不在這次的掃描範圍裡。</summary>
     public IReadOnlyList<string> UnmatchedLayoutNames { get; init; } = [];
+    /// <summary>經轉換器的候選色評出來的配對數（1.2，config 的 converters.constantBrushes；含壓掉的）。一個候選色一組 ——
+    /// 跟觸發態一樣，每個狀態各算一組。沒打開是 0。</summary>
+    public int ConverterPairs { get; init; }
+    /// <summary>這次稽核拿來當顏色的轉換器（資源鍵 → 分析結果）：哪些是固定顏色、哪些不是、為什麼。沒打開是 null。</summary>
+    public IReadOnlyList<ConverterUse>? ConvertersUsed { get; init; }
     /// <summary>本次生效的設定（分級門檻等；預設值 = 沒有 config 檔）</summary>
     public ToolConfig Config { get; init; } = new();
 

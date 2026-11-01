@@ -42,6 +42,9 @@ public sealed class ToolConfig
     public IgnoreSection Ignore { get; init; } = new();
     /// <summary>匿名使用統計（1.1，協定在 stats-collector 的 PROTOCOL.md）：share 寫 false 就不送；projectId 是使用者自己決定要不要加的專案 ID。</summary>
     public StatsSection Stats { get; init; } = new();
+    /// <summary>轉換器回傳的固定顏色（1.2）：constantBrushes 打開時讀 *.cs 找 IValueConverter，每條回傳路徑都是固定 Brush 的，
+    /// 每個顏色各評一次（ConverterIndex）。⚠ 預設關：讀 *.cs 找轉換器是擴大稽核範圍（凍結面第 9 面），改預設要等 2.0。</summary>
+    public ConvertersSection Converters { get; init; } = new();
 
     /// <summary>載入來源路徑；null = 沒有 config 檔（純預設值）</summary>
     [JsonIgnore] public string? SourcePath { get; private set; }
@@ -78,6 +81,11 @@ public sealed class ToolConfig
         public string[] Overlap { get; init; } = [];
         /// <summary>子元素排開的容器（兄弟不是彼此的底）。</summary>
         public string[] SideBySide { get; init; } = [];
+    }
+
+    public sealed class ConvertersSection
+    {
+        public bool ConstantBrushes { get; init; }
     }
 
     public sealed class IgnoreSection
@@ -150,6 +158,7 @@ public sealed class ToolConfig
         if (cfg.Ignore is null) throw new ConfigException("ignore must be an object, got null");
         if (cfg.Layout is null) throw new ConfigException("layout must be an object, got null");
         if (cfg.Stats is null) throw new ConfigException("stats must be an object, got null");
+        if (cfg.Converters is null) throw new ConfigException("converters must be an object, got null");
         if (cfg.Stats.ProjectId is { } projectId && ProjectIdProblem(projectId) is { } problem)
             throw new ConfigException($"stats.projectId {problem} — it is your own anonymous project ID (or leave it out)");
         RequireNames(cfg.Layout.Overlap, "layout.overlap");

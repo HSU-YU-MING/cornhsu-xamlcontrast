@@ -126,6 +126,7 @@ public class JsonReportContractTests
             "findings[].threshold:Number",
             "schemaVersion:Number",
             "summary.configLoaded:Boolean",
+            "summary.converterPairs:Number",
             "summary.counts.decorative:Number",
             "summary.counts.fail:Number",
             "summary.counts.ok:Number",
