@@ -260,4 +260,34 @@ public class RegressionTests
         Assert.Contains("\"unresolvedBy\"", json);
         Assert.Contains("\"bound-or-gradient\": 1", json);
     }
+    // ── 維護者回報（1.2 調查）：「樣式裡的字色碰上按下時才換的底色，配錯了底色」──
+    //    自己寫的最小重現（Style 的 Setter 設字色、IsPressed 觸發換底色）配出來的就是 WPF 在「只有按下」時的組合，沒有重現出錯配。
+    //    鄰近的一種形狀看起來像假警報、其實不是：IsMouseOver 換字色、IsPressed 只換底色。滑鼠按下時 hover 也成立（白字配深底），
+    //    但**鍵盤按下**（焦點在按鈕上按住空白鍵）時 IsMouseOver 不成立 —— 平常的深字配按下的深底是執行期真的會出現的畫面。
+    //    所以這一組照報（不能藏）；滑鼠按下的 hover ∧ pressed 組合不評（觸發態不組合，README 已知限制寫明）。
+    //    要改這個行為（例如加評組合狀態）先確認：只能「多評」，不能把鍵盤那一組拿掉
+    [Fact]
+    public void PressedBackgroundIsPairedWithTheForegroundWithoutHover()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Window.Resources>
+                <Style x:Key="B" TargetType="Button">
+                  <Setter Property="Background" Value="#F0F0F0"/>
+                  <Setter Property="Foreground" Value="#202020"/>
+                  <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter Property="Foreground" Value="#FFFFFF"/><Setter Property="Background" Value="#505050"/></Trigger>
+                    <Trigger Property="IsPressed" Value="True"><Setter Property="Background" Value="#303030"/></Trigger>
+                  </Style.Triggers>
+                </Style>
+              </Window.Resources>
+              <Button Style="{StaticResource B}" Content="x"/>
+            </Window>
+            """);
+        var r = fx.Run();
+        Assert.Equal(["#202020 on #F0F0F0", "#FFFFFF on #505050", "#202020 on #303030"],
+            r.Findings.Select(f => $"{f.Fg} on {f.Bg}"));
+        Assert.Equal(Category.Fail, r.Findings[2].Category); // 鍵盤按下：1.23:1
+    }
 }

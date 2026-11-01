@@ -25,7 +25,10 @@ public enum ColorKind
 /// 半透明「色票」（palette 鍵的值是 8 碼）深淺各帶自己的 alpha。
 /// Raw：背景是 Binding／漸層／兄弟圖片時的原始值 —— 它一路往下傳成子元素的底，
 /// 子元素卡在它上面時 unresolved[].value 要點名它，不是點名沒問題的字色。
-/// Composite：合成出來的底的描述（「A over B」）—— 與色票鍵 Key 分開，Key 永遠是真的資源鍵。</summary>
+/// Composite：合成出來的底的描述（「A over B」）—— 與色票鍵 Key 分開，Key 永遠是真的資源鍵。
+/// Candidates（1.2，config 的 converters.constantBrushes）：Binding 經過一個「每條回傳路徑都是固定 Brush」的轉換器時，那幾個顏色。
+/// Kind 照舊是 Other（看不懂）—— 只有評分處（Auditor.BackdropVariants）會把它展開成每個候選各評一次；
+/// PaintedOver／PaintedInGroup 記它畫上去時底下那一層，展開時把候選色重新畫上去（半透明、Transparent 的候選才算得對）。</summary>
 public sealed record Resolved(
     ColorKind Kind,
     string? Dark = null,
@@ -36,7 +39,10 @@ public sealed record Resolved(
     double AlphaLight = 0,
     string? RgbLight = null,
     string? Raw = null,
-    string? Composite = null);
+    string? Composite = null,
+    IReadOnlyList<ConverterCandidate>? Candidates = null,
+    Resolved? PaintedOver = null,
+    bool PaintedInGroup = false);
 
 /// <summary>把 XAML 屬性值解析成顏色（或「工具知道自己不知道」的標記）。</summary>
 public static partial class ColorResolver

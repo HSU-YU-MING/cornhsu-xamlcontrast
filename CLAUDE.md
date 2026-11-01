@@ -251,7 +251,10 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   那些檔用單一主題視圖評（對稱標 single-theme；`Finding.Theme` 記是哪個主題，另一個主題的比值經 `Finding.RatioIn` 是 null ——
   ⚠ `RatioDark`／`RatioLight` 內部兩欄都填那個主題的值，對外輸出一律走 `RatioIn`，不然會印出不存在的主題的比值）；`StyleIndex.Build(sideOf)` 讓同 key 的 Style 在使用處依主題
   各自解析，兩個主題解析到不同的鏈時各評各的（`@dark`／`@light`），只有一個主題解析得到時另一側記 unknown-palette-key。
-  拿 Dark 的 Style 配淺色色票是執行期不存在的組合。C#／單一主題模式不建這張表——Kindling 的 `DarkTheme.xaml`
+  拿 Dark 的 Style 配淺色色票是執行期不存在的組合。另一側記的原因是 `unknown-style-key`（1.2；之前是 unknown-palette-key，
+  還混進 `summary.unknownKeys`）。**BasedOn 也一樣**（1.2）：鏈上的基底「這個主題找不到、另一個主題找得到」時那一側不評
+  （`StyleIndex.Merged.MissingBase`、`Auditor.OnlyInOtherTheme`）—— 之前缺基底的鏈照樣評，字配到祖先的底，是編出來的比值。
+  兩個主題都找不到的基底（函式庫樣式）照舊略過那一層，不然用函式庫的專案覆蓋率會整片掉。C#／單一主題模式不建這張表——Kindling 的 `DarkTheme.xaml`
   是 C# 色盤的靜態複本，兩個主題共用。
 - **Application 含子類別**（`PaletteDetector.RootKindOf`）：根元素名稱以 Application 結尾（Prism 的 `PrismApplication`），
   或根元素底下有 `<…Application.Resources>`。只認 `Application` 的話，Prism 的 App.xaml 被當成畫面、全域鍵全變成區域鍵。
@@ -267,9 +270,27 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   Style 定義處遇到透明／半透明的**底**：有元素以 `Style=` 用到的（`StyleIndex.IsUsedByAnElement`，含 BasedOn 基底）與行內
   Style 交給使用處評、不另外計；使用處評不到的（隱含樣式、只從 code-behind／ItemContainerStyle 套用或沒用到的）記
   unresolved（translucent-uncomposited），不是 skipped——記 skipped 等於整組消失，兩邊都記則同一組算兩次。
+- **圖示字型是圖形，不是裝飾**（1.2，`IconFonts.cs`、`Auditor.ApplyIconFont`）：用圖示字型的文字元素 isText = false、門檻固定 3:1
+  （WCAG 1.4.11，不跟 config 的 thresholds 走）。⚠ 不要歸成 decorative —— `NeedFor` 對非文字元素給 0（不設門檻），
+  1.2:1 的圖示會整個消失。字型順序：本地 > Style（含觸發 Setter）> 繼承；進模板（`*Template`）就重設成不知道。
+  後備清單要**每一個**都是圖示字型才算；Binding、找不到的資源、資源裡再引用資源都當文字（往嚴格那邊錯）。
 - **元素分類用「後綴比對」不是全名相等**（`Auditor.IsNonTextElement`）：MahApps 的
   `MetroProgressBar` 對不上 `ProgressBar`，進度條填色會被當文字用 4.5 要求。
   兩邊都中時取最長的後綴（名字愈長愈具體）。
+
+### 轉換器的固定顏色（1.2，`ConverterIndex.cs`、config 的 `converters.constantBrushes`，預設關）
+
+- **預設關是凍結規則，不是保守**：讀 `*.cs` 找轉換器是擴大稽核範圍（第 9 面），改成預設開要等 2.0。關的時候 `_converters` 是 null，
+  `ResolveColour` 等於 `ColorResolver.Resolve`，行為與 1.1 完全相同（測試釘住）。
+- **不猜**：`Convert` 的每一條回傳路徑都要是固定 Brush 字面值；任何一條不是，整個轉換器照舊 bound-or-gradient。條件不評估 ——
+  每個候選各評一次（一個狀態一組，跟觸發態一樣）。C# 是文字分析（`Mask` 先遮掉註解與字串內容），看不懂的寫法一律「不是固定的」。
+- **候選色怎麼評**：`Resolved` 照舊是 Other，另外帶 `Candidates` 與畫上去時底下那一層（`PaintedOver`／`PaintedInGroup`）。
+  評分處（`BackdropVariants`）在底的結構裡找它，把每個候選畫回那一層再 `Screen` —— 半透明、Transparent、Opacity 群組、兩個主題都走原本的算法。
+  會丟資訊的地方拿掉候選（`Lost`）：半透明的東西疊在它上面（`PaintOver` 只留下看不懂的那一層）、兩個主題的底不同（`BothThemes`）。
+- **字與底都來自轉換器 → 不展開**：全部組合裡有執行期不存在的（同一個 Binding 的 on 字配 off 底），報出來就是編造。
+  字色的候選只在底是「一個解得出來的不透明顏色」時展開，否則照舊記字色看不懂（一筆，不是每個候選一筆）。
+- 鍵：底／字寫成 `資源鍵→欄位名`（`ActiveBrush→On`），欄位名而不是色碼 —— C# 裡調暗顏色，鍵不變、worst 抓得到惡化。
+- `summary.converterPairs`（含在 pairs 裡）讓「覆蓋率變高」說得出是哪裡來的。
 
 ### baseline 的鍵
 
@@ -333,6 +354,11 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - Action 的 `share-stats: false` 在 Run audit 的 script 裡 `export`，**不寫進 step 的 `env:`** —— step 的 env 會蓋掉呼叫端 workflow／job 層的
   同名變數，`true` 時呼叫端的 `XAMLCONTRAST_SHARE_STATS=false` 就失效了。
 - `stats.projectId` 逐字檢查，不用正則的 `$`（它在結尾的換行前也成立）。
+- **1.2 的 data 多三欄**（收集站 2026-10-31 起收）：`symmetry`（fail／warn 依對稱分四類，四個鍵都送，加總 = fail + warn）、
+  `suppressedBy`（ignore 理由的第一個詞對到 `icon`／`state-only`／`watermark`／`decorative`，其他 `other`；只列 > 0，加總 = suppressed）、
+  `disabledExempt`。兩個加總都有測試釘住。理由原文只存在 `AuditResult.SuppressedReasons`（internal，記憶體裡）給
+  `UsageStats.SuppressionKind` 分類 —— **不進任何報告、不送**。一組配對歸給「壓掉它的那個註解」：樹走訪一進入被壓掉的子樹就不再看
+  裡面的註解，所以是最外層那一個；`WalkStyles` 照這個規則取（祖先優先於 Style 自己的註解）。
 
 ### 守門腳本自身
 

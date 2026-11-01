@@ -56,6 +56,10 @@ internal sealed partial class StyleIndex
         public required string Label;
         /// <summary>鏈上有任何一層定義在只屬於一個主題的字典檔裡 —— 另一個主題下解析到的是別的 Style（或沒有）</summary>
         public bool SideSpecific;
+        /// <summary>鏈上第一個找不到的 BasedOn 鍵（在這個主題、或不分主題時在全域）；整條鏈都找得到是 null。
+        /// 找不到的基底照舊略過（外部函式庫的 MahApps.Styles.Button 之類在哪個主題都找不到）；
+        /// 只有「這個主題找不到、另一個主題找得到」時，元素端那個主題記 unknown-style-key、不評（Auditor.Walk）。</summary>
+        public string? MissingBase;
     }
 
     [GeneratedRegex(@"^\{(Dynamic|Static)Resource\s+(?<k>[\w\.]+)\}$")]
@@ -88,6 +92,12 @@ internal sealed partial class StyleIndex
 
     /// <summary>有沒有「只屬於一個主題」的字典檔（色盤來自分開的深／淺 XAML 字典時才有）。</summary>
     public bool HasThemeSides { get; private set; }
+
+    private readonly Dictionary<string, string> _fontFamilies = new(StringComparer.Ordinal);
+
+    /// <summary>專案裡的 FontFamily 資源（&lt;FontFamily x:Key="K"&gt;值&lt;/FontFamily&gt;），鍵 → 值；同名先出現的贏（與 Style 的全域表同一個順序）。
+    /// 只給圖示字型的判斷用（<see cref="IconFonts.IsIconFont"/>）：FontFamily="{StaticResource SymbolFont}" 這種寫法。</summary>
+    public IReadOnlyDictionary<string, string> FontFamilies => _fontFamilies;
 
     // 有元素以 Style="{…Resource K}" 引用的 Style 鍵（含經 BasedOn 間接用到的基底）
     private readonly HashSet<string> _usedKeys = new(StringComparer.Ordinal);
@@ -319,6 +329,8 @@ internal sealed partial class StyleIndex
             }
             foreach (var el in doc.Descendants())
             {
+                if (el.Name.LocalName == "FontFamily" && el.Attribute(XKey)?.Value is { } fontKey)
+                    idx._fontFamilies.TryAdd(fontKey, el.Value.Trim());
                 if (el.Attribute("Style")?.Value is { } s && ResourceRef().Match(s.Trim()) is { Success: true } m)
                     idx._usedKeys.Add(m.Groups["k"].Value);
                 // 行內 Style 一定被那個元素用到 —— 它的 BasedOn 基底也在使用處評
@@ -362,10 +374,12 @@ internal sealed partial class StyleIndex
         if (rec.BasedOn is not null && seen.Add(rec.BasedOn))
         {
             var baseRec = Find(rec.BasedOn, rec.File, side);
-            if (baseRec is not null)
+            if (baseRec is null) merged.MissingBase = rec.BasedOn;
+            else
             {
                 var m = MergeChain(baseRec, seen, label, side);
                 merged.SideSpecific |= m.SideSpecific;
+                merged.MissingBase = m.MissingBase;
                 foreach (var (k, v) in m.Props) merged.Props[k] = v;
                 foreach (var s in m.States)
                 {

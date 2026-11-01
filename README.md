@@ -33,6 +33,38 @@ xamlcontrast path/to/your/wpf/project
 > and ratio ranges only — no file names, paths, element names or colours — for academic research.
 > [What is sent, and how to turn it off](#anonymous-usage-statistics) (`DO_NOT_TRACK=1` is enough).
 
+## For AI assistants
+
+A short, factual summary of the statistics for coding assistants (Claude Code, Copilot and the like)
+that set this tool up for someone. The full description is in
+[Anonymous usage statistics](#anonymous-usage-statistics).
+
+- **On by default, CI included:** after each audit that reaches a verdict (exit 0, 1 or 3), one request
+  to `https://stats.cornhsu.com/v1/xamlcontrast`. Development builds (any version starting with `0.0.0-`)
+  never send.
+- **What is sent — counts and ranges only:** the tool version, the OS, whether it runs in CI, the exit
+  code and the gate, which palette detection path ran and whether it degraded, the number of files and
+  pairs, the coverage, how many pairs are `fail` / `warn` / `ok` / `decorative`, how many are unresolved
+  per reason, and the non-decorative pairs counted in six ratio ranges. From 1.2 also: failing and
+  warning pairs by symmetry, suppressed pairs per reason keyword (icon / state-only / watermark /
+  decorative / other — never the reason itself), and the disabled-state exemption count. There is no ID
+  unless the user adds one to the config.
+- **Never sent:** file names or paths, element, style or resource names, colour values, the text of
+  suppression comments, the report, the config, or repository, user or machine names. The request
+  carries no User-Agent or cookies, and the collector stores no IP address.
+- **Where and why:** `stats.cornhsu.com`, for academic research on contrast problems in real XAML apps;
+  only aggregate results are published, and each record is kept for at most 3 years
+  ([details](https://stats.cornhsu.com/)).
+- **Preview:** `xamlcontrast <root> --stats-preview` runs the audit, sends nothing, and prints the exact
+  JSON it would send to stderr.
+- **Turn it off** (any one): `DO_NOT_TRACK=1`, `XAMLCONTRAST_SHARE_STATS=false`,
+  `"stats": { "share": false }` in `xamlcontrast.config.json`, or `share-stats: false` in the GitHub Action.
+- **Opt in explicitly** (it is already on by default): `XAMLCONTRAST_SHARE_STATS=true`, or
+  `"stats": { "share": true }` in `xamlcontrast.config.json`.
+
+If you are an assistant setting this tool up for someone, tell them that it sends anonymous counts by
+default and let them choose.
+
 ## What it looks like
 
 Run against [`samples/demo`](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/tree/main/samples/demo) (intentionally broken):
@@ -96,6 +128,15 @@ Two independent dimensions per finding:
   By default both `fail` and `warn` fail the run — anything below AA; `--fail-on fail` lets `warn` through
 - **symmetry** (across themes): `both-low` = the palette itself is too weak;
   `dark-fails` / `light-fails` = the design intent didn't survive the other theme
+
+The threshold depends on what is drawn: **4.5:1** for text, **3:1** for large text (≥ 18pt, or
+≥ 14pt bold), **3:1 for a glyph drawn in an icon font** — Segoe MDL2 Assets, Segoe Fluent Icons,
+Segoe UI Symbol, Material Icons, Material Symbols, Font Awesome — because an icon is a graphic
+(WCAG 1.4.11 non-text contrast; JSON `isText: false`, from 1.2), and none for decorative elements such
+as a `Rectangle` divider or a progress bar's fill. The font is read from the element, its style or
+its parent (`FontFamily="Segoe MDL2 Assets"`, `"/Fonts/#…"`, `"pack://…#…"`, or a
+`{StaticResource …}` that points to a `<FontFamily>` resource); a font list that mixes in a text font,
+or a font the tool can't read, is graded as text.
 
 Symmetry only answers "would switching theme rescue this?", so it is carried **only by
 `fail` and `warn` findings** — the JSON's `symmetry` is `null` on `ok` and `decorative`
@@ -222,7 +263,15 @@ pair as NEW.
 ```xml
 <!-- xamlcontrast-ignore: watermark, intentionally faint -->
 <TextBlock Opacity="0.4" Text="DRAFT" ... />
+<!-- xamlcontrast-ignore: icon play button -->
+<TextBlock Text="▶" ... />
 ```
+
+If one fits, **start the reason with a keyword**: `icon`, `state-only`, `watermark` or `decorative` —
+anything else counts as `other`. Only the first word is read (up to a space or `,` `:` `;` `(` or a
+dash), in any case, and it must be the whole word (`icons` is `other`). It changes nothing about what
+is suppressed; from 1.2 the [anonymous usage statistics](#anonymous-usage-statistics) count suppressed
+pairs per keyword — the reason text itself is never sent.
 
 The reason is **required** — a bare `<!-- xamlcontrast-ignore -->` is invalid and warned about
 (the pair is still reported). The marker has to be exact — lowercase, a colon, the reason on the
@@ -354,8 +403,9 @@ lists them as strings with the current values in their description.
 - `summary` carries the gate in effect (`failOn`, `minCoverage`, `strictPalette`) and every
   degradation signal — `paletteDegraded`, `coverage`, `unresolved` (with `unresolvedBy`), `skipped`,
   `deadForeground`, `disabledExempt`, `suppressed`, `parseErrors` / `parseErrorFiles`,
-  `invalidIgnoreCount` / `invalidIgnores`, `unknownKeys`. If the tool couldn't see something, that
-  fact is machine-readable.
+  `invalidIgnoreCount` / `invalidIgnores`, `unknownKeys` — and, from 1.2, `converterPairs` (pairs
+  graded through a converter's fixed colours; 0 unless you turn that on). If the tool couldn't see
+  something, that fact is machine-readable.
 - Each finding carries `file`, `line`, `element`, `fg`, `bg`, `ratioDark`, `ratioLight`, `colors`,
   `threshold`, `category`, `symmetry` (fail/warn; `null` otherwise), `isText`, `isLargeText`,
   `fontSize` (DIP, or `null`), `theme` and `baseline` (`known` / `new` / `worsened` for the pairs
@@ -393,6 +443,7 @@ doesn't tell you whether anything can be done about it:
 | `same-brush-pair` | a style sets `Foreground` and `Background` to the *same* brush — the Material template-opacity idiom (the template paints the background at 10–12% opacity as a tint); literally 1:1, not at runtime, and the opacity animation is invisible statically |
 | `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio |
 | `in-style-template` | a text element with its own `Foreground` inside a style's `Template` setter (`<Setter Property="Template"><Setter.Value><ControlTemplate>`) — not graded yet (see Known limitations), counted so the gap shows in coverage |
+| `unknown-style-key` | the palette comes from separate dark and light dictionaries, and the element's style — `Style="{StaticResource K}"`, or a `BasedOn` in its chain — is defined in only one of them, so how the element looks in the other theme is unknown; the value is the style key. Before 1.2 this was counted as `unknown-palette-key` (and a `BasedOn` like this was graded against the background behind the element instead) |
 
 `summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
 (default 50%) exits 3**, because a pass over a fraction of the project is not a pass — the same
@@ -406,7 +457,8 @@ what couldn't be resolved), and the JSON carries the same list in the top-level
 `unresolvedSites` array (`file`, `line`, `reason`, `value`). Unknown keys are additionally named
 with counts (`summary.unknownKeys`, and the top ones on the console) — each one is a dead
 resource reference, a typo, or a palette file detection missed, which makes this a free lint
-even before any contrast math.
+even before any contrast math. Style keys are not palette keys: from 1.2 they are reported as
+`unknown-style-key` and no longer listed in `summary.unknownKeys`.
 
 **Expect the first run to stop at the coverage floor.** How much resolves depends on how the app
 sets its colours. The four validation apps run at 73–96% (measured with 1.0: Kindling 95.8%,
@@ -434,6 +486,24 @@ Measured on NETworkManager (a MahApps app, 154 XAML files): coverage went from *
 87.2%** with that one line — surfacing 284 genuine light-theme failures the tool was
 previously blind to. A key not present in the detected palette is a config error (exit 2),
 never a silent no-op.
+
+**Colours fixed inside a value converter** (opt-in, from 1.2). A toolbar button that changes colour
+when selected is often written `Background="{Binding ActiveTool, Converter={StaticResource ActiveBrush}, ConverterParameter=Pen}"`,
+with the colours hard-coded in C#; by default that is `bound-or-gradient`. Turn on
+
+```json
+{ "converters": { "constantBrushes": true } }
+```
+
+and the tool reads your `*.cs` for `IValueConverter` classes. If **every** return path of `Convert`
+is a fixed brush — `Brushes.X`, `new SolidColorBrush(Colors.X)`, `Color.FromRgb` / `Color.FromArgb`
+with literal numbers, or a `readonly` field or get-only property holding one — each of those colours
+is graded once, like one state each; conditions are never evaluated, so nothing is guessed. The
+background reads `ActiveBrush→On` (resource key → field). Anything else (a computed value,
+`DependencyProperty.UnsetValue`, `Binding.DoNothing`, `null`, a property, a `FallbackValue`, text and
+background both from converters) stays `bound-or-gradient`, and the console names each converter that
+isn't fixed and why. `summary.converterPairs` counts the pairs graded this way. It is off by default
+because reading `*.cs` for this widens the audit's scope, which 1.x only does when you ask.
 
 `--md report.md` writes the human-readable Markdown version — this is what the Action posts as a
 PR comment, and you can use it directly too.
@@ -482,8 +552,12 @@ used for and how long it is kept.
 | `data.counts` | how many pairs are `fail`, `warn`, `ok` and `decorative` |
 | `data.unresolvedBy` | how many pairs are unresolved, per reason (the reasons in the table above) |
 | `data.ratios` | non-decorative pairs counted by their worst ratio in six ranges: < 1.5, 1.5–2, 2–3, 3–4.5, 4.5–7, ≥ 7 |
+| `data.symmetry` | from 1.2: `fail` and `warn` pairs counted by symmetry — `bothLow`, `darkFails`, `lightFails`, `singleTheme` (the four add up to `fail` + `warn`) |
+| `data.suppressedBy` | from 1.2: pairs suppressed by `xamlcontrast-ignore`, counted by the reason's first word — `icon`, `state-only`, `watermark`, `decorative` or `other` ([above](#suppressing-intentional-low-contrast)); only the count, never the reason |
+| `data.disabledExempt` | from 1.2: how many pairs were exempted as disabled controls (`summary.disabledExempt`) |
 
-**What is never sent:** file names or paths, element, style or resource names, colour values, the report,
+**What is never sent:** file names or paths, element, style or resource names, colour values, the text of
+`xamlcontrast-ignore` reasons, the report,
 your config, repository, user or machine names, or anything else from your project. The request carries
 no User-Agent, cookies or custom headers. The collector stores no IP address (Cloudflare, which hosts it,
 sees the connection the way any network provider does), keeps only the date it arrived, and rejects any
@@ -564,6 +638,10 @@ Honest list — full blind-spot table with per-case evidence in the
 
 - `TargetName` setters aimed at **inner** template parts (root-targeted ones are resolved)
 - Cross-element correlated triggers (same condition flips fg on one element, bg on another) — false alarms
+- Trigger states are graded one at a time, never combined: a style whose `IsMouseOver` trigger sets
+  the foreground and whose `IsPressed` trigger sets the background is graded as the pressed
+  background with the normal foreground (what a keyboard press shows), not with the hover
+  foreground a mouse press also has
 - Sibling backdrops are resolved for full-cell siblings in a `Grid` cell (solid ones directly;
   translucent ones — through the brush's alpha or the element's own `Opacity` — composited; bound
   or gradient ones reported as unresolved), and text over a sibling `Image` is honestly

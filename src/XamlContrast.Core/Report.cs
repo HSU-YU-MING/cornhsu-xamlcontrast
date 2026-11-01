@@ -54,6 +54,7 @@ public static partial class Report
         UnresolvedReason.SameBrushPair => "same-brush-pair",
         UnresolvedReason.OverSiblingContent => "over-sibling-content",
         UnresolvedReason.InStyleTemplate => "in-style-template",
+        UnresolvedReason.UnknownStyleKey => "unknown-style-key",
         _ => "translucent-uncomposited",
     };
 
@@ -228,6 +229,9 @@ public static partial class Report
                 skipped = r.Skipped,
                 deadForeground = r.DeadForeground,
                 disabledExempt = r.DisabledExempt,
+                // 1.2：經轉換器的候選色評出來的配對數（config 的 converters.constantBrushes；沒打開是 0）。
+                // 讓「覆蓋率變高了」看得出來是哪裡來的：這些配對以前是 bound-or-gradient
+                converterPairs = r.ConverterPairs,
                 parseErrors = r.ParseErrors.Count,
                 parseErrorFiles = r.ParseErrors,
                 suppressed = r.Suppressed,
@@ -409,6 +413,15 @@ public static partial class Report
             SafeLine(sb, string.Create(inv, $"suppressed {r.Suppressed} pair(s) via xamlcontrast-ignore comments"));
         foreach (var w in r.InvalidIgnores)
             SafeLine(sb, $"!! {w}"); // 沒理由的 ignore 是無效的，且要讓人看見
+        // 1.2：converters.constantBrushes 打開時，說清楚哪些配對是經轉換器的固定顏色評的、哪些轉換器不是固定顏色（照舊看不懂）
+        if (r.ConvertersUsed is { } used)
+        {
+            var fixedOnes = used.Where(u => u.Info.Candidates is not null).ToList();
+            var which = fixedOnes.Count > 0 ? " (" + string.Join(", ", fixedOnes.Select(u => string.Create(inv, $"{u.Key}: {u.Info.Candidates!.Count}"))) + ")" : "";
+            SafeLine(sb, string.Create(inv, $"converter colours: {r.ConverterPairs} pair(s) graded once per fixed colour of {fixedOnes.Count} converter(s){which}"));
+            foreach (var u in used.Where(u => u.Info.Candidates is null))
+                SafeLine(sb, $"  not fixed, still unresolved: {u.Key} ({u.Info.Name}, {u.Info.File}:{u.Info.Line}) — {u.Info.NotFixedBecause}");
+        }
         sb.AppendLine();
 
         if (r.Detection.Palette.Count > 0 && r.Detection.Palette.IsSingleTheme)
@@ -444,6 +457,7 @@ public static partial class Report
             {
                 var tag = string.Create(inv, $"need {f.Need}");
                 if (f.Large) tag += $" large-text {f.Size}";
+                else if (!f.IsText && f.Need > 0) tag += " non-text"; // 圖示字型（1.2）：WCAG 1.4.11 的 3:1
                 else if (f.Size.Length > 0) tag += $" {f.Size}";
                 SafeLine(sb, string.Create(inv,
                     $"{f.File + ":" + f.Line,-34} {f.Element,-24} fg={f.Fg,-26} bg={f.Bg,-20} dark={RatioCell(f, ThemeSide.Dark, 6)} light={RatioCell(f, ThemeSide.Light, 6)}  [{SymmetryLabel(f.Symmetry)}] {tag}"));
@@ -528,6 +542,7 @@ public static partial class Report
             {
                 var need = string.Create(inv, $"{f.Need}");
                 if (f.Large) need += " (large)";
+                else if (!f.IsText && f.Need > 0) need += " (non-text)";
                 sb.AppendLine(string.Create(inv,
                     // Element 也是 code span：標籤含 XAML 的鍵，鍵裡的 [文字](網址)、@帳號 在 PR 留言裡會被渲染
                     $"| {Code($"{f.File}:{f.Line}")} | {Code(f.Element)} | {Code(f.Fg)} → {Code(f.Bg)} | " +

@@ -3,6 +3,84 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Upgrading
+- **Counts can move if your palette comes from separate dark and light XAML dictionaries and a style is
+  defined in only one of them.** An element whose `Style="{StaticResource K}"` is found in one theme
+  only was already unresolved in the other theme; it is now counted as the new reason
+  **`unknown-style-key`** instead of `unknown-palette-key`, and `K` is no longer listed in
+  `summary.unknownKeys` (those are palette keys: dead references, typos, missed palette files). The same
+  shape through `BasedOn` — an inline style, or a shared style, based on a style that only one theme
+  defines — used to be graded in the other theme anyway: the chain lost its base, so the text was paired
+  with whatever background was behind the element, a combination that doesn't exist in that theme. That
+  theme's pairs are now `unknown-style-key` too, so `pairs` and coverage can go down and a `fail` or
+  `warn` that was never real disappears. If such a pair is in your baseline, `--baseline` counts it as
+  paid off; rewrite the baseline with `--write-baseline` to drop it. Baseline keys are unchanged
+  (`keyVersion` stays 1). A base that no theme defines (a library style such as
+  `MahApps.Styles.Button`) is skipped as before.
+- **Icons drawn in an icon font are graded at 3:1 instead of 4.5:1, so counts move.** A `TextBlock`,
+  `Run`, `Button` (or any text element) whose font is a recognised icon font is a graphic, not text:
+  WCAG 1.4.11 asks 3:1 of it. Its finding now has `isText: false`, `isLargeText: false` and
+  `threshold: 3`; the console tags it `non-text`. An icon between 3:1 and 4.5:1 moves from `warn` (or
+  `fail` below 3.01:1) to `ok`; one between 2.01:1 and 3:1 is now `warn` instead of `fail`. Icons are
+  **not** made `decorative` — an icon below 3:1 is still reported. If such an icon is in your
+  baseline, `--baseline` may count it as paid off. Baseline keys are unchanged (`keyVersion` stays 1).
+  The font is read from the element (`FontFamily`, or `TextElement.FontFamily` and the like), its
+  style's `FontFamily` setter, or its parent (a `Run` in a `TextBlock`, a `TextBlock` in a `Button`);
+  a template's content does not inherit from where the template is defined. Recognised: Segoe MDL2
+  Assets, Segoe Fluent Icons, Segoe UI Symbol, Material Icons\*, Material Symbols\*, Font Awesome\* and
+  FontAwesome\*, written as the name, `/Fonts/#Name`, `pack://…#Name`, or a `{StaticResource}` /
+  `{DynamicResource}` to a `<FontFamily x:Key>` resource. Every font in a fallback list has to be an
+  icon font; anything the tool can't read stays text at 4.5:1.
+- Nothing changes unless you turn on the new `converters.constantBrushes`. If you do, pairs whose
+  colour went through a value converter with fixed colours move from `unresolved` (`bound-or-gradient`)
+  to graded pairs — one per colour — so `pairs`, coverage and possibly `fail` / `warn` go up. A baseline
+  written before you turned it on lists none of them, so `--baseline` reports any that are below the
+  gate as NEW; run `--write-baseline` again after turning it on if you want to take them as known debt.
+  Baseline keys of everything else are unchanged (`keyVersion` stays 1).
+
+### Added
+- **Anonymous usage statistics send three more counts** (the collector accepts them from 1.2):
+  `data.symmetry` — `fail` and `warn` pairs by symmetry, `{ "bothLow", "darkFails", "lightFails",
+  "singleTheme" }`, always all four, adding up to `fail` + `warn`; `data.suppressedBy` — pairs
+  suppressed by `xamlcontrast-ignore`, by the first word of the reason: `icon`, `state-only`,
+  `watermark`, `decorative`, or `other` for anything else (only keys above 0; `{}` when nothing was
+  suppressed; adding up to `summary.suppressed`); `data.disabledExempt` — `summary.disabledExempt`.
+  The reason text itself is never sent, and nothing else is added. `--stats-preview` shows the new
+  fields. `data.unresolvedBy` sends `unknown-style-key` under its own name.
+- **Suppression reasons can start with a keyword** — `icon`, `state-only`, `watermark` or `decorative`
+  (`<!-- xamlcontrast-ignore: icon play button -->`). The first word is read up to a space or
+  `,` `，` `:` `：` `;` `；` `—` `–` `(` `（`, in any case, and must match exactly; anything else is `other`.
+  The comment syntax and what it suppresses are unchanged — the keyword only feeds `data.suppressedBy`.
+  A suppressed pair counts under the comment that suppressed it: on a container, the container's.
+- **Unresolved reason `unknown-style-key`** (the reasons are an open set; `docs/report.schema.json`
+  lists it). The demo's ignore comment now starts with `watermark`.
+- README *Known limitations*: trigger states are graded one at a time. A style whose `IsMouseOver`
+  trigger sets the foreground and whose `IsPressed` trigger sets the background is graded as the
+  pressed background with the normal foreground — what a keyboard press shows — not with the hover
+  foreground that a mouse press also has. This is unchanged; a test now pins it.
+- **Config `converters.constantBrushes`** (default `false`): read the project's `*.cs` for
+  `IValueConverter` classes and, when **every** return path of `Convert` is a fixed brush, grade each
+  of those colours once wherever a `{Binding …, Converter={StaticResource K}}` supplies a `Background`,
+  `Foreground` or `Fill` — on the element, in a style setter, or for the text inside it. Recognised:
+  `Brushes.X`, `new SolidColorBrush(Colors.X)`, `new SolidColorBrush(Color.FromRgb(…))` /
+  `Color.FromArgb(…)` with literal numbers, and `readonly` fields or get-only properties of the
+  converter holding one; conditions (`?:`, `if`/`return`, `switch` expressions) are not evaluated —
+  every branch is a candidate. Anything else (a computed value, `DependencyProperty.UnsetValue`,
+  `Binding.DoNothing`, `null`, a property, an object initializer, a `partial` class, two classes with
+  the same name), a binding with `FallbackValue` / `TargetNullValue`, text and background both from
+  converters, or a translucent layer over the converter's colour stays `bound-or-gradient`. Translucent
+  and `Transparent` candidates are composited over what is behind them, and `Opacity` applies as usual.
+  The colour reads `K→Field` in reports and baseline keys (`ActiveBrush→On`), so darkening it in C#
+  shows as worsened, not as a new key. Off by default because reading `*.cs` for this widens the
+  audit's scope (frozen surface 9: opt-in only). A `"converters": null` or a non-boolean
+  `constantBrushes` is a config error (exit 2).
+- **JSON: `summary.converterPairs`** — how many pairs were graded through a converter's fixed colours
+  (included in `pairs`; 0 when the option is off). An addition: `schemaVersion` stays 6.
+- Console: with the option on, one line with the count and the converters used, and one line per
+  converter that is not fixed, naming why (it stays unresolved).
+
 ## 1.1.0 — 2026-10-28
 
 > **⚠️ This release sends anonymous usage statistics by default.** After every audit that reaches a

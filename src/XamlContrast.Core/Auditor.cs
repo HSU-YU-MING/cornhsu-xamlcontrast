@@ -92,10 +92,16 @@ public sealed partial class Auditor
     private readonly List<Finding> _findings = new();
     private readonly List<string> _parseErrors = new();
     private readonly List<string> _invalidIgnores = new();
-    private int _pairs, _unresolved, _skipped, _deadFg, _suppressed, _disabled, _translucentOverNothing;
+    private readonly Dictionary<string, int> _suppressedReasons = new(StringComparer.Ordinal);
+    private int _pairs, _unresolved, _skipped, _deadFg, _suppressed, _disabled, _translucentOverNothing, _converterPairs;
+    /// <summary>轉換器的固定顏色（config 的 converters.constantBrushes；沒打開是 null —— 行為與 1.1 完全相同）。</summary>
+    private ConverterIndex? _converters;
     private readonly HashSet<string> _walkedNames = new(StringComparer.Ordinal); // config 的 layout 宣告有沒有命中
     private StyleIndex _styles = null!;
     private string _curFile = ""; // 具名 Style 查找的「同檔優先」範圍（完整路徑）
+    /// <summary>目前這個元素從祖先繼承到的 FontFamily（原始寫法；null = 沒有或不知道）。FontFamily 是繼承屬性：
+    /// TextBlock 裡的 Run、Button 裡的 TextBlock 跟著外層的字型走。只給圖示字型的判斷用（<see cref="IconFonts"/>）。</summary>
+    private string? _inheritedFont;
     private ThemeSide? _curSide;  // 目前這個檔只屬於哪一個主題（ThemeFileSides；Style 查找依主題解析，見 StyleIndex.Build）
     private readonly Dictionary<(Palette, ThemeSide), Palette> _sideViews = new();
 
@@ -106,35 +112,45 @@ public sealed partial class Auditor
     /// ignore 註解（規劃書 4.6）：&lt;!-- xamlcontrast-ignore: 理由 --&gt; 管下一個元素（含子樹）。
     /// 理由必填 —— 沒理由的 ignore 視為無效並警告；被壓掉的計入 suppressed。
     /// 否則 ignore 就是新開的一條靜默退化通道。
+    /// 回傳壓掉這個元素（含子樹）的註解的理由原文（requireReason 關掉、沒寫理由時是空字串）；沒被壓掉是 null。
     /// </summary>
-    private bool IsSuppressedByComment(XElement el, string file)
+    private string? SuppressionOf(XElement el, string file)
     {
-        var (suppressed, invalid) = IgnoreStateOf(el, file);
+        var (reason, invalid) = IgnoreStateOf(el, file);
         if (invalid is not null) _invalidIgnores.Add(invalid);
-        return suppressed;
+        return reason;
     }
 
-    /// <summary>同上，不記錄無效的註解（給「祖先有沒有被壓掉」這種重複查詢用 —— 那些註解在樹走訪時已經記過）。</summary>
-    private (bool Suppressed, string? Invalid) IgnoreStateOf(XElement el, string file)
+    /// <summary>同上，不記錄無效的註解（給「祖先有沒有被壓掉」這種重複查詢用 —— 那些註解在樹走訪時已經記過）。
+    /// Reason 不是 null = 壓掉（值是理由原文，沒寫理由時是空字串）。</summary>
+    private (string? Reason, string? Invalid) IgnoreStateOf(XElement el, string file)
     {
         // 往前找最近的非空白節點；只有「緊鄰的前一個註解」才算數
         var prev = el.PreviousNode;
         while (prev is XText t && string.IsNullOrWhiteSpace(t.Value)) prev = prev.PreviousNode;
-        if (prev is not XComment c) return (false, null);
+        if (prev is not XComment c) return (null, null);
         var m = IgnoreComment().Match(c.Value);
         if (!m.Success)
         {
             // ⚠ 寫錯的變體（大小寫不同、冒號後沒有理由、漏冒號、理由換到第二行）舊版整段認不出來：
             //   不壓（方向安全），但也不警告 —— 使用者看不出自己的註解沒生效。看起來像標記就要講出來。
             //   多行理由維持不接受：接受等於放寬，會讓既有的這類註解開始壓掉配對
-            return (false, IgnoreCommentLenient().IsMatch(c.Value)
+            return (null, IgnoreCommentLenient().IsMatch(c.Value)
                 ? $"{file}:{LineOfComment(c)}: malformed xamlcontrast-ignore comment (not suppressed)" +
                   " — write it as 'xamlcontrast-ignore: reason', lowercase, with the reason on the same line"
                 : null);
         }
         if (!m.Groups["reason"].Success && _cfg.Ignore.RequireReason)
-            return (false, $"{file}:{LineOfComment(c)}: xamlcontrast-ignore without a reason is invalid (not suppressed)");
-        return (true, null);
+            return (null, $"{file}:{LineOfComment(c)}: xamlcontrast-ignore without a reason is invalid (not suppressed)");
+        return (m.Groups["reason"].Success ? m.Groups["reason"].Value : "", null);
+    }
+
+    /// <summary>一組配對被 ignore 壓掉：計數，並記在壓掉它的那個註解的理由底下（總和 = _suppressed）。
+    /// 理由原文只留在記憶體裡給統計分類（<see cref="UsageStats.SuppressedBy"/>），不進任何報告、也不送出去。</summary>
+    private void Suppress(string reason)
+    {
+        _suppressed++;
+        _suppressedReasons[reason] = _suppressedReasons.GetValueOrDefault(reason) + 1;
     }
 
     /// <summary>「看起來像 ignore 標記」：註解開頭、不分大小寫、整個字（xamlcontrast-ignored 不算）。</summary>
@@ -242,6 +258,29 @@ public sealed partial class Auditor
     private double NeedFor(bool isText, bool isLarge) =>
         !isText ? 0.0 : isLarge ? _cfg.Thresholds.LargeText : _cfg.Thresholds.NormalText;
 
+    /// <summary>WCAG 1.4.11 非文字對比：看懂畫面要用到的圖形（圖示字型畫的圖示）3:1。條文沒有 AAA 的版本，
+    /// 所以不跟 config 的 thresholds 走（largeText 是大字級文字的門檻，不是圖形的）。</summary>
+    internal const double NonTextGraphic = 3.0;
+
+    /// <summary>
+    /// 用圖示字型的文字元素是圖形：isText = false、不算大字級、門檻 3:1（1.2；之前當文字用 4.5:1）。
+    /// 只在原本當文字時改：本來就是非文字（Rectangle、ProgressBar…）的照舊是 decorative。
+    /// 字型認不出來（Binding、找不到的資源、混了一般字型的後備清單）照舊當文字 —— 往嚴格那邊錯。
+    /// </summary>
+    private void ApplyIconFont(string? font, ref bool isText, ref bool isLarge, ref double need)
+    {
+        if (!isText || !IconFonts.IsIconFont(font, _styles.FontFamilies)) return;
+        (isText, isLarge, need) = (false, false, NonTextGraphic);
+    }
+
+    /// <summary>元素自己寫的 FontFamily：屬性，或附加屬性的寫法（TextElement.FontFamily、TextBlock.FontFamily…）。</summary>
+    private static string? LocalFontFamily(XElement el)
+        => el.Attribute("FontFamily")?.Value
+           ?? el.Attributes().FirstOrDefault(a => a.Name.LocalName.EndsWith(".FontFamily", StringComparison.Ordinal))?.Value;
+
+    private static string? ChainFont(StyleIndex.Merged? chain)
+        => chain is not null && chain.Props.TryGetValue("FontFamily", out var f) ? f.V : null;
+
     /// <summary>config 的 rootBackground 正規化成 ColorResolver 認得的值：
     /// 色碼／具名色／markup 原樣通過，裸鍵名包成 {DynamicResource X}。</summary>
     public static string? NormalizeRootBackground(string? raw)
@@ -273,6 +312,8 @@ public sealed partial class Auditor
         // 具名 Style 索引含色盤／主題字典 ——「排除出 UI 掃描」不等於「排除出索引」
         // 主題字典的歸屬一併交給索引：同 key 的 Style 依主題各自解析
         auditor._styles = StyleIndex.Build(root, detection.ThemeFileSides.Count > 0 ? detection.SideOf : null);
+        // 讀 *.cs 找轉換器是擴大稽核範圍（凍結面第 9 面）：只在 config 打開時做
+        if (auditor._cfg.Converters.ConstantBrushes) auditor._converters = ConverterIndex.Build(root);
         auditor._parseErrors.AddRange(detection.ReadErrors); // 偵測時讀不到的檔（被鎖住的 .cs 之類）一樣要喊
         var all = PaletteDetector.EnumerateFiles(root, "*.xaml").ToList();
         // ⚠ 兩邊都 GetFullPath 再比：config 強制模式的色盤檔是 GetFullPath 過的，EnumerateFiles 卻沿用 root 的
@@ -316,7 +357,7 @@ public sealed partial class Auditor
                 // 畫面檔自己的區域 brush 在那個畫面裡蓋過全域（見 MergedXamlPalette 的區域層）
                 if (!paletteFile && PaletteDetector.LocalOverrides(f, basePal) is { Count: > 0 } local)
                     auditor._pal = WithLocalOverrides(auditor._pal, local);
-                auditor.Walk(doc.Root, default, name, 1.0, suppressed: false);
+                auditor.Walk(doc.Root, default, name, 1.0, suppressedBy: null);
                 auditor.WalkStyles(doc, name);
             }
         }
@@ -336,6 +377,9 @@ public sealed partial class Auditor
             DisabledExempt = auditor._disabled,
             ParseErrors = auditor._parseErrors,
             Suppressed = auditor._suppressed,
+            SuppressedReasons = auditor._suppressedReasons,
+            ConverterPairs = auditor._converterPairs,
+            ConvertersUsed = auditor._converters?.Used.Select(u => new ConverterUse(u.Key, u.Info)).ToList(),
             InvalidIgnores = auditor._invalidIgnores,
             Config = auditor._cfg,
             UnmatchedLayoutNames = auditor._cfg.Layout.Overlap.Concat(auditor._cfg.Layout.SideBySide)
@@ -382,10 +426,14 @@ public sealed partial class Auditor
         }, file, line, r.Kind == ColorKind.UnknownKey && r.Key is not null ? r.Key : raw);
     }
 
-    private void Walk(XElement el, Backdrop bd, string file, double op, bool suppressed)
+    private void Walk(XElement el, Backdrop bd, string file, double op, string? suppressedBy)
     {
         _walkedNames.Add(el.Name.LocalName);
-        if (!suppressed && IsSuppressedByComment(el, file)) suppressed = true;
+        // 模板（DataTemplate、ControlTemplate…）的內容繼承的是「套用它的地方」的字型，不是定義處的祖先 —— 進模板就從不知道開始
+        var outerFont = _inheritedFont;
+        if (el.Name.LocalName.EndsWith("Template", StringComparison.Ordinal) && !el.Name.LocalName.Contains('.')) _inheritedFont = null;
+        // 歸給「壓掉它的那個註解」：一進入被壓掉的子樹就不再看裡面的註解，所以是最外層那一個
+        if (suppressedBy is null && SuppressionOf(el, file) is { } reason) suppressedBy = reason;
         var opRaw = el.Attribute("Opacity")?.Value;
         // Opacity 也可能是 Binding；只處理字面數值，其餘維持原值
         if (opRaw is not null && ParseDouble(opRaw, out var opVal)) op *= opVal;
@@ -432,17 +480,30 @@ public sealed partial class Auditor
         var handledFg = chain is not null || chainLight is not null;
         if (perSide)
         {
-            if (chain is not null) GradeChain(el, chain, ThemeSide.Dark, bd, ancestorBd, localBgRaw, file, op, suppressed);
-            if (chainLight is not null) GradeChain(el, chainLight, ThemeSide.Light, bd, ancestorBd, localBgRaw, file, op, suppressed);
             // 只在一個主題定義的 Style key：另一個主題下這個元素的樣子工具不知道（StaticResource 會丟例外、
-            // DynamicResource 退回預設樣式）—— 不評，但要計數。⚠ 92520b2 那一側整組靜默消失（審查最後一輪 5）
-            if ((chain is null || chainLight is null) && StyleKeyOf(el) is { } styleKey)
-                Unres(UnresolvedReason.UnknownPaletteKey, file, LineOf(el), styleKey);
+            // DynamicResource 退回預設樣式）—— 不評，但要計數。⚠ 92520b2 那一側整組靜默消失（審查最後一輪 5）。
+            // 兩種形狀：Style="{StaticResource K}" 的 K 在那個主題找不到（鏈是 null），或鏈上的 BasedOn 在那個主題找不到、
+            // 在另一個主題找得到（行內 Style BasedOn K）。⚠ 1.2 之前後者照樣評：缺基底的鏈沒有底，字配到祖先的底 ——
+            // 那個主題下根本不存在的組合。1.2 之前前者記 unknown-palette-key（K 不是色票的鍵）
+            var missingDark = chain is null ? StyleKeyOf(el) : OnlyInOtherTheme(chain, chainLight);
+            var missingLight = chainLight is null ? StyleKeyOf(el) : OnlyInOtherTheme(chainLight, chain);
+            if (chain is not null && missingDark is null) GradeChain(el, chain, ThemeSide.Dark, bd, ancestorBd, localBgRaw, file, op, suppressedBy);
+            if (chainLight is not null && missingLight is null) GradeChain(el, chainLight, ThemeSide.Light, bd, ancestorBd, localBgRaw, file, op, suppressedBy);
+            if ((missingDark ?? missingLight) is { } styleKey)
+                Unres(UnresolvedReason.UnknownStyleKey, file, LineOf(el), styleKey);
         }
-        else if (chain is not null) GradeChain(el, chain, null, bd, ancestorBd, localBgRaw, file, op, suppressed);
+        else if (chain is not null) GradeChain(el, chain, null, bd, ancestorBd, localBgRaw, file, op, suppressedBy);
 
-        WalkForegroundAndChildren(el, bd, file, op, suppressed, handledFg);
+        // 這個元素的字型（WPF 優先序：本地 > Style > 繼承）—— 它自己的 Foreground／Fill 用它評，子元素繼承它
+        var elementFont = LocalFontFamily(el) ?? ChainFont(chain) ?? ChainFont(chainLight) ?? _inheritedFont;
+        WalkForegroundAndChildren(el, bd, file, op, suppressedBy, handledFg, elementFont);
+        _inheritedFont = outerFont;
     }
+
+    /// <summary>這一側的鏈缺了一個 BasedOn 基底，而另一側找得到它（另一側沒缺、或缺的是別的）—— 那個基底只定義在另一個主題。
+    /// 兩側缺同一個（外部函式庫的基底之類，哪個主題都找不到）不算：照舊略過缺的那一層。</summary>
+    private static string? OnlyInOtherTheme(StyleIndex.Merged mine, StyleIndex.Merged? other)
+        => mine.MissingBase is { } k && other is not null && other.MissingBase != k ? k : null;
 
     // ── 元素 Opacity 的群組 ──
     //
@@ -520,18 +581,94 @@ public sealed partial class Auditor
     }
 
     /// <summary>元素自己的底（bgVal）畫到目前的底上（at = 元素的累乘透明度，含它自己的 Opacity）。</summary>
-    private static Backdrop NextBackground(string? bgVal, Palette pal, Backdrop bd, double at)
+    private Backdrop NextBackground(string? bgVal, Palette pal, Backdrop bd, double at)
     {
         if (bgVal is null) return bd;
-        var r = ColorResolver.Resolve(bgVal, pal);
+        var r = ResolveColour(bgVal, pal);
         if (r is null) return bd;
         // 底色來自 Binding / TemplateBinding / 漸層 —— 執行期才知道實際顏色。
         // 關鍵：不能「往上繼承祖先背景」，那會把子元素的文字色配到錯的底色上
         // （例：標籤徽章的底色綁使用者選的顏色，白字是對的，但繼承祖先會誤判成白配白）。
         // 標記為無法判定，子元素一律跳過。
-        if (r.Kind == ColorKind.Other) r = new Resolved(ColorKind.Other, Raw: bgVal);
+        if (r.Kind == ColorKind.Other) r = new Resolved(ColorKind.Other, Raw: bgVal, Candidates: r.Candidates);
         return Paint(bd, at, r, bgVal);
     }
+
+    // ── 轉換器的固定顏色（1.2，config 的 converters.constantBrushes）──
+    //
+    // Binding 經過「每條回傳路徑都是固定 Brush」的轉換器時，Resolved 照舊是 Other（看不懂），另外帶著候選色（Candidates）
+    // 與它畫上去時底下那一層（PaintedOver）。一路往下傳成子元素的底；評分處（BackdropVariants）把它展開成每個候選各一個底 ——
+    // 候選色重新畫在記下來的那一層上，所以半透明、Transparent 的候選、Opacity 群組、兩個主題都用原本那一套算法。
+    // 中間任何一步會丟掉資訊的（半透明的東西疊在它上面、它在 Opacity 群組裡被變淡、兩個主題的底不同）就把候選拿掉（Lost）：
+    // 照舊看不懂，不編一個比值。
+
+    /// <summary>ColorResolver.Resolve，加上轉換器的候選色（沒打開或不是固定顏色的轉換器時與 Resolve 相同）。</summary>
+    private Resolved? ResolveColour(string? raw, Palette pal)
+    {
+        var r = ColorResolver.Resolve(raw, pal);
+        if (r is { Kind: ColorKind.Other } && raw is not null && _converters?.CandidatesFor(raw, _curFile) is { Count: > 0 } candidates)
+            return r with { Raw = raw, Candidates = candidates };
+        return r;
+    }
+
+    private static readonly Palette NoPalette = new();
+
+    /// <summary>一個候選色本身（Hard、Alpha 或 Transparent）；報告裡的寫法是候選的標籤（ActiveBrush→On）。</summary>
+    private static Resolved CandidateColour(ConverterCandidate c)
+    {
+        var r = ColorResolver.Resolve(c.Value, NoPalette) ?? new Resolved(ColorKind.Other, Raw: c.Value);
+        return r.Kind is ColorKind.Hard or ColorKind.Alpha ? r with { Composite = c.Label } : r;
+    }
+
+    /// <summary>轉換器的字色：每個候選一個。看不見的候選（Transparent、alpha ≈ 0）各記一筆 skipped —— 跟一般的字色同一套。</summary>
+    private List<(Resolved Fg, string Label, bool FromConverter)> VisibleForegrounds(Resolved fg, double op)
+    {
+        var list = new List<(Resolved, string, bool)>();
+        foreach (var c in fg.Candidates!)
+        {
+            var r = CandidateColour(c);
+            if (r.Kind is ColorKind.Transparent || op * VisibleAlpha(r) < 0.01) { _skipped++; continue; }
+            list.Add((r, c.Label, true));
+        }
+        return list;
+    }
+
+    /// <summary>
+    /// 評分用的底：平常是一個（螢幕上的顏色，可能是 null 或看不懂）；底的結構裡（目前那一層，或某個 Opacity 群組底下那一層）
+    /// 有一個固定顏色的轉換器時，每個候選色各一個 —— 候選畫回那一層、再照原本的算法一層一層疊出去（Screen），
+    /// 所以疊在它上面的 Opacity 群組照樣算得對。兩個不同的轉換器（組合不知道），或每個候選都還是被別的東西卡住，就照舊一個。
+    /// </summary>
+    private static List<(Backdrop Bd, Resolved? Bg, bool FromConverter)> BackdropVariants(Backdrop bd)
+    {
+        var bg = Screen(bd);
+        var found = new List<IReadOnlyList<ConverterCandidate>>();
+        void Look(Resolved? r) { if (r?.Candidates is { } c && !found.Any(f => ReferenceEquals(f, c))) found.Add(c); }
+        Look(bd.Bg);
+        for (var g = bd.Group; g is not null; g = g.Parent) Look(g.Under);
+        if (found is not [var candidates]) return [(bd, bg, false)];
+        var list = new List<(Backdrop, Resolved?, bool)>(candidates.Count);
+        foreach (var c in candidates)
+        {
+            var painted = CandidateColour(c);
+            var variant = Substitute(bd, candidates, r => painted.Kind == ColorKind.Transparent
+                ? r.PaintedOver
+                : PaintOver(painted, c.Label, r.PaintedOver, r.PaintedInGroup));
+            list.Add((variant, Screen(variant), true));
+        }
+        // 每個候選都還是看不懂（疊在別的 Binding 上之類）：展開沒有幫助，照舊記一筆，不是每個候選各記一筆
+        return list.All(v => IsUnknowable(v.Item2)) ? [(bd, bg, false)] : list;
+    }
+
+    /// <summary>底裡面帶著這組候選的那一層（目前的底、或某一層 Opacity 群組底下的那一層）換成 repaint 的結果。</summary>
+    private static Backdrop Substitute(Backdrop b, IReadOnlyList<ConverterCandidate> candidates, Func<Resolved, Resolved?> repaint)
+    {
+        Resolved? Map(Resolved? r) => r is not null && ReferenceEquals(r.Candidates, candidates) ? repaint(r) : r;
+        OpacityGroup? MapGroup(OpacityGroup? g) => g is null ? null : g with { Under = Map(g.Under), Parent = MapGroup(g.Parent) };
+        return new Backdrop(Map(b.Bg), MapGroup(b.Group));
+    }
+
+    /// <summary>候選色展開不了了（有東西以半透明疊在它上面、它被 Opacity 群組變淡、兩個主題的底不一樣）：拿掉候選，照舊看不懂。</summary>
+    private static Resolved? Lost(Resolved? r) => r?.Candidates is null ? r : r with { Candidates = null, PaintedOver = null };
 
     /// <summary>在累乘透明度 at（含畫它的元素自己的 Opacity）的位置畫上 painted（元素的底、Style 狀態的底、兄弟背板）。</summary>
     private static Backdrop Paint(Backdrop under, double at, Resolved painted, string label)
@@ -540,7 +677,10 @@ public sealed partial class Auditor
         var gOp = GroupOpacity(under.Group);
         if (at < gOp - 0.001)
             // 畫在新的 Opacity 群組裡：那一層從透明開始畫，整層疊到目前的底上
-            return new Backdrop(IsUnknowable(painted) ? painted : painted with { Raw = label },
+            return new Backdrop(IsUnknowable(painted)
+                                    // 轉換器的候選：畫在新的一層裡，底下是空的（展開時候選色畫在空的那一層上，再整層疊出去）
+                                    ? painted.Candidates is null ? painted : painted with { PaintedOver = null, PaintedInGroup = true }
+                                    : painted with { Raw = label },
                                 new OpacityGroup(at / gOp, under.Bg, under.Group));
         return new Backdrop(PaintOver(painted, label, under.Bg, inGroup: under.Group is not null), under.Group);
     }
@@ -548,13 +688,15 @@ public sealed partial class Auditor
     /// <summary>同一層裡畫上去：不透明的蓋掉、看不懂的照實帶下去；半透明的疊在那一層已有的顏色上。</summary>
     private static Resolved? PaintOver(Resolved painted, string label, Resolved? layer, bool inGroup)
     {
-        if (painted.Kind != ColorKind.Alpha) return painted;
+        if (painted.Kind != ColorKind.Alpha)
+            // 轉換器的候選：記下底下那一層，展開時候選色重新畫在它上面（半透明、Transparent 的候選才算得對）
+            return painted.Candidates is null ? painted : painted with { PaintedOver = layer, PaintedInGroup = inGroup };
         // 那一層還沒畫東西：群組裡是透明（整層之後疊出去）；不在群組裡 = 底下什麼都沒有 —— 半透明的那一層本身
         // 往下傳（Alpha），後面的字記 translucent-uncomposited、點名它的值。
         // ⚠ 1.0 之前這裡回 null（維持「沒有底」），字一律記 no-ancestor-background，列舉裡的 translucent-uncomposited
         //   永遠不會出現（決策檔 L2，選項 A）
         if (layer is null) return painted with { Raw = label };
-        if (IsUnknowable(layer)) return layer;
+        if (IsUnknowable(layer)) return Lost(layer); // 半透明的一層疊在轉換器的底上：展開時拿不回這一層 → 照舊看不懂
         // 半透明遮罩：疊在目前生效的背景上算出實際顏色（WPF 以 sRGB 混合；半透明「色票」深淺各帶自己的 alpha）
         if (IsOpaque(layer))
             return new Resolved(ColorKind.Hard,
@@ -570,8 +712,8 @@ public sealed partial class Auditor
     private static Resolved? GroupOver(Resolved? pix, double ratio, Resolved? under)
     {
         if (pix is null) return under;         // 這一層那裡沒畫東西：上一層不變
-        if (IsUnknowable(pix)) return pix;
-        if (IsUnknowable(under)) return under; // 疊到看不懂的底上（Binding 的底之類）= 看不懂
+        if (IsUnknowable(pix)) return Lost(pix);     // 被群組變淡的轉換器底：展開不了
+        if (IsUnknowable(under)) return Lost(under); // 疊到看不懂的底上（Binding 的底之類）= 看不懂
         var (pd, pl) = (Px(pix, true), Px(pix, false));
         var composite = string.Create(CultureInfo.InvariantCulture,
             $"{LabelOf(pix)} ×{Math.Round(ratio, 2)} over {(under is null ? "nothing" : LabelOf(under))}");
@@ -602,8 +744,8 @@ public sealed partial class Auditor
 
     /// <summary>色盤值的單一主題投影：兩欄都用指定主題那一欄（配 <see cref="SideView"/> 用）。</summary>
     private static Resolved? OnSide(Resolved? r, ThemeSide side) => r is null ? null : side == ThemeSide.Dark
-        ? r with { Light = r.Dark, RgbLight = r.Rgb, AlphaLight = r.Alpha }
-        : r with { Dark = r.Light, Rgb = r.RgbLight, Alpha = r.AlphaLight };
+        ? r with { Light = r.Dark, RgbLight = r.Rgb, AlphaLight = r.Alpha, PaintedOver = OnSide(r.PaintedOver, side) }
+        : r with { Dark = r.Light, Rgb = r.RgbLight, Alpha = r.AlphaLight, PaintedOver = OnSide(r.PaintedOver, side) };
 
     private static OpacityGroup? OnSide(OpacityGroup? g, ThemeSide side)
         => g is null ? null : g with { Under = OnSide(g.Under, side), Parent = OnSide(g.Parent, side) };
@@ -633,8 +775,13 @@ public sealed partial class Auditor
     private static Resolved? BothThemes(Resolved? dark, Resolved? light, bool inGroup)
     {
         if (!inGroup && (dark is null || light is null)) return null;
-        if (IsUnknowable(dark)) return dark;
-        if (IsUnknowable(light)) return light;
+        // 轉換器的候選只在兩個主題是同一個轉換器的底時保留（底下那一層深淺各自拼回兩欄）；另一邊是別的顏色時，
+        // 展開會拿深色那邊的底去蓋淺色那一欄 → 拿掉候選，照舊看不懂
+        if (IsUnknowable(dark))
+            return dark!.Candidates is not null && ReferenceEquals(dark.Candidates, light?.Candidates) && dark.PaintedInGroup == light!.PaintedInGroup
+                ? dark with { PaintedOver = BothThemes(dark.PaintedOver, light.PaintedOver, dark.PaintedInGroup) }
+                : Lost(dark);
+        if (IsUnknowable(light)) return Lost(light);
         if (dark is null && light is null) return null;
         // 兩側同一個色票 → 照舊是那個鍵；寫法相同的合成 → 那段描述；不同 → 「A (dark) / B (light)」
         var dl = dark is null ? "nothing" : LabelOf(dark);
@@ -656,7 +803,7 @@ public sealed partial class Auditor
     /// （同 key 的 Style 依主題各自解析、兩個主題解析到不同的鏈）：色盤用那個主題的視圖、finding 標那個主題（Theme），
     /// 元素名的 Style 標籤帶 @dark／@light。</summary>
     private void GradeChain(XElement el, StyleIndex.Merged chain, ThemeSide? side, Backdrop bd, Backdrop ancestorBd,
-        string? localBgRaw, string file, double op, bool suppressed)
+        string? localBgRaw, string file, double op, string? suppressedBy)
     {
         var pal = _pal;
         var label = chain.Label;
@@ -707,159 +854,195 @@ public sealed partial class Auditor
                 // 停用態：WCAG 1.4.3 豁免，計數回報、不評分
                 if (st.Disabled) { _disabled++; continue; }
 
-                var fgR = ColorResolver.Resolve(fgV, pal);
-                if (fgR is null) continue;
+                var fgAll = ResolveColour(fgV, pal);
+                if (fgAll is null) continue;
+                var fgConverter = fgAll.Candidates is not null;
                 // 字色是 Binding／漸層／未知鍵 = 工具看不懂 → unresolved（盲區要誠實計數，
-                // 之前全塞 skipped，把盲區藏進「合法豁免」桶）；透明字才是合法跳過
-                if (fgR.Kind is ColorKind.Other or ColorKind.UnknownKey)
-                { Unres(fgR, file, LineOf(el), fgV); continue; }
-                if (fgR.Kind is ColorKind.Transparent) { _skipped++; continue; } // 半透明字色往下疊到底上評分（見 EffectiveForeground）
-                // 看不見的字（Opacity 0、alpha ≈ 0）排在底的判斷前面，理由同樹走訪那邊
-                if (op * VisibleAlpha(fgR) < 0.01) { _skipped++; continue; }
+                // 之前全塞 skipped，把盲區藏進「合法豁免」桶）；透明字才是合法跳過。
+                // 轉換器的固定候選色（converters.constantBrushes）等底解出來之後再決定展不展開
+                if (fgAll.Kind is ColorKind.UnknownKey || fgAll.Kind is ColorKind.Other && !fgConverter)
+                { Unres(fgAll, file, LineOf(el), fgV); continue; }
+                if (!fgConverter)
+                {
+                    if (fgAll.Kind is ColorKind.Transparent) { _skipped++; continue; } // 半透明字色往下疊到底上評分（見 EffectiveForeground）
+                    // 看不見的字（Opacity 0、alpha ≈ 0）排在底的判斷前面，理由同樹走訪那邊
+                    if (op * VisibleAlpha(fgAll) < 0.01) { _skipped++; continue; }
+                }
 
                 Backdrop stateBd;
                 var bgOwnRaw = bgV; // 卡住時要點名的底：透明的 Setter 只是穿透，卡住的是祖先那一層
                 if (bgV is not null)
                 {
-                    var rb = ColorResolver.Resolve(bgV, pal);
+                    var rb = ResolveColour(bgV, pal);
                     if (rb is null) continue;
                     if (rb.Kind == ColorKind.Transparent) { stateBd = bd; bgOwnRaw = null; }
-                    else if (rb.Kind is ColorKind.Other or ColorKind.UnknownKey) { Unres(rb, file, LineOf(el), bgV!); continue; }
+                    else if (rb.Kind is ColorKind.UnknownKey || rb.Kind is ColorKind.Other && rb.Candidates is null) { Unres(rb, file, LineOf(el), bgV!); continue; }
                     // 這個狀態的底畫在元素自己身上：半透明的疊在祖先的底上；元素有 Opacity 時連底一起變淡
                     else stateBd = Paint(ancestorBd, op, rb, bgV);
                 }
                 else stateBd = bd; // Style 鏈沒設底 → 退回祖先背景
-                var bgObj = Screen(stateBd);
-                if (bgObj is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgV); continue; }
-                // 看不懂的底一定來自祖先或兄弟（這個狀態自己的看不懂的底上面已經記過）：點名卡住的那個值
-                // （半透明的 hover 底疊在 Background="{Binding …}" 的祖先上 → 點名那個 Binding，不是 hover 的色碼）
-                if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent)
-                {
-                    Unres(bgObj, file, LineOf(el), IsUnknowable(bgObj) ? bgObj.Raw ?? bgObj.Key ?? fgV : bgOwnRaw ?? bgObj.Key ?? bgObj.Composite ?? bgObj.Raw ?? fgV);
-                    continue;
-                }
+                var backdrops = BackdropVariants(stateBd);
+                // 轉換器的字色：只在底是「一個解得出來的不透明顏色」時展開。底也來自轉換器（哪個字色配哪個底不知道 ——
+                // 全部組合裡有執行期不存在的）或底本身看不懂時，照舊記字色看不懂
+                if (fgConverter && (backdrops is not [{ FromConverter: false, Bg: { } onlyBg }] || !IsOpaque(onlyBg)))
+                { Unres(fgAll, file, LineOf(el), fgV); continue; }
+                var fgVariants = fgConverter ? VisibleForegrounds(fgAll, op) : [(fgAll, fgV, false)];
 
-                var isTextC = !IsNonTextElement(el.Name.LocalName);
-                var fsC = 0.0;
-                var fsRawC = el.Attribute("FontSize")?.Value;
-                if (fsRawC is not null) ParseFontSize(fsRawC, out fsC);
-                else if (st.Set.TryGetValue("FontSize", out var sfs)) ParseFontSize(sfs, out fsC);
-                else if (chain.Props.TryGetValue("FontSize", out var pfs)) ParseFontSize(pfs.V, out fsC);
-                var fwV = el.Attribute("FontWeight")?.Value
-                          ?? (chain.Props.TryGetValue("FontWeight", out var pfw) ? pfw.V : null);
-                var boldC = IsBold(fwV);
-                var ptC = fsC * 0.75;
-                var isLargeC = ptC >= 18 || (boldC && ptC >= 14);
-                var needC = NeedFor(isTextC, isLargeC);
+                foreach (var (fgR, fgLabel, fgFromConverter) in fgVariants)
+                    foreach (var (variantBd, bgObj, bgFromConverter) in backdrops)
+                    {
+                        if (bgObj is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgV); continue; }
+                        // 看不懂的底一定來自祖先或兄弟（這個狀態自己的看不懂的底上面已經記過）：點名卡住的那個值
+                        // （半透明的 hover 底疊在 Background="{Binding …}" 的祖先上 → 點名那個 Binding，不是 hover 的色碼）
+                        if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent)
+                        {
+                            Unres(bgObj, file, LineOf(el), IsUnknowable(bgObj) ? bgObj.Raw ?? bgObj.Key ?? fgV : bgOwnRaw ?? bgObj.Key ?? bgObj.Composite ?? bgObj.Raw ?? fgV);
+                            continue;
+                        }
 
-                var (fgDC, fgLC) = TextOnScreen(fgR, op, stateBd);
+                        var isTextC = !IsNonTextElement(el.Name.LocalName);
+                        var fsC = 0.0;
+                        var fsRawC = el.Attribute("FontSize")?.Value;
+                        if (fsRawC is not null) ParseFontSize(fsRawC, out fsC);
+                        else if (st.Set.TryGetValue("FontSize", out var sfs)) ParseFontSize(sfs, out fsC);
+                        else if (chain.Props.TryGetValue("FontSize", out var pfs)) ParseFontSize(pfs.V, out fsC);
+                        var fwV = el.Attribute("FontWeight")?.Value
+                                  ?? (chain.Props.TryGetValue("FontWeight", out var pfw) ? pfw.V : null);
+                        var boldC = IsBold(fwV);
+                        var ptC = fsC * 0.75;
+                        var isLargeC = ptC >= 18 || (boldC && ptC >= 14);
+                        var needC = NeedFor(isTextC, isLargeC);
+                        // 圖示字型：本地 > 這個狀態的觸發 Setter > Style Setter > 繼承
+                        var fontC = LocalFontFamily(el)
+                                    ?? (st.Set.TryGetValue("FontFamily", out var sff) ? sff : null)
+                                    ?? ChainFont(chain)
+                                    ?? _inheritedFont;
+                        ApplyIconFont(fontC, ref isTextC, ref isLargeC, ref needC);
 
-                // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複。
-                // ⚠ 鍵是兩個主題合成後的實際顏色（加上門檻）：舊版只看深色值，hover 換成「深色同值、淺色不同」的色票時，
-                //   淺色 1.16:1 的真 fail 被當成重複丟掉（審查素材 dedup；半透明色票深色同 alpha、淺色不同 alpha 也一樣）
-                if (!emitted.Add($"{fgDC}|{fgLC}|{bgObj.Dark}|{bgObj.Light}|{needC}")) continue;
+                        var (fgDC, fgLC) = TextOnScreen(fgR, op, variantBd);
 
-                _pairs++;
-                if (suppressed) { _suppressed++; continue; }
-                var lineC = el is IXmlLineInfo cli && cli.HasLineInfo() ? cli.LineNumber : 0;
-                var (ratioDC, colorsDC) = Wcag.Measure(fgDC, bgObj.Dark!);
-                var (ratioLC, colorsLC) = Wcag.Measure(fgLC, bgObj.Light!);
-                _findings.Add(new Finding
-                {
-                    File = file,
-                    Line = lineC,
-                    Element = $"{el.Name.LocalName}⊕{label}/{(st.Cond is null && st.Set.Count == 0 ? "base" : "trigger")}",
-                    Fg = op < 0.999 ? WithOpacityNote(fgV, op) : fgV,
-                    Bg = LabelOf(bgObj),
-                    Mixed = fgR.Kind != bgObj.Kind,
-                    RatioDark = ratioDC,
-                    RatioLight = ratioLC,
-                    ColorsDark = colorsDC,
-                    ColorsLight = colorsLC,
-                    IsText = isTextC,
-                    Need = needC,
-                    Size = fsC > 0 ? $"{(int)Math.Round(fsC, MidpointRounding.ToEven)}px" : "",
-                    FontSize = fsC > 0 ? fsC : null,
-                    Large = isLargeC,
-                    Theme = theme,
-                });
+                        // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複。
+                        // ⚠ 鍵是兩個主題合成後的實際顏色（加上門檻）：舊版只看深色值，hover 換成「深色同值、淺色不同」的色票時，
+                        //   淺色 1.16:1 的真 fail 被當成重複丟掉（審查素材 dedup；半透明色票深色同 alpha、淺色不同 alpha 也一樣）
+                        if (!emitted.Add($"{fgDC}|{fgLC}|{bgObj.Dark}|{bgObj.Light}|{needC}")) continue;
+
+                        _pairs++;
+                        if (fgFromConverter || bgFromConverter) _converterPairs++;
+                        if (suppressedBy is not null) { Suppress(suppressedBy); continue; }
+                        var lineC = el is IXmlLineInfo cli && cli.HasLineInfo() ? cli.LineNumber : 0;
+                        var (ratioDC, colorsDC) = Wcag.Measure(fgDC, bgObj.Dark!);
+                        var (ratioLC, colorsLC) = Wcag.Measure(fgLC, bgObj.Light!);
+                        _findings.Add(new Finding
+                        {
+                            File = file,
+                            Line = lineC,
+                            Element = $"{el.Name.LocalName}⊕{label}/{(st.Cond is null && st.Set.Count == 0 ? "base" : "trigger")}",
+                            Fg = op < 0.999 ? WithOpacityNote(fgLabel, op) : fgLabel,
+                            Bg = LabelOf(bgObj),
+                            Mixed = fgR.Kind != bgObj.Kind,
+                            RatioDark = ratioDC,
+                            RatioLight = ratioLC,
+                            ColorsDark = colorsDC,
+                            ColorsLight = colorsLC,
+                            IsText = isTextC,
+                            Need = needC,
+                            Size = fsC > 0 ? $"{(int)Math.Round(fsC, MidpointRounding.ToEven)}px" : "",
+                            FontSize = fsC > 0 ? fsC : null,
+                            Large = isLargeC,
+                            Theme = theme,
+                        });
+                    }
             }
         }
     }
 
     /// <summary>元素自己的 Foreground／Fill（沒有 Style 鏈接手時）與子元素（含規則 17 的兄弟背板）。</summary>
-    private void WalkForegroundAndChildren(XElement el, Backdrop bd, string file, double op, bool suppressed, bool handledFg)
+    private void WalkForegroundAndChildren(XElement el, Backdrop bd, string file, double op, string? suppressedBy, bool handledFg, string? font)
     {
-        var bg = Screen(bd); // 螢幕上實際看到的底（Opacity 群組一層一層疊出去之後）
+        // 螢幕上實際看到的底（Opacity 群組一層一層疊出去之後）；底來自固定顏色的轉換器時，每個候選色一個
+        var backdrops = BackdropVariants(bd);
         foreach (var attrName in (ReadOnlySpan<string>)["Foreground", "Fill"])
         {
             if (attrName == "Foreground" && handledFg) continue;
             var fgRaw = XamlBrush.Read(el, attrName);
             if (fgRaw is null) continue;
-            var fg = ColorResolver.Resolve(fgRaw, _pal);
-            if (fg is null) continue;
-            // 同上：看不懂 → unresolved；透明 → skipped（與背景側同一套分桶標準）
-            if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey) { Unres(fg, file, LineOf(el), fgRaw); continue; }
-            if (fg.Kind is ColorKind.Transparent) { _skipped++; continue; } // 半透明字色往下疊到底上評分（見 EffectiveForeground）
-            // Opacity 0 = 元素當下完全隱形。XAML 裡寫 Opacity="0" 幾乎都是淡入動畫的
-            // 初始狀態，穩態是 1。對「看不見的東西」算對比沒有意義，跳過而不是報 1:1。
-            // ⚠ 要排在底的判斷前面：看不見的字不管底是什麼都看不見（審查最後一輪 4：Opacity 0 的群組疊到
-            //   「什麼都沒有」或 Binding 的底上時，先被底的判斷攔成 unresolved）
-            if (op * VisibleAlpha(fg) < 0.01) { _skipped++; continue; }
-            if (bg is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgRaw); continue; }
-            if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bg, file, LineOf(el), bg.Key ?? bg.Composite ?? bg.Raw ?? fgRaw); continue; }
-
-            _pairs++;
-
-            // ignore 壓掉的不進 findings，但一定要計數 —— 靜默退化等於謊報
-            if (suppressed) { _suppressed++; continue; }
-
-            var line = el is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
-
-            // ── 這是文字還是裝飾？WCAG 的 4.5:1 只管文字 ──
-            var localName = el.Name.LocalName;
-            var isText = !IsNonTextElement(localName) &&
-                         (_textEls.Contains(localName) || localName.EndsWith("TextBlock") || attrName == "Foreground");
-
-            // ── WCAG 大字級豁免：≥18pt 或 ≥14pt 粗體只需 3:1 ──
-            // ⚠ WPF 的 FontSize 是「裝置獨立像素」(1/96 吋) 不是 point (1/72 吋)，
-            //    換算要 ×0.75。18pt = 24px、14pt = 18.67px —— 少了這一步會把
-            //    18px 的字誤判成大字級而放過它。
-            var fs = 0.0;
-            var fsRaw = el.Attribute("FontSize")?.Value;
-            if (fsRaw is not null) ParseFontSize(fsRaw, out fs);
-            var fw = el.Attribute("FontWeight")?.Value;
-            var bold = IsBold(fw);
-            var pt = fs * 0.75;
-            var isLarge = pt >= 18 || (bold && pt >= 14);
-            var need = NeedFor(isText, isLarge);
-
-            // Opacity < 1 或字色本身半透明時，螢幕上看到的是「文字色以 alpha 疊在背景上」的混色結果
-            // （底也在 Opacity 群組裡時，連底一起一層一層疊出去，見 TextOnScreen）
-            var (fgD, fgL) = TextOnScreen(fg, op, bd);
-            // 比值與報告的 colors 出自同一組輸入（合成之後的字色、螢幕上的底）
-            var (ratioD, colorsD) = Wcag.Measure(fgD, bg.Dark!);
-            var (ratioL, colorsL) = Wcag.Measure(fgL, bg.Light!);
-
-            _findings.Add(new Finding
+            var fgAll = ResolveColour(fgRaw, _pal);
+            if (fgAll is null) continue;
+            // 同上：看不懂 → unresolved；透明 → skipped（與背景側同一套分桶標準）。轉換器的字色只在底是
+            // 一個解得出來的不透明顏色時展開（見 GradeChain 同一段），否則照舊記字色看不懂
+            var fgConverter = fgAll.Candidates is not null;
+            if (fgAll.Kind is ColorKind.UnknownKey || fgAll.Kind is ColorKind.Other &&
+                (!fgConverter || backdrops is not [{ FromConverter: false, Bg: { } onlyBg }] || !IsOpaque(onlyBg)))
+            { Unres(fgAll, file, LineOf(el), fgRaw); continue; }
+            var fgVariants = fgConverter ? VisibleForegrounds(fgAll, op) : [(fgAll, fgRaw, false)];
+            foreach (var (fg, fgLabel, fgFromConverter) in fgVariants)
             {
-                File = file,
-                Line = line,
-                Element = localName,
-                Fg = op < 0.999 ? WithOpacityNote(fgRaw, op) : fgRaw,
-                Bg = LabelOf(bg),
-                Mixed = fg.Kind != bg.Kind,
-                RatioDark = ratioD,
-                RatioLight = ratioL,
-                ColorsDark = colorsD,
-                ColorsLight = colorsL,
-                IsText = isText,
-                Need = need,
-                Size = fs > 0 ? $"{(int)Math.Round(fs, MidpointRounding.ToEven)}px" : "",
-                FontSize = fs > 0 ? fs : null,
-                Large = isLarge,
-                Theme = _curSide,
-            });
+                if (fg.Kind is ColorKind.Transparent) { _skipped++; continue; } // 半透明字色往下疊到底上評分（見 EffectiveForeground）
+                // Opacity 0 = 元素當下完全隱形。XAML 裡寫 Opacity="0" 幾乎都是淡入動畫的
+                // 初始狀態，穩態是 1。對「看不見的東西」算對比沒有意義，跳過而不是報 1:1。
+                // ⚠ 要排在底的判斷前面：看不見的字不管底是什麼都看不見（審查最後一輪 4：Opacity 0 的群組疊到
+                //   「什麼都沒有」或 Binding 的底上時，先被底的判斷攔成 unresolved）
+                if (op * VisibleAlpha(fg) < 0.01) { _skipped++; continue; }
+                foreach (var (variantBd, bg, bgFromConverter) in backdrops)
+                {
+                    if (bg is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgRaw); continue; }
+                    if (bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent) { Unres(bg, file, LineOf(el), bg.Key ?? bg.Composite ?? bg.Raw ?? fgRaw); continue; }
+
+                    _pairs++;
+                    if (fgFromConverter || bgFromConverter) _converterPairs++;
+
+                    // ignore 壓掉的不進 findings，但一定要計數 —— 靜默退化等於謊報
+                    if (suppressedBy is not null) { Suppress(suppressedBy); continue; }
+
+                    var line = el is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
+
+                    // ── 這是文字還是裝飾？WCAG 的 4.5:1 只管文字 ──
+                    var localName = el.Name.LocalName;
+                    var isText = !IsNonTextElement(localName) &&
+                                 (_textEls.Contains(localName) || localName.EndsWith("TextBlock") || attrName == "Foreground");
+
+                    // ── WCAG 大字級豁免：≥18pt 或 ≥14pt 粗體只需 3:1 ──
+                    // ⚠ WPF 的 FontSize 是「裝置獨立像素」(1/96 吋) 不是 point (1/72 吋)，
+                    //    換算要 ×0.75。18pt = 24px、14pt = 18.67px —— 少了這一步會把
+                    //    18px 的字誤判成大字級而放過它。
+                    var fs = 0.0;
+                    var fsRaw = el.Attribute("FontSize")?.Value;
+                    if (fsRaw is not null) ParseFontSize(fsRaw, out fs);
+                    var fw = el.Attribute("FontWeight")?.Value;
+                    var bold = IsBold(fw);
+                    var pt = fs * 0.75;
+                    var isLarge = pt >= 18 || (bold && pt >= 14);
+                    var need = NeedFor(isText, isLarge);
+                    ApplyIconFont(font, ref isText, ref isLarge, ref need);
+
+                    // Opacity < 1 或字色本身半透明時，螢幕上看到的是「文字色以 alpha 疊在背景上」的混色結果
+                    // （底也在 Opacity 群組裡時，連底一起一層一層疊出去，見 TextOnScreen）
+                    var (fgD, fgL) = TextOnScreen(fg, op, variantBd);
+                    // 比值與報告的 colors 出自同一組輸入（合成之後的字色、螢幕上的底）
+                    var (ratioD, colorsD) = Wcag.Measure(fgD, bg.Dark!);
+                    var (ratioL, colorsL) = Wcag.Measure(fgL, bg.Light!);
+
+                    _findings.Add(new Finding
+                    {
+                        File = file,
+                        Line = line,
+                        Element = localName,
+                        Fg = op < 0.999 ? WithOpacityNote(fgLabel, op) : fgLabel,
+                        Bg = LabelOf(bg),
+                        Mixed = fg.Kind != bg.Kind,
+                        RatioDark = ratioD,
+                        RatioLight = ratioL,
+                        ColorsDark = colorsD,
+                        ColorsLight = colorsL,
+                        IsText = isText,
+                        Need = need,
+                        Size = fs > 0 ? $"{(int)Math.Round(fs, MidpointRounding.ToEven)}px" : "",
+                        FontSize = fs > 0 ? fs : null,
+                        Large = isLarge,
+                        Theme = _curSide,
+                    });
+                }
+            }
         }
 
         // ── 規則 17:重疊容器內的兄弟背景 ──
@@ -874,6 +1057,8 @@ public sealed partial class Auditor
         var layout = LayoutOf(el.Name.LocalName);
         var overlap = layout != PanelLayout.SideBySide;
         Dictionary<(int Row, int Col), Backdrop>? cellBg = overlap ? new() : null;
+        var parentFont = _inheritedFont;
+        _inheritedFont = font; // 子元素繼承這個元素的字型
         foreach (var child in el.Elements())
         {
             // Style / Setter / Trigger 這些不是視覺樹，個別處理（WalkStyles），這裡跳過
@@ -887,7 +1072,7 @@ public sealed partial class Auditor
                 cell = CellOf(child, el.Name.LocalName == "Grid");
                 if (cellBg!.TryGetValue(cell, out var sb)) childBd = sb;
             }
-            Walk(child, childBd, file, op, suppressed);
+            Walk(child, childBd, file, op, suppressedBy);
             // 兄弟背板畫在容器那一層（容器的累乘透明度）；它自己的 Opacity 已折進 alpha（見 SiblingBackdrop）
             if (overlap && SiblingBackdrop(child, stretches: StretchesChildren(el.Name.LocalName)) is { } backdrop)
                 cellBg![cell] = layout == PanelLayout.Unknown
@@ -895,6 +1080,7 @@ public sealed partial class Auditor
                     ? Paint(childBd, op, new Resolved(ColorKind.SiblingContent, Raw: $"<{child.Name.LocalName}> in <{el.Name.LocalName}>"), "")
                     : Paint(childBd, op, backdrop, backdrop.Raw ?? "");
         }
+        _inheritedFont = parentFont;
     }
 
     private enum PanelLayout { SideBySide, Overlap, Unknown }
@@ -1028,8 +1214,13 @@ public sealed partial class Auditor
         {
             // ignore 管「下一個元素連同整個子樹」—— 子樹裡的 Style 定義也算（1.0）。⚠ 0.x 只看緊鄰 <Style> 的註解：
             //   容器上的 ignore 壓得到容器內元素 × Style 鏈的配對，卻壓不到容器 Resources 裡 Style 定義處的配對
-            var styleSuppressed = IsSuppressedByComment(style, file) ||
-                                  style.Ancestors().Any(a => IgnoreStateOf(a, file).Suppressed);
+            //   歸給哪一個註解：與樹走訪一致，是最外層那一個（樹走訪一進入被壓掉的子樹就不再看裡面的註解）。
+            //   自己的註解照舊先讀（無效的要記下來），祖先有壓掉的就歸祖先
+            var ownSuppressedBy = SuppressionOf(style, file);
+            var styleSuppressedBy = style.Ancestors().Reverse()
+                                        .Select(a => IgnoreStateOf(a, file).Reason)
+                                        .FirstOrDefault(r => r is not null)
+                                    ?? ownSuppressedBy;
 
             CountStyleTemplateText(style, file);
 
@@ -1085,78 +1276,97 @@ public sealed partial class Auditor
                 if (fgDead) { _deadFg++; continue; }
                 // 停用態（IsEnabled=False 觸發）：WCAG 1.4.3 豁免，計數回報、不評分
                 if (stDisabled) { _disabled++; continue; }
-                var fg = ColorResolver.Resolve(fgv, _pal);
-                var bgr = ColorResolver.Resolve(bgv, _pal);
-                if (fg is null || bgr is null) continue;
-                // 之前這裡是裸 continue —— 配對從報告徹底消失，連計數都沒有，
-                // 違反「靜默退化等於謊報」（同檔 ignore 註解那段的規矩）。
-                // 任一側看不懂 → unresolved；任一側透明/半透明 → skipped
-                if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey ||
-                    bgr.Kind is ColorKind.Other or ColorKind.UnknownKey)
-                {
-                    var (bad, raw) = fg.Kind is ColorKind.Other or ColorKind.UnknownKey ? (fg, fgv) : (bgr, bgv);
-                    Unres(bad, file, line, raw); continue;
-                }
-                // 透明（看不見）的字 → 合法跳過；半透明字色疊到 Style 自己的不透明底上評分
-                if (fg.Kind is ColorKind.Transparent || VisibleAlpha(fg) < 0.01) { _skipped++; continue; }
-                // 透明／半透明的底：定義處沒有底下那層可疊。
-                // - 會在使用處被評到的（有元素 Style= 引用的具名 Style、它們的 BasedOn 基底、行內 Style）：交給使用處
-                //   對著祖先的底評（見元素 × Style 鏈的同源判定），這裡不另外計 —— 再記一筆就是同一組算兩次
-                //   （審查最後一輪 3：QuillNest 的覆蓋率因此被多扣）
-                // - 使用處評不到的（隱含樣式、只透過 ItemContainerStyle 之類套用或沒用到的具名 Style）→ unresolved。
-                //   ⚠ 舊版記 skipped（不進覆蓋率分母），這組整個從報告消失、覆蓋率照樣 100%（審查素材 use 的 ToggleButton）
-                if (bgr.Kind is ColorKind.Alpha or ColorKind.Transparent)
-                {
-                    var gradedWhereUsed = key is not null
-                        ? _styles.IsUsedByAnElement(key)
-                        : style.Parent?.Name.LocalName.EndsWith(".Style", StringComparison.Ordinal) == true;
-                    if (!gradedWhereUsed) Unres(UnresolvedReason.TranslucentUncomposited, file, line, bgv);
-                    continue;
-                }
-                // 同一個 brush 同時當字色與底色 —— Material 系的模板不透明度慣用手法：
-                // 模板把 Background 以 10~12% Opacity 畫成暈染（VisualState 動畫），字全濃度。
-                // 字面上 1:1、執行期不是；Opacity 藏在模板動畫裡，靜態看不到 —— 不猜，
-                // 歸 unresolved 而不是報一筆必然假的 fail（MaterialDesign 抽驗實證，
-                // NavigationPrimaryListBoxItem 等三處全是這形狀）。
-                if (fg.Key is not null && fg.Key == bgr.Key)
-                { Unres(UnresolvedReason.SameBrushPair, file, line, fg.Key); continue; }
+                var fgAll = ResolveColour(fgv, _pal);
+                var bgAll = ResolveColour(bgv, _pal);
+                if (fgAll is null || bgAll is null) continue;
+                // 轉換器的固定候選色（1.2，converters.constantBrushes）：定義處沒有底下那一層 —— 底的候選要全部是不透明的顏色、
+                // 字要解得出來；字的候選要底是一個不透明的顏色。兩邊都來自轉換器（哪個配哪個不知道）或另一邊看不懂時不展開，
+                // 照舊記看不懂
+                List<(Resolved Fg, string Label, bool FromConverter)> fgVariants =
+                    fgAll.Candidates is { } fc && bgAll.Candidates is null && IsOpaque(bgAll)
+                        ? [.. fc.Select(c => (CandidateColour(c), c.Label, true))]
+                        : [(fgAll, fgv, false)];
+                List<(Resolved Bg, bool FromConverter)> bgVariants =
+                    bgAll.Candidates is { } bc && fgAll.Candidates is null && fgAll.Kind is not (ColorKind.Other or ColorKind.UnknownKey) &&
+                    bc.All(c => CandidateColour(c).Kind == ColorKind.Hard)
+                        ? [.. bc.Select(c => (CandidateColour(c), true))]
+                        : [(bgAll, false)];
+                foreach (var (fg, fgLabel, fgFromConverter) in fgVariants)
+                    foreach (var (bgr, bgFromConverter) in bgVariants)
+                    {
+                        // 之前這裡是裸 continue —— 配對從報告徹底消失，連計數都沒有，
+                        // 違反「靜默退化等於謊報」（同檔 ignore 註解那段的規矩）。
+                        // 任一側看不懂 → unresolved；任一側透明/半透明 → skipped
+                        if (fg.Kind is ColorKind.Other or ColorKind.UnknownKey ||
+                            bgr.Kind is ColorKind.Other or ColorKind.UnknownKey)
+                        {
+                            var (bad, raw) = fg.Kind is ColorKind.Other or ColorKind.UnknownKey ? (fg, fgv) : (bgr, bgv);
+                            Unres(bad, file, line, raw); continue;
+                        }
+                        // 透明（看不見）的字 → 合法跳過；半透明字色疊到 Style 自己的不透明底上評分
+                        if (fg.Kind is ColorKind.Transparent || VisibleAlpha(fg) < 0.01) { _skipped++; continue; }
+                        // 透明／半透明的底：定義處沒有底下那層可疊。
+                        // - 會在使用處被評到的（有元素 Style= 引用的具名 Style、它們的 BasedOn 基底、行內 Style）：交給使用處
+                        //   對著祖先的底評（見元素 × Style 鏈的同源判定），這裡不另外計 —— 再記一筆就是同一組算兩次
+                        //   （審查最後一輪 3：QuillNest 的覆蓋率因此被多扣）
+                        // - 使用處評不到的（隱含樣式、只透過 ItemContainerStyle 之類套用或沒用到的具名 Style）→ unresolved。
+                        //   ⚠ 舊版記 skipped（不進覆蓋率分母），這組整個從報告消失、覆蓋率照樣 100%（審查素材 use 的 ToggleButton）
+                        if (bgr.Kind is ColorKind.Alpha or ColorKind.Transparent)
+                        {
+                            var gradedWhereUsed = key is not null
+                                ? _styles.IsUsedByAnElement(key)
+                                : style.Parent?.Name.LocalName.EndsWith(".Style", StringComparison.Ordinal) == true;
+                            if (!gradedWhereUsed) Unres(UnresolvedReason.TranslucentUncomposited, file, line, bgv);
+                            continue;
+                        }
+                        // 同一個 brush 同時當字色與底色 —— Material 系的模板不透明度慣用手法：
+                        // 模板把 Background 以 10~12% Opacity 畫成暈染（VisualState 動畫），字全濃度。
+                        // 字面上 1:1、執行期不是；Opacity 藏在模板動畫裡，靜態看不到 —— 不猜，
+                        // 歸 unresolved 而不是報一筆必然假的 fail（MaterialDesign 抽驗實證，
+                        // NavigationPrimaryListBoxItem 等三處全是這形狀）。
+                        if (fg.Key is not null && fg.Key == bgr.Key)
+                        { Unres(UnresolvedReason.SameBrushPair, file, line, fg.Key); continue; }
 
-                // ⚠ v0.1 的第 5 號 bug（規劃書 8.2）：這裡曾漏了 Need，而分級把
-                //   「沒有 Need」當裝飾 → 所有 Style 配對被靜默歸為裝飾、完全不受檢。
-                //   分類沿用排除清單：TargetType 是非文字控制項才免檢；
-                //   不確定（匿名、沒 TargetType）就當文字報出來 —— 不替使用者放過。
-                var isText = ttName is null || !IsNonTextElement(ttName);
-                var fs = 0.0;
-                if (Prop("FontSize", out _) is { } fsv) ParseFontSize(fsv, out fs);
-                var bold = IsBold(Prop("FontWeight", out _));
-                var pt = fs * 0.75; // WPF FontSize 是 DIP，換 point 要 ×0.75（規劃書 4.3）
-                var isLarge = pt >= 18 || (bold && pt >= 14);
-                var need = NeedFor(isText, isLarge);
+                        // ⚠ v0.1 的第 5 號 bug（規劃書 8.2）：這裡曾漏了 Need，而分級把
+                        //   「沒有 Need」當裝飾 → 所有 Style 配對被靜默歸為裝飾、完全不受檢。
+                        //   分類沿用排除清單：TargetType 是非文字控制項才免檢；
+                        //   不確定（匿名、沒 TargetType）就當文字報出來 —— 不替使用者放過。
+                        var isText = ttName is null || !IsNonTextElement(ttName);
+                        var fs = 0.0;
+                        if (Prop("FontSize", out _) is { } fsv) ParseFontSize(fsv, out fs);
+                        var bold = IsBold(Prop("FontWeight", out _));
+                        var pt = fs * 0.75; // WPF FontSize 是 DIP，換 point 要 ×0.75（規劃書 4.3）
+                        var isLarge = pt >= 18 || (bold && pt >= 14);
+                        var need = NeedFor(isText, isLarge);
+                        // Style 自己（含這個狀態的觸發 Setter、BasedOn 基底）設的圖示字型；定義處沒有祖先可以繼承
+                        ApplyIconFont(Prop("FontFamily", out _), ref isText, ref isLarge, ref need);
 
-                _pairs++;
-                if (styleSuppressed) { _suppressed++; continue; }
-                var (fgOnD, fgOnL) = EffectiveForeground(fg, 1.0, bgr);
-                var (ratioD, colorsD) = Wcag.Measure(fgOnD, bgr.Dark!);
-                var (ratioL, colorsL) = Wcag.Measure(fgOnL, bgr.Light!);
-                _findings.Add(new Finding
-                {
-                    File = file,
-                    Line = line,
-                    Element = $"Style[{label}]/{stateName}",
-                    Fg = fgv,
-                    Bg = LabelOf(bgr),
-                    Mixed = fg.Kind != bgr.Kind,
-                    RatioDark = ratioD,
-                    RatioLight = ratioL,
-                    ColorsDark = colorsD,
-                    ColorsLight = colorsL,
-                    IsText = isText,
-                    Need = need,
-                    Size = fs > 0 ? $"{(int)Math.Round(fs, MidpointRounding.ToEven)}px" : "",
-                    FontSize = fs > 0 ? fs : null,
-                    Large = isLarge,
-                    Theme = _curSide,
-                });
+                        _pairs++;
+                        if (fgFromConverter || bgFromConverter) _converterPairs++;
+                        if (styleSuppressedBy is not null) { Suppress(styleSuppressedBy); continue; }
+                        var (fgOnD, fgOnL) = EffectiveForeground(fg, 1.0, bgr);
+                        var (ratioD, colorsD) = Wcag.Measure(fgOnD, bgr.Dark!);
+                        var (ratioL, colorsL) = Wcag.Measure(fgOnL, bgr.Light!);
+                        _findings.Add(new Finding
+                        {
+                            File = file,
+                            Line = line,
+                            Element = $"Style[{label}]/{stateName}",
+                            Fg = fgLabel,
+                            Bg = LabelOf(bgr),
+                            Mixed = fg.Kind != bgr.Kind,
+                            RatioDark = ratioD,
+                            RatioLight = ratioL,
+                            ColorsDark = colorsD,
+                            ColorsLight = colorsL,
+                            IsText = isText,
+                            Need = need,
+                            Size = fs > 0 ? $"{(int)Math.Round(fs, MidpointRounding.ToEven)}px" : "",
+                            FontSize = fs > 0 ? fs : null,
+                            Large = isLarge,
+                            Theme = _curSide,
+                        });
+                    }
             }
         }
     }

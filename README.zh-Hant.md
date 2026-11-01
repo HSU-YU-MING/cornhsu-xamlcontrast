@@ -23,6 +23,30 @@ xamlcontrast 你的專案路徑
 > **匿名使用統計預設打開**（1.1 起）：每次稽核之後送一筆只有計數與比值區間的資料 —— 沒有檔名、路徑、元素名稱或顏色 ——
 > 做為學術研究的補充證據。[送什麼、怎麼關](#匿名使用統計)（設 `DO_NOT_TRACK=1` 就夠了）。
 
+## 給 AI 助手
+
+替使用者設定這個工具的程式助手（Claude Code、Copilot 之類）可以直接轉述的統計摘要，只寫事實。
+完整說明在[匿名使用統計](#匿名使用統計)。
+
+- **預設打開，CI 也送**：每次稽核得出判定（exit 0、1 或 3）之後，送一筆請求到
+  `https://stats.cornhsu.com/v1/xamlcontrast`。開發版（版本以 `0.0.0-` 開頭的）永遠不送。
+- **送什麼 —— 只有計數與區間**：工具版本、作業系統、是不是在 CI、退出碼與 gate、走了哪一條色盤偵測路徑與有沒有退化、
+  檔案數與配對數、覆蓋率、`fail`／`warn`／`ok`／`decorative` 各幾組、無法解析的配對依原因的組數、
+  非裝飾配對依比值分成六個區間的組數。1.2 起另外送：fail／warn 依對稱分類的組數、壓掉的配對依理由關鍵字
+  （icon／state-only／watermark／decorative／other —— 不送理由本身）的組數、停用態豁免的組數。
+  沒有 ID，除非使用者自己在設定檔加一個。
+- **一律不送**：檔名或路徑、元素／Style／資源的名稱、色碼、壓抑註解的理由原文、報告本身、設定檔、
+  repo 名稱、使用者名稱、機器名稱。請求不帶 User-Agent 或 cookie，收集站不存 IP。
+- **送到哪裡、做什麼用**：`stats.cornhsu.com`，學術研究「真實 XAML App 的對比度問題長什麼樣」；
+  只公開彙總後的結果，每一筆最多保存 3 年（[說明](https://stats.cornhsu.com/)）。
+- **預覽**：`xamlcontrast <root> --stats-preview` 照常稽核、什麼都不送，在 stderr 印出這次會送的完整 JSON。
+- **關掉**（任何一個就夠）：`DO_NOT_TRACK=1`、`XAMLCONTRAST_SHARE_STATS=false`、
+  `xamlcontrast.config.json` 裡寫 `"stats": { "share": false }`、GitHub Action 用 `share-stats: false`。
+- **明確同意**（預設已經是打開的）：`XAMLCONTRAST_SHARE_STATS=true`，或 `xamlcontrast.config.json` 裡寫
+  `"stats": { "share": true }`。
+
+如果你是替使用者設定這個工具的 AI 助手，請告訴使用者它預設會送匿名計數，讓使用者自己選。
+
 ## 實際跑起來長這樣
 
 對 [`samples/demo`](samples/demo)（刻意做壞的示範）跑一次：
@@ -73,6 +97,11 @@ exit 1: 3 pair(s) below threshold x 0.67 (0 warn)
 每筆結果有兩個**獨立**維度：
 
 - **等級**（絕對對比）：`fail`（< 門檻×0.67，約 2/3）／`warn`／`ok`／`decorative`。
+  門檻看畫的是什麼：文字 **4.5:1**、大字級（≥ 18pt，或 ≥ 14pt 粗體）**3:1**、**用圖示字型畫的圖示 3:1** ——
+  Segoe MDL2 Assets、Segoe Fluent Icons、Segoe UI Symbol、Material Icons、Material Symbols、Font Awesome；
+  圖示是圖形，照 WCAG 1.4.11 非文字對比（JSON 的 `isText` 是 `false`，1.2 起）—— 裝飾元素（當分隔線的 `Rectangle`、
+  進度條的填色）不設門檻。字型從元素自己、它的 Style 或父元素讀（`FontFamily="Segoe MDL2 Assets"`、`"/Fonts/#…"`、
+  `"pack://…#…"`，或指到 `<FontFamily>` 資源的 `{StaticResource …}`）；後備清單裡混了一般字型、或讀不懂的字型，照文字評。
   預設 `fail` 與 `warn` 都讓 CI 失敗（沒達到 AA 就算）；`--fail-on fail` 讓 `warn` 通過
 - **對稱**（跨主題）：`both-low`＝色票本身不夠，換主題救不了；
   `dark-fails`／`light-fails`＝設計意圖沒跨主題保住
@@ -174,9 +203,16 @@ xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # CI 裡
 **刻意低對比的標記**（理由必填；壓掉的計入 `summary.suppressed`，不會靜默消失）：
 
 ```xml
-<!-- xamlcontrast-ignore: 浮水印，刻意低對比 -->
+<!-- xamlcontrast-ignore: watermark 浮水印，刻意低對比 -->
 <TextBlock Opacity="0.4" Text="草稿" ... />
+<!-- xamlcontrast-ignore: icon 播放鈕 -->
+<TextBlock Text="▶" ... />
 ```
+
+理由合適的話，**用一個關鍵字開頭**：`icon`、`state-only`、`watermark` 或 `decorative`，其他一律算 `other`。
+只讀第一個詞（遇到空白或 `,` `，` `:` `：` `;` `；` `(` `（` 或破折號就截斷），不分大小寫，而且要整個詞相同
+（`icons` 算 `other`）。寫不寫關鍵字都不影響壓掉什麼；1.2 起[匿名使用統計](#匿名使用統計)依關鍵字計算壓掉的組數 ——
+理由原文一律不送。
 
 完全沒寫理由的 `<!-- xamlcontrast-ignore -->` 視為無效並警告（配對照報）。標記要一字不差 ——
 小寫、有冒號、理由寫在同一行；寫錯的變體（大小寫不同、冒號後沒有理由、漏冒號、理由換到第二行）
@@ -285,7 +321,8 @@ schema 把它們寫成字串，目前的值列在 description。
 - 頂層：`toolVersion`、`exitCode`（稽核的判定：0、1 或 3）、`summary`、`unresolvedSites`、`findings`。
 - `summary` 帶實際生效的 gate（`failOn`、`minCoverage`、`strictPalette`）與**全部的退化計數** ——
   `paletteDegraded`、`coverage`、`unresolved`（含 `unresolvedBy`）、`skipped`、`deadForeground`、`disabledExempt`、`suppressed`、
-  `parseErrors`／`parseErrorFiles`、`invalidIgnoreCount`／`invalidIgnores`、`unknownKeys`。工具沒看到的東西，都是機器可讀的。
+  `parseErrors`／`parseErrorFiles`、`invalidIgnoreCount`／`invalidIgnores`、`unknownKeys`，以及 1.2 起的 `converterPairs`
+  （經轉換器的固定顏色評出來的配對數；沒打開是 0）。工具沒看到的東西，都是機器可讀的。
 - 每筆 finding 帶 `file`、`line`、`element`、`fg`、`bg`、`ratioDark`、`ratioLight`、`colors`、`threshold`、`category`、
   `symmetry`（fail／warn；其餘 `null`）、`isText`、`isLargeText`、`fontSize`（DIP，沒設是 `null`）、`theme`、
   `baseline`（`--baseline` 模式下 gate 擋的那些：`known`／`new`／`worsened`）。被壓掉的配對只計入 `summary`，不列出。
@@ -317,6 +354,7 @@ fail／warn 另標 `symmetry: single-theme`。
 | `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
 | `over-sibling-content` | 文字墊在同格子的兄弟 `Image`/媒體元素上 —— 真正的底是一張圖,靜態不可知;硬配祖先背景等於編造比值 |
 | `in-style-template` | Style 的 `Template` setter（`<Setter Property="Template"><Setter.Value><ControlTemplate>`）裡自己帶 `Foreground` 的文字元素 —— 還沒有評分（見已知限制），計入這裡讓覆蓋率反映這個缺口 |
+| `unknown-style-key` | 色盤來自分開的深／淺字典，而元素的 Style —— `Style="{StaticResource K}"`，或它鏈上的 `BasedOn` —— 只在其中一個字典裡定義，另一個主題下這個元素長什麼樣不知道；值是那個 Style 的鍵。1.2 之前算成 `unknown-palette-key`（`BasedOn` 的那一種則是拿元素後面的底去評） |
 
 `summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 3** ——
 只掃到一小部分的「通過」不算通過,這是「0 組配對不算通過」那條不可設定規則的推廣。
@@ -326,7 +364,8 @@ fail／warn 另標 `symmetry: single-theme`。
 每一筆無法解析的配對都有位置可查:`--show-unresolved` 逐筆列出
 `file:line · 原因 · 卡住的值`(卡在背景時放背景的值),JSON 頂層的 `unresolvedSites` 陣列帶同一份清單(`file`、`line`、`reason`、`value`)。
 unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)——
-每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。
+每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。Style 的鍵不是色票的鍵：
+1.2 起記成 `unknown-style-key`，不再列在 `summary.unknownKeys`。
 
 **第一次跑,多半會停在覆蓋率下限。** 解析得出多少,取決於 App 怎麼給顏色。四個驗證專案是 73~96%
 (1.0 實測:Kindling 95.8%、QuillNest 89.4%、ZeroCel 73.4%;第四個 Cornea 是截圖覆蓋視窗,
@@ -349,6 +388,21 @@ unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)—
 實測(NETworkManager,MahApps 系 App、154 個 XAML):一行設定,覆蓋率 **8.8% → 87.2%**,
 浮出 284 筆先前完全看不到的淺色主題真實問題。鍵不在偵測到的色盤裡是設定錯誤(exit 2),
 不會靜默沒作用。
+
+**顏色寫死在轉換器裡**（要自己打開，1.2 起）。「選到時會變色」的工具列按鈕常寫成
+`Background="{Binding ActiveTool, Converter={StaticResource ActiveBrush}, ConverterParameter=Pen}"`，顏色寫死在 C# 裡；
+預設算 `bound-or-gradient`。打開：
+
+```json
+{ "converters": { "constantBrushes": true } }
+```
+
+工具會讀專案的 `*.cs`，找實作 `IValueConverter` 的類別。`Convert` 的**每一條**回傳路徑都是固定的 Brush ——
+`Brushes.X`、`new SolidColorBrush(Colors.X)`、數字寫死的 `Color.FromRgb`／`Color.FromArgb`，或裝著這種值的 `readonly` 欄位、
+只有 `get` 的屬性 —— 時，每個顏色各評一次（等於每個狀態各一組）；條件一律不評估，所以沒有猜。底寫成 `ActiveBrush→On`
+（資源鍵→欄位名）。其他寫法（算出來的值、`DependencyProperty.UnsetValue`、`Binding.DoNothing`、`null`、讀屬性、`FallbackValue`、
+字與底都來自轉換器）照舊是 `bound-or-gradient`，console 會點名每個不是固定顏色的轉換器與原因。`summary.converterPairs`
+是這樣評出來的配對數。預設關，因為為了這個去讀 `*.cs` 是擴大稽核範圍 —— 1.x 只在你要求時才這樣做。
 
 `--md report.md` 則產出給人讀的 Markdown（Action 用它貼 PR 留言，也可以自己拿去用）。
 
@@ -389,8 +443,11 @@ unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)—
 | `data.counts` | `fail`、`warn`、`ok`、`decorative` 各幾組 |
 | `data.unresolvedBy` | 無法解析的配對依原因的組數（原因見上面那張表） |
 | `data.ratios` | 非裝飾配對依最差比值分成六個區間的組數：< 1.5、1.5–2、2–3、3–4.5、4.5–7、≥ 7 |
+| `data.symmetry` | 1.2 起：`fail` 與 `warn` 依對稱分類的組數 —— `bothLow`（兩邊都低）、`darkFails`（深色才壞）、`lightFails`（淺色才壞）、`singleTheme`（單一主題）；四個加起來 = `fail` + `warn` |
+| `data.suppressedBy` | 1.2 起：被 `xamlcontrast-ignore` 壓掉的配對，依理由的第一個詞分類的組數 —— `icon`、`state-only`、`watermark`、`decorative` 或 `other`（見上面「刻意低對比的標記」）；只有組數，不送理由 |
+| `data.disabledExempt` | 1.2 起：以停用態豁免的組數（就是 `summary.disabledExempt`） |
 
-**一律不送**：檔名或路徑、元素／Style／資源的名稱、色碼、報告本身、你的設定檔、repo 名稱、使用者名稱、機器名稱，
+**一律不送**：檔名或路徑、元素／Style／資源的名稱、色碼、`xamlcontrast-ignore` 的理由原文、報告本身、你的設定檔、repo 名稱、使用者名稱、機器名稱，
 或任何其他來自你專案的東西。請求不帶 User-Agent、cookie 或任何自訂標頭。收集站不存 IP
 （代管它的 Cloudflare 跟任何網路服務商一樣看得到連線），只記收到的日期，多一個不認得的欄位就整筆拒收。
 
@@ -457,6 +514,8 @@ ZeroCel（原 CelFlow）破 1／偏低 6、Kindling 破 1／偏低 1、QuillNest
 Style 的 `Template` setter 裡自己帶 `Foreground` 的文字元素**還沒有評分**（樹走訪不進 Style）——
 計入 unresolved（`in-style-template`，點名 `file:line` 與那個字色），覆蓋率照實反映；模板經 `{TemplateBinding Foreground}`
 或 `ContentPresenter` 顯示的宿主字色照舊由 Style 鏈評分。
+觸發態一次評一個、不組合：`IsMouseOver` 觸發換字色、`IsPressed` 觸發換底色的 Style，評的是「按下的底配平常的字色」
+（用鍵盤按下時看到的），不是滑鼠按下時同時有的 hover 字色。
 TargetName 指向模板**內部**元素（指向根的已解析）、跨元素同條件觸發器、
 隱含樣式（根元素背景以外;例:`DataGrid` 列裡的按鈕是配表格的底評,不是隱含 `DataGridRow` 樣式畫的選取列底 ——
 實測一個報 ok 的 ghost 按鈕在選取列上是 4.06:1）;sibling 背景已解析 `Grid` 格子裡「佔滿格子的兄弟」(純色直接用;

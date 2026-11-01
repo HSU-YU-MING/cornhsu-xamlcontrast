@@ -99,7 +99,10 @@ public class CliStatsTests
                 "coverage": 100,
                 "counts": { "fail": 3, "warn": 0, "ok": 3, "decorative": 1 },
                 "unresolvedBy": {},
-                "ratios": [1, 1, 1, 1, 0, 2]
+                "ratios": [1, 1, 1, 1, 0, 2],
+                "symmetry": { "bothLow": 1, "darkFails": 0, "lightFails": 2, "singleTheme": 0 },
+                "suppressedBy": { "watermark": 1 },
+                "disabledExempt": 1
               }
             }
             """)!;
@@ -117,6 +120,23 @@ public class CliStatsTests
             buckets[worst < 1.5 ? 0 : worst < 2 ? 1 : worst < 3 ? 2 : worst < 4.5 ? 3 : worst < 7 ? 4 : 5]++;
         }
         Assert.Equal(buckets, sent["data"]!["ratios"]!.AsArray().Select(n => n!.GetValue<int>()));
+
+        // 1.2 的三個欄位也從報告獨立驗一次：symmetry 是 fail／warn 的 symmetry 欄、suppressedBy 加總是 summary.suppressed、
+        // disabledExempt 就是 summary.disabledExempt
+        var report = Cli.ReadJson(json);
+        var summary = report.GetProperty("summary");
+        var failOrWarn = report.GetProperty("findings").EnumerateArray()
+            .Where(f => f.GetProperty("category").GetString() is "fail" or "warn").ToList();
+        var symmetry = sent["data"]!["symmetry"]!;
+        foreach (var (key, label) in new[] { ("bothLow", "both-low"), ("darkFails", "dark-fails"), ("lightFails", "light-fails"), ("singleTheme", "single-theme") })
+            Assert.Equal(failOrWarn.Count(f => f.GetProperty("symmetry").GetString() == label), symmetry[key]!.GetValue<int>());
+        Assert.Equal(failOrWarn.Count, symmetry.AsObject().Sum(p => p.Value!.GetValue<int>()));
+        Assert.Equal(summary.GetProperty("suppressed").GetInt32(), sent["data"]!["suppressedBy"]!.AsObject().Sum(p => p.Value!.GetValue<int>()));
+        Assert.Equal(summary.GetProperty("disabledExempt").GetInt32(), sent["data"]!["disabledExempt"]!.GetValue<int>());
+        // 理由原文絕對不送：demo 的註解是「watermark 浮水印，刻意低對比 intentionally faint」，送出去的只有 watermark 這個類別
+        var body = Encoding.UTF8.GetString(req.Body);
+        Assert.DoesNotContain("浮水印", body, StringComparison.Ordinal);
+        Assert.DoesNotContain("intentionally", body, StringComparison.Ordinal);
 
         // 不影響結果：stdout、退出碼與 DO_NOT_TRACK 的那一次一模一樣；stderr 只多 CI 那一行
         var quiet = Cli.RunEnv(Env(collector.Url, egress, ("DO_NOT_TRACK", "1")), demo, "--json", json);
@@ -154,6 +174,10 @@ public class CliStatsTests
         Assert.Equal(25, d["coverage"]!.GetValue<double>());
         Assert.True(JsonNode.DeepEquals(JsonNode.Parse("""{ "bound-or-gradient": 3 }"""), d["unresolvedBy"]), d["unresolvedBy"]!.ToJsonString());
         Assert.Equal([0, 0, 0, 0, 0, 1], d["ratios"]!.AsArray().Select(n => n!.GetValue<int>()));
+        // 1.2：沒有 fail／warn 時四個對稱鍵照樣都送（0）；沒有壓掉任何東西是空物件
+        Assert.True(JsonNode.DeepEquals(JsonNode.Parse("""{ "bothLow": 0, "darkFails": 0, "lightFails": 0, "singleTheme": 0 }"""), d["symmetry"]), d["symmetry"]!.ToJsonString());
+        Assert.True(JsonNode.DeepEquals(new JsonObject(), d["suppressedBy"]), d["suppressedBy"]!.ToJsonString());
+        Assert.Equal(0, d["disabledExempt"]!.GetValue<int>());
 
         var second = JsonNode.Parse(Encoding.UTF8.GetString(collector.Requests[1].Body))!;
         Assert.Null(second["projectId"]);
@@ -551,6 +575,192 @@ public class CliStatsTests
         Assert.Equal(r.Findings.Count(f => f.Category != Category.Decorative), expected.Sum());
         Assert.Equal(1, data["counts"]!["decorative"]!.GetValue<int>());
         Assert.Throws<ArgumentOutOfRangeException>(() => UsageStats.Data(r, 2, "warn")); // 2 不是判定，不送
+    }
+
+    // ── 1.2 的三個欄位：symmetry、suppressedBy、disabledExempt（與 unresolvedBy 的新原因 unknown-style-key）──
+
+    [Theory] // suppressedBy 的分類：第一個詞（空白或 , ， : ： ; ； — – ( （ 截斷）、轉小寫、完全等於四個關鍵字之一；其他一律 other
+    [InlineData("icon 播放鈕", "icon")]
+    [InlineData("Icon", "icon")]
+    [InlineData("ICON, play button", "icon")]
+    [InlineData("icon\tplay", "icon")]
+    [InlineData("icon(play)", "icon")]
+    [InlineData("icon（播放）", "icon")]
+    [InlineData("icon:play", "icon")]
+    [InlineData("icon;play", "icon")]
+    [InlineData("state-only hover tint", "state-only")]
+    [InlineData("State-Only", "state-only")]
+    [InlineData("watermark", "watermark")]
+    [InlineData("watermark，浮水印", "watermark")]
+    [InlineData("watermark：浮水印", "watermark")]
+    [InlineData("watermark；浮水印", "watermark")]
+    [InlineData("decorative—divider", "decorative")]
+    [InlineData("decorative–divider", "decorative")]
+    [InlineData("decorative divider", "decorative")]
+    [InlineData("icons", "other")]               // 完全等於才算，不是開頭相同
+    [InlineData("icon播放鈕", "other")]           // 沒斷開就是一個詞
+    [InlineData("iconic", "other")]
+    [InlineData("state only", "other")]          // 第一個詞是 state
+    [InlineData("state", "other")]
+    [InlineData("decorative-ish", "other")]      // 連字號不截斷
+    [InlineData("浮水印，刻意低對比", "other")]
+    [InlineData("legacy panel", "other")]
+    [InlineData("", "other")]                    // requireReason 關掉、沒寫理由
+    [InlineData(null, "other")]
+    public void SuppressionReasonsAreClassifiedByTheirFirstWord(string? reason, string kind)
+    {
+        Assert.Equal(kind, UsageStats.SuppressionKind(reason));
+        Assert.Contains(kind, UsageStats.SuppressionKinds);
+    }
+
+    [Fact] // 每組壓掉的配對歸給「壓掉它的那個註解」：容器上的註解管整個子樹（裡面的註解不算）、容器 Resources 裡的 Style 定義也歸容器的；
+           // 加總 = summary.suppressed；只列 > 0 的、照固定順序；理由原文一個字都不進 data
+    public void SuppressedByCountsEachPairUnderTheCommentThatSuppressedIt()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <StackPanel>
+                <!-- xamlcontrast-ignore: icon 播放鈕 -->
+                <TextBlock Foreground="#EEEEEE" Text="▶"/>
+                <!-- xamlcontrast-ignore: Watermark, 草稿字樣 -->
+                <TextBlock Foreground="#EEEEEE" Text="DRAFT"/>
+                <!-- xamlcontrast-ignore: decorative divider -->
+                <Rectangle Fill="#EEEEEE" Height="1"/>
+                <!-- xamlcontrast-ignore: 舊版面，改版另案處理 -->
+                <StackPanel>
+                  <!-- xamlcontrast-ignore: icon 內層的註解不算 -->
+                  <TextBlock Foreground="#EEEEEE" Text="a"/>
+                  <TextBlock Foreground="#EEEEEE" Text="b"/>
+                </StackPanel>
+                <!-- xamlcontrast-ignore: state-only 按下時的底 -->
+                <StackPanel>
+                  <StackPanel.Resources>
+                    <!-- xamlcontrast-ignore: icon Style 自己的註解輸給容器的 -->
+                    <Style x:Key="Pressed" TargetType="Button">
+                      <Setter Property="Background" Value="#FFFFFF"/>
+                      <Setter Property="Foreground" Value="#EEEEEE"/>
+                    </Style>
+                  </StackPanel.Resources>
+                </StackPanel>
+                <TextBlock Foreground="#EEEEEE" Text="not suppressed"/>
+              </StackPanel>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(6, r.Suppressed);
+        Assert.Single(r.Findings); // 只剩沒被壓掉的那一組
+
+        var data = UsageStats.Data(r, 1, "warn");
+        var by = data["suppressedBy"]!.AsObject();
+        Assert.Equal(["icon", "state-only", "watermark", "decorative", "other"], by.Select(p => p.Key));
+        Assert.Equal([1, 1, 1, 1, 2], by.Select(p => p.Value!.GetValue<int>()));
+        Assert.Equal(r.Suppressed, by.Sum(p => p.Value!.GetValue<int>()));
+
+        var json = data.ToJsonString(new JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+        foreach (var text in new[] { "播放鈕", "草稿", "舊版面", "按下", "內層", "Style 自己", "divider" })
+            Assert.DoesNotContain(text, json, StringComparison.Ordinal);
+    }
+
+    [Fact] // requireReason 關掉時沒寫理由的 ignore 也壓 —— 歸 other，加總照樣等於 summary.suppressed（預覽印的就是送的）
+    public void SuppressionWithoutAReasonIsCountedAsOther()
+    {
+        using var collector = new PushStub(204, null, "No Content");
+        using var egress = new PushStub(502, null, "Bad Gateway");
+        using var fx = new Fixture();
+        fx.File(ToolConfig.FileName, """{ "ignore": { "requireReason": false } }""");
+        fx.File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <!-- xamlcontrast-ignore -->
+              <TextBlock Foreground="#EEEEEE" Text="x"/>
+              <TextBlock Foreground="#000000" Text="ok"/>
+            </Grid>
+            """);
+        var r = Cli.RunEnv(Env(collector.Url, egress), fx.Root, "--stats-preview");
+        Assert.True(r.Exit == 0, r.ToString());
+        var d = JsonNode.Parse(PreviewJson(r.Err))!["data"]!;
+        Assert.True(JsonNode.DeepEquals(JsonNode.Parse("""{ "other": 1 }"""), d["suppressedBy"]), d["suppressedBy"]!.ToJsonString());
+        Assert.Empty(collector.Requests);
+    }
+
+    [Fact] // symmetry：fail 與 warn 依對稱分四類（Grader 算的那一欄），四個鍵都送；加總 = counts.fail + counts.warn。
+           // ok 與 decorative 沒有對稱（NotApplicable），不算進任何一類
+    public void SymmetryCountsFailAndWarnPairsAndAddsUpToThem()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Dim" Color="#2A2A2A"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <Style x:Key="DarkOnly" TargetType="Button">
+                <Setter Property="Background" Value="#111111"/>
+                <Setter Property="Foreground" Value="#333333"/>
+              </Style>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FAFAFA"/>
+              <SolidColorBrush x:Key="Dim" Color="#E8E8E8"/>
+              <SolidColorBrush x:Key="Fg" Color="#212121"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """
+            <StackPanel Background="{DynamicResource Bg}">
+              <TextBlock Foreground="{DynamicResource Dim}" Text="both-low (fail)"/>
+              <TextBlock Foreground="#FFFFFF" Text="light-fails"/>
+              <TextBlock Foreground="#000000" Text="dark-fails"/>
+              <Border Background="#FFFFFF"><TextBlock Foreground="#8A8A8A" Text="both-low (warn)"/></Border>
+              <Border Background="#FFFFFF"><TextBlock Foreground="#000000" Text="ok: no symmetry"/></Border>
+              <Rectangle Fill="{DynamicResource Dim}" Height="1"/>
+            </StackPanel>
+            """);
+        var r = fx.Run();
+        var data = UsageStats.Data(r, 1, "warn");
+        var symmetry = data["symmetry"]!.AsObject();
+        Assert.Equal(["bothLow", "darkFails", "lightFails", "singleTheme"], symmetry.Select(p => p.Key));
+        var expected = new[] { Symmetry.BothLow, Symmetry.DarkFails, Symmetry.LightFails, Symmetry.SingleTheme }
+            .Select(s => r.Findings.Count(f => f.Category is Category.Fail or Category.Warn && f.Symmetry == s)).ToList();
+        Assert.Equal(expected, symmetry.Select(p => p.Value!.GetValue<int>()));
+        Assert.All(expected, n => Assert.True(n > 0, $"every class should be exercised: {string.Join(", ", expected)}"));
+        Assert.True(r.CountOf(Category.Warn) > 0);
+        Assert.Equal(data["counts"]!["fail"]!.GetValue<int>() + data["counts"]!["warn"]!.GetValue<int>(),
+                     symmetry.Sum(p => p.Value!.GetValue<int>()));
+    }
+
+    [Fact] // unresolvedBy 的新原因：協定 1.2 認得 unknown-style-key，照名字送（不是 other）；disabledExempt 就是報告的那個數
+    public void UnknownStyleKeyAndDisabledExemptReachTheData()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Dim" Color="#2A2A2A"/>
+              <Style x:Key="OnlyDark" TargetType="Button">
+                <Setter Property="Background" Value="#333333"/>
+                <Setter Property="Foreground" Value="#EEEEEE"/>
+                <Style.Triggers>
+                  <Trigger Property="IsEnabled" Value="False"><Setter Property="Foreground" Value="#444444"/></Trigger>
+                </Style.Triggers>
+              </Style>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FAFAFA"/>
+              <SolidColorBrush x:Key="Fg" Color="#212121"/>
+              <SolidColorBrush x:Key="Dim" Color="#E8E8E8"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Views/Main.xaml", """<Grid Background="{DynamicResource Bg}"><Button Style="{StaticResource OnlyDark}" Content="x"/></Grid>""");
+        var r = fx.Run();
+        var data = UsageStats.Data(r, 0, "warn");
+        Assert.True(JsonNode.DeepEquals(JsonNode.Parse("""{ "unknown-style-key": 1 }"""), data["unresolvedBy"]), data["unresolvedBy"]!.ToJsonString());
+        Assert.True(r.DisabledExempt > 0);
+        Assert.Equal(r.DisabledExempt, data["disabledExempt"]!.GetValue<int>());
+        Assert.DoesNotContain("OnlyDark", data.ToJsonString(), StringComparison.Ordinal); // 鍵名不送
     }
 
     /// <summary>只在 Linux 上執行（其他平台顯示為略過並附理由）。</summary>

@@ -58,11 +58,14 @@ vulnerability.
 - One `POST https://stats.cornhsu.com/v1/xamlcontrast` per audit that reaches a verdict (exit 0, 1 or 3);
   none for `--push`, `--help`, `--version` or exit 2. The body is a small JSON document of counts and
   ranges — the tool version, OS, whether it runs in CI, the verdict and gate, the palette mode, file and
-  pair counts, coverage, counts per category and per unresolved reason, and the worst ratios in six
-  ranges — plus a project ID only if you put one in the config. `--stats-preview` prints the exact body.
-- Never sent: file names or paths, element, style or resource names, colour values, report contents,
-  credentials, environment variables, or repository, user or machine names. No User-Agent, cookies or
-  custom headers.
+  pair counts, coverage, counts per category and per unresolved reason, the worst ratios in six
+  ranges, and (from 1.2) failing and warning pairs per symmetry class, suppressed pairs per reason
+  keyword (`icon`, `state-only`, `watermark`, `decorative`, `other` — never the reason itself) and the
+  disabled-state exemption count — plus a project ID only if you put one in the config.
+  `--stats-preview` prints the exact body.
+- Never sent: file names or paths, element, style or resource names, colour values, the text of
+  suppression comments, report contents, credentials, environment variables, or repository, user or
+  machine names. No User-Agent, cookies or custom headers.
 - Off with any one of `DO_NOT_TRACK=1`, `XAMLCONTRAST_SHARE_STATS=false`, `CORNHSU_SHARE_STATS=false`,
   `"stats": { "share": false }` in the config, or `share-stats: false` in the Action. Builds from source
   and other development builds (any version starting with `0.0.0-`) never send.
