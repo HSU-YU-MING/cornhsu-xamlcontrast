@@ -445,6 +445,7 @@ public static partial class Report
             {
                 var tag = string.Create(inv, $"need {f.Need}");
                 if (f.Large) tag += $" large-text {f.Size}";
+                else if (!f.IsText && f.Need > 0) tag += " non-text"; // 圖示字型（1.2）：WCAG 1.4.11 的 3:1
                 else if (f.Size.Length > 0) tag += $" {f.Size}";
                 SafeLine(sb, string.Create(inv,
                     $"{f.File + ":" + f.Line,-34} {f.Element,-24} fg={f.Fg,-26} bg={f.Bg,-20} dark={RatioCell(f, ThemeSide.Dark, 6)} light={RatioCell(f, ThemeSide.Light, 6)}  [{SymmetryLabel(f.Symmetry)}] {tag}"));
@@ -529,6 +530,7 @@ public static partial class Report
             {
                 var need = string.Create(inv, $"{f.Need}");
                 if (f.Large) need += " (large)";
+                else if (!f.IsText && f.Need > 0) need += " (non-text)";
                 sb.AppendLine(string.Create(inv,
                     // Element 也是 code span：標籤含 XAML 的鍵，鍵裡的 [文字](網址)、@帳號 在 PR 留言裡會被渲染
                     $"| {Code($"{f.File}:{f.Line}")} | {Code(f.Element)} | {Code(f.Fg)} → {Code(f.Bg)} | " +
