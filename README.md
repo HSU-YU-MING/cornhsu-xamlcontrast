@@ -45,8 +45,10 @@ that set this tool up for someone. The full description is in
 - **What is sent — counts and ranges only:** the tool version, the OS, whether it runs in CI, the exit
   code and the gate, which palette detection path ran and whether it degraded, the number of files and
   pairs, the coverage, how many pairs are `fail` / `warn` / `ok` / `decorative`, how many are unresolved
-  per reason, and the non-decorative pairs counted in six ratio ranges. There is no ID unless the user
-  adds one to the config.
+  per reason, and the non-decorative pairs counted in six ratio ranges. From 1.2 also: failing and
+  warning pairs by symmetry, suppressed pairs per reason keyword (icon / state-only / watermark /
+  decorative / other — never the reason itself), and the disabled-state exemption count. There is no ID
+  unless the user adds one to the config.
 - **Never sent:** file names or paths, element, style or resource names, colour values, the text of
   suppression comments, the report, the config, or repository, user or machine names. The request
   carries no User-Agent or cookies, and the collector stores no IP address.
