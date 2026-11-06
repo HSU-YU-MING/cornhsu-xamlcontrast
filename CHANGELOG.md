@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
-## Unreleased
+## 1.2.1 — 2026-11-06
 
 - **Security: strings from the repo can no longer write Markdown in the PR comment.** The four warnings
   outside the findings table (palette detection degraded, config layout name, parse failure, invalid
