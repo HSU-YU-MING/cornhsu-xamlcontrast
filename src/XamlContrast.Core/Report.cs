@@ -503,17 +503,20 @@ public static partial class Report
             $"{r.Pairs} text-on-background pair(s) across {r.FileCount} file(s)"));
         sb.AppendLine();
 
+        // ⚠ 這份報告會貼成 PR 留言,而下面這些警示的字串都來自 repo:檔案路徑、XML 解析器的訊息、設定檔的名稱。
+        // 一律是 code span:GitHub 只有在裡面不處理連結、圖片、@ 提及與 www. 開頭的自動連結,反斜線跳脫擋不住後兩個。
+        //
         // 色盤偵測退化要放最前面:退回「只算寫死色碼」時,下面那張表是嚴重不完整的,
-        // 讀者必須先知道這件事再看數字。
+        // 讀者必須先知道這件事再看數字。描述裡有被跳過的候選檔路徑,不是只有工具自己寫的句子。
         if (r.Detection.IsDegraded)
         {
-            sb.AppendLine($"> ⚠️ **Palette detection degraded** — {Esc(r.Detection.Description)}");
+            sb.AppendLine($"> ⚠️ **Palette detection degraded** — {Code(r.Detection.Description, table: false)}");
             sb.AppendLine("> Only hard-coded colors were evaluated; theme-driven colors are not covered by this run.");
             sb.AppendLine();
         }
         foreach (var n in r.UnmatchedLayoutNames)
         {
-            sb.AppendLine($"> ⚠️ **Config: layout name '{Esc(n)}' matched no element** — names are matched exactly (case-sensitive, without a namespace prefix).");
+            sb.AppendLine($"> ⚠️ **Config: layout name {Code(n, table: false)} matched no element** — names are matched exactly (case-sensitive, without a namespace prefix).");
             sb.AppendLine();
         }
         if (!r.Config.Thresholds.IsDefault)
@@ -573,12 +576,12 @@ public static partial class Report
         }
         foreach (var e in r.ParseErrors)
         {
-            sb.AppendLine($"> ⚠️ **Parse failed:** {Esc(e)} — this file is missing from the audit above.");
+            sb.AppendLine($"> ⚠️ **Parse failed:** {Code(e, table: false)} — this file is missing from the audit above.");
             sb.AppendLine();
         }
         foreach (var w in r.InvalidIgnores)
         {
-            sb.AppendLine($"> ⚠️ {Esc(w)}");
+            sb.AppendLine($"> ⚠️ {Code(w, table: false)}");
             sb.AppendLine();
         }
 
@@ -586,16 +589,13 @@ public static partial class Report
         return sb.ToString();
     }
 
-    /// <summary>Markdown 表格用:跳脫會破壞表格/格式的字元。</summary>
-    /// <summary>Markdown 一般文字：表格的 | 跳脫、換行收成空白、反引號跳脫（不然會開出一段 code span，審查 1.0 B6）。</summary>
-    private static string Esc(string s) => s.Replace("`", "\\`").Replace("|", "\\|").Replace("\r", " ").Replace("\n", " ");
-
     /// <summary>Markdown 的 code span：圍欄用比內容裡最長的反引號串多一個的反引號（CommonMark），內容裡有反引號時
-    /// 兩邊各墊一個空白。表格裡的 | 照樣要跳脫（GFM），換行收成空白。
-    /// ⚠ 舊版直接用一個反引號包起來，檔名裡一個反引號就提早結束 code span、整列走樣。</summary>
-    private static string Code(string s)
+    /// 兩邊各墊一個空白。換行收成空白。表格裡的 | 照樣要跳脫（GFM）；表格外的 code span 不處理反斜線，跳脫了會印出來，所以 table: false 不跳脫。
+    /// ⚠ 舊版直接用一個反引號包起來，檔名裡一個反引號就提早結束 code span、整列走樣。
+    /// ⚠ 不是工具自己寫的字串進 Markdown 一律走這裡，沒有「一般文字版」：以前的 Esc 只處理反引號與 |，檔名裡的 [文字](網址)、@帳號 照樣生效。</summary>
+    private static string Code(string s, bool table = true)
     {
-        var body = s.Replace("|", "\\|").Replace("\r", " ").Replace("\n", " ");
+        var body = (table ? s.Replace("|", "\\|") : s).Replace("\r", " ").Replace("\n", " ");
         var longest = 0;
         for (int i = 0, run = 0; i < body.Length; i++)
         {

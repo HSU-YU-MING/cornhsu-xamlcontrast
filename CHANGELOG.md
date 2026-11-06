@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## Unreleased
+
+- **Security: strings from the repo can no longer write Markdown in the PR comment.** The four warnings
+  outside the findings table (palette detection degraded, config layout name, parse failure, invalid
+  ignore comment) put file paths, XML parser messages and config names into the report as plain text, so
+  `[text](url)`, `![image](url)`, `@someone` and `www.` links in a file or layout name took effect in the
+  comment the Action posts by default. Anyone who can change those in a pull request could add a fake
+  link, an external image or a notification; no code runs and no token is reachable. They are now code
+  spans, like the findings table already was. Rendered through GitHub before and after: 5 links, 2 images
+  and 2 mentions became 0. The HTML report was not affected. Console, JSON, SARIF and exit codes are unchanged.
+  Visible change: those four warnings show their text as code.
+
 ## 1.2.0 — 2026-11-02
 
 ### Upgrading

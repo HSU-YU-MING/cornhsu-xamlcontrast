@@ -79,7 +79,7 @@ public class NotEvaluatedVisibilityTests
         Assert.Contains("**Not evaluated:** 1 unresolved (bound-or-gradient 1) · 1 skipped (invisible: transparent or opacity 0) · " +
                         "1 excluded (dead Foreground setter) · 1 exempted (IsEnabled=False; WCAG 1.4.3) · " +
                         "1 suppressed via xamlcontrast-ignore", md);
-        Assert.Contains("**Parse failed:** Broken.xaml", md);
+        Assert.Contains("**Parse failed:** `Broken.xaml", md);
         Assert.Contains("— this file is missing from the audit above.", md);
         Assert.Contains("xamlcontrast-ignore without a reason is invalid", md);
         // 警告框排在落差表之後、頁尾之前 —— 但一定在報告裡
