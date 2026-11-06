@@ -979,7 +979,7 @@ public class NewRuleTests
         Assert.Contains("!! config: layout name 'cardgrid' matched no element", console);
         Assert.Contains("!! config: layout name 'Toolbar2' matched no element", console);
         Assert.DoesNotContain("'CardGrid' matched no element", console);
-        Assert.Contains("layout name 'Toolbar2' matched no element", Report.ToMarkdown(r, 0));
+        Assert.Contains("layout name `Toolbar2` matched no element", Report.ToMarkdown(r, 0));
     }
 
     [Theory] // Canvas 裡有尺寸的純色兄弟也不當背板:Canvas.Left/Top 與文字的實際範圍靜態不可知,
