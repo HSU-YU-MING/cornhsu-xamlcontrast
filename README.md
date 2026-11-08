@@ -234,7 +234,7 @@ Exit codes:
 | code | meaning |
 |---|---|
 | `0` | pass |
-| `1` | pairs below the gate — any `fail` or `warn` by default (only `fail` with `--fail-on fail`), or new / worsened pairs vs `--baseline` |
+| `1` | pairs below the gate — any `fail` or `warn` by default (only `fail` with `--fail-on fail`), or new / worsened pairs vs `--baseline` (with `--fail-on-new-unresolved`, also more unresolved pairs than the baseline recorded) |
 | `2` | usage, configuration or input-file error — bad flags, invalid config, a report or baseline file that can't be written or read |
 | `3` | **the result can't be trusted** — zero pairs resolved (an empty scan is not a pass), coverage below `--min-coverage`, or a degraded palette with `--strict-palette` |
 
@@ -257,6 +257,31 @@ caught). The file carries a `schemaVersion` and a `keyVersion`; one with a missi
 written by 0.x, or one whose keys an older version generated (a later release may change how keys
 are spelled) is refused (exit 2) with a note to regenerate it — rather than reporting every known
 pair as NEW.
+
+**Pairs the tool can't see.** The ratchet compares graded pairs, and an unresolved pair is never
+graded. So turning a known failure into `Foreground="{Binding …}"` reads as paid-off debt, and a new
+binding or a key missing from the palette passes in silence — until overall coverage drops below
+`--min-coverage`. From 1.3 the baseline also records the unresolved pairs (by file, reason and value;
+no line numbers), and `--fail-on-new-unresolved` — or `"failOnNewUnresolved": true` in
+`xamlcontrast.config.json`, which is the way to turn it on in the GitHub Action — fails the run when
+there are more of them than recorded:
+
+```bash
+xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json --fail-on-new-unresolved
+```
+
+```
+baseline: known debt 12, paid off 1 (debt may only shrink)
+baseline: unresolved known 40, resolved 0, new 1
+  NEW unresolved: Views/Main.xaml:57 bound-or-gradient {Binding StatusBrush}
+exit 1: 1 new unresolved pair(s) vs baseline
+```
+
+It's off by default (changing a default waits for 2.0); without it, the same line still reports the
+count with `(not gated)`. The flag needs `--baseline`. A baseline written before 1.3 has no record of
+unresolved pairs, so turning the check on with one is refused (exit 2) — regenerate it with
+`--write-baseline` on a passing build. In `--json`, every `unresolvedSites[]` entry carries
+`baseline` (`known` / `new` / `worsened`).
 
 ### Suppressing intentional low contrast
 
@@ -400,7 +425,8 @@ lists them as strings with the current values in their description.
 
 - Top level: `toolVersion`, `exitCode` (the audit verdict: 0, 1 or 3), `summary`,
   `unresolvedSites`, `findings`.
-- `summary` carries the gate in effect (`failOn`, `minCoverage`, `strictPalette`) and every
+- `summary` carries the gate in effect (`failOn`, `minCoverage`, `strictPalette`, and from 1.3
+  `failOnNewUnresolved`) and every
   degradation signal — `paletteDegraded`, `coverage`, `unresolved` (with `unresolvedBy`), `skipped`,
   `deadForeground`, `disabledExempt`, `suppressed`, `parseErrors` / `parseErrorFiles`,
   `invalidIgnoreCount` / `invalidIgnores`, `unknownKeys` — and, from 1.2, `converterPairs` (pairs
@@ -454,7 +480,8 @@ principle as the non-configurable zero-pairs rule, which it generalises. Use
 Every unresolved pair is listed with its location: `--show-unresolved` prints
 `file:line · reason · the value it got stuck on` (the background's value when the background is
 what couldn't be resolved), and the JSON carries the same list in the top-level
-`unresolvedSites` array (`file`, `line`, `reason`, `value`). Unknown keys are additionally named
+`unresolvedSites` array (`file`, `line`, `reason`, `value`, and from 1.3 `baseline`: the verdict
+against a baseline that records unresolved pairs, `null` otherwise). Unknown keys are additionally named
 with counts (`summary.unknownKeys`, and the top ones on the console) — each one is a dead
 resource reference, a typo, or a palette file detection missed, which makes this a free lint
 even before any contrast math. Style keys are not palette keys: from 1.2 they are reported as

@@ -179,8 +179,8 @@ public class CliArgumentTests
             Assert.Contains("usage: xamlcontrast <project-root> [options]", r.Out);
             // help 要列出每一個旗標 —— 凍結面（CLI 旗標）的對外說明
             foreach (var flag in new[] { "--json", "--sarif", "--md", "--html", "--fail-on", "--strict-palette",
-                                         "--min-coverage", "--baseline", "--write-baseline", "--show-ok", "--show-unresolved",
-                                         "--version", "-h, --help" })
+                                         "--min-coverage", "--baseline", "--write-baseline", "--fail-on-new-unresolved",
+                                         "--show-ok", "--show-unresolved", "--version", "-h, --help" })
                 Assert.Contains(flag, r.Out);
             // --fail-on 吃 warn 與 fail 兩個值（warn 是 1.0 的預設）—— 舊版只寫 "--fail-on warn"，讓人以為 fail 不是合法值
             Assert.Contains("--fail-on <warn|fail>", r.Out);

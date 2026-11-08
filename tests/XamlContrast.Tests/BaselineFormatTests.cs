@@ -43,7 +43,9 @@ public class BaselineFormatTests
             ("B.xaml", OnWhite(FailText)));
         var root = JsonDocument.Parse(Baseline.Write(r)).RootElement;
 
-        Assert.Equal(["schemaVersion", "keyVersion", "comment", "entries"], root.EnumerateObject().Select(p => p.Name));
+        // unresolved 段（1.3）一律寫，這個專案沒有 unresolved 就是空陣列
+        Assert.Equal(["schemaVersion", "keyVersion", "comment", "entries", "unresolved"], root.EnumerateObject().Select(p => p.Name));
+        Assert.Empty(root.GetProperty("unresolved").EnumerateArray());
         Assert.Equal(1, root.GetProperty("schemaVersion").GetInt32());
         Assert.Equal(Baseline.KeyVersion, root.GetProperty("keyVersion").GetInt32());
         Assert.Equal("XamlContrast baseline — known debt; may only shrink", root.GetProperty("comment").GetString());

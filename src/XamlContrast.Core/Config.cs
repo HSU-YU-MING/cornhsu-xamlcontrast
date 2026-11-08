@@ -21,6 +21,9 @@ public sealed class ToolConfig
     public LayoutSection Layout { get; init; } = new();
     public string FailOn { get; init; } = "warn"; // 1.0 的預設 gate：沒達到 AA 就算失敗
     public bool StrictPalette { get; init; }
+    /// <summary>--baseline 模式下，比 baseline 多出來的 unresolved 也擋（1.3，與 --fail-on-new-unresolved 取 OR）。
+    /// 預設關：改預設要等 2.0。沒有 --baseline 時不作用（CLI 會說一聲）。</summary>
+    public bool FailOnNewUnresolved { get; init; }
 
     /// <summary>覆蓋率下限（百分比）。低於此值視為「這份結果不足以代表專案」而 exit 1。
     /// 預設 50 —— 解析不到一半就給過，那個「過」沒有意義。設 0 可完全關閉

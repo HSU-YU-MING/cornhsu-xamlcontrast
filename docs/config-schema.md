@@ -42,6 +42,7 @@
   },
   "failOn": "warn",
   "strictPalette": false,
+  "failOnNewUnresolved": false,
   "minCoverage": 50,
   "rootBackground": null,
   "ignore": {
@@ -153,6 +154,7 @@ WCAG 2.x AA。`failFactor` 是「破」的分界（門檻 × `failFactor`，預�
 |---|---|---|
 | `failOn` | `"warn"` | `"warn"` = 沒達到 AA 就擋（fail 與 warn 都算，1.0 的預設）；`"fail"` = 只擋低於 fail 線的（0.x 的預設） |
 | `strictPalette` | `false` | `true` = 色盤偵測失敗（退回寫死色碼模式）時 exit 3（結果不可信） |
+| `failOnNewUnresolved` | `false` | 1.3 新增。`true` = `--baseline` 模式下，工具解析不了的配對比 baseline 記的多（新的檔＋原因＋值，或同一組變多處）就 exit 1。沒有 `--baseline` 時不作用，stderr 說一聲；baseline 是 1.3 之前寫的（沒有 `unresolved` 段）→ exit 2，要重跑 `--write-baseline`。見下面說明 |
 | `minCoverage` | `50` | 解析成功的配對低於此百分比即 exit 3（結果不可信）—— 只解析到一小部分的「通過」沒有意義。設 `0` 關閉。比的是報告上印的那個數（四捨五入到一位） |
 | `rootBackground` | — | 文件根元素的預設背景:色票鍵(`"MahApps.Brushes.Window.Background"`)或色碼(`"#FF202020"`)。給**主題函式庫的使用者**:視窗底色鍵在 repo 的主題檔裡,但「視窗 → 那個鍵」的隱含樣式住在 NuGet 套件裡,工具看不到。鍵不在偵測到的色盤裡 → exit 2。實測:NETworkManager 一行設定,覆蓋率 8.8% → 87.2% |
 
@@ -167,6 +169,14 @@ WCAG 2.x AA。`failFactor` 是「破」的分界（門檻 × `failFactor`，預�
 這個組合特別要緊：色盤壞掉時色票配對全變 `unresolved`、從 findings 消失，
 ratchet 會把「不見了」讀成「還清了」而放行 —— 弄壞主題檔看起來像修好了所有問題。
 `--write-baseline` 同理會拒絕凍結一份用退化色盤算出來的基準線。
+
+`failOnNewUnresolved`（1.3）補的是同一個洞的小號版本：色盤沒壞、覆蓋率也沒掉到下限，但有一組既有的 fail 被改成
+`{Binding}`（從 findings 消失、算成還債），或新寫了 binding、引用了色盤裡沒有的鍵。baseline 一律記 `unresolved` 段
+（鍵 = 檔案｜原因｜值，不含行號，跟 fail／warn 的鍵一樣怕行號漂移），打開之後新的鍵、同鍵處數變多都 exit 1；
+沒打開時 console 照樣印數字（`(not gated)`）。工具照樣不猜這些配對的顏色 —— 擋的是「看不到的地方變多了」，不是給它們評分。
+⚠ 預設關：改預設是 2.0 的事。原因的分類屬稽核語意（可以在 minor 改，寫在 CHANGELOG 的 Upgrading）：
+分類變了，被改分類的位置在打開時會以新的鍵出現，照 Upgrading 的說明重跑 `--write-baseline`。
+用到 `failOnNewUnresolved` 的設定檔在 1.2.x 以前會因為「不認得的屬性」exit 2。
 
 色票值接受 WPF 的色彩字面值：`#RGB`、`#ARGB`、`#RRGGBB`、`#AARRGGBB` 與具名色（`Navy`、`Teal`…，不分大小寫）；
 `SolidColorBrush` 的 `Opacity` 會折進 alpha。七位數之類的打字錯誤、非十六進位字元、讀不懂的 `Opacity`
@@ -226,5 +236,7 @@ CLI > config > 內建預設。
 | `failOn` | `--fail-on <warn\|fail>` | 兩個方向（1.0 起）：config 寫 `"warn"`，`--fail-on fail` 會放寬回只擋 fail。0.x 的旗標只能加嚴 —— 預設改成 warn 之後，那會讓 `--fail-on fail` 永遠放不寬 |
 | `minCoverage` | `--min-coverage <0-100>` | 兩個方向 |
 | `strictPalette` | `--strict-palette` | 只能打開（沒有關掉的旗標）：config 寫了 `true` 就一律生效 |
+| `failOnNewUnresolved` | `--fail-on-new-unresolved` | 只能打開（同上）。旗標沒有 `--baseline` 是用法錯誤（exit 2）；config 沒有 `--baseline` 只提示 —— 同一份 config 也給 `--write-baseline` 與一般稽核用 |
 
 GitHub Action 的 `fail-on`／`min-coverage` 留空時不傳旗標，交給 config（沒有就是內建預設）。
+Action 沒有對應 `failOnNewUnresolved` 的 input（input 一加就凍結）：要在 Action 裡打開，寫在 config。

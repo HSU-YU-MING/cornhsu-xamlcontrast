@@ -17,7 +17,11 @@ public sealed record ReportContext
     public string? FailOn { get; init; }
     public double? MinCoverage { get; init; }
     public bool? StrictPalette { get; init; }
+    /// <summary>--fail-on-new-unresolved 或 config 的 failOnNewUnresolved（1.3）；null = 取 config 的值。</summary>
+    public bool? FailOnNewUnresolved { get; init; }
     public IReadOnlyDictionary<Finding, string>? BaselineStatus { get; init; }
+    /// <summary>--baseline 而且 baseline 有 unresolved 段時（1.3），每一處 unresolved 的判定：known／new／worsened。</summary>
+    public IReadOnlyDictionary<UnresolvedSite, string>? UnresolvedBaselineStatus { get; init; }
 }
 
 /// <summary>
@@ -213,6 +217,8 @@ public static partial class Report
                 failOn = ctx.FailOn ?? r.Config.FailOn,
                 minCoverage = ctx.MinCoverage ?? r.Config.MinCoverage,
                 strictPalette = ctx.StrictPalette ?? r.Config.StrictPalette,
+                // 1.3：--baseline 模式下多出來的 unresolved 擋不擋（沒有 --baseline 時照樣記設定值，但不作用）
+                failOnNewUnresolved = ctx.FailOnNewUnresolved ?? r.Config.FailOnNewUnresolved,
                 files = r.FileCount,
                 pairs = r.Pairs,
                 // 覆蓋率是「這份結果代不代表專案」的關鍵數字 —— 只給 pairs 的話，
@@ -254,6 +260,8 @@ public static partial class Report
                 line = s.Line,
                 reason = ReasonLabel(s.Reason),
                 value = s.Value,
+                // 1.3：跟 baseline 的 unresolved 段比的結果（known／new／worsened）；沒有比（沒有 --baseline、baseline 沒有這一段）是 null
+                baseline = ctx.UnresolvedBaselineStatus is { } us && us.TryGetValue(s, out var ub) ? ub : null,
             }),
             findings = r.Findings.Select(f => new
             {
