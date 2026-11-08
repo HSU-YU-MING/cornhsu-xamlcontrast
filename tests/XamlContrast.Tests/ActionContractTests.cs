@@ -595,8 +595,8 @@ public class ActionContractTests
         foreach (Match m in Regex.Matches(Step(step), @"^        (?<v>[A-Z_]+): \$\{\{ inputs\.(?<i>[a-z-]+) \}\}$", RegexOptions.Multiline))
             psi.Environment[m.Groups["v"].Value] = values[m.Groups["i"].Value];
         using var p = Process.Start(psi)!;
-        var stdout = p.StandardOutput.ReadToEndAsync();
-        var stderr = p.StandardError.ReadToEndAsync();
+        var stdout = Cli.ReadToEndOnOwnThread(p.StandardOutput);
+        var stderr = Cli.ReadToEndOnOwnThread(p.StandardError);
         Assert.True(p.WaitForExit(30_000), "bash 沒有在 30 秒內結束");
         inspectTemp?.Invoke(temp);
         string Text(string name) => Path.Combine(temp, name) is var f && File.Exists(f) ? File.ReadAllText(f).Replace("\r\n", "\n") : "";
