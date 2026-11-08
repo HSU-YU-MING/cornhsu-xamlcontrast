@@ -312,6 +312,7 @@ public class CliPushTests
     [InlineData(new[] { "--fail-on", "fail" }, "--fail-on")]
     [InlineData(new[] { "--min-coverage", "0" }, "--min-coverage")]
     [InlineData(new[] { "--strict-palette" }, "--strict-palette")]
+    [InlineData(new[] { "--fail-on-new-unresolved" }, "--fail-on-new-unresolved")]
     [InlineData(new[] { "--show-ok" }, "--show-ok")]
     [InlineData(new[] { "--show-unresolved" }, "--show-unresolved")]
     public void PushDoesNotAudit(string[] extra, string expectNamed)

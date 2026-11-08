@@ -14,6 +14,7 @@ var showOk = false;
 var showUnresolved = false;
 string? failOnFlag = null;   // null = 用 config／內建預設（warn）
 var strictPalette = false;
+var failOnNewUnresolvedFlag = false; // 1.3：--baseline 模式下多出來的 unresolved 也擋（與 config 的 failOnNewUnresolved 取 OR）
 double? minCoverage = null;   // null = 用 config／內建預設
 string? jsonPath = null;
 string? sarifPath = null;
@@ -37,6 +38,7 @@ for (var i = 0; i < args.Length; i++)
         case "--show-ok": showOk = true; break;
         case "--show-unresolved": showUnresolved = true; break;
         case "--strict-palette": strictPalette = true; break;
+        case "--fail-on-new-unresolved": failOnNewUnresolvedFlag = true; break;
         case "--stats-preview": statsPreview = true; break;
         case "--min-coverage":
             if (i + 1 >= args.Length ||
@@ -130,7 +132,8 @@ if (pushPath is not null)
         (jsonPath is not null, "--json"), (sarifPath is not null, "--sarif"), (mdPath is not null, "--md"), (htmlPath is not null, "--html"),
         (baselinePath is not null, "--baseline"), (writeBaselinePath is not null, "--write-baseline"),
         (failOnFlag is not null, "--fail-on"), (minCoverage is not null, "--min-coverage"),
-        (strictPalette, "--strict-palette"), (showOk, "--show-ok"), (showUnresolved, "--show-unresolved"),
+        (strictPalette, "--strict-palette"), (failOnNewUnresolvedFlag, "--fail-on-new-unresolved"),
+        (showOk, "--show-ok"), (showUnresolved, "--show-unresolved"),
         (statsPreview, "--stats-preview"),
     }.Where(x => x.Given).Select(x => x.Name).ToArray();
     if (auditInputs.Length > 0)
@@ -152,6 +155,15 @@ if ((server, commit, branch) is not (null, null, null))
 if (baselinePath is not null && writeBaselinePath is not null)
 {
     Console.Error.WriteLine("--baseline and --write-baseline cannot be used together");
+    return 2;
+}
+
+// 「多出來的」要有比較的對象：沒有 --baseline 時這個旗標什麼都擋不到 —— 默默接受的話，使用者以為 {Binding} 有人在守
+// （--write-baseline 不需要它：baseline 一律記 unresolved 段）
+if (failOnNewUnresolvedFlag && baselinePath is null)
+{
+    Console.Error.WriteLine("--fail-on-new-unresolved compares against a baseline: add --baseline <file> " +
+                            "(create the file once with --write-baseline, which always records the unresolved pairs)");
     return 2;
 }
 
@@ -209,6 +221,12 @@ if (config.RootBackground is not null)
 // ⚠ 0.x 是「旗標只能加嚴」（flag || config）—— 預設改成 warn 之後，那會讓 --fail-on fail 永遠放不寬
 var gateWarn = (failOnFlag ?? config.FailOn) == "warn";
 strictPalette = strictPalette || config.StrictPalette;
+// 只能打開（跟 strictPalette 一樣）。config 寫了而這次沒有 --baseline：不是錯誤（同一份 config 也給 --write-baseline 與本機的
+// 一般稽核用），但要說一聲 —— 一般稽核本來就擋每一組低於 AA 的配對，unresolved 則沒有任何東西在守
+var failOnNewUnresolved = failOnNewUnresolvedFlag || config.FailOnNewUnresolved;
+if (failOnNewUnresolved && baselinePath is null && writeBaselinePath is null)
+    Say(Console.Error, $"note: \"failOnNewUnresolved\" in {ToolConfig.FileName} only applies with --baseline; " +
+                       "this run does not gate unresolved pairs");
 // ⚠ 覆蓋率下限是唯一「旗標可以放寬 config」的項目：它擋的是「工具看不見你的專案」，
 //    不是稽核標準。使用者明確傳 --min-coverage 0 表示「我知道，先讓我跑」是合理的逃生口。
 var minCov = minCoverage ?? config.MinCoverage;
@@ -232,6 +250,15 @@ if (baselinePath is not null)
         // 這時叫人重寫，等於用舊工具把新工具寫的債清單蓋掉）
         if (!ex.Message.Contains("--write-baseline") && !ex.Message.Contains("upgrade XamlContrast"))
             Console.Error.WriteLine("regenerate it with --write-baseline");
+        return 2;
+    }
+    // 要擋多出來的 unresolved，baseline 就得記著原本有哪些。1.3 之前寫的檔沒有這一段：當成「原本一個都沒有」的話
+    // 每一處都是新的、整片紅；當成「不比」的話打開了等於沒打開 —— 兩個都是錯的答案，在稽核之前說清楚
+    if (failOnNewUnresolved && known!.Unresolved is null)
+    {
+        Say(Console.Error, $"baseline has no 'unresolved' section ({baselinePath}): it was written before XamlContrast 1.3, " +
+                           $"so {(failOnNewUnresolvedFlag ? "--fail-on-new-unresolved" : $"\"failOnNewUnresolved\" in {ToolConfig.FileName}")} " +
+                           "has nothing to compare against — regenerate it with --write-baseline on a passing build");
         return 2;
     }
 }
@@ -263,7 +290,9 @@ var context = new ReportContext
     FailOn = gateWarn ? "warn" : "fail",
     MinCoverage = minCov,
     StrictPalette = strictPalette,
+    FailOnNewUnresolved = failOnNewUnresolved,
     BaselineStatus = cmp?.Status,
+    UnresolvedBaselineStatus = cmp?.UnresolvedChanges is null ? null : cmp.UnresolvedStatus,
 };
 if (jsonPath is not null && !TryWrite(jsonPath, Report.ToJson(result, context), "json")) return 2;
 
@@ -394,14 +423,42 @@ int DecideExit()
             Say(Console.Out, $"  NEW failure: {f.File}:{f.Line} {f.Element} fg={f.Fg} bg={f.Bg}");
         foreach (var e in cmp.WorsenedFailures)
             Say(Console.Out, $"  WORSENED: {e.File} {e.Element} fg={e.Fg} bg={e.Bg} (now {e.Count} occurrence(s))");
-        if (!cmp.Passes)
+
+        // 1.3：工具看不到的地方。baseline 有 unresolved 段就一律報數字（不擋也報）—— fail 改成 {Binding} 會在上面那行算成 paid off，
+        // 這一行是另一半的帳
+        var addedUnresolved = cmp.UnresolvedChanges?.Sum(c => c.Added) ?? 0;
+        if (cmp.UnresolvedChanges is { } changes)
         {
-            Say(Console.Out, $"exit 1: {cmp.NewFailures.Count} new / {cmp.WorsenedFailures.Count} worsened failure(s) vs baseline");
+            Say(Console.Out, $"baseline: unresolved known {cmp.KnownUnresolved}, resolved {cmp.GoneUnresolved}, new {addedUnresolved}" +
+                             (failOnNewUnresolved ? "" : " (not gated)"));
+            if (failOnNewUnresolved)
+                foreach (var c in changes)
+                {
+                    if (c.Was == 0)
+                        foreach (var s in c.Sites)
+                            Say(Console.Out, $"  NEW unresolved: {s.File}:{s.Line} {c.Reason} {c.Value}");
+                    else
+                        Say(Console.Out, $"  MORE unresolved: {c.File} {c.Reason} {c.Value} (now {c.Sites.Count}, baseline {c.Was}; " +
+                                         $"line {string.Join(", ", c.Sites.Select(s => s.Line))})");
+                }
+            else if (addedUnresolved > 0)
+                Say(Console.Out, $"  pass --fail-on-new-unresolved (or set \"failOnNewUnresolved\": true in {ToolConfig.FileName}) to fail on these");
+        }
+        var unresolvedFails = failOnNewUnresolved && addedUnresolved > 0;
+
+        if (!cmp.Passes || unresolvedFails)
+        {
+            var parts = new List<string>();
+            if (!cmp.Passes) parts.Add($"{cmp.NewFailures.Count} new / {cmp.WorsenedFailures.Count} worsened failure(s)");
+            if (unresolvedFails) parts.Add($"{addedUnresolved} new unresolved pair(s)");
+            Say(Console.Out, $"exit 1: {string.Join(", ", parts)} vs baseline");
             return 1;
         }
         // warn 也在 ratchet 裡（baseline 收「低於 AA」的每一組）—— 0.x 在這裡另外對「所有」warn 套 --fail-on warn，
         // 既有的 warn 也擋，預設 gate 改成 warn 之後 baseline 就對 warn 完全沒用了
-        Console.WriteLine("exit 0: no new or worsened failures vs baseline");
+        Console.WriteLine(failOnNewUnresolved
+            ? "exit 0: no new or worsened failures and no new unresolved pairs vs baseline"
+            : "exit 0: no new or worsened failures vs baseline");
         return 0;
     }
 
@@ -451,6 +508,9 @@ static void PrintUsage(TextWriter w)
           --baseline <path>        ratchet mode: only fail on NEW or WORSENED pairs below the gate
           --write-baseline <path>  freeze every pair below AA as known debt (run once, commit the
                                    file); cannot be combined with --baseline
+          --fail-on-new-unresolved with --baseline: also fail when there are more pairs the tool
+                                   could NOT resolve than the baseline recorded (a new {Binding},
+                                   a key missing from the palette)
           --show-ok                list passing pairs, grouped
           --show-unresolved        list every pair the tool could NOT resolve, with
                                    file:line, reason and the offending value/key

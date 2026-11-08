@@ -20,6 +20,23 @@ public static class Baseline
     // 色盤值被調暗時鍵不會變 —— 少了比值欄位，「色盤漂移」型的惡化會靜默放行。
     public sealed record Entry(string File, string Element, string Fg, string Bg, int Count, double Worst);
 
+    /// <summary>
+    /// 工具看不到的配對（1.3，檔案的 unresolved 段）：鍵 = file|reason|value，跟 <see cref="Entry"/> 一樣不含行號；Count 是處數。
+    /// 為什麼要記：ratchet 只比 fail／warn 的話，把一組已知的 fail 改成 <c>{Binding}</c> 會從 findings 消失、算成「還了債」，
+    /// 新寫的 <c>{Binding}</c> 也一聲不吭地通過 —— 工具不猜（unresolved 永遠不評分），但「看不到的地方變多了」是可以擋的。
+    /// 擋不擋由 CLI 的 --fail-on-new-unresolved／config 的 failOnNewUnresolved 決定（預設不擋：改預設要等 2.0）。
+    /// reason 與 value 是稽核語意：哪些位置算哪個原因可以在 minor 改（寫在 Upgrading）；標籤的拼法或 value 的寫法變了就遞增 <see cref="KeyVersion"/>。
+    /// </summary>
+    public sealed record UnresolvedEntry(string File, string Reason, string Value, int Count);
+
+    /// <summary>比 baseline 多出來的 unresolved：Was = baseline 記的處數（0 = 新的鍵），Sites = 現在這個鍵底下的每一處
+    /// （鍵不含行號，分不出多出來的是哪一處，所以整組列出）。</summary>
+    public sealed record UnresolvedChange(string File, string Reason, string Value, int Was, IReadOnlyList<UnresolvedSite> Sites)
+    {
+        /// <summary>多出來的處數。</summary>
+        public int Added => Sites.Count - Was;
+    }
+
     public sealed class ComparisonResult
     {
         public required List<Finding> NewFailures { get; init; }
@@ -29,7 +46,17 @@ public static class Baseline
         /// <summary>gate 擋的每一筆 finding 的判定：known／new／worsened（JSON 的 findings[].baseline）。
         /// 鍵惡化時那個鍵底下 gate 擋的每一筆都標 worsened —— 鍵不含行號，分不出「多出來的是哪一處」。</summary>
         public IReadOnlyDictionary<Finding, string> Status { get; init; } = new Dictionary<Finding, string>();
+        /// <summary>只看 fail／warn。unresolved 擋不擋是 CLI 的選項（<see cref="UnresolvedChanges"/>），不算在這裡。</summary>
         public bool Passes => NewFailures.Count == 0 && WorsenedFailures.Count == 0;
+
+        /// <summary>比 baseline 多出來的 unresolved。null = baseline 沒有 unresolved 段（1.3 之前寫的檔），沒有比。</summary>
+        public IReadOnlyList<UnresolvedChange>? UnresolvedChanges { get; init; }
+        /// <summary>處數沒超過 baseline 的 unresolved。</summary>
+        public int KnownUnresolved { get; init; }
+        /// <summary>baseline 記了、現在少掉的 unresolved 處數（解析得到了，或那一處刪掉了）。</summary>
+        public int GoneUnresolved { get; init; }
+        /// <summary>每一處 unresolved 的判定：known／new／worsened（JSON 的 unresolvedSites[].baseline）；沒有比時是空的。</summary>
+        public IReadOnlyDictionary<UnresolvedSite, string> UnresolvedStatus { get; init; } = new Dictionary<UnresolvedSite, string>();
     }
 
     private static readonly JsonSerializerOptions JsonOpts = new()
@@ -43,13 +70,18 @@ public static class Baseline
 
     private static bool BelowAa(Finding f) => f.Category is Category.Fail or Category.Warn;
 
+    private static string UnresolvedKeyOf(string file, string reason, string value) => $"{file}|{reason}|{value}";
+
+    private static string UnresolvedKeyOf(UnresolvedSite s) => UnresolvedKeyOf(s.File, Report.ReasonLabel(s.Reason), s.Value);
+
     /// <summary>baseline 檔格式的版本。1.0 起寫進檔裡、讀取時必須認得 ——
     /// 沒有它就無法在 1.x 演進格式，舊格式的檔也分辨不出來（0.x 的檔沒有這一欄）。</summary>
     public const int SchemaVersion = 1;
 
     /// <summary>鍵的產生方式的版本（審查 1.0 A2）。鍵的文字（element 的標籤、fg 的寫法、bg 的合成描述）屬稽核語意，
     /// 1.x 的 minor 可以改 —— 改的那一版遞增這個數字。讀到舊的就明確叫人重寫，不要冒出一整排假的 NEW 加 paid off
-    /// （凍結宣告的演進規則 5）。檔案沒寫這一欄視為 1。</summary>
+    /// （凍結宣告的演進規則 5）。檔案沒寫這一欄視為 1。
+    /// unresolved 段（1.3）的鍵也算：原因標籤的拼法或 value 的寫法變了，一樣遞增。</summary>
     public const int KeyVersion = 1;
 
     public static string Write(AuditResult result)
@@ -63,7 +95,18 @@ public static class Baseline
             })
             .OrderBy(e => e.File, StringComparer.Ordinal).ThenBy(e => e.Element, StringComparer.Ordinal)
             .ThenBy(e => e.Fg, StringComparer.Ordinal).ThenBy(e => e.Bg, StringComparer.Ordinal);
-        return JsonSerializer.Serialize(new { schemaVersion = SchemaVersion, keyVersion = KeyVersion, comment = "XamlContrast baseline — known debt; may only shrink", entries }, JsonOpts);
+        // unresolved 段一律寫（1.3）：之後才打開 --fail-on-new-unresolved 的人不必重寫 baseline（重寫會把這段期間新增的 fail 一起凍成債）。
+        // 1.2 以前的版本讀到這段會忽略（頂層不認得的欄位不看），所以新工具寫的檔舊工具照樣讀得了
+        var unresolved = result.UnresolvedSites
+            .GroupBy(UnresolvedKeyOf)
+            .Select(g =>
+            {
+                var s = g.First();
+                return new UnresolvedEntry(s.File, Report.ReasonLabel(s.Reason), s.Value, g.Count());
+            })
+            .OrderBy(e => e.File, StringComparer.Ordinal).ThenBy(e => e.Reason, StringComparer.Ordinal)
+            .ThenBy(e => e.Value, StringComparer.Ordinal);
+        return JsonSerializer.Serialize(new { schemaVersion = SchemaVersion, keyVersion = KeyVersion, comment = "XamlContrast baseline — known debt; may only shrink", entries, unresolved }, JsonOpts);
     }
 
     /// <param name="gateWarn">gate 是 warn（預設）：低於 AA 的都擋；false（--fail-on fail）：只擋 fail。</param>
@@ -74,6 +117,8 @@ public static class Baseline
     public sealed class Known
     {
         public required Dictionary<string, Entry> Entries { get; init; }
+        /// <summary>unresolved 段：鍵（file|reason|value）→ entry。null = 檔案沒有這一段（1.3 之前寫的）。</summary>
+        public Dictionary<string, UnresolvedEntry>? Unresolved { get; init; }
     }
 
     /// <summary>
@@ -156,7 +201,38 @@ public static class Baseline
             firstSeen[key] = i;
             known[key] = e;
         }
-        return new Known { Entries = known };
+        return new Known { Entries = known, Unresolved = ParseUnresolved(Prop(root, "unresolved"), Prop) };
+    }
+
+    /// <summary>unresolved 段（1.3）：可以沒有（null），有就跟 entries 一樣嚴 —— 缺欄、型別錯、count &lt; 1、重複的鍵都是錯誤。
+    /// 缺 count 補 0 的話，每一處都會變成「多出來的」。</summary>
+    private static Dictionary<string, UnresolvedEntry>? ParseUnresolved(JsonElement? section, Func<JsonElement, string, JsonElement?> prop)
+    {
+        if (section is not { } list) return null;
+        if (list.ValueKind != JsonValueKind.Array) throw new FormatException("'unresolved' is not an array");
+        var result = new Dictionary<string, UnresolvedEntry>();
+        var firstSeen = new Dictionary<string, int>();
+        var i = 0;
+        foreach (var el in list.EnumerateArray())
+        {
+            i++;
+            if (el.ValueKind != JsonValueKind.Object) throw new FormatException($"unresolved entry {i} is not an object");
+            foreach (var field in (ReadOnlySpan<string>)["file", "reason", "value", "count"])
+            {
+                if (prop(el, field) is not { } fv || fv.ValueKind == JsonValueKind.Null)
+                    throw new FormatException($"unresolved entry {i} has no '{field}'");
+                var ok = field == "count" ? fv.ValueKind == JsonValueKind.Number && fv.TryGetInt32(out _) : fv.ValueKind == JsonValueKind.String;
+                if (!ok) throw new FormatException($"unresolved entry {i} has '{field}' {fv.GetRawText()} — it must be {(field == "count" ? "a whole number" : "a string")}");
+            }
+            var e = el.Deserialize<UnresolvedEntry>(JsonOpts)!;
+            if (e.Count < 1) throw new FormatException($"unresolved entry {i} has 'count' {e.Count} — it must be at least 1");
+            var key = UnresolvedKeyOf(e.File, e.Reason, e.Value);
+            if (firstSeen.TryGetValue(key, out var first))
+                throw new FormatException($"unresolved entries {first} and {i} have the same key ({key}) — one of them is stale");
+            firstSeen[key] = i;
+            result[key] = e;
+        }
+        return result;
     }
 
     public static ComparisonResult Compare(AuditResult result, Known baseline, bool gateWarn = true)
@@ -205,6 +281,35 @@ public static class Baseline
         //   這裡若數 key 的個數，同鍵 5 處一次修完只顯示「還了 1」——
         //   進度看起來比實際少，導入期最需要看到進展的時候反而低報。
         var paid = known.Where(kv => !current.ContainsKey(kv.Key)).Sum(kv => kv.Value.Count);
+
+        // unresolved 段（1.3）：跟 fail／warn 同一套 —— 新的鍵、同鍵處數變多都算多出來。沒有比值可比（工具不猜），所以沒有「色盤漂移」那一條
+        List<UnresolvedChange>? changes = null;
+        var unresolvedStatus = new Dictionary<UnresolvedSite, string>(ReferenceEqualityComparer.Instance);
+        int knownUnresolved = 0, goneUnresolved = 0;
+        if (baseline.Unresolved is { } knownSites)
+        {
+            changes = [];
+            var sites = result.UnresolvedSites.GroupBy(UnresolvedKeyOf).ToDictionary(g => g.Key, g => g.ToList());
+            foreach (var (key, list) in sites.OrderBy(kv => kv.Key, StringComparer.Ordinal))
+            {
+                var was = knownSites.TryGetValue(key, out var entry) ? entry.Count : 0;
+                var s = list[0];
+                if (list.Count > was)
+                {
+                    changes.Add(new UnresolvedChange(s.File, Report.ReasonLabel(s.Reason), s.Value, was,
+                        list.OrderBy(x => x.Line).ToList()));
+                    foreach (var x in list) unresolvedStatus[x] = was == 0 ? "new" : "worsened";
+                }
+                else
+                {
+                    knownUnresolved += list.Count;
+                    goneUnresolved += was - list.Count;
+                    foreach (var x in list) unresolvedStatus[x] = "known";
+                }
+            }
+            goneUnresolved += knownSites.Where(kv => !sites.ContainsKey(kv.Key)).Sum(kv => kv.Value.Count);
+        }
+
         return new ComparisonResult
         {
             NewFailures = newFailures,
@@ -212,6 +317,10 @@ public static class Baseline
             KnownDebt = knownDebt,
             PaidDebt = paid,
             Status = status,
+            UnresolvedChanges = changes,
+            KnownUnresolved = knownUnresolved,
+            GoneUnresolved = goneUnresolved,
+            UnresolvedStatus = unresolvedStatus,
         };
     }
 

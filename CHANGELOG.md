@@ -3,6 +3,39 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Upgrading
+- **Nothing changes unless you turn the new check on.** Exit codes, console lines and the baseline
+  verdicts for `fail` / `warn` are what 1.2 gives. Two visible differences: a baseline written by
+  `--write-baseline` now has an `unresolved` section (1.2.x and older ignore it, so a file written by
+  1.3 still works with them), and `--baseline` prints one more line,
+  `baseline: unresolved known N, resolved N, new N (not gated)`, when the file has that section.
+- To use the new check with a baseline written before 1.3, regenerate it once with `--write-baseline`
+  on a passing build — turning the check on with an old file is refused (exit 2) rather than
+  reporting every unresolved pair as new.
+
+### Added
+- **The baseline ratchet can also guard the pairs the tool can't see.** An unresolved pair (a
+  `{Binding}` colour, a gradient, a key missing from the palette…) is never graded, so the ratchet
+  never compared it: turning a known failure into `Foreground="{Binding …}"` read as paid-off debt,
+  and a new binding passed in silence unless overall coverage fell below `--min-coverage`. The
+  baseline now records the unresolved pairs too — keyed by file, reason and value, with a count and no
+  line numbers, like the existing entries — and **`--fail-on-new-unresolved`** (config
+  **`failOnNewUnresolved`**, the way to turn it on in the GitHub Action) fails the run (exit 1) when
+  a key is new or has more sites than recorded. The console names each new site as `file:line`, and
+  every site of a key that grew (the key has no line number, so it can't tell which one is new).
+  The tool still doesn't guess these colours; it only stops the blind spots from growing unnoticed.
+  Off by default — changing a default waits for 2.0.
+  - The flag needs `--baseline` (exit 2 without it). Set in the config without `--baseline`, it has no
+    effect and stderr says so — the same config also serves `--write-baseline` and plain runs.
+  - The three trust checks still come first: a run whose coverage falls below the floor is exit 3,
+    not "N new unresolved".
+  - **JSON** (schemaVersion stays 6): `summary.failOnNewUnresolved` (the setting in effect) and
+    `unresolvedSites[].baseline` (`known` / `new` / `worsened` against a baseline that records
+    unresolved pairs, whether or not the check is on; `null` otherwise). `docs/report.schema.json`
+    lists both.
+
 ## 1.2.1 — 2026-11-06
 
 - **Security: strings from the repo can no longer write Markdown in the PR comment.** The four warnings

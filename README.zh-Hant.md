@@ -180,7 +180,7 @@ xamlcontrast src/MyApp --html report.html    # 單檔 HTML 報告，附色塊
 | 碼 | 意思 |
 |---|---|
 | `0` | 通過 |
-| `1` | 有配對低於 gate —— 預設是任何 `fail` 或 `warn`（`--fail-on fail` 時只看 `fail`），或 `--baseline` 下有新增或惡化 |
+| `1` | 有配對低於 gate —— 預設是任何 `fail` 或 `warn`（`--fail-on fail` 時只看 `fail`），或 `--baseline` 下有新增或惡化（加了 `--fail-on-new-unresolved` 時，unresolved 比 baseline 記的多也算） |
 | `2` | 用法、設定或輸入檔錯誤 —— 旗標錯、config 不合法、報告或 baseline 檔寫不出／讀不到 |
 | `3` | **這份結果不可信** —— 解析出 0 組配對（空掃不是通過）、覆蓋率低於 `--min-coverage`、`--strict-palette` 下色盤退化 |
 
@@ -199,6 +199,27 @@ xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json         # CI 裡
 （同一個鍵、色值被調暗的色盤漂移照樣抓得到）。檔案帶 `schemaVersion` 與 `keyVersion`；缺欄位的、0.x 寫的、
 或鍵是較舊版本產生的（之後的版本可能改變鍵的寫法）baseline 會被拒絕（exit 2），並提示重跑 `--write-baseline`
 —— 而不是把每一筆既有債都報成 NEW。
+
+**工具看不到的配對。** ratchet 比的是評過分的配對，而 unresolved 永遠不評分。所以把一組既有的 fail 改成
+`Foreground="{Binding …}"` 會被讀成「還了債」，新寫的 binding、色盤裡沒有的鍵也一聲不吭地通過 ——
+直到整體覆蓋率掉到 `--min-coverage` 以下。1.3 起 baseline 也記 unresolved（依檔案、原因與值；不含行號），
+加 `--fail-on-new-unresolved`（或在 `xamlcontrast.config.json` 寫 `"failOnNewUnresolved": true`，GitHub Action 走這條）
+之後，比記錄的多就失敗：
+
+```bash
+xamlcontrast src/MyApp --baseline xamlcontrast-baseline.json --fail-on-new-unresolved
+```
+
+```
+baseline: known debt 12, paid off 1 (debt may only shrink)
+baseline: unresolved known 40, resolved 0, new 1
+  NEW unresolved: Views/Main.xaml:57 bound-or-gradient {Binding StatusBrush}
+exit 1: 1 new unresolved pair(s) vs baseline
+```
+
+預設關閉（改預設要等 2.0）；沒打開時同一行照樣報數字，後面標 `(not gated)`。這個旗標要搭 `--baseline`。
+1.3 之前寫的 baseline 沒有 unresolved 的紀錄，打開檢查時會被拒絕（exit 2）—— 在通過的 build 上重跑
+`--write-baseline`。`--json` 的每一筆 `unresolvedSites[]` 都帶 `baseline`（`known`／`new`／`worsened`）。
 
 **刻意低對比的標記**（理由必填；壓掉的計入 `summary.suppressed`，不會靜默消失）：
 
@@ -319,7 +340,7 @@ unresolved 的原因（`unresolvedBy` 的鍵、`unresolvedSites[].reason`）、`
 schema 把它們寫成字串，目前的值列在 description。
 
 - 頂層：`toolVersion`、`exitCode`（稽核的判定：0、1 或 3）、`summary`、`unresolvedSites`、`findings`。
-- `summary` 帶實際生效的 gate（`failOn`、`minCoverage`、`strictPalette`）與**全部的退化計數** ——
+- `summary` 帶實際生效的 gate（`failOn`、`minCoverage`、`strictPalette`，1.3 起加 `failOnNewUnresolved`）與**全部的退化計數** ——
   `paletteDegraded`、`coverage`、`unresolved`（含 `unresolvedBy`）、`skipped`、`deadForeground`、`disabledExempt`、`suppressed`、
   `parseErrors`／`parseErrorFiles`、`invalidIgnoreCount`／`invalidIgnores`、`unknownKeys`，以及 1.2 起的 `converterPairs`
   （經轉換器的固定顏色評出來的配對數；沒打開是 0）。工具沒看到的東西，都是機器可讀的。
@@ -362,7 +383,7 @@ fail／warn 另標 `symmetry: single-theme`。
 設 `"minCoverage": 0`)。
 
 每一筆無法解析的配對都有位置可查:`--show-unresolved` 逐筆列出
-`file:line · 原因 · 卡住的值`(卡在背景時放背景的值),JSON 頂層的 `unresolvedSites` 陣列帶同一份清單(`file`、`line`、`reason`、`value`)。
+`file:line · 原因 · 卡住的值`(卡在背景時放背景的值),JSON 頂層的 `unresolvedSites` 陣列帶同一份清單(`file`、`line`、`reason`、`value`,1.3 起加 `baseline`:跟記了 unresolved 的 baseline 比的結果,沒有比是 `null`)。
 unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)——
 每一個都是死引用、打字錯誤、或色盤偵測漏掉的檔,等於免費送一個 lint。Style 的鍵不是色票的鍵：
 1.2 起記成 `unknown-style-key`，不再列在 `summary.unknownKeys`。

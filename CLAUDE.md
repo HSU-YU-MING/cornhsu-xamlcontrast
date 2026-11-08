@@ -14,7 +14,7 @@
 
 ```bash
 dotnet build XamlContrast.slnx -c Release
-dotnet test  XamlContrast.slnx -c Release          # 2026-10-26 實跑（Windows）：946 綠、2 略過（沒有 jq 的機器略過 Action 註記的實跑；非 Linux 略過統計說明的標記檔）
+dotnet test  XamlContrast.slnx -c Release          # 2026-11-09 實跑（Windows）：1115 綠、2 略過（沒有 jq 的機器略過 Action 註記的實跑；非 Linux 略過統計說明的標記檔）
 dotnet format XamlContrast.slnx --verify-no-changes # CI 第一關，不過直接紅
 
 # 示範專案（刻意做壞的，exit 1 才是對的）
@@ -97,6 +97,10 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
       `~/.dotnet/tools` 寫進 `GITHUB_PATH`、Run audit 的 `--json` 落點固定在 `$RUNNER_TEMP/xamlcontrast-report.json`。
       改了任何一個，README 的那一步就安靜失效。
     - 協定跟 Parity repo 的伺服器端一起定，**不要單方面改**（伺服器照這個形狀實作，`CliPushTests` 釘住線上的樣子）。
+  - **1.3 的新增（凍結面，minor）**：`--fail-on-new-unresolved`（第 1 面）、`summary.failOnNewUnresolved`／`unresolvedSites[].baseline`
+    （第 3 面）、config 的 `failOnNewUnresolved`（第 5 面）、baseline 檔的頂層 `unresolved` 段（第 6 面；舊版不認得的頂層欄位一律忽略，
+    所以 1.3 寫的檔 1.2 照讀）。**不加 Action input**（一加就凍結），Action 使用者寫在 config。unresolved 段的鍵 = `file|reason|value`，
+    原因標籤的拼法或 value 的寫法變了就遞增 `Baseline.KeyVersion`（跟 fail／warn 的鍵同一個版本號）。
   - **1.1 的新增（凍結面，minor）**：`--html`、`--stats-preview`（第 1 面）、`findings[].colors`（第 3 面）、Action input `share-stats`
     （第 4 面）、config 的 `stats.share`／`stats.projectId`（第 5 面）。HTML 的**版面**跟 console、Markdown 一樣是 presentation、不凍結。
     **匿名統計送出去的 JSON 不是凍結面**：它的真相源是 `D:\擴充功能\nuget\stats-collector\PROTOCOL.md`，跟收集站與 Parity 一起演進
@@ -170,17 +174,17 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
 
 | # | 條件 | 退出碼 |
 |---|---|---|
-| 1 | 旗標錯誤（未知旗標、缺值、值以 `-` 開頭、`--fail-on`／`--min-coverage` 不合法、`--baseline` 與 `--write-baseline` 並用、缺 root） | 2 |
+| 1 | 旗標錯誤（未知旗標、缺值、值以 `-` 開頭、`--fail-on`／`--min-coverage` 不合法、`--baseline` 與 `--write-baseline` 並用、`--fail-on-new-unresolved` 沒有 `--baseline`、缺 root） | 2 |
 | 2 | root 不存在 | 2 |
 | 3 | config 錯誤（JSON、型別、範圍、未知屬性、`largeText > normalText`、`layout` 兩邊都宣告、`null`）；連檔案清單都拿不到 | 2 |
 | 4 | `rootBackground` 在色盤裡解析不出顏色 | 2 |
-| 5 | `--baseline` 檔不存在或不合法（**稽核之前**就驗：缺 `schemaVersion`、版本不認得、缺欄位） | 2 |
+| 5 | `--baseline` 檔不存在或不合法（**稽核之前**就驗：缺 `schemaVersion`、版本不認得、缺欄位；`unresolved` 段有就一樣嚴）；打開了 `failOnNewUnresolved` 而檔案沒有 `unresolved` 段（1.3 之前寫的） | 2 |
 | 6 | 稽核時讀不到專案 | 2 |
 | 7 | 0 組配對 | 3 |
 | 8 | `--strict-palette`（或 config）且色盤退化 | 3 |
 | 9 | 覆蓋率（`CoveragePercent`，四捨五入到一位）< 下限 | 3 |
 | 10 | `--write-baseline` | 0（檔案在判定之後寫；寫不出去 → 2） |
-| 11 | `--baseline`：有新增或惡化（只看目前 gate 擋的） | 1，否則 0 |
+| 11 | `--baseline`：有新增或惡化（只看目前 gate 擋的）；打開 `--fail-on-new-unresolved`／`failOnNewUnresolved`（1.3）時，unresolved 比 baseline 多也算 | 1，否則 0 |
 | 12 | fail > 0 | 1 |
 | 13 | gate 是 warn（預設）且 warn > 0 | 1 |
 | 14 | 其餘 | 0 |

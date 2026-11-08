@@ -101,7 +101,8 @@ public class JsonReportContractTests
         // findings[].largeText → isLargeText、fontSize 改成數字（DIP，不取整）、拿掉 paletteSource（由 paletteMode 推得）；
         // 每個欄位一律輸出（沒有值是 null、清單可為空），不再省略；新增 toolVersion、exitCode、summary.failOn／minCoverage／
         // strictPalette（實際生效的 gate）、summary.invalidIgnoreCount、findings[].theme（只屬於一個主題的配對）、
-        // findings[].baseline（--baseline 模式下的 known／new／worsened）
+        // findings[].baseline（--baseline 模式下的 known／new／worsened）。
+        // 1.x 只增、不遞增 schemaVersion：1.2 summary.converterPairs；1.3 summary.failOnNewUnresolved、unresolvedSites[].baseline
         [6] =
         [
             "exitCode:Number",
@@ -136,6 +137,7 @@ public class JsonReportContractTests
             "summary.deadForeground:Number",
             "summary.disabledExempt:Number",
             "summary.failOn:String",
+            "summary.failOnNewUnresolved:Boolean",
             "summary.files:Number",
             "summary.invalidIgnoreCount:Number",
             "summary.invalidIgnores:Array",
@@ -165,6 +167,7 @@ public class JsonReportContractTests
             "summary:Object",
             "toolVersion:String",
             "unresolvedSites:Array",
+            "unresolvedSites[].baseline:Null",
             "unresolvedSites[].file:String",
             "unresolvedSites[].line:Number",
             "unresolvedSites[].reason:String",
