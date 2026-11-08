@@ -70,11 +70,9 @@ internal static class Cli
 
     /// <summary>
     /// 讀子行程的 stdout／stderr，用自己的執行緒，不佔執行緒集區。
-    /// ⚠ Windows 上重導的管線是同步的：<c>ReadToEndAsync</c> 會在集區裡卡住一條執行緒，直到子行程結束（Linux、macOS 不會）。
-    ///   平行跑的 CLI 測試一多（每個子行程卡兩條），集區排不出執行緒給 <see cref="PushStub"/> 收連線 ——
-    ///   CLI 的統計等滿 3 秒就放棄，子行程結束時 stub 還沒記下請求。1.3 的 PR（多了 15 條跑 CLI 的測試）在 windows-latest 上
-    ///   <c>CliStatsTests.DemoPayloadMatchesTheProtocolFieldForField</c> 紅過一次，Ubuntu、macOS 都綠；那條剛好跑了 3 秒（統計的整體上限）。
-    ///   本機 20 核重現不出來，這個機制是推斷 —— 但讀管線本來就不該佔集區，改了沒有壞處。
+    /// Windows 上重導的管線是同步的：<c>ReadToEndAsync</c> 會在集區裡卡住一條執行緒，直到子行程結束（Linux、macOS 不會），
+    /// 平行跑的 CLI 測試一多，每個子行程卡兩條。這只是減輕集區的負擔；統計測試在 Windows 上偶發紅燈的真正原因是
+    /// <see cref="PushStub"/> 自己靠集區排程（見它的說明）—— 只改這裡的話，CI 的 windows-latest 重跑三次還是紅一次。
     /// </summary>
     internal static Task<string> ReadToEndOnOwnThread(StreamReader reader)
         => Task.Factory.StartNew(reader.ReadToEnd, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);

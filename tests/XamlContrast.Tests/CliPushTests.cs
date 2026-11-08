@@ -432,6 +432,11 @@ public class CliPushTests
 /// 127.0.0.1 上的最小 HTTP/1.1 伺服器（隨機埠）：記下每一個請求、回固定的狀態碼與本文，回完就關連線。
 /// 用 TcpListener 不用 HttpListener —— Windows 上 HttpListener 走 http.sys，非系統管理員要先保留 URL ACL 才綁得上。
 /// 請求在回應之前就記下來，所以子行程結束時 <see cref="Requests"/> 一定已經有它。
+///
+/// ⚠ 收連線、讀寫都在**自己的執行緒、同步 I/O**，不碰執行緒集區。舊版是 async（AcceptTcpClientAsync／ReadAsync），每一步的
+///   接續都要排進集區；平行跑的測試把集區佔滿時（CI 的 windows-latest，4 核），stub 超過 3 秒才輪到處理 —— CLI 的統計
+///   已經等滿整體上限放棄、子行程結束，<see cref="Requests"/> 還是空的。1.3 的 PR 在 Windows 上兩條統計測試各紅過一次（都跑了 3 秒）；
+///   本機用 DOTNET_ThreadPool_ForceMaxWorkerThreads=4 把集區縮小就穩定重現，所有用到 stub 的統計測試一起紅。
 /// </summary>
 internal sealed class PushStub : IDisposable
 {
@@ -449,7 +454,7 @@ internal sealed class PushStub : IDisposable
     {
         (this.status, this.body, this.reason, this.extraHeaders) = (status, body, reason, extraHeaders);
         listener.Start();
-        _ = Task.Run(AcceptLoopAsync);
+        new Thread(AcceptLoop) { IsBackground = true, Name = "PushStub accept" }.Start();
     }
 
     public string Url => $"http://127.0.0.1:{((IPEndPoint)listener.LocalEndpoint).Port}";
@@ -459,30 +464,31 @@ internal sealed class PushStub : IDisposable
 
     public IReadOnlyList<Request> Requests => requests.ToArray();
 
-    private async Task AcceptLoopAsync()
+    private void AcceptLoop()
     {
         while (!stop.IsCancellationRequested)
         {
             TcpClient client;
-            try { client = await listener.AcceptTcpClientAsync(stop.Token); }
-            catch (Exception ex) when (ex is OperationCanceledException or SocketException or ObjectDisposedException) { return; }
-            _ = Task.Run(() => ServeAsync(client));
+            try { client = listener.AcceptTcpClient(); } // Dispose 的 listener.Stop() 讓它擲例外、結束迴圈
+            catch (Exception ex) when (ex is SocketException or ObjectDisposedException or InvalidOperationException) { return; }
+            new Thread(() => Serve(client)) { IsBackground = true, Name = "PushStub serve" }.Start();
         }
     }
 
-    private async Task ServeAsync(TcpClient client)
+    private void Serve(TcpClient client)
     {
         using (client)
         {
             try
             {
+                client.ReceiveTimeout = 30_000; // 對方連上卻不送：不讓這條執行緒永遠卡著
                 var stream = client.GetStream();
                 var received = new MemoryStream();
                 var chunk = new byte[8192];
                 int headerEnd;
                 while ((headerEnd = IndexOfBlankLine(received)) < 0)
                 {
-                    var n = await stream.ReadAsync(chunk, stop.Token);
+                    var n = stream.Read(chunk);
                     if (n == 0) return;
                     received.Write(chunk, 0, n);
                 }
@@ -498,7 +504,7 @@ internal sealed class PushStub : IDisposable
                 var length = headers.TryGetValue("Content-Length", out var cl) ? int.Parse(cl) : 0;
                 while (received.Length - (headerEnd + 4) < length)
                 {
-                    var n = await stream.ReadAsync(chunk, stop.Token);
+                    var n = stream.Read(chunk);
                     if (n == 0) break;
                     received.Write(chunk, 0, n);
                 }
@@ -506,7 +512,7 @@ internal sealed class PushStub : IDisposable
                 requests.Enqueue(new Request(requestLine[0], requestLine.Length > 1 ? requestLine[1] : "", headers, requestBody));
                 if (Hang)
                 {
-                    await Task.Delay(Timeout.Infinite, stop.Token);
+                    stop.Token.WaitHandle.WaitOne(); // 一直不回，直到 Dispose
                     return;
                 }
 
@@ -515,10 +521,11 @@ internal sealed class PushStub : IDisposable
                 if (body is not null) response.Append("Content-Type: application/json; charset=utf-8\r\n");
                 foreach (var h in extraHeaders) response.Append(h).Append("\r\n");
                 response.Append($"Content-Length: {payload.Length}\r\nConnection: close\r\n\r\n");
-                await stream.WriteAsync(Encoding.ASCII.GetBytes(response.ToString()), stop.Token);
-                await stream.WriteAsync(payload, stop.Token);
+                stream.Write(Encoding.ASCII.GetBytes(response.ToString()));
+                stream.Write(payload);
             }
-            catch (Exception ex) when (ex is IOException or OperationCanceledException or SocketException) { /* 對方斷線：記到的就記到了 */ }
+            // 對方斷線、逾時、Dispose 之後才輪到（stop 已經釋放）：記到的就記到了
+            catch (Exception ex) when (ex is IOException or OperationCanceledException or SocketException or ObjectDisposedException) { }
         }
     }
 
