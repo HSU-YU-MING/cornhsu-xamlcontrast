@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
-## [Unreleased]
+## 1.3.0 — 2026-11-09
 
 ### Upgrading
 - **Nothing changes unless you turn the new check on.** Exit codes, console lines and the baseline
