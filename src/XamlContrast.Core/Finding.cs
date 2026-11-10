@@ -67,6 +67,11 @@ public sealed class Finding
     /// <summary>只屬於一個主題的配對（<see cref="Theme"/> 不是 null）</summary>
     public bool OneThemeOnly => Theme is not null;
 
+    /// <summary>非文字對比的配對（1.4，config 的 nonText.uiComponents）：這組比的是控制項的哪一部分 ——
+    /// <c>border</c>（框線）、<c>fill</c>（底色）、<c>focus-visual</c>（FocusVisualStyle 的焦點框）；跟周圍的底比，門檻 3:1。
+    /// 文字與圖示的配對是 null。</summary>
+    public string? Component { get; init; }
+
     // 分級後填入
     public Category Category { get; set; }
     public Symmetry Symmetry { get; set; }
@@ -158,6 +163,8 @@ public sealed class AuditResult
     /// <summary>經轉換器的候選色評出來的配對數（1.2，config 的 converters.constantBrushes；含壓掉的）。一個候選色一組 ——
     /// 跟觸發態一樣，每個狀態各算一組。沒打開是 0。</summary>
     public int ConverterPairs { get; init; }
+    /// <summary>非文字對比評出來的配對數（1.4，config 的 nonText.uiComponents；含壓掉的、含在 Pairs 裡）。沒打開是 0。</summary>
+    public int UiComponentPairs { get; init; }
     /// <summary>這次稽核拿來當顏色的轉換器（資源鍵 → 分析結果）：哪些是固定顏色、哪些不是、為什麼。沒打開是 null。</summary>
     public IReadOnlyList<ConverterUse>? ConvertersUsed { get; init; }
     /// <summary>本次生效的設定（分級門檻等；預設值 = 沒有 config 檔）</summary>

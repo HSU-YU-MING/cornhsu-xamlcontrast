@@ -238,6 +238,8 @@ public static partial class Report
                 // 1.2：經轉換器的候選色評出來的配對數（config 的 converters.constantBrushes；沒打開是 0）。
                 // 讓「覆蓋率變高了」看得出來是哪裡來的：這些配對以前是 bound-or-gradient
                 converterPairs = r.ConverterPairs,
+                // 1.4：非文字對比評出來的配對數（config 的 nonText.uiComponents；沒打開是 0）
+                uiComponentPairs = r.UiComponentPairs,
                 parseErrors = r.ParseErrors.Count,
                 parseErrorFiles = r.ParseErrors,
                 suppressed = r.Suppressed,
@@ -289,6 +291,8 @@ public static partial class Report
                 isLargeText = f.Large,
                 fontSize = f.FontSize,
                 theme = f.Theme is { } t ? ThemeLabel(t) : null,
+                // 1.4：非文字對比的配對比的是控制項的哪一部分（border／fill／focus-visual）；文字與圖示是 null
+                component = f.Component,
                 baseline = ctx.BaselineStatus is { } st && st.TryGetValue(f, out var b) ? b : null,
             }),
         };
