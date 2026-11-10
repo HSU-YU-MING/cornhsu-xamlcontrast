@@ -152,7 +152,9 @@ public static partial class PaletteDetector
     /// <summary>字面色值（#hex 或具名色）→ 正規化色碼（#RRGGBB／#AARRGGBB）；讀不懂回傳 null。
     /// WPF 也吃 #RGB／#ARGB 與完整的具名色表 —— 跟 ColorResolver 同一套（色票與使用處的標準要一致）。</summary>
     private static string? LiteralColor(string v)
-        => v.StartsWith('#') ? ColorResolver.NormalizeHex(v) : ColorResolver.NamedHex(v);
+        => v.StartsWith('#') ? ColorResolver.NormalizeHex(v)
+           // {x:Static Colors.Red}（1.4）：色票寫成 Color="{x:Static Colors.Red}" 也是同一個具名色。Transparent 不在色票裡收（跟具名色同一套）
+           : ColorResolver.NamedHex(v) ?? (ColorResolver.StaticNamedColour(v) is { } s && s != "Transparent" ? s : null);
 
     /// <summary>
     /// 專案內的檔案，排除建置輸出（bin／obj）。

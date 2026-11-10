@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## Unreleased
+
+### Upgrading
+- **`{x:Static Colors.Red}` and `{x:Static Brushes.Red}` are read as the named colour they are.** They used to be
+  `bound-or-gradient` unresolved sites ("only knowable at runtime"). A project that uses them gets more graded pairs
+  and higher coverage, and a pair that is really below AA now shows up as a `fail` / `warn` instead of hiding in
+  `unresolved` — with `--baseline` that is a new finding. Nothing else moves: the four maintainer projects give
+  exactly the same snapshot. Baseline keys are unchanged (`keyVersion` stays 1).
+  *{x:Static Colors.X} 與 {x:Static Brushes.X} 現在讀成對應的具名色;之前是 bound-or-gradient 的未解析。
+  用到它們的專案配對變多、覆蓋率變高,真的低於 AA 的會以 fail／warn 出現。四個驗證專案的快照完全不變。*
+
+### Added
+- `{x:Static Colors.X}` / `{x:Static Brushes.X}` (with an xmlns prefix or `Member=` too) resolve to the WPF named
+  colour, in element attributes, styles and palette dictionaries (`<SolidColorBrush Color="{x:Static Colors.Navy}"/>`).
+  `Brushes.Transparent` is transparent. Evidence: about 430 public XAML files on GitHub use `x:Static Brushes.` and about
+  140 use `x:Static Colors.` (code search, 2026-11-10).
+
+### Not changed, on purpose
+- `{x:Static SystemColors.…}` (about 40,000 public XAML files) stays `bound-or-gradient`: the colour follows the operating
+  system's theme and high-contrast setting, so it is not knowable from the source. A static member of your own class
+  (`{x:Static local:Theme.Accent}`) needs the C# and stays unresolved too. Same reason as before, so the `unresolved`
+  keys in a baseline do not change.
+
 ## 1.3.0 — 2026-11-09
 
 ### Upgrading

@@ -489,6 +489,74 @@ public class ParseRuleTests
         Assert.Equal(("#008080", "#008080"), d.Palette.Entries["Accent"]);
     }
 
+    // ── {x:Static Colors.X}／{x:Static Brushes.X}（1.4）──
+    // WPF 內建的具名色，跟字面寫 Red 是同一個顏色。之前落到 bound-or-gradient（「執行期才知道」），
+    // GitHub 上的公開 XAML 約 430 個檔用 x:Static Brushes.、約 140 個用 x:Static Colors.
+
+    [Theory]
+    [InlineData("{x:Static Brushes.Navy}", "#000080")]
+    [InlineData("{x:Static Colors.Navy}", "#000080")]
+    [InlineData("{x:Static media:Brushes.CornflowerBlue}", "#6495ED")]   // 帶 xmlns 前綴
+    [InlineData("{x:Static Member=Brushes.Black}", "#000000")]          // Member= 寫法
+    [InlineData("{x:Static  Brushes.navy }", "#000080")]                // 多餘空白、色名不分大小寫
+    public void StaticNamedColoursAndBrushesAreResolved(string value, string hex)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF"><TextBlock Foreground="{value}" Text="x"/></Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Unresolved);
+        Assert.Equal(Wcag.Contrast(hex, "#FFFFFF"), Assert.Single(r.Findings).RatioDark);
+    }
+
+    [Fact] // 背景也是：{x:Static Brushes.Black} 的底上放白字是 21:1；Brushes.Transparent 是透明，往下看祖先的底
+    public void StaticNamedBackgroundsResolveAndTransparentSeesThrough()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <StackPanel Background="{x:Static Brushes.Black}">
+              <TextBlock Foreground="White" Text="a"/>
+              <Border Background="{x:Static Brushes.Transparent}"><TextBlock Foreground="#777777" Text="b"/></Border>
+            </StackPanel>
+            """);
+        var r = fx.Run();
+        Assert.Equal(0, r.Unresolved);
+        Assert.Equal(21, Math.Round(Assert.Single(r.Findings, f => f.Fg == "White").RatioDark, 1));
+        Assert.Equal(Wcag.Contrast("#777777", "#000000"), Assert.Single(r.Findings, f => f.Fg == "#777777").RatioDark);
+    }
+
+    [Theory] // 只認 Colors／Brushes：SystemColors 跟著作業系統的主題與高對比走，使用者自己的靜態成員要讀 C# —— 都照舊不猜
+    [InlineData("{x:Static SystemColors.WindowTextBrush}")]
+    [InlineData("{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}")]
+    [InlineData("{x:Static local:Theme.Accent}")]
+    [InlineData("{x:Static Brushes.RebeccaPurple}")]                     // 不是 WPF 的色名
+    public void SystemColoursAndUserStaticsStayUnresolved(string value)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""<Grid Background="#FFFFFF"><TextBlock Foreground="{value}" Text="x"/></Grid>""");
+        var r = fx.Run();
+        Assert.Equal(1, r.UnresolvedBy[UnresolvedReason.BoundOrGradient]); // 原因不變：baseline 的 unresolved 鍵也不會變
+        Assert.Empty(r.Findings);
+    }
+
+    [Fact] // 色盤那一側同一套：Color="{x:Static Colors.X}" 的色票照常收
+    public void PaletteAcceptsStaticNamedColours()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Colors.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Fg" Color="{x:Static Colors.Navy}"/>
+              <SolidColorBrush x:Key="Bg" Color="{x:Static Colors.White}"/>
+              <SolidColorBrush x:Key="Accent" Color="{x:Static Colors.Teal}"/>
+            </ResourceDictionary>
+            """); // 色盤門檻是 3 個鍵
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(("#000080", "#000080"), d.Palette.Entries["Fg"]);
+        Assert.Equal(("#FFFFFF", "#FFFFFF"), d.Palette.Entries["Bg"]);
+        Assert.Equal(("#008080", "#008080"), d.Palette.Entries["Accent"]);
+    }
+
     // ── 屬性元素語法（<Border.Background>…</Border.Background>）──
     // 舊版只讀屬性：漸層底被忽略、文字配到祖先的底，給出篤定的 21:1 ok；
     // <TextBlock.Foreground> 那組更是整組消失（pairs、unresolved、skipped 全是 0）
