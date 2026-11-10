@@ -124,6 +124,25 @@ public static partial class ColorResolver
     [GeneratedRegex(@"^\{(Dynamic|Static)Resource\s+(?<k>[\w\.]+)\}$")]
     private static partial Regex ResourceRef();
 
+    /// <summary>
+    /// <c>{x:Static Colors.Red}</c>、<c>{x:Static Brushes.Red}</c>（可帶 xmlns 前綴、<c>Member=</c> 寫法）：WPF 內建的具名色，
+    /// 跟字面寫 <c>Red</c> 是同一個顏色（1.4）。之前落到「Binding／漸層」的 unresolved —— 靜態可解卻標成執行期才知道。
+    /// GitHub 上的公開 XAML 約 430 個檔用 <c>x:Static Brushes.</c>、約 140 個用 <c>x:Static Colors.</c>（2026-11-10 程式碼搜尋）。
+    /// ⚠ 只認 Colors／Brushes 兩個型別：<c>SystemColors.*</c> 跟著作業系統的主題與高對比設定走（約 40,000 個檔在用），
+    ///   靜態不可知，照舊不解析；使用者自己類別的靜態成員要讀 C# 才知道，也照舊不解析。
+    /// 回傳正規化色碼，Transparent 回傳 "Transparent"，不是這個形狀或色名認不得回傳 null。
+    /// </summary>
+    internal static string? StaticNamedColour(string value)
+    {
+        var m = StaticNamed().Match(value.Trim());
+        if (!m.Success) return null;
+        var name = m.Groups["n"].Value;
+        return IsTransparent(name) ? "Transparent" : NamedHex(name);
+    }
+
+    [GeneratedRegex(@"^\{x:Static\s+(?:Member\s*=\s*)?(?:[A-Za-z_]\w*:)?(?:Colors|Brushes)\.(?<n>[A-Za-z]+)\s*\}$")]
+    private static partial Regex StaticNamed();
+
     public static Resolved? Resolve(string? value, Palette palette)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
@@ -146,6 +165,8 @@ public static partial class ColorResolver
         }
         if (Named.TryGetValue(v, out var hex))
             return new Resolved(ColorKind.Hard, hex, hex);
+        if (StaticNamedColour(v) is { } staticColour)
+            return staticColour == "Transparent" ? new Resolved(ColorKind.Transparent) : new Resolved(ColorKind.Hard, staticColour, staticColour);
 
         var m = ResourceRef().Match(v);
         if (m.Success)

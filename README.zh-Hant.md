@@ -369,7 +369,7 @@ fail／warn 另標 `symmetry: single-theme`。
 | 原因 | 意思 |
 |---|---|
 | `no-ancestor-background` | 祖先鏈上沒有任何一層宣告背景。常見於根容器靠 App 層隱含樣式給底,或資源字典裡的向量圖 |
-| `bound-or-gradient` | 顏色來自 `{Binding}` / `{TemplateBinding}` / 漸層或圖片 brush —— 執行期才知道。其他工具讀不出顏色的值也歸這裡(WPF 的色彩字面值 —— `#RGB`、`#ARGB`、`#RRGGBB`、`#AARRGGBB`、具名色 —— 都讀得懂) |
+| `bound-or-gradient` | 顏色來自 `{Binding}` / `{TemplateBinding}` / 漸層或圖片 brush —— 執行期才知道。其他工具讀不出顏色的值也歸這裡(WPF 的色彩字面值 —— `#RGB`、`#ARGB`、`#RRGGBB`、`#AARRGGBB`、具名色、`{x:Static Colors.Red}`／`{x:Static Brushes.Red}` —— 都讀得懂;`{x:Static SystemColors.…}` 跟著作業系統的主題與高對比設定走、自己類別的靜態成員要讀 C#,這兩種照舊歸這裡) |
 | `unknown-palette-key` | 資源鍵不在偵測到的色盤裡 —— 打字錯誤,或色盤偵測漏了某個檔 |
 | `translucent-uncomposited` | 透明或半透明的背景、底下沒有可疊的顏色 —— 半透明的 `Background`、上面的祖先都沒有底；Style 定義處自己的 `Background="Transparent"`，而且沒有任何使用處會評到它（隱含樣式，或沒有元素以 `Style=` 引用的具名 Style；有元素用到的改在使用處評）；或以 `Opacity` 變淡、底下什麼都沒有的一層。第一種用下面的 `rootBackground` 補得回來 |
 | `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
