@@ -194,9 +194,15 @@ tried in this order, and the one that ran is always named on the first line of t
    **WinUI / UWP:** a dictionary's `<ResourceDictionary.ThemeDictionaries>` is split by `x:Key` —
    `Dark` (or `Default` when there is no `Dark`) is the dark theme, `Light` (or `Default`) the light one,
    `HighContrast…` is not graded (it is the user's system colours); the rest of the file is shared by both
-   themes as before. `{ThemeResource Key}` is read like `{DynamicResource Key}`. A key the project doesn't define
-   (WinUI's own `TextFillColorPrimaryBrush` and the like) is `unknown-palette-key` — set `rootBackground` or
-   add the keys you rely on to your own dictionary.
+   themes as before. `{ThemeResource Key}` is read like `{DynamicResource Key}`. In a project that uses
+   `{ThemeResource`, **WinUI's own Fluent theme resources** (`TextFillColorPrimaryBrush`,
+   `SolidBackgroundFillColorBaseBrush`, the older `SystemControl…` brushes — 557 brushes in all) are filled in with the
+   framework's default dark and light values wherever the project doesn't define the key itself; the project's own
+   definition always wins. Keys that follow the user's Windows accent colour (`AccentFillColorDefaultBrush`,
+   `SystemAccentColor…`) are not guessed — they stay `bound-or-gradient`. The table comes from microsoft/microsoft-ui-xaml
+   (MIT, see THIRD-PARTY-NOTICES.md); the commit is named on the palette line. WPF projects are not affected.
+   A page's background usually comes from the window (Mica or the default page brush), which the tool can't see —
+   set `rootBackground` for that.
 2. **Theme pair** — one `DarkTheme.xaml` × one `LightTheme.xaml`, keys overlapping ≥ 50%
 3. **C# source of truth** — `("Key", "#dark", "#light")` tuple arrays
    (beats a single-theme XAML copy: a source that provides both themes wins)

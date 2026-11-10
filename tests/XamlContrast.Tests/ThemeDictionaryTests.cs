@@ -115,12 +115,12 @@ public class ThemeDictionaryTests
         Assert.Null(PaletteDetector.ThemeDictionarySections("""<SolidColorBrush x:Key="B" Color="#123456"/>"""));
     }
 
-    [Fact] // 專案裡找不到的 ThemeResource 鍵（WinUI 內建的 TextFillColorPrimaryBrush 之類）跟 DynamicResource 一樣是 unknown-palette-key
+    [Fact] // 專案與 WinUI 預設主題都沒有的 ThemeResource 鍵（外部函式庫的鍵之類）跟 DynamicResource 一樣是 unknown-palette-key
     public void ThemeResourceToAKeyTheProjectDoesNotDefineIsAnUnknownKey()
     {
         using var fx = new Fixture();
         fx.File("Themes/Colors.xaml", WinUiColors).File("MainPage.xaml", """
-            <Page><Grid Background="{ThemeResource PageBg}"><TextBlock Foreground="{ThemeResource TextFillColorPrimaryBrush}" Text="a"/></Grid></Page>
+            <Page><Grid Background="{ThemeResource PageBg}"><TextBlock Foreground="{ThemeResource SomeLibraryTextBrush}" Text="a"/></Grid></Page>
             """);
 
         var r = fx.Run();

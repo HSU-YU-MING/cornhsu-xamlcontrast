@@ -268,6 +268,16 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   只有一個主題定義的區域鍵，另一個主題記讀不懂，不拿另一個主題的值補。`{ThemeResource K}`
   在五個地方跟 Dynamic／StaticResource 並列（ColorResolver、PaletteDetector、StyleIndex、Auditor 的 Style 鍵、IconFonts），
   新增解析資源引用的地方要一起認。⚠ 四個驗證專案都是 WPF，測不到這條；動它要靠 `ThemeDictionaryTests`。
+- **WinUI 的框架預設主題色（1.4，`WinUiTheme.cs` + 內嵌的 `WinUiTheme.json`）**：只在專案用到 `{ThemeResource` 時補（WPF 的
+  Wpf.Ui 借用同名鍵、值不一定一樣），當最底層 —— 專案定義的鍵、讀不懂而剔除的鍵、區域鍵、MissingRefs 一律優先。
+  資料**不是手抄**：`WinUiThemeTests.Regenerate` 拿 microsoft-ui-xaml 的 `Common_themeresources_any.xaml`（先）與
+  `generic.xaml`（後）跑工具自己的 `MergedXamlPalette` 產生；重產：sparse checkout 那兩個檔，設
+  `XAMLCONTRAST_WINUI_SOURCE`（checkout 目錄）與 `XAMLCONTRAST_WINUI_COMMIT`（完整 SHA）跑那條測試，看 git diff 再 commit。
+  brush 引用 `SystemAccentColor…` 的鍵放 `runtime`（使用者的強調色，執行期才知道），不給值。高對比不評。
+  授權：MIT，`THIRD-PARTY-NOTICES.md` 由 Directory.Build.props 打進套件 —— 換來源或加資料時要一起改。
+  WinUI Gallery（2026-11-10，`6de91fe`）實測：配對 49 → 59、unknown-palette-key 172 → 90，原本的 finding 比值與分類都不變。
+  剩下的大宗：頁面底色來自視窗（no-ancestor-background）、`<StaticResource x:Key ResourceKey>` 別名（還不認）、
+  inline brush 用 Color 鍵（`TextFillColorPrimary`）。
 - **Application 含子類別**（`PaletteDetector.RootKindOf`）：根元素名稱以 Application 結尾（Prism 的 `PrismApplication`），
   或根元素底下有 `<…Application.Resources>`。只認 `Application` 的話，Prism 的 App.xaml 被當成畫面、全域鍵全變成區域鍵。
 - **元素 Opacity 是群組**（`Auditor.Backdrop`／`OpacityGroup`）：WPF 的 Opacity 把整棵子樹畫成一層再疊。

@@ -73,7 +73,8 @@ public sealed class PaletteDetection
     /// 色盤來源是畫面檔（Window.Resources 裡的區域 brush）時照樣稽核，見 <see cref="PaletteDetector.IsResourceDictionaryFile"/>。</summary>
     public required HashSet<string> ExcludedFiles { get; init; }
     /// <summary>偵測結果的人話描述，一律印出來（偵測結果不靜默）。</summary>
-    public required string Description { get; init; }
+    // set 而不是 init:WinUI 的框架預設主題色在偵測之後補進來,描述要跟著加一句(WinUiTheme.Apply)
+    public required string Description { get; set; }
     /// <summary>偵測時讀不到的檔（"相對路徑: 訊息"）。稽核端併進 parse errors —— 檔案不能從報告裡靜默消失。
     /// ⚠ 自動偵測會讀樹裡每一個 .cs 找 C# 色盤；舊版 File.ReadLines 沒有 try，任何一個被 IDE／建置
     ///   鎖住的 .cs（跟色盤有沒有關係都一樣）都讓整支程式以未處理的 IOException 結束、退出碼跳出契約。</summary>
@@ -434,7 +435,7 @@ public static partial class PaletteDetector
     }
 
     /// <summary>同上，對一段已讀進來（已剔除註解）的 XAML 文字 —— ThemeDictionaries 的每一個主題字典各解一次。</summary>
-    private static Dictionary<string, string> ParseColorDefsText(string text, bool keepInvalid)
+    internal static Dictionary<string, string> ParseColorDefsText(string text, bool keepInvalid)
     {
         var colors = new Dictionary<string, string>();
         foreach (Match m in ColorElement().Matches(text))
@@ -815,7 +816,7 @@ public static partial class PaletteDetector
     }
 
     /// <summary>同上，對一段已讀進來（已剔除註解）的 XAML 文字。</summary>
-    private static (Dictionary<string, string> Literal, Dictionary<string, string> Ref) ParseBrushDefsText(string text, bool keepInvalid)
+    internal static (Dictionary<string, string> Literal, Dictionary<string, string> Ref) ParseBrushDefsText(string text, bool keepInvalid)
     {
         var lit = new Dictionary<string, string>();
         var refs = new Dictionary<string, string>();
@@ -966,6 +967,8 @@ public static partial class PaletteDetector
         var d = DetectCore(root, config, readErrors);
         d.ReadErrors.AddRange(readErrors);
         FillColorTables(root, d);
+        // WinUI／UWP 專案:框架的預設主題色當最底層(專案自己定義的優先)。WPF 專案不碰(見 WinUiTheme)
+        WinUiTheme.Apply(root, d);
         return d;
     }
 

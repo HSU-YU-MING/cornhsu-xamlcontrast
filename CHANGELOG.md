@@ -22,6 +22,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   conflicting keys (only one theme was graded, the other column was made up); it is now a dark/light pair.
   WPF projects are not affected: the four maintainer projects give exactly the same snapshot.
   *WinUI／UWP：讀得懂 {ThemeResource} 與 ThemeDictionaries。用 --fail-on-new-unresolved 的 WinUI 專案請重寫一次 baseline。*
+- **WinUI / UWP projects get WinUI's default Fluent theme colours** for theme resources they don't define themselves
+  (only projects that use `{ThemeResource`). Expect more graded pairs and, because the palette now has real dark and
+  light values, findings on hard-coded colours may change their `symmetry` from `single-theme` to `both-low` (same ratios).
+  Keys that follow the user's accent colour stay `bound-or-gradient`.
 
 ### Added
 - `{ThemeResource Key}` resolves through the palette like `{DynamicResource Key}` — in element attributes, styles
@@ -35,6 +39,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   single theme, `bound-or-gradient` drops from 189 to 17 and those sites now name the key they need; most of them
   (172 sites, 34 keys such as `TextFillColorSecondaryBrush`) are WinUI's built-in Fluent theme resources, which a
   project doesn't define — so graded pairs only go from 48 to 49. The other 48 findings are unchanged.
+- WinUI's default theme resources (`WinUiTheme.json`, embedded): 557 brushes and 135 colours with their dark and light
+  default values, from `Common_themeresources_any.xaml` and `generic.xaml` in microsoft/microsoft-ui-xaml (MIT —
+  `THIRD-PARTY-NOTICES.md`, now packed with the tool). Filled in as the lowest layer for projects that use
+  `{ThemeResource`; the project's own definition (and a project key it can't read) always wins; 34 accent-derived keys
+  are runtime-only. WinUI Gallery: graded pairs 49 → 59, `unknown-palette-key` 172 → 90; every earlier finding keeps
+  its ratio and category.
 - `{x:Static Colors.X}` / `{x:Static Brushes.X}` (with an xmlns prefix or `Member=` too) resolve to the WPF named
   colour, in element attributes, styles and palette dictionaries (`<SolidColorBrush Color="{x:Static Colors.Navy}"/>`).
   `Brushes.Transparent` is transparent. Evidence: about 430 public XAML files on GitHub use `x:Static Brushes.` and about

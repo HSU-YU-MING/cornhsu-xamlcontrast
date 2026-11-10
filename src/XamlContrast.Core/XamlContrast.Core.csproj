@@ -11,4 +11,9 @@
     <InternalsVisibleTo Include="XamlContrast.Tests" />
   </ItemGroup>
 
+  <!-- WinUI 的框架預設主題色(1.4)。由 microsoft/microsoft-ui-xaml 產生(MIT,見 THIRD-PARTY-NOTICES.md),產生方式見 WinUiThemeTests -->
+  <ItemGroup>
+    <EmbeddedResource Include="WinUiTheme.json" LogicalName="XamlContrast.Core.WinUiTheme.json" />
+  </ItemGroup>
+
 </Project>

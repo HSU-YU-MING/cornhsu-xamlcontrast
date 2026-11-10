@@ -1,0 +1,2811 @@
+{
+  "source": "microsoft/microsoft-ui-xaml@3259dc443754",
+  "entries": {
+    "AccentFillColorDisabledBrush": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "AccentTextFillColorDisabledBrush": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "AppBarBackgroundThemeBrush": [
+      "#FF000000",
+      "#FFF0F0F0"
+    ],
+    "AppBarBorderThemeBrush": [
+      "#FF000000",
+      "#FFF0F0F0"
+    ],
+    "AppBarItemDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "AppBarItemForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "AppBarItemPointerOverBackgroundThemeBrush": [
+      "#21FFFFFF",
+      "#3D000000"
+    ],
+    "AppBarItemPointerOverForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "AppBarItemPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "AppBarSeparatorForegroundThemeBrush": [
+      "#FF7B7B7B",
+      "#FF7B7B7B"
+    ],
+    "AppBarToggleButtonCheckedBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "AppBarToggleButtonCheckedBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "AppBarToggleButtonCheckedDisabledBackgroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "AppBarToggleButtonCheckedDisabledForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "AppBarToggleButtonCheckedForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "AppBarToggleButtonCheckedPointerOverBackgroundThemeBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "AppBarToggleButtonCheckedPointerOverBorderThemeBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "AppBarToggleButtonCheckedPressedBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "AppBarToggleButtonCheckedPressedForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "AppBarToggleButtonPointerOverBackgroundThemeBrush": [
+      "#21FFFFFF",
+      "#3D000000"
+    ],
+    "ApplicationForegroundThemeBrush": [
+      "#DEFFFFFF",
+      "#DE000000"
+    ],
+    "ApplicationHeaderForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ApplicationPageBackgroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "ApplicationPointerOverForegroundThemeBrush": [
+      "#CCFFFFFF",
+      "#CC000000"
+    ],
+    "ApplicationPressedForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "ApplicationSecondaryForegroundThemeBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "AutoSuggestBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "BackButtonDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "BackButtonForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "BackButtonPointerOverBackgroundThemeBrush": [
+      "#21FFFFFF",
+      "#3D000000"
+    ],
+    "BackButtonPointerOverForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "BackButtonPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "ButtonBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#33000000"
+    ],
+    "ButtonDisabledBorderThemeBrush": [
+      "#66FFFFFF",
+      "#1A000000"
+    ],
+    "ButtonDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "ButtonForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ButtonPointerOverBackgroundThemeBrush": [
+      "#21FFFFFF",
+      "#D1CDCDCD"
+    ],
+    "ButtonPointerOverForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ButtonPressedBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ButtonPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "CardBackgroundFillColorDefaultBrush": [
+      "#0DFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "CardBackgroundFillColorSecondaryBrush": [
+      "#08FFFFFF",
+      "#80F6F6F6"
+    ],
+    "CardBackgroundFillColorTertiaryBrush": [
+      "#12FFFFFF",
+      "#FFFFFF"
+    ],
+    "CardStrokeColorDefaultBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "CardStrokeColorDefaultSolidBrush": [
+      "#1C1C1C",
+      "#EBEBEB"
+    ],
+    "CheckBoxBackgroundThemeBrush": [
+      "#CCFFFFFF",
+      "#CCFFFFFF"
+    ],
+    "CheckBoxBorderThemeBrush": [
+      "#CCFFFFFF",
+      "#45000000"
+    ],
+    "CheckBoxContentDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "CheckBoxContentForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "CheckBoxDisabledBackgroundThemeBrush": [
+      "#66FFFFFF",
+      "#66CACACA"
+    ],
+    "CheckBoxDisabledBorderThemeBrush": [
+      "#66FFFFFF",
+      "#26000000"
+    ],
+    "CheckBoxDisabledForegroundThemeBrush": [
+      "#66000000",
+      "#66000000"
+    ],
+    "CheckBoxForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "CheckBoxPointerOverBackgroundThemeBrush": [
+      "#DEFFFFFF",
+      "#DEFFFFFF"
+    ],
+    "CheckBoxPointerOverBorderThemeBrush": [
+      "#DEFFFFFF",
+      "#70000000"
+    ],
+    "CheckBoxPointerOverForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "CheckBoxPressedBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "CheckBoxPressedBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "CheckBoxPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "CloseButtonBackgroundPointerOver": [
+      "#E81123",
+      "#E81123"
+    ],
+    "CloseButtonBackgroundPressed": [
+      "#F1707A",
+      "#F1707A"
+    ],
+    "CloseButtonStrokePointerOver": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ],
+    "CloseButtonStrokePressed": [
+      "#000000",
+      "#000000"
+    ],
+    "ComboBoxArrowDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "ComboBoxArrowForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "ComboBoxArrowPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "ComboBoxBackgroundThemeBrush": [
+      "#CCFFFFFF",
+      "#CCFFFFFF"
+    ],
+    "ComboBoxBorderThemeBrush": [
+      "#CCFFFFFF",
+      "#45000000"
+    ],
+    "ComboBoxDisabledBorderThemeBrush": [
+      "#66FFFFFF",
+      "#26000000"
+    ],
+    "ComboBoxDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "ComboBoxFocusedBackgroundThemeBrush": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ],
+    "ComboBoxFocusedBorderThemeBrush": [
+      "#FFFFFF",
+      "#70000000"
+    ],
+    "ComboBoxFocusedForegroundThemeBrush": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ],
+    "ComboBoxForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "ComboBoxHeaderForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ComboBoxItemDisabledForegroundThemeBrush": [
+      "#66000000",
+      "#66000000"
+    ],
+    "ComboBoxItemPointerOverBackgroundThemeBrush": [
+      "#21000000",
+      "#21000000"
+    ],
+    "ComboBoxItemPointerOverForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "ComboBoxItemPressedBackgroundThemeBrush": [
+      "#FFD3D3D3",
+      "#FFD3D3D3"
+    ],
+    "ComboBoxItemPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "ComboBoxItemSelectedBackgroundThemeBrush": [
+      "#FF4617B4",
+      "#FF4617B4"
+    ],
+    "ComboBoxItemSelectedDisabledBackgroundThemeBrush": [
+      "#8C000000",
+      "#8C000000"
+    ],
+    "ComboBoxItemSelectedDisabledForegroundThemeBrush": [
+      "#99FFFFFF",
+      "#99FFFFFF"
+    ],
+    "ComboBoxItemSelectedForegroundThemeBrush": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ],
+    "ComboBoxItemSelectedPointerOverBackgroundThemeBrush": [
+      "#FF5F37BE",
+      "#FF5F37BE"
+    ],
+    "ComboBoxPlaceholderTextForegroundThemeBrush": [
+      "#88000000",
+      "#88000000"
+    ],
+    "ComboBoxPointerOverBackgroundThemeBrush": [
+      "#DEFFFFFF",
+      "#DEFFFFFF"
+    ],
+    "ComboBoxPointerOverBorderThemeBrush": [
+      "#DEFFFFFF",
+      "#70000000"
+    ],
+    "ComboBoxPopupBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "ComboBoxPopupBorderThemeBrush": [
+      "#FF212121",
+      "#FF212121"
+    ],
+    "ComboBoxPopupForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "ComboBoxPressedBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "ComboBoxPressedBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#A3000000"
+    ],
+    "ComboBoxPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "ComboBoxPressedHighlightThemeBrush": [
+      "#FFD3D3D3",
+      "#FFD3D3D3"
+    ],
+    "ComboBoxSelectedBackgroundThemeBrush": [
+      "#FF4617B4",
+      "#FF4617B4"
+    ],
+    "ComboBoxSelectedPointerOverBackgroundThemeBrush": [
+      "#FF5F37BE",
+      "#FF5F37BE"
+    ],
+    "ContentDialogBackgroundThemeBrush": [
+      "#D3D3D3",
+      "#D3D3D3"
+    ],
+    "ContentDialogContentForegroundBrush": [
+      "#000000",
+      "#000000"
+    ],
+    "ContentDialogDimmingThemeBrush": [
+      "#99FFFFFF",
+      "#99FFFFFF"
+    ],
+    "ControlAltFillColorDisabledBrush": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ControlAltFillColorQuarternaryBrush": [
+      "#12FFFFFF",
+      "#18000000"
+    ],
+    "ControlAltFillColorSecondaryBrush": [
+      "#19000000",
+      "#06000000"
+    ],
+    "ControlAltFillColorTertiaryBrush": [
+      "#0BFFFFFF",
+      "#0F000000"
+    ],
+    "ControlAltFillColorTransparentBrush": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ControlFillColorDefaultBrush": [
+      "#0FFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "ControlFillColorDisabledBrush": [
+      "#0BFFFFFF",
+      "#4DF9F9F9"
+    ],
+    "ControlFillColorInputActiveBrush": [
+      "#B31E1E1E",
+      "#FFFFFF"
+    ],
+    "ControlFillColorQuarternaryBrush": [
+      "#0FFFFFFF",
+      "#C2F3F3F3"
+    ],
+    "ControlFillColorSecondaryBrush": [
+      "#15FFFFFF",
+      "#80F9F9F9"
+    ],
+    "ControlFillColorTertiaryBrush": [
+      "#08FFFFFF",
+      "#4DF9F9F9"
+    ],
+    "ControlFillColorTransparentBrush": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ControlOnImageFillColorDefaultBrush": [
+      "#B31C1C1C",
+      "#C9FFFFFF"
+    ],
+    "ControlOnImageFillColorDisabledBrush": [
+      "#1E1E1E",
+      "#00FFFFFF"
+    ],
+    "ControlOnImageFillColorSecondaryBrush": [
+      "#1A1A1A",
+      "#F3F3F3"
+    ],
+    "ControlOnImageFillColorTertiaryBrush": [
+      "#131313",
+      "#EBEBEB"
+    ],
+    "ControlSolidFillColorDefaultBrush": [
+      "#454545",
+      "#FFFFFF"
+    ],
+    "ControlStrokeColorDefaultBrush": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "ControlStrokeColorForStrongFillWhenOnImageBrush": [
+      "#6B000000",
+      "#59FFFFFF"
+    ],
+    "ControlStrokeColorOnAccentDefaultBrush": [
+      "#14FFFFFF",
+      "#14FFFFFF"
+    ],
+    "ControlStrokeColorOnAccentDisabledBrush": [
+      "#33000000",
+      "#0F000000"
+    ],
+    "ControlStrokeColorOnAccentSecondaryBrush": [
+      "#23000000",
+      "#66000000"
+    ],
+    "ControlStrokeColorOnAccentTertiaryBrush": [
+      "#37000000",
+      "#37000000"
+    ],
+    "ControlStrokeColorSecondaryBrush": [
+      "#18FFFFFF",
+      "#29000000"
+    ],
+    "ControlStrongFillColorDefaultBrush": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ControlStrongFillColorDisabledBrush": [
+      "#3FFFFFFF",
+      "#51000000"
+    ],
+    "ControlStrongStrokeColorDefaultBrush": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ControlStrongStrokeColorDisabledBrush": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "DatePickerForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "DatePickerHeaderForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "DefaultTextForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "DividerStrokeColorDefaultBrush": [
+      "#15FFFFFF",
+      "#0F000000"
+    ],
+    "FlipViewButtonBackgroundThemeBrush": [
+      "#59D5D5D5",
+      "#59D5D5D5"
+    ],
+    "FlipViewButtonBorderThemeBrush": [
+      "#59D5D5D5",
+      "#59D5D5D5"
+    ],
+    "FlipViewButtonForegroundThemeBrush": [
+      "#99000000",
+      "#99000000"
+    ],
+    "FlipViewButtonPointerOverBackgroundThemeBrush": [
+      "#F0D7D7D7",
+      "#F0D7D7D7"
+    ],
+    "FlipViewButtonPointerOverBorderThemeBrush": [
+      "#9EC1C1C1",
+      "#9EC1C1C1"
+    ],
+    "FlipViewButtonPointerOverForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "FlipViewButtonPressedBackgroundThemeBrush": [
+      "#BD292929",
+      "#BD292929"
+    ],
+    "FlipViewButtonPressedBorderThemeBrush": [
+      "#BD292929",
+      "#BD292929"
+    ],
+    "FlipViewButtonPressedForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "FlyoutBackgroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "FocusStrokeColorInnerBrush": [
+      "#B3000000",
+      "#B3FFFFFF"
+    ],
+    "FocusStrokeColorOuterBrush": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "FocusVisualBlackStrokeThemeBrush": [
+      "#000000",
+      "#000000"
+    ],
+    "FocusVisualWhiteStrokeThemeBrush": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ],
+    "HubSectionHeaderPointerOverForegroundThemeBrush": [
+      "#FFD1D1D1",
+      "#FFD1D1D1"
+    ],
+    "HubSectionHeaderPressedForegroundThemeBrush": [
+      "#FF777777",
+      "#FF777777"
+    ],
+    "HyperlinkDisabledThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "HyperlinkForegroundThemeBrush": [
+      "#FF9C72FF",
+      "#FF4F1ACB"
+    ],
+    "HyperlinkPointerOverForegroundThemeBrush": [
+      "#CC9C72FF",
+      "#CC4F1ACB"
+    ],
+    "HyperlinkPressedForegroundThemeBrush": [
+      "#999C72FF",
+      "#994F1ACB"
+    ],
+    "IMECandidateBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "IMECandidateForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "IMECandidateListBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "IMECandidateListPagingButtonBackgroundThemeBrush": [
+      "#7FD9D9D9",
+      "#7FD9D9D9"
+    ],
+    "IMECandidateListPagingButtonBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#33000000"
+    ],
+    "IMECandidateListPagingButtonForegroundThemeBrush": [
+      "#7F000000",
+      "#7F000000"
+    ],
+    "IMECandidateListPagingButtonPointerOverBackgroundThemeBrush": [
+      "#FFD9D9D9",
+      "#FFD9D9D9"
+    ],
+    "IMECandidateListPagingButtonPointerOverForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "IMECandidateListPagingButtonPressedBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "IMECandidateListPagingButtonPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "IMECandidatePointerOverBackgroundThemeBrush": [
+      "#21000000",
+      "#21000000"
+    ],
+    "IMECandidatePointerOverForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "IMECandidateSecondaryForegroundThemeBrush": [
+      "#FF707070",
+      "#FF707070"
+    ],
+    "IMECandidateSelectedBackgroundThemeBrush": [
+      "#FF4617B4",
+      "#FF4617B4"
+    ],
+    "IMECandidateSelectedForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "LayerFillColorAltBrush": [
+      "#0DFFFFFF",
+      "#FFFFFF"
+    ],
+    "LayerFillColorDefaultBrush": [
+      "#4C3A3A3A",
+      "#80FFFFFF"
+    ],
+    "LayerOnAccentAcrylicFillColorDefaultBrush": [
+      "#09FFFFFF",
+      "#40FFFFFF"
+    ],
+    "LayerOnAcrylicFillColorDefaultBrush": [
+      "#09FFFFFF",
+      "#40FFFFFF"
+    ],
+    "LayerOnMicaBaseAltFillColorDefaultBrush": [
+      "#733A3A3A",
+      "#B3FFFFFF"
+    ],
+    "LayerOnMicaBaseAltFillColorSecondaryBrush": [
+      "#0FFFFFFF",
+      "#0A000000"
+    ],
+    "LayerOnMicaBaseAltFillColorTertiaryBrush": [
+      "#2C2C2C",
+      "#F9F9F9"
+    ],
+    "LayerOnMicaBaseAltFillColorTransparentBrush": [
+      "#00FFFFFF",
+      "#00000000"
+    ],
+    "ListBoxBackgroundThemeBrush": [
+      "#CCFFFFFF",
+      "#CCFFFFFF"
+    ],
+    "ListBoxDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "ListBoxFocusBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "ListBoxForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "ListBoxItemDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "ListBoxItemPointerOverBackgroundThemeBrush": [
+      "#21000000",
+      "#21000000"
+    ],
+    "ListBoxItemPointerOverForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "ListBoxItemPressedBackgroundThemeBrush": [
+      "#FFD3D3D3",
+      "#FFD3D3D3"
+    ],
+    "ListBoxItemPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "ListBoxItemSelectedBackgroundThemeBrush": [
+      "#FF4617B4",
+      "#FF4617B4"
+    ],
+    "ListBoxItemSelectedDisabledBackgroundThemeBrush": [
+      "#66FFFFFF",
+      "#8C000000"
+    ],
+    "ListBoxItemSelectedDisabledForegroundThemeBrush": [
+      "#99000000",
+      "#99FFFFFF"
+    ],
+    "ListBoxItemSelectedForegroundThemeBrush": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ],
+    "ListBoxItemSelectedPointerOverBackgroundThemeBrush": [
+      "#FF5F37BE",
+      "#FF5F37BE"
+    ],
+    "ListPickerFlyoutPresenterSelectedItemBackgroundThemeBrush": [
+      "#00000000",
+      "#00FFFFFF"
+    ],
+    "ListViewGroupHeaderForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ListViewGroupHeaderPointerOverForegroundThemeBrush": [
+      "#CCFFFFFF",
+      "#CC000000"
+    ],
+    "ListViewGroupHeaderPressedForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "ListViewItemCheckHintThemeBrush": [
+      "#FFFFFFFF",
+      "#FF4617B4"
+    ],
+    "ListViewItemCheckSelectingThemeBrush": [
+      "#FFFFFFFF",
+      "#FF4617B4"
+    ],
+    "ListViewItemCheckThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "ListViewItemDragBackgroundThemeBrush": [
+      "#994617B4",
+      "#994617B4"
+    ],
+    "ListViewItemDragForegroundThemeBrush": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ],
+    "ListViewItemFocusBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ListViewItemOverlayBackgroundThemeBrush": [
+      "#A6000000",
+      "#A6000000"
+    ],
+    "ListViewItemOverlayForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "ListViewItemOverlaySecondaryForegroundThemeBrush": [
+      "#99FFFFFF",
+      "#99FFFFFF"
+    ],
+    "ListViewItemPlaceholderBackgroundThemeBrush": [
+      "#FF3D3D3D",
+      "#FF3D3D3D"
+    ],
+    "ListViewItemPointerOverBackgroundThemeBrush": [
+      "#4DFFFFFF",
+      "#4D000000"
+    ],
+    "ListViewItemSelectedBackgroundThemeBrush": [
+      "#FF4617B4",
+      "#FF4617B4"
+    ],
+    "ListViewItemSelectedForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ListViewItemSelectedPointerOverBackgroundThemeBrush": [
+      "#FF5F37BE",
+      "#FF5F37BE"
+    ],
+    "ListViewItemSelectedPointerOverBorderThemeBrush": [
+      "#FF5F37BE",
+      "#FF5F37BE"
+    ],
+    "LoopingSelectorForegroundThemeBrush": [
+      "#73FFFFFF",
+      "#40000000"
+    ],
+    "LoopingSelectorSelectionForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "MediaButtonForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "MediaButtonPointerOverBackgroundThemeBrush": [
+      "#21FFFFFF",
+      "#21FFFFFF"
+    ],
+    "MediaButtonPointerOverForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "MediaButtonPressedBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "MediaButtonPressedBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "MediaButtonPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "MediaControlPanelAudioThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "MediaControlPanelVideoThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "MediaDownloadProgressIndicatorThemeBrush": [
+      "#38FFFFFF",
+      "#38FFFFFF"
+    ],
+    "MediaErrorBackgroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "MediaTextThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "MenuFlyoutItemDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "MenuFlyoutItemFocusedBackgroundThemeBrush": [
+      "#FF212121",
+      "#FFE5E5E5"
+    ],
+    "MenuFlyoutItemFocusedForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "MenuFlyoutItemPointerOverBackgroundThemeBrush": [
+      "#FF212121",
+      "#FFE5E5E5"
+    ],
+    "MenuFlyoutItemPointerOverForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "MenuFlyoutItemPressedBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "MenuFlyoutItemPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "MenuFlyoutSeparatorThemeBrush": [
+      "#FF7A7A7A",
+      "#FF7A7A7A"
+    ],
+    "NavigationViewExpandedPaneBackground": [
+      "#FF1F1F1F",
+      "#FFE6E6E6"
+    ],
+    "PersonPictureEllipseBadgeFillThemeBrush": [
+      "#FF333333",
+      "#FFCCCCCC"
+    ],
+    "PersonPictureEllipseBadgeForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "PersonPictureEllipseBadgeStrokeThemeBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "PersonPictureEllipseFillThemeBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "PersonPictureForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "PivotForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "PivotHeaderForegroundSelectedBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "PivotHeaderForegroundUnselectedBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "PivotNavButtonBackgroundThemeBrush": [
+      "#59D5D5D5",
+      "#59D5D5D5"
+    ],
+    "PivotNavButtonBorderThemeBrush": [
+      "#59D5D5D5",
+      "#59D5D5D5"
+    ],
+    "PivotNavButtonForegroundThemeBrush": [
+      "#99000000",
+      "#99000000"
+    ],
+    "PivotNavButtonPointerOverBackgroundThemeBrush": [
+      "#F0D7D7D7",
+      "#F0D7D7D7"
+    ],
+    "PivotNavButtonPointerOverBorderThemeBrush": [
+      "#9EC1C1C1",
+      "#9EC1C1C1"
+    ],
+    "PivotNavButtonPointerOverForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "PivotNavButtonPressedBackgroundThemeBrush": [
+      "#BD292929",
+      "#BD292929"
+    ],
+    "PivotNavButtonPressedBorderThemeBrush": [
+      "#BD292929",
+      "#BD292929"
+    ],
+    "PivotNavButtonPressedForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "RadioButtonBackgroundThemeBrush": [
+      "#CCFFFFFF",
+      "#CCFFFFFF"
+    ],
+    "RadioButtonBorderThemeBrush": [
+      "#CCFFFFFF",
+      "#45000000"
+    ],
+    "RadioButtonContentDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "RadioButtonContentForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "RadioButtonDisabledBackgroundThemeBrush": [
+      "#66FFFFFF",
+      "#66CACACA"
+    ],
+    "RadioButtonDisabledBorderThemeBrush": [
+      "#66FFFFFF",
+      "#26000000"
+    ],
+    "RadioButtonDisabledForegroundThemeBrush": [
+      "#66000000",
+      "#66000000"
+    ],
+    "RadioButtonForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "RadioButtonPointerOverBackgroundThemeBrush": [
+      "#DEFFFFFF",
+      "#DEFFFFFF"
+    ],
+    "RadioButtonPointerOverBorderThemeBrush": [
+      "#DEFFFFFF",
+      "#70000000"
+    ],
+    "RadioButtonPointerOverForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "RadioButtonPressedBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "RadioButtonPressedBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "RadioButtonPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "RefreshContainerForegroundBrush": [
+      "#FFFFFF",
+      "#000000"
+    ],
+    "RefreshVisualizerForeground": [
+      "#FFFFFF",
+      "#000000"
+    ],
+    "RepeatButtonBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#33000000"
+    ],
+    "RepeatButtonDisabledBorderThemeBrush": [
+      "#66FFFFFF",
+      "#1A000000"
+    ],
+    "RepeatButtonDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "RepeatButtonForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "RepeatButtonPointerOverBackgroundThemeBrush": [
+      "#21FFFFFF",
+      "#D1CDCDCD"
+    ],
+    "RepeatButtonPointerOverForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "RepeatButtonPressedBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "RepeatButtonPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "ScrollBarButtonForegroundThemeBrush": [
+      "#99000000",
+      "#99000000"
+    ],
+    "ScrollBarButtonPointerOverBackgroundThemeBrush": [
+      "#FFDADADA",
+      "#FFDADADA"
+    ],
+    "ScrollBarButtonPointerOverBorderThemeBrush": [
+      "#FFDADADA",
+      "#FFDADADA"
+    ],
+    "ScrollBarButtonPointerOverForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "ScrollBarButtonPressedBackgroundThemeBrush": [
+      "#99000000",
+      "#99000000"
+    ],
+    "ScrollBarButtonPressedBorderThemeBrush": [
+      "#99000000",
+      "#99000000"
+    ],
+    "ScrollBarButtonPressedForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "ScrollBarPanningBackgroundThemeBrush": [
+      "#FFCDCDCD",
+      "#FFCDCDCD"
+    ],
+    "ScrollBarPanningBorderThemeBrush": [
+      "#7D9A9A9A",
+      "#7D9A9A9A"
+    ],
+    "ScrollBarThumbBackgroundThemeBrush": [
+      "#FFCDCDCD",
+      "#FFCDCDCD"
+    ],
+    "ScrollBarThumbBorderThemeBrush": [
+      "#3B555555",
+      "#3B555555"
+    ],
+    "ScrollBarThumbPointerOverBackgroundThemeBrush": [
+      "#FFDADADA",
+      "#FFDADADA"
+    ],
+    "ScrollBarThumbPointerOverBorderThemeBrush": [
+      "#6BB7B7B7",
+      "#6BB7B7B7"
+    ],
+    "ScrollBarThumbPressedBackgroundThemeBrush": [
+      "#99000000",
+      "#99000000"
+    ],
+    "ScrollBarThumbPressedBorderThemeBrush": [
+      "#ED555555",
+      "#ED555555"
+    ],
+    "ScrollBarTrackBackgroundThemeBrush": [
+      "#59D5D5D5",
+      "#59D5D5D5"
+    ],
+    "ScrollBarTrackBorderThemeBrush": [
+      "#59D5D5D5",
+      "#59D5D5D5"
+    ],
+    "ScrollBarTrackFill": [
+      "#E61F1F1F",
+      "#E6E6E6E6"
+    ],
+    "ScrollBarTrackFillPointerOver": [
+      "#E61F1F1F",
+      "#E6E6E6E6"
+    ],
+    "ScrollViewerScrollBarSeparatorBackground": [
+      "#E61F1F1F",
+      "#E6E6E6E6"
+    ],
+    "SemanticZoomButtonBackgroundThemeBrush": [
+      "#59D5D5D5",
+      "#59D5D5D5"
+    ],
+    "SemanticZoomButtonBorderThemeBrush": [
+      "#59D5D5D5",
+      "#59D5D5D5"
+    ],
+    "SemanticZoomButtonForegroundThemeBrush": [
+      "#99000000",
+      "#99000000"
+    ],
+    "SemanticZoomButtonPointerOverBackgroundThemeBrush": [
+      "#FFDADADA",
+      "#FFDADADA"
+    ],
+    "SemanticZoomButtonPointerOverBorderThemeBrush": [
+      "#FFDADADA",
+      "#FFDADADA"
+    ],
+    "SemanticZoomButtonPointerOverForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "SemanticZoomButtonPressedBackgroundThemeBrush": [
+      "#99000000",
+      "#99000000"
+    ],
+    "SemanticZoomButtonPressedBorderThemeBrush": [
+      "#99000000",
+      "#99000000"
+    ],
+    "SemanticZoomButtonPressedForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "SliderHeaderForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SliderThumbBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SliderThumbBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SliderThumbDisabledBackgroundThemeBrush": [
+      "#FF7E7E7E",
+      "#FF929292"
+    ],
+    "SliderThumbPointerOverBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SliderThumbPointerOverBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SliderThumbPressedBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SliderThumbPressedBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SliderTickMarkInlineBackgroundThemeBrush": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "SliderTickMarkInlineDisabledForegroundThemeBrush": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "SliderTickMarkOutsideDisabledForegroundThemeBrush": [
+      "#80FFFFFF",
+      "#80000000"
+    ],
+    "SliderTickmarkOutsideBackgroundThemeBrush": [
+      "#80FFFFFF",
+      "#80000000"
+    ],
+    "SliderTrackBackgroundThemeBrush": [
+      "#29FFFFFF",
+      "#1A000000"
+    ],
+    "SliderTrackDecreaseBackgroundThemeBrush": [
+      "#FF5B2EC5",
+      "#FF4617B4"
+    ],
+    "SliderTrackDecreaseDisabledBackgroundThemeBrush": [
+      "#1FFFFFFF",
+      "#1C000000"
+    ],
+    "SliderTrackDecreasePointerOverBackgroundThemeBrush": [
+      "#FF724BCD",
+      "#FF5F37BE"
+    ],
+    "SliderTrackDecreasePressedBackgroundThemeBrush": [
+      "#FF8152EF",
+      "#FF7241E4"
+    ],
+    "SliderTrackDisabledBackgroundThemeBrush": [
+      "#29FFFFFF",
+      "#1A000000"
+    ],
+    "SliderTrackPointerOverBackgroundThemeBrush": [
+      "#46FFFFFF",
+      "#26000000"
+    ],
+    "SliderTrackPressedBackgroundThemeBrush": [
+      "#59FFFFFF",
+      "#33000000"
+    ],
+    "SmokeFillColorDefaultBrush": [
+      "#4D000000",
+      "#4D000000"
+    ],
+    "SolidBackgroundFillColorBaseAltBrush": [
+      "#0A0A0A",
+      "#DADADA"
+    ],
+    "SolidBackgroundFillColorBaseBrush": [
+      "#202020",
+      "#F3F3F3"
+    ],
+    "SolidBackgroundFillColorQuarternaryBrush": [
+      "#2C2C2C",
+      "#FFFFFF"
+    ],
+    "SolidBackgroundFillColorQuinaryBrush": [
+      "#333333",
+      "#FDFDFD"
+    ],
+    "SolidBackgroundFillColorSecondaryBrush": [
+      "#1C1C1C",
+      "#EEEEEE"
+    ],
+    "SolidBackgroundFillColorSenaryBrush": [
+      "#373737",
+      "#FFFFFF"
+    ],
+    "SolidBackgroundFillColorTertiaryBrush": [
+      "#282828",
+      "#F9F9F9"
+    ],
+    "SubtleFillColorDisabledBrush": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "SubtleFillColorSecondaryBrush": [
+      "#0FFFFFFF",
+      "#09000000"
+    ],
+    "SubtleFillColorTertiaryBrush": [
+      "#0AFFFFFF",
+      "#06000000"
+    ],
+    "SubtleFillColorTransparentBrush": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "SurfaceStrokeColorDefaultBrush": [
+      "#66757575",
+      "#66757575"
+    ],
+    "SurfaceStrokeColorFlyoutBrush": [
+      "#33000000",
+      "#0F000000"
+    ],
+    "SurfaceStrokeColorInverseBrush": [
+      "#0F000000",
+      "#15FFFFFF"
+    ],
+    "SystemColorButtonFaceColorBrush": [
+      "#FF00FF",
+      "#FF00FF"
+    ],
+    "SystemColorButtonTextColorBrush": [
+      "#FF00FF",
+      "#FF00FF"
+    ],
+    "SystemColorGrayTextColorBrush": [
+      "#FF00FF",
+      "#FF00FF"
+    ],
+    "SystemColorHighlightColorBrush": [
+      "#FF00FF",
+      "#FF00FF"
+    ],
+    "SystemColorHighlightTextColorBrush": [
+      "#FF00FF",
+      "#FF00FF"
+    ],
+    "SystemColorHotlightColorBrush": [
+      "#FF00FF",
+      "#FF00FF"
+    ],
+    "SystemColorWindowColorBrush": [
+      "#FF00FF",
+      "#FF00FF"
+    ],
+    "SystemColorWindowTextColorBrush": [
+      "#FF00FF",
+      "#FF00FF"
+    ],
+    "SystemControlAcrylicElementBrush": [
+      "#FF1F1F1F",
+      "#FFE6E6E6"
+    ],
+    "SystemControlAcrylicElementMediumHighBrush": [
+      "#FF1F1F1F",
+      "#FFE6E6E6"
+    ],
+    "SystemControlAcrylicWindowBrush": [
+      "#FF1F1F1F",
+      "#FFE6E6E6"
+    ],
+    "SystemControlAcrylicWindowMediumHighBrush": [
+      "#FF1F1F1F",
+      "#FFE6E6E6"
+    ],
+    "SystemControlAltHighAcrylicElementBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "SystemControlAltHighAcrylicWindowBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "SystemControlAltLowAcrylicElementBrush": [
+      "#33000000",
+      "#33FFFFFF"
+    ],
+    "SystemControlAltLowAcrylicWindowBrush": [
+      "#33000000",
+      "#33FFFFFF"
+    ],
+    "SystemControlAltMediumLowAcrylicElementMediumBrush": [
+      "#66000000",
+      "#66FFFFFF"
+    ],
+    "SystemControlAltMediumLowAcrylicWindowMediumBrush": [
+      "#66000000",
+      "#66FFFFFF"
+    ],
+    "SystemControlBackgroundAltHighBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "SystemControlBackgroundAltMediumBrush": [
+      "#99000000",
+      "#99FFFFFF"
+    ],
+    "SystemControlBackgroundAltMediumHighBrush": [
+      "#CC000000",
+      "#CCFFFFFF"
+    ],
+    "SystemControlBackgroundAltMediumLowBrush": [
+      "#66000000",
+      "#66FFFFFF"
+    ],
+    "SystemControlBackgroundBaseHighBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlBackgroundBaseHighRevealBorderBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlBackgroundBaseLowBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlBackgroundBaseLowRevealBackgroundBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlBackgroundBaseLowRevealBorderBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlBackgroundBaseMediumBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "SystemControlBackgroundBaseMediumHighBrush": [
+      "#CCFFFFFF",
+      "#CC000000"
+    ],
+    "SystemControlBackgroundBaseMediumHighRevealBorderBrush": [
+      "#CCFFFFFF",
+      "#CC000000"
+    ],
+    "SystemControlBackgroundBaseMediumLowBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "SystemControlBackgroundBaseMediumLowRevealBorderBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "SystemControlBackgroundBaseMediumRevealBorderBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "SystemControlBackgroundChromeBlackHighBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "SystemControlBackgroundChromeBlackHighRevealBorderBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "SystemControlBackgroundChromeBlackLowBrush": [
+      "#33000000",
+      "#33000000"
+    ],
+    "SystemControlBackgroundChromeBlackMediumBrush": [
+      "#CC000000",
+      "#CC000000"
+    ],
+    "SystemControlBackgroundChromeBlackMediumLowBrush": [
+      "#66000000",
+      "#66000000"
+    ],
+    "SystemControlBackgroundChromeBlackMediumRevealChromeBorderBrush": [
+      "#CC000000",
+      "#CC000000"
+    ],
+    "SystemControlBackgroundChromeMediumBrush": [
+      "#FF1F1F1F",
+      "#FFE6E6E6"
+    ],
+    "SystemControlBackgroundChromeMediumLowBrush": [
+      "#FF2B2B2B",
+      "#FFF2F2F2"
+    ],
+    "SystemControlBackgroundChromeMediumLowRevealBorderBrush": [
+      "#FF2B2B2B",
+      "#FFF2F2F2"
+    ],
+    "SystemControlBackgroundChromeMediumRevealBorderBrush": [
+      "#FF1F1F1F",
+      "#FFE6E6E6"
+    ],
+    "SystemControlBackgroundChromeWhiteBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "SystemControlBackgroundChromeWhiteRevealBorderBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "SystemControlBackgroundListLowBrush": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "SystemControlBackgroundListLowRevealBorderBrush": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "SystemControlBackgroundListMediumBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlBackgroundListMediumRevealBorderBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlBaseHighAcrylicElementBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlBaseHighAcrylicElementMediumBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlBaseHighAcrylicElementMediumHighBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlBaseHighAcrylicWindowBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlBaseHighAcrylicWindowMediumBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlBaseHighAcrylicWindowMediumHighBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlBaseLowAcrylicElementBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlBaseLowAcrylicWindowBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlBaseMediumLowAcrylicElementMediumBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "SystemControlBaseMediumLowAcrylicWindowMediumBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "SystemControlChromeHighAcrylicElementMediumBrush": [
+      "#FF767676",
+      "#FFCCCCCC"
+    ],
+    "SystemControlChromeHighAcrylicWindowMediumBrush": [
+      "#FF767676",
+      "#FFCCCCCC"
+    ],
+    "SystemControlChromeLowAcrylicElementBrush": [
+      "#FF171717",
+      "#FFF2F2F2"
+    ],
+    "SystemControlChromeLowAcrylicWindowBrush": [
+      "#FF171717",
+      "#FFF2F2F2"
+    ],
+    "SystemControlChromeMediumAcrylicElementMediumBrush": [
+      "#FF1F1F1F",
+      "#FFE6E6E6"
+    ],
+    "SystemControlChromeMediumAcrylicWindowMediumBrush": [
+      "#FF1F1F1F",
+      "#FFE6E6E6"
+    ],
+    "SystemControlChromeMediumLowAcrylicElementMediumBrush": [
+      "#FF2B2B2B",
+      "#FFF2F2F2"
+    ],
+    "SystemControlChromeMediumLowAcrylicWindowMediumBrush": [
+      "#FF2B2B2B",
+      "#FFF2F2F2"
+    ],
+    "SystemControlDisabledBaseHighBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlDisabledBaseLowBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlDisabledBaseMediumLowBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "SystemControlDisabledChromeDisabledHighBrush": [
+      "#FF333333",
+      "#FFCCCCCC"
+    ],
+    "SystemControlDisabledChromeDisabledLowBrush": [
+      "#FF858585",
+      "#FF7A7A7A"
+    ],
+    "SystemControlDisabledChromeHighBrush": [
+      "#FF767676",
+      "#FFCCCCCC"
+    ],
+    "SystemControlDisabledChromeMediumLowBrush": [
+      "#FF2B2B2B",
+      "#FFF2F2F2"
+    ],
+    "SystemControlDisabledListMediumBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlErrorTextForegroundBrush": [
+      "#FFF000",
+      "#C50500"
+    ],
+    "SystemControlFocusVisualPrimaryBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlFocusVisualSecondaryBrush": [
+      "#99000000",
+      "#99FFFFFF"
+    ],
+    "SystemControlForegroundAltHighBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "SystemControlForegroundAltMediumHighBrush": [
+      "#CC000000",
+      "#CCFFFFFF"
+    ],
+    "SystemControlForegroundBaseHighBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlForegroundBaseLowBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlForegroundBaseMediumBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "SystemControlForegroundBaseMediumHighBrush": [
+      "#CCFFFFFF",
+      "#CC000000"
+    ],
+    "SystemControlForegroundBaseMediumLowBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "SystemControlForegroundChromeBlackHighBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "SystemControlForegroundChromeBlackMediumBrush": [
+      "#CC000000",
+      "#CC000000"
+    ],
+    "SystemControlForegroundChromeBlackMediumLowBrush": [
+      "#66000000",
+      "#66000000"
+    ],
+    "SystemControlForegroundChromeDisabledLowBrush": [
+      "#FF858585",
+      "#FF7A7A7A"
+    ],
+    "SystemControlForegroundChromeGrayBrush": [
+      "#FF767676",
+      "#FF767676"
+    ],
+    "SystemControlForegroundChromeHighBrush": [
+      "#FF767676",
+      "#FFCCCCCC"
+    ],
+    "SystemControlForegroundChromeMediumBrush": [
+      "#FF1F1F1F",
+      "#FFE6E6E6"
+    ],
+    "SystemControlForegroundChromeWhiteBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "SystemControlForegroundListLowBrush": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "SystemControlForegroundListMediumBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlHighlightAltAltHighBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "SystemControlHighlightAltAltMediumHighBrush": [
+      "#CC000000",
+      "#CCFFFFFF"
+    ],
+    "SystemControlHighlightAltBaseHighBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlHighlightAltBaseLowBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlHighlightAltBaseMediumBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "SystemControlHighlightAltBaseMediumHighBrush": [
+      "#CCFFFFFF",
+      "#CC000000"
+    ],
+    "SystemControlHighlightAltBaseMediumLowBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "SystemControlHighlightAltChromeWhiteBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "SystemControlHighlightBaseHighBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlHighlightBaseHighRevealBorderBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlHighlightBaseLowBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlHighlightBaseLowRevealBorderBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlHighlightBaseMediumBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "SystemControlHighlightBaseMediumHighBrush": [
+      "#CCFFFFFF",
+      "#CC000000"
+    ],
+    "SystemControlHighlightBaseMediumHighRevealBorderBrush": [
+      "#CCFFFFFF",
+      "#CC000000"
+    ],
+    "SystemControlHighlightBaseMediumLowBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "SystemControlHighlightBaseMediumLowRevealBorderBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "SystemControlHighlightBaseMediumRevealBorderBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "SystemControlHighlightChromeAltLowBrush": [
+      "#FFF2F2F2",
+      "#FF171717"
+    ],
+    "SystemControlHighlightChromeHighBrush": [
+      "#FF767676",
+      "#FFCCCCCC"
+    ],
+    "SystemControlHighlightChromeWhiteBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "SystemControlHighlightListLowBrush": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "SystemControlHighlightListLowRevealBackgroundBrush": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "SystemControlHighlightListMediumBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlHighlightListMediumRevealBackgroundBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlHighlightListMediumRevealListLowBackgroundBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlHyperlinkBaseHighBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlHyperlinkBaseMediumBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "SystemControlHyperlinkBaseMediumHighBrush": [
+      "#CCFFFFFF",
+      "#CC000000"
+    ],
+    "SystemControlPageBackgroundAltHighBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "SystemControlPageBackgroundAltMediumBrush": [
+      "#99000000",
+      "#99FFFFFF"
+    ],
+    "SystemControlPageBackgroundBaseLowBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemControlPageBackgroundBaseMediumBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "SystemControlPageBackgroundChromeLowBrush": [
+      "#FF171717",
+      "#FFF2F2F2"
+    ],
+    "SystemControlPageBackgroundChromeMediumLowBrush": [
+      "#FF2B2B2B",
+      "#FFF2F2F2"
+    ],
+    "SystemControlPageBackgroundListLowBrush": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "SystemControlPageBackgroundMediumAltMediumBrush": [
+      "#99000000",
+      "#99FFFFFF"
+    ],
+    "SystemControlPageTextBaseHighBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemControlPageTextBaseMediumBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "SystemControlPageTextChromeBlackMediumLowBrush": [
+      "#66000000",
+      "#66000000"
+    ],
+    "SystemControlTransientBackgroundBrush": [
+      "#FF2B2B2B",
+      "#FFF2F2F2"
+    ],
+    "SystemControlTransientBorderBrush": [
+      "#5C000000",
+      "#24000000"
+    ],
+    "SystemFillColorAttentionBackgroundBrush": [
+      "#08FFFFFF",
+      "#80F6F6F6"
+    ],
+    "SystemFillColorCautionBackgroundBrush": [
+      "#433519",
+      "#FFF4CE"
+    ],
+    "SystemFillColorCautionBrush": [
+      "#FCE100",
+      "#9D5D00"
+    ],
+    "SystemFillColorCriticalBackgroundBrush": [
+      "#442726",
+      "#FDE7E9"
+    ],
+    "SystemFillColorCriticalBrush": [
+      "#FF99A4",
+      "#C42B1C"
+    ],
+    "SystemFillColorNeutralBackgroundBrush": [
+      "#08FFFFFF",
+      "#06000000"
+    ],
+    "SystemFillColorNeutralBrush": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "SystemFillColorSolidAttentionBackgroundBrush": [
+      "#2E2E2E",
+      "#F7F7F7"
+    ],
+    "SystemFillColorSolidNeutralBackgroundBrush": [
+      "#2E2E2E",
+      "#F3F3F3"
+    ],
+    "SystemFillColorSolidNeutralBrush": [
+      "#9D9D9D",
+      "#8A8A8A"
+    ],
+    "SystemFillColorSuccessBackgroundBrush": [
+      "#393D1B",
+      "#DFF6DD"
+    ],
+    "SystemFillColorSuccessBrush": [
+      "#6CCB5F",
+      "#0F7B0F"
+    ],
+    "TextBoxBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "TextBoxBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#A3000000"
+    ],
+    "TextBoxButtonForegroundThemeBrush": [
+      "#99000000",
+      "#99000000"
+    ],
+    "TextBoxButtonPointerOverBackgroundThemeBrush": [
+      "#FFDEDEDE",
+      "#FFDEDEDE"
+    ],
+    "TextBoxButtonPointerOverForegroundThemeBrush": [
+      "#FF000000",
+      "#000000"
+    ],
+    "TextBoxButtonPressedBackgroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "TextBoxButtonPressedForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "TextBoxDisabledBorderThemeBrush": [
+      "#66FFFFFF",
+      "#26000000"
+    ],
+    "TextBoxDisabledForegroundThemeBrush": [
+      "#FF666666",
+      "#FF666666"
+    ],
+    "TextBoxForegroundHeaderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "TextBoxForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "TextBoxPlaceholderTextThemeBrush": [
+      "#AB000000",
+      "#AB000000"
+    ],
+    "TextControlHighlighterBackground": [
+      "#FFFFFF00",
+      "#FFFFFF00"
+    ],
+    "TextFillColorDisabledBrush": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "TextFillColorInverseBrush": [
+      "#E4000000",
+      "#FFFFFF"
+    ],
+    "TextFillColorPrimaryBrush": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "TextFillColorSecondaryBrush": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "TextFillColorTertiaryBrush": [
+      "#87FFFFFF",
+      "#72000000"
+    ],
+    "TextOnAccentFillColorDisabledBrush": [
+      "#87FFFFFF",
+      "#FFFFFF"
+    ],
+    "TextOnAccentFillColorPrimaryBrush": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "TextOnAccentFillColorSecondaryBrush": [
+      "#80000000",
+      "#B3FFFFFF"
+    ],
+    "TextOnAccentFillColorSelectedTextBrush": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ],
+    "TextSelectionHighlightColorThemeBrush": [
+      "#FF4617B4",
+      "#FF4617B4"
+    ],
+    "ThumbBackgroundThemeBrush": [
+      "#FFCDCDCD",
+      "#FFCDCDCD"
+    ],
+    "ThumbBorderThemeBrush": [
+      "#3B555555",
+      "#3B555555"
+    ],
+    "ThumbPointerOverBackgroundThemeBrush": [
+      "#FFDADADA",
+      "#FFDADADA"
+    ],
+    "ThumbPointerOverBorderThemeBrush": [
+      "#6BB7B7B7",
+      "#6BB7B7B7"
+    ],
+    "ThumbPressedBackgroundThemeBrush": [
+      "#99000000",
+      "#99000000"
+    ],
+    "ThumbPressedBorderThemeBrush": [
+      "#ED555555",
+      "#ED555555"
+    ],
+    "TimePickerForegroundThemeBrush": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "TimePickerHeaderForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleButtonBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleButtonCheckedBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleButtonCheckedBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleButtonCheckedDisabledBackgroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "ToggleButtonCheckedDisabledForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "ToggleButtonCheckedForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "ToggleButtonCheckedPointerOverBackgroundThemeBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "ToggleButtonCheckedPointerOverBorderThemeBrush": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "ToggleButtonCheckedPressedBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleButtonCheckedPressedForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleButtonDisabledBorderThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "ToggleButtonDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "ToggleButtonForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleButtonPointerOverBackgroundThemeBrush": [
+      "#21FFFFFF",
+      "#21000000"
+    ],
+    "ToggleButtonPressedBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleButtonPressedForegroundThemeBrush": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "ToggleSwitchCurtainBackgroundThemeBrush": [
+      "#FF5729C1",
+      "#FF4617B4"
+    ],
+    "ToggleSwitchCurtainPointerOverBackgroundThemeBrush": [
+      "#FF6E46CA",
+      "#FF5F37BE"
+    ],
+    "ToggleSwitchCurtainPressedBackgroundThemeBrush": [
+      "#FF7E4FEC",
+      "#FF7241E4"
+    ],
+    "ToggleSwitchDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "ToggleSwitchForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleSwitchHeaderDisabledForegroundThemeBrush": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "ToggleSwitchHeaderForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleSwitchOuterBorderBorderThemeBrush": [
+      "#59FFFFFF",
+      "#59000000"
+    ],
+    "ToggleSwitchOuterBorderDisabledBorderThemeBrush": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "ToggleSwitchThumbBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleSwitchThumbBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleSwitchThumbDisabledBackgroundThemeBrush": [
+      "#FF7E7E7E",
+      "#FF929292"
+    ],
+    "ToggleSwitchThumbDisabledBorderThemeBrush": [
+      "#FF7E7E7E",
+      "#FF929292"
+    ],
+    "ToggleSwitchThumbPointerOverBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleSwitchThumbPointerOverBorderThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleSwitchThumbPressedBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleSwitchThumbPressedForegroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "ToggleSwitchTrackBackgroundThemeBrush": [
+      "#42FFFFFF",
+      "#59000000"
+    ],
+    "ToggleSwitchTrackDisabledBackgroundThemeBrush": [
+      "#1FFFFFFF",
+      "#1F000000"
+    ],
+    "ToggleSwitchTrackPointerOverBackgroundThemeBrush": [
+      "#4AFFFFFF",
+      "#4A000000"
+    ],
+    "ToggleSwitchTrackPressedBackgroundThemeBrush": [
+      "#59FFFFFF",
+      "#42000000"
+    ],
+    "ToolTipBackgroundThemeBrush": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "ToolTipBorderThemeBrush": [
+      "#FF808080",
+      "#FF808080"
+    ],
+    "ToolTipForegroundThemeBrush": [
+      "#FF666666",
+      "#FF666666"
+    ]
+  },
+  "colors": {
+    "AccentFillColorDisabled": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "AccentTextFillColorDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "CardBackgroundFillColorDefault": [
+      "#0DFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "CardBackgroundFillColorSecondary": [
+      "#08FFFFFF",
+      "#80F6F6F6"
+    ],
+    "CardBackgroundFillColorTertiary": [
+      "#12FFFFFF",
+      "#FFFFFF"
+    ],
+    "CardStrokeColorDefault": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "CardStrokeColorDefaultSolid": [
+      "#1C1C1C",
+      "#EBEBEB"
+    ],
+    "ControlAltFillColorDisabled": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ControlAltFillColorQuarternary": [
+      "#12FFFFFF",
+      "#18000000"
+    ],
+    "ControlAltFillColorSecondary": [
+      "#19000000",
+      "#06000000"
+    ],
+    "ControlAltFillColorTertiary": [
+      "#0BFFFFFF",
+      "#0F000000"
+    ],
+    "ControlAltFillColorTransparent": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ControlFillColorDefault": [
+      "#0FFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "ControlFillColorDisabled": [
+      "#0BFFFFFF",
+      "#4DF9F9F9"
+    ],
+    "ControlFillColorInputActive": [
+      "#B31E1E1E",
+      "#FFFFFF"
+    ],
+    "ControlFillColorQuarternary": [
+      "#0FFFFFFF",
+      "#C2F3F3F3"
+    ],
+    "ControlFillColorSecondary": [
+      "#15FFFFFF",
+      "#80F9F9F9"
+    ],
+    "ControlFillColorTertiary": [
+      "#08FFFFFF",
+      "#4DF9F9F9"
+    ],
+    "ControlFillColorTransparent": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ControlOnImageFillColorDefault": [
+      "#B31C1C1C",
+      "#C9FFFFFF"
+    ],
+    "ControlOnImageFillColorDisabled": [
+      "#1E1E1E",
+      "#00FFFFFF"
+    ],
+    "ControlOnImageFillColorSecondary": [
+      "#1A1A1A",
+      "#F3F3F3"
+    ],
+    "ControlOnImageFillColorTertiary": [
+      "#131313",
+      "#EBEBEB"
+    ],
+    "ControlSolidFillColorDefault": [
+      "#454545",
+      "#FFFFFF"
+    ],
+    "ControlStrokeColorDefault": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "ControlStrokeColorForStrongFillWhenOnImage": [
+      "#6B000000",
+      "#59FFFFFF"
+    ],
+    "ControlStrokeColorOnAccentDefault": [
+      "#14FFFFFF",
+      "#14FFFFFF"
+    ],
+    "ControlStrokeColorOnAccentDisabled": [
+      "#33000000",
+      "#0F000000"
+    ],
+    "ControlStrokeColorOnAccentSecondary": [
+      "#23000000",
+      "#66000000"
+    ],
+    "ControlStrokeColorOnAccentTertiary": [
+      "#37000000",
+      "#37000000"
+    ],
+    "ControlStrokeColorSecondary": [
+      "#18FFFFFF",
+      "#29000000"
+    ],
+    "ControlStrongFillColorDefault": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ControlStrongFillColorDisabled": [
+      "#3FFFFFFF",
+      "#51000000"
+    ],
+    "ControlStrongStrokeColorDefault": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ControlStrongStrokeColorDisabled": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "DividerStrokeColorDefault": [
+      "#15FFFFFF",
+      "#0F000000"
+    ],
+    "FocusStrokeColorInner": [
+      "#B3000000",
+      "#B3FFFFFF"
+    ],
+    "FocusStrokeColorOuter": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "LayerFillColorAlt": [
+      "#0DFFFFFF",
+      "#FFFFFF"
+    ],
+    "LayerFillColorDefault": [
+      "#4C3A3A3A",
+      "#80FFFFFF"
+    ],
+    "LayerOnAccentAcrylicFillColorDefault": [
+      "#09FFFFFF",
+      "#40FFFFFF"
+    ],
+    "LayerOnAcrylicFillColorDefault": [
+      "#09FFFFFF",
+      "#40FFFFFF"
+    ],
+    "LayerOnMicaBaseAltFillColorDefault": [
+      "#733A3A3A",
+      "#B3FFFFFF"
+    ],
+    "LayerOnMicaBaseAltFillColorSecondary": [
+      "#0FFFFFFF",
+      "#0A000000"
+    ],
+    "LayerOnMicaBaseAltFillColorTertiary": [
+      "#2C2C2C",
+      "#F9F9F9"
+    ],
+    "LayerOnMicaBaseAltFillColorTransparent": [
+      "#00FFFFFF",
+      "#00000000"
+    ],
+    "SmokeFillColorDefault": [
+      "#4D000000",
+      "#4D000000"
+    ],
+    "SolidBackgroundFillColorBase": [
+      "#202020",
+      "#F3F3F3"
+    ],
+    "SolidBackgroundFillColorBaseAlt": [
+      "#0A0A0A",
+      "#DADADA"
+    ],
+    "SolidBackgroundFillColorQuarternary": [
+      "#2C2C2C",
+      "#FFFFFF"
+    ],
+    "SolidBackgroundFillColorQuinary": [
+      "#333333",
+      "#FDFDFD"
+    ],
+    "SolidBackgroundFillColorSecondary": [
+      "#1C1C1C",
+      "#EEEEEE"
+    ],
+    "SolidBackgroundFillColorSenary": [
+      "#373737",
+      "#FFFFFF"
+    ],
+    "SolidBackgroundFillColorTertiary": [
+      "#282828",
+      "#F9F9F9"
+    ],
+    "SolidBackgroundFillColorTransparent": [
+      "#00202020",
+      "#00F3F3F3"
+    ],
+    "SubtleFillColorDisabled": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "SubtleFillColorSecondary": [
+      "#0FFFFFFF",
+      "#09000000"
+    ],
+    "SubtleFillColorTertiary": [
+      "#0AFFFFFF",
+      "#06000000"
+    ],
+    "SubtleFillColorTransparent": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "SurfaceStrokeColorDefault": [
+      "#66757575",
+      "#66757575"
+    ],
+    "SurfaceStrokeColorFlyout": [
+      "#33000000",
+      "#0F000000"
+    ],
+    "SurfaceStrokeColorInverse": [
+      "#0F000000",
+      "#15FFFFFF"
+    ],
+    "SystemAltHighColor": [
+      "#FF000000",
+      "#FFFFFFFF"
+    ],
+    "SystemAltLowColor": [
+      "#33000000",
+      "#33FFFFFF"
+    ],
+    "SystemAltMediumColor": [
+      "#99000000",
+      "#99FFFFFF"
+    ],
+    "SystemAltMediumHighColor": [
+      "#CC000000",
+      "#CCFFFFFF"
+    ],
+    "SystemAltMediumLowColor": [
+      "#66000000",
+      "#66FFFFFF"
+    ],
+    "SystemBaseHighColor": [
+      "#FFFFFFFF",
+      "#FF000000"
+    ],
+    "SystemBaseLowColor": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemBaseMediumColor": [
+      "#99FFFFFF",
+      "#99000000"
+    ],
+    "SystemBaseMediumHighColor": [
+      "#CCFFFFFF",
+      "#CC000000"
+    ],
+    "SystemBaseMediumLowColor": [
+      "#66FFFFFF",
+      "#66000000"
+    ],
+    "SystemChromeAltHighColor": [
+      "#FF1C1C1C",
+      "#FFFFFFFF"
+    ],
+    "SystemChromeAltLowColor": [
+      "#FFF2F2F2",
+      "#FF171717"
+    ],
+    "SystemChromeAltMediumHighColor": [
+      "#CC1F1F1F",
+      "#CCFFFFFF"
+    ],
+    "SystemChromeBlackHighColor": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "SystemChromeBlackLowColor": [
+      "#33000000",
+      "#33000000"
+    ],
+    "SystemChromeBlackMediumColor": [
+      "#CC000000",
+      "#CC000000"
+    ],
+    "SystemChromeBlackMediumLowColor": [
+      "#66000000",
+      "#66000000"
+    ],
+    "SystemChromeDisabledHighColor": [
+      "#FF333333",
+      "#FFCCCCCC"
+    ],
+    "SystemChromeDisabledLowColor": [
+      "#FF858585",
+      "#FF7A7A7A"
+    ],
+    "SystemChromeGrayColor": [
+      "#FF767676",
+      "#FF767676"
+    ],
+    "SystemChromeHighColor": [
+      "#FF767676",
+      "#FFCCCCCC"
+    ],
+    "SystemChromeLowColor": [
+      "#FF171717",
+      "#FFF2F2F2"
+    ],
+    "SystemChromeMediumColor": [
+      "#FF1F1F1F",
+      "#FFE6E6E6"
+    ],
+    "SystemChromeMediumHighColor": [
+      "#FF323232",
+      "#FFE6E6E6"
+    ],
+    "SystemChromeMediumLowColor": [
+      "#FF2B2B2B",
+      "#FFF2F2F2"
+    ],
+    "SystemChromeWhiteColor": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "SystemErrorTextColor": [
+      "#FFF000",
+      "#C50500"
+    ],
+    "SystemFillColorAttentionBackground": [
+      "#08FFFFFF",
+      "#80F6F6F6"
+    ],
+    "SystemFillColorCaution": [
+      "#FCE100",
+      "#9D5D00"
+    ],
+    "SystemFillColorCautionBackground": [
+      "#433519",
+      "#FFF4CE"
+    ],
+    "SystemFillColorCritical": [
+      "#FF99A4",
+      "#C42B1C"
+    ],
+    "SystemFillColorCriticalBackground": [
+      "#442726",
+      "#FDE7E9"
+    ],
+    "SystemFillColorNeutral": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "SystemFillColorNeutralBackground": [
+      "#08FFFFFF",
+      "#06000000"
+    ],
+    "SystemFillColorSolidAttentionBackground": [
+      "#2E2E2E",
+      "#F7F7F7"
+    ],
+    "SystemFillColorSolidNeutral": [
+      "#9D9D9D",
+      "#8A8A8A"
+    ],
+    "SystemFillColorSolidNeutralBackground": [
+      "#2E2E2E",
+      "#F3F3F3"
+    ],
+    "SystemFillColorSuccess": [
+      "#6CCB5F",
+      "#0F7B0F"
+    ],
+    "SystemFillColorSuccessBackground": [
+      "#393D1B",
+      "#DFF6DD"
+    ],
+    "SystemListLowColor": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "SystemListMediumColor": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "SystemRevealAltHighColor": [
+      "#F2000000",
+      "#E6FFFFFF"
+    ],
+    "SystemRevealAltLowColor": [
+      "#30000000",
+      "#2EFFFFFF"
+    ],
+    "SystemRevealAltMediumColor": [
+      "#91000000",
+      "#8AFFFFFF"
+    ],
+    "SystemRevealAltMediumHighColor": [
+      "#C2000000",
+      "#B8FFFFFF"
+    ],
+    "SystemRevealAltMediumLowColor": [
+      "#61000000",
+      "#61FFFFFF"
+    ],
+    "SystemRevealBaseHighColor": [
+      "#F2FFFFFF",
+      "#E6000000"
+    ],
+    "SystemRevealBaseLowColor": [
+      "#30FFFFFF",
+      "#2E000000"
+    ],
+    "SystemRevealBaseMediumColor": [
+      "#91FFFFFF",
+      "#8A000000"
+    ],
+    "SystemRevealBaseMediumHighColor": [
+      "#C2FFFFFF",
+      "#B8000000"
+    ],
+    "SystemRevealBaseMediumLowColor": [
+      "#61FFFFFF",
+      "#61000000"
+    ],
+    "SystemRevealChromeAltLowColor": [
+      "#F2F9F9F9",
+      "#E6171717"
+    ],
+    "SystemRevealChromeBlackHighColor": [
+      "#F2000000",
+      "#E6000000"
+    ],
+    "SystemRevealChromeBlackLowColor": [
+      "#30000000",
+      "#2E000000"
+    ],
+    "SystemRevealChromeBlackMediumColor": [
+      "#C2000000",
+      "#B8000000"
+    ],
+    "SystemRevealChromeBlackMediumLowColor": [
+      "#61000000",
+      "#66000000"
+    ],
+    "SystemRevealChromeGrayColor": [
+      "#F2767676",
+      "#E6767676"
+    ],
+    "SystemRevealChromeHighColor": [
+      "#F2767676",
+      "#E6CCCCCC"
+    ],
+    "SystemRevealChromeLowColor": [
+      "#F21F1F1F",
+      "#E6F2F2F2"
+    ],
+    "SystemRevealChromeMediumColor": [
+      "#F2393939",
+      "#E6E6E6E6"
+    ],
+    "SystemRevealChromeMediumLowColor": [
+      "#F22B2B2B",
+      "#E6F2F2F2"
+    ],
+    "SystemRevealChromeWhiteColor": [
+      "#F2FFFFFF",
+      "#E6FFFFFF"
+    ],
+    "SystemRevealListLowColor": [
+      "#18FFFFFF",
+      "#17000000"
+    ],
+    "SystemRevealListMediumColor": [
+      "#30FFFFFF",
+      "#2E000000"
+    ],
+    "TextFillColorDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "TextFillColorInverse": [
+      "#E4000000",
+      "#FFFFFF"
+    ],
+    "TextFillColorPrimary": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "TextFillColorSecondary": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "TextFillColorTertiary": [
+      "#87FFFFFF",
+      "#72000000"
+    ],
+    "TextOnAccentFillColorDisabled": [
+      "#87FFFFFF",
+      "#FFFFFF"
+    ],
+    "TextOnAccentFillColorPrimary": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "TextOnAccentFillColorSecondary": [
+      "#80000000",
+      "#B3FFFFFF"
+    ],
+    "TextOnAccentFillColorSelectedText": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ]
+  },
+  "runtime": [
+    "AccentFillColorDefaultBrush",
+    "AccentFillColorSecondaryBrush",
+    "AccentFillColorSelectedTextBackgroundBrush",
+    "AccentFillColorTertiaryBrush",
+    "AccentTextFillColorPrimaryBrush",
+    "AccentTextFillColorSecondaryBrush",
+    "AccentTextFillColorTertiaryBrush",
+    "ContentDialogBorderThemeBrush",
+    "SystemControlAccentAcrylicElementAccentMediumHighBrush",
+    "SystemControlAccentAcrylicWindowAccentMediumHighBrush",
+    "SystemControlAccentDark1AcrylicElementAccentDark1Brush",
+    "SystemControlAccentDark1AcrylicWindowAccentDark1Brush",
+    "SystemControlAccentDark2AcrylicElementAccentDark2MediumHighBrush",
+    "SystemControlAccentDark2AcrylicWindowAccentDark2MediumHighBrush",
+    "SystemControlBackgroundAccentBrush",
+    "SystemControlBackgroundAccentRevealBorderBrush",
+    "SystemControlDisabledAccentBrush",
+    "SystemControlForegroundAccentBrush",
+    "SystemControlHighlightAccent2RevealBackgroundBrush",
+    "SystemControlHighlightAccent3RevealAccent2BackgroundBrush",
+    "SystemControlHighlightAccent3RevealBackgroundBrush",
+    "SystemControlHighlightAccentBrush",
+    "SystemControlHighlightAccentRevealBackgroundBrush",
+    "SystemControlHighlightAccentRevealBorderBrush",
+    "SystemControlHighlightAltAccentBrush",
+    "SystemControlHighlightAltListAccentHighBrush",
+    "SystemControlHighlightAltListAccentLowBrush",
+    "SystemControlHighlightAltListAccentMediumBrush",
+    "SystemControlHighlightListAccentHighBrush",
+    "SystemControlHighlightListAccentLowBrush",
+    "SystemControlHighlightListAccentMediumBrush",
+    "SystemControlHyperlinkTextBrush",
+    "SystemControlRevealFocusVisualBrush",
+    "SystemFillColorAttentionBrush"
+  ]
+}

@@ -145,9 +145,12 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
    定義的 key，另一個主題記 `unknown-palette-key`）。
    **WinUI／UWP：** 字典裡的 `<ResourceDictionary.ThemeDictionaries>` 依 `x:Key` 拆開 —— `Dark`（沒有 `Dark` 時用
    `Default`）是深色主題、`Light`（或 `Default`）是淺色主題，`HighContrast…` 不評（那是使用者的系統色）；
-   檔案其他部分照舊兩個主題共用。`{ThemeResource Key}` 跟 `{DynamicResource Key}` 一樣查色盤。專案沒定義的鍵
-   （WinUI 內建的 `TextFillColorPrimaryBrush` 之類）是 `unknown-palette-key` —— 設 `rootBackground` 或把用到的鍵
-   放進自己的字典
+   檔案其他部分照舊兩個主題共用。`{ThemeResource Key}` 跟 `{DynamicResource Key}` 一樣查色盤。用到 `{ThemeResource`
+   的專案，**WinUI 內建的 Fluent 主題資源**（`TextFillColorPrimaryBrush`、`SolidBackgroundFillColorBaseBrush`、舊名的
+   `SystemControl…`，共 557 個 brush）在專案自己沒定義時，用框架的深淺預設值補上；專案自己定義的一律優先。跟著使用者
+   Windows 強調色走的鍵（`AccentFillColorDefaultBrush`、`SystemAccentColor…`）不猜，照舊是 `bound-or-gradient`。
+   資料來自 microsoft/microsoft-ui-xaml（MIT，見 THIRD-PARTY-NOTICES.md），色盤那一行會點名是哪個 commit。WPF 專案不受影響。
+   頁面的底色通常來自視窗（Mica 或預設的頁面 brush），工具看不到 —— 那一層請設 `rootBackground`
 2. **主題配對** —— 一個 Dark 檔 × 一個 Light 檔，鍵集重疊 ≥ 50%
 3. **C# 真相源** —— 三元組陣列，**提供兩套主題的來源優先於只有一套的**
 4. **合併字典・單一主題** —— 同 (1) 的聯集，但每個鍵只有一套值
