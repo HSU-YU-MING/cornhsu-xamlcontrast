@@ -177,32 +177,42 @@ public static partial class ColorResolver
             if (palette.RuntimeKeys.Contains(key)) return new Resolved(ColorKind.Other, Key: key, Raw: v);
             // 畫面的區域 brush 引用了找不到的 Color：點名那個 Color（使用處的 brush 鍵本身是有定義的）
             if (palette.MissingRefs.TryGetValue(key, out var missingColor)) return new Resolved(ColorKind.UnknownKey, Key: missingColor, Raw: v);
-            if (palette.Entries.TryGetValue(key, out var e))
-            {
-                // 色票鍵的值同理：#FF... 是不透明色票，不是半透明疊層
-                var darkOpaque = e.Dark.Length != 9 || e.Dark.Substring(1, 2).Equals("FF", StringComparison.OrdinalIgnoreCase);
-                var lightOpaque = e.Light.Length != 9 || e.Light.Substring(1, 2).Equals("FF", StringComparison.OrdinalIgnoreCase);
-                if (darkOpaque && lightOpaque)
-                {
-                    var d = e.Dark.Length == 9 ? "#" + e.Dark[3..] : e.Dark;
-                    var l = e.Light.Length == 9 ? "#" + e.Light[3..] : e.Light;
-                    return new Resolved(ColorKind.Soft, d, l, Key: key);
-                }
-                // #AARRGGBB 的「半透明色票」（如 CelFlow 的 BlueOverlay/Scrim）：
-                // 之前只有字面 8 碼會走合成，色票鍵的 8 碼值被 Luminance 剝掉 alpha
-                // 當『不透明色』用 —— InfoL 疊 16% 藍被算成疊純藍的假「破 2.68」。
-                // 深淺各帶自己的 alpha。
-                // ⚠ 任一側半透明就整個走 alpha，兩側各自拆（7 碼那側 alpha = 1）。舊版只看深色那側的長度：
-                //   深色半透明、淺色 7 碼 → 把 "#E0E0E0" 切成 "#E0E0"，算對比時 ArgumentOutOfRangeException、
-                //   整支崩潰；淺色半透明、深色 7 碼 → 回傳帶 9 碼淺色值的 Soft，alpha 被剝掉當不透明色，
-                //   比值是編出來的（實際 3.91 報 1.3）。合併式色盤裡只有一個主題用半透明遮罩是實際會出現的形狀
-                var (ad, rd) = SplitAlpha(e.Dark);
-                var (al, rl) = SplitAlpha(e.Light);
-                return new Resolved(ColorKind.Alpha, Key: key, Alpha: ad, Rgb: rd, AlphaLight: al, RgbLight: rl);
-            }
+            // brush 鍵找不到時看 Color 表（1.4）：<SolidColorBrush Color="{ThemeResource TextFillColorPrimary}"/> 這種
+            // 「brush 裡直接寫 Color 鍵」的寫法，引用的是 Color 不是 brush。之前只查 brush 鍵，一律 unknown-palette-key
+            // （WinUI Gallery 21 處；WPF 的 MahApps、MaterialDesign 也常這樣寫）。深淺各查自己那一側的 Color 表
+            if (!palette.Entries.ContainsKey(key)
+                && palette.DarkColors.TryGetValue(key, out var colourDark) && colourDark.StartsWith('#')
+                && palette.LightColors.TryGetValue(key, out var colourLight) && colourLight.StartsWith('#'))
+                return FromThemeValues(key, colourDark, colourLight);
+            if (palette.Entries.TryGetValue(key, out var e)) return FromThemeValues(key, e.Dark, e.Light);
             return new Resolved(ColorKind.UnknownKey, Key: key);
         }
 
         return new Resolved(ColorKind.Other); // TemplateBinding / Binding / 漸層等
+    }
+
+    /// <summary>色票（brush 或 Color）的深淺兩個值 → Soft（不透明）或 Alpha（任一側半透明）。</summary>
+    private static Resolved FromThemeValues(string key, string dark, string light)
+    {
+        // 色票鍵的值同理：#FF... 是不透明色票，不是半透明疊層
+        var darkOpaque = dark.Length != 9 || dark.Substring(1, 2).Equals("FF", StringComparison.OrdinalIgnoreCase);
+        var lightOpaque = light.Length != 9 || light.Substring(1, 2).Equals("FF", StringComparison.OrdinalIgnoreCase);
+        if (darkOpaque && lightOpaque)
+        {
+            var d = dark.Length == 9 ? "#" + dark[3..] : dark;
+            var l = light.Length == 9 ? "#" + light[3..] : light;
+            return new Resolved(ColorKind.Soft, d, l, Key: key);
+        }
+        // #AARRGGBB 的「半透明色票」（如 CelFlow 的 BlueOverlay/Scrim）：
+        // 之前只有字面 8 碼會走合成，色票鍵的 8 碼值被 Luminance 剝掉 alpha
+        // 當『不透明色』用 —— InfoL 疊 16% 藍被算成疊純藍的假「破 2.68」。
+        // 深淺各帶自己的 alpha。
+        // ⚠ 任一側半透明就整個走 alpha，兩側各自拆（7 碼那側 alpha = 1）。舊版只看深色那側的長度：
+        //   深色半透明、淺色 7 碼 → 把 "#E0E0E0" 切成 "#E0E0"，算對比時 ArgumentOutOfRangeException、
+        //   整支崩潰；淺色半透明、深色 7 碼 → 回傳帶 9 碼淺色值的 Soft，alpha 被剝掉當不透明色，
+        //   比值是編出來的（實際 3.91 報 1.3）。合併式色盤裡只有一個主題用半透明遮罩是實際會出現的形狀
+        var (ad, rd) = SplitAlpha(dark);
+        var (al, rl) = SplitAlpha(light);
+        return new Resolved(ColorKind.Alpha, Key: key, Alpha: ad, Rgb: rd, AlphaLight: al, RgbLight: rl);
     }
 }
