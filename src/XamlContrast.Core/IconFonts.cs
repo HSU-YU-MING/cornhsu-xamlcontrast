@@ -61,10 +61,10 @@ public static class IconFonts
         }
     }
 
-    /// <summary>{StaticResource K}／{DynamicResource K} 的 K；其他 markup（Binding 之類）是 null。</summary>
+    /// <summary>{StaticResource K}／{DynamicResource K}／{ThemeResource K}（WinUI，1.4）的 K；其他 markup（Binding 之類）是 null。</summary>
     private static string? ResourceKey(string value)
     {
-        foreach (var prefix in (ReadOnlySpan<string>)["{StaticResource ", "{DynamicResource "])
+        foreach (var prefix in (ReadOnlySpan<string>)["{StaticResource ", "{DynamicResource ", "{ThemeResource "])
             if (value.StartsWith(prefix, StringComparison.Ordinal) && value.EndsWith('}'))
                 return value[prefix.Length..^1].Trim() is { Length: > 0 } k && !k.Contains(' ') && !k.Contains('{') ? k : null;
         return null;

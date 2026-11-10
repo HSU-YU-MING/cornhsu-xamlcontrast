@@ -118,7 +118,7 @@ public static partial class PaletteDetector
 
     /// <summary>色票值引用另一個 Color 資源。⚠ 舊版只認 StaticResource ——
     /// HandyControl 全用 DynamicResource 跨檔引用，色盤偵測因此完全失敗。</summary>
-    [GeneratedRegex("""^\{(?:Static|Dynamic)Resource\s+(?<c>[\w.]+)\}$""")]
+    [GeneratedRegex("""^\{(?:Static|Dynamic|Theme)Resource\s+(?<c>[\w.]+)\}$""")] // ThemeResource：WinUI／UWP（1.4）
     private static partial Regex ResourceRefValue();
 
     /// <summary>C# 真相源：("Key", "#深色", "#淺色") 三元組。
@@ -398,9 +398,21 @@ public static partial class PaletteDetector
     /// <paramref name="keepInvalid"/>：讀不懂的值記成 <see cref="InvalidValue"/> 而不是略過（合併式色盤用）。</summary>
     internal static Dictionary<string, string> ParseColorDefs(string file, bool keepInvalid = false)
     {
-        var colors = new Dictionary<string, string>();
         string text;
-        try { text = ReadXamlWithoutComments(file); } catch { return colors; }
+        try { text = ReadXamlWithoutComments(file); } catch { return new Dictionary<string, string>(); }
+        return ParseColorDefsText(text, keepInvalid);
+    }
+
+    /// <summary>剔除註解後的檔案內容；讀不到回傳 null（呼叫端照舊走讀檔失敗的路徑）。</summary>
+    private static string? ReadTextOrNull(string file)
+    {
+        try { return ReadXamlWithoutComments(file); } catch { return null; }
+    }
+
+    /// <summary>同上，對一段已讀進來（已剔除註解）的 XAML 文字 —— ThemeDictionaries 的每一個主題字典各解一次。</summary>
+    private static Dictionary<string, string> ParseColorDefsText(string text, bool keepInvalid)
+    {
+        var colors = new Dictionary<string, string>();
         foreach (Match m in ColorElement().Matches(text))
         {
             var key = Attr(KeyAttr(), m.Groups["attrs"].Value);
@@ -606,6 +618,24 @@ public static partial class PaletteDetector
             var isDark = hint == ThemeSide.Dark;
             var isLight = hint == ThemeSide.Light;
 
+            // WinUI／UWP 的 ThemeDictionaries（1.4）：一個檔裡分好的深淺兩份字典，各佔自己那側；其他部分照舊依檔名分組。
+            // 只在字典檔與 App.xaml 讀（畫面檔的區域定義是另一層，那裡的 ThemeDictionaries 不拆，照舊）
+            if (!IsScreenFile(f) && ReadTextOrNull(f) is { } text && ThemeDictionarySections(text) is { } td)
+            {
+                AddSection(td.Neutral, isDark, isLight);
+                if (td.Dark is not null) AddSection(td.Dark, true, false);
+                if (td.Light is not null) AddSection(td.Light, false, true);
+                continue;
+
+                void AddSection(string section, bool d, bool l)
+                {
+                    var sectionColors = ParseColorDefsText(section, keepInvalid: true);
+                    var (sectionLit, sectionRefs) = ParseBrushDefsText(section, keepInvalid: true);
+                    if (sectionColors.Count > 0) colorFiles.Add((f, sectionColors, d, l));
+                    if (sectionLit.Count + sectionRefs.Count > 0) brushFiles.Add((f, sectionLit, sectionRefs, d, l));
+                }
+            }
+
             var colors = ParseColorDefs(f, keepInvalid: true);
             var (lit, refs) = ParseBrushDefs(f, keepInvalid: true);
             if (IsScreenFile(f))
@@ -755,10 +785,16 @@ public static partial class PaletteDetector
     internal static (Dictionary<string, string> Literal, Dictionary<string, string> Ref) ParseBrushDefs(
         string file, bool keepInvalid = false)
     {
+        string text;
+        try { text = ReadXamlWithoutComments(file); } catch { return (new Dictionary<string, string>(), new Dictionary<string, string>()); }
+        return ParseBrushDefsText(text, keepInvalid);
+    }
+
+    /// <summary>同上，對一段已讀進來（已剔除註解）的 XAML 文字。</summary>
+    private static (Dictionary<string, string> Literal, Dictionary<string, string> Ref) ParseBrushDefsText(string text, bool keepInvalid)
+    {
         var lit = new Dictionary<string, string>();
         var refs = new Dictionary<string, string>();
-        string text;
-        try { text = ReadXamlWithoutComments(file); } catch { return (lit, refs); }
         foreach (Match m in BrushElement().Matches(text))
         {
             var attrs = m.Groups["attrs"].Value;
@@ -783,6 +819,39 @@ public static partial class PaletteDetector
 
     [GeneratedRegex("""\bOpacity\s*=\s*"(?<v>[^"]+)"\s*""")]
     private static partial Regex OpacityAttr();
+
+    /// <summary>
+    /// WinUI／UWP 的 <c>&lt;ResourceDictionary.ThemeDictionaries&gt;</c>（1.4）：同一個檔裡依 x:Key 分主題的字典 ——
+    /// <c>Dark</c>、<c>Light</c>、<c>Default</c>（缺 Dark 或 Light 時那個主題用它）、<c>HighContrast…</c>（不評）。
+    /// 檔名看不出主題，舊版把兩個主題的同名鍵當成同一個字典裡的衝突（先出現的贏）：只評到其中一個主題，另一個主題整欄是編的。
+    /// GitHub 上約 13,000 個 XAML 檔有 ThemeDictionaries（2026-11-10 程式碼搜尋）。
+    /// 回傳 null = 這段文字沒有 ThemeDictionaries；有的話，Dark／Light 是那個主題看得到的定義（沒有就是 null），
+    /// Neutral 是 ThemeDictionaries 以外的部分（兩個主題共用，照舊）。
+    /// </summary>
+    internal static (string? Dark, string? Light, string Neutral)? ThemeDictionarySections(string text)
+    {
+        var blocks = ThemeDictionariesBlock().Matches(text);
+        if (blocks.Count == 0) return null;
+        string? dark = null, light = null, fallback = null;
+        foreach (Match block in blocks)
+            foreach (Match d in KeyedDictionary().Matches(block.Groups["body"].Value))
+            {
+                var key = Attr(KeyAttr(), d.Groups["attrs"].Value);
+                var body = d.Groups["body"].Value;
+                if (string.Equals(key, "Dark", StringComparison.OrdinalIgnoreCase)) dark += body;
+                else if (string.Equals(key, "Light", StringComparison.OrdinalIgnoreCase)) light += body;
+                else if (string.Equals(key, "Default", StringComparison.OrdinalIgnoreCase)) fallback += body;
+                // HighContrast、HighContrastBlack、HighContrastWhite：高對比主題是使用者的系統色，不評
+            }
+        return (dark ?? fallback, light ?? fallback, ThemeDictionariesBlock().Replace(text, ""));
+    }
+
+    [GeneratedRegex(@"<(?:\w+:)?ResourceDictionary\.ThemeDictionaries\b[^>]*>(?<body>.*?)</(?:\w+:)?ResourceDictionary\.ThemeDictionaries\s*>", RegexOptions.Singleline)]
+    private static partial Regex ThemeDictionariesBlock();
+
+    // 主題字典本身：帶 x:Key、不是自我結束（<ResourceDictionary Source="…"/> 是合併進來的檔，不是主題字典）
+    [GeneratedRegex(@"<(?:\w+:)?ResourceDictionary\b(?<attrs>[^>]*?)(?<!/)>(?<body>.*?)</(?:\w+:)?ResourceDictionary\s*>", RegexOptions.Singleline)]
+    private static partial Regex KeyedDictionary();
 
     private static string WithOpacity(string hex, double op)
         => op >= 0.999 ? hex : ColorResolver.ApplyOpacity(hex, op) ?? InvalidValue;

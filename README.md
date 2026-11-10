@@ -191,6 +191,12 @@ tried in this order, and the one that ran is always named on the first line of t
    only, and a style key defined in both themes' dictionaries is resolved per theme where it's used
    (the element reads `Button⊕Style[Chip]@dark/base`; a key only one theme defines is
    `unknown-palette-key` for the other).
+   **WinUI / UWP:** a dictionary's `<ResourceDictionary.ThemeDictionaries>` is split by `x:Key` —
+   `Dark` (or `Default` when there is no `Dark`) is the dark theme, `Light` (or `Default`) the light one,
+   `HighContrast…` is not graded (it is the user's system colours); the rest of the file is shared by both
+   themes as before. `{ThemeResource Key}` is read like `{DynamicResource Key}`. A key the project doesn't define
+   (WinUI's own `TextFillColorPrimaryBrush` and the like) is `unknown-palette-key` — set `rootBackground` or
+   add the keys you rely on to your own dictionary.
 2. **Theme pair** — one `DarkTheme.xaml` × one `LightTheme.xaml`, keys overlapping ≥ 50%
 3. **C# source of truth** — `("Key", "#dark", "#light")` tuple arrays
    (beats a single-theme XAML copy: a source that provides both themes wins)

@@ -260,6 +260,11 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   （`StyleIndex.Merged.MissingBase`、`Auditor.OnlyInOtherTheme`）—— 之前缺基底的鏈照樣評，字配到祖先的底，是編出來的比值。
   兩個主題都找不到的基底（函式庫樣式）照舊略過那一層，不然用函式庫的專案覆蓋率會整片掉。C#／單一主題模式不建這張表——Kindling 的 `DarkTheme.xaml`
   是 C# 色盤的靜態複本，兩個主題共用。
+- **WinUI／UWP 的 ThemeDictionaries（1.4，`PaletteDetector.ThemeDictionarySections`）**：同一個檔裡依 x:Key 分主題，
+  不靠檔名。`Dark`（缺就用 `Default`）進深色側、`Light`（缺就用 `Default`）進淺色側，`HighContrast…` 不評；
+  ThemeDictionaries 以外的部分照舊依檔名分組。只拆字典檔與 App.xaml，畫面檔的區域定義不拆。`{ThemeResource K}`
+  在五個地方跟 Dynamic／StaticResource 並列（ColorResolver、PaletteDetector、StyleIndex、Auditor 的 Style 鍵、IconFonts），
+  新增解析資源引用的地方要一起認。⚠ 四個驗證專案都是 WPF，測不到這條；動它要靠 `ThemeDictionaryTests`。
 - **Application 含子類別**（`PaletteDetector.RootKindOf`）：根元素名稱以 Application 結尾（Prism 的 `PrismApplication`），
   或根元素底下有 `<…Application.Resources>`。只認 `Application` 的話，Prism 的 App.xaml 被當成畫面、全域鍵全變成區域鍵。
 - **元素 Opacity 是群組**（`Auditor.Backdrop`／`OpacityGroup`）：WPF 的 Opacity 把整棵子樹畫成一層再疊。
