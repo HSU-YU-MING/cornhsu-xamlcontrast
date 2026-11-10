@@ -62,7 +62,7 @@ internal sealed partial class StyleIndex
         public string? MissingBase;
     }
 
-    [GeneratedRegex(@"^\{(Dynamic|Static)Resource\s+(?<k>[\w\.]+)\}$")]
+    [GeneratedRegex(@"^\{(Dynamic|Static|Theme)Resource\s+(?<k>[\w\.]+)\}$")] // ThemeResource：WinUI／UWP（1.4）
     private static partial Regex ResourceRef();
 
     [GeneratedRegex(@"(^|\.)IsEnabled$")]

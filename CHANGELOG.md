@@ -14,7 +14,37 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   *{x:Static Colors.X} 與 {x:Static Brushes.X} 現在讀成對應的具名色;之前是 bound-or-gradient 的未解析。
   用到它們的專案配對變多、覆蓋率變高,真的低於 AA 的會以 fail／warn 出現。四個驗證專案的快照完全不變。*
 
+- **WinUI / UWP: `{ThemeResource Key}` and `<ResourceDictionary.ThemeDictionaries>` are read.** `{ThemeResource Key}`
+  used to be `bound-or-gradient`; it is now looked up like `{DynamicResource Key}` — a key the project defines is
+  graded, and one it doesn't (WinUI's own `TextFillColorPrimaryBrush`…) becomes `unknown-palette-key`. If you use
+  `--fail-on-new-unresolved`, those sites move from one reason to the other, so rewrite the baseline once with
+  `--write-baseline`. A file whose `ThemeDictionaries` hold both themes used to be read as one dictionary with
+  conflicting keys (only one theme was graded, the other column was made up); it is now a dark/light pair.
+  WPF projects are not affected: the four maintainer projects give exactly the same snapshot.
+  *WinUI／UWP：讀得懂 {ThemeResource} 與 ThemeDictionaries。用 --fail-on-new-unresolved 的 WinUI 專案請重寫一次 baseline。*
+- **WinUI / UWP projects get WinUI's default Fluent theme colours** for theme resources they don't define themselves
+  (only projects that use `{ThemeResource`). Expect more graded pairs and, because the palette now has real dark and
+  light values, findings on hard-coded colours may change their `symmetry` from `single-theme` to `both-low` (same ratios).
+  Keys that follow the user's accent colour stay `bound-or-gradient`.
+
 ### Added
+- `{ThemeResource Key}` resolves through the palette like `{DynamicResource Key}` — in element attributes, styles
+  (`Style="{ThemeResource …}"`), palette dictionaries and icon-font lookups. About 134,000 public XAML files on GitHub
+  use `{ThemeResource` (code search, 2026-11-10).
+- `<ResourceDictionary.ThemeDictionaries>` in a dictionary or `App.xaml` is split by `x:Key`: `Dark` (or `Default`)
+  is the dark theme, `Light` (or `Default`) the light theme, `HighContrast…` is not graded. About 13,000 public XAML
+  files have one. A page's own `ThemeDictionaries` (in its local resources) are split the same way and stay local to
+  that page; a key only one theme defines there is unresolved in the other theme, never borrowed from it.
+  Run against Microsoft's WinUI Gallery (196 XAML files): the palette is now read as a dark/light pair instead of a
+  single theme, `bound-or-gradient` drops from 189 to 17 and those sites now name the key they need; most of them
+  (172 sites, 34 keys such as `TextFillColorSecondaryBrush`) are WinUI's built-in Fluent theme resources, which a
+  project doesn't define — so graded pairs only go from 48 to 49. The other 48 findings are unchanged.
+- WinUI's default theme resources (`WinUiTheme.json`, embedded): 557 brushes and 135 colours with their dark and light
+  default values, from `Common_themeresources_any.xaml` and `generic.xaml` in microsoft/microsoft-ui-xaml (MIT —
+  `THIRD-PARTY-NOTICES.md`, now packed with the tool). Filled in as the lowest layer for projects that use
+  `{ThemeResource`; the project's own definition (and a project key it can't read) always wins; 34 accent-derived keys
+  are runtime-only. WinUI Gallery: graded pairs 49 → 59, `unknown-palette-key` 172 → 90; every earlier finding keeps
+  its ratio and category.
 - `{x:Static Colors.X}` / `{x:Static Brushes.X}` (with an xmlns prefix or `Member=` too) resolve to the WPF named
   colour, in element attributes, styles and palette dictionaries (`<SolidColorBrush Color="{x:Static Colors.Navy}"/>`).
   `Brushes.Transparent` is transparent. Evidence: about 430 public XAML files on GitHub use `x:Static Brushes.` and about

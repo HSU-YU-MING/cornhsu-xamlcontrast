@@ -121,7 +121,9 @@ public static partial class ColorResolver
             ? (Convert.ToInt32(hex.Substring(1, 2), 16) / 255.0, "#" + hex[3..])
             : (1.0, hex);
 
-    [GeneratedRegex(@"^\{(Dynamic|Static)Resource\s+(?<k>[\w\.]+)\}$")]
+    /// <summary>資源引用。ThemeResource 是 WinUI／UWP 的寫法（1.4）：跟 DynamicResource 一樣依目前主題查資源 ——
+    /// 之前落到「Binding／漸層」的 unresolved，WinUI 專案幾乎每個顏色都是這樣寫（GitHub 上約 134,000 個 XAML 檔）。</summary>
+    [GeneratedRegex(@"^\{(Dynamic|Static|Theme)Resource\s+(?<k>[\w\.]+)\}$")]
     private static partial Regex ResourceRef();
 
     /// <summary>

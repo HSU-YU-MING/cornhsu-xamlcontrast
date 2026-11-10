@@ -77,7 +77,8 @@ public sealed partial class Auditor
 
     private static bool IsBold(string? fw) => fw is not null && BoldWeight().IsMatch(fw);
 
-    [GeneratedRegex(@"^\{(Dynamic|Static)Resource\s+(?<k>[\w\.]+)\}$")]
+    // ThemeResource 是 WinUI／UWP 的寫法（1.4），跟 DynamicResource 一樣是「依目前主題查資源」
+    [GeneratedRegex(@"^\{(Dynamic|Static|Theme)Resource\s+(?<k>[\w\.]+)\}$")]
     private static partial Regex StyleResourceRef();
 
     /// <summary>元素 Style="{StaticResource X}" 的 X（行內 Style 或其他寫法回傳 null）。</summary>
