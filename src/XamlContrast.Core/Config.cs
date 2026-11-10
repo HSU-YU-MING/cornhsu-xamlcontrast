@@ -48,6 +48,10 @@ public sealed class ToolConfig
     /// <summary>轉換器回傳的固定顏色（1.2）：constantBrushes 打開時讀 *.cs 找 IValueConverter，每條回傳路徑都是固定 Brush 的，
     /// 每個顏色各評一次（ConverterIndex）。⚠ 預設關：讀 *.cs 找轉換器是擴大稽核範圍（凍結面第 9 面），改預設要等 2.0。</summary>
     public ConvertersSection Converters { get; init; } = new();
+    /// <summary>非文字對比（1.4，WCAG 1.4.11）：uiComponents 打開時，輸入控制項（TextBox、ComboBox、CheckBox…）的框線或底色
+    /// 要跟周圍的底有 3:1，焦點態（IsFocused 之類的觸發）與 FocusVisualStyle 的焦點框也一樣。
+    /// ⚠ 預設關：多評一類配對是擴大稽核範圍，改預設要等 2.0。</summary>
+    public NonTextSection NonText { get; init; } = new();
 
     /// <summary>載入來源路徑；null = 沒有 config 檔（純預設值）</summary>
     [JsonIgnore] public string? SourcePath { get; private set; }
@@ -89,6 +93,11 @@ public sealed class ToolConfig
     public sealed class ConvertersSection
     {
         public bool ConstantBrushes { get; init; }
+    }
+
+    public sealed class NonTextSection
+    {
+        public bool UiComponents { get; init; }
     }
 
     public sealed class IgnoreSection
@@ -162,6 +171,7 @@ public sealed class ToolConfig
         if (cfg.Layout is null) throw new ConfigException("layout must be an object, got null");
         if (cfg.Stats is null) throw new ConfigException("stats must be an object, got null");
         if (cfg.Converters is null) throw new ConfigException("converters must be an object, got null");
+        if (cfg.NonText is null) throw new ConfigException("nonText must be an object, got null");
         if (cfg.Stats.ProjectId is { } projectId && ProjectIdProblem(projectId) is { } problem)
             throw new ConfigException($"stats.projectId {problem} — it is your own anonymous project ID (or leave it out)");
         RequireNames(cfg.Layout.Overlap, "layout.overlap");

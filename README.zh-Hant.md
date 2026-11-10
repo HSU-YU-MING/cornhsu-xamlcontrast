@@ -275,7 +275,7 @@ Visual Studio 的錯誤清單，點兩下跳到那一行。不必裝擴充套件
 | `XC0003` | error | 結果不可信（exit 3）—— 不然建置會在工具其實什麼都沒看到時安靜地過 |
 
 有 error 建置就失敗，只有 warning 照樣通過。用法或設定錯誤（exit 2）不印診斷，所以片段裡另外用 `<Error>` 接住。
-其他旗標（`--baseline`、`--fail-on`、`--config`）照常可用，加進 `Command` 就好。`IgnoreExitCode` 讓 MSBuild
+其他旗標（`--baseline`、`--fail-on`、`--min-coverage`）照常可用，加進 `Command` 就好。`IgnoreExitCode` 讓 MSBuild
 不再多報一筆「exited with code 1」的籠統錯誤，`StandardOutputImportance="low"` 讓主控台報告不擠進一般建置輸出。
 
 ### GitHub Action
@@ -462,6 +462,23 @@ unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)—
 （資源鍵→欄位名）。其他寫法（算出來的值、`DependencyProperty.UnsetValue`、`Binding.DoNothing`、`null`、讀屬性、`FallbackValue`、
 字與底都來自轉換器）照舊是 `bound-or-gradient`，console 會點名每個不是固定顏色的轉換器與原因。`summary.converterPairs`
 是這樣評出來的配對數。預設關，因為為了這個去讀 `*.cs` 是擴大稽核範圍 —— 1.x 只在你要求時才這樣做。
+
+**輸入控制項的框線與焦點指示**（要自己打開，1.4 起；WCAG 1.4.11 非文字對比，3:1）。一個輸入框唯一的外框是 `#3A3A3A`、
+放在 `#1A1A1A` 的頁面上，是 1.53:1：裡面的字過了，但看不出該在哪裡打字。打開：
+
+```json
+{ "nonText": { "uiComponents": true } }
+```
+
+`TextBox`、`PasswordBox`、`ComboBox`、`CheckBox`、`RadioButton`、`DatePicker`、`NumberBox`、`AutoSuggestBox`（以及名字以它們結尾的
+控制項）會依「認得出它是控制項」的那一樣評：框線或底色跟周圍的底比，取對比高的那一個。看的是控制項自己的 Style，沒有就看
+那個型別的隱含樣式 —— 主題的框線多半寫在那裡。控制項自己的 Style 定義的每個狀態（選取、勾選、取得焦點）各評一次；
+滑鼠移過、按下不評，WCAG 不要求這兩個狀態看得出來。停用態豁免，計進 `disabledExempt`。設了 `FocusVisualStyle` 的控制項，
+焦點框也另外評：對著控制項的底，焦點框畫在控制項外面（`Margin` 是負的）時對著周圍的底。每一筆的 `component` 是
+`border`、`fill` 或 `focus-visual`，`summary.uiComponentPairs` 是這樣評出來的配對數。不在範圍內：按鈕（靠字就認得出來）、
+這些顏色都沒寫的控制項（作業系統的主題畫的）、WinUI 的 `VisualStateManager` 狀態。四個維護者自己的 App 與下面八個公開
+WPF 專案實跑：文字的 finding 一筆都沒變，新報出低於 3:1 的都是平常狀態的框線，例如 HandyControl 白底上的 `#E0E0E0`（1.32:1）。
+預設關，因為多評一類配對是擴大稽核範圍 —— 1.x 只在你要求時才這樣做。
 
 `--md report.md` 則產出給人讀的 Markdown（Action 用它貼 PR 留言，也可以自己拿去用）。
 

@@ -94,7 +94,7 @@ public sealed partial class Auditor
     private readonly List<string> _parseErrors = new();
     private readonly List<string> _invalidIgnores = new();
     private readonly Dictionary<string, int> _suppressedReasons = new(StringComparer.Ordinal);
-    private int _pairs, _unresolved, _skipped, _deadFg, _suppressed, _disabled, _translucentOverNothing, _converterPairs;
+    private int _pairs, _unresolved, _skipped, _deadFg, _suppressed, _disabled, _translucentOverNothing, _converterPairs, _uiComponentPairs;
     /// <summary>轉換器的固定顏色（config 的 converters.constantBrushes；沒打開是 null —— 行為與 1.1 完全相同）。</summary>
     private ConverterIndex? _converters;
     private readonly HashSet<string> _walkedNames = new(StringComparer.Ordinal); // config 的 layout 宣告有沒有命中
@@ -385,6 +385,7 @@ public sealed partial class Auditor
             Suppressed = auditor._suppressed,
             SuppressedReasons = auditor._suppressedReasons,
             ConverterPairs = auditor._converterPairs,
+            UiComponentPairs = auditor._uiComponentPairs,
             ConvertersUsed = auditor._converters?.Used.Select(u => new ConverterUse(u.Key, u.Info)).ToList(),
             InvalidIgnores = auditor._invalidIgnores,
             Config = auditor._cfg,
@@ -499,6 +500,8 @@ public sealed partial class Auditor
                 Unres(UnresolvedReason.UnknownStyleKey, file, LineOf(el), styleKey);
         }
         else if (chain is not null) GradeChain(el, chain, null, bd, ancestorBd, localBgRaw, file, op, suppressedBy);
+
+        if (_cfg.NonText.UiComponents) GradeUiComponent(el, chain, chainLight, splitThemes, ancestorBd, localBgRaw, file, op, suppressedBy);
 
         // 這個元素的字型（WPF 優先序：本地 > Style > 繼承）—— 它自己的 Foreground／Fill 用它評，子元素繼承它
         var elementFont = LocalFontFamily(el) ?? ChainFont(chain) ?? ChainFont(chainLight) ?? _inheritedFont;
@@ -959,6 +962,189 @@ public sealed partial class Auditor
                         });
                     }
             }
+        }
+    }
+
+    // ── 非文字對比（1.4，WCAG 1.4.11，config 的 nonText.uiComponents）──
+    /// <summary>靠框線或底色才認得出來的輸入控制項。按鈕不在裡面：有字的按鈕靠字就認得出來，條文不要求按鈕有邊界。
+    /// 比對後綴（MetroTextBox、ExtendedCheckBox 之類的衍生控制項也算），同 <see cref="IsNonTextElement"/>。</summary>
+    private static readonly string[] UiComponentEls =
+        ["TextBox", "PasswordBox", "ComboBox", "CheckBox", "RadioButton", "DatePicker", "NumberBox", "AutoSuggestBox"];
+
+    private static bool IsUiComponent(string localName) => UiComponentEls.Any(localName.EndsWith);
+
+    /// <summary>觸發條件（StyleIndex 的條件簽名，<c>P:屬性=值</c> 以 &amp; 串接）裡為 True 的屬性名，去掉型別前綴
+    /// （<c>UIElement.IsMouseOver</c> → <c>IsMouseOver</c>）；不是 <c>P:X=True</c> 的條件是 null。</summary>
+    private static IEnumerable<string?> TrueProperties(string cond)
+        => cond.Split('&').Select(c => c.StartsWith("P:", StringComparison.Ordinal) && c.LastIndexOf('=') is var eq and > 2 &&
+                                       c[(eq + 1)..].Trim().Equals("True", StringComparison.OrdinalIgnoreCase)
+            ? c[2..eq].Trim()[(c[2..eq].Trim().LastIndexOf('.') + 1)..] : null);
+
+    /// <summary>焦點態的觸發條件（IsFocused、IsKeyboardFocused、IsKeyboardFocusWithin 為 True）。</summary>
+    private static bool IsFocusCondition(string? cond)
+        => cond is not null && TrueProperties(cond).Any(p => p is "IsFocused" or "IsKeyboardFocused" or "IsKeyboardFocusWithin");
+
+    /// <summary>只跟指標有關的狀態（IsMouseOver、IsPressed 為 True 的條件，沒有別的）。</summary>
+    private static bool IsPointerOnlyCondition(string? cond)
+        => cond is not null && TrueProperties(cond).All(p => p is "IsMouseOver" or "IsPressed");
+
+    /// <summary>BorderThickness 是不是字面的 0（"0"、"0,0,0,0"）—— 沒有框線。Binding、資源之類讀不出來的當成有。</summary>
+    private static bool IsZeroThickness(string? v)
+        => v is not null && v.Split([',', ' '], StringSplitOptions.RemoveEmptyEntries) is { Length: > 0 } parts &&
+           parts.All(p => ParseDouble(p, out var d) && d == 0);
+
+    /// <summary>
+    /// 非文字對比：輸入控制項的框線或底色跟周圍的底（祖先畫出來的底）比，3:1。條文要的是「認得出這是一個控制項」，
+    /// 所以框線與底色只要一個夠就算過：挑兩者裡最差主題比值最高的那個報（兩個都不夠就是那個比較好的也不夠）。
+    /// 每個觸發態各評一次（hover、選取…）；焦點態（IsFocused 之類）的標籤是 focus —— 焦點指示是框線換色時，評的就是它。
+    /// FocusVisualStyle 指向的 Style 畫的焦點框，對著控制項的底（沒有底就是周圍的底）另外評一組。
+    /// 停用態不評（1.4.11 豁免停用的控制項），計進 disabledExempt。
+    /// 控制項的 Style：元素自己的（Style= 或行內），沒有就是型別的隱含樣式 —— 框線幾乎都寫在主題的隱含樣式裡。
+    /// 框線、底色、焦點框都沒寫的控制項不評：那是系統主題畫的，跟著作業系統走，從原始碼看不出來。
+    /// </summary>
+    private void GradeUiComponent(XElement el, StyleIndex.Merged? chain, StyleIndex.Merged? chainLight, bool splitThemes,
+        Backdrop ancestorBd, string? localBgRaw, string file, double op, string? suppressedBy)
+    {
+        var name = el.Name.LocalName;
+        var isComponent = IsUiComponent(name);
+        var explicitStyle = el.Attribute("Style") is not null ||
+                            el.Elements().Any(e => e.Name.LocalName == name + ".Style");
+        StyleIndex.Merged? Effective(StyleIndex.Merged? ch, ThemeSide? side)
+            => ch ?? (explicitStyle ? null : _styles.GetImplicitChain(name, _curFile, side));
+        var dark = Effective(chain, splitThemes ? ThemeSide.Dark : _curSide);
+        var light = splitThemes ? Effective(chainLight, ThemeSide.Light) : dark;
+        var perSide = splitThemes && (dark?.SideSpecific == true || light?.SideSpecific == true);
+        if (perSide)
+        {
+            if (dark is not null) GradeComponent(el, dark, ThemeSide.Dark, isComponent, ancestorBd, localBgRaw, file, op, suppressedBy);
+            if (light is not null) GradeComponent(el, light, ThemeSide.Light, isComponent, ancestorBd, localBgRaw, file, op, suppressedBy);
+        }
+        else GradeComponent(el, dark, null, isComponent, ancestorBd, localBgRaw, file, op, suppressedBy);
+    }
+
+    private void GradeComponent(XElement el, StyleIndex.Merged? chain, ThemeSide? side, bool isComponent, Backdrop ancestorBd,
+        string? localBgRaw, string file, double op, string? suppressedBy)
+    {
+        var pal = _pal;
+        var theme = side ?? _curSide;
+        var label = chain?.Label;
+        if (side is { } s)
+        {
+            pal = SideView(_pal, s);
+            ancestorBd = OnSide(ancestorBd, s);
+            label += s == ThemeSide.Dark ? "@dark" : "@light";
+        }
+        var name = el.Name.LocalName;
+        var line = LineOf(el);
+        var emitted = new HashSet<string>();
+        // 同一個控制項卡在同一個值上只記一次：每個觸發態各記一筆，一個控制項就會在 unresolved 裡出現三四次
+        var unresolvedOnce = new HashSet<string>();
+        void Once(string key, Action record) { if (unresolvedOnce.Add(key)) record(); }
+        // 模板根寫死的底（不是 {TemplateBinding Background}）：Style 的 Background 根本畫不到根上 —— wpfui 的 RadioButton
+        // 把 Background 設成強調色，模板只拿它畫中間的圓點，根是 Transparent。框線同理（StyleIndex 已經濾掉 TemplateBinding）
+        var tmplFill = chain?.TemplateRootBg is { } tb && !tb.TrimStart().StartsWith("{TemplateBinding", StringComparison.Ordinal) ? tb : null;
+        // 控制項平常的底（焦點框的旁邊）：模板根寫死的 > 元素屬性 > Style Setter
+        var baseFill = tmplFill ?? localBgRaw
+                       ?? (chain is not null && chain.Props.TryGetValue("Background", out var cbg) ? cbg.V : null);
+
+        if (isComponent)
+        {
+            var localBorder = XamlBrush.Read(el, "BorderBrush");
+            var localThickness = el.Attribute("BorderThickness")?.Value;
+            var states = new List<StyleIndex.State> { new() };
+            if (chain is not null) states.AddRange(chain.States);
+            foreach (var st in states)
+            {
+                // 觸發器直接設在模板根的 > 模板根寫死的（宿主的屬性畫不到根上）> 元素屬性 > 觸發 Setter > Style Setter
+                string? Pick(string prop, string? local, string? tmpl)
+                    => st.Set.TryGetValue(prop, out var rootV) && st.RootTargeted.Contains(prop) ? rootV
+                       : tmpl ?? local ?? (st.Set.TryGetValue(prop, out var sv) ? sv : null)
+                         ?? (chain is not null && chain.Props.TryGetValue(prop, out var pv) ? pv.V : null);
+                var border = Pick("BorderBrush", localBorder, chain?.TemplateRootBorder);
+                if (IsZeroThickness(Pick("BorderThickness", localThickness, chain?.TemplateRootBorderThickness))) border = null;
+                var fill = Pick("Background", localBgRaw, tmplFill);
+                var isBase = st.Cond is null && st.Set.Count == 0;
+                if (border is null && fill is null) continue;
+                if (st.Disabled)
+                {
+                    if (st.Set.Keys.Any(k => k is "BorderBrush" or "BorderThickness" or "Background")) _disabled++;
+                    continue;
+                }
+                // 滑鼠移過、按下：條文不要求這兩個狀態看得出來（WCAG 1.4.11 的 Understanding），不評。
+                // 巢狀 Style／模板裡的觸發器是別的元素的狀態（下拉清單的項目、內部的 ToggleButton）
+                if (st.Nested || IsPointerOnlyCondition(st.Cond)) continue;
+                var stateName = isBase ? "base" : IsFocusCondition(st.Cond) ? "focus" : "trigger";
+                var parts = new List<(string Part, string Raw)>();
+                if (border is not null) parts.Add(("border", border));
+                if (fill is not null) parts.Add(("fill", fill));
+                Measure(parts, ancestorBd, stateName);
+            }
+        }
+
+        // FocusVisualStyle 的焦點框：畫在控制項上面，旁邊是控制項自己的底（沒有底就是周圍的底）
+        var fvs = el.Attribute("FocusVisualStyle")?.Value
+                  ?? (chain is not null && chain.Props.TryGetValue("FocusVisualStyle", out var pf) ? pf.V : null);
+        if (_styles.FocusVisualStroke(fvs, _curFile, side ?? _curSide) is var (stroke, outside))
+        {
+            var under = ancestorBd;
+            var fillR = baseFill is null || outside ? null : ResolveColour(baseFill, pal); // 畫在控制項外面（Margin 是負的）：旁邊是周圍的底
+            if (fillR is { Kind: ColorKind.Hard or ColorKind.Soft or ColorKind.Alpha, Candidates: null })
+                under = Paint(ancestorBd, op, fillR, baseFill!);
+            Measure([("focus-visual", stroke)], under, "focus");
+        }
+
+        void Measure(List<(string Part, string Raw)> parts, Backdrop around, string stateName)
+        {
+            // 透明的框線／底色 = 沒有；全都沒有就沒什麼可評（不是「找不到底」）
+            parts = [.. parts.Where(p => ResolveColour(p.Raw, pal) is { Kind: not ColorKind.Transparent })];
+            if (parts.Count == 0) return;
+            var bg = Screen(around);
+            if (bg is null) { Once(UnresolvedReason.NoAncestorBackground.ToString(), () => Unres(UnresolvedReason.NoAncestorBackground, file, line, parts[0].Raw)); return; }
+            if (bg.Candidates is not null || bg.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent)
+            { var v = bg.Raw ?? bg.Key ?? bg.Composite ?? parts[0].Raw; Once("bg|" + v, () => Unres(bg, file, line, v)); return; }
+
+            (string Part, string Raw, Resolved Shown, double RD, double RL, ContrastColors CD, ContrastColors CL)? best = null;
+            (Resolved R, string Raw)? stuck = null;
+            foreach (var (part, raw) in parts)
+            {
+                var r = ResolveColour(raw, pal);
+                if (r is null || r.Kind == ColorKind.Transparent) continue; // 透明的框線／底色 = 沒有
+                if (r.Candidates is not null || r.Kind is ColorKind.Other or ColorKind.UnknownKey)
+                { stuck ??= (r, raw); continue; }
+                // 半透明的框線／底色疊在周圍的底上；元素的 Opacity 照算
+                var shown = Screen(Paint(around, op, r, raw));
+                if (!IsOpaque(shown)) { stuck ??= (r, raw); continue; }
+                var (rd, cd) = Wcag.Measure(shown!.Dark!, bg.Dark!);
+                var (rl, cl) = Wcag.Measure(shown.Light!, bg.Light!);
+                if (best is null || Math.Min(rd, rl) > Math.Min(best.Value.RD, best.Value.RL))
+                    best = (part, raw, shown, rd, rl, cd, cl);
+            }
+            // 看不懂的那一個可能就是認得出控制項的那一個：評得到的那個不夠時，不下結論
+            if (stuck is { } u && (best is null || Math.Min(best.Value.RD, best.Value.RL) < NonTextGraphic))
+            { Once("part|" + u.Raw, () => Unres(u.R, file, line, u.Raw)); return; }
+            if (best is not { } b) return;
+            if (!emitted.Add($"{b.Part}|{b.Shown.Dark}|{b.Shown.Light}|{bg.Dark}|{bg.Light}")) return;
+
+            _pairs++;
+            _uiComponentPairs++;
+            if (suppressedBy is not null) { Suppress(suppressedBy); return; }
+            _findings.Add(new Finding
+            {
+                File = file,
+                Line = line,
+                Element = label is null ? $"{name} {b.Part}/{stateName}" : $"{name} {b.Part}⊕{label}/{stateName}",
+                Fg = op < 0.999 ? WithOpacityNote(b.Raw, op) : b.Raw,
+                Bg = LabelOf(bg),
+                Mixed = b.Shown.Kind != bg.Kind,
+                RatioDark = b.RD,
+                RatioLight = b.RL,
+                ColorsDark = b.CD,
+                ColorsLight = b.CL,
+                IsText = false,
+                Need = NonTextGraphic,
+                Theme = theme,
+                Component = b.Part,
+            });
         }
     }
 

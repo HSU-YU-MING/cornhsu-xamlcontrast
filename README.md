@@ -345,7 +345,7 @@ app's `.csproj` (the tool must be on `PATH`, or use `dotnet xamlcontrast` with a
 | `XC0003` | error | The result can't be trusted (exit 3) — otherwise the build would pass while the tool saw nothing |
 
 The build fails when there is an error, and passes with warnings. A usage or config error (exit 2) prints no
-diagnostic, which is what the `<Error>` line is for. Other flags (`--baseline`, `--fail-on`, `--config`) work as
+diagnostic, which is what the `<Error>` line is for. Other flags (`--baseline`, `--fail-on`, `--min-coverage`) work as
 usual; add them to the `Command`. `IgnoreExitCode` keeps MSBuild from adding a second, generic "exited with code 1"
 error, and `StandardOutputImportance="low"` hides the console report from the normal build output.
 
@@ -574,6 +574,28 @@ background reads `ActiveBrush→On` (resource key → field). Anything else (a c
 background both from converters) stays `bound-or-gradient`, and the console names each converter that
 isn't fixed and why. `summary.converterPairs` counts the pairs graded this way. It is off by default
 because reading `*.cs` for this widens the audit's scope, which 1.x only does when you ask.
+
+**Borders and focus indicators of input controls** (opt-in, from 1.4 — WCAG 1.4.11 non-text contrast, 3:1).
+A text box whose only outline is `#3A3A3A` on a `#1A1A1A` page is 1.53:1: the text inside passes, but you can't see
+where to type. Turn on
+
+```json
+{ "nonText": { "uiComponents": true } }
+```
+
+and every `TextBox`, `PasswordBox`, `ComboBox`, `CheckBox`, `RadioButton`, `DatePicker`, `NumberBox` and
+`AutoSuggestBox` (and controls whose names end in one of those) is graded on what makes it recognisable: its border or its
+fill against what surrounds it, whichever contrasts more. The tool reads the control's own style, or its type's implicit
+style when it has none, since that is where themes put the border. It also grades each state the control's own style
+defines (checked, selected, focused), skipping hover and pressed, which WCAG doesn't require to be visible at all.
+Disabled states are exempt and counted in `disabledExempt`. A control that sets `FocusVisualStyle` also has its focus
+rectangle graded, against the control's fill, or against the surroundings when the rectangle is drawn outside the control
+(a negative `Margin`). Each finding's `component` is `border`, `fill` or `focus-visual`, and
+`summary.uiComponentPairs` counts these pairs. Not covered: buttons (their text identifies them), controls that set none
+of these colours (the operating system's theme draws them), and WinUI's `VisualStateManager` states. Checked on the four
+maintainer apps and the eight public WPF projects below: no text finding changes, and the new pairs it reports below 3:1
+are base-state borders such as HandyControl's `#E0E0E0` on white (1.32:1). It is off by default because grading a new
+kind of pair widens the audit's scope, which 1.x only does when you ask.
 
 `--md report.md` writes the human-readable Markdown version — this is what the Action posts as a
 PR comment, and you can use it directly too.

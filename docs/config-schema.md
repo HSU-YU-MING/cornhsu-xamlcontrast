@@ -54,6 +54,9 @@
   },
   "converters": {
     "constantBrushes": false
+  },
+  "nonText": {
+    "uiComponents": false
   }
 }
 ```
@@ -226,6 +229,27 @@ ratchet 會把「不見了」讀成「還清了」而放行 —— 弄壞主題�
 - 這是讀 `*.cs` 的文字分析（不編譯、不執行）：看不懂的寫法一律「不是固定的」，往 unresolved 那邊錯。
 - ⚠ 預設關：讀 `*.cs` 找轉換器是擴大稽核範圍（1.x 凍結面第 9 面），改預設要等 2.0。`"converters": null` 是設定錯誤；
   用到 `converters` 的設定檔在 1.1.x 以前會因為「不認得的屬性」exit 2。
+
+### nonText（1.4 新增）
+
+| 欄位 | 預設 | 說明 |
+|---|---|---|
+| `uiComponents` | `false` | `true` = 輸入控制項（`TextBox`、`PasswordBox`、`ComboBox`、`CheckBox`、`RadioButton`、`DatePicker`、`NumberBox`、`AutoSuggestBox`，比對名稱後綴）的框線或底色跟周圍的底比，3:1（WCAG 1.4.11） |
+
+- **框線與底色取高的那一個**：條文要的是「認得出這是一個控制項」，兩者有一個夠就算過。兩個都看得懂才比；有一個看不懂、
+  另一個又不夠時記 unresolved（看不懂的那個可能就是認得出控制項的那一個），同一個控制項同一個值只記一次。
+- **看哪個 Style**：元素自己的（`Style=` 或行內），沒有就是那個型別的隱含樣式。模板根寫死的 `Background`／`BorderBrush`
+  勝過 Style 的 Setter（Setter 畫不到根上）；`{TemplateBinding …}` 照 Setter 走。`BorderThickness` 字面是 0、顏色是
+  `Transparent` 都等於沒有。三樣都沒寫的控制項不評（系統主題畫的，跟著作業系統走）。
+- **狀態**：控制項自己的 Style 與模板裡的觸發器各評一次，標籤 `base`／`focus`（`IsFocused`、`IsKeyboardFocused`、
+  `IsKeyboardFocusWithin`）／`trigger`。不評：只有 `IsMouseOver`／`IsPressed` 的（條文不要求看得出來）、巢狀 Style 與巢狀模板裡的
+  （`ItemContainerStyle` 的項目、模板裡 `ToggleButton` 自己的模板 —— 那是別的元素的狀態）、停用態（豁免，計進 `disabledExempt`）。
+- **焦點框**：`FocusVisualStyle="{StaticResource K}"`（元素或 Style 的 Setter）指向的 Style，模板裡第一個 `Stroke`／`BorderBrush`，
+  對著控制項平常的底評；那個元素的 `Margin` 有負值（畫在控制項外面）時對著周圍的底。任何元素都看，不限上面的清單。
+- **報告**：`findings[].component` 是 `border`／`fill`／`focus-visual`（文字是 `null`），`threshold` 3，`isText` false；
+  元素欄寫成 `TextBox border⊕Style[implicit TextBox]/focus`。`summary.uiComponentPairs` 是這樣評的配對數（含在 `pairs` 裡）。
+- ⚠ 預設關：多評一類配對是擴大稽核範圍（1.x 凍結面第 9 面），改預設要等 2.0。`"nonText": null` 是設定錯誤；
+  用到 `nonText` 的設定檔在 1.3.x 以前會因為「不認得的屬性」exit 2。
 
 ## CLI 對應
 

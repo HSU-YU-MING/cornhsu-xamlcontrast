@@ -22,6 +22,10 @@ internal sealed partial class StyleIndex
     {
         public bool Disabled;
         public bool FromTemplate;
+        /// <summary>觸發器不屬於這個 Style 自己（或它自己的模板）：在巢狀的 Style（ItemContainerStyle 之類）或巢狀的模板
+        /// （ComboBox 模板裡 ToggleButton 的模板）裡 —— 那是別的元素的狀態。只有 nonText.uiComponents 看這一欄（1.4）；
+        /// 文字配對照舊全收（改它會動到既有的計數）。</summary>
+        public bool Nested;
         public Dictionary<string, string> Set = new();
         public Dictionary<string, int> SetSrc = new(); // 屬性 → 來源 Style Id
         /// <summary>來自「TargetName=模板根」Setter 的屬性 —— 直接設在根元素上，
@@ -44,6 +48,14 @@ internal sealed partial class StyleIndex
         /// <summary>模板根元素自帶的 Background（CellDeleteBtn 形狀：Style 層沒有
         /// Background setter，真正的底是模板根 Border 的色票 —— 少了它會誤配祖先背景）</summary>
         public string? TemplateRootBg;
+        /// <summary>模板根元素自帶的框線（1.4，nonText.uiComponents）：寫死在模板裡的 BorderBrush／BorderThickness。
+        /// <c>{TemplateBinding …}</c> 不算 —— 那就是宿主自己的值，照 Style 的 Setter 走。</summary>
+        public string? TemplateRootBorder;
+        public string? TemplateRootBorderThickness;
+        /// <summary>這個 Style 當成 FocusVisualStyle 時畫的焦點框（1.4）：模板裡第一個帶 Stroke（Rectangle 之類）或 BorderBrush 的元素。</summary>
+        public string? FocusStroke;
+        /// <summary>那個焦點框的 Margin 有負值：畫在控制項外面（旁邊是周圍的底），不是疊在控制項的底上。</summary>
+        public bool FocusOutside;
     }
 
     internal sealed class Merged
@@ -53,6 +65,9 @@ internal sealed partial class StyleIndex
         public List<State> States = new();
         /// <summary>生效模板的根元素背景（衍生自帶模板時整個換掉，含根背景）</summary>
         public string? TemplateRootBg;
+        /// <summary>生效模板的根元素框線（同 <see cref="TemplateRootBg"/>，衍生自帶模板時整個換掉）</summary>
+        public string? TemplateRootBorder;
+        public string? TemplateRootBorderThickness;
         public required string Label;
         /// <summary>鏈上有任何一層定義在只屬於一個主題的字典檔裡 —— 另一個主題下解析到的是別的 Style（或沒有）</summary>
         public bool SideSpecific;
@@ -239,6 +254,23 @@ internal sealed partial class StyleIndex
         // 模板根＝第一個視覺元素（跳過 <ControlTemplate.Resources> 之類的屬性元素）
         var tmplRoot = tmplEl?.Elements().FirstOrDefault(e => !e.Name.LocalName.Contains('.'));
         rec.TemplateRootBg = tmplRoot is null ? null : XamlBrush.Read(tmplRoot, "Background");
+        // 1.4 的新欄位只看這個 Style 自己的模板：tmplEl 是第一個 ControlTemplate，可能是巢狀 Style（ItemContainerStyle）的
+        // （TemplateRootBg 照舊用 tmplEl —— 改它會動到文字配對的既有計數）
+        var ownTmpl = tmplEl is not null && tmplEl.Ancestors().TakeWhile(a => !ReferenceEquals(a, style)).All(a => a.Name.LocalName != "Style")
+            ? tmplEl : null;
+        var ownRoot = ownTmpl is null ? null : tmplRoot;
+        if (ownRoot is not null)
+        {
+            rec.TemplateRootBorder = NotTemplateBound(XamlBrush.Read(ownRoot, "BorderBrush"));
+            rec.TemplateRootBorderThickness = NotTemplateBound(ownRoot.Attribute("BorderThickness")?.Value);
+        }
+        var focusEl = ownTmpl?.Descendants()
+            .FirstOrDefault(e => NotTemplateBound(XamlBrush.Read(e, "Stroke") ?? XamlBrush.Read(e, "BorderBrush")) is not null);
+        if (focusEl is not null)
+        {
+            rec.FocusStroke = NotTemplateBound(XamlBrush.Read(focusEl, "Stroke") ?? XamlBrush.Read(focusEl, "BorderBrush"));
+            rec.FocusOutside = focusEl.Attribute("Margin")?.Value.Contains('-') == true;
+        }
         // 模板根的名字：規則 13 —— 觸發器裡「TargetName=模板根」的 Setter 等同
         // 直接設在宿主上（Kindling CellDeleteBtn hover 換底、QuillNest RadioButton
         // 選取態換底，共六筆假警報全是這形狀）。指向內部元素的 TargetName 仍不做。
@@ -260,14 +292,21 @@ internal sealed partial class StyleIndex
             }
             if (set.Count == 0) continue;
             var inTmpl = false;
+            var nested = false;
             for (var anc = t.Parent; anc is not null && !ReferenceEquals(anc, style); anc = anc.Parent)
-                if (anc.Name.LocalName == "ControlTemplate") { inTmpl = true; break; }
+            {
+                var ln = anc.Name.LocalName;
+                if (ln == "ControlTemplate") inTmpl = true;
+                if (ln == "Style" || ln.EndsWith("Template", StringComparison.Ordinal) && !ln.Contains('.') && !ReferenceEquals(anc, ownTmpl))
+                    nested = true;
+            }
             // 條件簽名：同條件的狀態之後要跨節點合併
             var cond = CondSignature(t);
             rec.States.Add(new State
             {
                 Disabled = IsDisabledTrigger(t),
                 FromTemplate = inTmpl,
+                Nested = nested,
                 Set = set,
                 RootTargeted = rootTargeted,
                 Cond = cond,
@@ -387,6 +426,8 @@ internal sealed partial class StyleIndex
                     merged.States.Add(s);
                 }
                 merged.TemplateRootBg = m.TemplateRootBg;
+                merged.TemplateRootBorder = m.TemplateRootBorder;
+                merged.TemplateRootBorderThickness = m.TemplateRootBorderThickness;
             }
         }
         foreach (var (p, v) in rec.Setters) merged.Props[p] = (v, rec.Id);
@@ -397,13 +438,19 @@ internal sealed partial class StyleIndex
             {
                 Disabled = s.Disabled,
                 FromTemplate = s.FromTemplate,
+                Nested = s.Nested,
                 Set = new Dictionary<string, string>(s.Set),
                 SetSrc = srcMap,
                 RootTargeted = new HashSet<string>(s.RootTargeted),
                 Cond = s.Cond,
             });
         }
-        if (rec.HasTemplate) merged.TemplateRootBg = rec.TemplateRootBg;
+        if (rec.HasTemplate)
+        {
+            merged.TemplateRootBg = rec.TemplateRootBg;
+            merged.TemplateRootBorder = rec.TemplateRootBorder;
+            merged.TemplateRootBorderThickness = rec.TemplateRootBorderThickness;
+        }
         return merged;
     }
 
@@ -423,6 +470,7 @@ internal sealed partial class StyleIndex
                 {
                     Disabled = s.Disabled,
                     FromTemplate = s.FromTemplate,
+                    Nested = s.Nested,
                     Set = new Dictionary<string, string>(s.Set),
                     SetSrc = new Dictionary<string, int>(s.SetSrc),
                     RootTargeted = new HashSet<string>(s.RootTargeted),
@@ -451,6 +499,7 @@ internal sealed partial class StyleIndex
                 t.FromTemplate = t.FromTemplate && s.FromTemplate;
             }
             t.Disabled = t.Disabled || s.Disabled;
+            t.Nested = t.Nested && s.Nested; // 有一半是自己的狀態就算自己的
         }
         return order.Select(c => byCond[c]).ToList();
     }
@@ -497,6 +546,32 @@ internal sealed partial class StyleIndex
         var merged = MergeChain(rec, seen, "", null);
         merged.States = MergeSameCondition(merged.States);
         return (merged, rec.Id);
+    }
+
+    private static string? NotTemplateBound(string? v)
+        => v is not null && v.TrimStart().StartsWith("{TemplateBinding", StringComparison.Ordinal) ? null : v;
+
+    /// <summary>
+    /// 型別的隱含樣式（無 x:Key、TargetType 是這個型別）合併成鏈 —— 1.4 起只給 nonText.uiComponents 用：
+    /// 輸入框的框線幾乎都寫在主題的隱含樣式裡，不看它就什麼都評不到。查找同 <see cref="ImplicitRootBackground"/>（同檔優先、再全域）。
+    /// ⚠ 文字配對照舊不吃隱含樣式（理由見 ImplicitRootBackground）：這裡不改預設的稽核範圍。
+    /// </summary>
+    public Merged? GetImplicitChain(string typeName, string file, ThemeSide? side = null)
+    {
+        var rec = (_implicitByFile.TryGetValue(file, out var map) && map.TryGetValue(typeName, out var r))
+            ? r : side is { } s ? _implicitBySide[s].GetValueOrDefault(typeName) : _implicitGlobal.GetValueOrDefault(typeName);
+        if (rec is null) return null;
+        var merged = MergeChain(rec, new HashSet<string>(), $"Style[implicit {typeName}]", side);
+        merged.States = MergeSameCondition(merged.States);
+        return merged;
+    }
+
+    /// <summary>FocusVisualStyle 的值（<c>{StaticResource K}</c>）指向的 Style 畫的焦點框顏色（1.4）；
+    /// <c>{x:Null}</c>、找不到的鍵、模板裡沒有框線是 null。</summary>
+    public (string Stroke, bool Outside)? FocusVisualStroke(string? value, string file, ThemeSide? side = null)
+    {
+        if (value is null || ResourceRef().Match(value.Trim()) is not { Success: true } m) return null;
+        return Find(m.Groups["k"].Value, file, side) is { FocusStroke: { } stroke } rec ? (stroke, rec.FocusOutside) : null;
     }
 
     /// <summary>元素套用的 Style（Style="{StaticResource X}" 或 &lt;X.Style&gt; 行內）。

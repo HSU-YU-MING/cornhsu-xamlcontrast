@@ -322,6 +322,19 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - 鍵：底／字寫成 `資源鍵→欄位名`（`ActiveBrush→On`），欄位名而不是色碼 —— C# 裡調暗顏色，鍵不變、worst 抓得到惡化。
 - `summary.converterPairs`（含在 pairs 裡）讓「覆蓋率變高」說得出是哪裡來的。
 
+### 非文字對比（1.4，WCAG 1.4.11，config 的 `nonText.uiComponents`，預設關）
+
+- **預設關是凍結規則**：多評一類配對是擴大稽核範圍（第 9 面），改預設要等 2.0。關的時候 `GradeUiComponent` 根本不呼叫，
+  四個驗證專案與八個公開專案的文字 finding 一筆都不動（2026-11-10 實跑：開與關的文字 finding 完全相同）。
+- **只動新路徑，不動文字路徑**：StyleIndex 新加的 `TemplateRootBorder`、`FocusStroke`、`State.Nested`、`GetImplicitChain` 只給這個檢查用。
+  已知文字路徑也有同樣的毛病（觸發器從整個 Style 的所有後代收，含 `ItemContainerStyle` 與巢狀模板；`tmplEl` 可能是巢狀 Style 的模板），
+  但改它會動到既有計數 —— 要修就當成獨立的稽核語意改進（minor + Upgrading）。
+- **實跑抓到、已修的三個形狀**（別改回去）：(1) CelFlow 的 ComboBox「選取態」其實是下拉項目（`ItemContainerStyle`）的觸發器 → `State.Nested` 不評；
+  (2) wpfui 的 RadioButton 把 `Background` 設成強調色、模板只拿它畫圓點，根是 `Transparent` → 模板根寫死的顏色勝過 Setter；
+  (3) 焦點框 `Margin` 是負的（畫在控制項外面）→ 對著周圍的底，不是控制項的底。
+- **不評 hover／pressed**：WCAG 1.4.11 的 Understanding 不要求這兩個狀態看得出來。條件名去掉型別前綴再比（`UIElement.IsMouseOver`）。
+- 範圍外（README 有寫）：按鈕、三樣顏色都沒寫的控制項（系統主題）、WinUI 的 VisualStateManager。
+
 ### baseline 的鍵
 
 `Baseline.KeyOf` 是 `file|element|fg|bg`，**刻意不含行號**——行號隨編輯漂移，含進去每次

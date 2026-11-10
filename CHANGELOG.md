@@ -33,6 +33,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   the dark theme). With `--baseline` those are new findings; with `--fail-on-new-unresolved` rewrite the baseline once.
 
 ### Added
+- **Non-text contrast for input controls** (opt-in: `{ "nonText": { "uiComponents": true } }`, WCAG 1.4.11, 3:1). The border
+  or fill of a `TextBox`, `PasswordBox`, `ComboBox`, `CheckBox`, `RadioButton`, `DatePicker`, `NumberBox` or `AutoSuggestBox`
+  (by name suffix) is graded against what surrounds it, whichever contrasts more; the control's own style is read, or its
+  type's implicit style. Each state of that style is graded (checked, selected; `focus` for `IsFocused` /
+  `IsKeyboardFocused` / `IsKeyboardFocusWithin`), except hover and pressed, which WCAG doesn't require to be visible, and
+  disabled, which is exempt (`disabledExempt`). A `FocusVisualStyle` rectangle is graded against the control's fill, or
+  the surroundings when drawn outside it. New JSON fields `findings[].component` (`border` / `fill` / `focus-visual`, null
+  for text) and `summary.uiComponentPairs`; `schemaVersion` and `keyVersion` are unchanged, and the new pairs' keys can't
+  collide with text keys. Off by default: grading a new kind of pair widens the audit's scope (interface freeze, ninth
+  surface). Run with it on against the four maintainer apps, the eight public WPF projects and WinUI Gallery: **no text
+  finding changes**; new pairs below 3:1 are base-state borders, e.g. Kindling's `#3A3A3A` on `#1A1A1A` (1.53:1) and
+  HandyControl's light theme (1.32:1). WinUI's `VisualStateManager` states are not read, so Gallery gets none.
 - `--msbuild`: every pair below AA is also printed as an MSBuild diagnostic (`path(line,1): error XC0001: …`), so the
   CLI run from a `.csproj` target puts them in Visual Studio's Error List. `XC0001` error = blocked by the gate (with
   `--baseline`, only new or worse pairs); `XC0002` warning = below AA but not blocked (`--fail-on fail` warns, known

@@ -22,6 +22,7 @@ public class JsonReportContractTests
         ["1.1"] =
         [
             "findings[].colors:Object",
+            "findings[].component:Null",
             "findings[].colors.dark:Object",
             "findings[].colors.dark.bg:String",
             "findings[].colors.dark.fg:String",
@@ -102,7 +103,7 @@ public class JsonReportContractTests
         // 每個欄位一律輸出（沒有值是 null、清單可為空），不再省略；新增 toolVersion、exitCode、summary.failOn／minCoverage／
         // strictPalette（實際生效的 gate）、summary.invalidIgnoreCount、findings[].theme（只屬於一個主題的配對）、
         // findings[].baseline（--baseline 模式下的 known／new／worsened）。
-        // 1.x 只增、不遞增 schemaVersion：1.2 summary.converterPairs；1.3 summary.failOnNewUnresolved、unresolvedSites[].baseline
+        // 1.x 只增、不遞增 schemaVersion：1.2 summary.converterPairs；1.3 summary.failOnNewUnresolved、unresolvedSites[].baseline；1.4 summary.uiComponentPairs、findings[].component
         [6] =
         [
             "exitCode:Number",
@@ -128,6 +129,7 @@ public class JsonReportContractTests
             "schemaVersion:Number",
             "summary.configLoaded:Boolean",
             "summary.converterPairs:Number",
+            "summary.uiComponentPairs:Number",
             "summary.counts.decorative:Number",
             "summary.counts.fail:Number",
             "summary.counts.ok:Number",
@@ -344,7 +346,7 @@ public class JsonReportContractTests
         using var fx = Everything();
         var findings = JsonOf(fx).GetProperty("findings").EnumerateArray().ToList();
         string[] fields = ["file", "line", "element", "fg", "bg", "ratioDark", "ratioLight", "colors", "threshold", "category",
-                           "symmetry", "isText", "isLargeText", "fontSize", "theme", "baseline"];
+                           "symmetry", "isText", "isLargeText", "fontSize", "theme", "component", "baseline"];
         foreach (var f in findings)
         {
             Assert.Equal(fields, f.EnumerateObject().Select(p => p.Name));
