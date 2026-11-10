@@ -33,6 +33,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   the dark theme). With `--baseline` those are new findings; with `--fail-on-new-unresolved` rewrite the baseline once.
 
 ### Added
+- `--msbuild`: every pair below AA is also printed as an MSBuild diagnostic (`path(line,1): error XC0001: …`), so the
+  CLI run from a `.csproj` target puts them in Visual Studio's Error List. `XC0001` error = blocked by the gate (with
+  `--baseline`, only new or worse pairs); `XC0002` warning = below AA but not blocked (`--fail-on fail` warns, known
+  debt, `--write-baseline`); `XC0003` error = untrustworthy result (exit 3). The README has the `.csproj` snippet;
+  checked with a real `dotnet build` of the offline demo: three `XC0001` errors with their file and line, build failed.
 - `{ThemeResource Key}` resolves through the palette like `{DynamicResource Key}` — in element attributes, styles
   (`Style="{ThemeResource …}"`), palette dictionaries and icon-font lookups. About 134,000 public XAML files on GitHub
   use `{ThemeResource` (code search, 2026-11-10).

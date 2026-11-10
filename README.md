@@ -243,6 +243,7 @@ xamlcontrast src/MyApp --fail-on fail              # looser: only pairs below th
 xamlcontrast src/MyApp --sarif audit.sarif         # GitHub code scanning format
 xamlcontrast src/MyApp --md report.md              # Markdown report (for a PR comment)
 xamlcontrast src/MyApp --html report.html          # self-contained HTML report with colour swatches
+xamlcontrast src/MyApp --msbuild                   # also as MSBuild diagnostics (Visual Studio Error List)
 ```
 
 Exit codes:
@@ -321,6 +322,32 @@ that wraps onto a second line) does not suppress anything and is warned about th
 (`summary.invalidIgnores`). On a container, the marker covers everything inside it — its elements
 and the `Style` definitions in its `Resources`. Suppressed pairs are counted in
 `summary.suppressed`; nothing disappears silently.
+
+### Visual Studio Error List (MSBuild)
+
+`--msbuild` also prints every pair below AA as a standard MSBuild diagnostic, so running the CLI in your build puts
+them in Visual Studio's Error List — double-click one to jump to the line. No extension to install. Add this to the
+app's `.csproj` (the tool must be on `PATH`, or use `dotnet xamlcontrast` with a local tool manifest):
+
+```xml
+<Target Name="XamlContrast" AfterTargets="Build">
+  <Exec Command="xamlcontrast &quot;$(MSBuildProjectDirectory)&quot; --msbuild" IgnoreExitCode="true" StandardOutputImportance="low">
+    <Output TaskParameter="ExitCode" PropertyName="XamlContrastExitCode" />
+  </Exec>
+  <Error Condition="'$(XamlContrastExitCode)' == '2'" Text="XamlContrast could not run (exit 2) — see the build output" />
+</Target>
+```
+
+| Code | Kind | Means |
+|---|---|---|
+| `XC0001` | error | A pair the gate blocks: any `fail` or `warn` by default (`fail` only with `--fail-on fail`); with `--baseline`, only new or worse pairs |
+| `XC0002` | warning | Below AA but not blocked this run: a `warn` under `--fail-on fail`, known debt in the baseline, everything under `--write-baseline` |
+| `XC0003` | error | The result can't be trusted (exit 3) — otherwise the build would pass while the tool saw nothing |
+
+The build fails when there is an error, and passes with warnings. A usage or config error (exit 2) prints no
+diagnostic, which is what the `<Error>` line is for. Other flags (`--baseline`, `--fail-on`, `--config`) work as
+usual; add them to the `Command`. `IgnoreExitCode` keeps MSBuild from adding a second, generic "exited with code 1"
+error, and `StandardOutputImportance="low"` hides the console report from the normal build output.
 
 ### GitHub Action
 

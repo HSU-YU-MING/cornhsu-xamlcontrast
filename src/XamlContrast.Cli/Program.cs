@@ -24,6 +24,7 @@ string? baselinePath = null;
 string? writeBaselinePath = null;
 string? root = null;
 var doubleDash = false;
+var msbuild = false;      // --msbuild（1.4）：另外印 MSBuild 標準診斷格式，給 Visual Studio 的錯誤清單（Report.ToMsBuild）
 var statsPreview = false; // --stats-preview：印出這次會送的匿名統計、什麼都不送（Stats.cs）
 // --push（實驗性）：上傳既有的報告，不稽核
 string? pushPath = null;
@@ -40,6 +41,7 @@ for (var i = 0; i < args.Length; i++)
         case "--strict-palette": strictPalette = true; break;
         case "--fail-on-new-unresolved": failOnNewUnresolvedFlag = true; break;
         case "--stats-preview": statsPreview = true; break;
+        case "--msbuild": msbuild = true; break;
         case "--min-coverage":
             if (i + 1 >= args.Length ||
                 !double.TryParse(args[i + 1], System.Globalization.NumberStyles.Float,
@@ -134,7 +136,7 @@ if (pushPath is not null)
         (failOnFlag is not null, "--fail-on"), (minCoverage is not null, "--min-coverage"),
         (strictPalette, "--strict-palette"), (failOnNewUnresolvedFlag, "--fail-on-new-unresolved"),
         (showOk, "--show-ok"), (showUnresolved, "--show-unresolved"),
-        (statsPreview, "--stats-preview"),
+        (statsPreview, "--stats-preview"), (msbuild, "--msbuild"),
     }.Where(x => x.Given).Select(x => x.Name).ToArray();
     if (auditInputs.Length > 0)
     {
@@ -282,6 +284,9 @@ Baseline.ComparisonResult? cmp = null; // --baseline 模式的比對結果（JSO
 // 先判定、再寫輸出檔：JSON 帶退出碼與 baseline 判定、--md 標 PASS/FAIL，都得先知道結論。
 // 判定（0／1／3）只看稽核結果；之後任何一個輸出檔寫不出去 → 2（那時寫出去的 JSON 記的是判定）
 var exitCode = DecideExit();
+
+// --msbuild：判定之後才印 —— 哪一筆是 error（這次 gate 擋的、baseline 的新增或惡化）要等判定與 baseline 比對完才知道
+if (msbuild) Console.Write(Report.ToMsBuild(result, root, gateWarn, cmp?.Status, writeBaselinePath is not null, exitCode));
 
 var context = new ReportContext
 {
@@ -511,6 +516,10 @@ static void PrintUsage(TextWriter w)
           --fail-on-new-unresolved with --baseline: also fail when there are more pairs the tool
                                    could NOT resolve than the baseline recorded (a new {Binding},
                                    a key missing from the palette)
+          --msbuild                also print every pair below AA as an MSBuild diagnostic
+                                   (path(line,1): error XC0001 / warning XC0002), so a build
+                                   step puts them in the Visual Studio Error List; exit 3 adds
+                                   error XC0003
           --show-ok                list passing pairs, grouped
           --show-unresolved        list every pair the tool could NOT resolve, with
                                    file:line, reason and the offending value/key
