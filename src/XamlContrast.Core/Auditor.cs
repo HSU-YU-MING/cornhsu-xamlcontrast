@@ -253,6 +253,11 @@ public sealed partial class Auditor
         view = pal.Clone(); // 執行期才知道的鍵在哪個主題都一樣不知道
         foreach (var (k, (d, l)) in pal.Entries)
             view.Entries[k] = side == ThemeSide.Dark ? (d, d) : (l, l);
+        // Color 表也只看那個主題（1.4 起 brush 裡直接寫的 Color 鍵會查它；不收成一側的話，單一主題視圖會拿到另一個主題的 Color）
+        var colours = side == ThemeSide.Dark ? pal.DarkColors : pal.LightColors;
+        view.DarkColors.Clear();
+        view.LightColors.Clear();
+        foreach (var (k, v) in colours) { view.DarkColors[k] = v; view.LightColors[k] = v; }
         return _sideViews[(pal, side)] = view;
     }
 

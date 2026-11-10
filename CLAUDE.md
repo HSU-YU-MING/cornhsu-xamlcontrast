@@ -276,8 +276,16 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   brush 引用 `SystemAccentColor…` 的鍵放 `runtime`（使用者的強調色，執行期才知道），不給值。高對比不評。
   授權：MIT，`THIRD-PARTY-NOTICES.md` 由 Directory.Build.props 打進套件 —— 換來源或加資料時要一起改。
   WinUI Gallery（2026-11-10，`6de91fe`）實測：配對 49 → 59、unknown-palette-key 172 → 90，原本的 finding 比值與分類都不變。
-  剩下的大宗：頁面底色來自視窗（no-ancestor-background）、`<StaticResource x:Key ResourceKey>` 別名（還不認）、
-  inline brush 用 Color 鍵（`TextFillColorPrimary`）。
+  剩下的大宗：頁面底色來自視窗（no-ancestor-background；靜態不可知，請使用者設 rootBackground）。
+- **別名與 brush 裡的 Color 鍵（1.4）**：`<StaticResource x:Key ResourceKey>` 收進 `Palette.Aliases`（依主題分側），
+  在偵測最後、WinUI 預設色補進來之後才解（`ResolveAliases`，可以串；找不到 → MissingRefs，點名指向的鍵）。
+  `CollectAliases` 另外收一次：只放別名、沒有 brush 的字典，合併式色盤會放棄，別名不能跟著丟。畫面的區域別名在 `LocalOverridesOf`。
+  brush 裡的 Color 鍵：`ColorResolver` 找不到 brush 鍵時查 `DarkColors`／`LightColors`；⚠ `Auditor.SideView`
+  要把 Color 表也收成那一側，不然單一主題視圖會拿到另一個主題的 Color。
+- **外部專案回歸（2026-11-10）**：八個公開 WPF 專案（2026-08-10 實查那批）＋ WinUI Gallery，1.3.0 對 1.4 逐筆比對，
+  沒有任何既有 finding 消失或改變；新增的 fail 抽查兩筆（MaterialDesign 卡片上的工具列字 1.55:1、wpfui 淺藍底白字 2.63:1）
+  都對得上原始碼的色值。做法：sparse clone 只拿 `*.xaml`、新舊兩版各跑 `--json`、逐筆比 findings 與 unresolvedSites。
+  ⚠ `verify-baselines.ps1` 只守四個自家專案 —— 動到色盤偵測或解析規則時，這一輪外部比對值得再跑。
 - **Application 含子類別**（`PaletteDetector.RootKindOf`）：根元素名稱以 Application 結尾（Prism 的 `PrismApplication`），
   或根元素底下有 `<…Application.Resources>`。只認 `Application` 的話，Prism 的 App.xaml 被當成畫面、全域鍵全變成區域鍵。
 - **元素 Opacity 是群組**（`Auditor.Backdrop`／`OpacityGroup`）：WPF 的 Opacity 把整棵子樹畫成一層再疊。

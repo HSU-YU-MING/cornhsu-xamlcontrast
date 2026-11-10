@@ -26,6 +26,13 @@ public sealed class Palette
     /// 解析成 unknown-palette-key，點名的是找不到的 Color（外部函式庫的 MahApps.Colors.Accent 之類）。</summary>
     internal Dictionary<string, string> MissingRefs { get; } = new();
 
+    /// <summary>
+    /// 資源別名（1.4）：<c>&lt;StaticResource x:Key="A" ResourceKey="B"/&gt;</c>（Dynamic／ThemeResource 同）—— A 就是 B。
+    /// 鍵 → 深淺兩個主題各自指向的鍵（只在一個主題定義的那一側是 null）。偵測最後才解（<c>PaletteDetector.ResolveAliases</c>），
+    /// 因為指向的常是 WinUI 的框架預設主題色（WinUI Gallery：<c>GalleryBackgroundBrush</c> → <c>SolidBackgroundFillColorBaseBrush</c>）。
+    /// </summary>
+    internal Dictionary<string, (string? Dark, string? Light)> Aliases { get; } = new();
+
     /// <summary>複製一份（色票、執行期鍵、區域鍵、Color 表），給各檔的視圖改。</summary>
     internal Palette Clone()
     {
@@ -36,6 +43,7 @@ public sealed class Palette
         foreach (var (k, v) in DarkColors) p.DarkColors[k] = v;
         foreach (var (k, v) in LightColors) p.LightColors[k] = v;
         foreach (var (k, v) in MissingRefs) p.MissingRefs[k] = v;
+        foreach (var (k, v) in Aliases) p.Aliases[k] = v;
         return p;
     }
 }

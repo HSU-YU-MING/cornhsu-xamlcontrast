@@ -355,11 +355,12 @@ public static partial class PaletteDetector
         if (!IsScreenFile(file)) return overrides;
         // 畫面自己的 ThemeDictionaries（WinUI，1.4）：深淺各用自己那一份。⚠ 不拆的話整份檔一起解，同鍵先出現的贏 ——
         //   深色欄拿到 Default／Light 那一份的值，是編出來的比值（WinUI Gallery 的 XamlResourcesPage 實測抓到）
-        if (ReadTextOrNull(file) is { } text && ThemeDictionarySections(text) is { } td)
+        if (ReadTextOrNull(file) is not { } text) return overrides;
+        if (ThemeDictionarySections(text) is { } td)
         {
-            var neutral = LocalOverridesOf(ParseColorDefsText(td.Neutral, true), ParseBrushDefsText(td.Neutral, true), global);
-            var dark = td.Dark is null ? null : LocalOverridesOf(ParseColorDefsText(td.Dark, true), ParseBrushDefsText(td.Dark, true), global);
-            var light = td.Light is null ? null : LocalOverridesOf(ParseColorDefsText(td.Light, true), ParseBrushDefsText(td.Light, true), global);
+            var neutral = LocalOverridesOf(td.Neutral, global);
+            var dark = td.Dark is null ? null : LocalOverridesOf(td.Dark, global);
+            var light = td.Light is null ? null : LocalOverridesOf(td.Light, global);
             foreach (var (k, v) in neutral) overrides[k] = v;
             foreach (var k in (dark?.Keys ?? Enumerable.Empty<string>()).Concat(light?.Keys ?? Enumerable.Empty<string>()).Distinct())
             {
@@ -370,15 +371,15 @@ public static partial class PaletteDetector
             }
             return overrides;
         }
-        return LocalOverridesOf(ParseColorDefs(file, keepInvalid: true), ParseBrushDefs(file, keepInvalid: true), global);
+        return LocalOverridesOf(text, global);
     }
 
-    /// <summary>一段區域定義（Color 表＋brush 表）→ 區域 brush。字面色深淺同值；引用 Color 的逐側解析。</summary>
-    private static Dictionary<string, LocalBrush> LocalOverridesOf(
-        Dictionary<string, string> own, (Dictionary<string, string> Literal, Dictionary<string, string> Ref) brushes, Palette global)
+    /// <summary>一段區域定義（Color 表＋brush 表＋別名）→ 區域 brush。字面色深淺同值；引用 Color 的逐側解析。</summary>
+    private static Dictionary<string, LocalBrush> LocalOverridesOf(string text, Palette global)
     {
         var overrides = new Dictionary<string, LocalBrush>();
-        var (lit, refs) = brushes;
+        var own = ParseColorDefsText(text, keepInvalid: true);
+        var (lit, refs) = ParseBrushDefsText(text, keepInvalid: true);
         foreach (var (k, v) in lit) overrides[k] = v is InvalidValue ? new LocalBrush(null, null) : new LocalBrush(v, v);
         foreach (var (k, c) in refs)
         {
@@ -391,7 +392,103 @@ public static partial class PaletteDetector
                 d is null || l is null ? new LocalBrush(null, null, c.Split('@')[0]) :         // 找不到那個 Color（任一主題）
                 new LocalBrush(d, l);
         }
+        // 別名（1.4）：先找這個畫面自己的，再找全域的 brush 與 Color（全域在稽核時已含框架預設色與解好的別名）
+        foreach (var (k, target) in ParseAliasDefsText(text))
+        {
+            if (overrides.ContainsKey(k)) continue;
+            overrides[k] =
+                overrides.TryGetValue(target, out var ownTarget) ? ownTarget :
+                global.Entries.TryGetValue(target, out var g) ? new LocalBrush(g.Dark, g.Light) :
+                global.DarkColors.GetValueOrDefault(target) is { } cd && cd.StartsWith('#') &&
+                global.LightColors.GetValueOrDefault(target) is { } cl && cl.StartsWith('#') ? new LocalBrush(cd, cl) :
+                global.RuntimeKeys.Contains(target) ? new LocalBrush(null, null) :                 // 指向執行期才知道的鍵
+                new LocalBrush(null, null, target);                                                 // 找不到：點名它指向的鍵
+        }
         return overrides;
+    }
+
+    /// <summary>
+    /// 資源別名（1.4）：<c>&lt;StaticResource x:Key="A" ResourceKey="B"/&gt;</c>（DynamicResource、ThemeResource 元素同）。
+    /// WinUI 常用它把自己的鍵指到框架的主題資源；WPF 也有人這樣寫。回傳 A → B。
+    /// </summary>
+    internal static Dictionary<string, string> ParseAliasDefsText(string text)
+    {
+        var aliases = new Dictionary<string, string>();
+        foreach (Match m in AliasElement().Matches(text))
+        {
+            var attrs = m.Groups["attrs"].Value;
+            if (Attr(KeyAttr(), attrs) is { } key && Attr(ResourceKeyAttr(), attrs) is { } target && key != target)
+                aliases.TryAdd(key, target);
+        }
+        return aliases;
+    }
+
+    [GeneratedRegex(@"<(?:\w+:)?(?:Static|Dynamic|Theme)Resource\b(?<attrs>[^>]*?)/?>")]
+    private static partial Regex AliasElement();
+
+    [GeneratedRegex("""\bResourceKey\s*=\s*"(?<v>[^"{}]+)"\s*""")]
+    private static partial Regex ResourceKeyAttr();
+
+    /// <summary>專案字典（不含畫面檔、測試素材）裡的別名，依主題分側：主題檔各佔自己那側、ThemeDictionaries 依 x:Key、中性的兩側都給。</summary>
+    internal static Dictionary<string, (string? Dark, string? Light)> CollectAliases(string root)
+    {
+        var dark = new Dictionary<string, string>();
+        var light = new Dictionary<string, string>();
+        var neutral = new List<Dictionary<string, string>>();
+        foreach (var f in EnumerateFiles(root, "*.xaml"))
+        {
+            var rel = Path.GetRelativePath(root, f);
+            if (LooksLikeFixture(rel) || IsScreenFile(f) || ReadTextOrNull(f) is not { } text) continue;
+            var hint = GroupHint(rel);
+            void Add(Dictionary<string, string> aliases, ThemeSide? side)
+            {
+                if (side == ThemeSide.Dark) foreach (var (k, t) in aliases) dark.TryAdd(k, t);
+                else if (side == ThemeSide.Light) foreach (var (k, t) in aliases) light.TryAdd(k, t);
+                else neutral.Add(aliases);
+            }
+            if (ThemeDictionarySections(text) is { } td)
+            {
+                Add(ParseAliasDefsText(td.Neutral), hint);
+                if (td.Dark is not null) Add(ParseAliasDefsText(td.Dark), ThemeSide.Dark);
+                if (td.Light is not null) Add(ParseAliasDefsText(td.Light), ThemeSide.Light);
+            }
+            else Add(ParseAliasDefsText(text), hint);
+        }
+        foreach (var aliases in neutral) foreach (var (k, t) in aliases) { dark.TryAdd(k, t); light.TryAdd(k, t); }
+        return dark.Keys.Concat(light.Keys).Distinct()
+            .ToDictionary(k => k, k => (dark.GetValueOrDefault(k), light.GetValueOrDefault(k)));
+    }
+
+    /// <summary>
+    /// 把色盤裡的別名解成色票（1.4）。在偵測最後做（框架預設主題色補進來之後）：別名常指向框架的鍵。
+    /// 別名可以串（A → B → C），一輪解不完就再一輪。解得出來的進 <see cref="Palette.Entries"/>；
+    /// 指向執行期才知道的鍵 → 跟著執行期才知道；找不到 → unknown-palette-key，點名它指向的鍵。
+    /// 只在一個主題定義的別名，另一個主題沒有值：不拿另一個主題的補，整個算找不到。
+    /// </summary>
+    internal static void ResolveAliases(Palette pal)
+    {
+        string? Lookup(string? target, bool dark)
+        {
+            if (target is null) return null;
+            if (pal.Entries.TryGetValue(target, out var e)) return dark ? e.Dark : e.Light;
+            var c = (dark ? pal.DarkColors : pal.LightColors).GetValueOrDefault(target);
+            return c is not null && c.StartsWith('#') ? c : null;
+        }
+        bool Done(string k) => pal.Entries.ContainsKey(k) || pal.RuntimeKeys.Contains(k);
+        for (var pass = 0; pass < 16; pass++)
+        {
+            var changed = false;
+            foreach (var (k, (td, tl)) in pal.Aliases)
+            {
+                if (Done(k)) continue;
+                if (Lookup(td, true) is { } d && Lookup(tl, false) is { } l) { pal.Entries[k] = (d, l); changed = true; }
+                else if (td is not null && pal.RuntimeKeys.Contains(td) || tl is not null && pal.RuntimeKeys.Contains(tl))
+                { pal.RuntimeKeys.Add(k); changed = true; }
+            }
+            if (!changed) break;
+        }
+        foreach (var (k, (td, tl)) in pal.Aliases)
+            if (!Done(k)) pal.MissingRefs.TryAdd(k, td ?? tl!);
     }
 
     /// <summary>色盤來源檔 → 不算進 files 的「字典檔」（只留根元素是 ResourceDictionary 的；照樣稽核）。</summary>
@@ -633,6 +730,8 @@ public static partial class PaletteDetector
         // 畫面檔（Window／UserControl…）的區域定義另成最低一層，見下面「區域層」
         var localColorFiles = new List<(string File, Dictionary<string, string> Colors)>();
         var localBrushFiles = new List<(string File, Dictionary<string, string> Lit, Dictionary<string, string> Ref)>();
+        // 別名（1.4）：<StaticResource x:Key="A" ResourceKey="B"/>。跟 brush 一樣依主題分側；偵測最後才解（ResolveAliases）
+        var aliasFiles = new List<(Dictionary<string, string> Aliases, bool D, bool L)>();
 
         foreach (var f in EnumerateFiles(root, "*.xaml"))
         {
@@ -642,10 +741,12 @@ public static partial class PaletteDetector
             var hint = GroupHint(rel); // 寬鬆的分組提示，見 GroupHint
             var isDark = hint == ThemeSide.Dark;
             var isLight = hint == ThemeSide.Light;
+            var screen = IsScreenFile(f);
+            var fileText = ReadTextOrNull(f);
 
             // WinUI／UWP 的 ThemeDictionaries（1.4）：一個檔裡分好的深淺兩份字典，各佔自己那側；其他部分照舊依檔名分組。
-            // 只在字典檔與 App.xaml 讀（畫面檔的區域定義是另一層，那裡的 ThemeDictionaries 不拆，照舊）
-            if (!IsScreenFile(f) && ReadTextOrNull(f) is { } text && ThemeDictionarySections(text) is { } td)
+            // 只在字典檔與 App.xaml 讀（畫面檔的區域定義另成一層，在 LocalOverrides 拆）
+            if (!screen && fileText is { } text && ThemeDictionarySections(text) is { } td)
             {
                 AddSection(td.Neutral, isDark, isLight);
                 if (td.Dark is not null) AddSection(td.Dark, true, false);
@@ -658,19 +759,21 @@ public static partial class PaletteDetector
                     var (sectionLit, sectionRefs) = ParseBrushDefsText(section, keepInvalid: true);
                     if (sectionColors.Count > 0) colorFiles.Add((f, sectionColors, d, l));
                     if (sectionLit.Count + sectionRefs.Count > 0) brushFiles.Add((f, sectionLit, sectionRefs, d, l));
+                    if (ParseAliasDefsText(section) is { Count: > 0 } sectionAliases) aliasFiles.Add((sectionAliases, d, l));
                 }
             }
 
             var colors = ParseColorDefs(f, keepInvalid: true);
             var (lit, refs) = ParseBrushDefs(f, keepInvalid: true);
-            if (IsScreenFile(f))
+            if (screen)
             {
                 if (colors.Count > 0) localColorFiles.Add((f, colors));
                 if (lit.Count + refs.Count > 0) localBrushFiles.Add((f, lit, refs));
-                continue;
+                continue; // 畫面的區域別名在 LocalOverrides 解
             }
             if (colors.Count > 0) colorFiles.Add((f, colors, isDark, isLight));
             if (lit.Count + refs.Count > 0) brushFiles.Add((f, lit, refs, isDark, isLight));
+            if (fileText is not null && ParseAliasDefsText(fileText) is { Count: > 0 } aliases) aliasFiles.Add((aliases, isDark, isLight));
         }
         if (colorFiles.Count + brushFiles.Count + localColorFiles.Count + localBrushFiles.Count == 0) return null;
         IEnumerable<string> SourceFiles() => colorFiles.Select(c => c.File).Concat(brushFiles.Select(b => b.File))
@@ -763,6 +866,14 @@ public static partial class PaletteDetector
             pal.Entries.TryAdd(k, (d ?? l!, l ?? d!)); // 缺的一側（沒有定義）退回另一側
         }
         foreach (var (k, v) in localEntries) pal.Entries.TryAdd(k, v);
+        // 別名：主題檔先進（各佔自己那側）、中性檔補洞兩側都給 —— 跟 brush 表同一個先後。值留到偵測最後才解（ResolveAliases）
+        var aliasDark = new Dictionary<string, string>();
+        var aliasLight = new Dictionary<string, string>();
+        foreach (var a in aliasFiles.Where(a => a.D && !a.L)) foreach (var (k, t) in a.Aliases) aliasDark.TryAdd(k, t);
+        foreach (var a in aliasFiles.Where(a => a.L && !a.D)) foreach (var (k, t) in a.Aliases) aliasLight.TryAdd(k, t);
+        foreach (var a in aliasFiles.Where(a => !(a.D ^ a.L))) foreach (var (k, t) in a.Aliases) { aliasDark.TryAdd(k, t); aliasLight.TryAdd(k, t); }
+        foreach (var k in aliasDark.Keys.Concat(aliasLight.Keys).Distinct())
+            if (!pal.Entries.ContainsKey(k) && !invalid.Contains(k)) pal.Aliases[k] = (aliasDark.GetValueOrDefault(k), aliasLight.GetValueOrDefault(k));
         foreach (var (k, v) in localOnly) pal.LocalOnly[k] = v;
         foreach (var (k, v) in darkColors) pal.DarkColors[k] = v;
         foreach (var (k, v) in lightColors) pal.LightColors[k] = v;
@@ -967,8 +1078,15 @@ public static partial class PaletteDetector
         var d = DetectCore(root, config, readErrors);
         d.ReadErrors.AddRange(readErrors);
         FillColorTables(root, d);
+        // 別名也收沒有走合併式色盤的模式（只放別名、沒有 brush 的字典 —— WinUI 很常見 —— 合併式色盤會放棄）。
+        // 要在框架預設色之前收：專案用別名定義的鍵優先於框架的同名鍵
+        foreach (var (k, v) in CollectAliases(root))
+            if (!d.Palette.Entries.ContainsKey(k) && !d.DroppedKeys.Contains(k)) d.Palette.Aliases.TryAdd(k, v);
         // WinUI／UWP 專案:框架的預設主題色當最底層(專案自己定義的優先)。WPF 專案不碰(見 WinUiTheme)
         WinUiTheme.Apply(root, d);
+        // 別名最後解：它常指向框架的預設主題色（上一步才補進來）
+        ResolveAliases(d.Palette);
+        foreach (var scope in d.Scopes ?? []) ResolveAliases(scope.Palette);
         return d;
     }
 

@@ -26,6 +26,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   (only projects that use `{ThemeResource`). Expect more graded pairs and, because the palette now has real dark and
   light values, findings on hard-coded colours may change their `symmetry` from `single-theme` to `both-low` (same ratios).
   Keys that follow the user's accent colour stay `bound-or-gradient`.
+- **Resource aliases and colour keys inside brushes are followed** (WPF and WinUI). `<StaticResource x:Key="A" ResourceKey="B"/>`
+  and `<SolidColorBrush Color="{DynamicResource SomeColor}"/>` used to be `unknown-palette-key`; libraries such as
+  MaterialDesignInXamlToolkit define most of their theme this way. Expect more graded pairs — and real fails that
+  were hiding behind `unknown-palette-key` (MaterialDesign's own demo: the toolbar item colour on a card is 1.55:1 in
+  the dark theme). With `--baseline` those are new findings; with `--fail-on-new-unresolved` rewrite the baseline once.
 
 ### Added
 - `{ThemeResource Key}` resolves through the palette like `{DynamicResource Key}` — in element attributes, styles
@@ -39,6 +44,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   single theme, `bound-or-gradient` drops from 189 to 17 and those sites now name the key they need; most of them
   (172 sites, 34 keys such as `TextFillColorSecondaryBrush`) are WinUI's built-in Fluent theme resources, which a
   project doesn't define — so graded pairs only go from 48 to 49. The other 48 findings are unchanged.
+- Resource aliases — `<StaticResource x:Key="A" ResourceKey="B"/>`, and the `DynamicResource` / `ThemeResource` elements —
+  in dictionaries (per theme, `ThemeDictionaries` included) and in a page's own resources. Followed through chains and
+  after WinUI's defaults are filled in; an alias whose target isn't found is `unknown-palette-key` naming the target.
+- A colour key inside a brush (`<SolidColorBrush Color="{DynamicResource FgColor}"/>`) resolves through the dictionaries'
+  `Color` definitions, dark and light separately (a single-theme view sees only its own theme's colours).
+- Checked against the eight public WPF projects of the 2026-08-10 field check (MahApps.Metro, ScreenToGif, Playnite,
+  Flow.Launcher, HandyControl, MaterialDesignInXamlToolkit, wpfui, ILSpy — 2,065 XAML files, 2026-11-10 heads) and
+  WinUI Gallery, 1.3.0 against this release: **no earlier finding is lost or changes**. `x:Static` and the WinUI support
+  change nothing in the WPF projects; aliases and colour keys add graded pairs — MaterialDesignInXamlToolkit 162 → 293
+  (`unknown-palette-key` 355 → 21), wpfui 50 → 59, WinUI Gallery 48 → 111. The four maintainer projects are unchanged.
 - WinUI's default theme resources (`WinUiTheme.json`, embedded): 557 brushes and 135 colours with their dark and light
   default values, from `Common_themeresources_any.xaml` and `generic.xaml` in microsoft/microsoft-ui-xaml (MIT —
   `THIRD-PARTY-NOTICES.md`, now packed with the tool). Filled in as the lowest layer for projects that use

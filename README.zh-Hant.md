@@ -150,7 +150,11 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
    `SystemControl…`，共 557 個 brush）在專案自己沒定義時，用框架的深淺預設值補上；專案自己定義的一律優先。跟著使用者
    Windows 強調色走的鍵（`AccentFillColorDefaultBrush`、`SystemAccentColor…`）不猜，照舊是 `bound-or-gradient`。
    資料來自 microsoft/microsoft-ui-xaml（MIT，見 THIRD-PARTY-NOTICES.md），色盤那一行會點名是哪個 commit。WPF 專案不受影響。
-   頁面的底色通常來自視窗（Mica 或預設的頁面 brush），工具看不到 —— 那一層請設 `rootBackground`
+   頁面的底色通常來自視窗（Mica 或預設的頁面 brush），工具看不到 —— 那一層請設 `rootBackground`。
+   **別名** —— `<StaticResource x:Key="A" ResourceKey="B"/>`（`DynamicResource`／`ThemeResource` 元素同）—— 依主題各自
+   追下去、可以串，在 WinUI 預設色補進來之後才解，所以指向框架鍵的別名也解得出來；指向的鍵找不到時是
+   `unknown-palette-key`、點名那個鍵。**brush 裡直接寫 Color 鍵**（`<SolidColorBrush Color="{DynamicResource FgColor}"/>`）
+   依主題到字典的 `Color` 定義裡查
 2. **主題配對** —— 一個 Dark 檔 × 一個 Light 檔，鍵集重疊 ≥ 50%
 3. **C# 真相源** —— 三元組陣列，**提供兩套主題的來源優先於只有一套的**
 4. **合併字典・單一主題** —— 同 (1) 的聯集，但每個鍵只有一套值

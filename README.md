@@ -203,6 +203,10 @@ tried in this order, and the one that ran is always named on the first line of t
    (MIT, see THIRD-PARTY-NOTICES.md); the commit is named on the palette line. WPF projects are not affected.
    A page's background usually comes from the window (Mica or the default page brush), which the tool can't see —
    set `rootBackground` for that.
+   **Aliases** — `<StaticResource x:Key="A" ResourceKey="B"/>` (also the `DynamicResource` / `ThemeResource` elements) —
+   are followed per theme, through chains, and after WinUI's defaults are in, so an alias to a framework key resolves;
+   one whose target can't be found is `unknown-palette-key` naming the target. A **colour key inside a brush**
+   (`<SolidColorBrush Color="{DynamicResource FgColor}"/>`) is looked up in the dictionaries' `Color` definitions, per theme.
 2. **Theme pair** — one `DarkTheme.xaml` × one `LightTheme.xaml`, keys overlapping ≥ 50%
 3. **C# source of truth** — `("Key", "#dark", "#light")` tuple arrays
    (beats a single-theme XAML copy: a source that provides both themes wins)

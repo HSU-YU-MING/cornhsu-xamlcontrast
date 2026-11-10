@@ -74,7 +74,7 @@ internal static class WinUiTheme
     internal static int Augment(Palette pal, IReadOnlySet<string> dropped, Data data)
     {
         bool ProjectHas(string k) => pal.Entries.ContainsKey(k) || pal.RuntimeKeys.Contains(k) || pal.LocalOnly.ContainsKey(k)
-                                     || pal.MissingRefs.ContainsKey(k) || dropped.Contains(k);
+                                     || pal.MissingRefs.ContainsKey(k) || pal.Aliases.ContainsKey(k) || dropped.Contains(k);
         var added = 0;
         foreach (var (k, v) in data.Entries)
         {
