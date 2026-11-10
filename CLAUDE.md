@@ -262,7 +262,10 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   是 C# 色盤的靜態複本，兩個主題共用。
 - **WinUI／UWP 的 ThemeDictionaries（1.4，`PaletteDetector.ThemeDictionarySections`）**：同一個檔裡依 x:Key 分主題，
   不靠檔名。`Dark`（缺就用 `Default`）進深色側、`Light`（缺就用 `Default`）進淺色側，`HighContrast…` 不評；
-  ThemeDictionaries 以外的部分照舊依檔名分組。只拆字典檔與 App.xaml，畫面檔的區域定義不拆。`{ThemeResource K}`
+  ThemeDictionaries 以外的部分照舊依檔名分組。字典檔與 App.xaml 在 `MergedXamlPalette` 拆；畫面檔自己的 ThemeDictionaries
+  在 `LocalOverrides` 拆（只在那個畫面看得到）。⚠ 第一版畫面檔不拆，整份一起解、同鍵先出現的贏 —— 深色欄拿到 Default 那一份，
+  比值是編的（WinUI Gallery 的 XamlResourcesPage 實跑抓到；那頁深淺剛好互換、比值相同，光看數字看不出錯）。
+  只有一個主題定義的區域鍵，另一個主題記讀不懂，不拿另一個主題的值補。`{ThemeResource K}`
   在五個地方跟 Dynamic／StaticResource 並列（ColorResolver、PaletteDetector、StyleIndex、Auditor 的 Style 鍵、IconFonts），
   新增解析資源引用的地方要一起認。⚠ 四個驗證專案都是 WPF，測不到這條；動它要靠 `ThemeDictionaryTests`。
 - **Application 含子類別**（`PaletteDetector.RootKindOf`）：根元素名稱以 Application 結尾（Prism 的 `PrismApplication`），

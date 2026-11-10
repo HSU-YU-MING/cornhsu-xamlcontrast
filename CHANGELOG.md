@@ -29,8 +29,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   use `{ThemeResource` (code search, 2026-11-10).
 - `<ResourceDictionary.ThemeDictionaries>` in a dictionary or `App.xaml` is split by `x:Key`: `Dark` (or `Default`)
   is the dark theme, `Light` (or `Default`) the light theme, `HighContrast…` is not graded. About 13,000 public XAML
-  files have one. `ThemeDictionaries` inside a page's own resources are not split (a page's local resources are a
-  separate layer, as before).
+  files have one. A page's own `ThemeDictionaries` (in its local resources) are split the same way and stay local to
+  that page; a key only one theme defines there is unresolved in the other theme, never borrowed from it.
+  Run against Microsoft's WinUI Gallery (196 XAML files): the palette is now read as a dark/light pair instead of a
+  single theme, `bound-or-gradient` drops from 189 to 17 and those sites now name the key they need; most of them
+  (172 sites, 34 keys such as `TextFillColorSecondaryBrush`) are WinUI's built-in Fluent theme resources, which a
+  project doesn't define — so graded pairs only go from 48 to 49. The other 48 findings are unchanged.
 - `{x:Static Colors.X}` / `{x:Static Brushes.X}` (with an xmlns prefix or `Member=` too) resolve to the WPF named
   colour, in element attributes, styles and palette dictionaries (`<SolidColorBrush Color="{x:Static Colors.Navy}"/>`).
   `Brushes.Transparent` is transparent. Evidence: about 430 public XAML files on GitHub use `x:Static Brushes.` and about

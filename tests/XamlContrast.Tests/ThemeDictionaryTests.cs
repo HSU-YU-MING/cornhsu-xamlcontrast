@@ -128,4 +128,50 @@ public class ThemeDictionaryTests
         Assert.Equal(1, r.UnresolvedBy[UnresolvedReason.UnknownPaletteKey]);
         Assert.Equal(0, r.UnresolvedBy.GetValueOrDefault(UnresolvedReason.BoundOrGradient));
     }
+
+    [Fact]
+    public void APagesOwnThemeDictionariesAreSplitPerTheme()
+    {
+        // WinUI Gallery 的 XamlResourcesPage 實測抓到（2026-11-10）：畫面自己的資源裡放 ThemeDictionaries。
+        // 不拆的話整份一起解、同鍵先出現的贏 —— 深色欄拿到 Default 那一份的顏色，比值是編的。
+        // 這裡刻意讓兩個主題不對稱（Gallery 那一頁剛好深淺互換、比值相同，看不出錯）
+        using var fx = new Fixture();
+        fx.File("MainPage.xaml", """
+            <Page xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <StackPanel>
+                <StackPanel.Resources>
+                  <ResourceDictionary>
+                    <ResourceDictionary.ThemeDictionaries>
+                      <ResourceDictionary x:Key="Default">
+                        <SolidColorBrush x:Key="Back" Color="#FFFFFF"/>
+                        <SolidColorBrush x:Key="Text" Color="#767676"/>
+                      </ResourceDictionary>
+                      <ResourceDictionary x:Key="Dark">
+                        <SolidColorBrush x:Key="Back" Color="#202020"/>
+                        <SolidColorBrush x:Key="Text" Color="#5A5A5A"/>
+                        <SolidColorBrush x:Key="OnlyDark" Color="#FFFFFF"/>
+                      </ResourceDictionary>
+                    </ResourceDictionary.ThemeDictionaries>
+                  </ResourceDictionary>
+                </StackPanel.Resources>
+                <Border Background="{ThemeResource Back}">
+                  <StackPanel>
+                    <TextBlock Foreground="{ThemeResource Text}" Text="a"/>
+                    <TextBlock Foreground="{ThemeResource OnlyDark}" Text="b"/>
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </Page>
+            """);
+
+        var r = fx.Run();
+
+        var text = Assert.Single(r.Findings);
+        Assert.Equal(new ContrastColors("#5A5A5A", "#202020"), text.ColorsDark);
+        Assert.Equal(new ContrastColors("#767676", "#FFFFFF"), text.ColorsLight);
+        Assert.True(text.RatioDark < 4.5);    // 只有深色主題不合格
+        Assert.True(text.RatioLight >= 4.5);
+        // 只有深色主題定義的鍵：淺色主題下往外層找、工具不知道 —— 不拿深色的值補
+        Assert.Equal(1, r.Unresolved);
+    }
 }

@@ -352,8 +352,32 @@ public static partial class PaletteDetector
     {
         var overrides = new Dictionary<string, LocalBrush>();
         if (!IsScreenFile(file)) return overrides;
-        var own = ParseColorDefs(file, keepInvalid: true);
-        var (lit, refs) = ParseBrushDefs(file, keepInvalid: true);
+        // 畫面自己的 ThemeDictionaries（WinUI，1.4）：深淺各用自己那一份。⚠ 不拆的話整份檔一起解，同鍵先出現的贏 ——
+        //   深色欄拿到 Default／Light 那一份的值，是編出來的比值（WinUI Gallery 的 XamlResourcesPage 實測抓到）
+        if (ReadTextOrNull(file) is { } text && ThemeDictionarySections(text) is { } td)
+        {
+            var neutral = LocalOverridesOf(ParseColorDefsText(td.Neutral, true), ParseBrushDefsText(td.Neutral, true), global);
+            var dark = td.Dark is null ? null : LocalOverridesOf(ParseColorDefsText(td.Dark, true), ParseBrushDefsText(td.Dark, true), global);
+            var light = td.Light is null ? null : LocalOverridesOf(ParseColorDefsText(td.Light, true), ParseBrushDefsText(td.Light, true), global);
+            foreach (var (k, v) in neutral) overrides[k] = v;
+            foreach (var k in (dark?.Keys ?? Enumerable.Empty<string>()).Concat(light?.Keys ?? Enumerable.Empty<string>()).Distinct())
+            {
+                // 只有一個主題定義的鍵：另一個主題下往外層找（app 層、框架），工具不知道 —— 讀不懂，不拿另一個主題的值補
+                var d = dark?.GetValueOrDefault(k)?.Dark;
+                var l = light?.GetValueOrDefault(k)?.Light;
+                overrides[k] = d is null || l is null ? new LocalBrush(null, null) : new LocalBrush(d, l);
+            }
+            return overrides;
+        }
+        return LocalOverridesOf(ParseColorDefs(file, keepInvalid: true), ParseBrushDefs(file, keepInvalid: true), global);
+    }
+
+    /// <summary>一段區域定義（Color 表＋brush 表）→ 區域 brush。字面色深淺同值；引用 Color 的逐側解析。</summary>
+    private static Dictionary<string, LocalBrush> LocalOverridesOf(
+        Dictionary<string, string> own, (Dictionary<string, string> Literal, Dictionary<string, string> Ref) brushes, Palette global)
+    {
+        var overrides = new Dictionary<string, LocalBrush>();
+        var (lit, refs) = brushes;
         foreach (var (k, v) in lit) overrides[k] = v is InvalidValue ? new LocalBrush(null, null) : new LocalBrush(v, v);
         foreach (var (k, c) in refs)
         {
