@@ -185,6 +185,7 @@ xamlcontrast src/MyApp --fail-on fail        # 放寬：只有低於 fail 線的
 xamlcontrast src/MyApp --sarif audit.sarif   # GitHub code scanning 格式
 xamlcontrast src/MyApp --md report.md        # Markdown 報告（可貼 PR 留言）
 xamlcontrast src/MyApp --html report.html    # 單檔 HTML 報告，附色塊
+xamlcontrast src/MyApp --msbuild             # 另印成 MSBuild 診斷（Visual Studio 錯誤清單）
 ```
 
 退出碼：
@@ -251,6 +252,31 @@ exit 1: 1 new unresolved pair(s) vs baseline
 小寫、有冒號、理由寫在同一行；寫錯的變體（大小寫不同、冒號後沒有理由、漏冒號、理由換到第二行）
 不會壓掉任何配對，並以同樣方式警告（`summary.invalidIgnores`）。標記寫在容器上時，涵蓋容器裡的
 一切 —— 元素，以及容器 `Resources` 裡的 `Style` 定義。
+
+### Visual Studio 錯誤清單（MSBuild）
+
+加上 `--msbuild`，每一組低於 AA 的配對會另外印成 MSBuild 的標準診斷格式；在建置裡跑 CLI，它們就出現在
+Visual Studio 的錯誤清單，點兩下跳到那一行。不必裝擴充套件。把這段加進 App 的 `.csproj`（工具要在 `PATH` 上，
+或用本機工具清單的 `dotnet xamlcontrast`）：
+
+```xml
+<Target Name="XamlContrast" AfterTargets="Build">
+  <Exec Command="xamlcontrast &quot;$(MSBuildProjectDirectory)&quot; --msbuild" IgnoreExitCode="true" StandardOutputImportance="low">
+    <Output TaskParameter="ExitCode" PropertyName="XamlContrastExitCode" />
+  </Exec>
+  <Error Condition="'$(XamlContrastExitCode)' == '2'" Text="XamlContrast could not run (exit 2) — see the build output" />
+</Target>
+```
+
+| 碼 | 種類 | 意思 |
+|---|---|---|
+| `XC0001` | error | gate 擋的配對：預設是任何 `fail` 或 `warn`（`--fail-on fail` 時只看 `fail`）；`--baseline` 下只有新增或惡化的 |
+| `XC0002` | warning | 低於 AA 但這次不擋：`--fail-on fail` 下的 `warn`、baseline 的已知債、`--write-baseline` 時的全部 |
+| `XC0003` | error | 結果不可信（exit 3）—— 不然建置會在工具其實什麼都沒看到時安靜地過 |
+
+有 error 建置就失敗，只有 warning 照樣通過。用法或設定錯誤（exit 2）不印診斷，所以片段裡另外用 `<Error>` 接住。
+其他旗標（`--baseline`、`--fail-on`、`--config`）照常可用，加進 `Command` 就好。`IgnoreExitCode` 讓 MSBuild
+不再多報一筆「exited with code 1」的籠統錯誤，`StandardOutputImportance="low"` 讓主控台報告不擠進一般建置輸出。
 
 ### GitHub Action
 
