@@ -3,9 +3,16 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
-## Unreleased
+## 1.4.0 — 2026-11-10
 
 ### Upgrading
+- **In short:** the four maintainer projects give exactly the same snapshot, and no earlier finding is lost or changed in
+  the eight public WPF projects or WinUI Gallery. Counts move only where the tool now reads more: `x:Static` colours,
+  WinUI theme resources, resource aliases and colour keys inside brushes (details below). The two new features —
+  `--msbuild` and `nonText.uiComponents` — change nothing unless you turn them on.
+  *簡單說：四個驗證專案快照完全不變，八個公開 WPF 專案與 WinUI Gallery 原本的 finding 一筆都沒少、沒變；
+  計數只在工具多讀懂的地方變動。兩個新功能不打開就沒有任何影響。*
+
 - **`{x:Static Colors.Red}` and `{x:Static Brushes.Red}` are read as the named colour they are.** They used to be
   `bound-or-gradient` unresolved sites ("only knowable at runtime"). A project that uses them gets more graded pairs
   and higher coverage, and a pair that is really below AA now shows up as a `fail` / `warn` instead of hiding in
