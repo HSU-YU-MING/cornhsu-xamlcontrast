@@ -158,7 +158,7 @@ public static partial class PaletteDetector
            : ColorResolver.NamedHex(v) ?? (ColorResolver.StaticNamedColour(v) is { } s && s != "Transparent" ? s : null);
 
     /// <summary>
-    /// 專案內的檔案，排除建置輸出（bin／obj）。
+    /// 專案內的檔案，排除建置輸出（bin／obj）與點開頭的目錄（.git、.vs、.claude…）。
     /// ⚠ 只看 root 以下的相對路徑、整段比對、不分大小寫。舊版比對的是含 root 的完整路徑：專案本身放在
     ///   叫 bin 或 obj 的目錄底下（root 用絕對路徑）就整個專案 0 個檔 → 「resolved 0 pairs」exit 1，
     ///   訊息誤導；改傳相對路徑又正常 —— 跟「dark／light 提示只看專案內相對路徑」同一類地雷。
@@ -166,15 +166,24 @@ public static partial class PaletteDetector
     /// </summary>
     internal static IEnumerable<string> EnumerateFiles(string root, string pattern)
         => Directory.EnumerateFiles(root, pattern, SearchOption.AllDirectories)
-            .Where(f => !IsBuildOutput(Path.GetRelativePath(root, f)))
+            .Where(f => !IsExcluded(Path.GetRelativePath(root, f)))
             .OrderBy(f => f, StringComparer.OrdinalIgnoreCase);
 
-    private static bool IsBuildOutput(string rel)
+    /// <summary>
+    /// ⚠ 點開頭的目錄要一起排除，理由跟 bin／obj 不同：那底下可能放著整個專案的**複本**。
+    ///   實測 `.claude/worktrees/` 的三份副本讓 Kindling 的 1 個 fail 報成 3 個、QuillNest 的 2 個報成 10 個，
+    ///   數字直接失真。更糟的是 --write-baseline：baseline 的鍵裡會寫進 `clever-curran-d23c1c` 這種
+    ///   暫時性的 worktree 名字，worktree 一清掉 baseline 立刻過期，下一次跑就把每一筆真實 pair 都報成 NEW。
+    ///   影響範圍是所有用 git worktree、Claude Code worktree 或 vendored 副本的人。
+    /// </summary>
+    private static bool IsExcluded(string rel)
     {
         var segments = rel.Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries);
         // 最後一段是檔名，只看目錄段
         return segments.Take(segments.Length - 1)
-            .Any(s => s.Equals("bin", StringComparison.OrdinalIgnoreCase) || s.Equals("obj", StringComparison.OrdinalIgnoreCase));
+            .Any(s => s.StartsWith('.')
+                      || s.Equals("bin", StringComparison.OrdinalIgnoreCase)
+                      || s.Equals("obj", StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
