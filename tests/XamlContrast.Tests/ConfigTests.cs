@@ -353,6 +353,85 @@ public class ConfigTests
         Assert.DoesNotContain("MahApps", hint);
     }
 
+    /// <summary>
+    /// <c>ThemeMode</c> 的值來自<b>被掃描專案的 XAML</b>，是不可信輸入，而提示會印進 CI 日誌——
+    /// 帶換行的值可以偽造 GitHub Actions 的 workflow 指令（<c>::error::</c> 之類）。
+    /// 1.4.2 把值直接內插進去，1.4.3 改成只認 WPF 真的支援的那幾個值。
+    /// </summary>
+    [Theory]
+    [InlineData("System\n::error::injected")]
+    [InlineData("Dark\r\n::add-mask::secret")]
+    [InlineData("System\u2028::error::injected")]   // LINE SEPARATOR,有些工具也當換行
+    [InlineData("NotARealMode")]
+    public void CoverageHintNeverEchoesAnUntrustedThemeMode(string themeMode)
+    {
+        using var fx = new Fixture();
+        fx.File("App.xaml", $"""
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" ThemeMode="{System.Security.SecurityElement.Escape(themeMode)}" />
+            """);
+        fx.File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <TextBlock Foreground="#EEEEEE" Text="沒有任何祖先宣告背景 1"/>
+              <TextBlock Foreground="#DDDDDD" Text="沒有任何祖先宣告背景 2"/>
+            </Window>
+            """);
+        var hint = Report.CoverageHint(fx.Run());
+
+        Assert.NotNull(hint);
+        Assert.DoesNotContain("::error::", hint);
+        Assert.DoesNotContain("::add-mask::", hint);
+        Assert.DoesNotContain("injected", hint);
+        Assert.DoesNotContain("NotARealMode", hint);
+        // 提示本身仍然要有用:還是要講得出「你用了 ThemeMode」
+        Assert.Contains("ThemeMode", hint);
+    }
+
+    /// <summary><c>ThemeMode=""</c> 不算宣告過——空屬性要走回原本那條（主題函式庫）提示，
+    /// 不要變成「這個專案用了 ThemeMode」然後叫人去設一個他其實沒有的東西。</summary>
+    [Fact]
+    public void AnEmptyThemeModeIsNotADeclaration()
+    {
+        using var fx = new Fixture();
+        fx.File("App.xaml", """
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" ThemeMode="" />
+            """);
+        fx.File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <TextBlock Foreground="#EEEEEE" Text="沒有任何祖先宣告背景 1"/>
+              <TextBlock Foreground="#DDDDDD" Text="沒有任何祖先宣告背景 2"/>
+            </Window>
+            """);
+        var hint = Report.CoverageHint(fx.Run());
+
+        Assert.NotNull(hint);
+        Assert.Contains("MahApps", hint);
+        Assert.DoesNotContain("ThemeMode", hint);
+    }
+
+    /// <summary>白名單內的值照樣原樣顯示——擋注入不可以把正常訊息也擋掉。</summary>
+    [Theory]
+    [InlineData("System")]
+    [InlineData("Light")]
+    [InlineData("Dark")]
+    [InlineData("None")]
+    public void CoverageHintStillNamesARecognisedThemeMode(string themeMode)
+    {
+        using var fx = new Fixture();
+        fx.File("App.xaml", $"""
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" ThemeMode="{themeMode}" />
+            """);
+        fx.File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <TextBlock Foreground="#EEEEEE" Text="沒有任何祖先宣告背景 1"/>
+              <TextBlock Foreground="#DDDDDD" Text="沒有任何祖先宣告背景 2"/>
+            </Window>
+            """);
+        var hint = Report.CoverageHint(fx.Run());
+
+        Assert.NotNull(hint);
+        Assert.Contains($"ThemeMode=\"{themeMode}\"", hint);
+    }
+
     /// <summary>沒有 ThemeMode 的專案維持原本那條（主題函式庫）提示——
     /// 上面那條新分支不能把舊的逃生口弄沒了。</summary>
     [Fact]

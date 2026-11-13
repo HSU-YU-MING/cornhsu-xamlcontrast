@@ -105,7 +105,7 @@ public static partial class Report
         if (r.ThemeMode is { } themeMode)
         {
             sb.AppendLine(string.Create(inv, $"  hint: {counts} — this project sets WPF's own"));
-            sb.AppendLine(string.Create(inv, $"        ThemeMode=\"{themeMode}\" (the built-in Fluent theme, .NET 9+), so the brushes that paint"));
+            sb.AppendLine(string.Create(inv, $"        {ThemeModeLabel(themeMode)} (the built-in Fluent theme, .NET 9+), so the brushes that paint"));
             sb.AppendLine("        your windows live in the framework, not in this repo: there is no key of yours for");
             sb.AppendLine("        rootBackground to name, and nothing here for static analysis to read.");
             sb.AppendLine("        To get your own text measured, give rootBackground the window colour you actually");
@@ -143,6 +143,24 @@ public static partial class Report
     /// 落在行首（審查 1.0 最終驗證 S2，0.6.1 就有）。與 Markdown 的 Esc 同一個立場：報告裡的文字只能是資料。
     /// 定位字元保留（不換行，排版用得到）。
     /// </summary>
+    /// <summary>
+    /// 提示裡要怎麼稱呼這個 <c>ThemeMode</c>。
+    ///
+    /// <para>⚠ 這個值來自<b>被掃描專案的 XAML</b>,是不可信輸入 —— 而這段文字會印進 CI 日誌。
+    /// 帶換行的值可以偽造 GitHub Actions 的 workflow 指令(<c>::error::</c>、<c>::add-mask::</c> 之類),
+    /// 而這支工具的使用情境正好包含「掃別人的專案」與「掃 PR 帶進來的程式碼」。</para>
+    ///
+    /// <para>所以只認 WPF 真的支援的那幾個值,其餘一律**不把原字串印出來** ——
+    /// 使用者需要的資訊是「你用了 ThemeMode」,不是「你那個字串長什麼樣」。
+    /// 外面再包一層 <see cref="ConsoleSafe"/> 當保險(白名單已經夠了,但這條路徑不值得賭)。</para>
+    ///
+    /// <para>2026-11-13:1.4.2 漏了這一道,原本是直接把值內插進去。</para>
+    /// </summary>
+    private static string ThemeModeLabel(string value) =>
+        value is "System" or "Light" or "Dark" or "None"
+            ? ConsoleSafe($"ThemeMode=\"{value}\"")
+            : "a ThemeMode";
+
     public static string ConsoleSafe(string s)
     {
         static bool Escape(char c) => (char.IsControl(c) && c != '\t') || c is '\u2028' or '\u2029';
