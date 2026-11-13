@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 1.4.2 — 2026-11-13
+
+**Two fixes to what the tool says and writes, none to what it measures.** No interface change;
+`report.json` `schemaVersion` and the baseline `keyVersion` are unchanged, and no finding moves.
+
+### Fixed
+
+- **The coverage hint no longer sends WPF's own themed projects looking for a key that does not
+  exist.** When a project declares `ThemeMode` on its `Application` or `Window` (the built-in
+  Fluent theme, .NET 9+), the brushes that paint its windows live in the framework, not in the
+  repository — so the old advice ("declare your window background key from your own theme files")
+  named something the project cannot have. The hint now detects `ThemeMode`, says so, and tells
+  you to give `rootBackground` a literal colour and run once per theme. It closes with the part
+  that matters: inheriting a framework theme is a reasonable choice, it just is not evidence.
+  A maintainer project hit exactly this: 5 XAML files, 0 pairs, `exit 3`, and the tool pointed at
+  a MahApps key.
+
+- **`--stats-preview` no longer prints the value of your environment variable.** When
+  `CORNHSU_SHARE_STATS` or `XAMLCONTRAST_SHARE_STATS` held something other than `1`/`true`/`yes`/`on`,
+  the reason embedded that value — and on CI, stderr is the public build log. The reason is now
+  `… is set to something other than 1, true, yes or on`, which is just as useful for fixing your
+  own configuration. (Parity has always done it this way.)
+
+### Changed
+
+- **The job-summary line is written only when asked.** The tool used to append it whenever
+  `GITHUB_STEP_SUMMARY` existed, i.e. in *any* GitHub Actions job — so people calling
+  `xamlcontrast` directly in their own workflow got a paragraph about anonymous statistics they
+  never asked for. It now requires `XAMLCONTRAST_STATS_JOB_SUMMARY=true`, which **this action
+  sets**, so action users see no change. An empty `GITHUB_STEP_SUMMARY` is now treated as unset.
+
 ## 1.4.1 — 2026-11-13
 
 **One fix: the scan no longer walks dot-directories.** No interface change; `report.json`
