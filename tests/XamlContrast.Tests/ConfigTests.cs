@@ -328,6 +328,50 @@ public class ConfigTests
         Assert.Contains("no-ancestor-background", hint);
     }
 
+    /// <summary>用 WPF 內建 Fluent 主題（<c>ThemeMode</c>）的專案要收到<b>不同的</b>提示。
+    /// 這種專案的色票在框架裡、不在 repo 裡，所以「去設你自己主題檔裡的鍵」是個不存在的動作——
+    /// 自家的 Cornea 就是這樣（5 個 XAML、0 組配對），原本的提示叫他去設 MahApps 的鍵。</summary>
+    [Fact]
+    public void CoverageHintNamesThemeModeInsteadOfThemeLibrary()
+    {
+        using var fx = new Fixture();
+        fx.File("App.xaml", """
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" ThemeMode="System" />
+            """);
+        fx.File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <TextBlock Foreground="#EEEEEE" Text="沒有任何祖先宣告背景 1"/>
+              <TextBlock Foreground="#DDDDDD" Text="沒有任何祖先宣告背景 2"/>
+            </Window>
+            """);
+        var hint = Report.CoverageHint(fx.Run());
+
+        Assert.NotNull(hint);
+        Assert.Contains("ThemeMode=\"System\"", hint);
+        Assert.Contains("not evidence", hint);
+        // 關鍵:不可以再把這種專案送去找主題函式庫的鍵
+        Assert.DoesNotContain("MahApps", hint);
+    }
+
+    /// <summary>沒有 ThemeMode 的專案維持原本那條（主題函式庫）提示——
+    /// 上面那條新分支不能把舊的逃生口弄沒了。</summary>
+    [Fact]
+    public void CoverageHintKeepsThemeLibraryAdviceWithoutThemeMode()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <TextBlock Foreground="#EEEEEE" Text="沒有任何祖先宣告背景 1"/>
+              <TextBlock Foreground="#DDDDDD" Text="沒有任何祖先宣告背景 2"/>
+            </Window>
+            """);
+        var hint = Report.CoverageHint(fx.Run());
+
+        Assert.NotNull(hint);
+        Assert.Contains("MahApps", hint);
+        Assert.DoesNotContain("ThemeMode", hint);
+    }
+
     /// <summary>硬邊界（Binding／漸層）佔多數 → 不印。rootBackground 救不了執行期的值，
     /// 叫人去設等於浪費他一次嘗試，還會讓真正的結論（這是靜態分析的極限）被蓋掉。</summary>
     [Fact]

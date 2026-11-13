@@ -1,7 +1,7 @@
 {
   "schemaVersion": 6,
   "toolVersion": "0.0.0-dev",
-  "exitCode": 1,
+  "exitCode": 0,
   "summary": {
     "paletteMode": "csharp",
     "paletteDegraded": false,
@@ -19,8 +19,8 @@
     "strictPalette": false,
     "failOnNewUnresolved": false,
     "files": 15,
-    "pairs": 182,
-    "coverage": 95.8,
+    "pairs": 170,
+    "coverage": 95.5,
     "unresolved": 8,
     "unresolvedBy": {
       "in-style-template": 3,
@@ -39,9 +39,9 @@
     "invalidIgnoreCount": 0,
     "invalidIgnores": [],
     "counts": {
-      "fail": 1,
-      "warn": 1,
-      "ok": 177,
+      "fail": 0,
+      "warn": 0,
+      "ok": 167,
       "decorative": 3
     }
   },
@@ -55,35 +55,35 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 247,
+      "line": 256,
       "reason": "in-style-template",
       "value": "{DynamicResource Fg1}",
       "baseline": null
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 300,
+      "line": 309,
       "reason": "translucent-uncomposited",
       "value": "Transparent",
       "baseline": null
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 322,
+      "line": 331,
       "reason": "translucent-uncomposited",
       "value": "Transparent",
       "baseline": null
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 349,
+      "line": 358,
       "reason": "in-style-template",
       "value": "{DynamicResource Fg1}",
       "baseline": null
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 333,
+      "line": 342,
       "reason": "translucent-uncomposited",
       "value": "Transparent",
       "baseline": null
@@ -192,23 +192,23 @@
       "file": "Themes/DarkTheme.xaml",
       "line": 149,
       "element": "Style[DarkBtn]/trigger",
-      "fg": "{DynamicResource Fg0}",
+      "fg": "White",
       "bg": "{PurpleD}",
-      "ratioDark": 5.97,
-      "ratioLight": 2.49,
+      "ratioDark": 6.93,
+      "ratioLight": 6.93,
       "colors": {
         "dark": {
-          "fg": "#EEEEEE",
+          "fg": "#FFFFFF",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#1B1B1B",
+          "fg": "#FFFFFF",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "fail",
-      "symmetry": "light-fails",
+      "category": "ok",
+      "symmetry": null,
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -218,7 +218,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 183,
+      "line": 192,
       "element": "Style[AccentBtn]/base",
       "fg": "White",
       "bg": "{PurpleD}",
@@ -246,7 +246,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 183,
+      "line": 192,
       "element": "Style[AccentBtn]/trigger",
       "fg": "White",
       "bg": "{PurpleDHover}",
@@ -274,7 +274,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 202,
+      "line": 211,
       "element": "Style[DangerBtn]/base",
       "fg": "{DynamicResource DangerFg}",
       "bg": "{DangerBg}",
@@ -302,7 +302,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 202,
+      "line": 211,
       "element": "Style[DangerBtn]/trigger",
       "fg": "{DynamicResource DangerFg}",
       "bg": "{DangerBgHover}",
@@ -330,7 +330,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 202,
+      "line": 211,
       "element": "Style[DangerBtn]/trigger",
       "fg": "White",
       "bg": "{DangerSolid}",
@@ -358,7 +358,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 225,
+      "line": 234,
       "element": "Style[ComboBox]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg2}",
@@ -386,7 +386,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 280,
+      "line": 289,
       "element": "Style[ComboBoxItem]/trigger",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg3}",
@@ -414,7 +414,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 333,
+      "line": 342,
       "element": "Style[MenuItem]/trigger",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg3}",
@@ -442,7 +442,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 394,
+      "line": 403,
       "element": "Style[ToolTip]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg2}",
@@ -693,34 +693,6 @@
       "baseline": null
     },
     {
-      "file": "Views/ApiKeyDialog.xaml",
-      "line": 59,
-      "element": "Button\u2295Style[AccentBtn]/trigger",
-      "fg": "White",
-      "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
-      "colors": {
-        "dark": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        },
-        "light": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 12,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
       "file": "Views/ChoiceDialog.xaml",
       "line": 9,
       "element": "TextBlock",
@@ -820,34 +792,6 @@
         "light": {
           "fg": "#5A5A5A",
           "bg": "#EAEAEA"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 11,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/ClipLibraryView.xaml",
-      "line": 40,
-      "element": "Button\u2295Style[AccentBtn]/trigger",
-      "fg": "White",
-      "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
-      "colors": {
-        "dark": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        },
-        "light": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
@@ -1332,34 +1276,6 @@
       "isText": true,
       "isLargeText": false,
       "fontSize": 10,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/ExportSettingsDialog.xaml",
-      "line": 222,
-      "element": "Button\u2295Style[AccentBtn]/trigger",
-      "fg": "White",
-      "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
-      "colors": {
-        "dark": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        },
-        "light": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 12,
       "theme": null,
       "component": null,
       "baseline": null
@@ -1959,14 +1875,14 @@
       "fg": "{DynamicResource Amber}",
       "bg": "{Bg1}",
       "ratioDark": 10.54,
-      "ratioLight": 4.73,
+      "ratioLight": 5.46,
       "colors": {
         "dark": {
           "fg": "#E8C66B",
           "bg": "#1A1A1A"
         },
         "light": {
-          "fg": "#9D5D00",
+          "fg": "#8F5500",
           "bg": "#F3F3F3"
         }
       },
@@ -2116,34 +2032,6 @@
       "isText": true,
       "isLargeText": false,
       "fontSize": null,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/GenerateDialog.xaml",
-      "line": 242,
-      "element": "Button\u2295Style[AccentBtn]/trigger",
-      "fg": "White",
-      "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
-      "colors": {
-        "dark": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        },
-        "light": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 12,
       "theme": null,
       "component": null,
       "baseline": null
@@ -2962,34 +2850,6 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 205,
-      "element": "Button\u2295Style[AccentBtn]/trigger",
-      "fg": "White",
-      "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
-      "colors": {
-        "dark": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        },
-        "light": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 12,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 208,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
@@ -3124,34 +2984,6 @@
       "isText": true,
       "isLargeText": false,
       "fontSize": 10,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 318,
-      "element": "Button\u2295Style[AccentBtn]/trigger",
-      "fg": "White",
-      "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
-      "colors": {
-        "dark": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        },
-        "light": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 12,
       "theme": null,
       "component": null,
       "baseline": null
@@ -3578,34 +3410,6 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 468,
-      "element": "Button\u2295Style[AccentBtn]/trigger",
-      "fg": "White",
-      "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
-      "colors": {
-        "dark": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        },
-        "light": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 12,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 477,
       "element": "TextBlock",
       "fg": "White",
@@ -3723,20 +3527,20 @@
       "fg": "{DynamicResource Amber}",
       "bg": "{Bg3}",
       "ratioDark": 8.23,
-      "ratioLight": 4.32,
+      "ratioLight": 4.99,
       "colors": {
         "dark": {
           "fg": "#E8C66B",
           "bg": "#2E2E2E"
         },
         "light": {
-          "fg": "#9D5D00",
+          "fg": "#8F5500",
           "bg": "#E9E9E9"
         }
       },
       "threshold": 4.5,
-      "category": "warn",
-      "symmetry": "light-fails",
+      "category": "ok",
+      "symmetry": null,
       "isText": true,
       "isLargeText": false,
       "fontSize": 10,
@@ -3829,62 +3633,6 @@
       "baseline": null
     },
     {
-      "file": "Views/TextInputDialog.xaml",
-      "line": 20,
-      "element": "Button\u2295Style[AccentBtn]/trigger",
-      "fg": "White",
-      "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
-      "colors": {
-        "dark": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        },
-        "light": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 12,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/TimelineView.xaml",
-      "line": 83,
-      "element": "Button\u2295Style[AccentBtn]/trigger",
-      "fg": "White",
-      "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
-      "colors": {
-        "dark": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        },
-        "light": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 12,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
       "file": "Views/TimelineView.xaml",
       "line": 105,
       "element": "TextBlock",
@@ -3936,62 +3684,6 @@
       "isText": true,
       "isLargeText": false,
       "fontSize": 11,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/TimelineView.xaml",
-      "line": 125,
-      "element": "Button\u2295Style[AccentBtn]/trigger",
-      "fg": "White",
-      "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
-      "colors": {
-        "dark": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        },
-        "light": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 12,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/TimelineView.xaml",
-      "line": 139,
-      "element": "Button\u2295Style[AccentBtn]/trigger",
-      "fg": "White",
-      "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
-      "colors": {
-        "dark": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        },
-        "light": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 13,
       "theme": null,
       "component": null,
       "baseline": null
@@ -4908,34 +4600,6 @@
         "light": {
           "fg": "#AFA9EC",
           "bg": "#2A2640"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 11,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/WorkspaceView.xaml",
-      "line": 113,
-      "element": "Button\u2295Style[AccentBtn]/trigger",
-      "fg": "White",
-      "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
-      "colors": {
-        "dark": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        },
-        "light": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
         }
       },
       "threshold": 4.5,

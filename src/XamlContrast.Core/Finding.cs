@@ -167,6 +167,11 @@ public sealed class AuditResult
     public int UiComponentPairs { get; init; }
     /// <summary>這次稽核拿來當顏色的轉換器（資源鍵 → 分析結果）：哪些是固定顏色、哪些不是、為什麼。沒打開是 null。</summary>
     public IReadOnlyList<ConverterUse>? ConvertersUsed { get; init; }
+    /// <summary>`Application` 或 `Window` 上宣告的 WPF `ThemeMode`（.NET 9+ 的內建 Fluent 主題）的值；
+    /// 沒宣告是 null。只用在覆蓋率提示上 —— 見 <see cref="Report.CoverageHint"/>：
+    /// 這種專案的色票在框架裡而不在 repo 裡，叫人去找第三方主題庫的 brush 鍵是找不到的。</summary>
+    public string? ThemeMode { get; init; }
+
     /// <summary>本次生效的設定（分級門檻等；預設值 = 沒有 config 檔）</summary>
     public ToolConfig Config { get; init; } = new();
 

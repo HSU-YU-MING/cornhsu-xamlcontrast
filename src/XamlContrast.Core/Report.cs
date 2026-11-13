@@ -93,10 +93,29 @@ public static partial class Report
 
         var inv = System.Globalization.CultureInfo.InvariantCulture;
         var sb = new StringBuilder();
-        sb.AppendLine(overNothing == 0
-            ? string.Create(inv, $"  hint: {noBg} of them are 'no-ancestor-background' — typical of an app built on a theme")
-            : string.Create(inv, $"  hint: {noBg + overNothing} of them have nothing underneath ({noBg} 'no-ancestor-background', " +
-                                 $"{overNothing} 'translucent-uncomposited') — typical of an app built on a theme"));
+        var counts = overNothing == 0
+            ? string.Create(inv, $"{noBg} of them are 'no-ancestor-background'")
+            : string.Create(inv, $"{noBg + overNothing} of them have nothing underneath " +
+                                 $"({noBg} 'no-ancestor-background', {overNothing} 'translucent-uncomposited')");
+
+        // ⚠ 這裡原本只講第三方主題函式庫,把用 WPF 內建 Fluent 主題(ThemeMode)的人送去找
+        //    「自己主題檔裡的鍵」—— 而那種專案的色票在框架裡,沒有那個鍵可以指。
+        //    自家的 Cornea 就是這樣:5 個 XAML、0 組配對,提示叫他去設 MahApps 的鍵。
+        //    錯方向的提示比沒有提示更糟:人會以為試過了、沒用。
+        if (r.ThemeMode is { } themeMode)
+        {
+            sb.AppendLine(string.Create(inv, $"  hint: {counts} — this project sets WPF's own"));
+            sb.AppendLine(string.Create(inv, $"        ThemeMode=\"{themeMode}\" (the built-in Fluent theme, .NET 9+), so the brushes that paint"));
+            sb.AppendLine("        your windows live in the framework, not in this repo: there is no key of yours for");
+            sb.AppendLine("        rootBackground to name, and nothing here for static analysis to read.");
+            sb.AppendLine("        To get your own text measured, give rootBackground the window colour you actually");
+            sb.AppendLine("        render, as a literal, and run once per theme (one config each):");
+            sb.AppendLine("""          { "rootBackground": "#FFFFFF" }""");
+            sb.Append("        Inheriting a framework theme is a reasonable choice — it just is not evidence.");
+            return sb.ToString();
+        }
+
+        sb.AppendLine(string.Create(inv, $"  hint: {counts} — typical of an app built on a theme"));
         sb.AppendLine("        library (MahApps, HandyControl, MaterialDesign...), where the implicit style that");
         sb.AppendLine("        paints your windows lives inside the NuGet package, invisible to static analysis.");
         sb.AppendLine("        Declare your window background key once in xamlcontrast.config.json:");
