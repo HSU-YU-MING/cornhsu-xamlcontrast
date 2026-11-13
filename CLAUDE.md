@@ -14,7 +14,7 @@
 
 ```bash
 dotnet build XamlContrast.slnx -c Release
-dotnet test  XamlContrast.slnx -c Release          # 2026-11-09 實跑（Windows）：1115 綠、2 略過（沒有 jq 的機器略過 Action 註記的實跑；非 Linux 略過統計說明的標記檔）
+dotnet test  XamlContrast.slnx -c Release          # 2026-11-13 實跑（Windows）：1178 綠、2 略過（沒有 jq 的機器略過 Action 註記的實跑；非 Linux 略過統計說明的標記檔）
 dotnet format XamlContrast.slnx --verify-no-changes # CI 第一關，不過直接紅
 
 # 示範專案（刻意做壞的，exit 1 才是對的）

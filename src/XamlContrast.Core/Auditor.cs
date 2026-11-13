@@ -100,6 +100,7 @@ public sealed partial class Auditor
     private readonly HashSet<string> _walkedNames = new(StringComparer.Ordinal); // config 的 layout 宣告有沒有命中
     private StyleIndex _styles = null!;
     private string _curFile = ""; // 具名 Style 查找的「同檔優先」範圍（完整路徑）
+    private string? _themeMode;   // Application/Window 上的 WPF ThemeMode（第一個看到的就算）
     /// <summary>目前這個元素從祖先繼承到的 FontFamily（原始寫法；null = 沒有或不知道）。FontFamily 是繼承屬性：
     /// TextBlock 裡的 Run、Button 裡的 TextBlock 跟著外層的字型走。只給圖示字型的判斷用（<see cref="IconFonts"/>）。</summary>
     private string? _inheritedFont;
@@ -349,6 +350,16 @@ public sealed partial class Auditor
             }
             if (doc.Root is not null)
             {
+                // WPF 自己的 Fluent 主題(.NET 9+ 的 ThemeMode):色票在框架裡,不在這個 repo 的 XAML 裡。
+                // 記下來只為了讓覆蓋率提示講對話 —— 不然它會把人送去找第三方主題庫的 brush 鍵,
+                // 而這種專案根本沒有那個鍵(Cornea 實例:5 個 XAML、0 組配對,提示叫他設 MahApps 的鍵)。
+                if (auditor._themeMode is null &&
+                    doc.Root.Name.LocalName is "Application" or "Window" &&
+                    doc.Root.Attribute("ThemeMode")?.Value is { Length: > 0 } themeMode)
+                {
+                    auditor._themeMode = themeMode;
+                }
+
                 auditor._curFile = f;
                 // 多 App repo:這個檔案屬於哪個 App,就用哪個 App 的色盤
                 // (單 App 或無作用域資訊時 PaletteFor 回傳全域色盤,行為不變)
@@ -371,6 +382,7 @@ public sealed partial class Auditor
         var result = new AuditResult
         {
             Detection = detection,
+            ThemeMode = auditor._themeMode,
             FileCount = files.Count,
             Findings = auditor._findings,
             Pairs = auditor._pairs,
