@@ -70,7 +70,12 @@ public static class UsageStats
         {
             if (Env(name) is not { } v) continue;
             if (v.ToLowerInvariant() is not ("1" or "true" or "yes" or "on"))
-                return Off($"{name} is '{v}' (only 1, true, yes or on leave sharing on)");
+                // ⚠ 不要把 v 的值放進原因字串。這個原因會被 --stats-preview 印到 stderr,
+                //   而在 CI 上 stderr 就是公開的建置日誌 —— 使用者在這個變數裡放了什麼
+                //   (放錯的 token、內部網址、任何他以為只有自己看得到的東西)就會被照抄出去。
+                //   說「設成了 1/true/yes/on 以外的東西」已經足夠讓人修好自己的設定。
+                //   Parity 同一個位置用 enum 對到常數字串,從不印值(UsageStats.cs 的 StatsOff)。
+                return Off($"{name} is set to something other than 1, true, yes or on");
             consent = true;
         }
 

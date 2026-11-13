@@ -678,8 +678,11 @@ nothing, and prints to stderr the exact JSON it would send and whether — or wh
 
 **What you'll see:** on your machine, a short notice on stderr the first time it sends (a marker file,
 `cornhsu/xamlcontrast-stats-notice` in your user config folder — `%APPDATA%` on Windows, `~/.config` on
-Linux — keeps it from repeating); in CI, one line on stderr on every run, and on GitHub Actions one line
-in the job summary. Nothing goes to stdout, and nothing at all is printed when it doesn't send.
+Linux — keeps it from repeating); in CI, one line on stderr on every run. **This action** also adds one
+line to the job summary — the tool only does that when asked
+(`XAMLCONTRAST_STATS_JOB_SUMMARY=true`, which the action sets), so calling `xamlcontrast` yourself in a
+workflow leaves your job summary alone. Nothing goes to stdout, and nothing at all is printed when it
+doesn't send.
 
 **It never changes your run.** The request waits at most 3 seconds (1.5 to connect), is never retried or
 redirected, and any failure is ignored silently — the exit code and every output are exactly what they
