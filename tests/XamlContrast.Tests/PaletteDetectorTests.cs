@@ -918,6 +918,21 @@ public class PaletteDetectorTests
         Assert.Equal(files, fx.Run().FileCount);
     }
 
+    [Theory] // 點開頭的目錄底下可能是整個專案的複本（git worktree、Claude Code worktree、vendored）：
+             // 不排除的話同一個 bug 會被數好幾次，而且 --write-baseline 會把暫時性的 worktree 名字寫進鍵裡
+    [InlineData(".claude/worktrees/abc123/Views/Main.xaml", 0)]
+    [InlineData(".git/modules/x/Main.xaml", 0)]
+    [InlineData(".vs/Main.xaml", 0)]
+    [InlineData("Views/.hidden/Main.xaml", 0)]
+    [InlineData("Views/Main.xaml", 1)]           // 一般目錄照掃
+    [InlineData("dotnet/Main.xaml", 1)]          // 名字裡有 dot 不算
+    public void DotDirectoriesAreExcluded(string path, int files)
+    {
+        using var fx = new Fixture();
+        fx.File(path, """<Grid Background="#000000"><TextBlock Foreground="#FFFFFF"/></Grid>""");
+        Assert.Equal(files, fx.Run().FileCount);
+    }
+
     // ── 合併式色盤湊不到 3 個鍵時的退路：挑檔（偵測順序的「theme pair」與「single theme file」）──
     //    合併式只從 brush 取鍵，全專案一個 brush 都沒有才改用 <Color> 鍵 —— 所以「主題檔只有 <Color>、
     //    別處零星一個 brush」的專案，合併式不成立，交給這兩條挑檔的路。它們沒接住就是整個退化成無色盤。
