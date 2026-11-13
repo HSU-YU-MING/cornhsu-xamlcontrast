@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 1.4.3 — 2026-11-13
+
+**A security fix to 1.4.2's new coverage hint.** Nothing else changed; no finding moves.
+
+### Fixed
+
+- **The coverage hint no longer echoes the project's `ThemeMode` value.** 1.4.2 interpolated it
+  straight into the message. That value comes from the **scanned project's XAML**, which is
+  untrusted input, and the hint goes to stdout — in CI, that is the build log, where a value
+  containing a line break can forge GitHub Actions workflow commands (`::error::`, `::add-mask::`
+  and friends). This tool is used to scan other people's projects and code arriving by pull
+  request, so that input really is attacker-controlled.
+
+  The hint now names only the values WPF actually supports (`System`, `Light`, `Dark`, `None`)
+  and otherwise says "a ThemeMode" without repeating the string — what you need to know is *that*
+  you use `ThemeMode`, not what the attribute happened to contain. `ConsoleSafe` is applied on top.
+
+  Only the console hint was affected: `ThemeMode` never reached `report.json`, the HTML report,
+  the SARIF output or the PR comment.
+
 ## 1.4.2 — 2026-11-13
 
 **Two fixes to what the tool says and writes, none to what it measures.** No interface change;
