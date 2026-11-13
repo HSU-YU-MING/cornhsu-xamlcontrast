@@ -143,6 +143,11 @@ runs:
         XC_STRICT_PALETTE: ${{ inputs.strict-palette }}
         XC_SARIF: ${{ inputs.sarif }}
         XC_SHARE_STATS: ${{ inputs.share-stats }}
+        # 請 CLI 在 job summary 寫「統計已送出」那一行（PROTOCOL.md 第 4 節）。
+        # 這一行是本 Action 的行為，所以由本 Action 要求 —— CLI 不會因為「人在 GitHub Actions 裡」
+        # 就擅自寫進別人的 job summary（自己在 workflow 裡呼叫 xamlcontrast 的人沒要求過這行）。
+        # 照 Parity 的 PARITY_STATS_JOB_SUMMARY。
+        XAMLCONTRAST_STATS_JOB_SUMMARY: 'true'
       run: |
         set +e
         # share-stats: false → 這一次的 CLI 不送匿名統計（等於使用者自己設 XAMLCONTRAST_SHARE_STATS=false，PROTOCOL.md 第 3 節第 4 條）。

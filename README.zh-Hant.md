@@ -548,7 +548,9 @@ WPF 專案實跑：文字的 finding 一筆都沒變，新報出低於 3:1 的�
 
 **你會看到什麼**：本機上，第一次要送的時候在 stderr 印一段說明（使用者設定目錄裡的標記檔
 `cornhsu/xamlcontrast-stats-notice` —— Windows 是 `%APPDATA%`、Linux 是 `~/.config` —— 讓它不再重複）；
-CI 上每次在 stderr 印一行，GitHub Actions 另外在 job summary 寫一行。stdout 一個字都不碰；不送的時候什麼都不印。
+CI 上每次在 stderr 印一行。**這個 action** 另外在 job summary 寫一行 —— 工具只在被要求時才寫
+（`XAMLCONTRAST_STATS_JOB_SUMMARY=true`，action 會設它），所以你自己在 workflow 裡呼叫 `xamlcontrast`
+的話，job summary 不會被動到。stdout 一個字都不碰；不送的時候什麼都不印。
 
 **不影響你的結果。** 請求最多等 3 秒（連線 1.5 秒），不重試、不跟轉址，任何失敗都安靜略過 —— 退出碼與所有輸出
 都跟沒有它的時候一模一樣。開發版 —— 版本以 `0.0.0-` 開頭的，例如從原始碼建出來的 `0.0.0-dev` —— 永遠不送。

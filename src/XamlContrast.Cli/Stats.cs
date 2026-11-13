@@ -132,7 +132,16 @@ internal static class Stats
             }
         }
 
-        if (Env("GITHUB_STEP_SUMMARY") is { } summary)
+        // job summary 那一行只在 Action 要求時寫。
+        //
+        // ⚠ 這裡原本是「看到 GITHUB_STEP_SUMMARY 就寫」,也就是**只要在 GitHub Actions 裡
+        //   就無條件往別人的 job summary 塞一行字**。自己在 workflow 裡呼叫 xamlcontrast
+        //   的人沒要求過這行,卻會看到自己的 job summary 多出一段關於匿名統計的說明 ——
+        //   那是我們的話,不是他的。本工具的 Action 會設這個變數,所以 Action 使用者的行為不變。
+        //   (照 Parity 的 PARITY_STATS_JOB_SUMMARY;順帶補上 Length > 0 的檢查,
+        //    空字串當沒設,否則 File.AppendAllText("") 會丟例外被下面默默吃掉。)
+        if (Env("XAMLCONTRAST_STATS_JOB_SUMMARY") == "true" &&
+            Env("GITHUB_STEP_SUMMARY") is { Length: > 0 } summary)
         {
             try
             {

@@ -193,15 +193,18 @@ public class CliStatsTests
     [InlineData(null, "DO_NOT_TRACK is set", "DO_NOT_TRACK= ")]
     [InlineData(null, "DO_NOT_TRACK is set", "DO_NOT_TRACK=1", "XAMLCONTRAST_SHARE_STATS=true", "CORNHSU_SHARE_STATS=on")] // DO_NOT_TRACK 永遠優先
     [InlineData("""{ "stats": { "share": true } }""", "DO_NOT_TRACK is set", "DO_NOT_TRACK=1")]                          // 設定檔說好也一樣
-    [InlineData(null, "CORNHSU_SHARE_STATS is 'false'", "CORNHSU_SHARE_STATS=false")]
-    [InlineData(null, "CORNHSU_SHARE_STATS is '0'", "CORNHSU_SHARE_STATS=0", "XAMLCONTRAST_SHARE_STATS=true")]
-    [InlineData(null, "XAMLCONTRAST_SHARE_STATS is 'false'", "XAMLCONTRAST_SHARE_STATS=false")]                       // Action 的 share-stats: false
-    [InlineData(null, "XAMLCONTRAST_SHARE_STATS is 'off'", "XAMLCONTRAST_SHARE_STATS=off")]
-    [InlineData(null, "XAMLCONTRAST_SHARE_STATS is 'no'", "XAMLCONTRAST_SHARE_STATS=no")]
-    [InlineData(null, "XAMLCONTRAST_SHARE_STATS is 'ture'", "XAMLCONTRAST_SHARE_STATS=ture")]                         // 打錯字 → 不送
-    [InlineData(null, "XAMLCONTRAST_SHARE_STATS is ' true'", "XAMLCONTRAST_SHARE_STATS= true")]                       // 多一個空白 → 不送
+    [InlineData(null, "CORNHSU_SHARE_STATS is set to something other than 1, true, yes or on", "CORNHSU_SHARE_STATS=false")]
+    [InlineData(null, "CORNHSU_SHARE_STATS is set to something other than 1, true, yes or on", "CORNHSU_SHARE_STATS=0", "XAMLCONTRAST_SHARE_STATS=true")]
+    [InlineData(null, "XAMLCONTRAST_SHARE_STATS is set to something other than 1, true, yes or on", "XAMLCONTRAST_SHARE_STATS=false")]                       // Action 的 share-stats: false
+    [InlineData(null, "XAMLCONTRAST_SHARE_STATS is set to something other than 1, true, yes or on", "XAMLCONTRAST_SHARE_STATS=off")]
+    [InlineData(null, "XAMLCONTRAST_SHARE_STATS is set to something other than 1, true, yes or on", "XAMLCONTRAST_SHARE_STATS=no")]
+    [InlineData(null, "XAMLCONTRAST_SHARE_STATS is set to something other than 1, true, yes or on", "XAMLCONTRAST_SHARE_STATS=ture")]                         // 打錯字 → 不送
+    [InlineData(null, "XAMLCONTRAST_SHARE_STATS is set to something other than 1, true, yes or on", "XAMLCONTRAST_SHARE_STATS= true")]                       // 多一個空白 → 不送
     [InlineData("""{ "stats": { "share": false } }""", "\"stats\": { \"share\": false } in xamlcontrast.config.json")]
     [InlineData("""{ "stats": { "share": false } }""", "\"stats\": { \"share\": false }", "XAMLCONTRAST_SHARE_STATS=true", "CORNHSU_SHARE_STATS=1")]
+    // ⚠ 這些原因字串刻意**不含環境變數的值**。原因會被 --stats-preview 印到 stderr,
+    //   而 CI 上 stderr 就是公開的建置日誌 —— 使用者在這個變數裡放了什麼都會被照抄出去。
+    //   之前是 $"{name} is '{v}' (...)"。別為了「訊息更有幫助」把值加回去。
     public void EachSwitchTurnsItOff(string? config, string reason, params string[] env)
     {
         using var collector = new PushStub(204, null, "No Content");
@@ -361,7 +364,10 @@ public class CliStatsTests
         var summary = Path.Combine(fx.Root, "summary.md");
         foreach (var ci in new[] { ("CI", "true"), ("CI", "TRUE"), ("GITHUB_ACTIONS", "true") })
         {
-            var env = Env(collector.Url, egress, ("CI", null), ci, ("GITHUB_STEP_SUMMARY", summary));
+            // job summary 那一行要 Action 明確要求（XAMLCONTRAST_STATS_JOB_SUMMARY=true）才寫，
+            // 見下面 JobSummaryNeedsTheActionToAskForIt。
+            var env = Env(collector.Url, egress, ("CI", null), ci,
+                ("GITHUB_STEP_SUMMARY", summary), ("XAMLCONTRAST_STATS_JOB_SUMMARY", "true"));
             var r = Cli.RunEnv(env, fx.Root);
             Assert.True(r.Exit == 0, r.ToString());
             Assert.Equal([CiLine], Lines(r.Err));
@@ -372,11 +378,46 @@ public class CliStatsTests
         Assert.All(lines[1..], l => Assert.StartsWith("**XamlContrast** — anonymous usage statistics sent (counts only", l));
         Assert.All(lines[1..], l => Assert.Contains("https://stats.cornhsu.com/", l));
 
-        var off = Cli.RunEnv(Env(collector.Url, egress, ("GITHUB_STEP_SUMMARY", summary), ("DO_NOT_TRACK", "1")), fx.Root);
+        var off = Cli.RunEnv(Env(collector.Url, egress, ("GITHUB_STEP_SUMMARY", summary),
+            ("XAMLCONTRAST_STATS_JOB_SUMMARY", "true"), ("DO_NOT_TRACK", "1")), fx.Root);
         Assert.Equal("", off.Err);
         Assert.Equal(4, File.ReadAllText(summary, Encoding.UTF8).Split('\n', StringSplitOptions.RemoveEmptyEntries).Length);
         Assert.Equal(3, collector.Requests.Count);
         Assert.Empty(egress.Requests);
+    }
+
+    /// <summary>
+    /// job summary 那一行是<b>本工具 Action 的行為</b>，不是「人在 GitHub Actions 裡」就該有的。
+    ///
+    /// <para>這條原本不成立：程式是「看到 <c>GITHUB_STEP_SUMMARY</c> 就寫」，所以自己在 workflow 裡
+    /// 呼叫 <c>xamlcontrast</c> 的人（沒用這個 Action）會在自己的 job summary 看到一段他沒要求過的
+    /// 匿名統計說明 —— 那是我們的話，不是他的。改成要 <c>XAMLCONTRAST_STATS_JOB_SUMMARY=true</c>
+    /// 才寫，而 <c>action.yml</c> 會設它，所以 Action 使用者的行為不變（上面那條測的就是那個路徑）。
+    /// 照 Parity 的 <c>PARITY_STATS_JOB_SUMMARY</c>。</para>
+    /// </summary>
+    [Fact]
+    public void JobSummaryNeedsTheActionToAskForIt()
+    {
+        using var collector = new PushStub(204, null, "No Content");
+        using var egress = new PushStub(502, null, "Bad Gateway");
+        using var fx = CliProjects.Passing().File("summary.md", "# earlier step\n");
+        var summary = Path.Combine(fx.Root, "summary.md");
+        var before = File.ReadAllText(summary, Encoding.UTF8);
+
+        // 在 GitHub Actions 裡、統計也真的送出去了,但沒人要求寫 job summary
+        var r = Cli.RunEnv(Env(collector.Url, egress, ("CI", null), ("GITHUB_ACTIONS", "true"),
+            ("GITHUB_STEP_SUMMARY", summary)), fx.Root);
+
+        Assert.True(r.Exit == 0, r.ToString());
+        Assert.Equal([CiLine], Lines(r.Err));            // stderr 的那一行照印(協定第 4 節)
+        Assert.Single(collector.Requests);                // 統計照送
+        Assert.Equal(before, File.ReadAllText(summary, Encoding.UTF8));  // 但別人的 job summary 一個字都沒動
+
+        // 空字串當沒設(否則 File.AppendAllText("") 會丟例外,被 catch 默默吃掉)
+        var blank = Cli.RunEnv(Env(collector.Url, egress, ("CI", null), ("GITHUB_ACTIONS", "true"),
+            ("GITHUB_STEP_SUMMARY", ""), ("XAMLCONTRAST_STATS_JOB_SUMMARY", "true")), fx.Root);
+        Assert.True(blank.Exit == 0, blank.ToString());
+        Assert.Equal(before, File.ReadAllText(summary, Encoding.UTF8));
     }
 
     [LinuxOnlyFact] // 第 4 節的本機：第一次要送的時候印完整說明、寫標記檔，之後不再印（照樣送）；預覽不印也不寫；標記寫不進去 → 下次照樣印。
