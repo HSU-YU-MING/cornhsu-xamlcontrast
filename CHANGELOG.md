@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 未發佈
+
+- **發版流程**(none):GitHub Release 的內容改成在**推上 nuget.org 之前**就抽好,
+  抽不到就直接擋下。原本抽取放在最後一步「Create GitHub Release」,抽不到會安靜退回
+  一句 `See CHANGELOG.md.` —— 而那一步跑到的時候套件已經不可逆地發出去了,在那裡失敗
+  救不回任何東西。現在抽取搬進最前面那個「CHANGELOG 頂端必須等於 tag」的守門:
+  唯一真的會中的情況(標題寫了但底下沒有內容)會在什麼都還沒發出去的時候被擋住,
+  此時刪 tag 重來還救得回來。抽出來的內容存進 `$RUNNER_TEMP`,發的時候用 `--notes-file`
+  讀,全程只抽一次,兩邊不會漂開。
+
 ## 1.4.3 — 2026-11-13
 
 **A security fix to 1.4.2's new coverage hint.** Nothing else changed; no finding moves.
