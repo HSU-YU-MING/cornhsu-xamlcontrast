@@ -17,6 +17,7 @@
     "failOn": "warn",
     "minCoverage": 50,
     "strictPalette": false,
+    "failOnNewUnresolved": false,
     "files": 5,
     "pairs": 0,
     "coverage": 0,
@@ -29,6 +30,8 @@
     "skipped": 1,
     "deadForeground": 0,
     "disabledExempt": 0,
+    "converterPairs": 0,
+    "uiComponentPairs": 0,
     "parseErrors": 0,
     "parseErrorFiles": [],
     "suppressed": 0,
@@ -46,13 +49,15 @@
       "file": "Capture/SelectionOverlayWindow.xaml",
       "line": 18,
       "reason": "no-ancestor-background",
-      "value": "#66000000"
+      "value": "#66000000",
+      "baseline": null
     },
     {
       "file": "Capture/SelectionOverlayWindow.xaml",
       "line": 33,
       "reason": "translucent-uncomposited",
-      "value": "#CC1E1E1E"
+      "value": "#CC1E1E1E",
+      "baseline": null
     }
   ],
   "findings": []

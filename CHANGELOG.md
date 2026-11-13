@@ -3,6 +3,42 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 1.4.1 — 2026-11-13
+
+**One fix: the scan no longer walks dot-directories.** No interface change; `report.json`
+`schemaVersion` and the baseline `keyVersion` are unchanged.
+
+### Fixed
+
+- **Directories whose name starts with `.` are excluded from the scan** (affects every version
+  since 1.0.0). `PaletteDetector` only skipped `bin` and `obj`, so a repository that keeps git
+  worktrees under `.claude/worktrees/` — or any XAML under `.git/` — had **every file in those
+  copies audited a second time**. The symptom is nasty because it is not wrong, only doubled:
+  finding counts and baselines grow, and by how much depends on how many worktrees happen to
+  exist on that machine, so the same commit gives a different snapshot on a developer's box
+  than in CI. Only directory segments are tested, so a dot-prefixed **file name** such as
+  `.editorconfig` is unaffected.
+
+  **Measured effect: none, on a normal layout.** None of the maintainer projects keeps XAML
+  under a dot-directory, and re-freezing their baselines moved no counter and no exit code
+  that this fix is responsible for; that is why it ships as a patch rather than a minor. If
+  your repository does have XAML under one, expect those findings to disappear — read the diff
+  before you re-freeze your baseline.
+
+### Internal
+
+- The maintainer baselines were re-frozen. Two of the three were written before 1.3.0 and 1.4.0
+  and were missing the fields those versions added (`failOnNewUnresolved`, `converterPairs`,
+  `uiComponentPairs`, `baseline` on unresolved entries) — the comparison only reads the summary
+  counters, the failing `file:line` and the exit code, so the stale format had gone unnoticed.
+  Their counters did not move. The third project's snapshot does change (two failures and one
+  warning are gone), but that is an accessibility fix made in **that application's** XAML, not
+  a change in this tool.
+- `scripts/verify-baselines.ps1` still names a fourth project, `celflow`, at a path that no
+  longer exists on the maintainer's machine, so that slot has not been compared for some time.
+  Left as-is pending a decision on where that project went; the script reports it in red and
+  carries on with the rest.
+
 ## 1.4.0 — 2026-11-10
 
 ### Upgrading
