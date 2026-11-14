@@ -19,6 +19,14 @@ body:
 
         Either way the report is useful to me. Write in English or 中文.
 
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you file
+      options:
+        - label: I searched the [existing issues](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/issues?q=is%3Aissue) and this hasn't been reported.
+          required: true
+
   - type: input
     id: version
     attributes:
@@ -93,3 +101,11 @@ body:
         the breakdown above is still enough to work with.
     validations:
       required: false
+
+  - type: checkboxes
+    id: participation
+    attributes:
+      label: Optional
+      options:
+        - label: I can run a build with a fix on my project to confirm it.
+        - label: AI helped write this report, and I've checked it against what I actually ran.
