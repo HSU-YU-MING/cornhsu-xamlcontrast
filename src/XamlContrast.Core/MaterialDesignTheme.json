@@ -409,6 +409,130 @@
       "#FFCF6679",
       "#FFB00020"
     ],
+    "MaterialDesignBackground": [
+      "#FF454545",
+      "#FFFFFFFF"
+    ],
+    "MaterialDesignBody": [
+      "#E5FFFFFF",
+      "#E5000000"
+    ],
+    "MaterialDesignBodyLight": [
+      "#7FFFFFFF",
+      "#7F000000"
+    ],
+    "MaterialDesignCardBackground": [
+      "#FF454545",
+      "#FFFFFFFF"
+    ],
+    "MaterialDesignCheckBoxDisabled": [
+      "#FF616161",
+      "#FFB9B9B9"
+    ],
+    "MaterialDesignCheckBoxOff": [
+      "#7FFFFFFF",
+      "#7F000000"
+    ],
+    "MaterialDesignChipBackground": [
+      "#0CFFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesignColumnHeader": [
+      "#B2FFFFFF",
+      "#B2000000"
+    ],
+    "MaterialDesignDarkBackground": [
+      "#FF303030",
+      "#FF303030"
+    ],
+    "MaterialDesignDarkForeground": [
+      "#FFFAFAFA",
+      "#FFFAFAFA"
+    ],
+    "MaterialDesignDataGridRowHoverBackground": [
+      "#19FFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesignDivider": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesignFlatButtonClick": [
+      "#19757575",
+      "#19757575"
+    ],
+    "MaterialDesignFlatButtonRipple": [
+      "#FFB9B9B9",
+      "#FFB9B9B9"
+    ],
+    "MaterialDesignLightBackground": [
+      "#FFFAFAFA",
+      "#FFFAFAFA"
+    ],
+    "MaterialDesignLightForeground": [
+      "#DD000000",
+      "#DD000000"
+    ],
+    "MaterialDesignPaper": [
+      "#FF323232",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesignSnackbarBackground": [
+      "#FFD8D8D8",
+      "#FF323232"
+    ],
+    "MaterialDesignSnackbarMouseOver": [
+      "#FFB9B9B9",
+      "#FF454545"
+    ],
+    "MaterialDesignSnackbarRipple": [
+      "#FFB9B9B9",
+      "#FFB9B9B9"
+    ],
+    "MaterialDesignTextAreaBorder": [
+      "#B2FFFFFF",
+      "#B2000000"
+    ],
+    "MaterialDesignTextAreaInactiveBorder": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "MaterialDesignTextBoxBorder": [
+      "#7FFFFFFF",
+      "#7F000000"
+    ],
+    "MaterialDesignTextFieldBoxBackground": [
+      "#19FFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesignTextFieldBoxDisabledBackground": [
+      "#0CFFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesignTextFieldBoxHoverBackground": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesignToolBackground": [
+      "#FFD8D8D8",
+      "#FFD8D8D8"
+    ],
+    "MaterialDesignToolBarBackground": [
+      "#FF212121",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesignToolForeground": [
+      "#FF616161",
+      "#FF616161"
+    ],
+    "MaterialDesignToolTipBackground": [
+      "#FFF1F1F1",
+      "#FF757575"
+    ],
+    "MaterialDesignValidationErrorBrush": [
+      "#FFCF6679",
+      "#FFB00020"
+    ],
     "Neutral100": [
       "#FF323232",
       "#FF323232"

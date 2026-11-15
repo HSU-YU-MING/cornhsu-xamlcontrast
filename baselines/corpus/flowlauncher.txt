@@ -3,8 +3,8 @@
 project: flowlauncher
 repo: https://github.com/Flow-Launcher/Flow.Launcher
 commit: 236c847977abfe72d73de8cd8d2d0e4896c53647
-tool-commit: 795b190+dirty
-frozen: 2026-11-15
+tool-commit: 2624906+dirty
+frozen: 2026-11-16
 exit: 3
 palette-mode: pair
 palette-degraded: False

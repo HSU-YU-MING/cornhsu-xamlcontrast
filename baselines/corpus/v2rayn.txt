@@ -3,12 +3,12 @@
 project: v2rayn
 repo: https://github.com/2dust/v2rayN
 commit: 2c90ed1a9438a499aaaea0b612ffd5d705970106
-tool-commit: 795b190+dirty
-frozen: 2026-11-15
+tool-commit: 2624906+dirty
+frozen: 2026-11-16
 exit: 3
 palette-mode: none
 palette-degraded: True
-palette-keys: 124
+palette-keys: 155
 single-theme: False
 files: 24
 pairs: 0

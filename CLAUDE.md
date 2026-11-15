@@ -288,6 +288,11 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - **三個主題函式庫的內建色票（1.5，`LibraryThemes.cs` + 內嵌的 `WpfUiTheme.json`／`MaterialDesignTheme.json`／`HandyControlTheme.json`）**：跟 WinUI 那條同一個形狀、同一份資料結構
   （`WinUiTheme.Data`、`WinUiTheme.Augment` 共用），差別只在**觸發條件**：只在專案引用 `Wpf.Ui` 時補
   （`ThemeLibraries.DetectInProject`），不是看 `{ThemeResource`。
+  ⚠ 野外數字的狀態（2026-11-15）：WPF-UI 有（Bloxstrap 111 → 37 個查不到的鍵）、MaterialDesign 有
+  （VisualHFT 配對 33 → 83、覆蓋率 17.7% → 44.6%、44 筆真 fail）、**HandyControl 還沒有**
+  （兩個消費端一個自己定義全部的鍵、一個幾乎不用靜態鍵）。MaterialDesign 那張表一定要收**舊鍵名**
+  （`MaterialDesignPaper`／`MaterialDesignBody`，v5 改名前的寫法）—— VisualHFT 的 50 筆查不到的鍵有 49 筆是它，
+  少了那一份整張表對真實 App 幾乎沒作用。
   ⚠ **MahApps 刻意沒有表**：它的主題檔是建置時產生的（`Theme.Template.xaml`／`Theme.Base.Template.xaml`，
   1077 個鍵、112 個 `{{佔位符}}`），repo 裡沒有任何一份帶具體色值的主題檔，值還跟 App 合併了哪個強調色有關 ——
   補它就是猜。`MahAppsHasNoTableOnPurpose` 把這個決定釘住，以免哪天有人「順手補齊」。

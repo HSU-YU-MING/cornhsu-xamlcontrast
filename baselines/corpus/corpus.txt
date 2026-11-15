@@ -35,6 +35,18 @@ materialdesign | https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToo
 wpfui | https://github.com/lepoco/wpfui | ffebacd61058170cf63864b7d5aa730cffff848a
 ilspy | https://github.com/icsharpcode/ILSpy | caff1a9549afc1a97b5319454fe602bfbde5ccde
 winuigallery | https://github.com/microsoft/WinUI-Gallery | 6de91feccadfbb0a796b71caedead5a2284f730e
+# 以下兩個補的是另一個洞（2026-11-15）：MaterialDesign 與 HandyControl 的內嵌色票表原本在語料上
+# **沒有消費端可以量測** —— 語料裡那兩個是函式庫自己的 repo，它們本來就定義了那些鍵，補的是洞、量不到差別。
+# 一張沒有野外數字的表只有單元測試釘著，而這個專案的憲法是「每條規則來自實查」。
+# 結果（2026-11-15 實測）：VisualHFT 讓 MaterialDesign 那張表有了數字 —— 配對 33 → 83、覆蓋率
+# 17.7% → 44.6%、查不到的鍵 50 → 0，並浮出 44 筆真的 fail（寫死的 White／LightGray 疊在
+# MaterialDesignPaper 上，淺色主題 1.13:1）。而且是它逼出「舊鍵名也要收」：那 50 筆裡有 49 筆是
+# MaterialDesignPaper（v5 改名前的寫法）。
+# HandyControl 那張表**還是沒有野外數字**：TwitchDownloader 自己定義了全部的鍵（它的價值在別處 ——
+# 413 組配對、54 筆真 fail，白字疊 #00BCD4 青色按鈕 2.30:1），GeekDesk 幾乎不用靜態鍵。照實記著。
+visualhft | https://github.com/visualHFT/VisualHFT | 65b1d1270336864768180f5fbf8bae348694847f
+twitchdownloader | https://github.com/lay295/TwitchDownloader | 8adfd8e5d31984ae1918b1fa0273f019dc29899f
+geekdesk | https://github.com/BookerLiu/GeekDesk | 7f0e228f7827d0cb2b18a72549494f4fa637b990
 # 以下四個是「用 NuGet 的主題庫」那一類（2026-11-15 補）
 networkmanager | https://github.com/BornToBeRoot/NETworkManager.git | 350d81fa7257d1f436187c767706e789013c077a
 quicklook | https://github.com/QL-Win/QuickLook | e2f19a0ba9097024cc6520dd03735abd26f425f8

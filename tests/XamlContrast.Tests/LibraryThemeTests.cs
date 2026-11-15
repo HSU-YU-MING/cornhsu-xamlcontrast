@@ -93,7 +93,12 @@ public class LibraryThemeTests
           .File("Themes/Light.xaml", File.ReadAllText(Path.Combine(src, dir, "MaterialDesignTheme.Light.xaml")))
           // 兩份主題檔只有別名,色值在這一份（兩個主題共用,中性檔只補洞）
           .File("Themes/BaseColors.xaml",
-                File.ReadAllText(Path.Combine(src, dir, "Internal/MaterialDesignTheme.BaseThemeColors.xaml")));
+                File.ReadAllText(Path.Combine(src, dir, "Internal/MaterialDesignTheme.BaseThemeColors.xaml")))
+          // ⚠ 舊鍵名也要收:真實的 App 用的多半是 MaterialDesignPaper／MaterialDesignBody 這些
+          //   （v5 改名之前的寫法）。語料實測 VisualHFT 的 50 筆 unknown-palette-key 裡有 49 筆是
+          //   MaterialDesignPaper —— 少了這一份,整張表對真實消費端幾乎沒有作用
+          .File("Themes/Obsolete.xaml",
+                File.ReadAllText(Path.Combine(src, dir, "MaterialDesignTheme.ObsoleteBrushes.xaml")));
         var (entries, colors) = Read(fx);
 
         Write($"MaterialDesignInXAML/MaterialDesignInXamlToolkit@{sha[..Math.Min(12, sha.Length)]}",
@@ -143,6 +148,11 @@ public class LibraryThemeTests
         Assert.Equal(["#FF323232", "#FFF1F1F1"], t.Entries["MaterialDesign.Brush.Background"]);
         Assert.Equal(["#FF454545", "#FFFFFFFF"], t.Entries["MaterialDesign.Brush.Card.Background"]);
         Assert.Equal(["#E5FFFFFF", "#E5000000"], t.Entries["MaterialDesign.Brush.Foreground"]);
+        // ⚠ 舊鍵名(v5 改名前)也要在:真實的 App 用的多半是這些。語料實測 VisualHFT 的 50 筆
+        //   unknown-palette-key 有 49 筆是 MaterialDesignPaper —— 少了它們,整張表對真實消費端幾乎沒作用
+        //   (配對 33 → 83、覆蓋率 17.7% → 44.6% 就是補上它們的差別)
+        Assert.Equal(t.Entries["MaterialDesign.Brush.Background"], t.Entries["MaterialDesignPaper"]);
+        Assert.Equal(t.Entries["MaterialDesign.Brush.Foreground"], t.Entries["MaterialDesignBody"]);
     }
 
     [Fact] // HandyControl 的那份:色值在 Colors/ColorsDark，brush 在 Brushes.xaml 引用它們 —— 兩段要接得起來

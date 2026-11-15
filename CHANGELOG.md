@@ -56,6 +56,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   *A `v2rayN`-shaped project — one that defines no palette at all — used to get a self-contradicting palette
   line ("no palette found … ; + 124 brushes"); it now says that the whole palette is the library's defaults,
   and `paletteDegraded` stays true because the project's own palette is still unknown.*
+
+  **Measured on real consumers** (three were added to the corpus for exactly this — VisualHFT, TwitchDownloader
+  and GeekDesk — because the libraries' own repositories define their keys and so can't show the tables' effect):
+  - WPF-UI: Bloxstrap's unresolvable keys 111 → 37, and with `rootBackground` as the hint now suggests,
+    0 graded pairs → 55 at 46.2%. QuickLook 49 → 7.
+  - MaterialDesign: VisualHFT **33 → 83 graded pairs, coverage 17.7% → 44.6%, unknown keys 50 → 0, and
+    44 real failures surfaced** — hard-coded `White` / `LightGray` text on `MaterialDesignPaper`, which is
+    #323232 in the dark theme but #F1F1F1 in the light one (1.13:1 and 1.33:1). That only worked once the
+    **legacy key names** (`MaterialDesignPaper`, `MaterialDesignBody` — the names before the v5 rename) were
+    included: 49 of VisualHFT's 50 unresolvable keys were `MaterialDesignPaper`, so without them the table
+    was nearly useless to real apps.
+  - HandyControl: **no measured effect yet.** Both consumers tried define their own keys (TwitchDownloader)
+    or barely use static ones (GeekDesk). The table is correct and tested, but it has no field evidence —
+    stated here rather than implied, since "every rule comes from a real project" is this project's rule.
 - **WPF-UI's built-in theme colours ship with the tool**, for projects that reference `Wpf.Ui`
   (`src/XamlContrast.Core/WpfUiTheme.json`: 310 brushes, 88 colours, read from that library's own
   `Dark.xaml` / `Light.xaml` at a pinned commit — MIT, see `THIRD-PARTY-NOTICES.md`). This is the same
