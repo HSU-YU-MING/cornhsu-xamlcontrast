@@ -203,6 +203,12 @@ tried in this order, and the one that ran is always named on the first line of t
    (MIT, see THIRD-PARTY-NOTICES.md); the commit is named on the palette line. WPF projects are not affected.
    A page's background usually comes from the window (Mica or the default page brush), which the tool can't see —
    set `rootBackground` for that.
+   **WPF-UI:** a project that references `Wpf.Ui` gets that library's built-in theme colours the same way
+   (`ApplicationBackgroundBrush`, `WindowBackground`, `TextFillColorPrimaryBrush`… — 310 brushes and 88 colours,
+   from lepoco/wpfui at a pinned commit, MIT). Same rules: only for projects that reference it, lowest layer,
+   the project's own definition always wins, the 27 accent-derived keys are not guessed, high-contrast themes are
+   not included, and the palette line names the commit. Measured on a public WPF-UI app (Bloxstrap): unresolvable
+   keys 111 → 37, and with `rootBackground` set as the tool now suggests, 0 graded pairs → 55 at 46.2% coverage.
    **Aliases** — `<StaticResource x:Key="A" ResourceKey="B"/>` (also the `DynamicResource` / `ThemeResource` elements) —
    are followed per theme, through chains, and after WinUI's defaults are in, so an alias to a framework key resolves;
    one whose target can't be found is `unknown-palette-key` naming the target. A **colour key inside a brush**

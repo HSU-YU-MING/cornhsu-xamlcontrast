@@ -5,8 +5,8 @@
   "summary": {
     "paletteMode": "csharp",
     "paletteDegraded": false,
-    "paletteDetail": "auto-detected C# source of truth: Services\\SystemThemeService.cs (38 keys; assuming tuple = key, dark, light)",
-    "paletteKeys": 38,
+    "paletteDetail": "auto-detected C# source of truth: Services\\SystemThemeService.cs (37 keys; assuming tuple = key, dark, light)",
+    "paletteKeys": 37,
     "singleTheme": false,
     "configLoaded": false,
     "thresholds": {
@@ -19,12 +19,11 @@
     "strictPalette": false,
     "failOnNewUnresolved": false,
     "files": 15,
-    "pairs": 170,
-    "coverage": 95.5,
-    "unresolved": 8,
+    "pairs": 222,
+    "coverage": 97.8,
+    "unresolved": 5,
     "unresolvedBy": {
       "in-style-template": 3,
-      "translucent-uncomposited": 3,
       "over-sibling-content": 2
     },
     "unknownKeys": {},
@@ -36,77 +35,58 @@
     "parseErrors": 0,
     "parseErrorFiles": [],
     "suppressed": 0,
+    "stateColors": 0,
     "invalidIgnoreCount": 0,
     "invalidIgnores": [],
     "counts": {
       "fail": 0,
       "warn": 0,
-      "ok": 167,
+      "ok": 219,
       "decorative": 3
     }
   },
   "unresolvedSites": [
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 82,
+      "line": 79,
       "reason": "in-style-template",
       "value": "{DynamicResource InfoBarWarningIcon}",
       "baseline": null
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 256,
+      "line": 268,
       "reason": "in-style-template",
       "value": "{DynamicResource Fg1}",
       "baseline": null
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 309,
-      "reason": "translucent-uncomposited",
-      "value": "Transparent",
-      "baseline": null
-    },
-    {
-      "file": "Themes/DarkTheme.xaml",
-      "line": 331,
-      "reason": "translucent-uncomposited",
-      "value": "Transparent",
-      "baseline": null
-    },
-    {
-      "file": "Themes/DarkTheme.xaml",
-      "line": 358,
+      "line": 370,
       "reason": "in-style-template",
       "value": "{DynamicResource Fg1}",
-      "baseline": null
-    },
-    {
-      "file": "Themes/DarkTheme.xaml",
-      "line": 342,
-      "reason": "translucent-uncomposited",
-      "value": "Transparent",
       "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 240,
+      "line": 230,
       "reason": "over-sibling-content",
       "value": "\u003CImage\u003E",
       "baseline": null
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 333,
+      "line": 323,
       "reason": "over-sibling-content",
       "value": "\u003CImage\u003E",
       "baseline": null
     }
   ],
+  "stateColorSites": [],
   "findings": [
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 96,
+      "line": 93,
       "element": "Style[Window]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
@@ -134,7 +114,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 149,
+      "line": 146,
       "element": "Style[DarkBtn]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg3}",
@@ -162,7 +142,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 149,
+      "line": 146,
       "element": "Style[DarkBtn]/trigger",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg4}",
@@ -190,7 +170,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 149,
+      "line": 146,
       "element": "Style[DarkBtn]/trigger",
       "fg": "White",
       "bg": "{PurpleD}",
@@ -218,7 +198,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 192,
+      "line": 189,
       "element": "Style[AccentBtn]/base",
       "fg": "White",
       "bg": "{PurpleD}",
@@ -246,7 +226,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 192,
+      "line": 189,
       "element": "Style[AccentBtn]/trigger",
       "fg": "White",
       "bg": "{PurpleDHover}",
@@ -274,7 +254,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 211,
+      "line": 223,
       "element": "Style[DangerBtn]/base",
       "fg": "{DynamicResource DangerFg}",
       "bg": "{DangerBg}",
@@ -302,7 +282,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 211,
+      "line": 223,
       "element": "Style[DangerBtn]/trigger",
       "fg": "{DynamicResource DangerFg}",
       "bg": "{DangerBgHover}",
@@ -330,7 +310,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 211,
+      "line": 223,
       "element": "Style[DangerBtn]/trigger",
       "fg": "White",
       "bg": "{DangerSolid}",
@@ -358,7 +338,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 234,
+      "line": 246,
       "element": "Style[ComboBox]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg2}",
@@ -386,7 +366,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 289,
+      "line": 301,
       "element": "Style[ComboBoxItem]/trigger",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg3}",
@@ -414,7 +394,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 342,
+      "line": 354,
       "element": "Style[MenuItem]/trigger",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg3}",
@@ -442,7 +422,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 403,
+      "line": 415,
       "element": "Style[ToolTip]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg2}",
@@ -464,6 +444,34 @@
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/ApiKeyDialog.xaml",
+      "line": 1,
+      "element": "Window",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg1}",
+      "ratioDark": 15,
+      "ratioLight": 15.52,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 13,
       "theme": null,
       "component": null,
       "baseline": null
@@ -554,6 +562,34 @@
     },
     {
       "file": "Views/ApiKeyDialog.xaml",
+      "line": 37,
+      "element": "CheckBox",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg1}",
+      "ratioDark": 15,
+      "ratioLight": 15.52,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/ApiKeyDialog.xaml",
       "line": 38,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg0}",
@@ -582,6 +618,34 @@
     },
     {
       "file": "Views/ApiKeyDialog.xaml",
+      "line": 41,
+      "element": "CheckBox",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg1}",
+      "ratioDark": 15,
+      "ratioLight": 15.52,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/ApiKeyDialog.xaml",
       "line": 42,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg0}",
@@ -604,6 +668,34 @@
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/ApiKeyDialog.xaml",
+      "line": 47,
+      "element": "CheckBox",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg1}",
+      "ratioDark": 15,
+      "ratioLight": 15.52,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
       "theme": null,
       "component": null,
       "baseline": null
@@ -688,6 +780,34 @@
       "isText": true,
       "isLargeText": false,
       "fontSize": 11,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/ChoiceDialog.xaml",
+      "line": 1,
+      "element": "Window",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg1}",
+      "ratioDark": 15,
+      "ratioLight": 15.52,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 13,
       "theme": null,
       "component": null,
       "baseline": null
@@ -890,6 +1010,34 @@
     },
     {
       "file": "Views/ClipLibraryView.xaml",
+      "line": 122,
+      "element": "TextBlock",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{DangerBg}",
+      "ratioDark": 8.02,
+      "ratioLight": 14.59,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#7A2E2D"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#FDE7E9"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/ClipLibraryView.xaml",
       "line": 125,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
@@ -912,6 +1060,34 @@
       "isText": true,
       "isLargeText": false,
       "fontSize": 9,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/ClipLibraryView.xaml",
+      "line": 143,
+      "element": "ListBox",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg0}",
+      "ratioDark": 16.28,
+      "ratioLight": 14.32,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
       "theme": null,
       "component": null,
       "baseline": null
@@ -968,6 +1144,34 @@
       "isText": true,
       "isLargeText": false,
       "fontSize": 11,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/ExportSettingsDialog.xaml",
+      "line": 1,
+      "element": "Window",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg1}",
+      "ratioDark": 15,
+      "ratioLight": 15.52,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 13,
       "theme": null,
       "component": null,
       "baseline": null
@@ -1506,6 +1710,34 @@
     },
     {
       "file": "Views/GenerateDialog.xaml",
+      "line": 1,
+      "element": "Window",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg1}",
+      "ratioDark": 15,
+      "ratioLight": 15.52,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/GenerateDialog.xaml",
       "line": 27,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
@@ -1660,6 +1892,34 @@
         "light": {
           "fg": "#5A5A5A",
           "bg": "#FBFBFB"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/GenerateDialog.xaml",
+      "line": 86,
+      "element": "TextBlock",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{InfoBarWarningBackground}",
+      "ratioDark": 10.27,
+      "ratioLight": 15.65,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#433519"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#FFF4CE"
         }
       },
       "threshold": 4.5,
@@ -2038,6 +2298,34 @@
     },
     {
       "file": "Views/GenerateDialog.xaml",
+      "line": 235,
+      "element": "TextBlock",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{InfoBarWarningBackground}",
+      "ratioDark": 10.27,
+      "ratioLight": 15.65,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#433519"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#FFF4CE"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/GenerateDialog.xaml",
       "line": 139,
       "element": "Style[Button]/trigger",
       "fg": "White",
@@ -2144,6 +2432,90 @@
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/MainWindow.xaml",
+      "line": 1,
+      "element": "Window",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg1}",
+      "ratioDark": 15,
+      "ratioLight": 15.52,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/MessageDialog.xaml",
+      "line": 1,
+      "element": "Window",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg1}",
+      "ratioDark": 15,
+      "ratioLight": 15.52,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/MessageDialog.xaml",
+      "line": 21,
+      "element": "TextBlock",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg1}",
+      "ratioDark": 15,
+      "ratioLight": 15.52,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 3,
+      "category": "ok",
+      "symmetry": null,
+      "isText": false,
+      "isLargeText": false,
+      "fontSize": 20,
       "theme": null,
       "component": null,
       "baseline": null
@@ -2598,7 +2970,35 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 66,
+      "line": 1,
+      "element": "Window",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg1}",
+      "ratioDark": 15,
+      "ratioLight": 15.52,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/RegenerateWorkspaceWindow.xaml",
+      "line": 56,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
@@ -2626,7 +3026,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 70,
+      "line": 60,
       "element": "TextBlock",
       "fg": "{DynamicResource Purple}",
       "bg": "{BgDeep}",
@@ -2654,7 +3054,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 87,
+      "line": 77,
       "element": "TextBlock\u2295Style[PaneHeader]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -2682,7 +3082,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 92,
+      "line": 82,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -2710,7 +3110,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 131,
+      "line": 121,
       "element": "TextBlock",
       "fg": "#ECEAFB",
       "bg": "{PurpleD}",
@@ -2738,7 +3138,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 135,
+      "line": 125,
       "element": "TextBlock\u2295Style[inline]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -2766,7 +3166,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 135,
+      "line": 125,
       "element": "TextBlock\u2295Style[inline]/trigger",
       "fg": "{DynamicResource Purple}",
       "bg": "{Bg0}",
@@ -2794,7 +3194,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 161,
+      "line": 151,
       "element": "TextBlock\u2295Style[PaneHeader]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -2822,7 +3222,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 186,
+      "line": 176,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -2850,7 +3250,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 208,
+      "line": 198,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -2878,7 +3278,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 211,
+      "line": 201,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -2906,7 +3306,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 282,
+      "line": 272,
       "element": "TextBlock\u2295Style[PaneHeader]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -2934,7 +3334,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 297,
+      "line": 287,
       "element": "TextBlock\u2295Style[inline]/base",
       "fg": "{DynamicResource BadgeWarnFg}",
       "bg": "{BadgeWarnBg}",
@@ -2962,7 +3362,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 297,
+      "line": 287,
       "element": "TextBlock\u2295Style[inline]/trigger",
       "fg": "{DynamicResource BadgeOkFg}",
       "bg": "{BadgeWarnBg}",
@@ -2990,7 +3390,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 325,
+      "line": 315,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -3018,8 +3418,92 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 350,
+      "line": 340,
       "element": "TextBlock",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{BgDeep}",
+      "ratioDark": 7.43,
+      "ratioLight": 6.9,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#0D0D0D"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#FFFFFF"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/RegenerateWorkspaceWindow.xaml",
+      "line": 373,
+      "element": "TextBlock\u2295Style[FieldLabel]/base",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{BgDeep}",
+      "ratioDark": 7.43,
+      "ratioLight": 6.9,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#0D0D0D"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#FFFFFF"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/RegenerateWorkspaceWindow.xaml",
+      "line": 374,
+      "element": "RadioButton",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{BgDeep}",
+      "ratioDark": 7.43,
+      "ratioLight": 6.9,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#0D0D0D"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#FFFFFF"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/RegenerateWorkspaceWindow.xaml",
+      "line": 379,
+      "element": "RadioButton",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
       "ratioDark": 7.43,
@@ -3047,34 +3531,6 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 383,
-      "element": "TextBlock\u2295Style[FieldLabel]/base",
-      "fg": "{DynamicResource Fg1}",
-      "bg": "{BgDeep}",
-      "ratioDark": 7.43,
-      "ratioLight": 6.9,
-      "colors": {
-        "dark": {
-          "fg": "#A0A0A0",
-          "bg": "#0D0D0D"
-        },
-        "light": {
-          "fg": "#5A5A5A",
-          "bg": "#FFFFFF"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 11,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 384,
       "element": "RadioButton",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
@@ -3102,63 +3558,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 389,
-      "element": "RadioButton",
-      "fg": "{DynamicResource Fg1}",
-      "bg": "{BgDeep}",
-      "ratioDark": 7.43,
-      "ratioLight": 6.9,
-      "colors": {
-        "dark": {
-          "fg": "#A0A0A0",
-          "bg": "#0D0D0D"
-        },
-        "light": {
-          "fg": "#5A5A5A",
-          "bg": "#FFFFFF"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 12,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 393,
-      "element": "RadioButton",
-      "fg": "{DynamicResource Fg1}",
-      "bg": "{BgDeep}",
-      "ratioDark": 7.43,
-      "ratioLight": 6.9,
-      "colors": {
-        "dark": {
-          "fg": "#A0A0A0",
-          "bg": "#0D0D0D"
-        },
-        "light": {
-          "fg": "#5A5A5A",
-          "bg": "#FFFFFF"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 12,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 401,
+      "line": 391,
       "element": "TextBlock\u2295Style[FieldLabel]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
@@ -3186,7 +3586,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 408,
+      "line": 398,
       "element": "TextBlock\u2295Style[FieldLabel]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
@@ -3214,7 +3614,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 412,
+      "line": 402,
       "element": "TextBlock\u2295Style[FieldLabel]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
@@ -3242,7 +3642,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 420,
+      "line": 410,
       "element": "CheckBox",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
@@ -3270,7 +3670,35 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 427,
+      "line": 415,
+      "element": "TextBlock",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{BgDeep}",
+      "ratioDark": 16.75,
+      "ratioLight": 17.22,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#0D0D0D"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#FFFFFF"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/RegenerateWorkspaceWindow.xaml",
+      "line": 417,
       "element": "Run",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
@@ -3298,7 +3726,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 442,
+      "line": 432,
       "element": "TextBlock\u2295Style[FieldLabel]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
@@ -3326,7 +3754,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 443,
+      "line": 433,
       "element": "TextBox",
       "fg": "{DynamicResource Fg0}",
       "bg": "{BgDeep}",
@@ -3354,7 +3782,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 453,
+      "line": 443,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
@@ -3382,7 +3810,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 458,
+      "line": 448,
       "element": "TextBlock",
       "fg": "{DynamicResource Purple}",
       "bg": "{Bg1}",
@@ -3410,7 +3838,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 477,
+      "line": 467,
       "element": "TextBlock",
       "fg": "White",
       "bg": "#99000000 over {Bg1}",
@@ -3438,35 +3866,7 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 29,
-      "element": "Style[CandidateBtn]/trigger",
-      "fg": "White",
-      "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
-      "colors": {
-        "dark": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        },
-        "light": {
-          "fg": "#FFFFFF",
-          "bg": "#534AB7"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 12,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/RegenerateWorkspaceWindow.xaml",
-      "line": 45,
+      "line": 35,
       "element": "Style[NumBox]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{BgDeep}",
@@ -3606,6 +4006,34 @@
     },
     {
       "file": "Views/TextInputDialog.xaml",
+      "line": 1,
+      "element": "Window",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg1}",
+      "ratioDark": 15,
+      "ratioLight": 15.52,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/TextInputDialog.xaml",
       "line": 15,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
@@ -3690,7 +4118,63 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 152,
+      "line": 120,
+      "element": "TextBlock",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{DangerBg}",
+      "ratioDark": 8.02,
+      "ratioLight": 14.59,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#7A2E2D"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#FDE7E9"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 133,
+      "element": "TextBlock",
+      "fg": "White",
+      "bg": "{PurpleD}",
+      "ratioDark": 6.93,
+      "ratioLight": 6.93,
+      "colors": {
+        "dark": {
+          "fg": "#FFFFFF",
+          "bg": "#534AB7"
+        },
+        "light": {
+          "fg": "#FFFFFF",
+          "bg": "#534AB7"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 157,
       "element": "TextBlock",
       "fg": "{DynamicResource Purple}",
       "bg": "{BgDeep}",
@@ -3718,7 +4202,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 154,
+      "line": 159,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
@@ -3740,62 +4224,6 @@
       "isText": true,
       "isLargeText": false,
       "fontSize": 13,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/TimelineView.xaml",
-      "line": 156,
-      "element": "TextBlock",
-      "fg": "{DynamicResource Fg1}",
-      "bg": "{BgDeep}",
-      "ratioDark": 7.43,
-      "ratioLight": 6.9,
-      "colors": {
-        "dark": {
-          "fg": "#A0A0A0",
-          "bg": "#0D0D0D"
-        },
-        "light": {
-          "fg": "#5A5A5A",
-          "bg": "#FFFFFF"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 13,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/TimelineView.xaml",
-      "line": 158,
-      "element": "TextBlock",
-      "fg": "{DynamicResource Fg1}",
-      "bg": "{BgDeep}",
-      "ratioDark": 7.43,
-      "ratioLight": 6.9,
-      "colors": {
-        "dark": {
-          "fg": "#A0A0A0",
-          "bg": "#0D0D0D"
-        },
-        "light": {
-          "fg": "#5A5A5A",
-          "bg": "#FFFFFF"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 11,
       "theme": null,
       "component": null,
       "baseline": null
@@ -3823,7 +4251,7 @@
       "symmetry": null,
       "isText": true,
       "isLargeText": false,
-      "fontSize": 11,
+      "fontSize": 13,
       "theme": null,
       "component": null,
       "baseline": null
@@ -3858,20 +4286,48 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 171,
+      "line": 166,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
-      "bg": "{Bg0}",
-      "ratioDark": 7.22,
-      "ratioLight": 5.73,
+      "bg": "{BgDeep}",
+      "ratioDark": 7.43,
+      "ratioLight": 6.9,
       "colors": {
         "dark": {
           "fg": "#A0A0A0",
-          "bg": "#111111"
+          "bg": "#0D0D0D"
         },
         "light": {
           "fg": "#5A5A5A",
-          "bg": "#EAEAEA"
+          "bg": "#FFFFFF"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 168,
+      "element": "TextBlock",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{BgDeep}",
+      "ratioDark": 7.43,
+      "ratioLight": 6.9,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#0D0D0D"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#FFFFFF"
         }
       },
       "threshold": 4.5,
@@ -3907,6 +4363,34 @@
       "symmetry": null,
       "isText": true,
       "isLargeText": false,
+      "fontSize": 11,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 181,
+      "element": "TextBlock",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
       "fontSize": 10,
       "theme": null,
       "component": null,
@@ -3914,7 +4398,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 190,
+      "line": 195,
       "element": "CheckBox",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -3942,7 +4426,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 200,
+      "line": 205,
       "element": "TextBlock",
       "fg": "{DynamicResource Green}",
       "bg": "{BgDeep}",
@@ -3970,7 +4454,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 214,
+      "line": 219,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -3998,7 +4482,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 219,
+      "line": 224,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg0}",
       "bg": "{BgDeep}",
@@ -4026,7 +4510,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 225,
+      "line": 230,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -4054,7 +4538,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 244,
+      "line": 249,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -4082,7 +4566,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 250,
+      "line": 255,
       "element": "Button\u2295Style[\u2192IconBtn]/base",
       "fg": "{DynamicResource Green}",
       "bg": "{Bg3}",
@@ -4110,7 +4594,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 250,
+      "line": 255,
       "element": "Button\u2295Style[\u2192IconBtn]/trigger",
       "fg": "{DynamicResource Green}",
       "bg": "{Bg4}",
@@ -4138,7 +4622,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 250,
+      "line": 255,
       "element": "Button\u2295Style[\u2192IconBtn]/trigger",
       "fg": "White",
       "bg": "{PurpleD}",
@@ -4166,7 +4650,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 250,
+      "line": 255,
       "element": "Button\u2295Style[\u2192IconBtn]/trigger",
       "fg": "{DynamicResource RedOnBtn}",
       "bg": "{Bg3}",
@@ -4194,7 +4678,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 280,
+      "line": 285,
       "element": "Button\u2295Style[\u2192IconBtn]/base",
       "fg": "{DynamicResource BlueOnBtn}",
       "bg": "{Bg3}",
@@ -4222,7 +4706,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 280,
+      "line": 285,
       "element": "Button\u2295Style[\u2192IconBtn]/trigger",
       "fg": "{DynamicResource BlueOnBtn}",
       "bg": "{Bg4}",
@@ -4250,7 +4734,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 280,
+      "line": 285,
       "element": "Button\u2295Style[\u2192IconBtn]/trigger",
       "fg": "White",
       "bg": "{PurpleD}",
@@ -4278,7 +4762,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 280,
+      "line": 285,
       "element": "Button\u2295Style[\u2192IconBtn]/trigger",
       "fg": "{DynamicResource RedOnBtn}",
       "bg": "{Bg3}",
@@ -4306,7 +4790,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 331,
+      "line": 336,
       "element": "TextBlock",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
@@ -4334,7 +4818,91 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 379,
+      "line": 367,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg1}",
+      "ratioDark": 6.66,
+      "ratioLight": 6.22,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 369,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg1}",
+      "ratioDark": 6.66,
+      "ratioLight": 6.22,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 371,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg1}",
+      "ratioDark": 6.66,
+      "ratioLight": 6.22,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 384,
       "element": "TextBlock",
       "fg": "#9A9A9A",
       "bg": "#000000",
@@ -4362,7 +4930,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 423,
+      "line": 428,
       "element": "Button\u2295Style[CellDeleteBtn]/base",
       "fg": "#FFFFFF",
       "bg": "{DangerSolid}",
@@ -4390,7 +4958,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 437,
+      "line": 442,
       "element": "TextBlock",
       "fg": "#7AA87A",
       "bg": "#0A180A",
@@ -4418,7 +4986,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 453,
+      "line": 458,
       "element": "TextBlock",
       "fg": "#7A7AA8",
       "bg": "#0A0A18",
@@ -4446,7 +5014,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 468,
+      "line": 473,
       "element": "Polygon",
       "fg": "{DynamicResource Red}",
       "bg": "{Bg0}",
@@ -4474,7 +5042,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 470,
+      "line": 475,
       "element": "Rectangle",
       "fg": "{DynamicResource Red}",
       "bg": "{Bg0}",
@@ -4580,6 +5148,874 @@
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 35,
+      "element": "Menu",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 36,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 37,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 38,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 39,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 41,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 42,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 43,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 45,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 46,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 48,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 49,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 51,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 55,
+      "element": "Menu",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 56,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 57,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 58,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 60,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 61,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 63,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 67,
+      "element": "Menu",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 68,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 69,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 70,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 72,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 73,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 74,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 75,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 79,
+      "element": "Menu",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 80,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/WorkspaceView.xaml",
+      "line": 81,
+      "element": "MenuItem",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg0}",
+      "ratioDark": 7.22,
+      "ratioLight": 5.73,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
       "theme": null,
       "component": null,
       "baseline": null

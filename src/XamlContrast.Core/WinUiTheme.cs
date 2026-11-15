@@ -62,6 +62,8 @@ internal static class WinUiTheme
     {
         if (!UsesThemeResource(root)) return;
         var data = Current;
+        // 同 WpfUiTheme：補進來的鍵要記著是工具給的（覆蓋率提示會引用它）
+        foreach (var k in data.Entries.Keys.Where(k => !d.Palette.Entries.ContainsKey(k))) d.FrameworkKeys.Add(k);
         var added = Augment(d.Palette, d.DroppedKeys, data);
         foreach (var scope in d.Scopes ?? []) Augment(scope.Palette, d.DroppedKeys, data);
         if (added == 0) return;

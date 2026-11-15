@@ -35,6 +35,7 @@
     "parseErrors": 0,
     "parseErrorFiles": [],
     "suppressed": 0,
+    "stateColors": 0,
     "invalidIgnoreCount": 0,
     "invalidIgnores": [],
     "counts": {
@@ -60,5 +61,6 @@
       "baseline": null
     }
   ],
+  "stateColorSites": [],
   "findings": []
 }

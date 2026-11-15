@@ -108,7 +108,18 @@ public static partial class Report
             return sb.ToString();
         }
 
-        if ((noBg + overNothing) * 2 < r.Unresolved) return null;
+        // 門檻：rootBackground 補得回來的那一類要是**單一最大原因**，而且不是零星幾筆。
+        // ⚠ 1.5 之前是「過半」，而實測（Bloxstrap）原因分散時就什麼都不印：
+        //   no-ancestor-background 54、unknown-palette-key 37、bound-or-gradient 27 —— 一個都不過半，
+        //   於是使用者只看到「0 組配對、exit 3」，沒有任何下一步。而那個專案照提示設一行 rootBackground
+        //   就從 0 組配對變成 55 組、覆蓋率 46.2%。
+        //   「rootBackground 幫不上忙」才是不印的理由（硬邊界佔大宗那條測試顧的就是這個），
+        //   不是「它只能幫一半」。
+        var fixable = noBg + overNothing;
+        var otherCauses = r.UnresolvedBy
+            .Where(kv => kv.Key is not (UnresolvedReason.NoAncestorBackground or UnresolvedReason.TranslucentUncomposited))
+            .Select(kv => kv.Value).DefaultIfEmpty(0).Max();
+        if (fixable == 0 || fixable < otherCauses || fixable * 4 < r.Unresolved) return null;
         var counts = overNothing == 0
             ? string.Create(inv, $"{noBg} of them are 'no-ancestor-background'")
             : string.Create(inv, $"{noBg + overNothing} of them have nothing underneath " +
@@ -141,8 +152,14 @@ public static partial class Report
             sb.AppendLine("        NuGet package (compiled into the assembly), invisible to static analysis.");
             if (ThemeLibraries.BackgroundKeyIn(lib, r.Detection.Palette) is { } key)
             {
-                sb.AppendLine("        Your own theme files do declare its window background key, so one line in");
-                sb.AppendLine("        xamlcontrast.config.json is enough:");
+                // ⚠ 那個鍵可能是工具自己補的（WPF-UI 的內建色票,見 WpfUiTheme）——
+                //   說成「你的主題檔有宣告」就是假話。那一行設定照樣有效,但要說清楚值從哪來
+                sb.AppendLine(r.Detection.FrameworkKeys.Contains(key)
+                    ? "        Its window background key resolves here from the library defaults this tool ships"
+                    : "        Your own theme files do declare its window background key, so one line in");
+                sb.AppendLine(r.Detection.FrameworkKeys.Contains(key)
+                    ? "        (your repo doesn't declare it), so one line in xamlcontrast.config.json is enough:"
+                    : "        xamlcontrast.config.json is enough:");
                 sb.AppendLine(string.Create(inv, $$"""          { "rootBackground": "{{key}}" }"""));
                 sb.Append("        Measured on a public MahApps app: 135 pairs at 9.4% coverage -> 1161 at 83.5%.");
             }

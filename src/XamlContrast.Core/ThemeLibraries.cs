@@ -27,6 +27,9 @@ internal static class ThemeLibraries
     /// <param name="BackgroundKeys">視窗底色鍵的候選，依「函式庫自己用得最多的」排序。</param>
     internal sealed record Library(string Name, string[] PackMarkers, string[] ElementMarkers, string[] BackgroundKeys);
 
+    /// <summary>名字的常數（補預設色票時要比對它，不要拿字串字面值到處寫）。</summary>
+    internal const string WpfUi = "WPF-UI";
+
     private static readonly Library[] All =
     [
         // MahApps.Metro：Styles 裡 22 處用 ThemeBackground、1 處用 Window.Background（9466e8a）
@@ -37,7 +40,7 @@ internal static class ThemeLibraries
             ["/MaterialDesignThemes.Wpf;component/", "/MaterialDesignColors;component/"], ["BundledTheme"],
             ["MaterialDesign.Brush.Background", "MaterialDesignPaper"]),
         // WPF-UI：FluentWindow 的 Style 設 WindowBackground；頁面層是 ApplicationBackgroundBrush（ffebacd）
-        new("WPF-UI", ["/Wpf.Ui;component/"], ["ControlsDictionary", "ThemesDictionary"],
+        new(WpfUi, ["/Wpf.Ui;component/"], ["ControlsDictionary", "ThemesDictionary"],
             ["WindowBackground", "ApplicationBackgroundBrush"]),
         // HandyControl：Window 的隱含樣式設 SecondaryRegionBrush（e9ad3d7）
         new("HandyControl", ["/HandyControl;component/"], [],
@@ -72,6 +75,32 @@ internal static class ThemeLibraries
         var lib = All.FirstOrDefault(l => l.Name == library);
         if (lib is null) return null;
         return lib.BackgroundKeys.FirstOrDefault(k => palette.Entries.ContainsKey(k));
+    }
+
+    /// <summary>
+    /// 整個專案引用到的主題函式庫（回傳第一個比到的名字；沒有是 null）。
+    /// 純文字掃描 —— 補框架預設色票時在色盤偵測階段就要知道，那時還沒有載入的 XDocument
+    /// （同 <see cref="WinUiTheme.UsesThemeResource"/> 的做法）。測試素材路徑不算。
+    /// </summary>
+    public static string? DetectInProject(string root)
+    {
+        foreach (var f in PaletteDetector.EnumerateFiles(root, "*.xaml"))
+        {
+            if (PaletteDetector.LooksLikeFixture(Path.GetRelativePath(root, f))) continue;
+            string text;
+            try { text = File.ReadAllText(f); }
+            catch (IOException) { continue; }
+            catch (UnauthorizedAccessException) { continue; }
+            foreach (var lib in All)
+            {
+                foreach (var marker in lib.PackMarkers)
+                    if (text.Contains(marker, StringComparison.OrdinalIgnoreCase)) return lib.Name;
+                foreach (var el in lib.ElementMarkers)
+                    if (text.Contains("<" + el, StringComparison.Ordinal) || text.Contains(":" + el, StringComparison.Ordinal))
+                        return lib.Name;
+            }
+        }
+        return null;
     }
 
     /// <summary>這個函式庫的候選鍵（提示裡要列出來給使用者自己找）。</summary>

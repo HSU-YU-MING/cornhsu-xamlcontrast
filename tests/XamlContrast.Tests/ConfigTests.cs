@@ -387,8 +387,10 @@ public class ConfigTests
     }
 
     /// <summary>
-    /// 同上，但這個專案**自己沒有抄**那些鍵（Bloxstrap 形狀：用 WPF-UI 的鍵、一個都沒自己定義）。
-    /// 這種人照著「設那個鍵」做會得到 exit 2，所以提示要改口叫他給色碼、並依主題各跑一次。
+    /// 同上，但這個專案**自己沒有抄**那些鍵。這種人照著「設那個鍵」做會得到 exit 2，
+    /// 所以提示要改口叫他給色碼、並依主題各跑一次。
+    /// ⚠ 用 MahApps 當例子而不是 WPF-UI：1.5 起 WPF-UI 的預設色票內嵌在工具裡（<see cref="WpfUiThemeTests"/>），
+    /// 那種專案的鍵現在查得到，不會走到這一條。還沒有內嵌表的函式庫才會。
     /// </summary>
     [Fact]
     public void CoverageHintAsksForALiteralWhenTheLibraryKeysAreOnlyInThePackage()
@@ -400,7 +402,7 @@ public class ConfigTests
               <Application.Resources>
                 <ResourceDictionary>
                   <ResourceDictionary.MergedDictionaries>
-                    <ResourceDictionary Source="pack://application:,,,/Wpf.Ui;component/Resources/Theme/Dark.xaml"/>
+                    <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml"/>
                   </ResourceDictionary.MergedDictionaries>
                 </ResourceDictionary>
               </Application.Resources>
@@ -415,17 +417,19 @@ public class ConfigTests
         var hint = Report.CoverageHint(fx.Run());
 
         Assert.NotNull(hint);
-        Assert.Contains("WPF-UI", hint);
+        Assert.Contains("MahApps.Metro", hint);
         Assert.Contains("declares none of its background keys", hint);
         Assert.Contains("""{ "rootBackground": "#FFFFFF" }""", hint);
         Assert.Contains("exit 2", hint);           // 為什麼不能直接抄那個鍵
-        Assert.DoesNotContain("""{ "rootBackground": "WindowBackground" }""", hint);
+        Assert.DoesNotContain("""{ "rootBackground": "MahApps.Brushes.ThemeBackground" }""", hint);
     }
 
     /// <summary>
     /// 第三種形狀（1.5，Bloxstrap 實測）：unresolved 幾乎都是 unknown-palette-key —— 這個專案直接用
     /// 函式庫的鍵、自己一個都沒抄。rootBackground 救不了（它只補視窗底色），所以提示要說**別的**話。
     /// ⚠ 原本這種專案什麼提示都沒有：使用者只看到「0 組配對、exit 3」，不知道為什麼、也不知道有沒有救。
+    /// ⚠ 這裡用 MahApps 的鍵：WPF-UI 的那一份 1.5 起內嵌在工具裡（<see cref="WpfUiThemeTests"/>），
+    /// 已經查得到值了 —— 這條提示是給「還沒有內嵌表」的函式庫用的。
     /// </summary>
     [Fact]
     public void CoverageHintExplainsWhenEveryKeyLivesInThePackage()
@@ -436,23 +440,23 @@ public class ConfigTests
               <Application.Resources>
                 <ResourceDictionary>
                   <ResourceDictionary.MergedDictionaries>
-                    <ResourceDictionary Source="pack://application:,,,/Wpf.Ui;component/Resources/Theme/Dark.xaml"/>
+                    <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml"/>
                   </ResourceDictionary.MergedDictionaries>
                 </ResourceDictionary>
               </Application.Resources>
             </Application>
             """);
         fx.File("Main.xaml", """
-            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{DynamicResource ApplicationBackgroundBrush}">
-              <TextBlock Foreground="{DynamicResource TextFillColorPrimaryBrush}" Text="全部都是函式庫的鍵 1"/>
-              <TextBlock Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="全部都是函式庫的鍵 2"/>
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{DynamicResource MahApps.Brushes.ThemeBackground}">
+              <TextBlock Foreground="{DynamicResource MahApps.Brushes.ThemeForeground}" Text="全部都是函式庫的鍵 1"/>
+              <TextBlock Foreground="{DynamicResource MahApps.Brushes.Gray3}" Text="全部都是函式庫的鍵 2"/>
             </Window>
             """);
         var hint = Report.CoverageHint(fx.Run());
 
         Assert.NotNull(hint);
         Assert.Contains("unknown-palette-key", hint);
-        Assert.Contains("WPF-UI", hint);
+        Assert.Contains("MahApps.Metro", hint);
         Assert.Contains("rootBackground won't recover them", hint);  // 不要把人送去設一個救不了他的東西
         Assert.Contains("not a pass", hint);
         // 這個形狀不給那一行 config（給了就是把人送去做一件救不了他的事）

@@ -3,17 +3,17 @@
 project: quicklook
 repo: https://github.com/QL-Win/QuickLook
 commit: e2f19a0ba9097024cc6520dd03735abd26f425f8
-tool-commit: 5e3798a+dirty
+tool-commit: 817984a+dirty
 frozen: 2026-11-15
 exit: 3
 palette-mode: pair
 palette-degraded: False
-palette-keys: 26
+palette-keys: 336
 single-theme: False
 files: 51
-pairs: 7
-coverage: 1.8
-unresolved: 393
+pairs: 8
+coverage: 2.1
+unresolved: 381
 skipped: 2
 dead-foreground: 4
 disabled-exempt: 3
@@ -24,23 +24,20 @@ suppressed: 0
 state-colors: 0
 fail: 1
 warn: 2
-ok: 4
+ok: 5
 decorative: 0
 unresolved-by.bound-or-gradient: 7
 unresolved-by.in-style-template: 6
 unresolved-by.no-ancestor-background: 262
-unresolved-by.translucent-uncomposited: 69
-unresolved-by.unknown-palette-key: 49
+unresolved-by.translucent-uncomposited: 99
+unresolved-by.unknown-palette-key: 7
+unknown-keys.AccentButtonBackground: 1
 unknown-keys.AccentTextFillColorPrimaryBrush: 3
 unknown-keys.AccentTextFillColorSecondaryBrush: 2
-unknown-keys.ButtonForeground: 4
-unknown-keys.CardBackground: 5
-unknown-keys.CardBackgroundFillColorDefaultBrush: 11
 unknown-keys.SystemControlForegroundAccentBrush: 1
-unknown-keys.TextFillColorPrimaryBrush: 22
-unknown-keys.WindowBackground: 1
 # F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
 F  fail  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:67  TextBlock  {DynamicResource WindowTextForeground} on #3F3F3F  9.16/1.83  light-fails
+F  ok  QuickLook.Plugin/QuickLook.Plugin.CsvViewer/SearchPanel.xaml:55  TextBlock  {DynamicResource WindowTextForeground} on {WindowBackground}  14.17/18.50  
 F  ok  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/ELFInfoPanel.xaml:85  TextBlock  White on #0067C0  5.67/5.67  
 F  ok  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/MachOInfoPanel.xaml:85  TextBlock  White on #0067C0  5.67/5.67  
 F  ok  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/UImageInfoPanel.xaml:86  TextBlock  White on #0067C0  5.67/5.67  
@@ -323,7 +320,33 @@ U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Styles.
 U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Styles.xaml:94  {DynamicResource WindowTextForeground}
 U  no-ancestor-background  QuickLook/Plugin/InfoPanel/InfoPanel.xaml:75  {DynamicResource WindowTextForegroundAlternative}
 U  no-ancestor-background  QuickLook/Plugin/InfoPanel/InfoPanel.xaml:82  {DynamicResource WindowTextForegroundAlternative}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:242  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:264  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:208  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:231  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:173  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:195  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:168  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:187  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:242  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:264  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:291  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:313  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:242  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:264  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:261  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:280  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:289  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:311  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:233  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:256  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:151  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:173  CardBackgroundFillColorDefaultBrush
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.CsvViewer/CsvViewerPanel.xaml:19  #00FFFFFF
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:6  {DynamicResource ButtonBackgroundPointerOver}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:6  {DynamicResource ButtonBackgroundPressed}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:6  {DynamicResource ButtonBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.DbViewer/PasswordControl.xaml:28  CardBackground
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:183  #00FFFFFF
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:106  {DynamicResource CaptionButtonHoverBackground}
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:106  {DynamicResource CaptionButtonPressBackground}
@@ -337,6 +360,7 @@ U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/Image
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:139  {DynamicResource CaptionBackground}
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:99  {DynamicResource CaptionButtonHoverBackground}
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:99  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.PDFViewer/PasswordControl.xaml:29  CardBackground
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.PluginInstaller/PluginInfoPanel.xaml:77  {DynamicResource CaptionButtonHoverBackground}
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.PluginInstaller/PluginInfoPanel.xaml:77  {DynamicResource CaptionButtonPressBackground}
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:103  MainWindowBackground
@@ -349,6 +373,9 @@ U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Viewe
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:183  MainWindowBackground
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:183  {DynamicResource CaptionButtonHoverBackground}
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:183  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:197  {DynamicResource CardBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:197  {DynamicResource CardBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:197  {DynamicResource CardBackground}
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:215  MainWindowBackground
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:215  {DynamicResource CaptionButtonHoverBackground}
 U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:215  {DynamicResource CaptionButtonPressBackground}
@@ -392,52 +419,10 @@ U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:94  MainWindowBackgroun
 U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:94  MainWindowBackground
 U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:94  {DynamicResource CaptionButtonHoverBackground}
 U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:94  {DynamicResource CaptionButtonPressBackground}
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:242  CardBackgroundFillColorDefaultBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:254  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:264  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:208  CardBackgroundFillColorDefaultBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:221  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:231  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:173  CardBackgroundFillColorDefaultBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:185  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:195  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:168  CardBackgroundFillColorDefaultBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:180  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:187  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:242  CardBackgroundFillColorDefaultBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:254  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:264  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:291  CardBackgroundFillColorDefaultBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:303  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:313  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:242  CardBackgroundFillColorDefaultBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:254  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:264  TextFillColorPrimaryBrush
 U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:158  AccentTextFillColorPrimaryBrush
 U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:158  AccentTextFillColorSecondaryBrush
 U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:194  AccentTextFillColorPrimaryBrush
 U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:194  AccentTextFillColorSecondaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:261  CardBackgroundFillColorDefaultBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:273  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:280  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:289  CardBackgroundFillColorDefaultBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:301  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:311  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:233  CardBackgroundFillColorDefaultBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:246  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:256  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:151  CardBackgroundFillColorDefaultBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:163  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:173  TextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.CsvViewer/SearchPanel.xaml:55  WindowBackground
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:6  ButtonForeground
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:6  ButtonForeground
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:6  ButtonForeground
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:6  ButtonForeground
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.DbViewer/PasswordControl.xaml:28  CardBackground
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.PDFViewer/PasswordControl.xaml:29  CardBackground
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:6  AccentButtonBackground
 U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.PluginInstaller/PluginInfoPanel.xaml:11  SystemControlForegroundAccentBrush
 U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.PluginInstaller/PluginInfoPanel.xaml:82  AccentTextFillColorPrimaryBrush
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Styles.xaml:13  CardBackground
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Styles.xaml:13  CardBackground
-U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Styles.xaml:13  CardBackground

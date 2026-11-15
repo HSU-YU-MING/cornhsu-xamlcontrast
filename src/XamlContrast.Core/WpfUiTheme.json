@@ -1,0 +1,1628 @@
+{
+  "source": "lepoco/wpfui@ffebacd61058",
+  "entries": {
+    "AccentButtonBorderBrushPressed": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "AccentButtonForeground": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "AccentButtonForegroundPointerOver": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "AccentButtonForegroundPressed": [
+      "#80000000",
+      "#B3FFFFFF"
+    ],
+    "AccentFillColorDisabledBrush": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "AccentTextFillColorDisabledBrush": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "ApplicationBackgroundBrush": [
+      "#FF202020",
+      "#FFFAFAFA"
+    ],
+    "BadgeForeground": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "BreadcrumbBarCurrentNormalForegroundBrush": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "BreadcrumbBarHoverForegroundBrush": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "BreadcrumbBarNormalForegroundBrush": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "ButtonBackground": [
+      "#0FFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "ButtonBackgroundDisabled": [
+      "#0BFFFFFF",
+      "#4DF9F9F9"
+    ],
+    "ButtonBackgroundPointerOver": [
+      "#15FFFFFF",
+      "#80F9F9F9"
+    ],
+    "ButtonBackgroundPressed": [
+      "#08FFFFFF",
+      "#4DF9F9F9"
+    ],
+    "ButtonBorderBrushDisabled": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "ButtonBorderBrushPressed": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "ButtonForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "ButtonForegroundDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "ButtonForegroundPointerOver": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "ButtonForegroundPressed": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "CalendarViewBackground": [
+      "#B31E1E1E",
+      "#FFFFFF"
+    ],
+    "CalendarViewBorderBrush": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "CalendarViewForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "CalendarViewItemBackgroundPointerOver": [
+      "#0FFFFFFF",
+      "#09000000"
+    ],
+    "CalendarViewItemBackgroundPressed": [
+      "#0AFFFFFF",
+      "#06000000"
+    ],
+    "CalendarViewNavigationButtonForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "CalendarViewTodayForeground": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "CardBackground": [
+      "#0DFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "CardBackgroundDisabled": [
+      "#0BFFFFFF",
+      "#4DF9F9F9"
+    ],
+    "CardBackgroundFillColorDefaultBrush": [
+      "#0DFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "CardBackgroundFillColorSecondaryBrush": [
+      "#08FFFFFF",
+      "#80F6F6F6"
+    ],
+    "CardBackgroundPointerOver": [
+      "#15FFFFFF",
+      "#80F9F9F9"
+    ],
+    "CardBackgroundPressed": [
+      "#08FFFFFF",
+      "#4DF9F9F9"
+    ],
+    "CardBorderBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "CardBorderBrushDisabled": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "CardBorderBrushPressed": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "CardFooterBackground": [
+      "#08FFFFFF",
+      "#80F6F6F6"
+    ],
+    "CardForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "CardForegroundDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "CardForegroundPointerOver": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "CardForegroundPressed": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "CardStrokeColorDefaultBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "CardStrokeColorDefaultSolidBrush": [
+      "#1C1C1C",
+      "#EBEBEB"
+    ],
+    "CheckBoxBackground": [
+      "#19000000",
+      "#06000000"
+    ],
+    "CheckBoxBorderBrush": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "CheckBoxCheckBackgroundFillUncheckedDisabled": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "CheckBoxCheckBackgroundFillUncheckedPointerOver": [
+      "#0BFFFFFF",
+      "#0F000000"
+    ],
+    "CheckBoxCheckBackgroundFillUncheckedPressed": [
+      "#12FFFFFF",
+      "#18000000"
+    ],
+    "CheckBoxCheckBackgroundStrokeUncheckedDisabled": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "CheckBoxCheckBorderBrush": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "CheckBoxCheckGlyphForeground": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "CheckBoxForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "CheckBoxForegroundUncheckedDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "ComboBoxBackground": [
+      "#0FFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "ComboBoxBackgroundDisabled": [
+      "#0BFFFFFF",
+      "#4DF9F9F9"
+    ],
+    "ComboBoxBackgroundFocused": [
+      "#0FFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "ComboBoxBackgroundPointerOver": [
+      "#15FFFFFF",
+      "#80F9F9F9"
+    ],
+    "ComboBoxBorderBrushDisabled": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "ComboBoxDropDownBackground": [
+      "#2C2C2C",
+      "#F9F9F9"
+    ],
+    "ComboBoxDropDownBorderBrush": [
+      "#66757575",
+      "#66757575"
+    ],
+    "ComboBoxDropDownGlyphForeground": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "ComboBoxForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "ComboBoxForegroundDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "ComboBoxItemBackgroundSelected": [
+      "#0FFFFFFF",
+      "#09000000"
+    ],
+    "ComboBoxItemForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "ComboBoxItemForegroundSelected": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "ContentDialogBackground": [
+      "#202020",
+      "#F3F3F3"
+    ],
+    "ContentDialogBorderBrush": [
+      "#66757575",
+      "#66757575"
+    ],
+    "ContentDialogForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "ContentDialogSeparatorBorderBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "ContentDialogSmokeFill": [
+      "#4D000000",
+      "#4D000000"
+    ],
+    "ContentDialogTopOverlay": [
+      "#0DFFFFFF",
+      "#FFFFFF"
+    ],
+    "ContextMenuBackground": [
+      "#2C2C2C",
+      "#F9F9F9"
+    ],
+    "ContextMenuBorderBrush": [
+      "#33000000",
+      "#0F000000"
+    ],
+    "ContextMenuForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "ControlAltFillColorDisabledBrush": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ControlAltFillColorQuarternaryBrush": [
+      "#12FFFFFF",
+      "#18000000"
+    ],
+    "ControlAltFillColorSecondaryBrush": [
+      "#19000000",
+      "#06000000"
+    ],
+    "ControlAltFillColorTertiaryBrush": [
+      "#0BFFFFFF",
+      "#0F000000"
+    ],
+    "ControlAltFillColorTransparentBrush": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ControlFillColorDefaultBrush": [
+      "#0FFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "ControlFillColorDisabledBrush": [
+      "#0BFFFFFF",
+      "#4DF9F9F9"
+    ],
+    "ControlFillColorInputActiveBrush": [
+      "#B31E1E1E",
+      "#FFFFFF"
+    ],
+    "ControlFillColorSecondaryBrush": [
+      "#15FFFFFF",
+      "#80F9F9F9"
+    ],
+    "ControlFillColorTertiaryBrush": [
+      "#08FFFFFF",
+      "#4DF9F9F9"
+    ],
+    "ControlFillColorTransparentBrush": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ControlOnImageFillColorDefaultBrush": [
+      "#B31C1C1C",
+      "#C9FFFFFF"
+    ],
+    "ControlOnImageFillColorDisabledBrush": [
+      "#1E1E1E",
+      "#00FFFFFF"
+    ],
+    "ControlOnImageFillColorSecondaryBrush": [
+      "#1A1A1A",
+      "#F3F3F3"
+    ],
+    "ControlOnImageFillColorTertiaryBrush": [
+      "#131313",
+      "#EBEBEB"
+    ],
+    "ControlSolidFillColorDefaultBrush": [
+      "#454545",
+      "#FFFFFF"
+    ],
+    "ControlStrokeColorDefaultBrush": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "ControlStrokeColorForStrongFillWhenOnImageBrush": [
+      "#6B000000",
+      "#59FFFFFF"
+    ],
+    "ControlStrokeColorOnAccentDefaultBrush": [
+      "#14FFFFFF",
+      "#14FFFFFF"
+    ],
+    "ControlStrokeColorOnAccentDisabledBrush": [
+      "#33000000",
+      "#0F000000"
+    ],
+    "ControlStrokeColorOnAccentSecondaryBrush": [
+      "#23000000",
+      "#66000000"
+    ],
+    "ControlStrokeColorOnAccentTertiaryBrush": [
+      "#37000000",
+      "#37000000"
+    ],
+    "ControlStrokeColorSecondaryBrush": [
+      "#18FFFFFF",
+      "#29000000"
+    ],
+    "ControlStrokeColorTertiaryBrush": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "ControlStrongFillColorDefaultBrush": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ControlStrongFillColorDisabledBrush": [
+      "#3FFFFFFF",
+      "#51000000"
+    ],
+    "ControlStrongStrokeColorDefaultBrush": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ControlStrongStrokeColorDisabledBrush": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "DividerStrokeColorDefaultBrush": [
+      "#15FFFFFF",
+      "#0F000000"
+    ],
+    "ExpanderContentBackground": [
+      "#08FFFFFF",
+      "#80F6F6F6"
+    ],
+    "ExpanderHeaderBackground": [
+      "#0DFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "ExpanderHeaderBorderBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "ExpanderHeaderBorderPointerOverBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "ExpanderHeaderDisabledBorderBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "ExpanderHeaderDisabledForeground": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "ExpanderHeaderForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "FlyoutBackground": [
+      "#2C2C2C",
+      "#F9F9F9"
+    ],
+    "FlyoutBorderBrush": [
+      "#33000000",
+      "#0F000000"
+    ],
+    "FocusStrokeColorInnerBrush": [
+      "#B3000000",
+      "#B3FFFFFF"
+    ],
+    "FocusStrokeColorOuterBrush": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "HyperlinkButtonBackground": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "HyperlinkButtonBackgroundDisabled": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "HyperlinkButtonBackgroundPointerOver": [
+      "#0FFFFFFF",
+      "#09000000"
+    ],
+    "HyperlinkButtonBackgroundPressed": [
+      "#0AFFFFFF",
+      "#06000000"
+    ],
+    "HyperlinkButtonForegroundDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "InfoBadgeAttentionSeverityBackgroundBrush": [
+      "#4CC2FF",
+      "#0078D4"
+    ],
+    "InfoBadgeCautionSeverityBackgroundBrush": [
+      "#FCE100",
+      "#9D5D00"
+    ],
+    "InfoBadgeCriticalSeverityBackgroundBrush": [
+      "#FF99A4",
+      "#C42B1C"
+    ],
+    "InfoBadgeInformationalSeverityBackgroundBrush": [
+      "#9D9D9D",
+      "#8A8A8A"
+    ],
+    "InfoBadgeSuccessSeverityBackgroundBrush": [
+      "#6CCB5F",
+      "#0F7B0F"
+    ],
+    "InfoBadgeValueForeground": [
+      "#E4000000",
+      "#FFFFFF"
+    ],
+    "InfoBarBorderBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "InfoBarErrorSeverityBackgroundBrush": [
+      "#442726",
+      "#FDE7E9"
+    ],
+    "InfoBarErrorSeverityBorderBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "InfoBarErrorSeverityIconBackground": [
+      "#FF99A4",
+      "#C42B1C"
+    ],
+    "InfoBarInformationalSeverityBackgroundBrush": [
+      "#08FFFFFF",
+      "#80F6F6F6"
+    ],
+    "InfoBarInformationalSeverityBorderBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "InfoBarSuccessSeverityBackgroundBrush": [
+      "#393D1B",
+      "#DFF6DD"
+    ],
+    "InfoBarSuccessSeverityBorderBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "InfoBarSuccessSeverityIconBackground": [
+      "#6CCB5F",
+      "#0F7B0F"
+    ],
+    "InfoBarTitleForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "InfoBarWarningSeverityBackgroundBrush": [
+      "#433519",
+      "#FFF4CE"
+    ],
+    "InfoBarWarningSeverityBorderBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "InfoBarWarningSeverityIconBackground": [
+      "#FCE100",
+      "#9D5D00"
+    ],
+    "KeyboardFocusBorderColorBrush": [
+      "#87FFFFFF",
+      "#BE000000"
+    ],
+    "LabelForeground": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "LayerFillColorAltBrush": [
+      "#0DFFFFFF",
+      "#FFFFFF"
+    ],
+    "LayerFillColorDefaultBrush": [
+      "#4C3A3A3A",
+      "#80FFFFFF"
+    ],
+    "LayerOnAccentAcrylicFillColorDefaultBrush": [
+      "#09FFFFFF",
+      "#40FFFFFF"
+    ],
+    "LayerOnAcrylicFillColorDefaultBrush": [
+      "#09FFFFFF",
+      "#40FFFFFF"
+    ],
+    "LayerOnMicaBaseAltFillColorDefaultBrush": [
+      "#733A3A3A",
+      "#B3FFFFFF"
+    ],
+    "LayerOnMicaBaseAltFillColorSecondaryBrush": [
+      "#0FFFFFFF",
+      "#0A000000"
+    ],
+    "LayerOnMicaBaseAltFillColorTertiaryBrush": [
+      "#2C2C2C",
+      "#F9F9F9"
+    ],
+    "LayerOnMicaBaseAltFillColorTransparentBrush": [
+      "#00FFFFFF",
+      "#00000000"
+    ],
+    "ListBoxItemForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "ListBoxItemSelectedForegroundThemeBrush": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "ListViewItemBackgroundPointerOver": [
+      "#0FFFFFFF",
+      "#09000000"
+    ],
+    "ListViewItemForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "LoadingScreenBackground": [
+      "#FF202020",
+      "#FFFAFAFA"
+    ],
+    "LoadingScreenForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "MenuBarBackground": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "MenuBarItemBackgroundPressed": [
+      "#0AFFFFFF",
+      "#06000000"
+    ],
+    "MenuBarItemBackgroundSelected": [
+      "#0FFFFFFF",
+      "#09000000"
+    ],
+    "MenuBarItemBorderBrush": [
+      "#0BFFFFFF",
+      "#0F000000"
+    ],
+    "MenuBarItemTextForegroundPressed": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "MessageBoxBackground": [
+      "#202020",
+      "#F3F3F3"
+    ],
+    "MessageBoxForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "MessageBoxSeparatorBorderBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "MessageBoxTopOverlay": [
+      "#0DFFFFFF",
+      "#FFFFFF"
+    ],
+    "NavigationViewContentBackground": [
+      "#4C3A3A3A",
+      "#80FFFFFF"
+    ],
+    "NavigationViewContentGridBorderBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "NavigationViewItemBackground": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "NavigationViewItemBackgroundPointerOver": [
+      "#0FFFFFFF",
+      "#09000000"
+    ],
+    "NavigationViewItemBackgroundPressed": [
+      "#0AFFFFFF",
+      "#06000000"
+    ],
+    "NavigationViewItemBackgroundSelected": [
+      "#0FFFFFFF",
+      "#09000000"
+    ],
+    "NavigationViewItemBackgroundSelectedLeftFluent": [
+      "#0FFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "NavigationViewItemBorderBrush": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "NavigationViewItemForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "NavigationViewItemForegroundLeftFluent": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "NavigationViewItemForegroundPointerOver": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "NavigationViewItemForegroundPointerOverLeftFluent": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "NavigationViewItemForegroundPressed": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "NavigationViewItemSeparatorForeground": [
+      "#15FFFFFF",
+      "#0F000000"
+    ],
+    "ProgressBarBackground": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ProgressBarBorderBrush": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "ProgressBarIndeterminateBackground": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ProgressRingBackgroundThemeBrush": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "RadioButtonCheckGlyphFill": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "RadioButtonForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "RadioButtonForegroundDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "RadioButtonOuterEllipseFill": [
+      "#19000000",
+      "#06000000"
+    ],
+    "RadioButtonOuterEllipseFillDisabled": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "RadioButtonOuterEllipseFillPointerOver": [
+      "#0BFFFFFF",
+      "#0F000000"
+    ],
+    "RadioButtonOuterEllipseFillPressed": [
+      "#12FFFFFF",
+      "#18000000"
+    ],
+    "RadioButtonOuterEllipseStroke": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "RadioButtonOuterEllipseStrokeDisabled": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "RadioButtonOuterEllipseStrokePressed": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "ScrollBarButtonArrowForeground": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ScrollBarButtonBackground": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ScrollBarThumbFill": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ScrollBarTrackFillPointerOver": [
+      "#2C2C2C",
+      "#F9F9F9"
+    ],
+    "SeparatorBorderBrush": [
+      "#15FFFFFF",
+      "#0F000000"
+    ],
+    "SliderOuterThumbBackground": [
+      "#454545",
+      "#FFFFFF"
+    ],
+    "SliderTickBarFill": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "SliderTrackFill": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "SliderTrackFillPointerOver": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "SmokeFillColorDefaultBrush": [
+      "#4D000000",
+      "#4D000000"
+    ],
+    "SnackBarBackground": [
+      "#2C2C2C",
+      "#F9F9F9"
+    ],
+    "SnackBarBorderBrush": [
+      "#33000000",
+      "#0F000000"
+    ],
+    "SnackBarForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "SolidBackgroundFillColorBaseAltBrush": [
+      "#0A0A0A",
+      "#DADADA"
+    ],
+    "SolidBackgroundFillColorBaseBrush": [
+      "#202020",
+      "#F3F3F3"
+    ],
+    "SolidBackgroundFillColorQuarternaryBrush": [
+      "#2C2C2C",
+      "#FFFFFF"
+    ],
+    "SolidBackgroundFillColorSecondaryBrush": [
+      "#1C1C1C",
+      "#EEEEEE"
+    ],
+    "SolidBackgroundFillColorTertiaryBrush": [
+      "#282828",
+      "#F9F9F9"
+    ],
+    "SubtleFillColorDisabledBrush": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "SubtleFillColorSecondaryBrush": [
+      "#0FFFFFFF",
+      "#09000000"
+    ],
+    "SubtleFillColorTertiaryBrush": [
+      "#0AFFFFFF",
+      "#06000000"
+    ],
+    "SubtleFillColorTransparentBrush": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "SurfaceStrokeColorDefaultBrush": [
+      "#66757575",
+      "#66757575"
+    ],
+    "SurfaceStrokeColorFlyoutBrush": [
+      "#33000000",
+      "#0F000000"
+    ],
+    "SurfaceStrokeColorInverseBrush": [
+      "#0F000000",
+      "#15FFFFFF"
+    ],
+    "SystemFillColorAttentionBackgroundBrush": [
+      "#08FFFFFF",
+      "#80F6F6F6"
+    ],
+    "SystemFillColorCautionBackgroundBrush": [
+      "#433519",
+      "#FFF4CE"
+    ],
+    "SystemFillColorCautionBrush": [
+      "#FCE100",
+      "#9D5D00"
+    ],
+    "SystemFillColorCriticalBackgroundBrush": [
+      "#442726",
+      "#FDE7E9"
+    ],
+    "SystemFillColorCriticalBrush": [
+      "#FF99A4",
+      "#C42B1C"
+    ],
+    "SystemFillColorNeutralBackgroundBrush": [
+      "#08FFFFFF",
+      "#06000000"
+    ],
+    "SystemFillColorNeutralBrush": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "SystemFillColorSolidAttentionBackgroundBrush": [
+      "#2E2E2E",
+      "#F7F7F7"
+    ],
+    "SystemFillColorSolidNeutralBackgroundBrush": [
+      "#2E2E2E",
+      "#F3F3F3"
+    ],
+    "SystemFillColorSolidNeutralBrush": [
+      "#9D9D9D",
+      "#8A8A8A"
+    ],
+    "SystemFillColorSuccessBackgroundBrush": [
+      "#393D1B",
+      "#DFF6DD"
+    ],
+    "SystemFillColorSuccessBrush": [
+      "#6CCB5F",
+      "#0F7B0F"
+    ],
+    "TabViewBackground": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "TabViewBorderBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "TabViewForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "TabViewItemForegroundSelected": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "TabViewItemHeaderBackground": [
+      "#00FFFFFF",
+      "#00000000"
+    ],
+    "TabViewItemHeaderBackgroundSelected": [
+      "#282828",
+      "#F9F9F9"
+    ],
+    "TabViewSelectedItemBorderBrush": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "TextControlBackground": [
+      "#0FFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "TextControlBackgroundDisabled": [
+      "#0BFFFFFF",
+      "#4DF9F9F9"
+    ],
+    "TextControlBackgroundFocused": [
+      "#B31E1E1E",
+      "#FFFFFF"
+    ],
+    "TextControlBackgroundPointerOver": [
+      "#15FFFFFF",
+      "#80F9F9F9"
+    ],
+    "TextControlBorderBrushDisabled": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "TextControlButtonForeground": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "TextControlForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "TextControlForegroundDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "TextControlPlaceholderForeground": [
+      "#87FFFFFF",
+      "#9E000000"
+    ],
+    "TextFillColorDisabledBrush": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "TextFillColorInverseBrush": [
+      "#E4000000",
+      "#FFFFFF"
+    ],
+    "TextFillColorPrimaryBrush": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "TextFillColorSecondaryBrush": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "TextFillColorTertiaryBrush": [
+      "#87FFFFFF",
+      "#72000000"
+    ],
+    "TextOnAccentFillColorDisabledBrush": [
+      "#77000000",
+      "#A3FFFFFF"
+    ],
+    "TextOnAccentFillColorPrimaryBrush": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "TextOnAccentFillColorSecondaryBrush": [
+      "#80000000",
+      "#B3FFFFFF"
+    ],
+    "TextOnAccentFillColorSelectedTextBrush": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ],
+    "TextPlaceholderColorBrush": [
+      "#87FFFFFF",
+      "#9E000000"
+    ],
+    "TimePickerButtonBackground": [
+      "#08FFFFFF",
+      "#4DF9F9F9"
+    ],
+    "TimePickerButtonBackgroundDisabled": [
+      "#0BFFFFFF",
+      "#4DF9F9F9"
+    ],
+    "TimePickerButtonBackgroundPointerOver": [
+      "#15FFFFFF",
+      "#80F9F9F9"
+    ],
+    "TimePickerButtonBackgroundPressed": [
+      "#08FFFFFF",
+      "#4DF9F9F9"
+    ],
+    "TimePickerButtonBorderBrushDisabled": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "TimePickerButtonBorderBrushPressed": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "TimePickerButtonForegroundDefault": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "TimePickerButtonForegroundDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "TimePickerButtonForegroundPointerOver": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "TimePickerButtonForegroundPressed": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "ToggleButtonBackground": [
+      "#0FFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "ToggleButtonBackgroundCheckedDisabled": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "ToggleButtonBackgroundDisabled": [
+      "#0BFFFFFF",
+      "#4DF9F9F9"
+    ],
+    "ToggleButtonBackgroundPointerOver": [
+      "#15FFFFFF",
+      "#80F9F9F9"
+    ],
+    "ToggleButtonBackgroundPressed": [
+      "#08FFFFFF",
+      "#4DF9F9F9"
+    ],
+    "ToggleButtonBorderBrushCheckedDisabled": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ToggleButtonBorderBrushCheckedPressed": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ToggleButtonBorderBrushDisabled": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "ToggleButtonBorderBrushPressed": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "ToggleButtonForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "ToggleButtonForegroundChecked": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "ToggleButtonForegroundCheckedDisabled": [
+      "#77000000",
+      "#A3FFFFFF"
+    ],
+    "ToggleButtonForegroundCheckedPressed": [
+      "#80000000",
+      "#B3FFFFFF"
+    ],
+    "ToggleButtonForegroundDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "ToggleButtonForegroundPressed": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "ToggleSwitchContentForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "ToggleSwitchContentForegroundDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "ToggleSwitchFillOff": [
+      "#19000000",
+      "#06000000"
+    ],
+    "ToggleSwitchFillOffDisabled": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ToggleSwitchFillOffPointerOver": [
+      "#0BFFFFFF",
+      "#0F000000"
+    ],
+    "ToggleSwitchFillOffPressed": [
+      "#12FFFFFF",
+      "#18000000"
+    ],
+    "ToggleSwitchFillOnDisabled": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "ToggleSwitchKnobFillOff": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "ToggleSwitchKnobFillOffDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "ToggleSwitchKnobFillOffPointerOver": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "ToggleSwitchKnobFillOffPressed": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "ToggleSwitchKnobFillOn": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "ToggleSwitchKnobFillOnDisabled": [
+      "#77000000",
+      "#A3FFFFFF"
+    ],
+    "ToggleSwitchKnobFillOnPointerOver": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "ToggleSwitchKnobFillOnPressed": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "ToggleSwitchStrokeOff": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ToggleSwitchStrokeOffDisabled": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "ToggleSwitchStrokeOffPointerOver": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ToggleSwitchStrokeOffPressed": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ToggleSwitchStrokeOnDisabled": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "ToolTipBackground": [
+      "#2C2C2C",
+      "#F9F9F9"
+    ],
+    "ToolTipBorderBrush": [
+      "#33000000",
+      "#0F000000"
+    ],
+    "ToolTipForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "TreeViewItemBackground": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "TreeViewItemBackgroundPointerOver": [
+      "#0FFFFFFF",
+      "#09000000"
+    ],
+    "TreeViewItemBackgroundSelected": [
+      "#0FFFFFFF",
+      "#09000000"
+    ],
+    "TreeViewItemForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "WindowBackground": [
+      "#FF202020",
+      "#FFFAFAFA"
+    ],
+    "WindowForeground": [
+      "#FFFFFF",
+      "#E4000000"
+    ]
+  },
+  "colors": {
+    "AccentFillColorDisabled": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "AccentTextFillColorDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "AcrylicBackgroundFillColorDefault": [
+      "#2C2C2C",
+      "#F9F9F9"
+    ],
+    "ApplicationBackgroundColor": [
+      "#FF202020",
+      "#FFFAFAFA"
+    ],
+    "CardBackgroundFillColorDefault": [
+      "#0DFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "CardBackgroundFillColorSecondary": [
+      "#08FFFFFF",
+      "#80F6F6F6"
+    ],
+    "CardStrokeColorDefault": [
+      "#19000000",
+      "#0F000000"
+    ],
+    "CardStrokeColorDefaultSolid": [
+      "#1C1C1C",
+      "#EBEBEB"
+    ],
+    "ControlAltFillColorDisabled": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ControlAltFillColorQuarternary": [
+      "#12FFFFFF",
+      "#18000000"
+    ],
+    "ControlAltFillColorSecondary": [
+      "#19000000",
+      "#06000000"
+    ],
+    "ControlAltFillColorTertiary": [
+      "#0BFFFFFF",
+      "#0F000000"
+    ],
+    "ControlAltFillColorTransparent": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ControlFillColorDefault": [
+      "#0FFFFFFF",
+      "#B3FFFFFF"
+    ],
+    "ControlFillColorDisabled": [
+      "#0BFFFFFF",
+      "#4DF9F9F9"
+    ],
+    "ControlFillColorInputActive": [
+      "#B31E1E1E",
+      "#FFFFFF"
+    ],
+    "ControlFillColorSecondary": [
+      "#15FFFFFF",
+      "#80F9F9F9"
+    ],
+    "ControlFillColorTertiary": [
+      "#08FFFFFF",
+      "#4DF9F9F9"
+    ],
+    "ControlFillColorTransparent": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "ControlOnImageFillColorDefault": [
+      "#B31C1C1C",
+      "#C9FFFFFF"
+    ],
+    "ControlOnImageFillColorDisabled": [
+      "#1E1E1E",
+      "#00FFFFFF"
+    ],
+    "ControlOnImageFillColorSecondary": [
+      "#1A1A1A",
+      "#F3F3F3"
+    ],
+    "ControlOnImageFillColorTertiary": [
+      "#131313",
+      "#EBEBEB"
+    ],
+    "ControlSolidFillColorDefault": [
+      "#454545",
+      "#FFFFFF"
+    ],
+    "ControlStrokeColorDefault": [
+      "#12FFFFFF",
+      "#0F000000"
+    ],
+    "ControlStrokeColorForStrongFillWhenOnImage": [
+      "#6B000000",
+      "#59FFFFFF"
+    ],
+    "ControlStrokeColorOnAccentDefault": [
+      "#14FFFFFF",
+      "#14FFFFFF"
+    ],
+    "ControlStrokeColorOnAccentDisabled": [
+      "#33000000",
+      "#0F000000"
+    ],
+    "ControlStrokeColorOnAccentSecondary": [
+      "#23000000",
+      "#66000000"
+    ],
+    "ControlStrokeColorOnAccentTertiary": [
+      "#37000000",
+      "#37000000"
+    ],
+    "ControlStrokeColorSecondary": [
+      "#18FFFFFF",
+      "#29000000"
+    ],
+    "ControlStrokeColorTertiary": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "ControlStrongFillColorDefault": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ControlStrongFillColorDisabled": [
+      "#3FFFFFFF",
+      "#51000000"
+    ],
+    "ControlStrongStrokeColorDefault": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "ControlStrongStrokeColorDisabled": [
+      "#28FFFFFF",
+      "#37000000"
+    ],
+    "DividerStrokeColorDefault": [
+      "#15FFFFFF",
+      "#0F000000"
+    ],
+    "FocusStrokeColorInner": [
+      "#B3000000",
+      "#B3FFFFFF"
+    ],
+    "FocusStrokeColorOuter": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "KeyboardFocusBorderColor": [
+      "#87FFFFFF",
+      "#BE000000"
+    ],
+    "LayerFillColorAlt": [
+      "#0DFFFFFF",
+      "#FFFFFF"
+    ],
+    "LayerFillColorDefault": [
+      "#4C3A3A3A",
+      "#80FFFFFF"
+    ],
+    "LayerOnAccentAcrylicFillColorDefault": [
+      "#09FFFFFF",
+      "#40FFFFFF"
+    ],
+    "LayerOnAcrylicFillColorDefault": [
+      "#09FFFFFF",
+      "#40FFFFFF"
+    ],
+    "LayerOnMicaBaseAltFillColorDefault": [
+      "#733A3A3A",
+      "#B3FFFFFF"
+    ],
+    "LayerOnMicaBaseAltFillColorSecondary": [
+      "#0FFFFFFF",
+      "#0A000000"
+    ],
+    "LayerOnMicaBaseAltFillColorTertiary": [
+      "#2C2C2C",
+      "#F9F9F9"
+    ],
+    "LayerOnMicaBaseAltFillColorTransparent": [
+      "#00FFFFFF",
+      "#00000000"
+    ],
+    "SmokeFillColorDefault": [
+      "#4D000000",
+      "#4D000000"
+    ],
+    "SnowflakeGradientBottom": [
+      "#00000000",
+      "#CCCCCC"
+    ],
+    "SnowflakeGradientTop": [
+      "#171C26",
+      "#2E4053"
+    ],
+    "SolidBackgroundFillColorBase": [
+      "#202020",
+      "#F3F3F3"
+    ],
+    "SolidBackgroundFillColorBaseAlt": [
+      "#0A0A0A",
+      "#DADADA"
+    ],
+    "SolidBackgroundFillColorQuarternary": [
+      "#2C2C2C",
+      "#FFFFFF"
+    ],
+    "SolidBackgroundFillColorSecondary": [
+      "#1C1C1C",
+      "#EEEEEE"
+    ],
+    "SolidBackgroundFillColorTertiary": [
+      "#282828",
+      "#F9F9F9"
+    ],
+    "SolidBackgroundFillColorTransparent": [
+      "#00202020",
+      "#00F3F3F3"
+    ],
+    "SubtleFillColorDisabled": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "SubtleFillColorSecondary": [
+      "#0FFFFFFF",
+      "#09000000"
+    ],
+    "SubtleFillColorTertiary": [
+      "#0AFFFFFF",
+      "#06000000"
+    ],
+    "SubtleFillColorTransparent": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "SurfaceStrokeColorDefault": [
+      "#66757575",
+      "#66757575"
+    ],
+    "SurfaceStrokeColorFlyout": [
+      "#33000000",
+      "#0F000000"
+    ],
+    "SurfaceStrokeColorInverse": [
+      "#0F000000",
+      "#15FFFFFF"
+    ],
+    "SystemFillColorAttention": [
+      "#4CC2FF",
+      "#0078D4"
+    ],
+    "SystemFillColorAttentionBackground": [
+      "#08FFFFFF",
+      "#80F6F6F6"
+    ],
+    "SystemFillColorCaution": [
+      "#FCE100",
+      "#9D5D00"
+    ],
+    "SystemFillColorCautionBackground": [
+      "#433519",
+      "#FFF4CE"
+    ],
+    "SystemFillColorCritical": [
+      "#FF99A4",
+      "#C42B1C"
+    ],
+    "SystemFillColorCriticalBackground": [
+      "#442726",
+      "#FDE7E9"
+    ],
+    "SystemFillColorInformational": [
+      "#9D9D9D",
+      "#8A8A8A"
+    ],
+    "SystemFillColorNeutral": [
+      "#8BFFFFFF",
+      "#72000000"
+    ],
+    "SystemFillColorNeutralBackground": [
+      "#08FFFFFF",
+      "#06000000"
+    ],
+    "SystemFillColorSolidAttentionBackground": [
+      "#2E2E2E",
+      "#F7F7F7"
+    ],
+    "SystemFillColorSolidNeutral": [
+      "#9D9D9D",
+      "#8A8A8A"
+    ],
+    "SystemFillColorSolidNeutralBackground": [
+      "#2E2E2E",
+      "#F3F3F3"
+    ],
+    "SystemFillColorSuccess": [
+      "#6CCB5F",
+      "#0F7B0F"
+    ],
+    "SystemFillColorSuccessBackground": [
+      "#393D1B",
+      "#DFF6DD"
+    ],
+    "TextFillColorDisabled": [
+      "#5DFFFFFF",
+      "#5C000000"
+    ],
+    "TextFillColorInverse": [
+      "#E4000000",
+      "#FFFFFF"
+    ],
+    "TextFillColorPrimary": [
+      "#FFFFFF",
+      "#E4000000"
+    ],
+    "TextFillColorSecondary": [
+      "#C5FFFFFF",
+      "#9E000000"
+    ],
+    "TextFillColorTertiary": [
+      "#87FFFFFF",
+      "#72000000"
+    ],
+    "TextOnAccentFillColorDisabled": [
+      "#77000000",
+      "#A3FFFFFF"
+    ],
+    "TextOnAccentFillColorPrimary": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "TextOnAccentFillColorSecondary": [
+      "#80000000",
+      "#B3FFFFFF"
+    ],
+    "TextOnAccentFillColorSelectedText": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ],
+    "TextPlaceholderColor": [
+      "#87FFFFFF",
+      "#9E000000"
+    ]
+  },
+  "runtime": [
+    "BadgeBackground",
+    "CalendarViewSelectedBackground",
+    "CalendarViewSelectedBorderBrush",
+    "CalendarViewTodayBackground",
+    "CheckBoxCheckBackgroundFillChecked",
+    "ComboBoxBorderBrushFocused",
+    "ComboBoxItemPillFillBrush",
+    "HyperlinkButtonForeground",
+    "HyperlinkButtonForegroundPointerOver",
+    "HyperlinkButtonForegroundPressed",
+    "InfoBarInformationalSeverityIconBackground",
+    "ListBoxItemSelectedBackgroundThemeBrush",
+    "ListViewItemPillFillBrush",
+    "NavigationViewSelectionIndicatorForeground",
+    "ProgressBarForeground",
+    "ProgressRingForegroundThemeBrush",
+    "RadioButtonOuterEllipseCheckedStroke",
+    "RatingControlSelectedForeground",
+    "SliderThumbBackground",
+    "TextControlFocusedBorderBrush",
+    "ThumbRateForeground",
+    "ToggleButtonBackgroundChecked",
+    "ToggleButtonBackgroundCheckedPressed",
+    "ToggleButtonForegroundCheckedPointerOver",
+    "ToggleSwitchFillOn",
+    "ToggleSwitchStrokeOn",
+    "TreeViewItemSelectionIndicatorForeground"
+  ]
+}

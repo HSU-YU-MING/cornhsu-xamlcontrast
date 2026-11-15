@@ -285,6 +285,15 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   授權：MIT，`THIRD-PARTY-NOTICES.md` 由 Directory.Build.props 打進套件 —— 換來源或加資料時要一起改。
   WinUI Gallery（2026-11-10，`6de91fe`）實測：配對 49 → 59、unknown-palette-key 172 → 90，原本的 finding 比值與分類都不變。
   剩下的大宗：頁面底色來自視窗（no-ancestor-background；靜態不可知，請使用者設 rootBackground）。
+- **WPF-UI 的內建色票（1.5，`WpfUiTheme.cs` + 內嵌的 `WpfUiTheme.json`）**：跟 WinUI 那條同一個形狀、同一份資料結構
+  （`WinUiTheme.Data`、`WinUiTheme.Augment` 共用），差別只在**觸發條件**：只在專案引用 `Wpf.Ui` 時補
+  （`ThemeLibraries.DetectInProject`），不是看 `{ThemeResource`。⚠ 兩邊鍵名大量重疊、值不一樣 ——
+  絕對不要把 WinUI 的表拿給 WPF-UI 專案用或反過來，`AProjectThatDoesNotUseWpfUiGetsNothing` 釘住這條。
+  重產：sparse checkout `src/Wpf.Ui/Resources/Theme/{Dark,Light}.xaml`，設 `XAMLCONTRAST_WPFUI_SOURCE`／
+  `XAMLCONTRAST_WPFUI_COMMIT` 跑 `WpfUiThemeTests.Regenerate`，看 git diff 再 commit（同 WinUI）。
+  高對比的 `HC*.xaml` 不收；強調色來的 27 個鍵進 runtime、不給值。授權 MIT，`THIRD-PARTY-NOTICES.md` 要有。
+  ⚠ **補進來的鍵要記進 `PaletteDetection.FrameworkKeys`**：覆蓋率提示會說「你的主題檔有這個鍵」，
+  而那個鍵是工具補的時候那句話是假的（Bloxstrap 一個鍵都沒自己定義）。
 - **別名與 brush 裡的 Color 鍵（1.4）**：`<StaticResource x:Key ResourceKey>` 收進 `Palette.Aliases`（依主題分側），
   在偵測最後、WinUI 預設色補進來之後才解（`ResolveAliases`，可以串；找不到 → MissingRefs，點名指向的鍵）。
   `CollectAliases` 另外收一次：只放別名、沒有 brush 的字典，合併式色盤會放棄，別名不能跟著丟。畫面的區域別名在 `LocalOverridesOf`。
