@@ -1,0 +1,1476 @@
+# XamlContrast 公開語料摘要 —— 由 scripts/verify-corpus.ps1 -Update 產生，不要手改。
+# 語料釘死（corpus.txt 的 commit）+ 這份凍結 = 紅燈只有一個可能：工具自己變了。
+project: networkmanager
+repo: https://github.com/BornToBeRoot/NETworkManager.git
+commit: 350d81fa7257d1f436187c767706e789013c077a
+tool-commit: 5e3798a+dirty
+frozen: 2026-11-15
+exit: 3
+palette-mode: pair
+palette-degraded: False
+palette-keys: 291
+single-theme: False
+files: 163
+pairs: 135
+coverage: 9.4
+unresolved: 1299
+skipped: 0
+dead-foreground: 0
+disabled-exempt: 72
+converter-pairs: 0
+ui-component-pairs: 0
+parse-errors: 0
+suppressed: 0
+state-colors: 0
+fail: 76
+warn: 0
+ok: 52
+decorative: 7
+unresolved-by.bound-or-gradient: 98
+unresolved-by.in-style-template: 11
+unresolved-by.no-ancestor-background: 975
+unresolved-by.translucent-uncomposited: 97
+unresolved-by.unknown-palette-key: 118
+unknown-keys.Brushes.Button.Background: 58
+unknown-keys.Brushes.Control.MouseOver: 2
+unknown-keys.Brushes.Status.Error: 5
+unknown-keys.Brushes.Status.Success: 4
+unknown-keys.Brushes.Status.Warning: 2
+unknown-keys.Brushes.Surface.Border: 13
+unknown-keys.Brushes.Surface.Frame: 34
+# F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
+F  decorative  Source/NETworkManager/Resources/Templates/ValidationErrorTemplates.xaml:55  Rectangle  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  
+F  decorative  Source/NETworkManager/Views/Controls/ProfileExpanderPanel.xaml:204  Rectangle  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  
+F  decorative  Source/NETworkManager/Views/Controls/ProfileExpanderPanel.xaml:216  Rectangle  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  
+F  decorative  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1397  Rectangle  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  
+F  decorative  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1412  Rectangle  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  
+F  decorative  Source/NETworkManager/Views/ProfilesView.xaml:288  Rectangle  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  
+F  decorative  Source/NETworkManager/Views/ProfilesView.xaml:300  Rectangle  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  
+F  fail  Source/NETworkManager/Controls/LiveChartsBandwidthTooltip.xaml:17  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Controls/LiveChartsBandwidthTooltip.xaml:35  TextBlock⊕Style[DefaultTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Controls/LiveChartsBandwidthTooltip.xaml:38  TextBlock⊕Style[AccentTextBlock]/base  {DynamicResource MahApps.Brushes.Accent} on {MahApps.Brushes.Window.Background}  2.93/4.17  both-low
+F  fail  Source/NETworkManager/Controls/LiveChartsPingTimeTooltip.xaml:17  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Controls/LiveChartsPingTimeTooltip.xaml:35  TextBlock⊕Style[DefaultTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Controls/LiveChartsPingTimeTooltip.xaml:38  TextBlock⊕Style[AccentTextBlock]/base  {DynamicResource MahApps.Brushes.Accent} on {MahApps.Brushes.Window.Background}  2.93/4.17  both-low
+F  fail  Source/NETworkManager/Controls/LiveChartsSpeedTestTooltip.xaml:26  TextBlock⊕Style[DefaultTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Controls/LiveChartsSpeedTestTooltip.xaml:29  TextBlock⊕Style[AccentTextBlock]/base  {DynamicResource MahApps.Brushes.Accent} on {MahApps.Brushes.Window.Background}  2.93/4.17  both-low
+F  fail  Source/NETworkManager/Controls/LiveChartsWiFiChannelTooltip.xaml:28  TextBlock⊕Style[AccentTextBlock]/base  {DynamicResource MahApps.Brushes.Accent} on {MahApps.Brushes.Window.Background}  2.93/4.17  both-low
+F  fail  Source/NETworkManager/Controls/LiveChartsWiFiChannelTooltip.xaml:30  TextBlock⊕Style[ConsoleTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Controls/LiveChartsWiFiChannelTooltip.xaml:35  TextBlock⊕Style[DefaultTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Controls/LiveChartsWiFiChannelTooltip.xaml:38  TextBlock⊕Style[DefaultTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/MainWindow.xaml:1124  TextBlock⊕Style[→DefaultTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/MainWindow.xaml:1124  TextBlock⊕Style[→DefaultTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/Controls/ProfileExpanderPanel.xaml:161  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/Controls/ProfileExpanderPanel.xaml:184  TextBlock⊕Style[MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/Controls/ProfileExpanderPanel.xaml:188  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/DNSLookupHostView.xaml:151  TextBlock⊕Style[→MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/DNSLookupHostView.xaml:151  TextBlock⊕Style[→MessageTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/FirewallView.xaml:660  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/FirewallView.xaml:673  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/FirewallView.xaml:692  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/FirewallView.xaml:698  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/FirewallView.xaml:705  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/FirewallView.xaml:711  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/IPGeolocationHostView.xaml:150  TextBlock⊕Style[→MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/IPGeolocationHostView.xaml:150  TextBlock⊕Style[→MessageTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerHostView.xaml:162  TextBlock⊕Style[→MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerHostView.xaml:162  TextBlock⊕Style[→MessageTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerSettingsView.xaml:119  TextBlock⊕Style[TagTextBlock]/base  {DynamicResource MahApps.Brushes.Accent} on {MahApps.Brushes.Gray8}  1.54/3.37  dark-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:1486  TextBlock⊕Style[BoldTextBlock]/base  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.Window.Background}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:1508  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:1556  TextBlock⊕Style[BoldTextBlock]/base  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.Window.Background}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:1578  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:1623  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:1639  TextBlock⊕Style[BoldTextBlock]/base  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.Window.Background}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:1661  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:1697  TextBlock⊕Style[BoldTextBlock]/base  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.Window.Background}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:1721  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:1768  TextBlock⊕Style[BoldTextBlock]/base  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.Window.Background}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:1779  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:190  TextBlock⊕Style[TagTextBlock]/base  {DynamicResource MahApps.Brushes.Accent} on {MahApps.Brushes.Gray8}  1.54/3.37  dark-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:1968  TextBlock⊕Style[BoldTextBlock]/base  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.Window.Background}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:1992  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:2152  TextBlock⊕Style[BoldTextBlock]/base  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.Window.Background}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/IPScannerView.xaml:2174  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1000  TextBlock  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/NetworkInterfaceView.xaml:145  TextBlock  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/NetworkInterfaceView.xaml:721  TextBlock  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/NetworkInterfaceView.xaml:852  TextBlock⊕Style[inline]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/NetworkInterfaceView.xaml:852  TextBlock⊕Style[inline]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/PingMonitorView.xaml:169  TextBlock⊕Style[TagTextBlock]/base  {DynamicResource MahApps.Brushes.Accent} on {MahApps.Brushes.Gray8}  1.54/3.37  dark-fails
+F  fail  Source/NETworkManager/Views/PortScannerHostView.xaml:158  TextBlock⊕Style[→MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/PortScannerHostView.xaml:158  TextBlock⊕Style[→MessageTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/PowerShellHostView.xaml:243  TextBlock⊕Style[→MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/PowerShellHostView.xaml:243  TextBlock⊕Style[→MessageTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/ProfilesView.xaml:245  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/ProfilesView.xaml:268  TextBlock⊕Style[MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/ProfilesView.xaml:272  TextBlock⊕Style[InfoTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.Window.Background}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/PuTTYHostView.xaml:255  TextBlock⊕Style[→MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/PuTTYHostView.xaml:255  TextBlock⊕Style[→MessageTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/RDAPHostView.xaml:150  TextBlock⊕Style[→MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/RDAPHostView.xaml:150  TextBlock⊕Style[→MessageTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:333  TextBlock⊕Style[→MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:333  TextBlock⊕Style[→MessageTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/RunCommandChildWindow.xaml:204  TextBlock⊕Style[DefaultTextBlock]/base  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.Gray10}  6.82/1.83  light-fails
+F  fail  Source/NETworkManager/Views/SNMPHostView.xaml:149  TextBlock⊕Style[→MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/SNMPHostView.xaml:149  TextBlock⊕Style[→MessageTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/TigerVNCHostView.xaml:226  TextBlock⊕Style[→MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/TigerVNCHostView.xaml:226  TextBlock⊕Style[→MessageTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/TracerouteHostView.xaml:150  TextBlock⊕Style[→MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/TracerouteHostView.xaml:150  TextBlock⊕Style[→MessageTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/WebConsoleHostView.xaml:214  TextBlock⊕Style[→MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/WebConsoleHostView.xaml:214  TextBlock⊕Style[→MessageTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  fail  Source/NETworkManager/Views/WhoisHostView.xaml:150  TextBlock⊕Style[→MessageTextBlock]/base  {DynamicResource MahApps.Brushes.Gray3} on {MahApps.Brushes.ThemeBackground}  7.74/2.71  light-fails
+F  fail  Source/NETworkManager/Views/WhoisHostView.xaml:150  TextBlock⊕Style[→MessageTextBlock]/trigger  {DynamicResource MahApps.Brushes.Gray5} on {MahApps.Brushes.ThemeBackground}  10.70/1.96  light-fails
+F  ok  Source/NETworkManager/Resources/Templates/ValidationErrorTemplates.xaml:62  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.Window.Background}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/Controls/ProfileExpanderPanel.xaml:201  Button⊕Style[ImageButton]/base  {DynamicResource MahApps.Brushes.ThemeForeground} on {MahApps.Brushes.Window.Background}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/Controls/ProfileExpanderPanel.xaml:212  Button⊕Style[ImageButton]/base  {DynamicResource MahApps.Brushes.ThemeForeground} on {MahApps.Brushes.Window.Background}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:107  TextBlock⊕Style[HeaderTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1086  TextBlock⊕Style[HeaderTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1130  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1145  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1183  TextBlock⊕Style[CenterTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1236  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1251  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1328  TextBlock⊕Style[ButtonWithImageTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1385  TextBlock⊕Style[ButtonWithImageTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:226  TextBlock⊕Style[HeaderTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:269  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:273  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:277  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:281  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:285  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:289  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:293  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:309  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:327  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:347  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:367  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:385  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:405  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:425  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:445  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:463  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:483  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:503  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:523  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:541  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:559  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:684  TextBlock⊕Style[HeaderTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:802  TextBlock⊕Style[→HeaderTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:870  TextBlock⊕Style[HeaderTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:901  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:906  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:911  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:916  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:922  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:924  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:928  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:933  TextBlock  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/NetworkInterfaceView.xaml:958  TextBlock⊕Style[HeaderTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/ProfilesView.xaml:285  Button⊕Style[ImageButton]/base  {DynamicResource MahApps.Brushes.ThemeForeground} on {MahApps.Brushes.Window.Background}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/ProfilesView.xaml:296  Button⊕Style[ImageButton]/base  {DynamicResource MahApps.Brushes.ThemeForeground} on {MahApps.Brushes.Window.Background}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/RunCommandChildWindow.xaml:208  TextBlock⊕Style[DefaultTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.Gray10}  13.39/19.60  
+F  ok  Source/NETworkManager/Views/WakeOnLANView.xaml:114  TextBlock⊕Style[CenterTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/WakeOnLANView.xaml:79  TextBlock⊕Style[HeaderTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+F  ok  Source/NETworkManager/Views/WakeOnLANView.xaml:93  TextBlock⊕Style[CenterTextBlock]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.ThemeBackground}  21.00/21.00  
+# U  原因  檔案:行  值
+U  bound-or-gradient  Source/NETworkManager/CommandLineWindow.xaml:28  {Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}
+U  bound-or-gradient  Source/NETworkManager/Controls/LiveChartsBandwidthTooltip.xaml:33  {Binding SeriesColor}
+U  bound-or-gradient  Source/NETworkManager/Controls/LiveChartsPingTimeTooltip.xaml:33  {Binding SeriesColor}
+U  bound-or-gradient  Source/NETworkManager/Controls/LiveChartsSpeedTestTooltip.xaml:24  {Binding SeriesColor}
+U  bound-or-gradient  Source/NETworkManager/Controls/LiveChartsWiFiChannelTooltip.xaml:23  {Binding SeriesColor}
+U  bound-or-gradient  Source/NETworkManager/Controls/TracerouteMapControl.xaml:150  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Controls/TracerouteMapControl.xaml:150  {DynamicResource ResourceKey=MahApps.Brushes.Gray5}
+U  bound-or-gradient  Source/NETworkManager/Controls/TracerouteMapControl.xaml:193  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Controls/TracerouteMapControl.xaml:193  {DynamicResource ResourceKey=MahApps.Brushes.Gray5}
+U  bound-or-gradient  Source/NETworkManager/Controls/TracerouteMapControl.xaml:57  {DynamicResource ResourceKey=MahApps.Brushes.Gray10}
+U  bound-or-gradient  Source/NETworkManager/MainWindow.xaml:101  {DynamicResource ResourceKey=MahApps.Brushes.Accent}
+U  bound-or-gradient  Source/NETworkManager/MainWindow.xaml:119  {DynamicResource ResourceKey=MahApps.Brushes.Accent}
+U  bound-or-gradient  Source/NETworkManager/MainWindow.xaml:133  {DynamicResource ResourceKey=MahApps.Brushes.Accent}
+U  bound-or-gradient  Source/NETworkManager/MainWindow.xaml:169  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/MainWindow.xaml:203  {Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}
+U  bound-or-gradient  Source/NETworkManager/MainWindow.xaml:218  {Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}
+U  bound-or-gradient  Source/NETworkManager/MainWindow.xaml:231  {Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}
+U  bound-or-gradient  Source/NETworkManager/MainWindow.xaml:40  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/MainWindow.xaml:49  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/MainWindow.xaml:58  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/MainWindow.xaml:88  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/NotificationWindow.xaml:101  {Binding IconBrush}
+U  bound-or-gradient  Source/NETworkManager/NotificationWindow.xaml:125  {Binding StatusBrush, Mode=OneWay}
+U  bound-or-gradient  Source/NETworkManager/Resources/Styles/ChildWindowStyles.xaml:119  <MultiBinding>
+U  bound-or-gradient  Source/NETworkManager/Resources/Styles/ChildWindowStyles.xaml:154  {TemplateBinding TitleForeground}
+U  bound-or-gradient  Source/NETworkManager/Resources/Styles/ChildWindowStyles.xaml:86  {TemplateBinding TitleBarBackground}
+U  bound-or-gradient  Source/NETworkManager/Resources/Styles/ToolTipStyles.xaml:4  {DynamicResource  ResourceKey=MahApps.Brushes.Text}
+U  bound-or-gradient  Source/NETworkManager/StatusWindow.xaml:36  {Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}
+U  bound-or-gradient  Source/NETworkManager/Views/Controls/ProfileExpanderPanel.xaml:513  {DynamicResource ResourceKey=MahApps.Brushes.Gray5}
+U  bound-or-gradient  Source/NETworkManager/Views/Controls/ProfileExpanderPanel.xaml:615  {DynamicResource ResourceKey=MahApps.Brushes.Gray5}
+U  bound-or-gradient  Source/NETworkManager/Views/CredentialsPasswordProfileFileChildWindow.xaml:35  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/CredentialsPasswordProfileFileChildWindow.xaml:63  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/CredentialsPasswordProfileFileChildWindow.xaml:70  {DynamicResource ResourceKey=MahApps.Brushes.Gray5}
+U  bound-or-gradient  Source/NETworkManager/Views/CredentialsPasswordProfileFileChildWindow.xaml:75  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/CustomCommandChildWindow.xaml:150  {DynamicResource  ResourceKey=MahApps.Brushes.Window.Background}
+U  bound-or-gradient  Source/NETworkManager/Views/CustomCommandChildWindow.xaml:94  {DynamicResource  ResourceKey=MahApps.Brushes.Window.Background}
+U  bound-or-gradient  Source/NETworkManager/Views/GroupChildWindow.xaml:1060  {TemplateBinding Background}
+U  bound-or-gradient  Source/NETworkManager/Views/GroupChildWindow.xaml:1465  {DynamicResource  ResourceKey=MahApps.Brushes.Window.Background}
+U  bound-or-gradient  Source/NETworkManager/Views/GroupChildWindow.xaml:1679  {DynamicResource  ResourceKey=MahApps.Brushes.Window.Background}
+U  bound-or-gradient  Source/NETworkManager/Views/HostsFileEditorView.xaml:104  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/HostsFileEditorView.xaml:119  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/HostsFileEditorView.xaml:133  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/HostsFileEditorView.xaml:146  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/HostsFileEditorView.xaml:159  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/HostsFileEditorView.xaml:190  {DynamicResource ResourceKey= MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/HostsFileEditorView.xaml:206  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/HostsFileEditorView.xaml:221  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/HostsFileEditorView.xaml:235  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/HostsFileEditorView.xaml:248  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/IPScannerView.xaml:124  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/IPScannerView.xaml:165  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/ImportCsvFileChildWindow.xaml:102  {DynamicResource  ResourceKey=MahApps.Brushes.Window.Background}
+U  bound-or-gradient  Source/NETworkManager/Views/ImportCsvFileChildWindow.xaml:63  {DynamicResource  ResourceKey=MahApps.Brushes.Window.Background}
+U  bound-or-gradient  Source/NETworkManager/Views/ImportProfilesResultChildWindow.xaml:113  {DynamicResource ResourceKey=MahApps.Brushes.Gray5}
+U  bound-or-gradient  Source/NETworkManager/Views/ImportProfilesResultChildWindow.xaml:120  {DynamicResource ResourceKey=MahApps.Brushes.Gray5}
+U  bound-or-gradient  Source/NETworkManager/Views/NeighborTableView.xaml:147  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1171  {TemplateBinding Background}
+U  bound-or-gradient  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1175  {TemplateBinding Background}
+U  bound-or-gradient  Source/NETworkManager/Views/PingMonitorHostView.xaml:396  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/PingMonitorHostView.xaml:55  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/PowerShellConnectChildWindow.xaml:90  {DynamicResource  ResourceKey=MahApps.Brushes.Window.Background}
+U  bound-or-gradient  Source/NETworkManager/Views/PowerShellSettingsView.xaml:59  {DynamicResource  ResourceKey=MahApps.Brushes.Window.Background}
+U  bound-or-gradient  Source/NETworkManager/Views/ProfileChildWindow.xaml:2368  {TemplateBinding Background}
+U  bound-or-gradient  Source/NETworkManager/Views/ProfileChildWindow.xaml:2845  {DynamicResource  ResourceKey=MahApps.Brushes.Window.Background}
+U  bound-or-gradient  Source/NETworkManager/Views/ProfileChildWindow.xaml:3215  {DynamicResource  ResourceKey=MahApps.Brushes.Window.Background}
+U  bound-or-gradient  Source/NETworkManager/Views/ProfileChildWindow.xaml:3382  {DynamicResource  ResourceKey=MahApps.Brushes.Window.Background}
+U  bound-or-gradient  Source/NETworkManager/Views/ProfilesView.xaml:562  {DynamicResource ResourceKey=MahApps.Brushes.Gray5}
+U  bound-or-gradient  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:222  {DynamicResource  ResourceKey=MahApps.Brushes.Window.Background}
+U  bound-or-gradient  Source/NETworkManager/Views/PuTTYSettingsView.xaml:161  {DynamicResource  ResourceKey=MahApps.Brushes.Window.Background}
+U  bound-or-gradient  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:50  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:61  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:72  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/SNTPLookupView.xaml:158  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/SNTPLookupView.xaml:171  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/SettingsAppearanceView.xaml:29  {Binding Color}
+U  bound-or-gradient  Source/NETworkManager/Views/SettingsAppearanceView.xaml:53  {Binding Path=Color}
+U  bound-or-gradient  Source/NETworkManager/Views/SettingsProfilesView.xaml:199  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/SettingsProfilesView.xaml:209  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/SettingsProfilesView.xaml:220  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/SettingsProfilesView.xaml:232  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/SettingsProfilesView.xaml:244  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/SettingsProfilesView.xaml:256  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/TracerouteView.xaml:179  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/TracerouteView.xaml:191  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/TracerouteView.xaml:203  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/TracerouteView.xaml:213  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/TracerouteView.xaml:224  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/TracerouteView.xaml:237  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/TracerouteView.xaml:304  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/TracerouteView.xaml:316  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/TracerouteView.xaml:328  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/TracerouteView.xaml:340  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/TracerouteView.xaml:352  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/TracerouteView.xaml:452  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/TracerouteView.xaml:464  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/WiFiView.xaml:149  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/WiFiView.xaml:383  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  bound-or-gradient  Source/NETworkManager/Views/WiFiView.xaml:527  {DynamicResource ResourceKey=MahApps.Brushes.Gray3}
+U  in-style-template  Source/NETworkManager/MainWindow.xaml:655  {DynamicResource MahApps.Brushes.Text}
+U  in-style-template  Source/NETworkManager/Resources/Styles/TextBlockStyles.xaml:117  {DynamicResource MahApps.Brushes.Gray3}
+U  in-style-template  Source/NETworkManager/Resources/Styles/TextBlockStyles.xaml:70  {DynamicResource MahApps.Brushes.Gray3}
+U  in-style-template  Source/NETworkManager/Views/PingMonitorHostView.xaml:237  {DynamicResource ResourceKey=MahApps.Brushes.Gray5}
+U  in-style-template  Source/NETworkManager/Views/PingMonitorHostView.xaml:253  {DynamicResource ResourceKey=MahApps.Brushes.Gray5}
+U  in-style-template  Source/NETworkManager/Views/PingMonitorHostView.xaml:257  {DynamicResource ResourceKey=MahApps.Brushes.Gray5}
+U  in-style-template  Source/NETworkManager/Views/PingMonitorHostView.xaml:273  {DynamicResource ResourceKey=MahApps.Brushes.Gray5}
+U  in-style-template  Source/NETworkManager/Views/PingMonitorHostView.xaml:278  {DynamicResource ResourceKey=MahApps.Brushes.Gray5}
+U  in-style-template  Source/NETworkManager/Views/PortScannerView.xaml:858  {DynamicResource MahApps.Brushes.Gray5}
+U  in-style-template  Source/NETworkManager/Views/PortScannerView.xaml:863  {DynamicResource MahApps.Brushes.Gray5}
+U  in-style-template  Source/NETworkManager/Views/SettingsView.xaml:55  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/CommandLineWindow.xaml:116  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/CommandLineWindow.xaml:122  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/CommandLineWindow.xaml:51  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/CommandLineWindow.xaml:53  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/CommandLineWindow.xaml:84  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/CommandLineWindow.xaml:86  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/CommandLineWindow.xaml:88  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/CommandLineWindow.xaml:91  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/CommandLineWindow.xaml:94  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/CommandLineWindow.xaml:99  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Controls/PowerShellControl.xaml:49  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Controls/PowerShellControl.xaml:63  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Controls/PuTTYControl.xaml:49  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Controls/PuTTYControl.xaml:63  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Controls/RefreshStatusControl.xaml:9  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Controls/RemoteDesktopControl.xaml:50  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Controls/RemoteDesktopControl.xaml:64  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Controls/SNMPCredentialsControl.xaml:100  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Controls/SNMPCredentialsControl.xaml:106  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Controls/SNMPCredentialsControl.xaml:135  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Controls/SNMPCredentialsControl.xaml:178  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Controls/SNMPCredentialsControl.xaml:61  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Controls/TigerVNCControl.xaml:48  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Controls/TigerVNCControl.xaml:62  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Controls/WindowsCredentialsControl.xaml:39  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Controls/WindowsCredentialsControl.xaml:42  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Controls/WindowsCredentialsControl.xaml:56  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Controls/WindowsCredentialsControl.xaml:69  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/MainWindow.xaml:107  {DynamicResource MahApps.Brushes.Accent2}
+U  no-ancestor-background  Source/NETworkManager/MainWindow.xaml:107  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/MainWindow.xaml:792  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/MainWindow.xaml:792  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/MainWindow.xaml:792  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/MainWindow.xaml:792  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  Source/NETworkManager/MainWindow.xaml:920  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/MainWindow.xaml:988  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/MainWindow.xaml:988  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/MainWindow.xaml:988  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/MainWindow.xaml:988  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/NotificationWindow.xaml:114  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/NotificationWindow.xaml:122  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/NotificationWindow.xaml:52  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/NotificationWindow.xaml:57  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/NotificationWindow.xaml:63  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Resources/Styles/ComboBoxStyles.xaml:205  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Resources/Styles/ComboBoxStyles.xaml:217  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:102  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:112  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:115  {DynamicResource MahApps.Brushes.Accent2}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:115  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:115  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:126  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:246  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:260  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:271  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:328  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:342  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:376  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:390  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:42  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:44  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:46  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:48  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:49  {DynamicResource MahApps.Brushes.Accent2}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:49  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:49  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:56  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:57  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:58  {DynamicResource MahApps.Brushes.Accent2}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:58  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/AboutView.xaml:58  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorSettingsView.xaml:10  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorSettingsView.xaml:11  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:126  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:158  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:160  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:162  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:164  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:167  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:169  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:172  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:174  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:177  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:179  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:182  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:185  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:217  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:27  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:48  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/BitCalculatorView.xaml:65  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ConnectionsView.xaml:143  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ConnectionsView.xaml:155  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ConnectionsView.xaml:38  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/CredentialsChangePasswordChildWindow.xaml:40  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/CredentialsChangePasswordChildWindow.xaml:48  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/CredentialsChangePasswordChildWindow.xaml:56  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/CredentialsChangePasswordChildWindow.xaml:65  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/CredentialsPasswordChildWindow.xaml:34  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/CredentialsPasswordProfileFileChildWindow.xaml:42  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/CredentialsSetPasswordChildWindow.xaml:38  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/CredentialsSetPasswordChildWindow.xaml:46  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/CredentialsSetPasswordChildWindow.xaml:55  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/CustomCommandChildWindow.xaml:138  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/CustomCommandChildWindow.xaml:41  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/CustomCommandChildWindow.xaml:75  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupHostView.xaml:33  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupHostView.xaml:37  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupHostView.xaml:42  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupHostView.xaml:49  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupSettingsView.xaml:129  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupSettingsView.xaml:139  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupSettingsView.xaml:142  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupSettingsView.xaml:20  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupSettingsView.xaml:21  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupSettingsView.xaml:30  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupSettingsView.xaml:40  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupView.xaml:159  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupView.xaml:192  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupView.xaml:203  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupView.xaml:30  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupView.xaml:53  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupView.xaml:71  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DNSLookupView.xaml:94  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DashboardSettingsView.xaml:12  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DashboardSettingsView.xaml:14  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DashboardSettingsView.xaml:36  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:154  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:158  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:162  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:165  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:169  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:173  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:176  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:180  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:184  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:188  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:192  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:196  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:200  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:259  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:261  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:39  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:53  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:59  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:65  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:95  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/DropDownChildWindow.xaml:38  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ExportChildWindow.xaml:41  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ExportChildWindow.xaml:54  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ExportChildWindow.xaml:74  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:106  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:112  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:119  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:125  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:132  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:138  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:155  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:172  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:187  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:202  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:219  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:226  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:232  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:72  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:87  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:93  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:99  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallSettingsView.xaml:11  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:135  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:149  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:183  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:209  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:222  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:298  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:314  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:328  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:341  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:352  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:379  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:418  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:499  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:59  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/FirewallView.xaml:749  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1003  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1031  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1066  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1094  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1125  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1164  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1202  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1262  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1278  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1294  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1366  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1372  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1378  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1384  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1390  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1397  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1404  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1439  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1552  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1628  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1744  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1794  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:1833  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:438  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:438  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:438  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:566  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:588  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:609  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:612  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:617  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:643  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:696  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:822  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:824  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:851  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:876  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:889  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/GroupChildWindow.xaml:966  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/HostsFileEditorEntryChildWindow.xaml:46  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/HostsFileEditorEntryChildWindow.xaml:54  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/HostsFileEditorEntryChildWindow.xaml:72  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/HostsFileEditorEntryChildWindow.xaml:91  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/HostsFileEditorView.xaml:260  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/HostsFileEditorView.xaml:46  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPAddressAndSubnetmaskChildWindow.xaml:37  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPAddressAndSubnetmaskChildWindow.xaml:49  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPAddressDialog.xaml:31  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiDNSResolverWidgetView.xaml:108  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiDNSResolverWidgetView.xaml:110  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiDNSResolverWidgetView.xaml:113  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiDNSResolverWidgetView.xaml:116  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiDNSResolverWidgetView.xaml:118  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiDNSResolverWidgetView.xaml:121  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiDNSResolverWidgetView.xaml:139  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiDNSResolverWidgetView.xaml:142  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiDNSResolverWidgetView.xaml:154  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiDNSResolverWidgetView.xaml:161  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiDNSResolverWidgetView.xaml:165  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiDNSResolverWidgetView.xaml:49  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiDNSResolverWidgetView.xaml:54  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:126  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:128  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:137  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:146  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:155  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:158  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:161  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:164  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:167  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:170  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:173  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:176  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:198  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:200  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:203  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:206  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:209  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:212  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:215  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:218  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:221  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:224  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:243  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:260  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:263  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:275  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:282  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:286  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:52  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPApiIPGeolocationWidgetView.xaml:57  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationHostView.xaml:32  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationHostView.xaml:36  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationHostView.xaml:41  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationHostView.xaml:48  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:130  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:174  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:176  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:186  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:195  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:204  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:207  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:210  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:213  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:216  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:220  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:223  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:226  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:249  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:251  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:255  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:259  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:262  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:266  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:269  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:272  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:275  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:278  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:31  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:310  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPGeolocationView.xaml:47  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerHostView.xaml:32  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerHostView.xaml:36  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerHostView.xaml:41  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerHostView.xaml:48  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerHostView.xaml:61  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:101  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:105  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:110  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:133  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:138  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:150  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:161  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:166  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:189  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:19  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:200  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:204  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:219  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:234  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:24  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:249  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:256  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:262  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:275  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:279  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:293  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:298  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:312  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:316  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:327  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:339  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:349  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:36  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:39  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:405  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:406  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:409  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:412  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:42  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:57  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:60  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:64  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:79  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerSettingsView.xaml:94  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:1001  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:1164  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:340  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:340  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:340  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:374  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:405  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:411  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:415  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:425  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:429  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:437  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:441  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:449  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:453  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:484  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:496  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:507  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:518  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:527  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:536  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:547  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:557  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:566  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:577  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:589  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:600  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:611  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:622  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:632  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:643  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:654  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:664  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:675  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:685  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:871  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:884  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:894  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:930  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/IPScannerView.xaml:956  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:114  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:121  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:137  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:154  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:167  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:173  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:201  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:59  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:74  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:99  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ImportCsvFileChildWindow.xaml:116  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/ImportCsvFileChildWindow.xaml:40  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ImportProfilesChildWindow.xaml:27  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ListenersView.xaml:113  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ListenersView.xaml:125  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ListenersView.xaml:36  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/LookupOUILookupView.xaml:106  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/LookupOUILookupView.xaml:127  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/LookupOUILookupView.xaml:138  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/LookupOUILookupView.xaml:30  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/LookupOUILookupView.xaml:45  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/LookupPortLookupView.xaml:105  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/LookupPortLookupView.xaml:134  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/LookupPortLookupView.xaml:145  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/LookupPortLookupView.xaml:29  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/LookupPortLookupView.xaml:44  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NeighborTableAddEntryChildWindow.xaml:38  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NeighborTableAddEntryChildWindow.xaml:50  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NeighborTableAddEntryChildWindow.xaml:62  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NeighborTableView.xaml:113  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/NeighborTableView.xaml:160  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/NeighborTableView.xaml:49  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:110  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:115  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:138  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:145  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:152  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:179  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:184  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:230  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:237  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:244  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:247  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:47  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:52  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:75  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:82  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkConnectionWidgetView.xaml:89  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkInterfaceSettingsView.xaml:11  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkInterfaceSettingsView.xaml:12  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkInterfaceView.xaml:52  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkInterfaceView.xaml:56  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkInterfaceView.xaml:62  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/NetworkInterfaceView.xaml:71  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorHostView.xaml:39  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorHostView.xaml:43  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorHostView.xaml:48  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorSettingsView.xaml:11  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorSettingsView.xaml:12  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorSettingsView.xaml:15  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorSettingsView.xaml:18  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorSettingsView.xaml:23  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorSettingsView.xaml:26  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorSettingsView.xaml:27  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorSettingsView.xaml:32  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorSettingsView.xaml:41  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorSettingsView.xaml:54  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorSettingsView.xaml:66  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorView.xaml:138  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorView.xaml:142  {StaticResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorView.xaml:157  {StaticResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorView.xaml:26  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorView.xaml:263  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorView.xaml:263  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/PingMonitorView.xaml:60  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortProfileChildWindow.xaml:38  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortProfileChildWindow.xaml:60  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerHostView.xaml:34  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerHostView.xaml:45  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerHostView.xaml:50  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerHostView.xaml:57  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:115  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:118  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:121  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:135  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:139  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:143  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:148  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:151  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:165  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:169  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:184  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:196  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:20  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:21  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:33  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:45  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerSettingsView.xaml:55  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:198  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:198  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:198  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:231  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:262  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:268  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:272  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:278  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:282  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:292  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:296  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:304  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:308  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:337  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:349  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:360  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:369  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:378  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:389  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:399  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:408  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:419  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:43  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:431  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:442  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:453  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:464  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:475  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:486  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:497  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:539  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:552  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:562  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:599  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:62  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PortScannerView.xaml:82  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellConnectChildWindow.xaml:130  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellConnectChildWindow.xaml:48  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellConnectChildWindow.xaml:51  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellConnectChildWindow.xaml:51  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellConnectChildWindow.xaml:81  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellHostView.xaml:35  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellHostView.xaml:39  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellHostView.xaml:45  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellHostView.xaml:52  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellHostView.xaml:64  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellSettingsView.xaml:100  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellSettingsView.xaml:12  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellSettingsView.xaml:13  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellSettingsView.xaml:42  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellSettingsView.xaml:46  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PowerShellSettingsView.xaml:50  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1000  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1000  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1000  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1254  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1266  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1285  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1309  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1328  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1340  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1353  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1385  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1414  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1480  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1495  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1513  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1553  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1567  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1605  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1609  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1645  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1648  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1653  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1684  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1688  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1722  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1774  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1778  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1835  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1839  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1904  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1908  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:1940  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2086  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2090  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2127  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2129  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2156  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2181  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2195  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2274  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2311  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2339  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2374  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2402  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2433  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2472  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2510  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2570  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2586  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2602  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2674  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2680  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2686  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2692  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2698  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2705  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2712  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2753  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2757  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2762  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2805  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2942  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2961  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2967  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:2967  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3032  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3164  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3284  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3288  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3322  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3364  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3455  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3459  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3493  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3532  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3564  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3578  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3617  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3621  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3676  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3682  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3710  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3714  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3771  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileChildWindow.xaml:3775  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfileFileChildWindow.xaml:36  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfilesView.xaml:129  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfilesView.xaml:165  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfilesView.xaml:165  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfilesView.xaml:354  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfilesView.xaml:366  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfilesView.xaml:376  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfilesView.xaml:38  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfilesView.xaml:387  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfilesView.xaml:620  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfilesView.xaml:620  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfilesView.xaml:74  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ProfilesView.xaml:85  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:105  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:105  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:143  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:178  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:207  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:213  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:53  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:66  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:66  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYHostView.xaml:35  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYHostView.xaml:39  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYHostView.xaml:44  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYHostView.xaml:51  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYHostView.xaml:63  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:102  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:107  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:135  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:139  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:152  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:18  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:19  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:202  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:216  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:230  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:244  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:258  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:40  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:54  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:67  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:90  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/PuTTYSettingsView.xaml:96  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPHostView.xaml:32  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPHostView.xaml:36  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPHostView.xaml:41  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPHostView.xaml:48  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPSettingsView.xaml:120  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPSettingsView.xaml:21  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPSettingsView.xaml:23  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:111  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:137  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:163  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:198  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:223  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:235  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:247  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:276  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:30  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:305  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:337  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:370  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:403  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:441  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:446  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:455  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:457  {DynamicResource MahApps.Brushes.Accent2}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:457  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:457  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:482  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:502  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:525  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:628  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:65  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:681  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:681  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:681  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:705  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RDAPView.xaml:85  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopConnectChildWindow.xaml:102  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopConnectChildWindow.xaml:114  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopConnectChildWindow.xaml:125  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopConnectChildWindow.xaml:150  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopConnectChildWindow.xaml:152  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopConnectChildWindow.xaml:48  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopConnectChildWindow.xaml:64  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopConnectChildWindow.xaml:78  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:34  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:38  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:43  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:104  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:107  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:110  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:122  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:126  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:142  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:149  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:158  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:159  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:165  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:171  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:178  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:184  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:185  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:191  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:197  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:211  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:216  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:217  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:223  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:25  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:37  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:59  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:71  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:85  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:89  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:90  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:167  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:167  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:233  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:258  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:300  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:300  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:300  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:300  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:300  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:327  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:334  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:405  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:407  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:410  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:412  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:415  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:417  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:420  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:422  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:425  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:427  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:433  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:435  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:439  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/RunCommandChildWindow.xaml:441  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPHostView.xaml:32  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPHostView.xaml:36  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPHostView.xaml:41  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPHostView.xaml:48  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPOIDProfileChildWindow.xaml:103  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPOIDProfileChildWindow.xaml:40  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPOIDProfileChildWindow.xaml:72  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPSettingsView.xaml:101  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPSettingsView.xaml:105  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPSettingsView.xaml:108  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPSettingsView.xaml:18  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPSettingsView.xaml:19  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPSettingsView.xaml:29  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPSettingsView.xaml:39  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:131  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:142  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:148  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:148  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:182  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:182  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:207  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:207  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:242  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:338  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:38  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:601  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:601  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:601  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:64  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:640  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:651  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:83  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:90  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNMPView.xaml:97  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNTPLookupHostView.xaml:96  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SNTPLookupHostView.xaml:96  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/SNTPLookupSettingsView.xaml:19  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNTPLookupSettingsView.xaml:20  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SNTPLookupSettingsView.xaml:28  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SNTPLookupSettingsView.xaml:37  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SNTPLookupSettingsView.xaml:93  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ServerConnectionInfoProfileChildWindow.xaml:141  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  Source/NETworkManager/Views/ServerConnectionInfoProfileChildWindow.xaml:172  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/ServerConnectionInfoProfileChildWindow.xaml:48  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/ServerConnectionInfoProfileChildWindow.xaml:77  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsAppearanceView.xaml:129  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsAppearanceView.xaml:134  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsAutostartView.xaml:17  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsGeneralView.xaml:114  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsGeneralView.xaml:136  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsGeneralView.xaml:144  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsGeneralView.xaml:164  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsGeneralView.xaml:173  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsGeneralView.xaml:175  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsGeneralView.xaml:186  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsGeneralView.xaml:187  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsGeneralView.xaml:191  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsGeneralView.xaml:192  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsGeneralView.xaml:20  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsGeneralView.xaml:54  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsGeneralView.xaml:84  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsHotKeysView.xaml:11  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsLanguageView.xaml:140  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsLanguageView.xaml:28  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsLanguageView.xaml:54  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsLanguageView.xaml:56  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsLanguageView.xaml:97  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsNetworkView.xaml:13  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsNetworkView.xaml:18  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsNetworkView.xaml:21  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsNetworkView.xaml:76  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsProfilesView.xaml:128  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsProfilesView.xaml:133  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsProfilesView.xaml:163  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsProfilesView.xaml:313  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsProfilesView.xaml:316  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsSettingsView.xaml:127  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsSettingsView.xaml:132  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsSettingsView.xaml:162  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsSettingsView.xaml:188  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsSettingsView.xaml:192  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsSettingsView.xaml:207  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsSettingsView.xaml:21  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsStatusView.xaml:12  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsStatusView.xaml:15  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsUpdateView.xaml:17  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsUpdateView.xaml:36  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsUpdateView.xaml:41  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsView.xaml:100  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsView.xaml:100  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsView.xaml:100  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsView.xaml:189  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsWindowView.xaml:11  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsWindowView.xaml:28  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsWindowView.xaml:39  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsWindowView.xaml:44  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SettingsWindowView.xaml:47  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:121  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:163  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:165  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:211  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:216  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:227  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:231  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:244  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:249  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:275  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:280  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:45  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:50  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:57  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:59  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorCalculatorView.xaml:114  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorCalculatorView.xaml:117  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorCalculatorView.xaml:120  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorCalculatorView.xaml:123  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorCalculatorView.xaml:126  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorCalculatorView.xaml:128  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorCalculatorView.xaml:131  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorCalculatorView.xaml:134  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorCalculatorView.xaml:140  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorCalculatorView.xaml:25  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorCalculatorView.xaml:34  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorCalculatorView.xaml:87  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorSubnettingView.xaml:141  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorSubnettingView.xaml:189  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorSubnettingView.xaml:200  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorSubnettingView.xaml:254  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorSubnettingView.xaml:31  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorSubnettingView.xaml:49  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorSubnettingView.xaml:68  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:136  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:163  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:166  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:169  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:172  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:175  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:177  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:180  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:183  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:189  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:25  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:44  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:63  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/TigerVNCConnectChildWindow.xaml:45  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/TigerVNCConnectChildWindow.xaml:58  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/TigerVNCHostView.xaml:34  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/TigerVNCHostView.xaml:38  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/TigerVNCHostView.xaml:43  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/TigerVNCHostView.xaml:50  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/TigerVNCHostView.xaml:62  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/TigerVNCSettingsView.xaml:12  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/TigerVNCSettingsView.xaml:13  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/TigerVNCSettingsView.xaml:34  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/TracerouteHostView.xaml:33  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/TracerouteHostView.xaml:37  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/TracerouteHostView.xaml:42  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/TracerouteHostView.xaml:49  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/TracerouteView.xaml:248  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/TracerouteView.xaml:268  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/TracerouteView.xaml:280  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/TracerouteView.xaml:292  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/WakeOnLANSettingsView.xaml:12  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WakeOnLANSettingsView.xaml:13  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WakeOnLANView.xaml:33  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WakeOnLANView.xaml:37  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/WakeOnLANView.xaml:42  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WakeOnLANView.xaml:49  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/WebConsoleConnectChildWindow.xaml:36  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WebConsoleHostView.xaml:253  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WebConsoleHostView.xaml:254  {DynamicResource MahApps.Brushes.Accent2}
+U  no-ancestor-background  Source/NETworkManager/Views/WebConsoleHostView.xaml:254  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/WebConsoleHostView.xaml:254  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/WebConsoleHostView.xaml:34  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WebConsoleHostView.xaml:38  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/WebConsoleHostView.xaml:43  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WebConsoleHostView.xaml:50  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/WebConsoleSettingsView.xaml:16  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WebConsoleSettingsView.xaml:41  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WebConsoleSettingsView.xaml:42  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WelcomeChildWindow.xaml:29  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WhoisHostView.xaml:32  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WhoisHostView.xaml:36  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/WhoisHostView.xaml:41  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WhoisHostView.xaml:48  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/WhoisView.xaml:127  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WhoisView.xaml:176  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/WhoisView.xaml:28  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WhoisView.xaml:44  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiConnectChildWindow.xaml:135  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiConnectChildWindow.xaml:137  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiConnectChildWindow.xaml:150  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiConnectChildWindow.xaml:162  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiConnectChildWindow.xaml:182  {DynamicResource MahApps.Brushes.Accent}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiConnectChildWindow.xaml:46  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiConnectChildWindow.xaml:72  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiConnectChildWindow.xaml:98  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiSettingsView.xaml:12  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiSettingsView.xaml:26  {DynamicResource MahApps.Brushes.Text}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiView.xaml:261  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiView.xaml:267  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiView.xaml:271  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiView.xaml:279  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiView.xaml:283  {DynamicResource MahApps.Brushes.Gray5}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiView.xaml:370  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiView.xaml:464  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiView.xaml:491  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/WiFiView.xaml:970  {DynamicResource MahApps.Brushes.Gray3}
+U  no-ancestor-background  Source/NETworkManager/Views/WindowsCredentialsChildWindow.xaml:23  {DynamicResource MahApps.Brushes.Text}
+U  translucent-uncomposited  Source/NETworkManager/Resources/Styles/DragablzStyles.xaml:104  Transparent
+U  translucent-uncomposited  Source/NETworkManager/Resources/Styles/TabControlStyles.xaml:3  Transparent
+U  translucent-uncomposited  Source/NETworkManager/Resources/Styles/TabControlStyles.xaml:3  Transparent
+U  translucent-uncomposited  Source/NETworkManager/Views/CredentialsChangePasswordChildWindow.xaml:85  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/CredentialsChangePasswordChildWindow.xaml:85  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/CredentialsChangePasswordChildWindow.xaml:85  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/CredentialsPasswordChildWindow.xaml:44  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/CredentialsPasswordChildWindow.xaml:44  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/CredentialsPasswordChildWindow.xaml:44  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/CredentialsPasswordChildWindow.xaml:44  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/CredentialsSetPasswordChildWindow.xaml:75  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/CredentialsSetPasswordChildWindow.xaml:75  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/CredentialsSetPasswordChildWindow.xaml:75  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/CustomCommandChildWindow.xaml:196  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/CustomCommandChildWindow.xaml:196  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/CustomCommandChildWindow.xaml:196  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/DropDownChildWindow.xaml:45  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/DropDownChildWindow.xaml:45  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/DropDownChildWindow.xaml:45  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ExportChildWindow.xaml:93  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/ExportChildWindow.xaml:93  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/ExportChildWindow.xaml:93  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ExportChildWindow.xaml:93  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:250  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:250  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:250  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/GroupChildWindow.xaml:1848  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/GroupChildWindow.xaml:1848  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/GroupChildWindow.xaml:1848  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/GroupChildWindow.xaml:1848  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/GroupChildWindow.xaml:1848  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/GroupChildWindow.xaml:1848  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/IPAddressAndSubnetmaskChildWindow.xaml:63  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/IPAddressAndSubnetmaskChildWindow.xaml:63  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/IPAddressAndSubnetmaskChildWindow.xaml:63  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/IPAddressDialog.xaml:45  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/IPAddressDialog.xaml:45  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/IPAddressDialog.xaml:45  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:209  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:209  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:209  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:209  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:209  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:209  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:209  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:209  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:209  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:209  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportCsvFileChildWindow.xaml:123  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportCsvFileChildWindow.xaml:123  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportCsvFileChildWindow.xaml:123  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportCsvFileChildWindow.xaml:123  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportProfilesChildWindow.xaml:49  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportProfilesChildWindow.xaml:49  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/ImportProfilesChildWindow.xaml:49  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/NeighborTableAddEntryChildWindow.xaml:70  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/NeighborTableAddEntryChildWindow.xaml:70  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/NeighborTableAddEntryChildWindow.xaml:70  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/PortProfileChildWindow.xaml:74  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/PortProfileChildWindow.xaml:74  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/PortProfileChildWindow.xaml:74  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/PowerShellConnectChildWindow.xaml:135  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/PowerShellConnectChildWindow.xaml:135  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/PowerShellConnectChildWindow.xaml:135  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ProfileChildWindow.xaml:3817  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/ProfileChildWindow.xaml:3817  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/ProfileChildWindow.xaml:3817  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ProfileFileChildWindow.xaml:50  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/ProfileFileChildWindow.xaml:50  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/ProfileFileChildWindow.xaml:50  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ProfileFileChildWindow.xaml:50  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:264  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:264  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:264  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/RemoteDesktopConnectChildWindow.xaml:156  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/RemoteDesktopConnectChildWindow.xaml:156  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/RemoteDesktopConnectChildWindow.xaml:156  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/RemoteDesktopConnectChildWindow.xaml:156  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/SNMPOIDProfileChildWindow.xaml:107  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/SNMPOIDProfileChildWindow.xaml:107  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/SNMPOIDProfileChildWindow.xaml:107  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/ServerConnectionInfoProfileChildWindow.xaml:180  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/ServerConnectionInfoProfileChildWindow.xaml:180  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/ServerConnectionInfoProfileChildWindow.xaml:180  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/TigerVNCConnectChildWindow.xaml:73  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/TigerVNCConnectChildWindow.xaml:73  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/TigerVNCConnectChildWindow.xaml:73  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/WebConsoleConnectChildWindow.xaml:53  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/WebConsoleConnectChildWindow.xaml:53  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/WebConsoleConnectChildWindow.xaml:53  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/WiFiConnectChildWindow.xaml:190  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/WiFiConnectChildWindow.xaml:190  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/WiFiConnectChildWindow.xaml:190  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/WindowsCredentialsChildWindow.xaml:27  {DynamicResource MahApps.Brushes.Accent2}
+U  translucent-uncomposited  Source/NETworkManager/Views/WindowsCredentialsChildWindow.xaml:27  {DynamicResource MahApps.Brushes.Accent3}
+U  translucent-uncomposited  Source/NETworkManager/Views/WindowsCredentialsChildWindow.xaml:27  {DynamicResource MahApps.Brushes.Accent}
+U  translucent-uncomposited  Source/NETworkManager/Views/WindowsCredentialsChildWindow.xaml:27  {DynamicResource MahApps.Brushes.Accent}
+U  unknown-palette-key  Source/NETworkManager/MainWindow.xaml:300  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/MainWindow.xaml:309  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/MainWindow.xaml:322  Brushes.Control.MouseOver
+U  unknown-palette-key  Source/NETworkManager/MainWindow.xaml:67  Brushes.Status.Error
+U  unknown-palette-key  Source/NETworkManager/Resources/Styles/ButtonStyles.xaml:80  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Resources/Styles/ButtonStyles.xaml:80  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Resources/Styles/ButtonStyles.xaml:80  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Resources/Styles/ProgressBarStyles.xaml:9  Brushes.Control.MouseOver
+U  unknown-palette-key  Source/NETworkManager/Resources/Templates/ValidationErrorTemplates.xaml:14  Brushes.Status.Error
+U  unknown-palette-key  Source/NETworkManager/Views/AboutView.xaml:323  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/AboutView.xaml:82  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/BitCalculatorView.xaml:99  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/CredentialsChangePasswordChildWindow.xaml:65  Brushes.Status.Error
+U  unknown-palette-key  Source/NETworkManager/Views/CredentialsChangePasswordChildWindow.xaml:65  Brushes.Status.Success
+U  unknown-palette-key  Source/NETworkManager/Views/CredentialsChangePasswordChildWindow.xaml:65  Brushes.Status.Warning
+U  unknown-palette-key  Source/NETworkManager/Views/CredentialsSetPasswordChildWindow.xaml:55  Brushes.Status.Error
+U  unknown-palette-key  Source/NETworkManager/Views/CredentialsSetPasswordChildWindow.xaml:55  Brushes.Status.Success
+U  unknown-palette-key  Source/NETworkManager/Views/CredentialsSetPasswordChildWindow.xaml:55  Brushes.Status.Warning
+U  unknown-palette-key  Source/NETworkManager/Views/CustomCommandChildWindow.xaml:122  Brushes.Surface.Border
+U  unknown-palette-key  Source/NETworkManager/Views/CustomCommandChildWindow.xaml:178  Brushes.Surface.Border
+U  unknown-palette-key  Source/NETworkManager/Views/DNSLookupSettingsView.xaml:91  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/DNSLookupView.xaml:137  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/DiscoveryProtocolView.xaml:85  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/FirewallView.xaml:527  Brushes.Status.Error
+U  unknown-palette-key  Source/NETworkManager/Views/FirewallView.xaml:791  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/FirewallView.xaml:815  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/GroupChildWindow.xaml:1492  Brushes.Surface.Border
+U  unknown-palette-key  Source/NETworkManager/Views/GroupChildWindow.xaml:1706  Brushes.Surface.Border
+U  unknown-palette-key  Source/NETworkManager/Views/HostsFileEditorView.xaml:341  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/HostsFileEditorView.xaml:365  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/IPGeolocationView.xaml:100  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/IPScannerSettingsView.xaml:400  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/IPScannerView.xaml:297  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/IPScannerView.xaml:297  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/ImportCsvFileChildWindow.xaml:91  Brushes.Surface.Border
+U  unknown-palette-key  Source/NETworkManager/Views/ImportProfilesResultChildWindow.xaml:168  Brushes.Surface.Border
+U  unknown-palette-key  Source/NETworkManager/Views/LookupOUILookupView.xaml:92  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/LookupPortLookupView.xaml:91  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/NeighborTableView.xaml:252  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/NeighborTableView.xaml:274  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1311  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1440  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/NetworkInterfaceView.xaml:1514  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/NetworkInterfaceView.xaml:606  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/NetworkInterfaceView.xaml:641  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/PortScannerSettingsView.xaml:108  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/PortScannerView.xaml:155  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/PortScannerView.xaml:155  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/PowerShellConnectChildWindow.xaml:117  Brushes.Surface.Border
+U  unknown-palette-key  Source/NETworkManager/Views/PowerShellHostView.xaml:112  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/PowerShellHostView.xaml:126  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/PowerShellHostView.xaml:143  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/PowerShellHostView.xaml:143  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/PowerShellHostView.xaml:143  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/PowerShellHostView.xaml:143  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/PowerShellHostView.xaml:299  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/PowerShellSettingsView.xaml:86  Brushes.Surface.Border
+U  unknown-palette-key  Source/NETworkManager/Views/ProfileChildWindow.xaml:2872  Brushes.Surface.Border
+U  unknown-palette-key  Source/NETworkManager/Views/ProfileChildWindow.xaml:3242  Brushes.Surface.Border
+U  unknown-palette-key  Source/NETworkManager/Views/ProfileChildWindow.xaml:3409  Brushes.Surface.Border
+U  unknown-palette-key  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:249  Brushes.Surface.Border
+U  unknown-palette-key  Source/NETworkManager/Views/PuTTYHostView.xaml:111  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/PuTTYHostView.xaml:125  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/PuTTYHostView.xaml:138  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/PuTTYHostView.xaml:155  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/PuTTYHostView.xaml:155  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/PuTTYHostView.xaml:155  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/PuTTYHostView.xaml:155  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/PuTTYHostView.xaml:311  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/PuTTYSettingsView.xaml:188  Brushes.Surface.Border
+U  unknown-palette-key  Source/NETworkManager/Views/RDAPSettingsView.xaml:80  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/RDAPSettingsView.xaml:98  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/RDAPView.xaml:582  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/RDAPView.xaml:582  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/RDAPView.xaml:725  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:109  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:123  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:137  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:150  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:163  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:190  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:225  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:225  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:225  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:225  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/RemoteDesktopHostView.xaml:229  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/RunCommandChildWindow.xaml:128  Brushes.Status.Success
+U  unknown-palette-key  Source/NETworkManager/Views/SNMPSettingsView.xaml:96  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/SNMPView.xaml:548  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/SNMPView.xaml:548  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/SNTPLookupSettingsView.xaml:88  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/SettingsLanguageView.xaml:75  Brushes.Status.Success
+U  unknown-palette-key  Source/NETworkManager/Views/SettingsProfilesView.xaml:118  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/SettingsProfilesView.xaml:182  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/SettingsProfilesView.xaml:89  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/SettingsSettingsView.xaml:116  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/SettingsSettingsView.xaml:181  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/SettingsSettingsView.xaml:87  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:140  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/SubnetCalculatorCalculatorView.xaml:65  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/SubnetCalculatorSubnettingView.xaml:122  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/SubnetCalculatorWideSubnetView.xaml:121  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/TigerVNCHostView.xaml:109  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/TigerVNCHostView.xaml:126  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/TigerVNCHostView.xaml:126  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/TigerVNCHostView.xaml:126  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/TigerVNCHostView.xaml:126  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/TigerVNCHostView.xaml:278  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/WakeOnLANView.xaml:148  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/WebConsoleHostView.xaml:114  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/WebConsoleHostView.xaml:114  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/WebConsoleHostView.xaml:114  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/WebConsoleHostView.xaml:114  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/WebConsoleHostView.xaml:97  Brushes.Surface.Frame
+U  unknown-palette-key  Source/NETworkManager/Views/WelcomeChildWindow.xaml:49  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/WhoisView.xaml:97  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/WiFiView.xaml:1060  Brushes.Button.Background
+U  unknown-palette-key  Source/NETworkManager/Views/WiFiView.xaml:1080  Brushes.Button.Background

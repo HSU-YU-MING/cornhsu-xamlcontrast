@@ -1,0 +1,443 @@
+# XamlContrast 公開語料摘要 —— 由 scripts/verify-corpus.ps1 -Update 產生，不要手改。
+# 語料釘死（corpus.txt 的 commit）+ 這份凍結 = 紅燈只有一個可能：工具自己變了。
+project: quicklook
+repo: https://github.com/QL-Win/QuickLook
+commit: e2f19a0ba9097024cc6520dd03735abd26f425f8
+tool-commit: 5e3798a+dirty
+frozen: 2026-11-15
+exit: 3
+palette-mode: pair
+palette-degraded: False
+palette-keys: 26
+single-theme: False
+files: 51
+pairs: 7
+coverage: 1.8
+unresolved: 393
+skipped: 2
+dead-foreground: 4
+disabled-exempt: 3
+converter-pairs: 0
+ui-component-pairs: 0
+parse-errors: 0
+suppressed: 0
+state-colors: 0
+fail: 1
+warn: 2
+ok: 4
+decorative: 0
+unresolved-by.bound-or-gradient: 7
+unresolved-by.in-style-template: 6
+unresolved-by.no-ancestor-background: 262
+unresolved-by.translucent-uncomposited: 69
+unresolved-by.unknown-palette-key: 49
+unknown-keys.AccentTextFillColorPrimaryBrush: 3
+unknown-keys.AccentTextFillColorSecondaryBrush: 2
+unknown-keys.ButtonForeground: 4
+unknown-keys.CardBackground: 5
+unknown-keys.CardBackgroundFillColorDefaultBrush: 11
+unknown-keys.SystemControlForegroundAccentBrush: 1
+unknown-keys.TextFillColorPrimaryBrush: 22
+unknown-keys.WindowBackground: 1
+# F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
+F  fail  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:67  TextBlock  {DynamicResource WindowTextForeground} on #3F3F3F  9.16/1.83  light-fails
+F  ok  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/ELFInfoPanel.xaml:85  TextBlock  White on #0067C0  5.67/5.67  
+F  ok  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/MachOInfoPanel.xaml:85  TextBlock  White on #0067C0  5.67/5.67  
+F  ok  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/UImageInfoPanel.xaml:86  TextBlock  White on #0067C0  5.67/5.67  
+F  ok  QuickLook.Plugin/QuickLook.Plugin.PEViewer/PEInfoPanel.xaml:85  TextBlock  White on #0067C0  5.67/5.67  
+F  warn  QuickLook.Common/Styles/MainWindowStyles.xaml:89  Style[CaptionCloseButtonStyle]/trigger  {DynamicResource CaptionCloseButtonHoverForeground} on {CaptionCloseButtonHoverBackground}  3.41/3.41  both-low
+F  warn  QuickLook/ViewerWindow.xaml:90  Button⊕Style[CaptionCloseButtonStyle]/trigger  {DynamicResource CaptionButtonIconForeground} on {CaptionCloseButtonPressBackground}  4.32/3.16  both-low
+# U  原因  檔案:行  值
+U  bound-or-gradient  QuickLook.Plugin/QuickLook.Plugin.CsvViewer/DataGrid.xaml:244  {DynamicResource {x:Static SystemColors.GrayTextBrushKey}}
+U  bound-or-gradient  QuickLook.Plugin/QuickLook.Plugin.CsvViewer/DataGrid.xaml:244  {DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}
+U  bound-or-gradient  QuickLook.Plugin/QuickLook.Plugin.CsvViewer/DataGrid.xaml:244  {DynamicResource {x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}}
+U  bound-or-gradient  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:42  <ImageBrush>
+U  bound-or-gradient  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:52  <ImageBrush>
+U  bound-or-gradient  QuickLook/Controls/GlassLayer/GlassLayer.xaml:15  <ImageBrush>
+U  bound-or-gradient  QuickLook/Controls/GlassLayer/GlassLayer.xaml:27  {Binding ElementName=glassLayer, Path=OverlayColor}
+U  in-style-template  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:191  {DynamicResource TextFillColorPrimaryBrush}
+U  in-style-template  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:201  {DynamicResource TextFillColorPrimaryBrush}
+U  in-style-template  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:267  {DynamicResource TextFillColorPrimaryBrush}
+U  in-style-template  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:273  {DynamicResource TextFillColorPrimaryBrush}
+U  in-style-template  QuickLook.Plugin/QuickLook.Plugin.TextViewer/Controls/DropDownButton.xaml:37  {DynamicResource TextFillColorPrimaryBrush}
+U  in-style-template  QuickLook/Controls/BusyDecorator/BusyDecorator.xaml:12  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:101  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:107  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:117  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:123  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:133  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:139  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:149  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:155  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:165  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:171  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:181  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:187  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:197  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:203  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:213  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:219  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:227  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:233  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:105  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:115  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:121  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:131  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:137  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:147  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:153  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:163  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:169  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:179  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:185  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:193  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:199  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:99  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:102  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:112  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:118  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:128  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:134  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:144  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:150  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:158  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:164  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:96  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:107  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:113  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:123  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:129  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:139  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:145  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:153  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:159  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:75  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:81  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:91  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:97  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:101  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:107  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:117  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:123  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:133  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:139  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:149  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:155  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:165  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:171  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:181  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:187  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:197  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:203  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:213  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:219  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:227  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:233  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:132  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:139  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:150  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:156  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:166  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:172  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:182  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:188  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:198  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:204  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:214  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:220  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:230  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:236  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:246  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:252  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:262  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:268  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:276  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:282  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:101  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:107  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:117  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:123  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:133  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:139  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:149  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:155  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:165  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:171  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:181  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:187  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:197  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:203  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:213  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:219  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:227  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:233  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MsiInfoPanel.xaml:105  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MsiInfoPanel.xaml:111  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MsiInfoPanel.xaml:121  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MsiInfoPanel.xaml:127  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MsiInfoPanel.xaml:137  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MsiInfoPanel.xaml:143  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MsiInfoPanel.xaml:151  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MsiInfoPanel.xaml:157  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MsiInfoPanel.xaml:89  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MsiInfoPanel.xaml:95  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MspInfoPanel.xaml:105  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MspInfoPanel.xaml:111  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MspInfoPanel.xaml:121  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MspInfoPanel.xaml:127  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MspInfoPanel.xaml:137  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MspInfoPanel.xaml:143  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MspInfoPanel.xaml:151  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MspInfoPanel.xaml:157  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MspInfoPanel.xaml:89  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/MspInfoPanel.xaml:95  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:102  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:112  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:118  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:128  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:134  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:144  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:180  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:216  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:222  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:232  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:238  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:246  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:252  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:80  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:86  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:96  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:104  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:110  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:120  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:126  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:136  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:142  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:152  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:158  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:168  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:175  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:186  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:193  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:204  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:210  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:218  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:224  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:106  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:112  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:122  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:128  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:136  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:142  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:74  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:80  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:90  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:96  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/ArchiveFile/ArchiveInfoPanel.xaml:24  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/ArchiveFile/ArchiveInfoPanel.xaml:40  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/ArchiveFile/ArchiveInfoPanel.xaml:50  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/ArchiveFile/ArchiveInfoPanel.xaml:57  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/ArchiveFile/ArchiveInfoPanel.xaml:64  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/ChromiumResourcePackage/PakInfoPanel.xaml:226  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/ChromiumResourcePackage/PakInfoPanel.xaml:233  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/ChromiumResourcePackage/PakInfoPanel.xaml:238  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/ChromiumResourcePackage/PakInfoPanel.xaml:28  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/ChromiumResourcePackage/PakInfoPanel.xaml:44  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/CompoundFileBinary/CompoundInfoPanel.xaml:25  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/CompoundFileBinary/CompoundInfoPanel.xaml:41  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/CompoundFileBinary/CompoundInfoPanel.xaml:51  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/CompoundFileBinary/CompoundInfoPanel.xaml:58  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/CompoundFileBinary/CompoundInfoPanel.xaml:63  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/DSStore/DSStoreInfoPanel.xaml:25  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/DSStore/DSStoreInfoPanel.xaml:41  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/DSStore/DSStoreInfoPanel.xaml:51  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/DSStore/DSStoreInfoPanel.xaml:58  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ArchiveViewer/DSStore/DSStoreInfoPanel.xaml:63  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.DbViewer/DbViewerPanel.xaml:31  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:1  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:102  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:116  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:129  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:132  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:147  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:167  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:173  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:86  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:99  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/ELFInfoPanel.xaml:104  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/ELFInfoPanel.xaml:112  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/ELFInfoPanel.xaml:118  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/ELFInfoPanel.xaml:127  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/ELFInfoPanel.xaml:133  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/ELFInfoPanel.xaml:98  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/MachOInfoPanel.xaml:104  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/MachOInfoPanel.xaml:112  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/MachOInfoPanel.xaml:118  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/MachOInfoPanel.xaml:127  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/MachOInfoPanel.xaml:133  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/MachOInfoPanel.xaml:98  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/UImageInfoPanel.xaml:105  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/UImageInfoPanel.xaml:113  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/UImageInfoPanel.xaml:119  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/UImageInfoPanel.xaml:127  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/UImageInfoPanel.xaml:133  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/UImageInfoPanel.xaml:142  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/UImageInfoPanel.xaml:148  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ELFViewer/InfoPanels/UImageInfoPanel.xaml:99  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:106  {DynamicResource CaptionButtonIconForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:115  {DynamicResource CaptionButtonIconForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:124  {DynamicResource CaptionButtonIconForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:131  {DynamicResource CaptionButtonIconForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:99  {DynamicResource CaptionButtonIconForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PEViewer/PEInfoPanel.xaml:104  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PEViewer/PEInfoPanel.xaml:112  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PEViewer/PEInfoPanel.xaml:118  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PEViewer/PEInfoPanel.xaml:127  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PEViewer/PEInfoPanel.xaml:133  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PEViewer/PEInfoPanel.xaml:98  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PluginInstaller/PluginInfoPanel.xaml:57  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PluginInstaller/PluginInfoPanel.xaml:64  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PluginInstaller/PluginInfoPanel.xaml:77  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:105  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:111  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:118  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:124  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:130  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:136  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:141  #FF0000
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:29  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:35  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:42  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:48  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:55  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:61  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:68  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:74  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:81  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:92  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.PrefetchViewer/PrefetchInfoPanel.xaml:98  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Styles.xaml:102  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Styles.xaml:144  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Styles.xaml:179  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Styles.xaml:187  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Styles.xaml:94  {DynamicResource WindowTextForeground}
+U  no-ancestor-background  QuickLook/Plugin/InfoPanel/InfoPanel.xaml:75  {DynamicResource WindowTextForegroundAlternative}
+U  no-ancestor-background  QuickLook/Plugin/InfoPanel/InfoPanel.xaml:82  {DynamicResource WindowTextForegroundAlternative}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.CsvViewer/CsvViewerPanel.xaml:19  #00FFFFFF
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.DumpViewer/DumpInfoPanel.xaml:183  #00FFFFFF
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:106  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:106  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:115  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:115  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:124  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:124  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:131  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:131  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:139  {DynamicResource CaptionBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:139  {DynamicResource CaptionBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:99  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.ImageViewer/ImagePanel.xaml:99  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.PluginInstaller/PluginInfoPanel.xaml:77  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.PluginInstaller/PluginInfoPanel.xaml:77  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:103  MainWindowBackground
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:110  MainWindowBackground
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:169  MainWindowBackground
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:169  MainWindowBackground
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:169  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:169  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:183  MainWindowBackground
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:183  MainWindowBackground
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:183  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:183  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:215  MainWindowBackground
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:215  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:215  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:224  MainWindowBackground
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:224  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:224  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:231  MainWindowBackground
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:231  MainWindowBackground
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:231  MainWindowBackground
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:91  MainWindowBackground
+U  translucent-uncomposited  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:97  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:1  {DynamicResource MainWindowBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:108  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:108  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:108  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:113  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:113  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:113  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:118  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:118  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:118  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:123  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:123  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:123  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:128  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:128  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:128  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:160  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:160  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:160  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:160  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:160  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:194  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:194  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:194  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:194  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:194  {DynamicResource CaptionButtonPressBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:233  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:90  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:94  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:94  MainWindowBackground
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:94  {DynamicResource CaptionButtonHoverBackground}
+U  translucent-uncomposited  QuickLook/ViewerWindow.xaml:94  {DynamicResource CaptionButtonPressBackground}
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:242  CardBackgroundFillColorDefaultBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:254  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:264  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:208  CardBackgroundFillColorDefaultBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:221  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppImageInfoPanel.xaml:231  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:173  CardBackgroundFillColorDefaultBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:185  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/AppxInfoPanel.xaml:195  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:168  CardBackgroundFillColorDefaultBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:180  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DebInfoPanel.xaml:187  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:242  CardBackgroundFillColorDefaultBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:254  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/DmgInfoPanel.xaml:264  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:291  CardBackgroundFillColorDefaultBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:303  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/HapInfoPanel.xaml:313  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:242  CardBackgroundFillColorDefaultBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:254  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/IpaInfoPanel.xaml:264  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:158  AccentTextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:158  AccentTextFillColorSecondaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:194  AccentTextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:194  AccentTextFillColorSecondaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:261  CardBackgroundFillColorDefaultBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:273  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:280  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:289  CardBackgroundFillColorDefaultBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:301  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/NugetInfoPanel.xaml:311  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:233  CardBackgroundFillColorDefaultBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:246  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/RpmInfoPanel.xaml:256  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:151  CardBackgroundFillColorDefaultBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:163  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/WgtInfoPanel.xaml:173  TextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.CsvViewer/SearchPanel.xaml:55  WindowBackground
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:6  ButtonForeground
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:6  ButtonForeground
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:6  ButtonForeground
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:6  ButtonForeground
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.DbViewer/PasswordControl.xaml:28  CardBackground
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.PDFViewer/PasswordControl.xaml:29  CardBackground
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.PluginInstaller/PluginInfoPanel.xaml:11  SystemControlForegroundAccentBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.PluginInstaller/PluginInfoPanel.xaml:82  AccentTextFillColorPrimaryBrush
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Styles.xaml:13  CardBackground
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Styles.xaml:13  CardBackground
+U  unknown-palette-key  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/Styles.xaml:13  CardBackground

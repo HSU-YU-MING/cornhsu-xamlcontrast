@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace XamlContrast.Core;
@@ -56,6 +57,20 @@ internal sealed partial class StyleIndex
         public string? FocusStroke;
         /// <summary>那個焦點框的 Margin 有負值：畫在控制項外面（旁邊是周圍的底），不是疊在控制項的底上。</summary>
         public bool FocusOutside;
+        /// <summary>隱含樣式的作用範圍（1.5）：放它的那層 Resources 屬於哪個元素的子樹，用行號區間表示
+        /// （<c>FromLine</c>～<c>ToLine</c>；0～int.MaxValue = 整個檔）。
+        ///
+        /// ⚠ 這一格是實測踩出來的。只用「同一個檔」當範圍的話，QuillNest 的
+        /// <c>ContentPresenter.Resources</c> 裡（標籤膠囊的模板深處、底是 <c>{Binding ColorHex}</c>）
+        /// 那個 <c>&lt;Style TargetType="TextBlock"&gt;&lt;Setter Foreground="White"&gt;</c>
+        /// 會套到同一個檔案裡**毫不相干**的工具列文字上 —— 報出三筆「白字配白卡片」的假 fail。
+        /// 執行期它只管那個 ContentPresenter 底下的東西。
+        ///
+        /// 兩份 XDocument（索引自己載一次、稽核再載一次）之間沒辦法比祖先關係，所以用行號區間：
+        /// 範圍元素的起始行 ～ 它子樹裡最大的行號（≈ 它的結束標籤）。偏差只會發生在最後一行上，
+        /// 而且方向是「漏掉」而不是「多套」。</summary>
+        public int FromLine;
+        public int ToLine = int.MaxValue;
     }
 
     internal sealed class Merged
@@ -67,6 +82,9 @@ internal sealed partial class StyleIndex
         public string? TemplateRootBg;
         /// <summary>生效模板的根元素框線（同 <see cref="TemplateRootBg"/>，衍生自帶模板時整個換掉）</summary>
         public string? TemplateRootBorder;
+        /// <summary>鏈上有任何一層帶 ControlTemplate —— 這個控制項的視覺是模板畫的（1.5 用它判斷
+        /// 「字到底畫在什麼上面」：模板裡哪一層畫底靜默看不到時，拿祖先的底去配就是編造）。</summary>
+        public bool HasTemplate;
         public string? TemplateRootBorderThickness;
         public required string Label;
         /// <summary>鏈上有任何一層定義在只屬於一個主題的字典檔裡 —— 另一個主題下解析到的是別的 Style（或沒有）</summary>
@@ -88,16 +106,22 @@ internal sealed partial class StyleIndex
     private readonly Dictionary<string, Dictionary<string, Record>> _byFile = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Record> _global = new();
     /// <summary>隱含樣式（只有 TargetType、無 x:Key）依型別名索引。
-    /// ⚠ 範圍刻意極窄：只給「檔案根元素的背景」用，見 <see cref="ImplicitRootBackground"/>。</summary>
-    private readonly Dictionary<string, Dictionary<string, Record>> _implicitByFile = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, Record> _implicitGlobal = new(StringComparer.Ordinal);
+    /// ⚠ 一個檔、同一個型別可以有好幾個（巢狀的 Resources 各一個），所以是 List：
+    /// 查找時依行號挑「作用範圍涵蓋這個元素、而且範圍最窄」的那一個（WPF 從最近的資源範圍往外找）。
+    /// 見 <see cref="Record.FromLine"/>。</summary>
+    private readonly Dictionary<string, Dictionary<string, List<Record>>> _implicitByFile = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>全域（字典最外層／App.Resources）的隱含樣式候選。
+    /// ⚠ 一個型別可能有好幾個互相競爭的全域隱含樣式（MaterialDesign 的 repo 裡 Button 就有好幾個：
+    ///   兩份 Defaults、ToolBar、Snackbar…）。執行期是「合併字典的順序」決定誰贏，靜態不可知 ——
+    ///   所以候選內容不一致時一律不套用（<see cref="Agree"/>），不是挑第一個。</summary>
+    private readonly Dictionary<string, List<Record>> _implicitGlobal = new(StringComparer.Ordinal);
     // 依主題的全域查找表：只收兩個主題共用的檔與那個主題自己的檔（先出現的贏，與 _global 同一個順序）
     private readonly Dictionary<ThemeSide, Dictionary<string, Record>> _globalBySide = new()
     {
         [ThemeSide.Dark] = new(),
         [ThemeSide.Light] = new(),
     };
-    private readonly Dictionary<ThemeSide, Dictionary<string, Record>> _implicitBySide = new()
+    private readonly Dictionary<ThemeSide, Dictionary<string, List<Record>>> _implicitBySide = new()
     {
         [ThemeSide.Dark] = new(StringComparer.Ordinal),
         [ThemeSide.Light] = new(StringComparer.Ordinal),
@@ -116,6 +140,41 @@ internal sealed partial class StyleIndex
 
     // 有元素以 Style="{…Resource K}" 引用的 Style 鍵（含經 BasedOn 間接用到的基底）
     private readonly HashSet<string> _usedKeys = new(StringComparer.Ordinal);
+
+    // 專案裡出現過的元素型別名（屬性元素 <X.Y> 不算）
+    private readonly HashSet<string> _elementTypes = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// 這個型別的隱含樣式，在這個檔的這一行適用的是哪一筆：
+    /// 同檔、作用範圍涵蓋這一行的之中取**最窄**的（WPF 從最近的資源範圍往外找），
+    /// 都不涵蓋就退回全域（字典／App.xaml 的）。
+    /// ⚠ 舊版「同檔就算」沒有範圍概念 —— 模板深處 <c>ContentPresenter.Resources</c> 裡的隱含樣式
+    ///   會套到同一個檔案裡毫不相干的元素上（見 <see cref="Record.FromLine"/> 的實例）。
+    /// </summary>
+    private Record? ImplicitRecord(string typeName, string file, int line, ThemeSide? side)
+    {
+        if (_implicitByFile.TryGetValue(file, out var map) && map.TryGetValue(typeName, out var recs))
+        {
+            var inScope = recs.Where(r => line >= r.FromLine && line <= r.ToLine).ToList();
+            if (inScope.Count > 0)
+            {
+                // 最近的資源範圍優先；同樣窄的有好幾個（同一層宣告兩個同型別的隱含樣式）就要內容一致
+                var narrowest = inScope.Min(r => (long)r.ToLine - r.FromLine);
+                var best = Agree(inScope.Where(r => (long)r.ToLine - r.FromLine == narrowest).ToList());
+                if (best is not null) return best;
+                // 這一層說不清楚 → 不往外退（外層的在執行期也贏不了這一層）
+                return null;
+            }
+        }
+        var global = side is { } s ? _implicitBySide[s].GetValueOrDefault(typeName) : _implicitGlobal.GetValueOrDefault(typeName);
+        return global is null ? null : Agree(global);
+    }
+
+    /// <summary>專案裡有這個型別的元素嗎 —— 隱含樣式會不會在某個使用處被評到（1.5）。
+    /// 一個都沒有的話執行期根本不會套用那個隱含樣式，它的配對不存在，定義處要照舊把看不懂的部分記成 unresolved。
+    /// ⚠ 這是專案層級、不分作用域的近似：隱含樣式寫在某個畫面的 Resources 裡、而那個型別只出現在別的畫面時，
+    ///   執行期一樣套不到 —— 兩種情況的結論都是「那一組不存在」，所以近似的方向是安全的。</summary>
+    public bool AppliesToSomeElement(string typeName) => _elementTypes.Contains(typeName);
 
     /// <summary>
     /// 這個具名 Style 會不會在某個使用處被評到：有元素以 Style= 引用它，或它是這種 Style（或行內 Style）的 BasedOn 基底。
@@ -338,7 +397,8 @@ internal sealed partial class StyleIndex
         foreach (var f in PaletteDetector.EnumerateFiles(root, "*.xaml"))
         {
             XDocument doc;
-            try { doc = XDocument.Load(f); }
+            // SetLineInfo：隱含樣式的作用範圍用行號表示（見 Record.FromLine）
+            try { doc = XDocument.Load(f, LoadOptions.SetLineInfo); }
             catch { continue; }
             if (doc.Root is null) continue;
             var isGlobal = doc.Root.Name.LocalName == "ResourceDictionary" || PaletteDetector.IsApplicationRoot(doc.Root); // 含 Application 子類別
@@ -347,17 +407,34 @@ internal sealed partial class StyleIndex
                 var rec = idx.CreateRecord(style, f);
                 if (rec.Key is null)
                 {
-                    // 隱含樣式：無 x:Key、有 TargetType，自動套用到該型別的每個實例
+                    // 隱含樣式：無 x:Key、有 TargetType、而且**放在資源集合裡**，自動套用到該型別的每個實例。
+                    // ⚠ 「沒有 x:Key」不等於「隱含樣式」。行內樣式（<TextBlock.Style><Style TargetType=…>）、
+                    //   指派給屬性的樣式（ItemContainerStyle、DataGridTextColumn.ElementStyle、Setter.Value 裡的）
+                    //   都沒有 x:Key，但它們只管被指派的那個元素／那一欄。
+                    //   實測（MaterialDesign，1.5 開發中）：Clock 模板裡時鐘讀數的行內樣式
+                    //   （FontSize 66、Foreground=Primary.Foreground，疊在紫色標頭上）被當成全域隱含樣式，
+                    //   於是整個 repo 的 TextBlock 都被套上「66 級的深色字」—— 一口氣多出 214 筆假 fail。
+                    if (!InResources(style)) continue;
                     var tt = style.Attribute("TargetType")?.Value;
                     if (tt is null) continue;
                     var m = TargetTypeName().Match(tt);
                     if (!m.Success) continue;
                     var typeName = m.Groups["t"].Value;
                     if (!idx._implicitByFile.TryGetValue(f, out var imap))
-                        idx._implicitByFile[f] = imap = new Dictionary<string, Record>(StringComparer.Ordinal);
-                    imap[typeName] = rec;
-                    if (isGlobal && !idx._implicitGlobal.ContainsKey(typeName)) idx._implicitGlobal[typeName] = rec;
-                    if (isGlobal) idx.AddBySide(idx._implicitBySide, typeName, rec);
+                        idx._implicitByFile[f] = imap = new Dictionary<string, List<Record>>(StringComparer.Ordinal);
+                    var (from, to) = ScopeOf(style);
+                    rec.FromLine = from; rec.ToLine = to;
+                    if (!imap.TryGetValue(typeName, out var recs)) imap[typeName] = recs = new List<Record>();
+                    recs.Add(rec);
+                    // 全域表只收「整個範圍」的（字典最外層、App.Resources）—— 巢狀 Resources 裡的只管那個子樹，
+                    // 連它自己的檔案都不是全部，更不可能跨檔
+                    var wholeFile = from == 0 && to == int.MaxValue;
+                    if (isGlobal && wholeFile)
+                    {
+                        if (!idx._implicitGlobal.TryGetValue(typeName, out var g)) idx._implicitGlobal[typeName] = g = new List<Record>();
+                        g.Add(rec);
+                        idx.AddImplicitBySide(typeName, rec);
+                    }
                     continue;
                 }
                 if (!idx._byFile.TryGetValue(f, out var map))
@@ -368,6 +445,9 @@ internal sealed partial class StyleIndex
             }
             foreach (var el in doc.Descendants())
             {
+                // 型別名的集合（1.5）：隱含樣式在使用處評不評得到，看專案裡有沒有那個型別的元素。
+                // 屬性元素 <Border.Background> 不是實例，排除
+                if (!el.Name.LocalName.Contains('.', StringComparison.Ordinal)) idx._elementTypes.Add(el.Name.LocalName);
                 if (el.Name.LocalName == "FontFamily" && el.Attribute(XKey)?.Value is { } fontKey)
                     idx._fontFamilies.TryAdd(fontKey, el.Value.Trim());
                 if (el.Attribute("Style")?.Value is { } s && ResourceRef().Match(s.Trim()) is { Success: true } m)
@@ -396,6 +476,34 @@ internal sealed partial class StyleIndex
         if (rec.Side is not null) HasThemeSides = true;
         foreach (var (side, table) in tables)
             if ((rec.Side is null || rec.Side == side) && !table.ContainsKey(key)) table[key] = rec;
+    }
+
+    /// <summary>隱含樣式的依主題候選（同 <see cref="AddBySide"/>，但收成清單）。</summary>
+    private void AddImplicitBySide(string typeName, Record rec)
+    {
+        if (rec.Side is not null) HasThemeSides = true;
+        foreach (var (side, table) in _implicitBySide)
+            if (rec.Side is null || rec.Side == side)
+            {
+                if (!table.TryGetValue(typeName, out var list)) table[typeName] = list = new List<Record>();
+                list.Add(rec);
+            }
+    }
+
+    /// <summary>
+    /// 候選一致就回那一個，不一致回 null（「不知道是哪一個」→ 不猜）。
+    ///
+    /// 一致的判準是「我們會用到的那幾格」：BasedOn、Foreground／Background 的 Setter、有沒有模板、模板根的底。
+    /// 深／淺兩份主題字典各宣告一個寫法相同的隱含樣式（<c>Foreground="{DynamicResource Fg0}"</c>）是常態，
+    /// 那不是歧義 —— 色票鍵本身會依主題解析。
+    /// </summary>
+    private static Record? Agree(List<Record> candidates)
+    {
+        if (candidates.Count == 0) return null;
+        static object Shape(Record r) => (r.BasedOn, r.Setters.GetValueOrDefault("Foreground"),
+            r.Setters.GetValueOrDefault("Background"), r.HasTemplate, r.TemplateRootBg);
+        var first = Shape(candidates[0]);
+        return candidates.All(c => Shape(c).Equals(first)) ? candidates[0] : null;
     }
 
     /// <summary>同檔優先，其次全域；指定主題時全域只看那個主題看得到的（共用檔 ∪ 那個主題自己的檔）。</summary>
@@ -428,6 +536,7 @@ internal sealed partial class StyleIndex
                 merged.TemplateRootBg = m.TemplateRootBg;
                 merged.TemplateRootBorder = m.TemplateRootBorder;
                 merged.TemplateRootBorderThickness = m.TemplateRootBorderThickness;
+                merged.HasTemplate = merged.HasTemplate || m.HasTemplate;
             }
         }
         foreach (var (p, v) in rec.Setters) merged.Props[p] = (v, rec.Id);
@@ -447,6 +556,7 @@ internal sealed partial class StyleIndex
         }
         if (rec.HasTemplate)
         {
+            merged.HasTemplate = true;
             merged.TemplateRootBg = rec.TemplateRootBg;
             merged.TemplateRootBorder = rec.TemplateRootBorder;
             merged.TemplateRootBorderThickness = rec.TemplateRootBorderThickness;
@@ -522,10 +632,9 @@ internal sealed partial class StyleIndex
     /// 只補「根元素」這一格：一個檔案最多影響一個值，不碰繼承語意，
     /// 拿到大部分的覆蓋率而不引入完整解析的雜訊風險。
     /// </summary>
-    public string? ImplicitRootBackground(string typeName, string file, ThemeSide? side = null)
+    public string? ImplicitRootBackground(string typeName, string file, int line = 0, ThemeSide? side = null)
     {
-        var rec = (_implicitByFile.TryGetValue(file, out var map) && map.TryGetValue(typeName, out var r))
-            ? r : side is { } s ? _implicitBySide[s].GetValueOrDefault(typeName) : _implicitGlobal.GetValueOrDefault(typeName);
+        var rec = ImplicitRecord(typeName, file, line, side);
         if (rec is null) return null;
         var merged = MergeChain(rec, new HashSet<string>(), $"Style[implicit {typeName}]", side);
         return merged.Props.TryGetValue("Background", out var v) ? v.V : merged.TemplateRootBg;
@@ -548,6 +657,37 @@ internal sealed partial class StyleIndex
         return (merged, rec.Id);
     }
 
+    private static int LineOf(XElement el) => el is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
+
+    /// <summary>
+    /// 隱含樣式的作用範圍（行號區間）：放它的那層 <c>&lt;X.Resources&gt;</c> 屬於哪個元素的子樹。
+    /// 字典／App 的資源、以及檔案根元素的 Resources 都是「整個範圍」（0～MaxValue）；
+    /// 巢狀的（某個 Grid、ContentPresenter、模板裡的 Resources）只管那個元素的子樹。
+    /// ⚠ 這是 1.5 的假警報修正，實例見 <see cref="Record.FromLine"/>。
+    /// </summary>
+    /// <summary>這個 Style 是放在資源集合裡嗎（<c>&lt;ResourceDictionary&gt;</c> 底下，或 <c>&lt;X.Resources&gt;</c> 裡，
+    /// 含中間那層 ResourceDictionary）—— 只有這種無 x:Key 的 Style 才是隱含樣式。</summary>
+    private static bool InResources(XElement style)
+        => style.Parent is { } p &&
+           (p.Name.LocalName == "ResourceDictionary" ||
+            p.Name.LocalName.EndsWith(".Resources", StringComparison.Ordinal));
+
+    private static (int From, int To) ScopeOf(XElement style)
+    {
+        var holder = style.Ancestors()
+            .FirstOrDefault(a => a.Name.LocalName.EndsWith(".Resources", StringComparison.Ordinal));
+        var owner = holder?.Parent;
+        // 沒有 X.Resources 包著（直接寫在 ResourceDictionary 的最外層）或擁有者就是檔案根元素
+        // （Window.Resources／Application.Resources）→ 整個範圍
+        if (owner is null || owner.Parent is null) return (0, int.MaxValue);
+        // ⚠ 字典檔也要套這條。MaterialDesign 的 PopupBox 模板裡有一個
+        //   <Style TargetType="Button" BasedOn="…PopupBoxButton">，寫在模板內某個元素的 Resources 裡；
+        //   把它當全域的話，那個 repo 裡六個示範 App 的每一顆 Button 都被套上彈出盒按鈕的字色 ——
+        //   數字甚至可能剛好接近真實（都是卡片上的強調色字），但歸因是碰巧對的，那不是稽核。
+        var to = owner.DescendantsAndSelf().Select(LineOf).DefaultIfEmpty(0).Max();
+        return (LineOf(owner), to);
+    }
+
     private static string? NotTemplateBound(string? v)
         => v is not null && v.TrimStart().StartsWith("{TemplateBinding", StringComparison.Ordinal) ? null : v;
 
@@ -556,10 +696,9 @@ internal sealed partial class StyleIndex
     /// 輸入框的框線幾乎都寫在主題的隱含樣式裡，不看它就什麼都評不到。查找同 <see cref="ImplicitRootBackground"/>（同檔優先、再全域）。
     /// ⚠ 文字配對照舊不吃隱含樣式（理由見 ImplicitRootBackground）：這裡不改預設的稽核範圍。
     /// </summary>
-    public Merged? GetImplicitChain(string typeName, string file, ThemeSide? side = null)
+    public Merged? GetImplicitChain(string typeName, string file, int line = 0, ThemeSide? side = null)
     {
-        var rec = (_implicitByFile.TryGetValue(file, out var map) && map.TryGetValue(typeName, out var r))
-            ? r : side is { } s ? _implicitBySide[s].GetValueOrDefault(typeName) : _implicitGlobal.GetValueOrDefault(typeName);
+        var rec = ImplicitRecord(typeName, file, line, side);
         if (rec is null) return null;
         var merged = MergeChain(rec, new HashSet<string>(), $"Style[implicit {typeName}]", side);
         merged.States = MergeSameCondition(merged.States);

@@ -120,7 +120,7 @@ exit 1: 3 pair(s) below threshold x 0.67 (0 warn)
 ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、具名／行內 Style
 （含 BasedOn 鏈）、同條件觸發器合併、停用態豁免（WCAG 1.4.3）、半透明色票、
 模板根背景、指向模板根的觸發 Setter、`MultiTrigger` 複合條件狀態、
-`#FFRRGGBB` 是不透明而非半透明、文件根的隱含樣式背景、重疊容器中的兄弟背板。
+`#FFRRGGBB` 是不透明而非半透明、隱含樣式的底與字色、重疊容器中的兄弟背板。
 
 前十三條來自四個已出貨的 WPF App；後四條來自 2026 年 8 月掃描八個公開 WPF 專案
 （1909 個 XAML 檔）——其中兩條在原本那四個專案上**完全測不到代價**，因為四個都是同一
@@ -377,7 +377,8 @@ GitHub Actions 上這一步也會在 job summary 加一行儀表板連結。`pul
 unresolved 的原因（`unresolvedBy` 的鍵、`unresolvedSites[].reason`）、`paletteMode`、`summary.failOn`、`findings[].theme` —— **不認得的值也要容忍**；
 schema 把它們寫成字串，目前的值列在 description。
 
-- 頂層：`toolVersion`、`exitCode`（稽核的判定：0、1 或 3）、`summary`、`unresolvedSites`、`findings`。
+- 頂層：`toolVersion`、`exitCode`（稽核的判定：0、1 或 3）、`summary`、`unresolvedSites`、
+  `stateColorSites`（1.5 起：找到但刻意不評的 VisualStateManager 狀態顏色，每一處帶 `file`、`line`、`state`、`kind`、`property`、`target`）、`findings`。
 - `summary` 帶實際生效的 gate（`failOn`、`minCoverage`、`strictPalette`，1.3 起加 `failOnNewUnresolved`）與**全部的退化計數** ——
   `paletteDegraded`、`coverage`、`unresolved`（含 `unresolvedBy`）、`skipped`、`deadForeground`、`disabledExempt`、`suppressed`、
   `parseErrors`／`parseErrorFiles`、`invalidIgnoreCount`／`invalidIgnores`、`unknownKeys`，以及 1.2 起的 `converterPairs`
@@ -409,7 +410,7 @@ fail／warn 另標 `symmetry: single-theme`。
 | `no-ancestor-background` | 祖先鏈上沒有任何一層宣告背景。常見於根容器靠 App 層隱含樣式給底,或資源字典裡的向量圖 |
 | `bound-or-gradient` | 顏色來自 `{Binding}` / `{TemplateBinding}` / 漸層或圖片 brush —— 執行期才知道。其他工具讀不出顏色的值也歸這裡(WPF 的色彩字面值 —— `#RGB`、`#ARGB`、`#RRGGBB`、`#AARRGGBB`、具名色、`{x:Static Colors.Red}`／`{x:Static Brushes.Red}` —— 都讀得懂;`{x:Static SystemColors.…}` 跟著作業系統的主題與高對比設定走、自己類別的靜態成員要讀 C#,這兩種照舊歸這裡) |
 | `unknown-palette-key` | 資源鍵不在偵測到的色盤裡 —— 打字錯誤,或色盤偵測漏了某個檔 |
-| `translucent-uncomposited` | 透明或半透明的背景、底下沒有可疊的顏色 —— 半透明的 `Background`、上面的祖先都沒有底；Style 定義處自己的 `Background="Transparent"`，而且沒有任何使用處會評到它（隱含樣式，或沒有元素以 `Style=` 引用的具名 Style；有元素用到的改在使用處評）；或以 `Opacity` 變淡、底下什麼都沒有的一層。第一種用下面的 `rootBackground` 補得回來 |
+| `translucent-uncomposited` | 透明或半透明的背景、底下沒有可疊的顏色 —— 半透明的 `Background`、上面的祖先都沒有底；Style 定義處自己的 `Background="Transparent"`，而且沒有任何使用處會評到它（沒有元素以 `Style=` 引用的具名 Style，或專案裡根本沒有那個型別元素的隱含樣式；隱含樣式與被引用的 Style 都在使用處評）；或以 `Opacity` 變淡、底下什麼都沒有的一層。第一種用下面的 `rootBackground` 補得回來 |
 | `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
 | `over-sibling-content` | 文字墊在同格子的兄弟 `Image`/媒體元素上 —— 真正的底是一張圖,靜態不可知;硬配祖先背景等於編造比值 |
 | `in-style-template` | Style 的 `Template` setter（`<Setter Property="Template"><Setter.Value><ControlTemplate>`）裡自己帶 `Foreground` 的文字元素 —— 還沒有評分（見已知限制），計入這裡讓覆蓋率反映這個缺口 |
@@ -436,17 +437,19 @@ unknown key 另外點名加計數(`summary.unknownKeys`,console 印前幾名)—
 的顏色執行期才存在,這也是控制項函式庫解析率低的原因)—— 把下限調到專案做得到的值
 (`--min-coverage 20`,或 config 的 `"minCoverage"`),並把解析出的部分當抽樣看待。
 
-**建立在主題函式庫上的 App**(MahApps、HandyControl、MaterialDesign…)是可修的特例:
-視窗底色的**鍵**在你 repo 的主題檔裡,但把它連到視窗的隱含樣式住在 NuGet 套件裡,
-靜態分析看不到。在 `xamlcontrast.config.json` 宣告一次:
+**建立在主題函式庫上的 App**(MahApps.Metro、HandyControl、MaterialDesignInXamlToolkit、WPF-UI…)
+是可修的特例:視窗底色的**鍵**多半在你 repo 的主題檔裡,但把它連到視窗的隱含樣式住在 NuGet 套件裡
+(編譯成 BAML、在組件的資源裡),靜態分析看不到。在 `xamlcontrast.config.json` 宣告一次:
 
 ```json
-{ "rootBackground": "MahApps.Brushes.Window.Background" }
+{ "rootBackground": "MahApps.Brushes.ThemeBackground" }
 ```
 
-實測(NETworkManager,MahApps 系 App、154 個 XAML):一行設定,覆蓋率 **8.8% → 87.2%**,
-浮出 284 筆先前完全看不到的淺色主題真實問題。鍵不在偵測到的色盤裡是設定錯誤(exit 2),
-不會靜默沒作用。
+實測(NETworkManager,MahApps 系 App、163 個 XAML):一行設定,**135 組配對、覆蓋率 9.4% → 1161 組、83.5%**,
+浮出 249 筆先前完全看不到的真實問題。鍵不在偵測到的色盤裡是設定錯誤(exit 2),不會靜默沒作用 ——
+所以提示會先查:它會指名偵測到的函式庫(從 pack URI,或 `<BundledTheme/>`／`<ControlsDictionary/>`／
+`<ThemesDictionary/>`),並在「你的主題檔真的有那個函式庫的底色鍵」時把那一行 config 直接寫給你;
+沒有的話(鍵只存在於套件裡)就改口要你給色碼,並依主題各跑一次。
 
 **顏色寫死在轉換器裡**（要自己打開，1.2 起）。「選到時會變色」的工具列按鈕常寫成
 `Background="{Binding ActiveTool, Converter={StaticResource ActiveBrush}, ConverterParameter=Pen}"`，顏色寫死在 C# 裡；
@@ -594,9 +597,14 @@ Style 的 `Template` setter 裡自己帶 `Foreground` 的文字元素**還沒有
 或 `ContentPresenter` 顯示的宿主字色照舊由 Style 鏈評分。
 觸發態一次評一個、不組合：`IsMouseOver` 觸發換字色、`IsPressed` 觸發換底色的 Style，評的是「按下的底配平常的字色」
 （用鍵盤按下時看到的），不是滑鼠按下時同時有的 hover 字色。
-TargetName 指向模板**內部**元素（指向根的已解析）、跨元素同條件觸發器、
-隱含樣式（根元素背景以外;例:`DataGrid` 列裡的按鈕是配表格的底評,不是隱含 `DataGridRow` 樣式畫的選取列底 ——
-實測一個報 ok 的 ghost 按鈕在選取列上是 4.06:1）;sibling 背景已解析 `Grid` 格子裡「佔滿格子的兄弟」(純色直接用;
+TargetName 指向模板**內部**元素（指向根的已解析）、跨元素同條件觸發器;
+隱含樣式（`<Style TargetType="X">` 無 x:Key）**已解析** —— 每個元素的底與字色都查得到它,
+作用範圍照 WPF 走:巢狀 `<X.Resources>` 只管那個元素的子樹、最內層優先、元素有自己的 Style 就不套、
+指派給屬性的樣式（`ItemContainerStyle`、`DataGridTextColumn.ElementStyle`、行內 `<X.Style>`）不算隱含樣式。
+還有三塊是「不說也不猜」:隱含樣式的**觸發態**（基礎態照評）、模板把底畫在看不到的那一層的**帶模板控制項**
+（`<hc:Shield Color="#1182c3"/>` 的白字在藍色徽章上,不是祖先的底）、
+以及同一個型別有**好幾個互相競爭的全域隱含樣式**（執行期看合併順序,靜態不可知）;
+sibling 背景已解析 `Grid` 格子裡「佔滿格子的兄弟」(純色直接用;
 半透明的 —— 不論來自 brush 的 alpha 或元素自己的 `Opacity` —— 合成;Binding／漸層計入無法解析),
 文字疊兄弟 Image 誠實歸 `over-sibling-content`;版面無法得知的自訂 `*Panel`、衍生命名的 `*Canvas`／`*Grid` 裡,
 可能是背板的兄弟之後的字也歸 `over-sibling-content`(`InkCanvas` 與 `Canvas` 一樣疊層;
@@ -604,9 +612,12 @@ TargetName 指向模板**內部**元素（指向根的已解析）、跨元素�
 但部分覆蓋的兄弟(含 `Canvas` 裡的一切,Canvas 不撐滿子元素)、
 藏在背板元素**裡面**的圖片仍看不到;Binding 來的顏色標「無法解析」而不猜 ——
 猜了就是拿誠實的不確定去換錯誤的信心。
-另:`VisualStateManager` 的顏色動畫(狀態 storyboard 裡的 `ColorAnimation`)不稽核
-**且尚未計數** —— Blend 時代的樣式方言(實測:kaxaml/snoop 這類老專案有數十處,
-現代專案為零)。計數器已列入規劃;在那之前,這一行就是揭露。
+另:`VisualStateManager` 的狀態顏色(狀態 storyboard 的 `ColorAnimation`、brush 的 key frame,
+以及 WinUI 的 `<VisualState.Setters>`)**不稽核,但有計數與逐筆位置**:
+`report.json` 的 `summary.stateColors` 與 `stateColorSites` 點名每一處,console、Markdown、HTML 也會說有幾處。
+那個狀態下長什麼樣只有執行期知道;基礎態照舊評。`Opacity` 動畫不計(焦點框與陰影的淡入淡出會把訊號蓋掉)。
+實測:WinUI Gallery 44 處、wpfui 18 處、HandyControl 15 處、Playnite 8 處,而四個自家專案是 0 ——
+這正是只有別人的專案才測得出來的那種盲區。
 
 ## 在你的專案上跑過了嗎？我想知道結果
 

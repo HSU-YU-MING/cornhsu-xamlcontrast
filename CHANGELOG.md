@@ -5,6 +5,79 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## 未發佈
 
+### Upgrading（這一段的兩個改動都會動到計數，是 minor 不是 patch）
+- **In short:** two audit-semantics improvements. No finding is lost or changed anywhere we measured
+  (the maintainer's apps and thirteen public projects), **baseline keys are unchanged** (`keyVersion` stays 1,
+  `schemaVersion` stays 6), and no existing field moves. What does move: more pairs are graded, so a real
+  problem that used to be invisible can now turn your build red — on the maintainer's own Kindling that is
+  exactly what happened (one `fail`, see below). Projects whose palette is built at runtime may see
+  **coverage drop** (Playnite 18.6% → 9.2%): the extra pairs are real, we just can't resolve their colours,
+  and that is what the coverage number is for. If you gate on `--min-coverage`, check that first.
+  *簡單說：兩個稽核語意的改進。沒有任何 finding 消失或改變、baseline 的鍵不動（keyVersion 仍是 1）。
+  但配對變多，原本看不見的真問題會讓 build 變紅（維護者自己的 Kindling 就多出一筆 fail）；
+  色盤在執行期才組出來的專案覆蓋率可能下降 —— 多出來的配對是真的，只是顏色解不出來，
+  那正是覆蓋率這個數字的用途。有用 --min-coverage 把關的請先確認。*
+
+- **Implicit styles are resolved for every element, not just the document root's background.**
+  A `<Style TargetType="X">` with no `x:Key` applies to every `X` in scope, and WPF lets its setters
+  **beat inherited values** — so this was never a cosmetic gap. Measured on the maintainer's Kindling:
+  `AccentBtn` sets `Foreground="White"` on the button, but the project's own implicit `TextBlock` style
+  overrides that for the label, which is really `Fg0` — **2.49:1 on the purple button in the light theme**,
+  while the tool used to report 21:1 ✓ against an ancestor background. A false pass is the one failure mode
+  this tool exists to prevent.
+  The scope rules follow WPF rather than "same file": a style in a nested `<X.Resources>` applies only inside
+  that element's subtree (an implicit `TextBlock` style inside one `ContentPresenter.Resources` must not
+  repaint the rest of the file), the innermost scope wins, an element with its own `Style` takes no implicit
+  style at all, and a style assigned to a property (`ItemContainerStyle`, `DataGridTextColumn.ElementStyle`,
+  an inline `<X.Style>`) is not an implicit style even though it has no key.
+  Where it still says nothing rather than guessing: **trigger states** of an implicit style (grading those
+  would change every affected finding's `element` label, i.e. every baseline key — that belongs in one
+  coordinated release), a **templated control** whose template paints the background somewhere we can't see
+  (`<hc:Shield Color="#1182c3"/>`: the white label is on the blue badge, not on the ancestor), and a type with
+  **several competing global implicit styles** (which one wins depends on merge order at runtime — unknowable).
+  Measured, 1.4.3 → this release: graded pairs +12% to +59% (Kindling 169 → 222, QuillNest 895 → 949,
+  ScreenToGif 498 → 620, wpfui 59 → 94, HandyControl 492 → 545, MaterialDesignInXamlToolkit 293 → 386);
+  `fail` moves only where it should (Kindling 0 → 1 real, MaterialDesignInXamlToolkit 73 → 112 — mostly flat
+  buttons whose light-blue label sits on a white card, 2.63:1 — Flow.Launcher 3 → 4); MahApps.Metro,
+  ScreenToGif, wpfui, WinUI Gallery, Playnite, ILSpy and QuillNest keep exactly the same `fail` and `warn`.
+  *隱含樣式現在套到每個元素（之前只補檔案根元素的底）。作用範圍照 WPF 走：巢狀 Resources 只管那個子樹、
+  最內層優先、元素有自己的 Style 就不套、指派給屬性的樣式不算隱含樣式。觸發態、模板畫底看不到的控制項、
+  以及同型別有多個互相競爭的全域隱含樣式，一律不評也不猜。*
+
+- **The coverage hint now names the theme library you actually use, and the key you actually have.**
+  An app built on MahApps.Metro, MaterialDesignInXamlToolkit, WPF-UI or HandyControl can't be audited
+  out of the box: the implicit style that paints its windows lives inside the NuGet package, compiled
+  into the assembly, so nothing up the tree declares a background and coverage collapses (measured,
+  zero-config: NETworkManager 9.4%, QuickLook 1.8%, Bloxstrap and v2rayN 0%). The escape hatch —
+  `rootBackground` in `xamlcontrast.config.json` — has always existed, and it is dramatic:
+  **NETworkManager goes from 135 graded pairs at 9.4% to 1161 at 83.5% with one line.**
+  The hint used to print a MahApps key as the example to everybody, so a WPF-UI or HandyControl user who
+  followed it got `exit 2` (a `rootBackground` key the palette doesn't have is a usage error). It now
+  detects which library the project merges (pack URI, or `<BundledTheme/>` / `<ControlsDictionary/>` /
+  `<ThemesDictionary/>`), names it, and checks whether your own theme files declare one of that library's
+  background keys: if they do, it prints that exact line of config; if they don't, it says so and asks for
+  a literal colour instead, once per theme. Same lesson as 1.4.2's `ThemeMode` fix, one layer up —
+  **a hint pointing the wrong way is worse than no hint**, because people conclude they already tried it.
+  Nothing else moves: no counter, no finding, no JSON field (the library name, like `ThemeMode`, never
+  reaches `report.json`). The library names and keys are constants in this repo, read from each library's
+  own source at the commits pinned in `baselines/corpus/corpus.txt`, so no scanned content is echoed.
+  *覆蓋率提示現在會指名你用的那個主題函式庫，並確認「你自己的主題檔裡真的有那個鍵」才叫你去設它 ——
+  沒有就改口要你給色碼。原本一律印 MahApps 的鍵，用別的函式庫的人照做會得到 exit 2。
+  實測：NETworkManager 加一行 rootBackground，135 組 9.4% → 1161 組 83.5%。*
+
+- **`VisualStateManager` state colours are counted and listed** — `summary.stateColors` and the new
+  `stateColorSites` array in `report.json`, a line in the console, Markdown and HTML reports. This was the
+  last blind spot with **no counter at all**: state storyboards (`ColorAnimation`, brush key frames) and
+  WinUI's `<VisualState.Setters>` paint at runtime, so they are still not graded — but a report that doesn't
+  mention them at all reads as "nothing here". Measured: WinUI Gallery 44 sites (41 animations, 3 setters),
+  wpfui 18, HandyControl 15, Playnite 8, Flow.Launcher 2, ScreenToGif 1, and **0 in all four maintainer apps** —
+  the shape of blind spot that only an outside project can show you.
+  It deliberately **does not** enter `pairs`, `unresolved` or `coverage` (that would push every VSM project's
+  coverage down and some builds red while adding no information), and `Opacity` animations are not counted
+  (focus/shadow fades would bury the signal).
+  *VisualStateManager 的狀態顏色有計數器與逐筆位置了（summary.stateColors、stateColorSites）。照舊不評 ——
+  只是不再靜默。刻意不進 pairs／unresolved／覆蓋率。*
+
 - **發版流程**(none):GitHub Release 的內容改成在**推上 nuget.org 之前**就抽好,
   抽不到就直接擋下。原本抽取放在最後一步「Create GitHub Release」,抽不到會安靜退回
   一句 `See CHANGELOG.md.` —— 而那一步跑到的時候套件已經不可逆地發出去了,在那裡失敗
@@ -12,6 +85,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   唯一真的會中的情況(標題寫了但底下沒有內容)會在什麼都還沒發出去的時候被擋住,
   此時刪 tag 重來還救得回來。抽出來的內容存進 `$RUNNER_TEMP`,發的時候用 `--notes-file`
   讀,全程只抽一次,兩邊不會漂開。
+
+- **守門（none）：公開語料回歸變成腳本，不再是「改完記得手動跑一輪」。**
+  `scripts/verify-corpus.ps1` + `baselines/corpus/`：十三個公開專案各**釘住一個 commit**
+  （2026-08-10 那輪實查的八個 WPF ＋ WinUI Gallery，再加四個「從 NuGet 裝主題庫、主題檔不在自己 repo 裡」
+  的應用程式 —— NETworkManager、QuickLook、v2rayN、Bloxstrap。那一類原本一個樣本都沒有，
+  而它正是覆蓋率會崩到個位數、使用者撞上 exit 3 的場景：實測覆蓋率 9.4%／1.8%／0%／0%）、sparse checkout 只取 `*.xaml`，摘要凍住每一筆
+  finding 與 unresolved 的位置（純文字、一行一筆，`git diff` 直接看得出哪一筆動了）。
+  語料釘死 + 摘要凍結 = 紅燈只有一個可能：工具自己變了。
+  1.4 那輪比對做完之後，結果只留在這份 CHANGELOG 的散文裡，下一次改規則沒有任何東西會紅 ——
+  這一版的隱含樣式改動就是靠它抓到三個假警報來源（巢狀 Resources 外洩、行內樣式被當成隱含樣式、
+  模板畫底看不到時配到祖先）。只有維護者本機跑（要網路與約 52 MB 的 clone），不進 CI。
+- **守門（none）：四個自家專案的快照旁邊記下「這份是對什麼凍的」。**
+  `verify-baselines.ps1 -Update` 會寫一份對象指紋（`baselines/<name>.project.txt`：專案路徑、git commit、
+  每個稽核輸入檔的 SHA-256 前 16 碼），驗收時重算再比。這支腳本有個結構性弱點 —— 受測的四個專案活在
+  repo 外面、會自己演化，所以紅燈分不出「工具行為變了」還是「被稽核的 App 改了」。實際發生過：
+  `celflow.json` 從 2026-08-26 就是紅的，原因是那個 App 自己改了四個 XAML 檔，中間紅了兩個月。
+  現在腳本自己說得出「對象沒變 → 差異來自工具」或「對象也變了 → 這些檔案動過」。
+  另有 `-UpdateFingerprint`：只補指紋、不動快照，而且**只在數字一致時才寫** ——
+  數字不一致時補指紋等於把「對著舊版 App 凍的數字」蓋章成「對著新版驗過」，正是這份指紋要防的謊。
 
 ## 1.4.3 — 2026-11-13
 

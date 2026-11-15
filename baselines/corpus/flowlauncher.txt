@@ -1,0 +1,256 @@
+# XamlContrast 公開語料摘要 —— 由 scripts/verify-corpus.ps1 -Update 產生，不要手改。
+# 語料釘死（corpus.txt 的 commit）+ 這份凍結 = 紅燈只有一個可能：工具自己變了。
+project: flowlauncher
+repo: https://github.com/Flow-Launcher/Flow.Launcher
+commit: 236c847977abfe72d73de8cd8d2d0e4896c53647
+tool-commit: 5e3798a+dirty
+frozen: 2026-11-15
+exit: 3
+palette-mode: pair
+palette-degraded: False
+palette-keys: 76
+single-theme: False
+files: 372
+pairs: 101
+coverage: 47.2
+unresolved: 113
+skipped: 1
+dead-foreground: 23
+disabled-exempt: 3
+converter-pairs: 0
+ui-component-pairs: 0
+parse-errors: 0
+suppressed: 0
+state-colors: 2
+fail: 4
+warn: 5
+ok: 88
+decorative: 4
+unresolved-by.bound-or-gradient: 10
+unresolved-by.in-style-template: 5
+unresolved-by.no-ancestor-background: 71
+unresolved-by.over-sibling-content: 1
+unresolved-by.translucent-uncomposited: 16
+unresolved-by.unknown-palette-key: 10
+unknown-keys.AccentButtonBackground: 1
+unknown-keys.AccentButtonForegroundPointerOver: 1
+unknown-keys.MenuFlyoutItemForeground: 3
+unknown-keys.MenuFlyoutSubItemForeground: 1
+unknown-keys.NavigationViewItemForeground: 3
+unknown-keys.RepeatButtonBackground: 1
+# F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
+F  decorative  Flow.Launcher/PluginUpdateWindow.xaml:59  Rectangle  {DynamicResource SeparatorForeground} on {PopuBGColor}  1.55/1.33  
+F  decorative  Flow.Launcher/SelectBrowserWindow.xaml:89  Rectangle  {DynamicResource SeparatorForeground} on {PopuBGColor}  1.55/1.33  
+F  decorative  Flow.Launcher/SelectFileManagerWindow.xaml:62  Rectangle  {StaticResource SeparatorForeground} on {PopuBGColor}  1.55/1.33  
+F  decorative  Flow.Launcher/SelectFileManagerWindow.xaml:99  Rectangle  {StaticResource SeparatorForeground} on {PopuBGColor}  1.55/1.33  
+F  fail  Flow.Launcher/Msg.xaml:60  TextBlock  #8e94a4 on #EBEBEB  2.54/2.54  both-low
+F  fail  Flow.Launcher/MsgWithButton.xaml:61  TextBlock  #8e94a4 on #EBEBEB  2.54/2.54  both-low
+F  fail  Flow.Launcher/MsgWithButton.xaml:77  Button  #dcdcdc on #EBEBEB  1.15/1.15  both-low
+F  fail  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:368  ContentControl  {DynamicResource Color05B} on #2F2F2F  13.39/1.29  light-fails
+F  ok  Flow.Launcher/ActionKeywords.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Flow.Launcher/ActionKeywords.xaml:70  TextBox  {DynamicResource Color05B} on {PopuBGColor}  16.29/17.22  
+F  ok  Flow.Launcher/CustomQueryHotkeySetting.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Flow.Launcher/CustomShortcutSetting.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Flow.Launcher/HotkeyControlDialog.xaml:1  ContentDialog⊕Style[ContentDialog]/base  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Flow.Launcher/HotkeyControlDialog.xaml:105  TextBlock  {DynamicResource Color05B} on {InfoBarWarningBG}  11.92/15.65  
+F  ok  Flow.Launcher/HotkeyControlDialog.xaml:98  FontIcon  {DynamicResource InfoBarWarningIcon} on {InfoBarWarningBG}  9.03/4.77  
+F  ok  Flow.Launcher/MessageBoxEx.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Flow.Launcher/Msg.xaml:53  TextBlock  #37392c on #EBEBEB  9.87/9.87  
+F  ok  Flow.Launcher/MsgWithButton.xaml:54  TextBlock  #37392c on #EBEBEB  9.87/9.87  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:106  TextBlock⊕Style[PluginSettingsRowGlyphStyle]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:109  TextBlock⊕Style[PluginSettingsRowLabelStyle]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:122  TextBlock⊕Style[PluginSettingsRowGlyphStyle]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:125  TextBlock⊕Style[PluginSettingsRowLabelStyle]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:151  TextBlock⊕Style[PluginSettingsRowGlyphStyle]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:154  TextBlock⊕Style[PluginSettingsRowLabelStyle]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:171  TextBlock⊕Style[PluginSettingsRowGlyphStyle]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:174  TextBlock⊕Style[PluginSettingsRowLabelStyle]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:204  ContentControl  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:221  ContentControl  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:229  ContentControl  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:80  TextBlock  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:87  TextBlock  {DynamicResource Color04B} on {Color01B}  10.46/5.75  
+F  ok  Flow.Launcher/PluginUpdateWindow.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Flow.Launcher/ProgressBoxEx.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Flow.Launcher/ReleaseNotesWindow.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Flow.Launcher/ReportWindow.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Flow.Launcher/Resources/Controls/CustomWindowTitleBar.xaml:35  Button⊕Style[TitleBarButtonStyle]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/Resources/Controls/CustomWindowTitleBar.xaml:46  Button⊕Style[TitleBarButtonStyle]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/Resources/Controls/CustomWindowTitleBar.xaml:56  Button⊕Style[TitleBarButtonStyle]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:174  ContentControl  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:52  TextBlock⊕Style[LinkBtnStyle]/base  {DynamicResource PluginInfoColor} on {Color00B}  3.94/3.10  
+F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:52  TextBlock⊕Style[LinkBtnStyle]/trigger  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:61  TextBlock⊕Style[LinkBtnStyle]/base  {DynamicResource PluginInfoColor} on {Color00B}  3.94/3.10  
+F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:61  TextBlock⊕Style[LinkBtnStyle]/trigger  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:70  TextBlock⊕Style[LinkBtnStyle]/base  {DynamicResource PluginInfoColor} on {Color00B}  3.94/3.10  
+F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:70  TextBlock⊕Style[LinkBtnStyle]/trigger  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplayKeyword.xaml:22  TextBlock⊕Style[Glyph]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplayKeyword.xaml:30  TextBlock⊕Style[SettingTitleLabel]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/Resources/CustomControlTemplate.xaml:102  Style[TitleBarButtonStyle]/trigger  {DynamicResource Color05B} on {Color06B}  13.77/14.32  
+F  ok  Flow.Launcher/Resources/CustomControlTemplate.xaml:102  Style[TitleBarButtonStyle]/trigger  {DynamicResource Color05B} on {Color09B}  14.55/14.71  
+F  ok  Flow.Launcher/Resources/CustomControlTemplate.xaml:136  Style[TitleBarCloseButtonStyle]/trigger  {DynamicResource MouseOverWindowCloseButtonForegroundBrush} on {Color10B}  5.66/5.66  
+F  ok  Flow.Launcher/Resources/CustomControlTemplate.xaml:136  Style[TitleBarCloseButtonStyle]/trigger  {DynamicResource MouseOverWindowCloseButtonForegroundBrush} on {Color11B}  5.06/5.06  
+F  ok  Flow.Launcher/Resources/CustomControlTemplate.xaml:1639  Style[DefaultRepeatButtonStyle]/trigger  {DynamicResource NumberBoxColor26B} on {NumberBoxColor23B}  11.03/15.39  
+F  ok  Flow.Launcher/Resources/CustomControlTemplate.xaml:1639  Style[DefaultRepeatButtonStyle]/trigger  {DynamicResource NumberBoxColor26B} on {NumberBoxColor24B}  14.94/15.80  
+F  ok  Flow.Launcher/Resources/CustomControlTemplate.xaml:1721  Style[ContentDialog]/base  {DynamicResource PopupTextColor} on {PopupBGColor}  10.46/17.22  
+F  ok  Flow.Launcher/Resources/Pages/WelcomePage2.xaml:72  TextBox⊕Style[QueryBoxStyle]/base  #FFFFFFFF on #2F2F2F  13.39/13.39  
+F  ok  Flow.Launcher/Resources/Pages/WelcomePage4.xaml:109  TextBlock⊕Style[QueryText]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/Resources/Pages/WelcomePage4.xaml:110  TextBlock⊕Style[ResultText]/base  {DynamicResource Color04B} on {Color01B}  10.46/5.75  
+F  ok  Flow.Launcher/Resources/Pages/WelcomePage4.xaml:115  TextBlock⊕Style[QueryText]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/Resources/Pages/WelcomePage4.xaml:116  TextBlock⊕Style[ResultText]/base  {DynamicResource Color04B} on {Color01B}  10.46/5.75  
+F  ok  Flow.Launcher/Resources/Pages/WelcomePage4.xaml:121  TextBlock⊕Style[QueryText]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/Resources/Pages/WelcomePage4.xaml:122  TextBlock⊕Style[ResultText]/base  {DynamicResource Color04B} on {Color01B}  10.46/5.75  
+F  ok  Flow.Launcher/Resources/Pages/WelcomePage4.xaml:127  TextBlock⊕Style[QueryText]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/Resources/Pages/WelcomePage4.xaml:128  TextBlock⊕Style[ResultText]/base  {DynamicResource Color04B} on {Color01B}  10.46/5.75  
+F  ok  Flow.Launcher/SelectBrowserWindow.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Flow.Launcher/SelectFileManagerWindow.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Flow.Launcher/SettingPages/Views/SettingsPanePluginStore.xaml:282  TextBlock  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/SettingPages/Views/SettingsPanePluginStore.xaml:291  TextBlock  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/SettingPages/Views/SettingsPanePluginStore.xaml:304  Hyperlink  {DynamicResource Color04B} on {Color00B}  9.09/6.12  
+F  ok  Flow.Launcher/SettingPages/Views/SettingsPanePluginStore.xaml:376  TextBlock  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/SettingPages/Views/SettingsPanePluginStore.xaml:383  TextBlock  {DynamicResource Color04B} on {Color00B}  9.09/6.12  
+F  ok  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:303  FontIcon  {DynamicResource Color05B} on {ButtonBackgroundColor}  11.90/17.08  
+F  ok  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:324  TextBox⊕Style[QueryBoxStyle]/base  #FFFFFFFF on #2F2F2F  13.39/13.39  
+F  ok  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:339  TextBlock⊕Style[ClockBox]/base  #C6C6C6 on #2F2F2F  7.84/7.84  
+F  ok  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:345  TextBlock⊕Style[DateBox]/base  #C6C6C6 on #2F2F2F  7.84/7.84  
+F  ok  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:729  FontIcon  {DynamicResource InfoBarWarningIcon} on {InfoBarWarningBG}  9.03/4.77  
+F  ok  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:736  TextBlock  {DynamicResource Color05B} on {InfoBarWarningBG}  11.92/15.65  
+F  ok  Flow.Launcher/SettingWindow.xaml:71  TextBlock  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/SettingWindow.xaml:93  TextBlock⊕Style[TabMenu]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/Themes/Base.xaml:739  Style[{x:Type Paragraph}]/trigger  {DynamicResource Color05B} on {Color03B}  16.86/13.67  
+F  ok  Flow.Launcher/Themes/Base.xaml:799  Style[{x:Type Run}]/trigger  {DynamicResource Color05B} on {Color03B}  16.86/13.67  
+F  ok  Flow.Launcher/Themes/Base.xaml:810  Style[{x:Type Span}]/trigger  {DynamicResource Color05B} on {Color03B}  16.86/13.67  
+F  ok  Flow.Launcher/WelcomeWindow.xaml:1  Window  {DynamicResource PopupTextColor} on {Color00B}  9.09/16.50  
+F  ok  Plugins/Flow.Launcher.Plugin.BrowserBookmark/Views/CustomBrowserSetting.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Plugins/Flow.Launcher.Plugin.BrowserBookmark/Views/CustomBrowserSetting.xaml:39  Button⊕Style[TitleBarCloseButtonStyle]/base  {DynamicResource Color05B} on {PopuBGColor}  16.29/17.22  
+F  ok  Plugins/Flow.Launcher.Plugin.Explorer/Views/ActionKeywordSetting.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Plugins/Flow.Launcher.Plugin.Explorer/Views/ActionKeywordSetting.xaml:37  Button⊕Style[TitleBarCloseButtonStyle]/base  {DynamicResource Color05B} on {PopuBGColor}  16.29/17.22  
+F  ok  Plugins/Flow.Launcher.Plugin.Explorer/Views/QuickAccessLinkSettings.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Plugins/Flow.Launcher.Plugin.Explorer/Views/QuickAccessLinkSettings.xaml:36  Button⊕Style[TitleBarCloseButtonStyle]/base  {DynamicResource Color05B} on {PopuBGColor}  16.29/17.22  
+F  ok  Plugins/Flow.Launcher.Plugin.Program/AddProgramSource.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Plugins/Flow.Launcher.Plugin.Program/AddProgramSource.xaml:39  Button⊕Style[TitleBarCloseButtonStyle]/base  {DynamicResource Color05B} on {PopuBGColor}  16.29/17.22  
+F  ok  Plugins/Flow.Launcher.Plugin.Program/ProgramSuffixes.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
+F  ok  Plugins/Flow.Launcher.Plugin.Program/ProgramSuffixes.xaml:100  Button⊕Style[TitleBarCloseButtonStyle]/base  {DynamicResource Color05B} on {PopuBGColor}  16.29/17.22  
+F  ok  Plugins/Flow.Launcher.Plugin.Sys/CommandKeywordSetting.xaml:1  Window  {DynamicResource PopupTextColor} on {PopupBGColor}  10.46/17.22  
+F  ok  Plugins/Flow.Launcher.Plugin.Sys/CommandKeywordSetting.xaml:31  Button⊕Style[TitleBarCloseButtonStyle]/base  {DynamicResource Color05B} on {PopupBGColor}  16.29/17.22  
+F  ok  Plugins/Flow.Launcher.Plugin.WebSearch/SearchSourceSetting.xaml:1  Window  {DynamicResource PopupTextColor} on {PopupBGColor}  10.46/17.22  
+F  ok  Plugins/Flow.Launcher.Plugin.WebSearch/SearchSourceSetting.xaml:36  Button⊕Style[TitleBarCloseButtonStyle]/base  {DynamicResource Color05B} on {PopupBGColor}  16.29/17.22  
+F  warn  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:20  TextBlock  {DynamicResource PluginInfoColor} on {Color00B}  3.94/3.10  both-low
+F  warn  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:26  TextBlock  {DynamicResource PluginInfoColor} on {Color00B}  3.94/3.10  both-low
+F  warn  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:32  TextBlock  {DynamicResource PluginInfoColor} on {Color00B}  3.94/3.10  both-low
+F  warn  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:38  TextBlock  {DynamicResource PluginInfoColor} on {Color00B}  3.94/3.10  both-low
+F  warn  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:46  TextBlock  {DynamicResource PluginInfoColor} on {Color00B}  3.94/3.10  both-low
+# U  原因  檔案:行  值
+U  bound-or-gradient  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:18  {DynamicResource {x:Static SystemColors.ControlTextBrushKey}}
+U  bound-or-gradient  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:18  {DynamicResource {x:Static SystemColors.GrayTextBrushKey}}
+U  bound-or-gradient  Flow.Launcher/Resources/CustomControlTemplate.xaml:1520  {DynamicResource {x:Static SystemColors.ControlTextBrushKey}}
+U  bound-or-gradient  Flow.Launcher/Resources/CustomControlTemplate.xaml:1520  {DynamicResource {x:Static SystemColors.GrayTextBrushKey}}
+U  bound-or-gradient  Flow.Launcher/ResultListBox.xaml:166  {Binding Result.ProgressBarColor}
+U  bound-or-gradient  Flow.Launcher/ResultListBox.xaml:166  {Binding Result.ProgressBarColor}
+U  bound-or-gradient  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:386  {Binding PreviewBackground}
+U  bound-or-gradient  Flow.Launcher/Themes/Circle System.xaml:35  {m:DynamicColor SystemControlHighlightBaseMediumLowBrush}
+U  bound-or-gradient  Flow.Launcher/Themes/ThemeBuilder/Template.xaml:8  {%searchFieldTextColor%}
+U  bound-or-gradient  Plugins/Flow.Launcher.Plugin.Explorer/Views/PreviewPanel.xaml:51  {Binding ElementName=PreviewSep, Path=Fill}
+U  in-style-template  Flow.Launcher/Resources/CustomControlTemplate.xaml:2260  {DynamicResource NavigationViewItemForeground}
+U  in-style-template  Flow.Launcher/Resources/CustomControlTemplate.xaml:695  {DynamicResource ToggleSwitchHeaderForeground}
+U  in-style-template  Flow.Launcher/Resources/SettingWindowStyle.xaml:321  {DynamicResource Color05B}
+U  in-style-template  Flow.Launcher/Resources/SettingWindowStyle.xaml:326  {DynamicResource Color05B}
+U  in-style-template  Flow.Launcher/SettingPages/Views/SettingsPanePluginStore.xaml:193  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/HotkeyControl.xaml:8  {DynamicResource Color01B}
+U  no-ancestor-background  Flow.Launcher/Resources/Controls/CustomWindowTitleBar.xaml:26  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/Resources/Controls/CustomWindowTitleBar.xaml:67  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/Resources/Controls/HotkeyDisplay.xaml:12  {DynamicResource Color01B}
+U  no-ancestor-background  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:112  {DynamicResource Color08B}
+U  no-ancestor-background  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:159  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:181  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:39  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:44  {DynamicResource Color04B}
+U  no-ancestor-background  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:55  {DynamicResource Color08B}
+U  no-ancestor-background  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:59  {DynamicResource Color08B}
+U  no-ancestor-background  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:64  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:89  {DynamicResource Color08B}
+U  no-ancestor-background  Flow.Launcher/ResultListBox.xaml:182  #FFFFFFFF
+U  no-ancestor-background  Flow.Launcher/ResultListBox.xaml:200  #FFFFFFFF
+U  no-ancestor-background  Flow.Launcher/ResultListBox.xaml:200  #FFFFFFFF
+U  no-ancestor-background  Flow.Launcher/SettingPages/Views/SettingsPaneAbout.xaml:223  {DynamicResource Color15B}
+U  no-ancestor-background  Flow.Launcher/SettingPages/Views/SettingsPaneAbout.xaml:26  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:27  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/SettingPages/Views/SettingsPaneHotkey.xaml:24  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/SettingPages/Views/SettingsPanePluginStore.xaml:133  {DynamicResource Color15B}
+U  no-ancestor-background  Flow.Launcher/SettingPages/Views/SettingsPanePluginStore.xaml:42  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/SettingPages/Views/SettingsPanePlugins.xaml:32  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/SettingPages/Views/SettingsPanePlugins.xaml:45  {DynamicResource Color15B}
+U  no-ancestor-background  Flow.Launcher/SettingPages/Views/SettingsPaneProxy.xaml:26  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:35  {DynamicResource Color05B}
+U  no-ancestor-background  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:571  {DynamicResource Color04B}
+U  no-ancestor-background  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:596  {DynamicResource Color04B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Calculator/Views/CalculatorSettings.xaml:132  {DynamicResource InfoBarWarningIcon}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:185  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:23  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:249  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:276  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:303  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:330  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:347  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:364  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:381  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:397  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:41  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:427  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:456  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:476  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:499  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:521  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:555  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:573  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:584  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:59  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:59  {DynamicResource Color18B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:596  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:627  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:648  Orange
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:675  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:692  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:707  Orange
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:723  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:769  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/ExplorerSettings.xaml:852  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/PreviewPanel.xaml:103  #8f8f8f
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/PreviewPanel.xaml:112  #8f8f8f
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/PreviewPanel.xaml:123  #8f8f8f
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/PreviewPanel.xaml:132  #8f8f8f
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/PreviewPanel.xaml:29  #8f8f8f
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/PreviewPanel.xaml:47  #8f8f8f
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/PreviewPanel.xaml:83  #8f8f8f
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Explorer/Views/PreviewPanel.xaml:92  #8f8f8f
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Shell/Views/ShellSetting.xaml:106  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Shell/Views/ShellSetting.xaml:28  {DynamicResource Color05B}
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.WebSearch/SettingsControl.xaml:19  gray
+U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.WebSearch/SettingsControl.xaml:29  gray
+U  over-sibling-content  Flow.Launcher/ResultListBox.xaml:134  <Image>
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:222  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:230  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:244  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:305  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:305  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:310  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:310  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:416  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:423  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:430  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:485  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:485  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:514  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:548  #E6000000
+U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:558  #E6000000
+U  translucent-uncomposited  Flow.Launcher/ResultListBox.xaml:76  #138A8A8A
+U  unknown-palette-key  Flow.Launcher/HotkeyControlDialog.xaml:63  AccentButtonBackground
+U  unknown-palette-key  Flow.Launcher/Resources/Controls/HotkeyDisplay.xaml:66  AccentButtonForegroundPointerOver
+U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:1639  RepeatButtonBackground
+U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  NavigationViewItemForeground
+U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  NavigationViewItemForeground
+U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:245  MenuFlyoutItemForeground
+U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:245  MenuFlyoutItemForeground
+U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:245  MenuFlyoutItemForeground
+U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:245  MenuFlyoutSubItemForeground
+U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:2923  NavigationViewItemForeground

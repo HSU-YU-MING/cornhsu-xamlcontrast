@@ -491,9 +491,13 @@ public class NewRuleTests
         Assert.Equal(UnresolvedReason.TranslucentUncomposited, seeThrough.Reason);
     }
 
-    [Fact] // 隱含樣式（沒有 x:Key）的透明底不會在使用處補評：定義處記 skipped 的話這組整個消失、覆蓋率照樣 100%
-           // （審查素材 use：白底上的 ToggleButton 實際 1.16:1）。記成 unresolved，覆蓋率照實掉下來
-    public void ImplicitStyleWithASeeThroughBackgroundIsUnresolvedNotSkipped()
+    [Fact] // 審查素材 use 的那一組：白底上的 ToggleButton，隱含樣式給 Transparent 底 + #EEEEEE 字，實際 1.16:1。
+           // 歷史三段，每一段都比上一段誠實：
+           //   0.x 定義處記 skipped → 整組從報告消失、覆蓋率照樣 100%（謊報健康）
+           //   1.0 定義處記 unresolved → 看得見「有一組沒評到」，覆蓋率照實掉下來，但那個 1.16:1 還是沒人說
+           //   1.5 使用處評得到（隱含樣式套到元素身上）→ 直接報出 1.16:1 的 fail，覆蓋率回到 100%
+           // 不變的那條線：這一組**不能**是 skipped —— 它不是「看不見的東西」
+    public void ImplicitStyleWithASeeThroughBackgroundIsGradedWhereItIsUsed()
     {
         using var fx = new Fixture();
         fx.File("Main.xaml", """
@@ -510,10 +514,13 @@ public class NewRuleTests
             """);
         var r = fx.Run();
         Assert.Equal(0, r.Skipped);
-        var site = Assert.Single(r.UnresolvedSites);
-        Assert.Equal(UnresolvedReason.TranslucentUncomposited, site.Reason);
-        Assert.Equal("Main.xaml", site.File);
-        Assert.Equal(0.5, r.Coverage);
+        Assert.Empty(r.UnresolvedSites);          // 使用處評到了 —— 定義處再記一筆就是同一組算兩次
+        Assert.Equal(1.0, r.Coverage);
+        var fail = Assert.Single(r.Findings, f => f.Category == Category.Fail);
+        Assert.Equal("ToggleButton", fail.Element);
+        Assert.Equal("#EEEEEE", fail.Fg);
+        Assert.Equal("#FFFFFF", fail.Bg);         // Transparent 只是穿透：真正的底是 Grid 的白
+        Assert.Equal(Wcag.Contrast("#EEEEEE", "#FFFFFF"), fail.RatioDark);
     }
 
     [Fact] // 上一條的另一半：看不懂的是「底」時要點名底的值（unknownKeys 靠它當死引用偵測器）；
@@ -656,9 +663,15 @@ public class NewRuleTests
         Assert.Equal(0, r.Unresolved);
     }
 
-    [Fact] // 界線要守住：隱含樣式只補「根元素」一格，不是完整的隱含樣式解析。
-           // 非根元素照舊沿樹往上找 —— 否則 Foreground 的繼承語意會把配對數炸開。
-    public void ImplicitStyleIsNotAppliedToNonRootElements()
+    [Fact] // 1.5：隱含樣式套到**每個**元素，不再只有根元素那一格。
+           //
+           // ⚠ 這條測試原本釘的是相反的行為（「只補根元素」），而它釘住的其實是一筆**假的通過**：
+           // 這份 XAML 執行期是「白底上的白字」，1.4 卻回報 21:1 ✓ —— 因為中間那個 Border 的白底
+           // 來自隱含樣式，工具不看，就沿樹找到了 Window 的黑。回報「通過」比漏報更糟，
+           // 而這正是本工具憲法的第一條（稽核工具最大的風險是謊報健康）。
+           // 當初的顧慮是「配對數會炸開」，1.5 的做法是只取隱含樣式的**基礎 Setter**、不走逐狀態路徑，
+           // 所以沒有任何 baseline 的鍵會動（見 Auditor 裡的註解）。
+    public void ImplicitStyleAppliesToEveryElementNotJustTheRoot()
     {
         using var fx = new Fixture();
         fx.File("App.xaml", """
@@ -673,14 +686,15 @@ public class NewRuleTests
         fx.File("Main.xaml", """
             <Window Background="#000000">
               <Border>
-                <TextBlock Foreground="#FFFFFF" Text="不該套到中間的 Border"/>
+                <TextBlock Foreground="#FFFFFF" Text="執行期是白底白字"/>
               </Border>
             </Window>
             """);
         var r = fx.Run();
         var f = Assert.Single(r.Findings);
-        Assert.Equal("#000000", f.Bg);   // 沿樹找到 Window 的黑，不是 Border 隱含樣式的白
-        Assert.Equal(21.0, f.RatioDark);
+        Assert.Equal("#FFFFFF", f.Bg);   // Border 的底來自隱含樣式的白 —— 不是沿樹找到的 Window 黑
+        Assert.Equal(1.0, f.RatioDark);  // 1.4 報的是 21:1 ✓（假的通過）
+        Assert.Equal(Category.Fail, f.Category);
     }
 
     [Fact] // 規則 17(b):文字墊在同格子的 Image 上 —— 底是一張圖,靜態不可知。

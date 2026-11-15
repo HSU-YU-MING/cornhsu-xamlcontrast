@@ -328,6 +328,164 @@ public class ConfigTests
         Assert.Contains("no-ancestor-background", hint);
     }
 
+    /// <summary>
+    /// 用第三方主題函式庫的專案（1.5）：提示要說**他用的那一個**，而且在「他自己的色盤真的有那個鍵」時
+    /// 直接把那一行 config 寫給他。
+    ///
+    /// ⚠ 1.4.2 的教訓同一層：提示原本一律印 MahApps 的鍵當範例，用 WPF-UI 或 HandyControl 的人照做
+    /// 就是 exit 2（rootBackground 的鍵在色盤裡解析不出來）—— 錯方向的提示比沒有提示更糟。
+    /// </summary>
+    [Theory]
+    [InlineData("""<ResourceDictionary Source="pack://application:,,,/Wpf.Ui;component/Resources/Theme/Dark.xaml"/>""",
+                "WPF-UI", "WindowBackground")]
+    [InlineData("""<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml"/>""",
+                "MahApps.Metro", "MahApps.Brushes.ThemeBackground")]
+    [InlineData("""<ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>""",
+                "HandyControl", "SecondaryRegionBrush")]
+    public void CoverageHintNamesTheThemeLibraryTheProjectActuallyUses(string merge, string library, string key)
+    {
+        // 真實形狀：色票在深／淺兩份主題字典裡（函式庫使用者多半把鍵抄一份在自己的 repo），
+        // App.xaml 只負責合併函式庫的字典
+        using var fx = new Fixture();
+        fx.File("Themes/DarkTheme.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="{key}" Color="#202020"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Dim" Color="#2A2A2A"/>
+            </ResourceDictionary>
+            """);
+        fx.File("Themes/LightTheme.xaml", $"""
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="{key}" Color="#FAFAFA"/>
+              <SolidColorBrush x:Key="Fg" Color="#212121"/>
+              <SolidColorBrush x:Key="Dim" Color="#E8E8E8"/>
+            </ResourceDictionary>
+            """);
+        fx.File("App.xaml", $"""
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Application.Resources>
+                <ResourceDictionary>
+                  <ResourceDictionary.MergedDictionaries>{merge}</ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary>
+              </Application.Resources>
+            </Application>
+            """);
+        fx.File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <TextBlock Foreground="{DynamicResource Fg}" Text="沒有任何祖先宣告背景 1"/>
+              <TextBlock Foreground="#DDDDDD" Text="沒有任何祖先宣告背景 2"/>
+            </Window>
+            """);
+        var hint = Report.CoverageHint(fx.Run());
+
+        Assert.NotNull(hint);
+        Assert.Contains(library, hint);
+        Assert.Contains($$"""{ "rootBackground": "{{key}}" }""", hint);
+        // 別的函式庫的鍵不可以出現 —— 那就是 1.4.2 修掉的那種錯方向提示
+        foreach (var other in new[] { "MahApps.Brushes.ThemeBackground", "WindowBackground", "SecondaryRegionBrush", "MaterialDesign.Brush.Background" })
+            if (other != key) Assert.DoesNotContain($"\"rootBackground\": \"{other}\"", hint);
+    }
+
+    /// <summary>
+    /// 同上，但這個專案**自己沒有抄**那些鍵（Bloxstrap 形狀：用 WPF-UI 的鍵、一個都沒自己定義）。
+    /// 這種人照著「設那個鍵」做會得到 exit 2，所以提示要改口叫他給色碼、並依主題各跑一次。
+    /// </summary>
+    [Fact]
+    public void CoverageHintAsksForALiteralWhenTheLibraryKeysAreOnlyInThePackage()
+    {
+        // 色盤偵測得到（三個鍵），但裡面**沒有** WPF-UI 的任何底色鍵 —— Bloxstrap 形狀
+        using var fx = new Fixture().WithPalette();
+        fx.File("App.xaml", """
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Application.Resources>
+                <ResourceDictionary>
+                  <ResourceDictionary.MergedDictionaries>
+                    <ResourceDictionary Source="pack://application:,,,/Wpf.Ui;component/Resources/Theme/Dark.xaml"/>
+                  </ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary>
+              </Application.Resources>
+            </Application>
+            """);
+        fx.File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <TextBlock Foreground="{DynamicResource Fg}" Text="沒有任何祖先宣告背景 1"/>
+              <TextBlock Foreground="#DDDDDD" Text="沒有任何祖先宣告背景 2"/>
+            </Window>
+            """);
+        var hint = Report.CoverageHint(fx.Run());
+
+        Assert.NotNull(hint);
+        Assert.Contains("WPF-UI", hint);
+        Assert.Contains("declares none of its background keys", hint);
+        Assert.Contains("""{ "rootBackground": "#FFFFFF" }""", hint);
+        Assert.Contains("exit 2", hint);           // 為什麼不能直接抄那個鍵
+        Assert.DoesNotContain("""{ "rootBackground": "WindowBackground" }""", hint);
+    }
+
+    /// <summary>
+    /// 第三種形狀（1.5，Bloxstrap 實測）：unresolved 幾乎都是 unknown-palette-key —— 這個專案直接用
+    /// 函式庫的鍵、自己一個都沒抄。rootBackground 救不了（它只補視窗底色），所以提示要說**別的**話。
+    /// ⚠ 原本這種專案什麼提示都沒有：使用者只看到「0 組配對、exit 3」，不知道為什麼、也不知道有沒有救。
+    /// </summary>
+    [Fact]
+    public void CoverageHintExplainsWhenEveryKeyLivesInThePackage()
+    {
+        using var fx = new Fixture();
+        fx.File("App.xaml", """
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Application.Resources>
+                <ResourceDictionary>
+                  <ResourceDictionary.MergedDictionaries>
+                    <ResourceDictionary Source="pack://application:,,,/Wpf.Ui;component/Resources/Theme/Dark.xaml"/>
+                  </ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary>
+              </Application.Resources>
+            </Application>
+            """);
+        fx.File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{DynamicResource ApplicationBackgroundBrush}">
+              <TextBlock Foreground="{DynamicResource TextFillColorPrimaryBrush}" Text="全部都是函式庫的鍵 1"/>
+              <TextBlock Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="全部都是函式庫的鍵 2"/>
+            </Window>
+            """);
+        var hint = Report.CoverageHint(fx.Run());
+
+        Assert.NotNull(hint);
+        Assert.Contains("unknown-palette-key", hint);
+        Assert.Contains("WPF-UI", hint);
+        Assert.Contains("rootBackground won't recover them", hint);  // 不要把人送去設一個救不了他的東西
+        Assert.Contains("not a pass", hint);
+        // 這個形狀不給那一行 config（給了就是把人送去做一件救不了他的事）
+        Assert.DoesNotContain("\"rootBackground\":", hint, StringComparison.Ordinal);
+    }
+
+    /// <summary>MaterialDesign 的 `<BundledTheme/>` 不是 pack URI，但一樣是「用了那個函式庫」的證據。</summary>
+    [Fact]
+    public void TheMaterialDesignBundledThemeElementCountsAsEvidence()
+    {
+        using var fx = new Fixture().WithPalette();
+        fx.File("App.xaml", """
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes">
+              <Application.Resources>
+                <ResourceDictionary>
+                  <ResourceDictionary.MergedDictionaries>
+                    <md:BundledTheme BaseTheme="Dark" PrimaryColor="Amber" SecondaryColor="Lime"/>
+                  </ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary>
+              </Application.Resources>
+            </Application>
+            """);
+        fx.File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <TextBlock Foreground="{DynamicResource Fg}" Text="沒有任何祖先宣告背景 1"/>
+              <TextBlock Foreground="#DDDDDD" Text="沒有任何祖先宣告背景 2"/>
+            </Window>
+            """);
+
+        Assert.Contains("MaterialDesignInXamlToolkit", Report.CoverageHint(fx.Run()) ?? "");
+    }
+
     /// <summary>用 WPF 內建 Fluent 主題（<c>ThemeMode</c>）的專案要收到<b>不同的</b>提示。
     /// 這種專案的色票在框架裡、不在 repo 裡，所以「去設你自己主題檔裡的鍵」是個不存在的動作——
     /// 自家的 Cornea 就是這樣（5 個 XAML、0 組配對），原本的提示叫他去設 MahApps 的鍵。</summary>

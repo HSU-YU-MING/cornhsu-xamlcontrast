@@ -1,0 +1,42 @@
+# XamlContrast 公開語料 —— scripts/verify-corpus.ps1 讀這份
+#
+# 為什麼要有：自家四個驗證專案全部是 WPF **應用程式**，測不到控制項函式庫、WinUI、
+# ThemeDictionaries、建置時產生的主題檔那幾類形狀。規劃書 8.3 節那條憲法修正寫得很直白 ——
+# 「每條規則來自實查」要加一句：**實查的樣本必須包含非作者的專案**。當時的數據是四個自家
+# 專案的解析覆蓋率 89~100%，八個公開專案合計 9.6%；同一個工具、兩個數量級。
+#
+# 這八個公開 WPF 專案 + WinUI Gallery 就是 2026-08-10 那輪實查的語料，1.4 的逐筆比對
+# （findings 與 unresolvedSites 一筆一筆比）也是對它們做的。以前那是手動跑一輪、結果寫進
+# CHANGELOG；現在是腳本 + 凍結摘要，動到色盤偵測或解析規則時跑一次就有逐筆的歸因證據。
+#
+# 為什麼釘住 commit：外部專案會自己演化。不釘的話摘要紅燈分不出「工具行為變了」還是
+# 「語料的專案改了」—— 跟自家四專案的對象指紋（verify-baselines.ps1）同一個問題，
+# 只是語料這邊可以直接釘死。刻意更新語料用 -Repin，然後必須連帶重凍摘要。
+#
+# 只取 *.xaml（sparse checkout）：語料是為了看解析規則在別人的 XAML 上長什麼樣，
+# 整份 clone 要好幾百 MB。⚠ 代價是 C# 色盤與轉換器那兩條路徑語料測不到 —— 它們靠
+# 自家的 Kindling（csharp 模式）與 ConverterTests 守。
+#
+# 語料的組成也要有意識地看（2026-11-15 盤點）：前九個是五個控制項函式庫本身 ＋ 四個自己手寫主題的
+# 應用程式 ＋ WinUI Gallery。缺的是「**從 NuGet 裝主題庫、主題檔不在自己 repo 裡**」那種應用程式 ——
+# 那種專案的色票鍵全部查不到、覆蓋率會崩到個位數、使用者會撞上 exit 3，然後要靠 config 的 rootBackground
+# 自救。換句話說：**這個工具最容易給錯建議的場景，語料裡原本一個樣本都沒有。**
+# （1.4.2 的 ThemeMode 提示 bug 正是這條線上的 —— 維護者自己的專案撞到「5 個檔、0 組配對、exit 3」，
+# 而工具叫他去找一個根本不存在的 MahApps 鍵。）所以 2026-11-15 補了後面四個，
+# 它們在 XamlKeys 的語料裡已經驗證過有料（光 external 鍵就 819／98／93／115 筆）。
+#
+# 名稱 | repo | commit（HEAD = 還沒釘，-Update／-Repin 會把它換成實際的 SHA）
+mahapps | https://github.com/MahApps/MahApps.Metro | 9466e8acd96591e1f552841bc5357f376552bb57
+screentogif | https://github.com/NickeManarin/ScreenToGif | a4d0a67c2131cd048ceec86cd40afc2f1a06f2fd
+playnite | https://github.com/JosefNemec/Playnite | e2e6efcda311fea38fcd92f61c8ca90811d97f28
+flowlauncher | https://github.com/Flow-Launcher/Flow.Launcher | 236c847977abfe72d73de8cd8d2d0e4896c53647
+handycontrol | https://github.com/HandyOrg/HandyControl | e9ad3d701b90e724399a413569fbd7f35a141053
+materialdesign | https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit | 087728011a8d71926ccf86cb28dc99439e9b1c3f
+wpfui | https://github.com/lepoco/wpfui | ffebacd61058170cf63864b7d5aa730cffff848a
+ilspy | https://github.com/icsharpcode/ILSpy | caff1a9549afc1a97b5319454fe602bfbde5ccde
+winuigallery | https://github.com/microsoft/WinUI-Gallery | 6de91feccadfbb0a796b71caedead5a2284f730e
+# 以下四個是「用 NuGet 的主題庫」那一類（2026-11-15 補）
+networkmanager | https://github.com/BornToBeRoot/NETworkManager.git | 350d81fa7257d1f436187c767706e789013c077a
+quicklook | https://github.com/QL-Win/QuickLook | e2f19a0ba9097024cc6520dd03735abd26f425f8
+v2rayn | https://github.com/2dust/v2rayN | 2c90ed1a9438a499aaaea0b612ffd5d705970106
+bloxstrap | https://github.com/pizzaboxer/bloxstrap | 02db76006741f039b79ac7547b8054d7f3ccfc05

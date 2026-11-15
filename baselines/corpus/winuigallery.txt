@@ -1,0 +1,385 @@
+# XamlContrast 公開語料摘要 —— 由 scripts/verify-corpus.ps1 -Update 產生，不要手改。
+# 語料釘死（corpus.txt 的 commit）+ 這份凍結 = 紅燈只有一個可能：工具自己變了。
+project: winuigallery
+repo: https://github.com/microsoft/WinUI-Gallery
+commit: 6de91feccadfbb0a796b71caedead5a2284f730e
+tool-commit: 5e3798a+dirty
+frozen: 2026-11-15
+exit: 3
+palette-mode: pair
+palette-degraded: False
+palette-keys: 573
+single-theme: False
+files: 196
+pairs: 111
+coverage: 33.1
+unresolved: 224
+skipped: 0
+dead-foreground: 0
+disabled-exempt: 0
+converter-pairs: 0
+ui-component-pairs: 0
+parse-errors: 0
+suppressed: 0
+state-colors: 44
+fail: 6
+warn: 6
+ok: 84
+decorative: 15
+unresolved-by.bound-or-gradient: 39
+unresolved-by.no-ancestor-background: 130
+unresolved-by.over-sibling-content: 12
+unresolved-by.translucent-uncomposited: 7
+unresolved-by.unknown-palette-key: 36
+unknown-keys.AcrylicBackgroundFillColorBaseBrush: 1
+unknown-keys.AcrylicBackgroundFillColorDefaultBrush: 3
+unknown-keys.AcrylicInAppFillColorDefaultBrush: 1
+unknown-keys.BackgroundColor: 1
+unknown-keys.ButtonBackgroundThemeBrush: 3
+unknown-keys.ButtonForeground: 2
+unknown-keys.CustomAcrylicInAppBrush: 1
+unknown-keys.CustomAcrylicInAppLuminosity: 1
+unknown-keys.HomePageBackgroundBrush: 1
+unknown-keys.InfoBarWarningSeverityIconBackground: 2
+unknown-keys.OverlayRadialGradient: 1
+unknown-keys.PrimaryColor: 1
+unknown-keys.SystemAccentColor: 12
+unknown-keys.SystemColorHighlightTextColor: 2
+unknown-keys.TextOnAccentFillColorDefaultBrush: 4
+# F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
+F  decorative  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:139  Ellipse  {ThemeResource SystemFillColorSuccess} on {ControlFillColorDefaultBrush} over {GalleryBackgroundBrush}  6.78/5.26  
+F  decorative  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:165  Ellipse  {ThemeResource SystemFillColorSuccess} on {ControlFillColorDefaultBrush} over {GalleryBackgroundBrush}  6.78/5.26  
+F  decorative  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:193  Ellipse  {ThemeResource SystemFillColorSuccess} on {ControlFillColorDefaultBrush} over {GalleryBackgroundBrush}  6.78/5.26  
+F  decorative  WinUIGallery/Samples/Canvas/CanvasPage.xaml:35  Rectangle  Red on #808080  1.01/1.01  
+F  decorative  WinUIGallery/Samples/Canvas/CanvasPage.xaml:40  Rectangle  Blue on #808080  2.18/2.18  
+F  decorative  WinUIGallery/Samples/Canvas/CanvasPage.xaml:45  Rectangle  Green on #808080  1.30/1.30  
+F  decorative  WinUIGallery/Samples/Canvas/CanvasPage.xaml:50  Rectangle  Yellow on #808080  3.68/3.68  
+F  decorative  WinUIGallery/Samples/Grid/GridPage.xaml:37  Rectangle  Red on #808080  1.01/1.01  
+F  decorative  WinUIGallery/Samples/Grid/GridPage.xaml:44  Rectangle  Blue on #808080  2.18/2.18  
+F  decorative  WinUIGallery/Samples/Grid/GridPage.xaml:49  Rectangle  Green on #808080  1.30/1.30  
+F  decorative  WinUIGallery/Samples/Grid/GridPage.xaml:54  Rectangle  Yellow on #808080  3.68/3.68  
+F  decorative  WinUIGallery/Samples/Viewbox/ViewboxPage.xaml:31  Rectangle  Blue on #A9A9A9  3.66/3.66  
+F  decorative  WinUIGallery/Samples/Viewbox/ViewboxPage.xaml:35  Rectangle  Green on #A9A9A9  2.19/2.19  
+F  decorative  WinUIGallery/Samples/Viewbox/ViewboxPage.xaml:39  Rectangle  Red on #A9A9A9  1.70/1.70  
+F  decorative  WinUIGallery/Samples/Viewbox/ViewboxPage.xaml:43  Rectangle  Yellow on #A9A9A9  2.19/2.19  
+F  fail  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:271  ColorTile  #FFFFFF on #A6A6A6  2.43/2.43  both-low
+F  fail  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:93  ColorTile  #FFFFFF on #A6A6A6  2.43/2.43  both-low
+F  fail  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:144  FontIcon  White on {ControlFillColorDefaultBrush} over {GalleryBackgroundBrush}  13.77/1.03  light-fails
+F  fail  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:170  FontIcon  White on {ControlFillColorDefaultBrush} over {GalleryBackgroundBrush}  13.77/1.03  light-fails
+F  fail  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:199  FontIcon  White on {ControlFillColorDefaultBrush} over {GalleryBackgroundBrush}  13.77/1.03  light-fails
+F  fail  WinUIGallery/Samples/SwipeControl/SwipeControlPage.xaml:117  SwipeItem  White on #FF9501  2.20/2.20  both-low
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml:187  ColorTile  {ThemeResource TextFillColorPrimary} on {LayerOnMicaBaseAltFillColorDefaultBrush} over {GalleryBackgroundBrush}  13.97/16.65  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml:195  ColorTile  {ThemeResource TextFillColorPrimary} on {LayerOnMicaBaseAltFillColorTertiaryBrush}  13.97/16.53  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml:211  ColorTile  {ThemeResource TextFillColorPrimary} on {LayerOnMicaBaseAltFillColorTransparentBrush} over {GalleryBackgroundBrush}  16.29/15.68  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml:220  ColorTile  {ThemeResource TextFillColorPrimary} on {LayerOnMicaBaseAltFillColorSecondaryBrush} over {GalleryBackgroundBrush}  13.77/14.48  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml:253  ColorTile  {ThemeResource TextFillColorPrimary} on {SolidBackgroundFillColorBaseBrush}  16.29/15.68  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml:259  ColorTile  {ThemeResource TextFillColorPrimary} on {SolidBackgroundFillColorBaseAltBrush}  19.80/12.82  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml:266  ColorTile  {ThemeResource TextFillColorPrimary} on {SolidBackgroundFillColorSecondaryBrush}  17.04/15.15  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml:273  ColorTile  {ThemeResource TextFillColorPrimary} on {SolidBackgroundFillColorTertiaryBrush}  14.74/16.53  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml:290  ColorTile  {ThemeResource TextFillColorPrimary} on {SolidBackgroundFillColorQuarternaryBrush}  13.97/17.22  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml:296  ColorTile  {ThemeResource TextFillColorPrimary} on {SolidBackgroundFillColorQuinaryBrush}  12.63/16.93  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml:303  ColorTile  {ThemeResource TextFillColorPrimary} on {SolidBackgroundFillColorSenaryBrush}  11.90/17.22  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:183  ColorTile  {ThemeResource TextFillColorPrimary} on {ControlStrongFillColorDisabledBrush} over {GalleryBackgroundBrush}  7.23/7.70  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:222  ColorTile  {ThemeResource TextFillColorPrimary} on {SubtleFillColorTransparentBrush} over {GalleryBackgroundBrush}  16.29/15.68  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:229  ColorTile  {ThemeResource TextFillColorPrimary} on {SubtleFillColorSecondaryBrush} over {GalleryBackgroundBrush}  13.77/14.61  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:236  ColorTile  {ThemeResource TextFillColorPrimary} on {SubtleFillColorTertiaryBrush} over {GalleryBackgroundBrush}  14.55/15.02  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:243  ColorTile  {ThemeResource TextFillColorPrimary} on {SubtleFillColorDisabledBrush} over {GalleryBackgroundBrush}  16.29/15.68  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:282  ColorTile  {ThemeResource TextFillColorPrimary} on {ControlOnImageFillColorDefaultBrush} over {GalleryBackgroundBrush}  16.86/16.79  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:288  ColorTile  {ThemeResource TextFillColorPrimary} on {ControlOnImageFillColorSecondaryBrush}  17.40/15.68  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:295  ColorTile  {ThemeResource TextFillColorPrimary} on {ControlOnImageFillColorTertiaryBrush}  18.58/14.75  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:302  ColorTile  {ThemeResource TextFillColorPrimary} on {ControlOnImageFillColorDisabledBrush} over {GalleryBackgroundBrush}  16.67/15.68  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:122  ColorTile  #FFFAEF on #3D3D3D  10.43/10.43  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:129  ColorTile  #3D3D3D on #FFFAEF  10.43/10.43  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:138  ColorTile  #903909 on #FFF5E3  7.00/7.00  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:146  ColorTile  #FFF5E3 on #903909  7.00/7.00  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:156  ColorTile  #FFFAEF on #202020  15.65/15.65  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:164  ColorTile  #202020 on #FFFAEF  15.65/15.65  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:174  ColorTile  #FFFAEF on #1C5E75  6.94/6.94  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:182  ColorTile  #FFFAEF on #676767  5.43/5.43  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:211  ColorTile  #2D3236 on #FFFFFF  12.95/12.95  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:218  ColorTile  #FFFFFF on #2D3236  12.95/12.95  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:227  ColorTile  #ABCFF2 on #212D3B  8.61/8.61  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:235  ColorTile  #212D3B on #ABCFF2  8.61/8.61  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:245  ColorTile  #2D3236 on #B6F6F0  10.75/10.75  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:253  ColorTile  #B6F6F0 on #2D3236  10.75/10.75  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:263  ColorTile  #202020 on #70EBDE  11.35/11.35  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:300  ColorTile  #000000 on #FFFFFF  21.00/21.00  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:307  ColorTile  #FFFFFF on #000000  21.00/21.00  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:316  ColorTile  #D6B4FD on #2B2B2B  7.96/7.96  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:324  ColorTile  #2B2B2B on #D6B4FD  7.96/7.96  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:33  ColorTile  #202020 on #FFFFFF  16.29/16.29  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:334  ColorTile  #000000 on #FFEE32  17.53/17.53  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:342  ColorTile  #FFEE32 on #000000  17.53/17.53  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:360  ColorTile  #000000 on #A6A6A6  8.63/8.63  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:40  ColorTile  #FFFFFF on #202020  16.29/16.29  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:49  ColorTile  #8EE3F0 on #263B50  7.89/7.89  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:57  ColorTile  #263B50 on #8EE3F0  7.89/7.89  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:67  ColorTile  #202020 on #FFFFFF  16.29/16.29  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:75  ColorTile  #FFFFFF on #202020  16.29/16.29  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:85  ColorTile  #202020 on #75E9FC  11.50/11.50  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/SignalSection.xaml:35  ColorTile  {ThemeResource TextFillColorInverseBrush} on {SystemFillColorSuccessBrush}  9.19/5.44  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/SignalSection.xaml:42  ColorTile  {ThemeResource TextFillColorInverseBrush} on {SystemFillColorCautionBrush}  13.51/5.25  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/SignalSection.xaml:50  ColorTile  {ThemeResource TextFillColorInverseBrush} on {SystemFillColorCriticalBrush}  9.16/5.66  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/StrokeSection.xaml:261  ColorTile  {ThemeResource TextFillColorPrimary} on {DividerStrokeColorDefaultBrush} over {GalleryBackgroundBrush}  12.82/14.10  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/StrokeSection.xaml:304  ColorTile  {ThemeResource TextFillColorInverseBrush} on {FocusStrokeColorOuterBrush} over {GalleryBackgroundBrush}  17.22/17.40  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:108  ColorTile  {ThemeResource TextFillColorPrimaryBrush} on {AccentTextFillColorDisabledBrush} over {GalleryBackgroundBrush}  4.88/6.85  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:138  ColorTile  {ThemeResource TextFillColorPrimaryBrush} on {TextOnAccentFillColorPrimaryBrush}  21.00/17.22  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:145  ColorTile  {ThemeResource TextFillColorPrimaryBrush} on {TextOnAccentFillColorSecondaryBrush} over {GalleryBackgroundBrush}  19.03/16.65  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:161  ColorTile  Black on {TextOnAccentFillColorDisabledBrush} over {GalleryBackgroundBrush}  7.10/21.00  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:167  ColorTile  Black on {TextOnAccentFillColorSelectedTextBrush}  21.00/21.00  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:33  ColorTile  {ThemeResource TextOnAccentFillColorPrimaryBrush} on {TextFillColorPrimaryBrush} over {GalleryBackgroundBrush}  21.00/17.40  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:40  ColorTile  {ThemeResource TextOnAccentFillColorPrimaryBrush} on {TextFillColorSecondaryBrush} over {GalleryBackgroundBrush}  13.08/6.69  
+F  ok  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:56  ColorTile  {ThemeResource TextFillColorPrimaryBrush} on {TextFillColorDisabledBrush} over {GalleryBackgroundBrush}  4.88/6.85  
+F  ok  WinUIGallery/MainWindow.xaml:169  TextBlock  {ThemeResource SystemFillColorCautionBrush} on {SystemFillColorCautionBackgroundBrush}  9.03/4.77  
+F  ok  WinUIGallery/Samples/Border/BorderPage.xaml:28  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  WinUIGallery/Samples/Iconography/IconographyPage.xaml:171  FontIcon  {ThemeResource SystemFillColorCautionBrush} on {CardBackgroundFillColorDefaultBrush} over {GalleryBackgroundBrush}  10.73/5.07  
+F  ok  WinUIGallery/Samples/Iconography/IconographyPage.xaml:175  TextBlock  {ThemeResource SystemFillColorCautionBrush} on {CardBackgroundFillColorDefaultBrush} over {GalleryBackgroundBrush}  10.73/5.07  
+F  ok  WinUIGallery/Samples/Iconography/IconographyPage.xaml:182  TextBlock  {ThemeResource TextFillColorSecondaryBrush} on {CardBackgroundFillColorDefaultBrush} over {GalleryBackgroundBrush}  9.09/6.17  
+F  ok  WinUIGallery/Samples/Iconography/IconographyPage.xaml:187  TextBlock  {ThemeResource TextFillColorSecondaryBrush} on {CardBackgroundFillColorDefaultBrush} over {GalleryBackgroundBrush}  9.09/6.17  
+F  ok  WinUIGallery/Samples/Iconography/IconographyPage.xaml:192  TextBlock  {ThemeResource TextFillColorSecondaryBrush} on {CardBackgroundFillColorDefaultBrush} over {GalleryBackgroundBrush}  9.09/6.17  
+F  ok  WinUIGallery/Samples/Iconography/IconographyPage.xaml:200  TextBlock  {ThemeResource TextFillColorSecondaryBrush} on {CardBackgroundFillColorDefaultBrush} over {GalleryBackgroundBrush}  9.09/6.17  
+F  ok  WinUIGallery/Samples/Iconography/IconographyPage.xaml:208  TextBlock  {ThemeResource TextFillColorSecondaryBrush} on {CardBackgroundFillColorDefaultBrush} over {GalleryBackgroundBrush}  9.09/6.17  
+F  ok  WinUIGallery/Samples/Iconography/IconographyPage.xaml:216  TextBlock  {ThemeResource TextFillColorSecondaryBrush} on {CardBackgroundFillColorDefaultBrush} over {GalleryBackgroundBrush}  9.09/6.17  
+F  ok  WinUIGallery/Samples/Iconography/IconographyPage.xaml:225  TextBlock  {ThemeResource TextFillColorSecondaryBrush} on {CardBackgroundFillColorDefaultBrush} over {GalleryBackgroundBrush}  9.09/6.17  
+F  ok  WinUIGallery/Samples/Iconography/IconographyPage.xaml:234  TextBlock  {ThemeResource TextFillColorSecondaryBrush} on {CardBackgroundFillColorDefaultBrush} over {GalleryBackgroundBrush}  9.09/6.17  
+F  ok  WinUIGallery/Samples/Iconography/IconographyPage.xaml:278  TextBlock  {ThemeResource TextFillColorSecondaryBrush} on {CardBackgroundFillColorDefaultBrush} over {GalleryBackgroundBrush}  9.09/6.17  
+F  ok  WinUIGallery/Samples/Iconography/IconographyPage.xaml:309  TextBlock  {ThemeResource TextFillColorSecondaryBrush} on {CardBackgroundFillColorDefaultBrush} over {CardBackgroundFillColorDefaultBrush} over {GalleryBackgroundBrush}  7.91/6.14  
+F  ok  WinUIGallery/Samples/Spacing/SpacingPage.xaml:126  TextBlock  {ThemeResource TextFillColorSecondaryBrush} on {GalleryBackgroundBrush}  10.15/6.03  
+F  ok  WinUIGallery/Samples/Spacing/SpacingPage.xaml:130  TextBlock  {ThemeResource TextFillColorSecondaryBrush} on {GalleryBackgroundBrush}  10.15/6.03  
+F  ok  WinUIGallery/Samples/SwipeControl/SwipeControlPage.xaml:112  SwipeItem  White on #3E6FA7  5.20/5.20  
+F  ok  WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml:145  TextBlock  {StaticResource TextFillColorPrimaryBrush} on {SolidBackgroundFillColorBaseBrush}  16.29/15.68  
+F  ok  WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml:153  TextBlock  {ThemeResource TextFillColorPrimaryBrush} on {SolidBackgroundFillColorBaseBrush}  16.29/15.68  
+F  ok  WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml:201  TextBlock  {ThemeResource TextBrush} on {BackgroundBrush}  10.89/10.89  
+F  ok  WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml:74  TextBlock  {StaticResource FontColor} on {HighlightBrush}  4.65/4.65  
+F  ok  WinUIGallery/Styles/ItemTemplates.xaml:71  TextBlock  {ThemeResource SystemFillColorCautionBrush} on {SystemFillColorCautionBackgroundBrush}  9.03/4.77  
+F  warn  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:176  ColorTile  {ThemeResource TextFillColorInverseBrush} on {ControlStrongFillColorDefaultBrush} over {GalleryBackgroundBrush}  6.76/3.64  light-fails
+F  warn  WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml:352  ColorTile  #FFFFFF on #8080FF  3.26/3.26  both-low
+F  warn  WinUIGallery/Controls/DesignGuidance/ColorSections/SignalSection.xaml:103  ColorTile  {ThemeResource TextFillColorInverseBrush} on {SystemFillColorNeutralBrush} over {GalleryBackgroundBrush}  6.76/3.64  light-fails
+F  warn  WinUIGallery/Controls/DesignGuidance/ColorSections/SignalSection.xaml:112  ColorTile  {ThemeResource TextFillColorInverseBrush} on {SystemFillColorSolidNeutralBrush}  6.96/3.45  light-fails
+F  warn  WinUIGallery/Controls/DesignGuidance/ColorSections/StrokeSection.xaml:182  ColorTile  {ThemeResource TextFillColorInverseBrush} on {ControlStrongStrokeColorDefaultBrush} over {GalleryBackgroundBrush}  6.76/3.64  light-fails
+F  warn  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:48  ColorTile  {ThemeResource TextOnAccentFillColorPrimaryBrush} on {TextFillColorTertiaryBrush} over {GalleryBackgroundBrush}  7.10/3.64  light-fails
+# U  原因  檔案:行  值
+U  bound-or-gradient  WinUIGallery/Controls/DesignGuidance/ColorPageExample.xaml:27  {x:Bind Foreground, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Controls/DesignGuidance/ColorPageExample.xaml:31  {x:Bind Foreground, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Controls/DesignGuidance/ColorSections/SignalSection.xaml:95  {ThemeResource SystemFillColorAttentionBrush}
+U  bound-or-gradient  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:100  {ThemeResource AccentTextFillColorTertiaryBrush}
+U  bound-or-gradient  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:120  {ThemeResource AccentFillColorDefaultBrush}
+U  bound-or-gradient  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:125  {ThemeResource AccentFillColorDefaultBrush}
+U  bound-or-gradient  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:72  {ThemeResource AccentTextFillColorPrimaryBrush}
+U  bound-or-gradient  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:85  {ThemeResource AccentTextFillColorPrimaryBrush}
+U  bound-or-gradient  WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml:92  {ThemeResource AccentTextFillColorSecondaryBrush}
+U  bound-or-gradient  WinUIGallery/Controls/DesignGuidance/ColorTile.xaml:39  {x:Bind Foreground, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Controls/DesignGuidance/ColorTile.xaml:46  {x:Bind Foreground, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Controls/InlineColorPicker.xaml:33  {x:Bind ColorBrush, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Controls/PageHeader.xaml:160  {ThemeResource AccentTextFillColorPrimaryBrush}
+U  bound-or-gradient  WinUIGallery/Controls/PageHeader.xaml:194  {ThemeResource AccentTextFillColorPrimaryBrush}
+U  bound-or-gradient  WinUIGallery/Controls/PageHeader.xaml:50  {ThemeResource AccentTextFillColorPrimaryBrush}
+U  bound-or-gradient  WinUIGallery/Pages/HomePage.xaml:66  {TemplateBinding Background}
+U  bound-or-gradient  WinUIGallery/Pages/HomePage.xaml:72  {TemplateBinding Background}
+U  bound-or-gradient  WinUIGallery/Pages/SearchResultsPage.xaml:74  {ThemeResource AccentTextFillColorPrimaryBrush}
+U  bound-or-gradient  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:233  {x:Bind TextColorPicker.ColorBrush, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:243  {x:Bind TextColorPicker.ColorBrush, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:248  {x:Bind TextColorPicker.ColorBrush, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:261  {x:Bind TextColorPicker.ColorBrush, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:267  {x:Bind BackgroundColorPicker.ColorBrush, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:271  {x:Bind TextColorPicker.ColorBrush, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:277  {x:Bind BackgroundColorPicker.ColorBrush, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:285  {x:Bind TextColorPicker.ColorBrush, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:29  {x:Bind}
+U  bound-or-gradient  WinUIGallery/Samples/ColorPicker/ColorPickerPage.xaml:64  {x:Bind colorPicker.Color, Mode=OneWay}
+U  bound-or-gradient  WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionPage.xaml:54  <LinearGradientBrush>
+U  bound-or-gradient  WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml:160  {x:Bind Color}
+U  bound-or-gradient  WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml:447  {x:Bind}
+U  bound-or-gradient  WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml:62  {ThemeResource SystemControlBackgroundAccentBrush}
+U  bound-or-gradient  WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml:72  {ThemeResource SystemControlBackgroundAccentBrush}
+U  bound-or-gradient  WinUIGallery/Samples/LayoutPanel/LayoutPanelPage.xaml:43  {ThemeResource AccentFillColorDefaultBrush}
+U  bound-or-gradient  WinUIGallery/Samples/LayoutPanel/LayoutPanelPage.xaml:47  {ThemeResource AccentFillColorDefaultBrush}
+U  bound-or-gradient  WinUIGallery/Samples/RadialGradientBrush/RadialGradientBrushPage.xaml:24  <RadialGradientBrush>
+U  bound-or-gradient  WinUIGallery/Samples/StoragePickers/StoragePickersPage.xaml:114  {ThemeResource AccentTextFillColorPrimaryBrush}
+U  bound-or-gradient  WinUIGallery/Samples/Templates/TemplatesPage.xaml:85  {ThemeResource AccentFillColorDefaultBrush}
+U  bound-or-gradient  WinUIGallery/Samples/WrapPanel/WrapPanelPage.xaml:265  {ThemeResource AccentFillColorDefaultBrush}
+U  no-ancestor-background  WinUIGallery/Controls/ControlExample.xaml:103  {ThemeResource SystemFillColorCriticalBrush}
+U  no-ancestor-background  WinUIGallery/Controls/HomePage/HomePageHeader.xaml:112  {ThemeResource ForegroundBrush}
+U  no-ancestor-background  WinUIGallery/Controls/HomePage/HomePageHeader.xaml:145  {ThemeResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  WinUIGallery/Controls/HomePage/HomePageHeader.xaml:162  {ThemeResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  WinUIGallery/Controls/HomePage/HomePageHeader.xaml:92  {ThemeResource ForegroundBrush}
+U  no-ancestor-background  WinUIGallery/Controls/PageHeader.xaml:149  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Controls/PageHeader.xaml:183  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Controls/PageHeader.xaml:61  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Controls/PageHeader.xaml:75  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Pages/HomePage.xaml:157  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Pages/SettingsPage.xaml:116  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Pages/SettingsPage.xaml:126  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SamplePage5.xaml:39  DarkSeaGreen
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SamplePage5.xaml:45  MediumSeaGreen
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SamplePage6.xaml:27  MediumTurquoise
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SamplePage6.xaml:33  SteelBlue
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SamplePage6.xaml:45  PowderBlue
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SamplePage6.xaml:51  MediumTurquoise
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SampleWindow1.xaml:40  {ThemeResource SystemFillColorCriticalBrush}
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SampleWindow1.xaml:43  {ThemeResource SystemFillColorCriticalBrush}
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SampleWindow3.xaml:38  {ThemeResource SystemFillColorCriticalBrush}
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SampleWindow3.xaml:41  {ThemeResource SystemFillColorCriticalBrush}
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SampleWindow4.xaml:38  {ThemeResource SystemFillColorCriticalBrush}
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SampleWindow4.xaml:42  {ThemeResource SystemFillColorCriticalBrush}
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SampleWindow6.xaml:27  {ThemeResource SystemFillColorCriticalBrush}
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/SampleWindow6.xaml:30  {ThemeResource SystemFillColorCriticalBrush}
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/TitleBarDragRegionsWindow.xaml:106  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/TitleBarDragRegionsWindow.xaml:81  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/SampleSupport/SamplePages/TitleBarDragRegionsWindow.xaml:97  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Samples/AccessibilityKeyboard/AccessibilityKeyboardPage.xaml:337  Red
+U  no-ancestor-background  WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml:251  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:101  Yellow
+U  no-ancestor-background  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:167  Aqua
+U  no-ancestor-background  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:173  Magenta
+U  no-ancestor-background  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:179  Yellow
+U  no-ancestor-background  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:55  Aqua
+U  no-ancestor-background  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:61  Magenta
+U  no-ancestor-background  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:67  Yellow
+U  no-ancestor-background  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:89  Aqua
+U  no-ancestor-background  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:95  Magenta
+U  no-ancestor-background  WinUIGallery/Samples/Binding/BindingPage.xaml:185  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Samples/Binding/BindingPage.xaml:203  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Samples/Chart/ChartPage.xaml:114  #0078D4
+U  no-ancestor-background  WinUIGallery/Samples/Chart/ChartPage.xaml:313  #4D0078D4
+U  no-ancestor-background  WinUIGallery/Samples/Chart/ChartPage.xaml:325  #008575
+U  no-ancestor-background  WinUIGallery/Samples/Clipboard/ClipboardPage.xaml:92  {ThemeResource SystemFillColorSuccessBrush}
+U  no-ancestor-background  WinUIGallery/Samples/CustomXamlConditionals/CustomXamlConditionalsPage.xaml:53  White
+U  no-ancestor-background  WinUIGallery/Samples/Geometry/GeometryPage.xaml:125  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Samples/Geometry/GeometryPage.xaml:130  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Samples/Geometry/GeometryPage.xaml:135  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml:36  {ThemeResource SystemChromeLowColor}
+U  no-ancestor-background  WinUIGallery/Samples/Line/LinePage.xaml:233  #CCCCFF
+U  no-ancestor-background  WinUIGallery/Samples/ListView/ListViewPage.xaml:452  {ThemeResource ControlStrongFillColorDefaultBrush}
+U  no-ancestor-background  WinUIGallery/Samples/ListView/ListViewPage.xaml:51  {ThemeResource ControlStrongFillColorDefaultBrush}
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:64  White
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:77  AliceBlue
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:78  AntiqueWhite
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:79  Aqua
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:80  Aquamarine
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:81  Azure
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:82  Beige
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:83  Bisque
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:84  BlanchedAlmond
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:85  BlueViolet
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:86  Brown
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:87  BurlyWood
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:88  CadetBlue
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:89  Chartreuse
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:90  Chocolate
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:91  Coral
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:92  CornflowerBlue
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:93  Cornsilk
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:94  Crimson
+U  no-ancestor-background  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:95  Cyan
+U  no-ancestor-background  WinUIGallery/Samples/RelativePanel/RelativePanelPage.xaml:26  Red
+U  no-ancestor-background  WinUIGallery/Samples/RelativePanel/RelativePanelPage.xaml:31  Blue
+U  no-ancestor-background  WinUIGallery/Samples/RelativePanel/RelativePanelPage.xaml:38  Green
+U  no-ancestor-background  WinUIGallery/Samples/RelativePanel/RelativePanelPage.xaml:44  Yellow
+U  no-ancestor-background  WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml:130  Red
+U  no-ancestor-background  WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml:136  Orange
+U  no-ancestor-background  WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml:142  Yellow
+U  no-ancestor-background  WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml:148  Green
+U  no-ancestor-background  WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml:154  Blue
+U  no-ancestor-background  WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml:160  Indigo
+U  no-ancestor-background  WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml:166  Violet
+U  no-ancestor-background  WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml:172  Gray
+U  no-ancestor-background  WinUIGallery/Samples/SemanticZoom/SemanticZoomPage.xaml:43  {ThemeResource ApplicationForegroundThemeBrush}
+U  no-ancestor-background  WinUIGallery/Samples/Shape/ShapePage.xaml:142  SteelBlue
+U  no-ancestor-background  WinUIGallery/Samples/Shape/ShapePage.xaml:24  SteelBlue
+U  no-ancestor-background  WinUIGallery/Samples/Shape/ShapePage.xaml:69  SteelBlue
+U  no-ancestor-background  WinUIGallery/Samples/Sound/SoundPage.xaml:37  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:108  Red
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:113  Orange
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:118  Yellow
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:123  Green
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:128  Blue
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:133  Indigo
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:138  Violet
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:143  Gray
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:148  Black
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:53  Red
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:54  Orange
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:55  Yellow
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:56  Green
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:57  Blue
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:58  Indigo
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:59  Violet
+U  no-ancestor-background  WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml:60  Gray
+U  no-ancestor-background  WinUIGallery/Samples/StackPanel/StackPanelPage.xaml:34  Red
+U  no-ancestor-background  WinUIGallery/Samples/StackPanel/StackPanelPage.xaml:35  Blue
+U  no-ancestor-background  WinUIGallery/Samples/StackPanel/StackPanelPage.xaml:36  Green
+U  no-ancestor-background  WinUIGallery/Samples/StackPanel/StackPanelPage.xaml:37  Yellow
+U  no-ancestor-background  WinUIGallery/Samples/TableView/TableViewPage.xaml:304  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Samples/TextBlock/TextBlockPage.xaml:39  CornflowerBlue
+U  no-ancestor-background  WinUIGallery/Samples/TextBlock/TextBlockPage.xaml:52  DarkGray
+U  no-ancestor-background  WinUIGallery/Samples/TextBox/TextBoxPage.xaml:30  #5178BE
+U  no-ancestor-background  WinUIGallery/Samples/ThemeTransition/ThemeTransitionPage.xaml:171  {ThemeResource FlyoutBackgroundThemeBrush}
+U  no-ancestor-background  WinUIGallery/Samples/ThemeTransition/ThemeTransitionPage.xaml:18  LightBlue
+U  no-ancestor-background  WinUIGallery/Samples/ThemeTransition/ThemeTransitionPage.xaml:23  LightBlue
+U  no-ancestor-background  WinUIGallery/Samples/ThemeTransition/ThemeTransitionPage.xaml:28  LightBlue
+U  no-ancestor-background  WinUIGallery/Samples/ThemeTransition/ThemeTransitionPage.xaml:33  LightBlue
+U  no-ancestor-background  WinUIGallery/Samples/ThemeTransition/ThemeTransitionPage.xaml:38  LightBlue
+U  no-ancestor-background  WinUIGallery/Samples/ThemeTransition/ThemeTransitionPage.xaml:74  Red
+U  no-ancestor-background  WinUIGallery/Samples/ThemeTransition/ThemeTransitionPage.xaml:79  Green
+U  no-ancestor-background  WinUIGallery/Samples/ThemeTransition/ThemeTransitionPage.xaml:86  Blue
+U  no-ancestor-background  WinUIGallery/Samples/Typography/TypographyPage.xaml:174  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Samples/Typography/TypographyPage.xaml:179  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Samples/Typography/TypographyPage.xaml:184  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Samples/Typography/TypographyPage.xaml:189  {ThemeResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  WinUIGallery/Samples/VariableSizedWrapGrid/VariableSizedWrapGridPage.xaml:29  Red
+U  over-sibling-content  WinUIGallery/Samples/GridView/GridViewPage.xaml:108  <Image>
+U  over-sibling-content  WinUIGallery/Samples/GridView/GridViewPage.xaml:110  <Image>
+U  over-sibling-content  WinUIGallery/Samples/GridView/GridViewPage.xaml:114  <Image>
+U  over-sibling-content  WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml:119  <Image>
+U  over-sibling-content  WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml:121  <Image>
+U  over-sibling-content  WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml:125  <Image>
+U  over-sibling-content  WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml:53  <Image>
+U  over-sibling-content  WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml:55  <Image>
+U  over-sibling-content  WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml:59  <Image>
+U  over-sibling-content  WinUIGallery/Samples/VariableSizedWrapGrid/VariableSizedWrapGridPage.xaml:30  <Rectangle> in <VariableSizedWrapGrid>
+U  over-sibling-content  WinUIGallery/Samples/VariableSizedWrapGrid/VariableSizedWrapGridPage.xaml:34  <Rectangle> in <VariableSizedWrapGrid>
+U  over-sibling-content  WinUIGallery/Samples/VariableSizedWrapGrid/VariableSizedWrapGridPage.xaml:38  <Rectangle> in <VariableSizedWrapGrid>
+U  translucent-uncomposited  WinUIGallery/Controls/HomePage/HomePageHeader.xaml:105  ControlAltFillColorQuarternaryBrush
+U  translucent-uncomposited  WinUIGallery/SampleSupport/SamplePages/CardPage.xaml:86  {CardBackgroundFillColorDefaultBrush} over {SmokeFillColorDefaultBrush}
+U  translucent-uncomposited  WinUIGallery/Samples/FlipView/FlipViewPage.xaml:64  #A5FFFFFF
+U  translucent-uncomposited  WinUIGallery/Samples/Iconography/IconographyPage.xaml:68  CardBackgroundFillColorDefaultBrush
+U  translucent-uncomposited  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:33  #80000000
+U  translucent-uncomposited  WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml:37  #80000000
+U  translucent-uncomposited  WinUIGallery/Styles/ItemTemplates.xaml:47  ControlFillColorDefaultBrush
+U  unknown-palette-key  WinUIGallery/Controls/ControlExample.xaml:91  InfoBarWarningSeverityIconBackground
+U  unknown-palette-key  WinUIGallery/Controls/ControlExample.xaml:95  InfoBarWarningSeverityIconBackground
+U  unknown-palette-key  WinUIGallery/Controls/CopyButton.xaml:26  ButtonForeground
+U  unknown-palette-key  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:329  TextOnAccentFillColorDefaultBrush
+U  unknown-palette-key  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:336  TextOnAccentFillColorDefaultBrush
+U  unknown-palette-key  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:344  TextOnAccentFillColorDefaultBrush
+U  unknown-palette-key  WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml:364  TextOnAccentFillColorDefaultBrush
+U  unknown-palette-key  WinUIGallery/Controls/HomePage/HomePageHeader.xaml:72  OverlayRadialGradient
+U  unknown-palette-key  WinUIGallery/Controls/HomePage/Tile.xaml:57  AcrylicBackgroundFillColorDefaultBrush
+U  unknown-palette-key  WinUIGallery/Controls/HomePage/Tile.xaml:73  AcrylicBackgroundFillColorDefaultBrush
+U  unknown-palette-key  WinUIGallery/Controls/HomePage/Tile.xaml:78  AcrylicBackgroundFillColorDefaultBrush
+U  unknown-palette-key  WinUIGallery/Controls/HorizontalScrollContainer.xaml:13  ButtonForeground
+U  unknown-palette-key  WinUIGallery/Pages/SearchResultsPage.xaml:84  HomePageBackgroundBrush
+U  unknown-palette-key  WinUIGallery/SampleSupport/SamplePages/ItemsRepeaterCollectionPage.xaml:50  AcrylicBackgroundFillColorBaseBrush
+U  unknown-palette-key  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:108  CustomAcrylicInAppBrush
+U  unknown-palette-key  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:186  CustomAcrylicInAppLuminosity
+U  unknown-palette-key  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:74  AcrylicInAppFillColorDefaultBrush
+U  unknown-palette-key  WinUIGallery/Samples/EasingFunction/EasingFunctionPage.xaml:123  SystemAccentColor
+U  unknown-palette-key  WinUIGallery/Samples/EasingFunction/EasingFunctionPage.xaml:191  SystemAccentColor
+U  unknown-palette-key  WinUIGallery/Samples/EasingFunction/EasingFunctionPage.xaml:41  SystemAccentColor
+U  unknown-palette-key  WinUIGallery/Samples/EasingFunction/EasingFunctionPage.xaml:76  SystemAccentColor
+U  unknown-palette-key  WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionPage.xaml:162  SystemAccentColor
+U  unknown-palette-key  WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionPage.xaml:17  SystemAccentColor
+U  unknown-palette-key  WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionPage.xaml:96  SystemAccentColor
+U  unknown-palette-key  WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml:16  SystemAccentColor
+U  unknown-palette-key  WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml:26  SystemAccentColor
+U  unknown-palette-key  WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml:42  SystemAccentColor
+U  unknown-palette-key  WinUIGallery/Samples/ListView/ListViewPage.xaml:87  SystemColorHighlightTextColor
+U  unknown-palette-key  WinUIGallery/Samples/ListView/ListViewPage.xaml:92  SystemColorHighlightTextColor
+U  unknown-palette-key  WinUIGallery/Samples/SwipeControl/SwipeControlPage.xaml:194  ButtonBackgroundThemeBrush
+U  unknown-palette-key  WinUIGallery/Samples/SwipeControl/SwipeControlPage.xaml:37  ButtonBackgroundThemeBrush
+U  unknown-palette-key  WinUIGallery/Samples/SwipeControl/SwipeControlPage.xaml:43  ButtonBackgroundThemeBrush
+U  unknown-palette-key  WinUIGallery/Samples/XamlCompInterop/XamlCompInteropPage.xaml:58  SystemAccentColor
+U  unknown-palette-key  WinUIGallery/Samples/XamlCompInterop/XamlCompInteropPage.xaml:65  SystemAccentColor
+U  unknown-palette-key  WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml:63  PrimaryColor
+U  unknown-palette-key  WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml:93  BackgroundColor
