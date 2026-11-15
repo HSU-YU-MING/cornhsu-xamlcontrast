@@ -18,7 +18,7 @@
 #
 # 受測對象的指紋（baselines/<name>.project.txt）
 # ---------------------------------------------
-# 這支腳本有一個結構性弱點：受測的四個專案活在 repo 外面、會自己演化，所以紅燈分不出
+# 這支腳本有一個結構性弱點：受測的專案活在 repo 外面、會自己演化，所以紅燈分不出
 # 「工具行為變了」還是「被稽核的 App 改了」。實際發生過 —— celflow.json 從 2026-08-26 就是紅的
 # （pairs 期望 363 實得 353），原因是 CelFlow.WPF 在 2026-08-18 改過四個 XAML 檔，不是工具的回歸，
 # 但要人逐項比對才看得出來，中間紅了兩個月。
@@ -45,12 +45,15 @@ $cli = Join-Path $repo 'src\XamlContrast.Cli'
 $snapDir = Join-Path $repo 'baselines'
 New-Item -ItemType Directory -Force $snapDir | Out-Null
 
+# ⚠ 第四格（CelFlow，2026-08-28 改名 ZeroCel）2026-11-15 拿掉了 —— 那個專案已經不在這台機器上
+#   （整個 D: 都找不到），連同它的 baselines/celflow.json 一起移除。
+#   理由不是「紅燈很煩」，是**永遠紅的守門員等於沒有守門員**：它每次都紅、每次原因都一樣，
+#   真正的回歸就藏在那行紅字旁邊沒人看。快照留在 git 歷史裡（移除的那個 commit 之前）。
+#   專案回到這台機器的話：加回下面這張表、跑 -Update 重新凍一份 —— 1.5 的稽核語意跟當年那份
+#   快照已經不同，不要直接拿舊的 json 來比。
 $projects = @{
     kindling  = 'D:\應用程式\Kindling\Kindling.WPF'
     quillnest = 'D:\應用程式\QuillNest\QuillNest'
-    # CelFlow 2026-08-28 改名 ZeroCel（資料夾、專案都改了，舊路徑不再存在）。
-    # 快照名稱沿用 celflow.json：它記錄的是同一個 App，改名不是行為變更
-    celflow   = 'D:\應用程式\ZeroCel\frontend\ZeroCel.WPF'
     cornea    = 'D:\應用程式\Cornea'
 }
 
@@ -171,7 +174,7 @@ function Compare-Fingerprint {
 
 $anyFail = $false
 $drifted = 0
-foreach ($name in @('kindling', 'quillnest', 'celflow', 'cornea')) {
+foreach ($name in @('kindling', 'quillnest', 'cornea')) {
     # 受測專案不在（改名、搬家、沒 clone）→ 紅字點名、繼續比對下一個。
     # ⚠ 之前直接把不存在的路徑丟給 CLI：它照契約 exit 2、stderr 印 root not found，
     #   而 Windows PowerShell 5.1 在 $ErrorActionPreference='Stop' 下把原生指令的 stderr 變成終止錯誤，
@@ -179,7 +182,7 @@ foreach ($name in @('kindling', 'quillnest', 'celflow', 'cornea')) {
     if (-not (Test-Path $projects[$name])) {
         Write-Host "[$name] 找不到受測專案：$($projects[$name]) —— 未比對（改名或搬家了就更新這支腳本的路徑）" -ForegroundColor Red
         # 指紋還在的話，至少說得出那份快照當初是對什麼凍結的 —— 專案不在本機時，
-        # 這是唯一還能看的線索（例如 celflow：ZeroCel 2026-11 已不在這台機器上）
+        # 這是唯一還能看的線索（受測專案搬家或改名時）
         $gone = Read-Fingerprint (Get-FingerprintPath $name)
         if ($gone) {
             Write-Host "    快照凍結時的對象：$($gone.header['project'])（$($gone.header['frozen'])，git $($gone.header['git-commit'])，$($gone.header['inputs']) 個輸入檔）" -ForegroundColor DarkYellow
@@ -301,6 +304,6 @@ foreach ($name in @('kindling', 'quillnest', 'celflow', 'cornea')) {
 if ($Update) { Write-Host "快照凍結完成 —— 檢視 git diff baselines/ 後 commit（*.project.txt 是對象指紋，一起 commit）" -ForegroundColor Cyan; exit 0 }
 if ($drifted -gt 0) { Write-Host "有 $drifted 個受測對象自己也變了 —— 對象更新是正常的，但歸因時要先把它們的影響扣掉" -ForegroundColor DarkYellow }
 if ($anyFail) { Write-Host "驗收失敗：行為變了 —— 若為刻意，人工檢視後跑 -Update 重新凍結" -ForegroundColor Red; exit 1 }
-if ($drifted -gt 0) { Write-Host "驗收通過：四個專案的計數與凍結快照一致（其中 $drifted 個對象已更新，指紋待重凍）" -ForegroundColor Green; exit 0 }
-Write-Host "驗收通過：四個專案與凍結快照一致，對象也沒變" -ForegroundColor Green
+if ($drifted -gt 0) { Write-Host "驗收通過：$($projects.Count) 個專案的計數與凍結快照一致（其中 $drifted 個對象已更新，指紋待重凍）" -ForegroundColor Green; exit 0 }
+Write-Host "驗收通過：$($projects.Count) 個專案與凍結快照一致，對象也沒變" -ForegroundColor Green
 exit 0

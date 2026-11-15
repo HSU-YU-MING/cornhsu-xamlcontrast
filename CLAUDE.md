@@ -24,7 +24,7 @@ dotnet run --project src/XamlContrast.Cli -c Release -- samples/demo
 守門腳本兩支（下一節是重點）：
 
 ```powershell
-powershell -File .\scripts\verify-baselines.ps1      # 四個真實 App 的快照回歸（只有本機能跑）
+powershell -File .\scripts\verify-baselines.ps1      # 三個真實 App 的快照回歸（只有本機能跑）
 powershell -File .\scripts\verify-readme-sample.ps1  # README 示範輸出比對（CI 也跑）
 ```
 
@@ -41,7 +41,7 @@ powershell -File .\scripts\verify-readme-sample.ps1  # README 示範輸出比對
 |---|---|---|---|
 | demo 自我把關 | `.github/workflows/ci.yml` + `samples/demo` | CI（`ci.yml`／`release.yml` 各一份） | 守門員本身失效：退出碼不是 1，或 `jq` 驗的計數（fail 3／豁免 1／壓掉 1）變動 |
 | README 示範輸出 | `scripts/verify-readme-sample.ps1` | CI（Linux 上以 pwsh 跑）＋本機 | 文件裡貼的輸出跟實跑對不上 |
-| 四專案快照回歸 | `scripts/verify-baselines.ps1` + `baselines/*.json` + `baselines/*.project.txt`（對象指紋） | **只有維護者本機**，發版前 | 稽核行為在真實專案上悄悄變了；指紋負責分辨「工具變了」還是「被稽核的 App 自己改了」 |
+| 三專案快照回歸 | `scripts/verify-baselines.ps1` + `baselines/*.json` + `baselines/*.project.txt`（對象指紋） | **只有維護者本機**，發版前 | 稽核行為在真實專案上悄悄變了；指紋負責分辨「工具變了」還是「被稽核的 App 自己改了」 |
 | 十三個公開專案語料 | `scripts/verify-corpus.ps1` + `baselines/corpus/`（清單釘 commit＋逐筆摘要） | **只有維護者本機**（要網路、約 52 MB clone），動到色盤偵測／解析規則時 | 自家四個專案測不到的形狀：控制項函式庫、WinUI、ThemeDictionaries、建置時產生的主題檔 |
 
 ### 為什麼要有這一套
@@ -306,7 +306,7 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - **外部專案回歸（2026-11-10，手動那一輪的紀錄）**：八個公開 WPF 專案（2026-08-10 實查那批）＋ WinUI Gallery，1.3.0 對 1.4 逐筆比對，
   沒有任何既有 finding 消失或改變；新增的 fail 抽查兩筆（MaterialDesign 卡片上的工具列字 1.55:1、wpfui 淺藍底白字 2.63:1）
   都對得上原始碼的色值。做法：sparse clone 只拿 `*.xaml`、新舊兩版各跑 `--json`、逐筆比 findings 與 unresolvedSites。
-  ⚠ `verify-baselines.ps1` 只守四個自家專案 —— 動到色盤偵測或解析規則時跑 `verify-corpus.ps1`（1.5 起那一輪
+  ⚠ `verify-baselines.ps1` 只守三個自家專案（第四格 ZeroCel 2026-11-15 移除，專案已不在本機）—— 動到色盤偵測或解析規則時跑 `verify-corpus.ps1`（1.5 起那一輪
   外部比對有腳本了，不必再手動重做）。
 - **Application 含子類別**（`PaletteDetector.RootKindOf`）：根元素名稱以 Application 結尾（Prism 的 `PrismApplication`），
   或根元素底下有 `<…Application.Resources>`。只認 `Application` 的話，Prism 的 App.xaml 被當成畫面、全域鍵全變成區域鍵。
@@ -476,19 +476,24 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 
 ## 技術債（留帳）
 
-- **四份 `baselines/*.json` 已在 2026-10-23 依 1.0 重凍**（schemaVersion 6，帶 `exitCode`）。
+- **`baselines/*.json` 在 2026-10-23 依 1.0 重凍過一次（當時四份）**（schemaVersion 6，帶 `exitCode`）。
   重凍前四份都是紅的，每一個差異都歸因到 commit（逐 commit 重播 v0.6.1 之後的 82 個 src commit），
   寫在 `D:/擴充功能/nuget/稽核-2026-10-22/XamlContrast-快照變動說明.md`，維護者逐項看過、同意之後才跑 `-Update`。
   其中 `celflow.json` 早在 1.0 之前就是紅的（2026-08-26 實跑：`pairs` 期望 363 實得 353），
   原因是 CelFlow.WPF 在 2026-08-18 改過四個 XAML 檔，不是工具的回歸；這次重凍一併吸收。
   2026-08-28 CelFlow 改名 ZeroCel，腳本已改指 `D:\應用程式\ZeroCel\frontend\ZeroCel.WPF`
   （快照名稱沿用 `celflow.json`）；找不到專案時會紅字點名並繼續。
-  這段歷史暴露了 `verify-baselines.ps1` 的結構性弱點：**受測對象是四個活在 repo 外、會自己演化的
-  專案**，紅燈分不出「工具行為變了」與「被稽核的 App 改了」。目前只能靠人工看 diff 判斷。
-  修法有兩條（都還沒做）：把四個專案的 XAML 快照複製進 repo 當固定素材，
-  或在快照裡記下受測專案的 commit／檔案雜湊，讓腳本自己說「對象變了」。
+  這段歷史暴露了 `verify-baselines.ps1` 的結構性弱點：**受測對象是活在 repo 外、會自己演化的
+  專案**，紅燈分不出「工具行為變了」與「被稽核的 App 改了」。
+  **1.5 做掉了那兩條修法的第二條**：`-Update` 會寫一份對象指紋（`baselines/<name>.project.txt`：
+  專案路徑、git commit、每個稽核輸入檔的 SHA-256 前 16 碼），驗收時重算再比，所以腳本現在自己說得出
+  「對象沒變 → 差異來自工具」或「對象也變了 → 這些檔案動過」。另有 `-UpdateFingerprint`（只補指紋、
+  不動快照，且只在數字一致時才寫）。第一條（把 XAML 複製進 repo 當固定素材）沒做也不打算做 ——
+  那會變成另一份要維護的複本，而公開語料（`verify-corpus.ps1`，釘住 commit）已經補上「固定素材」這個需求。
+  2026-11-15：第四格（ZeroCel）的專案已不在本機，那一格與 `baselines/celflow.json` 一併移除 ——
+  **永遠紅的守門員等於沒有守門員**。
   ⚠ 在判定之前**不要習慣性跑 `-Update` 蓋掉**——那正是這套機制要防的事。
-- **`verify-baselines.ps1` 進不了 CI**（路徑寫死 `D:\應用程式\...`，且那四個是未發佈的
+- **`verify-baselines.ps1` 進不了 CI**（路徑寫死 `D:\應用程式\...`，且那三個是未發佈的
   App）。所以它是「發版前本機關卡」而不是「每次 push 的關卡」，外部貢獻者跑不了
   （CONTRIBUTING 已明講）。RELEASING.md 把它列為發版前提，實務上要記得它可能因上面那個
   原因紅燈。

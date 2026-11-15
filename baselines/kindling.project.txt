@@ -4,8 +4,8 @@
 project: D:\應用程式\Kindling\Kindling.WPF
 frozen: 2026-11-15
 git-repo: D:/應用程式/Kindling
-git-commit: 932d04edd7015b5bf8bbb6db5efe8ae3b2f5a826
-git-dirty: 3
+git-commit: e9a6ca2d8e57647c293c87fc60b581de71ea4cc1
+git-dirty: 1
 inputs: 79
 # sha256(前 16 碼)  專案內相對路徑
 E601E2E55C365610  App.xaml
