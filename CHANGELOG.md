@@ -45,8 +45,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   以及同型別有多個互相競爭的全域隱含樣式，一律不評也不猜。*
 
 - **Three theme libraries' built-in colours ship with the tool** — WPF-UI, MaterialDesignInXamlToolkit and
-  HandyControl (`WpfUiTheme.json` 310 brushes, `MaterialDesignTheme.json` 124, `HandyControlTheme.json` 27 plus
-  34 colours; each read from that library's own theme files at a pinned commit, all MIT, see
+  HandyControl (`WpfUiTheme.json` 310 brushes, `MaterialDesignTheme.json` 155 (including the legacy key names), 
+  `HandyControlTheme.json` 27 plus 34 colours; each read from that library's own theme files at a pinned commit, all MIT, see
   `THIRD-PARTY-NOTICES.md`). Applied only to projects that reference that library, as the lowest layer.
   **MahApps.Metro deliberately has no table, and that is not an omission:** its theme files are generated at
   build time (`Theme.Template.xaml` and `Theme.Base.Template.xaml`, 1077 keys and 112 `{{placeholders}}`),
@@ -70,27 +70,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   - HandyControl: **no measured effect yet.** Both consumers tried define their own keys (TwitchDownloader)
     or barely use static ones (GeekDesk). The table is correct and tested, but it has no field evidence —
     stated here rather than implied, since "every rule comes from a real project" is this project's rule.
-- **WPF-UI's built-in theme colours ship with the tool**, for projects that reference `Wpf.Ui`
-  (`src/XamlContrast.Core/WpfUiTheme.json`: 310 brushes, 88 colours, read from that library's own
-  `Dark.xaml` / `Light.xaml` at a pinned commit — MIT, see `THIRD-PARTY-NOTICES.md`). This is the same
-  move 1.4 made for WinUI's Fluent defaults, and for the same reason: an app that uses a library's keys
-  without copying them into its own theme files had **every** pair as `unknown-palette-key`
-  (measured, zero-config: Bloxstrap 38 XAML files, 111 unresolvable keys, **0 graded pairs**;
-  QuickLook 49 keys, 7 pairs). With the table: Bloxstrap's unknown keys drop 111 → 37, QuickLook's
-  49 → 7, and because the window background key now *has* a value, `rootBackground` finally works for
-  them — **Bloxstrap goes from 0 graded pairs to 55 at 46.2% coverage with one line of config**, which
-  before would have been `exit 2` (a key the palette doesn't have).
-  It is applied only when the project actually references WPF-UI, as the lowest layer: a key the
-  project defines itself always wins, and a key it defines but the tool can't read is not filled in
-  either. Keys that follow the user's accent colour (27 of them) stay unresolved — those are decided at
-  runtime and this tool does not guess. High-contrast themes are not included. Projects that don't use
-  WPF-UI are untouched: its key names overlap WinUI's heavily but the values differ, so neither table is
-  ever used for the other's projects (WinUI Gallery, wpfui's own repo, MahApps: not one number moves).
-  The known cost is version drift — the user's installed Wpf.Ui may not be the pinned commit — so the
-  palette line in the report names the commit the values came from.
-  *WPF-UI 的內建主題色票內嵌進工具了（只在專案真的引用它時補，當最底層；專案自己定義的優先）。
-  實測 Bloxstrap 查不到的鍵 111 → 37，而且因為視窗底色鍵現在有值，照提示設一行 rootBackground
-  就從 0 組配對變成 55 組、覆蓋率 46.2%（以前那一行是 exit 2）。強調色的鍵照舊不猜。*
+  Each table is applied only when the project actually references that library, as the lowest layer: a key the
+  project defines itself always wins, and a key it defines but the tool can't read is not filled in either.
+  Keys that follow the user's accent colour stay unresolved — those are decided at runtime and this tool does
+  not guess — and high-contrast themes are not included. Projects that use none of them are untouched: these
+  key names overlap each other's and WinUI's heavily but the values differ, so one table is never used for
+  another's projects (WinUI Gallery, each library's own repo, MahApps: not one number moves). The known cost is
+  version drift — the installed package may not be the pinned commit — so the palette line in the report names
+  the commit the values came from.
 
 - **The coverage hint now names the theme library you actually use, and the key you actually have.**
   An app built on MahApps.Metro, MaterialDesignInXamlToolkit, WPF-UI or HandyControl can't be audited
