@@ -3,17 +3,19 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
-## 未發佈
+## 1.5.0 — 2026-11-16
 
-### Upgrading（這一段的兩個改動都會動到計數，是 minor 不是 patch）
-- **In short:** two audit-semantics improvements. No finding is lost or changed anywhere we measured
-  (the maintainer's apps and thirteen public projects), **baseline keys are unchanged** (`keyVersion` stays 1,
-  `schemaVersion` stays 6), and no existing field moves. What does move: more pairs are graded, so a real
+### Upgrading（這一版有三個改動會動到計數，是 minor 不是 patch）
+- **In short:** three audit-semantics improvements — implicit styles are resolved everywhere, a style's own
+  `<Style.Resources>` is read, and three theme libraries' built-in colours ship with the tool. No finding is
+  lost or changed anywhere we measured (the maintainer's apps and **seventeen** public projects),
+  **baseline keys are unchanged** (`keyVersion` stays 1, `schemaVersion` stays 6), and no existing field moves. What does move: more pairs are graded, so a real
   problem that used to be invisible can now turn your build red — on the maintainer's own Kindling that is
   exactly what happened (one `fail`, see below). Projects whose palette is built at runtime may see
   **coverage drop** (Playnite 18.6% → 9.2%): the extra pairs are real, we just can't resolve their colours,
   and that is what the coverage number is for. If you gate on `--min-coverage`, check that first.
-  *簡單說：兩個稽核語意的改進。沒有任何 finding 消失或改變、baseline 的鍵不動（keyVersion 仍是 1）。
+  *簡單說：三個稽核語意的改進（隱含樣式每個元素都解析、Style 自己的 Resources 讀得到、三個主題函式庫的
+  內建色票內嵌）。沒有任何 finding 消失或改變、baseline 的鍵不動（keyVersion 仍是 1）。
   但配對變多，原本看不見的真問題會讓 build 變紅（維護者自己的 Kindling 就多出一筆 fail）；
   色盤在執行期才組出來的專案覆蓋率可能下降 —— 多出來的配對是真的，只是顏色解不出來，
   那正是覆蓋率這個數字的用途。有用 --min-coverage 把關的請先確認。*
