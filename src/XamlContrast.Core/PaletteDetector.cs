@@ -40,6 +40,11 @@ public sealed class PaletteDetection
     /// </summary>
     internal HashSet<string> FrameworkKeys { get; } = new(StringComparer.Ordinal);
 
+    /// <summary>這個專案引用到的第三方主題函式庫（1.5，<see cref="ThemeLibraries.DetectInProject"/>）。
+    /// ⚠ 這是**唯一的真相源**：補色票與覆蓋率提示都讀它。之前兩邊各自偵測一次，
+    /// 於是色盤補了 MaterialDesign 的值、提示卻說「你用的是 HandyControl」（MaaAssistantArknights 實測）。</summary>
+    internal IReadOnlyList<string> Libraries { get; set; } = [];
+
     /// <summary>檔案該用哪個色盤：最深的包含它的 App 目錄；都不包含 → 共用區；
     /// 沒有作用域資訊 → 全域色盤。</summary>
     public Palette PaletteFor(string fullPath)

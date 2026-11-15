@@ -47,6 +47,9 @@ winuigallery | https://github.com/microsoft/WinUI-Gallery | 6de91feccadfbb0a796b
 visualhft | https://github.com/visualHFT/VisualHFT | 65b1d1270336864768180f5fbf8bae348694847f
 twitchdownloader | https://github.com/lay295/TwitchDownloader | 8adfd8e5d31984ae1918b1fa0273f019dc29899f
 geekdesk | https://github.com/BookerLiu/GeekDesk | 7f0e228f7827d0cb2b18a72549494f4fa637b990
+# 同時用兩個主題函式庫的形狀（MaterialDesign ＋ HandyControl）—— 語料裡只有這一個。
+# 它抓到的 bug:補色票與覆蓋率提示原本各自偵測一次、各自挑到不同的函式庫（色盤補了一個、提示說另一個）。
+maa | https://github.com/MaaAssistantArknights/MaaAssistantArknights.git | b666b84a317c603c561401ab5e5c7b12203d8271
 # 以下四個是「用 NuGet 的主題庫」那一類（2026-11-15 補）
 networkmanager | https://github.com/BornToBeRoot/NETworkManager.git | 350d81fa7257d1f436187c767706e789013c077a
 quicklook | https://github.com/QL-Win/QuickLook | e2f19a0ba9097024cc6520dd03735abd26f425f8

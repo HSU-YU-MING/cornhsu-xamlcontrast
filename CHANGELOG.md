@@ -67,9 +67,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
     **legacy key names** (`MaterialDesignPaper`, `MaterialDesignBody` — the names before the v5 rename) were
     included: 49 of VisualHFT's 50 unresolvable keys were `MaterialDesignPaper`, so without them the table
     was nearly useless to real apps.
-  - HandyControl: **no measured effect yet.** Both consumers tried define their own keys (TwitchDownloader)
-    or barely use static ones (GeekDesk). The table is correct and tested, but it has no field evidence —
-    stated here rather than implied, since "every rule comes from a real project" is this project's rule.
+  - HandyControl: TwitchDownloader defines its own keys and GeekDesk barely uses static ones, so neither showed
+    anything — the evidence came from **MaaAssistantArknights** (87 XAML files), which uses HandyControl *and*
+    MaterialDesign at once: **80 → 101 graded pairs, coverage 22.1% → 28.1%, unresolvable keys 48 → 13.**
+
+  **That same project found a real bug in this feature**, which is why it is now in the corpus: the palette fill
+  and the coverage hint each detected the library independently and picked a *different* one — the palette was
+  filled with MaterialDesign's 155 brushes while the hint said "you are using HandyControl". Both now read one
+  source (`PaletteDetection.Libraries`), the hint names every library the project references, and when two
+  libraries are in play only the keys they **agree** on are filled: a key just one of them defines has no
+  ambiguity, but a name they both define with different values is decided by merge order at runtime, so the tool
+  leaves it unresolved rather than picking one. A report that fills from one library while naming another is the
+  same failure as a contradicting palette line — it reads as fact and half of it is made up.
   Each table is applied only when the project actually references that library, as the lowest layer: a key the
   project defines itself always wins, and a key it defines but the tool can't read is not filled in either.
   Keys that follow the user's accent colour stay unresolved — those are decided at runtime and this tool does

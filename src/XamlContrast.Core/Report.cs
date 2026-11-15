@@ -96,8 +96,9 @@ public static partial class Report
         // 這種專案直接用函式庫的鍵、自己一個都沒抄，所以 rootBackground 救不了（它只補視窗底色那一層）——
         // 原本這裡什麼都不印，使用者只看到「0 組配對、exit 3」而不知道為什麼，也不知道還有沒有救。
         var unknownKeys = r.UnresolvedBy.GetValueOrDefault(UnresolvedReason.UnknownPaletteKey);
-        if (r.ThemeLibrary is { } keyLib && unknownKeys * 2 >= r.Unresolved && unknownKeys > noBg + overNothing)
+        if (r.ThemeLibraries.Count > 0 && unknownKeys * 2 >= r.Unresolved && unknownKeys > noBg + overNothing)
         {
+            var keyLib = string.Join(" and ", r.ThemeLibraries);
             sb.AppendLine(string.Create(inv, $"  hint: {unknownKeys} of them are 'unknown-palette-key' — this project uses"));
             sb.AppendLine(string.Create(inv, $"        {keyLib}'s keys directly, and those brushes are defined inside the NuGet"));
             sb.AppendLine("        package, not here — so there is nothing for static analysis to read, and");
@@ -145,12 +146,16 @@ public static partial class Report
         // 1.5：偵測到是哪一個主題函式庫就說那一個，而且只在「這個專案的色盤真的有那個鍵」時叫人去設它。
         // ⚠ 這是 1.4.2 那個教訓的同一層：原本一律印 MahApps 的鍵當範例，用 WPF-UI 或 HandyControl 的人
         //   照做就是 exit 2（rootBackground 的鍵在色盤裡解析不出來）—— 錯方向的提示比沒有提示更糟。
-        if (r.ThemeLibrary is { } lib)
+        if (r.ThemeLibraries.Count > 0)
         {
+            // 專案同時用兩個函式庫時兩個都說（實測 MaaAssistantArknights）—— 說一個就是在挑,而挑錯會讓人
+            // 去設一個救不了他的鍵。底色鍵就依序找第一個「這個專案的色盤真的有」的
+            var lib = string.Join(" and ", r.ThemeLibraries);
             sb.AppendLine(string.Create(inv, $"  hint: {counts} — this project merges {lib}'s theme"));
             sb.AppendLine("        dictionaries, and the implicit style that paints your windows lives inside that");
             sb.AppendLine("        NuGet package (compiled into the assembly), invisible to static analysis.");
-            if (ThemeLibraries.BackgroundKeyIn(lib, r.Detection.Palette) is { } key)
+            if (r.ThemeLibraries.Select(l => ThemeLibraries.BackgroundKeyIn(l, r.Detection.Palette))
+                    .FirstOrDefault(k => k is not null) is { } key)
             {
                 // ⚠ 那個鍵可能是工具自己補的（WPF-UI 的內建色票,見 WpfUiTheme）——
                 //   說成「你的主題檔有宣告」就是假話。那一行設定照樣有效,但要說清楚值從哪來
@@ -165,7 +170,7 @@ public static partial class Report
             }
             else
             {
-                var keys = string.Join(" / ", ThemeLibraries.BackgroundKeysOf(lib));
+                var keys = string.Join(" / ", r.ThemeLibraries.SelectMany(ThemeLibraries.BackgroundKeysOf));
                 sb.AppendLine(string.Create(inv, $"        Your repo declares none of its background keys ({keys}),"));
                 sb.AppendLine("        so they only exist inside the package. Give rootBackground the window colour you");
                 sb.AppendLine("        actually render, as a literal, and run once per theme (one config each):");

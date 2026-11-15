@@ -186,6 +186,40 @@ public class LibraryThemeTests
         Assert.True(r.Detection.IsDegraded, "專案自己的色盤還是不知道 —— degraded 不能因為補了預設值就變 false");
     }
 
+    [Fact] // 一個專案同時用兩個函式庫（實測 MaaAssistantArknights:MaterialDesign ＋ HandyControl）。
+           // ⚠ 這形狀抓到一個真的 bug:補色票與覆蓋率提示各自偵測一次、各自挑到不同的那一個 ——
+           //   色盤補了 MaterialDesign 的 155 個鍵,提示卻說「你用的是 HandyControl」。
+           //   現在兩邊讀同一份(PaletteDetection.Libraries),而且只有**兩份表都定義、值卻不同**的鍵才丟掉。
+    public void AProjectThatUsesTwoLibrariesGetsTheUnambiguousKeysAndIsToldBoth()
+    {
+        using var fx = new Fixture();
+        fx.File("App.xaml", """
+            <Application xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Application.Resources>
+                <ResourceDictionary>
+                  <ResourceDictionary.MergedDictionaries>
+                    <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml"/>
+                    <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+                  </ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary>
+              </Application.Resources>
+            </Application>
+            """);
+        fx.File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{DynamicResource RegionBrush}">
+              <TextBlock Foreground="{DynamicResource MaterialDesignPaper}" Text="兩個函式庫各出一個鍵"/>
+            </Window>
+            """);
+        var r = fx.Run();
+
+        // 兩邊各自獨有的鍵沒有歧義 —— 照補
+        Assert.Single(r.Findings);
+        Assert.Equal(0, r.Unresolved);
+        Assert.Equal([ThemeLibraries.MaterialDesign, ThemeLibraries.HandyControl], r.ThemeLibraries);
+        Assert.Contains("only where they agree", r.Detection.Description);
+        Assert.Contains("MaterialDesignInXamlToolkit", r.Detection.Description);
+    }
+
     [Fact] // MahApps 刻意沒有表（主題檔是建置時產生的）—— 不是漏掉。它的使用者走 rootBackground
     public void MahAppsHasNoTableOnPurpose()
     {

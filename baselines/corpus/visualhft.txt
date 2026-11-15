@@ -3,7 +3,7 @@
 project: visualhft
 repo: https://github.com/visualHFT/VisualHFT
 commit: 65b1d1270336864768180f5fbf8bae348694847f
-tool-commit: 2624906+dirty
+tool-commit: 07be1dd+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: single

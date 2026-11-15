@@ -288,9 +288,13 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - **三個主題函式庫的內建色票（1.5，`LibraryThemes.cs` + 內嵌的 `WpfUiTheme.json`／`MaterialDesignTheme.json`／`HandyControlTheme.json`）**：跟 WinUI 那條同一個形狀、同一份資料結構
   （`WinUiTheme.Data`、`WinUiTheme.Augment` 共用），差別只在**觸發條件**：只在專案引用 `Wpf.Ui` 時補
   （`ThemeLibraries.DetectInProject`），不是看 `{ThemeResource`。
-  ⚠ 野外數字的狀態（2026-11-15）：WPF-UI 有（Bloxstrap 111 → 37 個查不到的鍵）、MaterialDesign 有
-  （VisualHFT 配對 33 → 83、覆蓋率 17.7% → 44.6%、44 筆真 fail）、**HandyControl 還沒有**
-  （兩個消費端一個自己定義全部的鍵、一個幾乎不用靜態鍵）。MaterialDesign 那張表一定要收**舊鍵名**
+  ⚠ 野外數字（2026-11-15，都在語料裡）：WPF-UI（Bloxstrap 111 → 37 個查不到的鍵）、MaterialDesign
+  （VisualHFT 配對 33 → 83、覆蓋率 17.7% → 44.6%、44 筆真 fail）、HandyControl（MaaAssistantArknights
+  配對 80 → 101、查不到的鍵 48 → 13）。
+  ⚠ **一個專案可以同時用兩個函式庫**（MAA 就是）：`DetectInProject` 回傳**全部**，而且兩份表同名但值不同的鍵
+  一律不補（執行期看合併順序，不知道哪份贏）；只有一份表定義的鍵沒有歧義，照補。
+  補色票與覆蓋率提示**讀同一份**（`PaletteDetection.Libraries`）—— 之前各自偵測一次，色盤補了 MaterialDesign
+  的 155 個鍵、提示卻說「你用的是 HandyControl」。MaterialDesign 那張表一定要收**舊鍵名**
   （`MaterialDesignPaper`／`MaterialDesignBody`，v5 改名前的寫法）—— VisualHFT 的 50 筆查不到的鍵有 49 筆是它，
   少了那一份整張表對真實 App 幾乎沒作用。
   ⚠ **MahApps 刻意沒有表**：它的主題檔是建置時產生的（`Theme.Template.xaml`／`Theme.Base.Template.xaml`，

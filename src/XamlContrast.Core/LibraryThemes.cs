@@ -60,19 +60,53 @@ internal static class LibraryThemes
                ?? throw new InvalidOperationException($"{resource} is empty");
     }
 
-    /// <summary>把專案引用到的那個函式庫的預設值補進色盤（全域與每一個 App 作用域），描述加一句。</summary>
+    /// <summary>
+    /// 把專案引用到的函式庫的預設值補進色盤（全域與每一個 App 作用域），描述加一句。
+    ///
+    /// ⚠ 專案同時用兩個函式庫時（實測 MaaAssistantArknights：MaterialDesign ＋ HandyControl），
+    /// 只補**兩邊值一致**的鍵。同名而值不同的，執行期看合併字典的順序 —— 靜態不可知，所以不猜。
+    /// 挑其中一個來填是最糟的做法：數字看起來一樣合理，但有一半的機率是編的。
+    /// </summary>
     internal static void Apply(string root, PaletteDetection d)
     {
-        if (ThemeLibraries.DetectInProject(root) is not { } library) return;
-        var table = All.FirstOrDefault(t => t.Library == library);
-        if (table is null) return;   // 偵測到的函式庫沒有內嵌表（MahApps）
-        var data = Of(library);
+        var libraries = ThemeLibraries.DetectInProject(root);
+        d.Libraries = libraries;
+        var tables = libraries.Where(Has).Select(l => (Library: l, Data: Of(l))).ToList();
+        if (tables.Count == 0) return;
+
+        WinUiTheme.Data data;
+        if (tables.Count == 1) data = tables[0].Data;
+        else
+        {
+            // 多個函式庫：只有「兩份表都定義、而且值不一樣」的鍵才丟掉（執行期看合併順序，不知道哪一份會贏）。
+            // ⚠ 只有一份表定義的鍵沒有歧義 —— 全丟掉的話，MaaAssistantArknights 那種專案一個鍵都補不到，
+            //   等於白做。要丟的是說不清楚的那幾個，不是全部。
+            static Dictionary<string, string[]> Unanimous(IEnumerable<Dictionary<string, string[]>> maps)
+            {
+                var all = new Dictionary<string, string[]?>(StringComparer.Ordinal);
+                foreach (var m in maps)
+                    foreach (var (k, v) in m)
+                    {
+                        if (!all.TryGetValue(k, out var seen)) all[k] = v;
+                        else if (seen is not null && !seen.SequenceEqual(v)) all[k] = null; // 兩份表不同調 → 不補
+                    }
+                return all.Where(e => e.Value is not null).ToDictionary(e => e.Key, e => e.Value!, StringComparer.Ordinal);
+            }
+            var entries = Unanimous(tables.Select(t => t.Data.Entries));
+            var colors = Unanimous(tables.Select(t => t.Data.Colors));
+            var runtime = tables.SelectMany(t => t.Data.Runtime).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToList();
+            data = new WinUiTheme.Data(string.Join(" + ", tables.Select(t => t.Data.Source)), entries, colors, runtime);
+        }
+
         // 補之前先記下「這些值是工具給的，不是專案自己的」—— 覆蓋率提示要據此說對話
         foreach (var k in data.Entries.Keys.Where(k => !d.Palette.Entries.ContainsKey(k))) d.FrameworkKeys.Add(k);
         var added = WinUiTheme.Augment(d.Palette, d.DroppedKeys, data);
         foreach (var scope in d.Scopes ?? []) WinUiTheme.Augment(scope.Palette, d.DroppedKeys, data);
         if (added == 0) return;
-        Note(d, added, table.What, data.Source, data.Runtime.Count(k => !d.Palette.Entries.ContainsKey(k)));
+        var what = tables.Count == 1
+            ? All.First(t => t.Library == tables[0].Library).What
+            : $"default theme brush(es) ({string.Join(" + ", tables.Select(t => t.Library))}, only where they agree)";
+        Note(d, added, what, data.Source, data.Runtime.Count(k => !d.Palette.Entries.ContainsKey(k)));
     }
 
     /// <summary>

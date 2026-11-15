@@ -81,12 +81,18 @@ internal static class ThemeLibraries
     }
 
     /// <summary>
-    /// 整個專案引用到的主題函式庫（回傳第一個比到的名字；沒有是 null）。
+    /// 整個專案引用到的主題函式庫（**全部**，依本檔的順序；一個都沒有是空清單）。
+    ///
+    /// ⚠ 一個專案可以同時用兩個（實測 MaaAssistantArknights：App.xaml 同時 merge MaterialDesign 與
+    /// HandyControl 的字典）。回傳「第一個」的舊寫法讓兩條路徑各自挑到不同的那一個 ——
+    /// 色盤補了 MaterialDesign 的 155 個鍵，提示卻說「你用的是 HandyControl」。
+    /// 報告自相矛盾跟謊報是同一件事，而且更糟的是:兩邊同名的鍵值不一樣，挑錯就是編造。
     /// 純文字掃描 —— 補框架預設色票時在色盤偵測階段就要知道，那時還沒有載入的 XDocument
     /// （同 <see cref="WinUiTheme.UsesThemeResource"/> 的做法）。測試素材路徑不算。
     /// </summary>
-    public static string? DetectInProject(string root)
+    public static IReadOnlyList<string> DetectInProject(string root)
     {
+        var found = new List<string>();
         foreach (var f in PaletteDetector.EnumerateFiles(root, "*.xaml"))
         {
             if (PaletteDetector.LooksLikeFixture(Path.GetRelativePath(root, f))) continue;
@@ -96,14 +102,14 @@ internal static class ThemeLibraries
             catch (UnauthorizedAccessException) { continue; }
             foreach (var lib in All)
             {
-                foreach (var marker in lib.PackMarkers)
-                    if (text.Contains(marker, StringComparison.OrdinalIgnoreCase)) return lib.Name;
-                foreach (var el in lib.ElementMarkers)
-                    if (text.Contains("<" + el, StringComparison.Ordinal) || text.Contains(":" + el, StringComparison.Ordinal))
-                        return lib.Name;
+                if (found.Contains(lib.Name)) continue;
+                var hit = lib.PackMarkers.Any(m => text.Contains(m, StringComparison.OrdinalIgnoreCase))
+                          || lib.ElementMarkers.Any(el => text.Contains("<" + el, StringComparison.Ordinal)
+                                                         || text.Contains(":" + el, StringComparison.Ordinal));
+                if (hit) found.Add(lib.Name);
             }
         }
-        return null;
+        return found;
     }
 
     /// <summary>這個函式庫的候選鍵（提示裡要列出來給使用者自己找）。</summary>

@@ -195,9 +195,10 @@ public sealed class AuditResult
     /// 沒宣告是 null。只用在覆蓋率提示上 —— 見 <see cref="Report.CoverageHint"/>：
     /// 這種專案的色票在框架裡而不在 repo 裡，叫人去找第三方主題庫的 brush 鍵是找不到的。</summary>
     public string? ThemeMode { get; init; }
-    /// <summary>這個專案引用到的第三方 WPF 主題函式庫的名字（<see cref="ThemeLibraries"/> 的常數；沒有是 null）。
-    /// 跟 <see cref="ThemeMode"/> 同一個用途：只用在覆蓋率提示上，讓它說得出「你用的是哪一個、該設哪個鍵」。</summary>
-    public string? ThemeLibrary { get; init; }
+    /// <summary>這個專案引用到的第三方 WPF 主題函式庫（<see cref="ThemeLibraries"/> 的常數；可能不只一個）。
+    /// 跟 <see cref="ThemeMode"/> 同一個用途：只用在覆蓋率提示上，讓它說得出「你用的是哪些、該設哪個鍵」。
+    /// ⚠ 與補色票讀的是同一份（<c>PaletteDetection.Libraries</c>）—— 兩邊各自偵測會說出互相矛盾的話。</summary>
+    public IReadOnlyList<string> ThemeLibraries { get; init; } = [];
 
     /// <summary>本次生效的設定（分級門檻等；預設值 = 沒有 config 檔）</summary>
     public ToolConfig Config { get; init; } = new();

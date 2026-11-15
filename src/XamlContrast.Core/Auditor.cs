@@ -101,7 +101,6 @@ public sealed partial class Auditor
     private StyleIndex _styles = null!;
     private string _curFile = ""; // 具名 Style 查找的「同檔優先」範圍（完整路徑）
     private string? _themeMode;   // Application/Window 上的 WPF ThemeMode（第一個看到的就算）
-    private string? _themeLibrary; // 引用到的第三方主題函式庫（第一個看到的就算；只給覆蓋率提示用）
     /// <summary>目前這個元素從祖先繼承到的 FontFamily（原始寫法；null = 沒有或不知道）。FontFamily 是繼承屬性：
     /// TextBlock 裡的 Run、Button 裡的 TextBlock 跟著外層的字型走。只給圖示字型的判斷用（<see cref="IconFonts"/>）。</summary>
     private string? _inheritedFont;
@@ -361,9 +360,6 @@ public sealed partial class Auditor
                     auditor._themeMode = themeMode;
                 }
 
-                // 第三方主題函式庫（1.5）：同樣只為了讓覆蓋率提示講對話 —— 這類專案的「視窗 → 底色鍵」
-                // 隱含樣式住在 NuGet 套件裡，工具看不到。偵測到哪一個就說那一個，不要一律叫人去設 MahApps 的鍵
-                auditor._themeLibrary ??= ThemeLibraries.Detect(doc);
 
                 auditor._curFile = f;
                 // 多 App repo:這個檔案屬於哪個 App,就用哪個 App 的色盤
@@ -390,7 +386,9 @@ public sealed partial class Auditor
         {
             Detection = detection,
             ThemeMode = auditor._themeMode,
-            ThemeLibrary = auditor._themeLibrary,
+            // ⚠ 從色盤偵測那邊讀,不要自己再掃一次 —— 兩邊各掃各的會得到不同的答案
+            //   (MaaAssistantArknights 同時用 MaterialDesign 與 HandyControl,色盤補了一個、提示說另一個)
+            ThemeLibraries = detection.Libraries,
             FileCount = files.Count,
             Findings = auditor._findings,
             Pairs = auditor._pairs,
