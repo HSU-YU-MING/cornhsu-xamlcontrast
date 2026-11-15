@@ -29,21 +29,24 @@ internal static class ThemeLibraries
 
     /// <summary>名字的常數（補預設色票時要比對它，不要拿字串字面值到處寫）。</summary>
     internal const string WpfUi = "WPF-UI";
+    internal const string MaterialDesign = "MaterialDesignInXamlToolkit";
+    internal const string HandyControl = "HandyControl";
+    internal const string MahApps = "MahApps.Metro";
 
     private static readonly Library[] All =
     [
         // MahApps.Metro：Styles 裡 22 處用 ThemeBackground、1 處用 Window.Background（9466e8a）
-        new("MahApps.Metro", ["/MahApps.Metro;component/"], [],
+        new(MahApps, ["/MahApps.Metro;component/"], [],
             ["MahApps.Brushes.ThemeBackground", "MahApps.Brushes.Window.Background"]),
         // MaterialDesignInXamlToolkit：新版是 MaterialDesign.Brush.Background，舊版 MaterialDesignPaper（0877280）
-        new("MaterialDesignInXamlToolkit",
+        new(MaterialDesign,
             ["/MaterialDesignThemes.Wpf;component/", "/MaterialDesignColors;component/"], ["BundledTheme"],
             ["MaterialDesign.Brush.Background", "MaterialDesignPaper"]),
         // WPF-UI：FluentWindow 的 Style 設 WindowBackground；頁面層是 ApplicationBackgroundBrush（ffebacd）
         new(WpfUi, ["/Wpf.Ui;component/"], ["ControlsDictionary", "ThemesDictionary"],
             ["WindowBackground", "ApplicationBackgroundBrush"]),
         // HandyControl：Window 的隱含樣式設 SecondaryRegionBrush（e9ad3d7）
-        new("HandyControl", ["/HandyControl;component/"], [],
+        new(HandyControl, ["/HandyControl;component/"], [],
             ["SecondaryRegionBrush", "RegionBrush"]),
     ];
 

@@ -77,3 +77,66 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## MaterialDesignInXAML/MaterialDesignInXamlToolkit
+
+`src/XamlContrast.Core/MaterialDesignTheme.json` lists the default colours of that library's light and dark
+themes (`MaterialDesign.Brush.Background`, `MaterialDesign.Brush.Card.Background`, …), read from
+`src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.{Light,Dark}.xaml` and the
+`Internal/MaterialDesignTheme.BaseThemeColors.xaml` they alias into, at the commit named in the file's
+`source` field. The primary and secondary colours a project picks through `<BundledTheme/>` are **not**
+included — those are the project's own choice, not a default. Source:
+https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit (MIT)
+
+```
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+
+## HandyOrg/HandyControl
+
+`src/XamlContrast.Core/HandyControlTheme.json` lists the default colours of its light and dark skins
+(`RegionBrush`, `PrimaryTextBrush`, …), read from
+`src/Shared/HandyControl_Shared/Themes/Basic/Colors/{Colors,ColorsDark}.xaml` and the brushes in
+`Basic/Brushes.xaml` that reference them, at the commit named in the file's `source` field.
+Source: https://github.com/HandyOrg/HandyControl (MIT)
+
+```
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

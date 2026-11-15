@@ -1101,9 +1101,9 @@ public static partial class PaletteDetector
         // 要在框架預設色之前收：專案用別名定義的鍵優先於框架的同名鍵
         foreach (var (k, v) in CollectAliases(root))
             if (!d.Palette.Entries.ContainsKey(k) && !d.DroppedKeys.Contains(k)) d.Palette.Aliases.TryAdd(k, v);
-        // WPF-UI 專案:那個函式庫的預設色票當最底層(1.5,見 WpfUiTheme)。排在 WinUiTheme 前面 ——
-        // 兩邊鍵名大量重疊但值不一定一樣,引用 Wpf.Ui 的專案該拿 Wpf.Ui 的值
-        WpfUiTheme.Apply(root, d);
+        // 第三方主題函式庫的內建色票當最底層(1.5,見 LibraryThemes)。排在 WinUiTheme 前面 ——
+        // 鍵名彼此大量重疊但值不一樣,引用哪個函式庫就該拿那個函式庫的值
+        LibraryThemes.Apply(root, d);
         // WinUI／UWP 專案:框架的預設主題色當最底層(專案自己定義的優先)。WPF 專案不碰(見 WinUiTheme)
         WinUiTheme.Apply(root, d);
         // 別名最後解：它常指向框架的預設主題色（上一步才補進來）

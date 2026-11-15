@@ -151,11 +151,14 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
    Windows 強調色走的鍵（`AccentFillColorDefaultBrush`、`SystemAccentColor…`）不猜，照舊是 `bound-or-gradient`。
    資料來自 microsoft/microsoft-ui-xaml（MIT，見 THIRD-PARTY-NOTICES.md），色盤那一行會點名是哪個 commit。WPF 專案不受影響。
    頁面的底色通常來自視窗（Mica 或預設的頁面 brush），工具看不到 —— 那一層請設 `rootBackground`。
-   **WPF-UI：** 引用 `Wpf.Ui` 的專案也會拿到那個函式庫的內建主題色票（`ApplicationBackgroundBrush`、
-   `WindowBackground`、`TextFillColorPrimaryBrush`… 共 310 個 brush、88 個 Color，來自 lepoco/wpfui 的某個釘住的
-   commit，MIT）。規則相同：只在專案真的引用它時補、當最底層、專案自己定義的一律優先、27 個跟強調色走的鍵不猜、
-   高對比主題不收，色盤那一行會點名 commit。實測（Bloxstrap，公開的 WPF-UI 系 App）：查不到的鍵 111 → 37，
-   再照工具現在的提示設一行 `rootBackground`，0 組配對 → 55 組、覆蓋率 46.2%。
+   **主題函式庫：** 引用 WPF-UI、MaterialDesignInXamlToolkit 或 HandyControl 的專案會拿到那個函式庫的內建色票
+   （各 310／124／27 個 brush，來自各函式庫自己的主題檔、釘住的 commit，都是 MIT）。規則相同：只在專案真的引用它
+   時補、當最底層、專案自己定義的一律優先、跟強調色走的鍵不猜、高對比主題不收，色盤那一行會點名 commit。
+   實測（Bloxstrap，公開的 WPF-UI 系 App）：查不到的鍵 111 → 37，再照工具現在的提示設一行 `rootBackground`，
+   0 組配對 → 55 組、覆蓋率 46.2%。
+   **MahApps.Metro 刻意沒有這張表：** 它的主題檔是建置時產生的（1077 個鍵、112 個佔位符），repo 裡沒有任何一份
+   帶具體色值的主題檔，而且值還跟 App 合併了哪個強調色有關。補它就是猜，而猜正是這個工具不做的事 ——
+   MahApps 的專案走 `rootBackground` 提示，實測一行 9.4% → 83.5%。
    **別名** —— `<StaticResource x:Key="A" ResourceKey="B"/>`（`DynamicResource`／`ThemeResource` 元素同）—— 依主題各自
    追下去、可以串，在 WinUI 預設色補進來之後才解，所以指向框架鍵的別名也解得出來；指向的鍵找不到時是
    `unknown-palette-key`、點名那個鍵。**brush 裡直接寫 Color 鍵**（`<SolidColorBrush Color="{DynamicResource FgColor}"/>`）

@@ -285,9 +285,14 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   授權：MIT，`THIRD-PARTY-NOTICES.md` 由 Directory.Build.props 打進套件 —— 換來源或加資料時要一起改。
   WinUI Gallery（2026-11-10，`6de91fe`）實測：配對 49 → 59、unknown-palette-key 172 → 90，原本的 finding 比值與分類都不變。
   剩下的大宗：頁面底色來自視窗（no-ancestor-background；靜態不可知，請使用者設 rootBackground）。
-- **WPF-UI 的內建色票（1.5，`WpfUiTheme.cs` + 內嵌的 `WpfUiTheme.json`）**：跟 WinUI 那條同一個形狀、同一份資料結構
+- **三個主題函式庫的內建色票（1.5，`LibraryThemes.cs` + 內嵌的 `WpfUiTheme.json`／`MaterialDesignTheme.json`／`HandyControlTheme.json`）**：跟 WinUI 那條同一個形狀、同一份資料結構
   （`WinUiTheme.Data`、`WinUiTheme.Augment` 共用），差別只在**觸發條件**：只在專案引用 `Wpf.Ui` 時補
-  （`ThemeLibraries.DetectInProject`），不是看 `{ThemeResource`。⚠ 兩邊鍵名大量重疊、值不一樣 ——
+  （`ThemeLibraries.DetectInProject`），不是看 `{ThemeResource`。
+  ⚠ **MahApps 刻意沒有表**：它的主題檔是建置時產生的（`Theme.Template.xaml`／`Theme.Base.Template.xaml`，
+  1077 個鍵、112 個 `{{佔位符}}`），repo 裡沒有任何一份帶具體色值的主題檔，值還跟 App 合併了哪個強調色有關 ——
+  補它就是猜。`MahAppsHasNoTableOnPurpose` 把這個決定釘住，以免哪天有人「順手補齊」。
+  ⚠ 專案自己沒有色盤時，色盤那一行要整句改寫（`LibraryThemes.Note`）：接在後面會印出
+  「no palette found …; + 124 brush(es)」這種自相矛盾的句子（v2rayN 實測）。`paletteDegraded` 維持 true。⚠ 兩邊鍵名大量重疊、值不一樣 ——
   絕對不要把 WinUI 的表拿給 WPF-UI 專案用或反過來，`AProjectThatDoesNotUseWpfUiGetsNothing` 釘住這條。
   重產：sparse checkout `src/Wpf.Ui/Resources/Theme/{Dark,Light}.xaml`，設 `XAMLCONTRAST_WPFUI_SOURCE`／
   `XAMLCONTRAST_WPFUI_COMMIT` 跑 `WpfUiThemeTests.Regenerate`，看 git diff 再 commit（同 WinUI）。

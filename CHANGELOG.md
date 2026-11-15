@@ -44,6 +44,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   最內層優先、元素有自己的 Style 就不套、指派給屬性的樣式不算隱含樣式。觸發態、模板畫底看不到的控制項、
   以及同型別有多個互相競爭的全域隱含樣式，一律不評也不猜。*
 
+- **Three theme libraries' built-in colours ship with the tool** — WPF-UI, MaterialDesignInXamlToolkit and
+  HandyControl (`WpfUiTheme.json` 310 brushes, `MaterialDesignTheme.json` 124, `HandyControlTheme.json` 27 plus
+  34 colours; each read from that library's own theme files at a pinned commit, all MIT, see
+  `THIRD-PARTY-NOTICES.md`). Applied only to projects that reference that library, as the lowest layer.
+  **MahApps.Metro deliberately has no table, and that is not an omission:** its theme files are generated at
+  build time (`Theme.Template.xaml` and `Theme.Base.Template.xaml`, 1077 keys and 112 `{{placeholders}}`),
+  so there is no file in its repository with real colours in it, and the values also depend on which accent
+  the app merged (`Light.Blue`, `Light.Red`…). Filling that in would be guessing; MahApps users get the
+  `rootBackground` hint instead, which is measured at 9.4% → 83.5% coverage on a real MahApps app.
+  *A `v2rayN`-shaped project — one that defines no palette at all — used to get a self-contradicting palette
+  line ("no palette found … ; + 124 brushes"); it now says that the whole palette is the library's defaults,
+  and `paletteDegraded` stays true because the project's own palette is still unknown.*
 - **WPF-UI's built-in theme colours ship with the tool**, for projects that reference `Wpf.Ui`
   (`src/XamlContrast.Core/WpfUiTheme.json`: 310 brushes, 88 colours, read from that library's own
   `Dark.xaml` / `Light.xaml` at a pinned commit — MIT, see `THIRD-PARTY-NOTICES.md`). This is the same
