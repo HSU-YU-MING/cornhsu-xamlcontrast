@@ -3,7 +3,7 @@
 project: wpfui
 repo: https://github.com/lepoco/wpfui
 commit: ffebacd61058170cf63864b7d5aa730cffff848a
-tool-commit: 9a53b69+dirty
+tool-commit: 795b190+dirty
 frozen: 2026-11-15
 exit: 3
 palette-mode: pair

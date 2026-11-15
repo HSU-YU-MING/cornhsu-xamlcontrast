@@ -346,6 +346,12 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   的才是隱含樣式。⚠ 少這一條：MaterialDesign 的 Clock 模板裡時鐘讀數的行內樣式（FontSize 66、
   字色是 `Primary.Foreground`、本來疊在紫色標頭上）被當成全域隱含樣式，整個 repo 的 TextBlock 都被套上
   「66 級的深色字」→ 一口氣 214 筆假 fail。
+- **`<Style.Resources>` 是第三種作用範圍**（1.5 後半，`Record.ScopedImplicit`／`Merged.ScopedImplicit`／
+  `Auditor._scopedStyles`）：它不是「某個子樹的行號區間」，是「用了這個 Style 的地方」—— 跨檔，所以得由鏈帶著走。
+  推進 `_scopedStyles` 的時機是**走子元素之前**（它管內容，不管套了樣式的那個元素自己），查找順序是
+  最內層的 scoped → 檔案／全域（WPF 的資源查找方向）。⚠ 這個洞是工具自己的輸出逼出來的：Kindling 照 WPF
+  的標準手法（在 AccentBtn 的 Style.Resources 裡把字色蓋回白色）修好之後，工具還是報 fail，逼得那邊得在
+  元素上再明寫一次字色 —— **守門員看不懂正確的修法，就是在逼人寫多餘的程式碼**。
 - **作用範圍是子樹，不是整個檔**（`ScopeOf`，用行號區間；索引與稽核各自載一份 XDocument，比不了祖先關係）：
   巢狀 `<X.Resources>` 裡的只管那個元素的子樹，最內層優先（`ImplicitRecord` 取最窄的範圍）。
   ⚠ 少這一條：QuillNest 標籤膠囊模板深處 `ContentPresenter.Resources` 裡的隱含 TextBlock 樣式（白字，

@@ -3,7 +3,7 @@
 project: mahapps
 repo: https://github.com/MahApps/MahApps.Metro
 commit: 9466e8acd96591e1f552841bc5357f376552bb57
-tool-commit: 9a53b69+dirty
+tool-commit: 795b190+dirty
 frozen: 2026-11-15
 exit: 3
 palette-mode: single

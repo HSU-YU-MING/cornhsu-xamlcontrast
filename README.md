@@ -769,7 +769,10 @@ Honest list — full blind-spot table with per-case evidence in the
   background and foreground, following WPF's scope rules: a style in a nested `<X.Resources>` applies
   only inside that element's subtree, the innermost scope wins, an element with its own `Style` takes no
   implicit style, and a style assigned to a property (`ItemContainerStyle`, `DataGridTextColumn.ElementStyle`,
-  an inline `<X.Style>`) is not an implicit style. Three parts still say nothing rather than guess:
+  an inline `<X.Style>`) is not an implicit style. A style's own `<Style.Resources>` is resolved too, for the
+  content of the elements that use that style — WPF's standard way to override a global implicit style for one
+  control — and it beats the file's and the global one, is inherited through `BasedOn`, and does not reach the
+  styled element itself. Three parts still say nothing rather than guess:
   the **trigger states** of an implicit style (the base state is graded), a **templated control** whose
   template paints the background out of sight (`<hc:Shield Color="#1182c3"/>` — the label is on the badge,
   not on the ancestor), and a type with **several competing global implicit styles**, where the winner

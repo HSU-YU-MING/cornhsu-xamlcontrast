@@ -4,7 +4,7 @@
 project: D:\應用程式\Kindling\Kindling.WPF
 frozen: 2026-11-15
 git-repo: D:/應用程式/Kindling
-git-commit: e9a6ca2d8e57647c293c87fc60b581de71ea4cc1
+git-commit: 57ce70b6383455e17a2ac2f6c783478dcaf90e77
 git-dirty: 1
 inputs: 79
 # sha256(前 16 碼)  專案內相對路徑
@@ -43,7 +43,7 @@ FD261CA7C9F965FF  Services/SequenceFlattener.cs
 A81056CFCA87A3D7  Services/SourceSalvage.cs
 674EB6A0C73BE9FB  Services/SystemThemeService.cs
 0CA9D79E6AE530A6  Services/UndoService.cs
-15DE1607E6F171CD  Themes/DarkTheme.xaml
+68D1016BDE1ADB64  Themes/DarkTheme.xaml
 3F0A4BB6CE2A45C7  ViewModels/ApiKeyViewModel.cs
 2EDA2F038A210B5D  ViewModels/ClipViewModel.cs
 CF230195F7121906  ViewModels/ExportSettingsViewModel.cs
@@ -82,7 +82,7 @@ F8BBCFED2AA1124F  Views/SequenceTrackView.xaml
 BE6AA7361F4F96B8  Views/SequenceTrackView.xaml.cs
 7515128A2AC1DA87  Views/TextInputDialog.xaml
 0830E7F51FCCAC5D  Views/TextInputDialog.xaml.cs
-FD3C50C1F903CB6B  Views/TimelineView.xaml
+C67717633472BEC4  Views/TimelineView.xaml
 010176B08D534905  Views/TimelineView.xaml.cs
 BA9480A7D1C33DB4  Views/WaveformControl.cs
 F59B23A2C77100FD  Views/WorkspaceView.xaml

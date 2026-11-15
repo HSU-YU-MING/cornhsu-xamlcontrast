@@ -3,7 +3,7 @@
 project: materialdesign
 repo: https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit
 commit: 087728011a8d71926ccf86cb28dc99439e9b1c3f
-tool-commit: 9a53b69+dirty
+tool-commit: 795b190+dirty
 frozen: 2026-11-15
 exit: 3
 palette-mode: pair
@@ -13,7 +13,7 @@ single-theme: False
 files: 214
 pairs: 386
 coverage: 14
-unresolved: 2370
+unresolved: 2372
 skipped: 2
 dead-foreground: 50
 disabled-exempt: 177
@@ -28,7 +28,7 @@ ok: 216
 decorative: 8
 unresolved-by.bound-or-gradient: 1907
 unresolved-by.in-style-template: 27
-unresolved-by.no-ancestor-background: 329
+unresolved-by.no-ancestor-background: 331
 unresolved-by.same-brush-pair: 13
 unresolved-by.translucent-uncomposited: 55
 unresolved-by.unknown-palette-key: 39
@@ -2500,6 +2500,7 @@ U  no-ancestor-background  src/MainDemo.Wpf/Trees.xaml:356  {DynamicResource Mat
 U  no-ancestor-background  src/MainDemo.Wpf/Trees.xaml:407  {DynamicResource MaterialDesign.Brush.Foreground}
 U  no-ancestor-background  src/MainDemo.Wpf/Trees.xaml:457  {DynamicResource MaterialDesign.Brush.Foreground}
 U  no-ancestor-background  src/MainDemo.Wpf/Trees.xaml:51  {DynamicResource MaterialDesign.Brush.Foreground}
+U  no-ancestor-background  src/MainDemo.Wpf/Typography.xaml:108  {DynamicResource MaterialDesign.Brush.Foreground}
 U  no-ancestor-background  src/MainDemo.Wpf/Typography.xaml:145  {DynamicResource MaterialDesign.Brush.Foreground}
 U  no-ancestor-background  src/MainDemo.Wpf/Typography.xaml:145  {DynamicResource MaterialDesign.Brush.Foreground}
 U  no-ancestor-background  src/MainDemo.Wpf/Typography.xaml:145  {DynamicResource MaterialDesign.Brush.Foreground}
@@ -2530,6 +2531,7 @@ U  no-ancestor-background  src/MainDemo.Wpf/Typography.xaml:441  {DynamicResourc
 U  no-ancestor-background  src/MainDemo.Wpf/Typography.xaml:478  {DynamicResource MaterialDesign.Brush.Foreground}
 U  no-ancestor-background  src/MainDemo.Wpf/Typography.xaml:478  {DynamicResource MaterialDesign.Brush.Foreground}
 U  no-ancestor-background  src/MainDemo.Wpf/Typography.xaml:478  {DynamicResource MaterialDesign.Brush.Foreground}
+U  no-ancestor-background  src/MainDemo.Wpf/Typography.xaml:71  {DynamicResource MaterialDesign.Brush.Foreground}
 U  no-ancestor-background  src/MaterialDesign3.Demo.Wpf/Buttons.xaml:274  {DynamicResource MaterialDesign.Brush.Primary.Light}
 U  no-ancestor-background  src/MaterialDesign3.Demo.Wpf/Buttons.xaml:274  {DynamicResource MaterialDesign.Brush.Primary.Light}
 U  no-ancestor-background  src/MaterialDesign3.Demo.Wpf/Buttons.xaml:283  {DynamicResource MaterialDesign.Brush.Primary}

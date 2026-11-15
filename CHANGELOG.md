@@ -99,6 +99,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   沒有就改口要你給色碼。原本一律印 MahApps 的鍵，用別的函式庫的人照做會得到 exit 2。
   實測：NETworkManager 加一行 rootBackground，135 組 9.4% → 1161 組 83.5%。*
 
+- **A style's own resources (`<Style.Resources>`) are resolved for the content of the elements that use it.**
+  This is WPF's standard answer to "a global implicit `TextBlock` style overrides my button's foreground":
+  you override it back inside that style's scope. The tool couldn't see it — its implicit-style scope is a line
+  range in a file, while this one is "wherever this style is applied", which crosses files.
+  **The gap was found by the tool's own output.** The fix it prompted in a maintainer app (see the implicit-style
+  entry) was written exactly this way, and the audit still reported the failure, so that project had to declare the
+  colour a second time on the element itself. *A gate that can't read the correct fix is a gate that pushes people
+  into writing redundant code* — once this landed, that second declaration was removed again and the project still
+  reports `exit 0`.
+  Scope follows WPF's lookup direction: a style-scoped style beats the file's and the global one (it is nearer the
+  element), it reaches the content but not the styled element itself, and it is inherited through `BasedOn` with the
+  derived style's own declaration winning. Measured across 13 public projects: **nothing changes** except
+  MaterialDesignInXamlToolkit's unresolved going 2370 → 2372 — two text elements in `Typography.xaml` that the tool
+  now *sees* (their foreground comes from a style-scoped style) but whose background it still can't resolve.
+  *Style 自己的 `<Style.Resources>` 現在對「用了這個 Style 的元素的內容」生效 —— 那是 WPF 修
+  「全域隱含樣式蓋掉按鈕字色」的標準手法。這個洞是工具自己的輸出逼出來的：它看不懂正確的修法，
+  等於在逼人寫多餘的程式碼。十三個公開專案只有兩筆 unresolved 變動（看見了、但底色還是解不出來）。*
+
 - **`VisualStateManager` state colours are counted and listed** — `summary.stateColors` and the new
   `stateColorSites` array in `report.json`, a line in the console, Markdown and HTML reports. This was the
   last blind spot with **no counter at all**: state storyboards (`ColorAnimation`, brush key frames) and

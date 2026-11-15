@@ -428,6 +428,25 @@ public sealed partial class Auditor
     private readonly Dictionary<UnresolvedReason, int> _unresolvedBy = new();
     private readonly List<UnresolvedSite> _unresolvedSites = new();
     private readonly List<StateColorSite> _stateColors = new();
+    /// <summary>
+    /// 祖先元素的 Style 鏈帶下來的 <c>&lt;Style.Resources&gt;</c> 隱含樣式（1.5）—— 最後一個是最內層。
+    /// WPF 修「全域隱含樣式蓋掉按鈕字色」的標準手法就是這個，看不到它等於看不到那個修正
+    /// （Kindling 的 AccentBtn 實例，見 StyleIndex.Record.ScopedImplicit）。
+    /// </summary>
+    private readonly List<(StyleIndex.Merged? Dark, StyleIndex.Merged? Light)> _scopedStyles = new();
+
+    /// <summary>作用中的 scoped 隱含樣式裡，這個型別最內層的那一條（兩個主題各一條；都沒有是 (null, null)）。</summary>
+    private (StyleIndex.Merged? Dark, StyleIndex.Merged? Light) ScopedImplicitFor(string typeName, ThemeSide? dark, ThemeSide? light)
+    {
+        for (var i = _scopedStyles.Count - 1; i >= 0; i--)
+        {
+            var (od, ol) = _scopedStyles[i];
+            var d = od is null ? null : _styles.ScopedImplicitChain(od, typeName, dark);
+            var l = ol is null ? null : _styles.ScopedImplicitChain(ol, typeName, light);
+            if (d is not null || l is not null) return (d, l);
+        }
+        return (null, null);
+    }
 
     private static int LineOf(XElement el) => el is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
 
@@ -490,10 +509,14 @@ public sealed partial class Auditor
         //   也就是 baseline 的鍵變了 → 要遞增 Baseline.KeyVersion、所有使用者重寫 baseline，
         //   還要連動 Parity 儀表板手刻的那份鍵。觸發態（hover 等）留到那一次一起做（ROADMAP）。
         //   這樣的代價是「隱含樣式的觸發態不評」，好處是這一版沒有任何既有的鍵會動。
+        // 查找順序 = WPF 的資源查找方向：祖先元素的 Style 帶下來的 <Style.Resources>（最內層優先）
+        // 勝過檔案／全域的隱含樣式 —— 它離元素更近
+        var darkSide = splitThemes ? ThemeSide.Dark : _curSide;
+        var (scopedDark, scopedLight) = ScopedImplicitFor(el.Name.LocalName, darkSide, ThemeSide.Light);
         var implicitChain = chain is null
-            ? _styles.GetImplicitChain(el.Name.LocalName, _curFile, LineOf(el), splitThemes ? ThemeSide.Dark : _curSide) : null;
+            ? scopedDark ?? _styles.GetImplicitChain(el.Name.LocalName, _curFile, LineOf(el), darkSide) : null;
         var implicitLight = splitThemes
-            ? (chainLight is null ? _styles.GetImplicitChain(el.Name.LocalName, _curFile, LineOf(el), ThemeSide.Light) : null)
+            ? (chainLight is null ? scopedLight ?? _styles.GetImplicitChain(el.Name.LocalName, _curFile, LineOf(el), ThemeSide.Light) : null)
             : implicitChain;
 
         var localBgRaw = XamlBrush.Read(el, "Background");
@@ -581,7 +604,12 @@ public sealed partial class Auditor
         //   MaterialDesign 的扁平按鈕（Background=Transparent、字是 Primary）就是那條路，2.63:1 是真的。
         if (implicitFg is not null && implicitChain is { HasTemplate: true } && !bgFromImplicit && !bgLightFromImplicit)
             implicitFg = null;
+        // ⚠ 推在「走子元素之前」：Style.Resources 管的是套了這個 Style 的元素的**內容**，不是元素自己
+        var pushed = (chain?.ScopedImplicit.Count > 0 || chainLight?.ScopedImplicit.Count > 0)
+                     || (implicitChain?.ScopedImplicit.Count > 0 || implicitLight?.ScopedImplicit.Count > 0);
+        if (pushed) _scopedStyles.Add((chain ?? implicitChain, chainLight ?? implicitLight));
         WalkForegroundAndChildren(el, bd, file, op, suppressedBy, handledFg, elementFont, implicitFg, implicitChain);
+        if (pushed) _scopedStyles.RemoveAt(_scopedStyles.Count - 1);
         _inheritedFont = outerFont;
     }
 

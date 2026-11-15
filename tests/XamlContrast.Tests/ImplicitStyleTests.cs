@@ -256,6 +256,120 @@ public class ImplicitStyleTests
         Assert.Equal("#000000", Assert.Single(r.Findings, f => f.Bg == "#FFFFFF").Fg);
     }
 
+    // ── Style 的 <Style.Resources>（1.5 後半）────────────────────────────────────────────
+    // WPF 修「全域隱含樣式蓋掉按鈕字色」的標準手法：在那個 Style 的作用範圍裡把字色蓋回來。
+    // ⚠ 這一段是被自己的輸出逼出來的：1.5 前半抓到 Kindling 的 AccentBtn 標籤只有 2.49:1，
+    //   而照這個標準手法修好之後，工具**看不到**那個修正（它的作用範圍不是行號區間，是「用了這個 Style 的地方」），
+    //   逼得那邊得在元素上再明寫一次字色。守門員看不懂正確的修法，就是在逼人寫多餘的程式碼。
+
+    private const string ScopedFixture = """
+        <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+          <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+          <SolidColorBrush x:Key="Fg0" Color="#1B1B1B"/>
+          <SolidColorBrush x:Key="Purple" Color="#534AB7"/>
+          <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource Fg0}"/>
+          </Style>
+          <Style x:Key="AccentBtn" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource Purple}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Style.Resources>
+              <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="White"/>
+              </Style>
+            </Style.Resources>
+          </Style>
+        </ResourceDictionary>
+        """;
+
+    [Fact] // 套了那個 Style 的元素,它的內容吃得到 Style.Resources 裡的隱含樣式 —— 而且範圍不外洩
+    public void StyleScopedResourcesApplyToTheContentAndNowhereElse()
+    {
+        using var fx = new Fixture().File("Themes/Theme.xaml", ScopedFixture)
+            .File("Main.xaml", """
+                <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{DynamicResource Bg}">
+                  <StackPanel>
+                    <Button Style="{StaticResource AccentBtn}"><TextBlock Text="按鈕裡"/></Button>
+                    <TextBlock Text="按鈕外"/>
+                  </StackPanel>
+                </Window>
+                """);
+        var r = fx.Run();
+
+        // 按鈕裡：白字疊紫底（6.93:1）—— 這就是 AccentBtn 設計意圖的樣子
+        var inside = Assert.Single(r.Findings, f => f.Element == "TextBlock" && f.Bg == "{Purple}");
+        Assert.Equal("White", inside.Fg);
+        Assert.Equal(Category.Ok, inside.Category);
+        // 按鈕外：照舊吃全域的隱含樣式（Fg0 疊白底）
+        var outside = Assert.Single(r.Findings, f => f.Element == "TextBlock" && f.Bg == "{Bg}");
+        Assert.Equal("{DynamicResource Fg0}", outside.Fg);
+    }
+
+    [Fact] // 這就是 1.5 前半那筆真 bug 的「修好之後」：沒有 Style.Resources 的話標籤是深色字疊紫底 2.49:1
+    public void WithoutTheScopedResourcesTheLabelIsTheFailingPair()
+    {
+        using var fx = new Fixture()
+            .File("Themes/Theme.xaml", ScopedFixture.Replace("""
+                    <Style.Resources>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="White"/>
+                      </Style>
+                    </Style.Resources>
+                """, ""))
+            .File("Main.xaml", """
+                <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{DynamicResource Bg}">
+                  <Button Style="{StaticResource AccentBtn}"><TextBlock Text="按鈕裡"/></Button>
+                </Window>
+                """);
+
+        var label = Assert.Single(fx.Run().Findings, f => f.Element == "TextBlock");
+        Assert.Equal("{DynamicResource Fg0}", label.Fg);   // 按鈕上的 Foreground="White" 贏不過隱含樣式
+        Assert.Equal("{Purple}", label.Bg);
+        Assert.Equal(Category.Fail, label.Category);       // 2.49:1
+    }
+
+    [Fact] // 離元素最近的贏：Style.Resources 勝過檔案／全域的隱含樣式（WPF 的資源查找方向）
+    public void TheStyleScopedOneBeatsTheGlobalImplicitStyle()
+    {
+        using var fx = new Fixture().File("Themes/Theme.xaml", ScopedFixture)
+            .File("Main.xaml", """
+                <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{DynamicResource Bg}">
+                  <Button Style="{StaticResource AccentBtn}"><TextBlock Text="按鈕裡"/></Button>
+                </Window>
+                """);
+
+        Assert.Equal("White", Assert.Single(fx.Run().Findings, f => f.Element == "TextBlock").Fg);
+    }
+
+    [Fact] // BasedOn:基底的 Style.Resources 也算，衍生自己宣告的蓋掉基底的
+    public void ScopedResourcesAreInheritedThroughBasedOnAndOverriddenByTheDerivedStyle()
+    {
+        using var fx = new Fixture()
+            .File("Themes/Theme.xaml", ScopedFixture.Replace("</ResourceDictionary>", """
+                  <Style x:Key="AccentBtnQuiet" TargetType="Button" BasedOn="{StaticResource AccentBtn}"/>
+                  <Style x:Key="AccentBtnLoud" TargetType="Button" BasedOn="{StaticResource AccentBtn}">
+                    <Style.Resources>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="#FFD700"/>
+                      </Style>
+                    </Style.Resources>
+                  </Style>
+                </ResourceDictionary>
+                """))
+            .File("Main.xaml", """
+                <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{DynamicResource Bg}">
+                  <StackPanel>
+                    <Button Style="{StaticResource AccentBtnQuiet}"><TextBlock Text="繼承基底的白字"/></Button>
+                    <Button Style="{StaticResource AccentBtnLoud}"><TextBlock Text="自己蓋成金色"/></Button>
+                  </StackPanel>
+                </Window>
+                """);
+        var labels = fx.Run().Findings.Where(f => f.Element == "TextBlock").Select(f => f.Fg).ToList();
+
+        Assert.Contains("White", labels);     // 繼承基底的
+        Assert.Contains("#FFD700", labels);   // 衍生自己宣告的贏
+    }
+
     [Fact] // 隱含樣式套得到的型別一個都沒有時，它的配對執行期不存在 —— 定義處照舊把看不懂的部分記出來
     public void AnImplicitStyleWithNoMatchingElementIsStillDisclosedAtItsDefinition()
     {

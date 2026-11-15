@@ -71,6 +71,16 @@ internal sealed partial class StyleIndex
         /// 而且方向是「漏掉」而不是「多套」。</summary>
         public int FromLine;
         public int ToLine = int.MaxValue;
+        /// <summary>
+        /// 這個 Style 的 <c>&lt;Style.Resources&gt;</c> 裡宣告的隱含樣式（型別名 → 那個 Style，1.5）。
+        ///
+        /// 執行期它們套用在「用了這個 Style 的元素」的內容上 —— 這是 WPF 修「全域隱含樣式蓋掉按鈕字色」
+        /// 的標準手法。⚠ 作用範圍跟別的隱含樣式不同（不是「某個子樹的行號區間」，是「用了這個 Style 的地方」），
+        /// 所以得由鏈帶著走，見 <see cref="Merged.ScopedImplicit"/>。
+        /// 實例：Kindling 的 AccentBtn 這樣把標籤的字色蓋回白色，而 1.5 開發中的工具看不到，
+        /// 於是那個修正在報告上「沒發生」—— 得在元素上再明寫一次才檢得到。
+        /// </summary>
+        public Dictionary<string, Record> ScopedImplicit = new(StringComparer.Ordinal);
     }
 
     internal sealed class Merged
@@ -82,6 +92,8 @@ internal sealed partial class StyleIndex
         public string? TemplateRootBg;
         /// <summary>生效模板的根元素框線（同 <see cref="TemplateRootBg"/>，衍生自帶模板時整個換掉）</summary>
         public string? TemplateRootBorder;
+        /// <summary>鏈上各層的 <c>&lt;Style.Resources&gt;</c> 隱含樣式（衍生蓋基底）—— 見 <see cref="Record.ScopedImplicit"/>。</summary>
+        public Dictionary<string, Record> ScopedImplicit = new(StringComparer.Ordinal);
         /// <summary>鏈上有任何一層帶 ControlTemplate —— 這個控制項的視覺是模板畫的（1.5 用它判斷
         /// 「字到底畫在什麼上面」：模板裡哪一層畫底靜默看不到時，拿祖先的底去配就是編造）。</summary>
         public bool HasTemplate;
@@ -308,6 +320,18 @@ internal sealed partial class StyleIndex
             var v = XamlBrush.SetterValue(s);
             if (p is not null && v is not null) rec.Setters[p] = v;
         }
+        // <Style.Resources> 裡的隱含樣式（1.5）：執行期套用在「用了這個 Style 的元素」的內容上。
+        // ⚠ 只收直接那一層、只收無 x:Key 且有 TargetType 的（keyed 的是一般資源，要靠 Style= 引用）。
+        //   這些 Style 本身照舊也進一般的隱含樣式索引（它們在資源集合裡），那一份的作用範圍是行號區間、
+        //   幾乎不會命中 —— 真正讓它們生效的是這裡這一格。
+        if (style.Elements().FirstOrDefault(e => e.Name.LocalName == style.Name.LocalName + ".Resources") is { } styleRes)
+            foreach (var inner in styleRes.Elements().Where(e => e.Name.LocalName == "Style"))
+            {
+                if (inner.Attribute(XKey) is not null) continue;
+                if (inner.Attribute("TargetType")?.Value is not { } itt) continue;
+                var im = TargetTypeName().Match(itt);
+                if (im.Success) rec.ScopedImplicit[im.Groups["t"].Value] = CreateRecord(inner, file);
+            }
         var tmplEl = style.Descendants().FirstOrDefault(e => e.Name.LocalName == "ControlTemplate");
         rec.HasTemplate = tmplEl is not null;
         // 模板根＝第一個視覺元素（跳過 <ControlTemplate.Resources> 之類的屬性元素）
@@ -537,8 +561,10 @@ internal sealed partial class StyleIndex
                 merged.TemplateRootBorder = m.TemplateRootBorder;
                 merged.TemplateRootBorderThickness = m.TemplateRootBorderThickness;
                 merged.HasTemplate = merged.HasTemplate || m.HasTemplate;
+                foreach (var (k, v) in m.ScopedImplicit) merged.ScopedImplicit[k] = v; // 基底的先進，下面讓衍生蓋掉
             }
         }
+        foreach (var (k, v) in rec.ScopedImplicit) merged.ScopedImplicit[k] = v;
         foreach (var (p, v) in rec.Setters) merged.Props[p] = (v, rec.Id);
         foreach (var s in rec.States)
         {
@@ -700,6 +726,18 @@ internal sealed partial class StyleIndex
     {
         var rec = ImplicitRecord(typeName, file, line, side);
         if (rec is null) return null;
+        var merged = MergeChain(rec, new HashSet<string>(), $"Style[implicit {typeName}]", side);
+        merged.States = MergeSameCondition(merged.States);
+        return merged;
+    }
+
+    /// <summary>
+    /// 這條鏈的 <c>&lt;Style.Resources&gt;</c> 裡那個型別的隱含樣式（1.5）；沒有是 null。
+    /// 用在「套了這個 Style 的元素」的**內容**上 —— 呼叫端負責把它帶給子元素，見 <c>Auditor.Walk</c>。
+    /// </summary>
+    public Merged? ScopedImplicitChain(Merged owner, string typeName, ThemeSide? side = null)
+    {
+        if (!owner.ScopedImplicit.TryGetValue(typeName, out var rec)) return null;
         var merged = MergeChain(rec, new HashSet<string>(), $"Style[implicit {typeName}]", side);
         merged.States = MergeSameCondition(merged.States);
         return merged;
