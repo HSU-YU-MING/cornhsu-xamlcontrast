@@ -1,0 +1,443 @@
+# XamlContrast 公開語料摘要 —— 由 scripts/verify-corpus.ps1 -Update 產生，不要手改。
+# 語料釘死（corpus.txt 的 commit）+ 這份凍結 = 紅燈只有一個可能：工具自己變了。
+project: twitchdownloader
+repo: https://github.com/lay295/TwitchDownloader
+commit: 8adfd8e5d31984ae1918b1fa0273f019dc29899f
+tool-commit: 07be1dd+dirty
+frozen: 2026-11-16
+exit: 1
+palette-mode: pair
+palette-degraded: False
+palette-keys: 52
+single-theme: False
+files: 14
+pairs: 413
+coverage: 100
+unresolved: 0
+skipped: 0
+dead-foreground: 0
+disabled-exempt: 0
+converter-pairs: 0
+ui-component-pairs: 0
+parse-errors: 0
+suppressed: 0
+state-colors: 0
+fail: 54
+warn: 20
+ok: 333
+decorative: 6
+# F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
+F  decorative  TwitchDownloaderWPF/PageChatDownload.xaml:159  ProgressBar  {DynamicResource ProgressBarForeground} on {StatusBarElement}  3.30/3.96  
+F  decorative  TwitchDownloaderWPF/PageChatRender.xaml:289  ProgressBar  {DynamicResource ProgressBarForeground} on {StatusBarElement}  3.30/3.96  
+F  decorative  TwitchDownloaderWPF/PageChatUpdate.xaml:159  ProgressBar  {DynamicResource ProgressBarForeground} on {StatusBarElement}  3.30/3.96  
+F  decorative  TwitchDownloaderWPF/PageClipDownload.xaml:114  ProgressBar  {DynamicResource ProgressBarForeground} on {StatusBarElement}  3.30/3.96  
+F  decorative  TwitchDownloaderWPF/PageQueue.xaml:91  ProgressBar  {DynamicResource ProgressBarForeground} on {AppElementInnerBackground}  2.11/3.01  
+F  decorative  TwitchDownloaderWPF/PageVodDownload.xaml:140  ProgressBar  {DynamicResource ProgressBarForeground} on {StatusBarElement}  3.30/3.96  
+F  fail  TwitchDownloaderWPF/PageChatDownload.xaml:123  SplitButton  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageChatDownload.xaml:130  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageChatDownload.xaml:148  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageChatDownload.xaml:64  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageChatRender.xaml:126  ColorPicker  {DynamicResource AppText} on #FFFFFF  1.00/16.10  dark-fails
+F  fail  TwitchDownloaderWPF/PageChatRender.xaml:211  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageChatRender.xaml:247  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageChatRender.xaml:250  SplitButton  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageChatRender.xaml:258  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageChatRender.xaml:259  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageChatRender.xaml:277  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageChatRender.xaml:66  ColorPicker  {DynamicResource AppText} on #FFFFFF  1.00/16.10  dark-fails
+F  fail  TwitchDownloaderWPF/PageChatRender.xaml:67  ColorPicker  {DynamicResource AppText} on #FFFFFF  1.00/16.10  dark-fails
+F  fail  TwitchDownloaderWPF/PageChatRender.xaml:68  ColorPicker  {DynamicResource AppText} on #FFFFFF  1.00/16.10  dark-fails
+F  fail  TwitchDownloaderWPF/PageChatUpdate.xaml:123  SplitButton  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageChatUpdate.xaml:130  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageChatUpdate.xaml:148  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageChatUpdate.xaml:64  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageClipDownload.xaml:103  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageClipDownload.xaml:63  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageClipDownload.xaml:78  SplitButton  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageClipDownload.xaml:85  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageQueue.xaml:100  SvgAwesome  {DynamicResource AppTextDisabled} on {AppElementBackground}  3.72/2.43  both-low
+F  fail  TwitchDownloaderWPF/PageQueue.xaml:103  SvgAwesome  {DynamicResource AppTextDisabled} on {AppElementBackground}  3.72/2.43  both-low
+F  fail  TwitchDownloaderWPF/PageQueue.xaml:137  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageQueue.xaml:138  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageQueue.xaml:139  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageQueue.xaml:88  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageQueue.xaml:89  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageQueue.xaml:90  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageQueue.xaml:97  SvgAwesome  {DynamicResource AppTextDisabled} on {AppElementBackground}  3.72/2.43  both-low
+F  fail  TwitchDownloaderWPF/PageVodDownload.xaml:104  SplitButton  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageVodDownload.xaml:111  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageVodDownload.xaml:129  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/PageVodDownload.xaml:65  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowMassDownload.xaml:110  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowMassDownload.xaml:112  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowMassDownload.xaml:113  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowMassDownload.xaml:114  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowMassDownload.xaml:43  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowOldVideoCacheManager.xaml:73  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowOldVideoCacheManager.xaml:74  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowQueueOptions.xaml:34  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowQueueOptions.xaml:38  TextBlock  {DynamicResource AppTextDisabled} on {AppBackground}  3.63/2.43  both-low
+F  fail  TwitchDownloaderWPF/WindowQueueOptions.xaml:57  TextBlock  {DynamicResource AppTextDisabled} on {AppBackground}  3.63/2.43  both-low
+F  fail  TwitchDownloaderWPF/WindowQueueOptions.xaml:63  TextBlock  {DynamicResource AppTextDisabled} on {AppBackground}  3.63/2.43  both-low
+F  fail  TwitchDownloaderWPF/WindowQueueOptions.xaml:76  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowRangeSelect.xaml:27  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowSettings.xaml:198  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowSettings.xaml:200  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowSettings.xaml:201  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowSettings.xaml:38  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowSettings.xaml:39  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  fail  TwitchDownloaderWPF/WindowUrlList.xaml:28  Button  {DynamicResource ActionButtonText} on {ActionButtonBackground}  2.30/2.30  both-low
+F  ok  TwitchDownloaderWPF/MainWindow.xaml:29  Button  {DynamicResource BigButtonText} on {BigButtonBackground}  5.19/4.59  
+F  ok  TwitchDownloaderWPF/MainWindow.xaml:32  Button  {DynamicResource BigButtonText} on {BigButtonBackground}  5.19/4.59  
+F  ok  TwitchDownloaderWPF/MainWindow.xaml:35  Button  {DynamicResource BigButtonText} on {BigButtonBackground}  5.19/4.59  
+F  ok  TwitchDownloaderWPF/MainWindow.xaml:38  Button  {DynamicResource BigButtonText} on {BigButtonBackground}  5.19/4.59  
+F  ok  TwitchDownloaderWPF/MainWindow.xaml:41  Button  {DynamicResource BigButtonText} on {BigButtonBackground}  5.19/4.59  
+F  ok  TwitchDownloaderWPF/MainWindow.xaml:44  Button  {DynamicResource BigButtonText} on {BigButtonBackground}  5.19/4.59  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:100  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:101  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:105  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:106  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:107  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:108  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:114  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:115  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:116  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:119  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:135  Button  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:136  Button  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:140  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:141  RichTextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:156  TextBlock  {DynamicResource StatusBarText} on {StatusBarBackground}  12.21/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:48  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:49  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:52  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:53  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:56  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:58  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:62  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:63  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:68  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:69  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:70  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:71  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:72  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:74  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:75  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:77  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:80  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:82  RadioButton  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:83  RadioButton  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:84  RadioButton  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:87  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:88  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:91  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:92  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:93  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:98  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatDownload.xaml:99  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:100  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:101  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:102  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:112  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:113  CheckComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:114  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:115  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:116  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:117  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:118  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:125  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:129  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:130  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:131  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:132  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:138  TabItem  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:143  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:144  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:145  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:146  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:147  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:148  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:149  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:152  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:153  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:154  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:155  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:156  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:157  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:158  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:161  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:162  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:163  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:164  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:165  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:166  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:169  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:170  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:171  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:172  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:173  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:174  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:179  TabItem  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:184  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:185  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:186  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:187  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:188  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:191  ComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:192  ComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:193  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:200  TabItem  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:204  SvgAwesome  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:205  TextBlock  {DynamicResource AppInnerText} on {AppBackground}  11.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:207  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:208  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:209  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:210  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:212  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:245  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:246  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:264  Button  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:265  Button  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:269  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:270  RichTextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:286  TextBlock  {DynamicResource StatusBarText} on {StatusBarBackground}  12.21/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:44  TabItem  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:49  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:50  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:53  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:54  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:57  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:58  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:59  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:60  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:61  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:64  ComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:65  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:73  TabItem  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:78  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:79  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:80  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:81  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:82  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:83  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:84  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:85  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:92  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:98  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatRender.xaml:99  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:100  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:101  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:105  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:106  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:107  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:108  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:115  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:116  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:117  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:135  Button  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:136  Button  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:140  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:141  RichTextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:156  TextBlock  {DynamicResource StatusBarText} on {StatusBarBackground}  12.21/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:48  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:49  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:52  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:53  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:56  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:58  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:62  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:63  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:68  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:69  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:70  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:71  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:72  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:74  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:75  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:76  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:80  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:82  RadioButton  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:83  RadioButton  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:84  RadioButton  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:87  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:88  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:91  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:92  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:93  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:98  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageChatUpdate.xaml:99  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:111  TextBlock  {DynamicResource StatusBarText} on {StatusBarBackground}  12.21/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:47  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:48  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:51  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:52  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:55  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:57  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:61  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:62  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:67  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:68  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:69  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:72  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:73  ComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:90  Button  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:91  Button  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:95  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageClipDownload.xaml:96  RichTextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:115  Button  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:116  Button  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:119  Divider  {DynamicResource AppDividerText} on {AppBackground}  11.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:121  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:122  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:125  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:126  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:129  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:130  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:133  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:134  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:136  Divider  {DynamicResource AppDividerText} on {AppBackground}  11.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:44  MenuItem  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:46  SvgAwesome  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:49  MenuItem  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:51  SvgAwesome  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:54  MenuItem  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:56  SvgAwesome  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:59  MenuItem  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:61  SvgAwesome  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:64  MenuItem  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:66  SvgAwesome  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:69  MenuItem  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:71  SvgAwesome  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:84  TextBlock  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:85  TextBlock  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageQueue.xaml:86  TextBlock  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:116  Button  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:117  Button  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:121  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:122  RichTextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:137  TextBlock  {DynamicResource StatusBarText} on {StatusBarBackground}  12.21/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:49  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:50  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:53  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:54  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:57  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:59  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:63  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:64  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:69  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:70  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:71  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:72  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:73  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:74  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:77  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:78  ComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:81  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:82  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:86  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:87  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:88  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:89  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:93  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:94  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:95  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:96  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:98  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/PageVodDownload.xaml:99  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:104  Label  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:25  Label  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:26  ComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:32  ComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:42  ComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:46  Label  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:47  ComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:66  MenuItem  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:68  SvgAwesome  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:71  MenuItem  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:73  SvgAwesome  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:76  MenuItem  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:78  SvgAwesome  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:85  TextBlock  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:94  TextBlock  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowMassDownload.xaml:95  TextBlock  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowOldVideoCacheManager.xaml:27  DataGrid  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowOldVideoCacheManager.xaml:30  MenuItem  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowOldVideoCacheManager.xaml:32  SvgAwesome  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowOldVideoCacheManager.xaml:35  MenuItem  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowOldVideoCacheManager.xaml:37  SvgAwesome  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowOldVideoCacheManager.xaml:50  MenuItem  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowOldVideoCacheManager.xaml:52  SvgAwesome  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowOldVideoCacheManager.xaml:67  DataGridTextColumn  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowOldVideoCacheManager.xaml:68  DataGridTextColumn  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowOldVideoCacheManager.xaml:69  DataGridTextColumn  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowOldVideoCacheManager.xaml:75  Label  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:32  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:33  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:36  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:39  ComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:53  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:54  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:58  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:59  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:60  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:64  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:65  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:67  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:69  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:70  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:71  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:73  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowQueueOptions.xaml:75  CheckBox  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowRangeSelect.xaml:24  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowRangeSelect.xaml:25  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:104  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:106  NumericUpDown  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:107  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:110  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:111  CheckComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:113  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:116  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:117  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:118  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:121  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:122  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:123  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:126  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:37  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:40  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:43  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:47  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:51  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:52  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:53  RadioButton  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:56  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:61  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:62  ComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:65  SvgAwesome  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:66  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:67  ComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:70  TextBlock  {DynamicResource AppText} on {AppBackground}  14.92/16.10  
+F  ok  TwitchDownloaderWPF/WindowSettings.xaml:80  ComboBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowUrlList.xaml:26  Label  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  ok  TwitchDownloaderWPF/WindowUrlList.xaml:27  TextBox  {DynamicResource AppText} on {AppElementBackground}  15.31/16.10  
+F  warn  TwitchDownloaderWPF/PageChatDownload.xaml:74  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/PageChatDownload.xaml:75  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/PageChatRender.xaml:102  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/PageChatRender.xaml:114  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/PageChatRender.xaml:116  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/PageChatRender.xaml:118  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/PageChatRender.xaml:234  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/PageChatRender.xaml:83  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/PageChatRender.xaml:84  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/PageChatUpdate.xaml:74  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/PageChatUpdate.xaml:75  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/PageChatUpdate.xaml:76  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/PageVodDownload.xaml:71  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/PageVodDownload.xaml:74  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/WindowSettings.xaml:104  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/WindowSettings.xaml:187  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/WindowSettings.xaml:190  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/WindowSettings.xaml:61  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/WindowSettings.xaml:66  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+F  warn  TwitchDownloaderWPF/WindowSettings.xaml:72  Hyperlink  {DynamicResource AppHyperlink} on {AppBackground}  4.06/5.57  dark-fails
+# U  原因  檔案:行  值

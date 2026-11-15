@@ -1,0 +1,581 @@
+# XamlContrast 公開語料摘要 —— 由 scripts/verify-corpus.ps1 -Update 產生，不要手改。
+# 語料釘死（corpus.txt 的 commit）+ 這份凍結 = 紅燈只有一個可能：工具自己變了。
+project: wpfui
+repo: https://github.com/lepoco/wpfui
+commit: ffebacd61058170cf63864b7d5aa730cffff848a
+tool-commit: 07be1dd+dirty
+frozen: 2026-11-16
+exit: 3
+palette-mode: pair
+palette-degraded: False
+palette-keys: 381
+single-theme: False
+files: 219
+pairs: 94
+coverage: 17.4
+unresolved: 446
+skipped: 14
+dead-foreground: 9
+disabled-exempt: 28
+converter-pairs: 0
+ui-component-pairs: 0
+parse-errors: 0
+suppressed: 0
+state-colors: 18
+fail: 16
+warn: 15
+ok: 61
+decorative: 2
+unresolved-by.bound-or-gradient: 48
+unresolved-by.in-style-template: 21
+unresolved-by.no-ancestor-background: 141
+unresolved-by.translucent-uncomposited: 229
+unresolved-by.unknown-palette-key: 7
+unknown-keys.AccentButtonBackground: 1
+unknown-keys.HyperlinkButtonBackground: 1
+unknown-keys.InfoBadgeInformationSeverityBackgroundBrush: 2
+unknown-keys.RadioButtonOuterEllipseCheckedStrokePointerOver: 1
+unknown-keys.ToggleSwitchFillOnPointerOver: 1
+unknown-keys.ToggleSwitchFillOnPressed: 1
+# F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
+F  decorative  src/Wpf.Ui.Gallery/Views/Windows/EditorWindow.xaml:226  ProgressBar  {DynamicResource ProgressBarForeground} on {ProgressBarBackground} over {ControlFillColorDefault} over {WindowBackground}  2.14/1.69  
+F  decorative  src/Wpf.Ui/Controls/Slider/Slider.xaml:24  Style[UiSliderThumbStyle]/base  {DynamicResource SliderThumbBackground} on {SliderOuterThumbBackground}  1.69/5.67  
+F  fail  src/Wpf.Ui.Gallery/Views/Windows/MonacoWindow.xaml:118  MenuItem  {DynamicResource PaletteGreenBrush} on {WindowBackground}  5.86/2.66  light-fails
+F  fail  src/Wpf.Ui.Gallery/Views/Windows/MonacoWindow.xaml:128  MenuItem  {DynamicResource PaletteLightBlueBrush} on {WindowBackground}  6.20/2.52  light-fails
+F  fail  src/Wpf.Ui.Gallery/Views/Windows/SandboxWindow.xaml:81  MenuItem  {DynamicResource PaletteGreenBrush} on {WindowBackground}  5.86/2.66  light-fails
+F  fail  src/Wpf.Ui.Gallery/Views/Windows/SandboxWindow.xaml:87  MenuItem  {DynamicResource PaletteLightBlueBrush} on {WindowBackground}  6.20/2.52  light-fails
+F  fail  src/Wpf.Ui/Controls/Badge/Badge.xaml:13  Style[{x:Type controls:Badge}]/trigger  {DynamicResource BadgeForeground} on {PaletteGreenBrush}  7.56/2.78  light-fails
+F  fail  src/Wpf.Ui/Controls/Badge/Badge.xaml:13  Style[{x:Type controls:Badge}]/trigger  {DynamicResource BadgeForeground} on {PaletteLightBlueBrush}  7.99/2.63  light-fails
+F  fail  src/Wpf.Ui/Controls/Badge/Badge.xaml:13  Style[{x:Type controls:Badge}]/trigger  {DynamicResource BadgeForeground} on {PaletteOrangeBrush}  9.74/2.16  light-fails
+F  fail  src/Wpf.Ui/Controls/Button/Button.xaml:214  Style[DefaultUiButtonStyle]/trigger  {DynamicResource ButtonForeground} on {PaletteGreenColor}  2.78/6.82  dark-fails
+F  fail  src/Wpf.Ui/Controls/Button/Button.xaml:214  Style[DefaultUiButtonStyle]/trigger  {DynamicResource ButtonForeground} on {PaletteOrangeColor}  2.16/8.69  dark-fails
+F  fail  src/Wpf.Ui/Controls/Button/Button.xaml:214  Style[DefaultUiButtonStyle]/trigger  {DynamicResource TextFillColorLightPrimaryBrush} on {PaletteLightBlueColor}  2.63/2.63  both-low
+F  fail  src/Wpf.Ui/Controls/Snackbar/Snackbar.xaml:13  Style[{x:Type controls:Snackbar}]/trigger  #FFFFFF on {PaletteGreenColor}  2.78/2.78  both-low
+F  fail  src/Wpf.Ui/Controls/Snackbar/Snackbar.xaml:13  Style[{x:Type controls:Snackbar}]/trigger  #FFFFFF on {PaletteLightBlueColor}  2.63/2.63  both-low
+F  fail  src/Wpf.Ui/Controls/Snackbar/Snackbar.xaml:13  Style[{x:Type controls:Snackbar}]/trigger  #FFFFFF on {PaletteOrangeColor}  2.16/2.16  both-low
+F  fail  src/Wpf.Ui/Controls/Snackbar/Snackbar.xaml:13  Style[{x:Type controls:Snackbar}]/trigger  {DynamicResource TextOnAccentFillColorPrimary} on {SystemAccentColorSecondary}  2.10/9.98  dark-fails
+F  fail  src/Wpf.Ui/Controls/ToggleButton/ToggleButton.xaml:17  Style[DefaultToggleButtonStyle]/trigger  {DynamicResource ToggleButtonForeground} on {ToggleButtonBackgroundCheckedPressed}  15.58/1.32  light-fails
+F  fail  src/Wpf.Ui/Controls/ToggleButton/ToggleButton.xaml:17  Style[DefaultToggleButtonStyle]/trigger  {DynamicResource ToggleButtonForeground} on {ToggleButtonForegroundCheckedPointerOver}  9.98/2.03  light-fails
+F  ok  samples/Wpf.Ui.Demo.Console/Views/MainView.xaml:31  NavigationView  {DynamicResource NavigationViewItemForeground} on {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Console/Views/MainView.xaml:45  NavigationViewItem  {DynamicResource NavigationViewItemForeground} on {NavigationViewItemBackground} over {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Console/Views/MainView.xaml:54  NavigationViewItem  {DynamicResource NavigationViewItemForeground} on {NavigationViewItemBackground} over {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Console/Views/MainView.xaml:65  NavigationViewItem  {DynamicResource NavigationViewItemForeground} on {NavigationViewItemBackground} over {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Console/Views/MainView.xaml:76  TitleBar  {DynamicResource ButtonForeground} on {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Console/Views/SimpleView.xaml:17  TitleBar  {DynamicResource ButtonForeground} on {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Console/Views/SimpleView.xaml:19  CardAction  {DynamicResource CardForeground} on {CardBackground} over {WindowBackground}  14.16/17.08  
+F  ok  samples/Wpf.Ui.Demo.Mvvm/Views/MainWindow.xaml:1  FluentWindow  {DynamicResource TextFillColorPrimaryBrush} on {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Mvvm/Views/MainWindow.xaml:38  NavigationView  {DynamicResource NavigationViewItemForeground} on {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Mvvm/Views/MainWindow.xaml:57  TitleBar  {DynamicResource ButtonForeground} on {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.SetResources.Simple/MainWindow.xaml:1  FluentWindow  {DynamicResource TextFillColorPrimaryBrush} on {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.SetResources.Simple/MainWindow.xaml:36  NavigationView  {DynamicResource NavigationViewItemForeground} on {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.SetResources.Simple/MainWindow.xaml:50  NavigationViewItem  {DynamicResource NavigationViewItemForeground} on {NavigationViewItemBackground} over {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.SetResources.Simple/MainWindow.xaml:59  NavigationViewItem  {DynamicResource NavigationViewItemForeground} on {NavigationViewItemBackground} over {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.SetResources.Simple/MainWindow.xaml:68  NavigationViewItem  {DynamicResource NavigationViewItemForeground} on {NavigationViewItemBackground} over {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.SetResources.Simple/MainWindow.xaml:79  NavigationViewItem  {DynamicResource NavigationViewItemForeground} on {NavigationViewItemBackground} over {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.SetResources.Simple/MainWindow.xaml:90  TitleBar  {DynamicResource ButtonForeground} on {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Simple/MainWindow.xaml:1  FluentWindow  {DynamicResource TextFillColorPrimaryBrush} on {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Simple/MainWindow.xaml:37  NavigationView  {DynamicResource NavigationViewItemForeground} on {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Simple/MainWindow.xaml:51  NavigationViewItem  {DynamicResource NavigationViewItemForeground} on {NavigationViewItemBackground} over {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Simple/MainWindow.xaml:60  NavigationViewItem  {DynamicResource NavigationViewItemForeground} on {NavigationViewItemBackground} over {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Simple/MainWindow.xaml:71  NavigationViewItem  {DynamicResource NavigationViewItemForeground} on {NavigationViewItemBackground} over {WindowBackground}  16.29/16.67  
+F  ok  samples/Wpf.Ui.Demo.Simple/MainWindow.xaml:82  TitleBar  {DynamicResource ButtonForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui.Extension.Template.Compact/Views/Windows/MainWindow.xaml:1  FluentWindow  {DynamicResource TextFillColorPrimaryBrush} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui.Extension.Template.Compact/Views/Windows/MainWindow.xaml:33  TitleBar  {DynamicResource ButtonForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui.Extension.Template.Compact/Views/Windows/MainWindow.xaml:43  NavigationView  {DynamicResource NavigationViewItemForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui.Extension.Template.Fluent/Views/Windows/MainWindow.xaml:1  FluentWindow  {DynamicResource TextFillColorPrimaryBrush} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui.Extension.Template.Fluent/Views/Windows/MainWindow.xaml:30  NavigationView  {DynamicResource NavigationViewItemForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui.Extension.Template.Fluent/Views/Windows/MainWindow.xaml:52  TitleBar  {DynamicResource ButtonForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui.Gallery/Controls/TermsOfUseContentDialog.xaml:58  CheckBox  {DynamicResource CheckBoxForeground} on {CheckBoxBackground} over {ContentDialogBackground}  16.86/15.02  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/EditorWindow.xaml:196  StatusBar  {DynamicResource TextFillColorPrimary} on {ControlFillColorDefault} over {WindowBackground}  13.77/17.08  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/EditorWindow.xaml:32  TitleBar  {DynamicResource ButtonForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/MainWindow.xaml:37  NavigationView  {DynamicResource NavigationViewItemForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/MainWindow.xaml:81  TitleBar  {DynamicResource ButtonForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/MonacoWindow.xaml:158  StatusBar  {DynamicResource TextFillColorPrimary} on {ControlFillColorDefault} over {WindowBackground}  13.77/17.08  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/MonacoWindow.xaml:180  SymbolIcon  {DynamicResource TextFillColorSecondaryBrush} on {ControlFillColorDefault} over {WindowBackground}  8.84/6.14  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/MonacoWindow.xaml:183  TextBlock  {DynamicResource TextFillColorSecondaryBrush} on {ControlFillColorDefault} over {WindowBackground}  8.84/6.14  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/MonacoWindow.xaml:186  SymbolIcon  {DynamicResource TextFillColorSecondaryBrush} on {ControlFillColorDefault} over {WindowBackground}  8.84/6.14  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/MonacoWindow.xaml:189  SymbolIcon  {DynamicResource TextFillColorSecondaryBrush} on {ControlFillColorDefault} over {WindowBackground}  8.84/6.14  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/MonacoWindow.xaml:192  TextBlock  {DynamicResource TextFillColorSecondaryBrush} on {ControlFillColorDefault} over {WindowBackground}  8.84/6.14  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/MonacoWindow.xaml:195  TextBlock  {DynamicResource TextFillColorSecondaryBrush} on {ControlFillColorDefault} over {WindowBackground}  8.84/6.14  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/MonacoWindow.xaml:32  TitleBar  {DynamicResource ButtonForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/SandboxWindow.xaml:102  DropDownButton  {DynamicResource ButtonForeground} on {ButtonBackground} over {WindowBackground}  13.77/17.08  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/SandboxWindow.xaml:124  NavigationView  {DynamicResource NavigationViewItemForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui.Gallery/Views/Windows/SandboxWindow.xaml:25  TitleBar  {DynamicResource ButtonForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui/Controls/ContentDialog/ContentDialog.xaml:13  Style[{x:Type controls:ContentDialog}]/base  {DynamicResource ContentDialogForeground} on {ContentDialogBackground}  16.29/15.68  
+F  ok  src/Wpf.Ui/Controls/ContentDialog/ContentDialog.xaml:13  Style[{x:Type controls:ContentDialog}]/trigger  {DynamicResource ContentDialogForeground} on {ContentDialogBackground}  16.29/15.68  
+F  ok  src/Wpf.Ui/Controls/ContentDialog/ContentDialog.xaml:13  Style[{x:Type controls:ContentDialog}]/trigger  {DynamicResource ContentDialogForeground} on {ContentDialogBackground}  16.29/15.68  
+F  ok  src/Wpf.Ui/Controls/FluentWindow/FluentWindow.xaml:13  Style[DefaultFluentWindowStyle]/base  {DynamicResource WindowForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui/Controls/MessageBox/MessageBox.xaml:16  Style[{x:Type controls:MessageBox}]/base  {DynamicResource MessageBoxForeground} on {MessageBoxBackground}  16.29/15.68  
+F  ok  src/Wpf.Ui/Controls/MessageBox/MessageBox.xaml:16  Style[{x:Type controls:MessageBox}]/trigger  {DynamicResource MessageBoxForeground} on {MessageBoxBackground}  16.29/15.68  
+F  ok  src/Wpf.Ui/Controls/MessageBox/MessageBox.xaml:16  Style[{x:Type controls:MessageBox}]/trigger  {DynamicResource MessageBoxForeground} on {MessageBoxBackground}  16.29/15.68  
+F  ok  src/Wpf.Ui/Controls/MessageBox/MessageBox.xaml:16  Style[{x:Type controls:MessageBox}]/trigger  {DynamicResource MessageBoxForeground} on {MessageBoxBackground}  16.29/15.68  
+F  ok  src/Wpf.Ui/Controls/Snackbar/Snackbar.xaml:13  Style[{x:Type controls:Snackbar}]/base  {DynamicResource SnackBarForeground} on {SnackBarBackground}  13.97/16.53  
+F  ok  src/Wpf.Ui/Controls/Snackbar/Snackbar.xaml:13  Style[{x:Type controls:Snackbar}]/trigger  #E4000000 on #F3F3F3  15.68/15.68  
+F  ok  src/Wpf.Ui/Controls/Snackbar/Snackbar.xaml:13  Style[{x:Type controls:Snackbar}]/trigger  #FFFFFF on #2E2E2E  13.58/13.58  
+F  ok  src/Wpf.Ui/Controls/Snackbar/Snackbar.xaml:13  Style[{x:Type controls:Snackbar}]/trigger  {DynamicResource SnackBarForeground} on {SnackBarBackground}  13.97/16.53  
+F  ok  src/Wpf.Ui/Controls/ToolTip/ToolTip.xaml:13  Style[DefaultToolTipStyle]/base  {DynamicResource ToolTipForeground} on {ToolTipBackground}  13.97/16.53  
+F  ok  src/Wpf.Ui/Controls/Window/Window.xaml:18  Style[DefaultWindowStyle]/base  {DynamicResource WindowForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui/Controls/Window/Window.xaml:18  Style[DefaultWindowStyle]/trigger  {DynamicResource WindowForeground} on {WindowBackground}  16.29/16.67  
+F  ok  src/Wpf.Ui/Controls/Window/Window.xaml:18  Style[DefaultWindowStyle]/trigger  {DynamicResource WindowForeground} on {WindowBackground}  16.29/16.67  
+F  warn  src/Wpf.Ui.Gallery/Controls/TermsOfUseContentDialog.xaml:49  TextBlock  Red on {ContentDialogBackground}  4.07/3.60  both-low
+F  warn  src/Wpf.Ui.Gallery/Views/Windows/MonacoWindow.xaml:112  MenuItem  {DynamicResource PaletteDeepOrangeBrush} on {WindowBackground}  5.15/3.03  light-fails
+F  warn  src/Wpf.Ui.Gallery/Views/Windows/MonacoWindow.xaml:123  MenuItem  {DynamicResource PaletteRedBrush} on {WindowBackground}  4.42/3.53  both-low
+F  warn  src/Wpf.Ui.Gallery/Views/Windows/SandboxWindow.xaml:78  MenuItem  {DynamicResource PaletteDeepOrangeBrush} on {WindowBackground}  5.15/3.03  light-fails
+F  warn  src/Wpf.Ui.Gallery/Views/Windows/SandboxWindow.xaml:84  MenuItem  {DynamicResource PaletteRedBrush} on {WindowBackground}  4.42/3.53  both-low
+F  warn  src/Wpf.Ui/Controls/Badge/Badge.xaml:13  Style[{x:Type controls:Badge}]/base  {DynamicResource BadgeForeground} on {BadgeBackground}  3.70/5.67  dark-fails
+F  warn  src/Wpf.Ui/Controls/Badge/Badge.xaml:13  Style[{x:Type controls:Badge}]/trigger  {DynamicResource BadgeForeground} on {BadgeBackground}  3.70/5.67  dark-fails
+F  warn  src/Wpf.Ui/Controls/Badge/Badge.xaml:13  Style[{x:Type controls:Badge}]/trigger  {DynamicResource BadgeForeground} on {PaletteRedBrush}  5.70/3.68  light-fails
+F  warn  src/Wpf.Ui/Controls/Button/Button.xaml:214  Style[DefaultUiButtonStyle]/trigger  {DynamicResource ButtonForeground} on {PaletteRedColor}  3.68/5.30  dark-fails
+F  warn  src/Wpf.Ui/Controls/ListBox/ListBoxItem.xaml:15  Style[DefaultListBoxItemStyle]/base  {DynamicResource ListBoxItemForeground} on {ListBoxItemSelectedBackgroundThemeBrush}  5.67/3.50  light-fails
+F  warn  src/Wpf.Ui/Controls/ListBox/ListBoxItem.xaml:15  Style[DefaultListBoxItemStyle]/trigger  {DynamicResource ListBoxItemSelectedForegroundThemeBrush} on {ListBoxItemSelectedBackgroundThemeBrush}  3.70/5.67  dark-fails
+F  warn  src/Wpf.Ui/Controls/RadioButton/RadioButton.xaml:25  Style[DefaultRadioButtonStyle]/base  {DynamicResource RadioButtonForeground} on {RadioButtonOuterEllipseCheckedStroke}  5.67/3.50  light-fails
+F  warn  src/Wpf.Ui/Controls/Snackbar/Snackbar.xaml:13  Style[{x:Type controls:Snackbar}]/trigger  #FFFFFF on {PaletteRedColor}  3.68/3.68  both-low
+F  warn  src/Wpf.Ui/Controls/ToggleButton/ToggleButton.xaml:17  Style[DefaultToggleButtonStyle]/trigger  {DynamicResource ToggleButtonForeground} on {ToggleButtonBackgroundChecked}  5.67/3.50  light-fails
+F  warn  src/Wpf.Ui/Controls/ToggleSwitch/ToggleSwitch.xaml:24  Style[DefaultUiToggleSwitchStyle]/base  {DynamicResource ToggleSwitchContentForeground} on {ToggleSwitchFillOn}  5.67/3.50  light-fails
+# U  原因  檔案:行  值
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/BasicInputPage.xaml:29  <LinearGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Collections/CollectionsPage.xaml:28  <LinearGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Collections/ListViewPage.xaml:80  {ui:ThemeResource ControlStrongStrokeColorDefaultBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Collections/ListViewPage.xaml:95  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:50  <RadialGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:54  <RadialGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:58  <RadialGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:63  <RadialGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/DateAndTime/DateAndTimePage.xaml:28  <LinearGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/ColorsPage.xaml:145  {ui:ThemeResource AccentTextFillColorPrimaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:142  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:151  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:160  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:169  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/DialogsAndFlyoutsPage.xaml:29  <LinearGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Layout/ExpanderPage.xaml:63  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Layout/LayoutPage.xaml:29  <LinearGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Media/MediaPage.xaml:29  <LinearGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Media/WebBrowserPage.xaml:29  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationPage.xaml:29  <LinearGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:134  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:149  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:166  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:234  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:248  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:261  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:322  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:336  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:349  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:59  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:72  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:85  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/OpSystem/OpSystemPage.xaml:27  <LinearGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/SettingsPage.xaml:35  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/SettingsPage.xaml:72  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/SettingsPage.xaml:77  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/SettingsPage.xaml:94  {ui:ThemeResource TextFillColorSecondaryBrush}
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/StatusAndInfoPage.xaml:29  <LinearGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui.Gallery/Views/Pages/Text/TextPage.xaml:27  <LinearGradientBrush>
+U  bound-or-gradient  src/Wpf.Ui/Controls/Button/Button.xaml:214  {Binding MouseOverBackground, RelativeSource={RelativeSource TemplatedParent}}
+U  bound-or-gradient  src/Wpf.Ui/Controls/Button/Button.xaml:214  {Binding PressedForeground, RelativeSource={RelativeSource TemplatedParent}}
+U  bound-or-gradient  src/Wpf.Ui/Controls/CardExpander/CardExpander.xaml:50  {TemplateBinding Foreground}
+U  bound-or-gradient  src/Wpf.Ui/Controls/Expander/Expander.xaml:46  {TemplateBinding Foreground}
+U  bound-or-gradient  src/Wpf.Ui/Controls/ListView/ListViewItem.xaml:23  {TemplateBinding Background}
+U  bound-or-gradient  src/Wpf.Ui/Controls/ListView/ListViewItem.xaml:66  {TemplateBinding Background}
+U  bound-or-gradient  src/Wpf.Ui/Controls/Menu/MenuItem.xaml:788  {TemplateBinding Background}
+U  bound-or-gradient  src/Wpf.Ui/Controls/TextBox/TextBox.xaml:167  {TemplateBinding Background}
+U  bound-or-gradient  src/Wpf.Ui/Controls/TextBox/TextBox.xaml:178  {TemplateBinding Background}
+U  in-style-template  src/Wpf.Ui.Gallery/Controls/ControlExample.xaml:25  {DynamicResource TextFillColorPrimaryBrush}
+U  in-style-template  src/Wpf.Ui.Gallery/Controls/ControlExample.xaml:50  {DynamicResource TextFillColorPrimaryBrush}
+U  in-style-template  src/Wpf.Ui.Gallery/Controls/ControlExample.xaml:71  {DynamicResource TextFillColorPrimaryBrush}
+U  in-style-template  src/Wpf.Ui.Gallery/Controls/GalleryNavigationPresenter.xaml:40  {DynamicResource TextFillColorPrimaryBrush}
+U  in-style-template  src/Wpf.Ui.Gallery/Controls/GalleryNavigationPresenter.xaml:46  {DynamicResource TextFillColorSecondaryBrush}
+U  in-style-template  src/Wpf.Ui/Controls/Calendar/Calendar.xaml:359  {DynamicResource CalendarViewForeground}
+U  in-style-template  src/Wpf.Ui/Controls/Calendar/Calendar.xaml:376  {DynamicResource CalendarViewNavigationButtonForeground}
+U  in-style-template  src/Wpf.Ui/Controls/Calendar/Calendar.xaml:410  {DynamicResource CalendarViewNavigationButtonForeground}
+U  in-style-template  src/Wpf.Ui/Controls/Calendar/Calendar.xaml:534  {DynamicResource CalendarViewForeground}
+U  in-style-template  src/Wpf.Ui/Controls/CardColor/CardColor.xaml:43  {DynamicResource CardForegroundPressed}
+U  in-style-template  src/Wpf.Ui/Controls/CheckBox/CheckBox.xaml:84  {DynamicResource CheckBoxCheckGlyphForeground}
+U  in-style-template  src/Wpf.Ui/Controls/ComboBox/ComboBox.xaml:225  {DynamicResource ComboBoxDropDownGlyphForeground}
+U  in-style-template  src/Wpf.Ui/Controls/InfoBadge/InfoBadge.xaml:152  {DynamicResource InfoBadgeValueForeground}
+U  in-style-template  src/Wpf.Ui/Controls/NumberBox/NumberBox.xaml:110  {DynamicResource TextControlButtonForeground}
+U  in-style-template  src/Wpf.Ui/Controls/NumberBox/NumberBox.xaml:128  {DynamicResource TextControlButtonForeground}
+U  in-style-template  src/Wpf.Ui/Controls/NumberBox/NumberBox.xaml:166  {DynamicResource TextControlButtonForeground}
+U  in-style-template  src/Wpf.Ui/Controls/NumberBox/NumberBox.xaml:183  {DynamicResource TextControlButtonForeground}
+U  in-style-template  src/Wpf.Ui/Controls/NumberBox/NumberBox.xaml:96  {DynamicResource TextControlPlaceholderForeground}
+U  in-style-template  src/Wpf.Ui/Controls/PasswordBox/PasswordBox.xaml:195  {DynamicResource TextControlPlaceholderForeground}
+U  in-style-template  src/Wpf.Ui/Controls/PasswordBox/PasswordBox.xaml:205  {DynamicResource TextControlButtonForeground}
+U  in-style-template  src/Wpf.Ui/Controls/PasswordBox/PasswordBox.xaml:231  {DynamicResource TextControlButtonForeground}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.Console/Views/Pages/DashboardPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.Console/Views/Pages/DataPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.Console/Views/Pages/DataPage.xaml:20  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.Console/Views/Pages/SettingsPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.Mvvm/Views/Pages/DashboardPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.Mvvm/Views/Pages/DataPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.Mvvm/Views/Pages/DataPage.xaml:22  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.Mvvm/Views/Pages/SettingsPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.SetResources.Simple/Views/Pages/DashboardPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.SetResources.Simple/Views/Pages/DataPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.SetResources.Simple/Views/Pages/DataPage.xaml:19  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.SetResources.Simple/Views/Pages/ExpanderPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.SetResources.Simple/Views/Pages/SettingsPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.Simple/Views/Pages/DashboardPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.Simple/Views/Pages/DataPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.Simple/Views/Pages/DataPage.xaml:20  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  samples/Wpf.Ui.Demo.Simple/Views/Pages/SettingsPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Extension.Template.Compact/Views/Pages/DashboardPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Extension.Template.Compact/Views/Pages/DataPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Extension.Template.Compact/Views/Pages/DataPage.xaml:22  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Extension.Template.Compact/Views/Pages/SettingsPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Extension.Template.Fluent/Views/Pages/DashboardPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Extension.Template.Fluent/Views/Pages/DataPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Extension.Template.Fluent/Views/Pages/DataPage.xaml:22  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Extension.Template.Fluent/Views/Pages/SettingsPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/AllControlsPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/AnchorPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/BasicInputPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/BasicInputPage.xaml:53  {DynamicResource TextControlPlaceholderForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ButtonPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ButtonPage.xaml:123  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ButtonPage.xaml:124  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/CheckBoxPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ComboBoxPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/DropDownButtonPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/RadioButtonPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/RatingPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/RatingPage.xaml:41  {DynamicResource LabelForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/RatingPage.xaml:73  {DynamicResource LabelForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/SliderPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/SplitButtonPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ThumbRatePage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ThumbRatePage.xaml:32  {DynamicResource ThumbRateForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ThumbRatePage.xaml:37  {DynamicResource LabelForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ToggleButtonPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ToggleSwitchPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Collections/CollectionsPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Collections/CollectionsPage.xaml:52  {DynamicResource TextControlPlaceholderForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Collections/DataGridPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Collections/ListBoxPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Collections/ListViewPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Collections/ListViewPage.xaml:110  {DynamicResource LabelForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Collections/TreeListPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Collections/TreeViewPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Collections/TreeViewPage.xaml:29  {DynamicResource TreeViewItemForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DateAndTime/CalendarDatePickerPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DateAndTime/CalendarPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DateAndTime/DateAndTimePage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DateAndTime/DateAndTimePage.xaml:52  {DynamicResource TextControlPlaceholderForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DateAndTime/DatePickerPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DateAndTime/TimePickerPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/ColorsPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/TypographyPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/ContentDialogPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/DialogsAndFlyoutsPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/DialogsAndFlyoutsPage.xaml:53  {DynamicResource TextControlPlaceholderForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/FlyoutPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/MessageBoxPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/SnackbarPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/SnackbarPage.xaml:60  {DynamicResource LabelForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardActionPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardControlPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Layout/ExpanderPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Layout/LayoutPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Layout/LayoutPage.xaml:53  {DynamicResource TextControlPlaceholderForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Media/CanvasPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Media/CanvasPage.xaml:33  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Media/CanvasPage.xaml:34  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Media/CanvasPage.xaml:35  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Media/CanvasPage.xaml:36  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Media/CanvasPage.xaml:37  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Media/CanvasPage.xaml:38  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Media/ImagePage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Media/MediaPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Media/MediaPage.xaml:53  {DynamicResource TextControlPlaceholderForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Media/WebBrowserPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Media/WebViewPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Navigation/BreadcrumbBarPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Navigation/MenuPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Navigation/MultilevelNavigationPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationPage.xaml:53  {DynamicResource TextControlPlaceholderForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:107  {DynamicResource NavigationViewItemForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:190  {DynamicResource NavigationViewItemForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:28  {DynamicResource NavigationViewItemForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:283  {DynamicResource NavigationViewItemForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Navigation/TabControlPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Navigation/TabViewPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/OpSystem/ClipboardPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/OpSystem/FilePickerPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/OpSystem/OpSystemPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/OpSystem/OpSystemPage.xaml:51  {DynamicResource TextControlPlaceholderForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:28  {DynamicResource NavigationViewItemForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/ProgressBarPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/ProgressRingPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/StatusAndInfoPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/StatusAndInfoPage.xaml:53  {DynamicResource TextControlPlaceholderForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/ToolTipPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Text/AutoSuggestBoxPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Text/LabelPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Text/LabelPage.xaml:26  {DynamicResource LabelForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Text/LabelPage.xaml:38  {DynamicResource LabelForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Text/NumberBoxPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Text/NumberBoxPage.xaml:54  {DynamicResource LabelForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Text/PasswordBoxPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Text/RichTextBoxPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Text/TextBlockPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Text/TextBlockPage.xaml:50  DarkGray
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Text/TextBoxPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Text/TextPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Text/TextPage.xaml:51  {DynamicResource TextControlPlaceholderForeground}
+U  no-ancestor-background  src/Wpf.Ui.Gallery/Views/Pages/Windows/WindowsPage.xaml:1  {DynamicResource TextFillColorPrimaryBrush}
+U  no-ancestor-background  src/Wpf.Ui/Controls/GridView/GridViewHeaderRowIndicator.xaml:15  {DynamicResource ListViewItemPillFillBrush}
+U  no-ancestor-background  src/Wpf.Ui/Controls/ListView/ListView.xaml:104  #FFFFFFFF
+U  no-ancestor-background  src/Wpf.Ui/Controls/ListView/ListView.xaml:109  #FFFFFFFF
+U  no-ancestor-background  src/Wpf.Ui/Controls/Menu/MenuItem.xaml:295  {DynamicResource TextFillColorDisabledBrush}
+U  no-ancestor-background  src/Wpf.Ui/Controls/NavigationView/NavigationViewBottom.xaml:56  {DynamicResource ButtonForeground}
+U  no-ancestor-background  src/Wpf.Ui/Controls/NavigationView/NavigationViewCompact.xaml:313  {DynamicResource ButtonForeground}
+U  no-ancestor-background  src/Wpf.Ui/Controls/NavigationView/NavigationViewCompact.xaml:328  {DynamicResource ButtonForeground}
+U  no-ancestor-background  src/Wpf.Ui/Controls/NavigationView/NavigationViewCompact.xaml:357  {DynamicResource ButtonForeground}
+U  no-ancestor-background  src/Wpf.Ui/Controls/NavigationView/NavigationViewTop.xaml:29  {DynamicResource ButtonForeground}
+U  no-ancestor-background  src/Wpf.Ui/Controls/Slider/Slider.xaml:124  {DynamicResource SliderTickBarFill}
+U  no-ancestor-background  src/Wpf.Ui/Controls/Slider/Slider.xaml:151  {DynamicResource SliderTickBarFill}
+U  no-ancestor-background  src/Wpf.Ui/Controls/Slider/Slider.xaml:62  {DynamicResource SliderTickBarFill}
+U  no-ancestor-background  src/Wpf.Ui/Controls/Slider/Slider.xaml:89  {DynamicResource SliderTickBarFill}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/AnchorPage.xaml:32  ButtonBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/AnchorPage.xaml:38  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ButtonPage.xaml:57  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ButtonPage.xaml:79  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/CheckBoxPage.xaml:23  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/CheckBoxPage.xaml:31  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/CheckBoxPage.xaml:42  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/CheckBoxPage.xaml:48  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/CheckBoxPage.xaml:54  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/CheckBoxPage.xaml:60  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ComboBoxPage.xaml:26  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ComboBoxPage.xaml:30  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ComboBoxPage.xaml:31  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ComboBoxPage.xaml:32  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ComboBoxPage.xaml:33  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ComboBoxPage.xaml:41  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ComboBoxPage.xaml:58  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ComboBoxPage.xaml:77  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ComboBoxPage.xaml:88  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/DropDownButtonPage.xaml:26  ButtonBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:38  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/RadioButtonPage.xaml:45  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/RatingPage.xaml:44  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/RatingPage.xaml:76  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/SplitButtonPage.xaml:26  ButtonBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/SplitButtonPage.xaml:70  ButtonBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ToggleButtonPage.xaml:30  ToggleButtonBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ToggleButtonPage.xaml:34  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ToggleSwitchPage.xaml:37  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Collections/ListViewPage.xaml:111  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Collections/ListViewPage.xaml:112  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Collections/ListViewPage.xaml:113  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Collections/ListViewPage.xaml:114  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:119  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:128  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:157  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:166  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:195  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:90  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DateAndTime/CalendarDatePickerPage.xaml:32  ButtonBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DateAndTime/CalendarPage.xaml:26  CalendarViewBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DateAndTime/DatePickerPage.xaml:26  ControlFillColorDefault
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DateAndTime/TimePickerPage.xaml:27  TimePickerButtonBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:59  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/ContentDialogPage.xaml:26  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/SnackbarPage.xaml:44  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/SnackbarPage.xaml:50  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/SnackbarPage.xaml:51  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/SnackbarPage.xaml:52  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/SnackbarPage.xaml:53  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/SnackbarPage.xaml:54  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/SnackbarPage.xaml:55  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/SnackbarPage.xaml:56  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/SnackbarPage.xaml:57  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/SnackbarPage.xaml:58  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardActionPage.xaml:28  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardActionPage.xaml:30  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardActionPage.xaml:49  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardActionPage.xaml:51  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardActionPage.xaml:57  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardControlPage.xaml:103  {ButtonBackground} over {CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardControlPage.xaml:28  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardControlPage.xaml:47  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardControlPage.xaml:53  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardControlPage.xaml:59  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardControlPage.xaml:84  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardControlPage.xaml:90  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/CardControlPage.xaml:96  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/ExpanderPage.xaml:105  {ButtonBackground} over {CardBackground} over {CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/ExpanderPage.xaml:29  ExpanderHeaderBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/ExpanderPage.xaml:46  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/ExpanderPage.xaml:79  {CardBackground} over {CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/ExpanderPage.xaml:86  {CardBackground} over {CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/ExpanderPage.xaml:92  {CardBackground} over {CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Layout/ExpanderPage.xaml:98  {CardBackground} over {CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:114  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:118  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:124  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:197  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:202  {NavigationViewItemBackground} over {NavigationViewItemBackground}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:203  {NavigationViewItemBackground} over {NavigationViewItemBackground}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:206  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:210  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:214  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:220  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:290  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:294  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:298  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:302  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:308  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:39  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:43  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:49  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/TabControlPage.xaml:26  TabViewBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/SettingsPage.xaml:24  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/SettingsPage.xaml:41  {ComboBoxBackground} over {CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/SettingsPage.xaml:46  {ComboBoxBackground} over {CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/SettingsPage.xaml:47  {ComboBoxBackground} over {CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/SettingsPage.xaml:48  {ComboBoxBackground} over {CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/SettingsPage.xaml:56  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:115  TextControlBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:121  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:125  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:126  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:127  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:128  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:129  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:36  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:37  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:44  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:87  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:91  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:92  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:93  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:94  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBadgePage.xaml:95  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:32  ControlFillColorDefault
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:43  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:48  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:53  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:54  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:55  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:56  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:71  ControlFillColorDefault
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:82  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:87  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:92  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:93  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:94  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/InfoBarPage.xaml:95  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/StatusAndInfo/ProgressBarPage.xaml:25  ProgressBarBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Text/AutoSuggestBoxPage.xaml:36  CheckBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Text/NumberBoxPage.xaml:26  TextControlBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Text/NumberBoxPage.xaml:39  TextControlBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Text/NumberBoxPage.xaml:55  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Text/NumberBoxPage.xaml:56  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Text/NumberBoxPage.xaml:57  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Text/NumberBoxPage.xaml:58  ComboBoxBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Text/NumberBoxPage.xaml:68  TextControlBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Text/NumberBoxPage.xaml:83  TextControlBackground
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Windows/WindowsPage.xaml:26  CardBackground
+U  translucent-uncomposited  src/Wpf.Ui/Controls/AutoSuggestBox/AutoSuggestBox.xaml:16  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/AutoSuggestBox/AutoSuggestBox.xaml:16  {DynamicResource ListViewItemBackgroundPointerOver}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Badge/Badge.xaml:13  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Badge/Badge.xaml:13  {DynamicResource ControlFillColorDefaultBrush}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Badge/Badge.xaml:13  {DynamicResource ControlStrongFillColorDarkBrush}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Badge/Badge.xaml:13  {DynamicResource ControlStrongFillColorLightBrush}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Button/Button.xaml:20  {DynamicResource ButtonBackgroundPointerOver}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Button/Button.xaml:20  {DynamicResource ButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Button/Button.xaml:20  {DynamicResource ButtonBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Button/Button.xaml:214  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Button/Button.xaml:214  {DynamicResource ButtonBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Button/Button.xaml:214  {DynamicResource ButtonBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Button/Button.xaml:214  {DynamicResource ControlStrongFillColorDark}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Button/Button.xaml:214  {DynamicResource ControlStrongFillColorLight}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Button/Button.xaml:93  {DynamicResource ButtonBackgroundPointerOver}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Button/Button.xaml:93  {DynamicResource ButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Button/Button.xaml:93  {DynamicResource ButtonBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Calendar/Calendar.xaml:333  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Card/Card.xaml:19  {DynamicResource CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/CardAction/CardAction.xaml:24  {DynamicResource CardBackgroundPointerOver}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/CardAction/CardAction.xaml:24  {DynamicResource CardBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/CardAction/CardAction.xaml:24  {DynamicResource CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/CardColor/CardColor.xaml:13  {DynamicResource CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/CardControl/CardControl.xaml:23  {DynamicResource CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/CardExpander/CardExpander.xaml:86  {DynamicResource CardBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/CheckBox/CheckBox.xaml:39  {DynamicResource CheckBoxBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/CheckBox/CheckBox.xaml:39  {DynamicResource CheckBoxBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/CheckBox/CheckBox.xaml:39  {DynamicResource CheckBoxBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/ComboBox/ComboBox.xaml:148  {DynamicResource ComboBoxBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/ComboBox/ComboBox.xaml:148  {DynamicResource ComboBoxBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/ComboBox/ComboBox.xaml:148  {DynamicResource ComboBoxBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/ComboBox/ComboBox.xaml:90  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/DataGrid/DataGrid.xaml:955  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/DatePicker/DatePicker.xaml:40  {DynamicResource ControlFillColorDefault}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/DatePicker/DatePicker.xaml:40  {DynamicResource ControlFillColorDefault}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Expander/Expander.xaml:81  {DynamicResource ExpanderHeaderBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/HyperlinkButton/HyperlinkButton.xaml:20  {DynamicResource HyperlinkButtonBackgroundPointerOver}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/HyperlinkButton/HyperlinkButton.xaml:20  {DynamicResource HyperlinkButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/ListBox/ListBoxItem.xaml:15  {DynamicResource MenuBarItemBackgroundSelected}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/ListView/ListViewItem.xaml:94  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/ListView/ListViewItem.xaml:94  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/ListView/ListViewItem.xaml:94  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationView.xaml:20  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationView.xaml:20  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationView.xaml:20  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationView.xaml:20  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationView.xaml:20  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationView.xaml:20  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewBottom.xaml:56  {DynamicResource SubtleFillColorSecondaryBrush}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewBottom.xaml:56  {DynamicResource SubtleFillColorTertiaryBrush}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewCompact.xaml:313  {DynamicResource SubtleFillColorSecondaryBrush}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewCompact.xaml:313  {DynamicResource SubtleFillColorTertiaryBrush}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewCompact.xaml:328  {DynamicResource SubtleFillColorSecondaryBrush}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewCompact.xaml:328  {DynamicResource SubtleFillColorTertiaryBrush}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewCompact.xaml:357  {DynamicResource SubtleFillColorSecondaryBrush}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewCompact.xaml:357  {DynamicResource SubtleFillColorTertiaryBrush}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewCompact.xaml:92  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewItemDefaultStyle.xaml:8  {DynamicResource NavigationViewItemBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewItemHeader.xaml:14  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewLeftMinimalCompact.xaml:35  NavigationViewItemBackground
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewTop.xaml:29  {DynamicResource SubtleFillColorSecondaryBrush}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationViewTop.xaml:29  {DynamicResource SubtleFillColorTertiaryBrush}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NumberBox/NumberBox.xaml:26  {DynamicResource TextControlBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/NumberBox/NumberBox.xaml:26  {DynamicResource TextControlBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/PasswordBox/PasswordBox.xaml:131  {DynamicResource TextControlBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/PasswordBox/PasswordBox.xaml:131  {DynamicResource TextControlBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/PasswordBox/PasswordBox.xaml:45  {DynamicResource TextControlBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/PasswordBox/PasswordBox.xaml:45  {DynamicResource TextControlBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/RichTextBox/RichTextBox.xaml:13  {DynamicResource TextControlBackgroundFocused}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/RichTextBox/RichTextBox.xaml:13  {DynamicResource TextControlBackgroundPointerOver}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/RichTextBox/RichTextBox.xaml:13  {DynamicResource TextControlBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/Snackbar/Snackbar.xaml:13  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/TextBox/TextBox.xaml:25  {DynamicResource TextControlBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/TextBox/TextBox.xaml:25  {DynamicResource TextControlBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/TextBox/TextBox.xaml:318  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/TextBox/TextBox.xaml:318  {DynamicResource TextControlBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/TextBox/TextBox.xaml:318  {DynamicResource TextControlBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/ThumbRate/ThumbRate.xaml:13  Transparent
+U  translucent-uncomposited  src/Wpf.Ui/Controls/TimePicker/TimePicker.xaml:9  {DynamicResource TimePickerButtonBackgroundPointerOver}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/TimePicker/TimePicker.xaml:9  {DynamicResource TimePickerButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/TimePicker/TimePicker.xaml:9  {DynamicResource TimePickerButtonBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/ToggleButton/ToggleButton.xaml:17  {DynamicResource ToggleButtonBackgroundPointerOver}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/ToggleButton/ToggleButton.xaml:17  {DynamicResource ToggleButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/ToggleButton/ToggleButton.xaml:17  {DynamicResource ToggleButtonBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/TreeView/TreeViewItem.xaml:186  {DynamicResource TreeViewItemBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/TreeView/TreeViewItem.xaml:186  {DynamicResource TreeViewItemBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/TreeView/TreeViewItem.xaml:73  {DynamicResource TreeViewItemBackground}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/TreeView/TreeViewItem.xaml:73  {DynamicResource TreeViewItemBackground}
+U  unknown-palette-key  src/Wpf.Ui/Controls/Button/Button.xaml:214  AccentButtonBackground
+U  unknown-palette-key  src/Wpf.Ui/Controls/HyperlinkButton/HyperlinkButton.xaml:20  HyperlinkButtonBackground
+U  unknown-palette-key  src/Wpf.Ui/Controls/InfoBadge/InfoBadge.xaml:121  InfoBadgeInformationSeverityBackgroundBrush
+U  unknown-palette-key  src/Wpf.Ui/Controls/InfoBadge/InfoBadge.xaml:61  InfoBadgeInformationSeverityBackgroundBrush
+U  unknown-palette-key  src/Wpf.Ui/Controls/RadioButton/RadioButton.xaml:25  RadioButtonOuterEllipseCheckedStrokePointerOver
+U  unknown-palette-key  src/Wpf.Ui/Controls/ToggleSwitch/ToggleSwitch.xaml:24  ToggleSwitchFillOnPointerOver
+U  unknown-palette-key  src/Wpf.Ui/Controls/ToggleSwitch/ToggleSwitch.xaml:24  ToggleSwitchFillOnPressed

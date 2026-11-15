@@ -24,7 +24,7 @@ dotnet run --project src/XamlContrast.Cli -c Release -- samples/demo
 守門腳本兩支（下一節是重點）：
 
 ```powershell
-powershell -File .\scripts\verify-baselines.ps1      # 四個真實 App 的快照回歸（只有本機能跑）
+powershell -File .\scripts\verify-baselines.ps1      # 三個真實 App 的快照回歸（只有本機能跑）
 powershell -File .\scripts\verify-readme-sample.ps1  # README 示範輸出比對（CI 也跑）
 ```
 
@@ -41,7 +41,8 @@ powershell -File .\scripts\verify-readme-sample.ps1  # README 示範輸出比對
 |---|---|---|---|
 | demo 自我把關 | `.github/workflows/ci.yml` + `samples/demo` | CI（`ci.yml`／`release.yml` 各一份） | 守門員本身失效：退出碼不是 1，或 `jq` 驗的計數（fail 3／豁免 1／壓掉 1）變動 |
 | README 示範輸出 | `scripts/verify-readme-sample.ps1` | CI（Linux 上以 pwsh 跑）＋本機 | 文件裡貼的輸出跟實跑對不上 |
-| 四專案快照回歸 | `scripts/verify-baselines.ps1` + `baselines/*.json` | **只有維護者本機**，發版前 | 稽核行為在真實專案上悄悄變了 |
+| 三專案快照回歸 | `scripts/verify-baselines.ps1` + `baselines/*.json` + `baselines/*.project.txt`（對象指紋） | **只有維護者本機**，發版前 | 稽核行為在真實專案上悄悄變了；指紋負責分辨「工具變了」還是「被稽核的 App 自己改了」 |
+| 十三個公開專案語料 | `scripts/verify-corpus.ps1` + `baselines/corpus/`（清單釘 commit＋逐筆摘要） | **只有維護者本機**（要網路、約 52 MB clone），動到色盤偵測／解析規則時 | 自家四個專案測不到的形狀：控制項函式庫、WinUI、ThemeDictionaries、建置時產生的主題檔 |
 
 ### 為什麼要有這一套
 
@@ -49,6 +50,13 @@ powershell -File .\scripts\verify-readme-sample.ps1  # README 示範輸出比對
 README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的字串已經不是 README 上寫的，
 覆蓋率那行根本不存在。改輸出格式的時候沒有人會想到 README，所以人工比對一定會漏。
 解法不是「記得改」，是讓 CI 自己跑一次再比對。
+
+`verify-corpus.ps1`（1.5 加的）是第三種，而且它的理由跟上面兩支同一個形狀：**1.4 那輪公開專案的逐筆比對
+做完之後，結果只留在 CHANGELOG 的散文裡，下一次改規則沒有任何東西會紅。** 「改完記得手動跑一輪外部比對」
+不是機制。現在語料清單釘住每個專案的 commit、摘要凍住每一筆 finding 與 unresolved 的位置，所以
+「紅燈 = 工具自己變了」是可以成立的推論。它當場就付出了代價也證明了價值：1.5 的隱含樣式改動靠它抓到
+三個假警報來源（巢狀 Resources 外洩到整個檔、行內樣式被當成隱含樣式、模板畫底看不到時配到祖先的底），
+三個都是自家四專案一筆都測不到的形狀。
 
 `verify-baselines.ps1` 是另一種：規則 13 之後原型（PowerShell）退役，C# 成為權威實作，
 期望值改成**C# 自己產的快照**——比對的是「這次跑」與「上次凍結」，不是「跟正確答案比」。
@@ -277,15 +285,43 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   授權：MIT，`THIRD-PARTY-NOTICES.md` 由 Directory.Build.props 打進套件 —— 換來源或加資料時要一起改。
   WinUI Gallery（2026-11-10，`6de91fe`）實測：配對 49 → 59、unknown-palette-key 172 → 90，原本的 finding 比值與分類都不變。
   剩下的大宗：頁面底色來自視窗（no-ancestor-background；靜態不可知，請使用者設 rootBackground）。
+- **三個主題函式庫的內建色票（1.5，`LibraryThemes.cs` + 內嵌的 `WpfUiTheme.json`／`MaterialDesignTheme.json`／`HandyControlTheme.json`）**：跟 WinUI 那條同一個形狀、同一份資料結構
+  （`WinUiTheme.Data`、`WinUiTheme.Augment` 共用），差別只在**觸發條件**：只在專案引用 `Wpf.Ui` 時補
+  （`ThemeLibraries.DetectInProject`），不是看 `{ThemeResource`。
+  ⚠ 野外數字（2026-11-15，都在語料裡）：WPF-UI（Bloxstrap 111 → 37 個查不到的鍵）、MaterialDesign
+  （VisualHFT 配對 33 → 83、覆蓋率 17.7% → 44.6%、44 筆真 fail）、HandyControl（MaaAssistantArknights
+  配對 80 → 101、查不到的鍵 48 → 13）。
+  ⚠ **一個專案可以同時用兩個函式庫**（MAA 就是）：`DetectInProject` 回傳**全部**，而且兩份表同名但值不同的鍵
+  一律不補（執行期看合併順序，不知道哪份贏）；只有一份表定義的鍵沒有歧義，照補。
+  補色票與覆蓋率提示**讀同一份**（`PaletteDetection.Libraries`）—— 之前各自偵測一次，色盤補了 MaterialDesign
+  的 155 個鍵、提示卻說「你用的是 HandyControl」。MaterialDesign 那張表一定要收**舊鍵名**
+  （`MaterialDesignPaper`／`MaterialDesignBody`，v5 改名前的寫法）—— VisualHFT 的 50 筆查不到的鍵有 49 筆是它，
+  少了那一份整張表對真實 App 幾乎沒作用。
+  ⚠ **MahApps 刻意沒有表**：它的主題檔是建置時產生的（`Theme.Template.xaml`／`Theme.Base.Template.xaml`，
+  1077 個鍵、112 個 `{{佔位符}}`），repo 裡沒有任何一份帶具體色值的主題檔，值還跟 App 合併了哪個強調色有關 ——
+  補它就是猜。`MahAppsHasNoTableOnPurpose` 把這個決定釘住，以免哪天有人「順手補齊」。
+  ⚠ 專案自己沒有色盤時，色盤那一行要整句改寫（`LibraryThemes.Note`）：接在後面會印出
+  「no palette found …; + 124 brush(es)」這種自相矛盾的句子（v2rayN 實測）。`paletteDegraded` 維持 true。⚠ 兩邊鍵名大量重疊、值不一樣 ——
+  絕對不要把 WinUI 的表拿給 WPF-UI 專案用或反過來，`AProjectThatDoesNotUseWpfUiGetsNothing` 釘住這條。
+  重產：sparse checkout `src/Wpf.Ui/Resources/Theme/{Dark,Light}.xaml`，設 `XAMLCONTRAST_WPFUI_SOURCE`／
+  `XAMLCONTRAST_WPFUI_COMMIT` 跑 `WpfUiThemeTests.Regenerate`，看 git diff 再 commit（同 WinUI）。
+  高對比的 `HC*.xaml` 不收；強調色來的 27 個鍵進 runtime、不給值。授權 MIT，`THIRD-PARTY-NOTICES.md` 要有。
+  ⚠ **補進來的鍵要記進 `PaletteDetection.FrameworkKeys`**：覆蓋率提示會說「你的主題檔有這個鍵」，
+  而那個鍵是工具補的時候那句話是假的（Bloxstrap 一個鍵都沒自己定義）。
 - **別名與 brush 裡的 Color 鍵（1.4）**：`<StaticResource x:Key ResourceKey>` 收進 `Palette.Aliases`（依主題分側），
   在偵測最後、WinUI 預設色補進來之後才解（`ResolveAliases`，可以串；找不到 → MissingRefs，點名指向的鍵）。
   `CollectAliases` 另外收一次：只放別名、沒有 brush 的字典，合併式色盤會放棄，別名不能跟著丟。畫面的區域別名在 `LocalOverridesOf`。
   brush 裡的 Color 鍵：`ColorResolver` 找不到 brush 鍵時查 `DarkColors`／`LightColors`；⚠ `Auditor.SideView`
   要把 Color 表也收成那一側，不然單一主題視圖會拿到另一個主題的 Color。
-- **外部專案回歸（2026-11-10）**：八個公開 WPF 專案（2026-08-10 實查那批）＋ WinUI Gallery，1.3.0 對 1.4 逐筆比對，
+- **外部專案回歸現在是腳本**（1.5）：`scripts/verify-corpus.ps1` + `baselines/corpus/`，十三個公開專案釘住 commit、
+  逐筆凍結。語料的組成要有意識地維護：五個控制項函式庫 ＋ 四個自己寫主題的 App ＋ WinUI Gallery
+  ＋ 四個「從 NuGet 裝主題庫」的 App（NETworkManager 9.4%、QuickLook 1.8%、v2rayN 0%、Bloxstrap 0% 覆蓋率 ——
+  這一類原本一個樣本都沒有，而它正是覆蓋率提示與 rootBackground 逃生口的目標族群，1.4.2 的 ThemeMode 提示 bug 就在這條線上）。
+- **外部專案回歸（2026-11-10，手動那一輪的紀錄）**：八個公開 WPF 專案（2026-08-10 實查那批）＋ WinUI Gallery，1.3.0 對 1.4 逐筆比對，
   沒有任何既有 finding 消失或改變；新增的 fail 抽查兩筆（MaterialDesign 卡片上的工具列字 1.55:1、wpfui 淺藍底白字 2.63:1）
   都對得上原始碼的色值。做法：sparse clone 只拿 `*.xaml`、新舊兩版各跑 `--json`、逐筆比 findings 與 unresolvedSites。
-  ⚠ `verify-baselines.ps1` 只守四個自家專案 —— 動到色盤偵測或解析規則時，這一輪外部比對值得再跑。
+  ⚠ `verify-baselines.ps1` 只守三個自家專案（第四格 ZeroCel 2026-11-15 移除，專案已不在本機）—— 動到色盤偵測或解析規則時跑 `verify-corpus.ps1`（1.5 起那一輪
+  外部比對有腳本了，不必再手動重做）。
 - **Application 含子類別**（`PaletteDetector.RootKindOf`）：根元素名稱以 Application 結尾（Prism 的 `PrismApplication`），
   或根元素底下有 `<…Application.Resources>`。只認 `Application` 的話，Prism 的 App.xaml 被當成畫面、全域鍵全變成區域鍵。
 - **元素 Opacity 是群組**（`Auditor.Backdrop`／`OpacityGroup`）：WPF 的 Opacity 把整棵子樹畫成一層再疊。
@@ -307,6 +343,46 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - **元素分類用「後綴比對」不是全名相等**（`Auditor.IsNonTextElement`）：MahApps 的
   `MetroProgressBar` 對不上 `ProgressBar`，進度條填色會被當文字用 4.5 要求。
   兩邊都中時取最長的後綴（名字愈長愈具體）。
+
+### 隱含樣式（1.5，`StyleIndex` 的 `InResources`／`ScopeOf`／`Agree`／`ImplicitRecord` + `Auditor.Walk`）
+
+1.4 之前只補「檔案根元素的背景」一格；1.5 起每個元素的底與字色都查隱含樣式。四個地雷全是實測踩出來的，
+**三個來自公開語料（自家四專案一筆都測不到）**：
+
+- **「沒有 x:Key」≠「隱含樣式」**（`InResources`）：行內樣式（`<TextBlock.Style><Style TargetType=…>`）、
+  指派給屬性的樣式（`ItemContainerStyle`、`DataGridTextColumn.ElementStyle`、`Setter.Value` 裡的）都沒有 key，
+  但它們只管被指派的那一個元素／那一欄。只有**放在資源集合裡**（`<ResourceDictionary>` 底下或 `<X.Resources>` 裡）
+  的才是隱含樣式。⚠ 少這一條：MaterialDesign 的 Clock 模板裡時鐘讀數的行內樣式（FontSize 66、
+  字色是 `Primary.Foreground`、本來疊在紫色標頭上）被當成全域隱含樣式，整個 repo 的 TextBlock 都被套上
+  「66 級的深色字」→ 一口氣 214 筆假 fail。
+- **`<Style.Resources>` 是第三種作用範圍**（1.5 後半，`Record.ScopedImplicit`／`Merged.ScopedImplicit`／
+  `Auditor._scopedStyles`）：它不是「某個子樹的行號區間」，是「用了這個 Style 的地方」—— 跨檔，所以得由鏈帶著走。
+  推進 `_scopedStyles` 的時機是**走子元素之前**（它管內容，不管套了樣式的那個元素自己），查找順序是
+  最內層的 scoped → 檔案／全域（WPF 的資源查找方向）。⚠ 這個洞是工具自己的輸出逼出來的：Kindling 照 WPF
+  的標準手法（在 AccentBtn 的 Style.Resources 裡把字色蓋回白色）修好之後，工具還是報 fail，逼得那邊得在
+  元素上再明寫一次字色 —— **守門員看不懂正確的修法，就是在逼人寫多餘的程式碼**。
+- **作用範圍是子樹，不是整個檔**（`ScopeOf`，用行號區間；索引與稽核各自載一份 XDocument，比不了祖先關係）：
+  巢狀 `<X.Resources>` 裡的只管那個元素的子樹，最內層優先（`ImplicitRecord` 取最窄的範圍）。
+  ⚠ 少這一條：QuillNest 標籤膠囊模板深處 `ContentPresenter.Resources` 裡的隱含 TextBlock 樣式（白字，
+  底是 `{Binding ColorHex}`）套到同一個檔案裡毫不相干的工具列文字上 → 三筆「白字配白卡片」的假 fail。
+  **字典檔也要套這條**（PopupBox 模板裡的那個 Button 隱含樣式）。
+- **多個互相競爭的全域隱含樣式 = 不知道**（`Agree`）：同一個型別有好幾個全域隱含樣式時（MaterialDesign 的
+  Button 就有兩份 Defaults ＋ ToolBar ＋ Snackbar…），執行期看的是合併字典的順序 —— 靜態不可知，所以
+  候選內容不一致就不套用，**不是挑第一個**。深／淺兩份主題字典各宣告一個寫法相同的（`Foreground="{DynamicResource Fg0}"`）
+  不算歧義：色票鍵本身會依主題解析。
+- **帶模板的隱含樣式，底不是它自己給的就不評**（`Auditor` 裡 `implicitChain is { HasTemplate: true }` 那一段）：
+  這種控制項的字畫在模板裡某一層上，那一層靜態看不到。⚠ 少這一條：HandyControl 的
+  `<hc:Shield Color="#1182c3"/>` 白字其實在藍色徽章上，配祖先的白底報出 1:1 的假 fail。
+  底由隱含樣式自己給（含 `Background="Transparent"` 穿透到祖先）時照評 —— MaterialDesign 的扁平按鈕就是那條路。
+- **`{TemplateBinding Background}` 不是「一個看不懂的顏色」**：它的意思是「控制項自己的 Background」，
+  沒設就是實質上沒有底 → 往祖先穿透。⚠ 當成未解析的話，ScreenToGif 的 Editor.xaml 有 163 處原本評得出來的
+  配對變成 unresolved —— 看起來「更誠實」，實際上是把算得出來的答案丟掉。
+- **刻意只取基礎 Setter、不走 `GradeChain` 的逐狀態路徑**：走鏈路徑會讓 finding 的 `element` 從 `TextBlock`
+  變成 `TextBlock⊕Style[implicit TextBlock]/base`，等於 **baseline 的鍵變了** → 要遞增 `Baseline.KeyVersion`、
+  所有使用者重寫 baseline，還要連動 Parity 儀表板手刻的那份鍵。觸發態留到那一次一起做（ROADMAP）。
+- 定義處與使用處**不能同時記**：隱含樣式的基礎 Setter 現在在使用處評得到，所以 `WalkStyles` 的
+  translucent-uncomposited 那一段多一個條件 `_styles.AppliesToSomeElement(ttName)` —— 專案裡真的有那個型別的元素
+  才算「使用處評得到」；一個都沒有的話執行期套不到它，那一組不存在，照舊記 unresolved。
 
 ### 轉換器的固定顏色（1.2，`ConverterIndex.cs`、config 的 `converters.constantBrushes`，預設關）
 
@@ -420,26 +496,31 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 
 ## 技術債（留帳）
 
-- **四份 `baselines/*.json` 已在 2026-10-23 依 1.0 重凍**（schemaVersion 6，帶 `exitCode`）。
+- **`baselines/*.json` 在 2026-10-23 依 1.0 重凍過一次（當時四份）**（schemaVersion 6，帶 `exitCode`）。
   重凍前四份都是紅的，每一個差異都歸因到 commit（逐 commit 重播 v0.6.1 之後的 82 個 src commit），
   寫在 `D:/擴充功能/nuget/稽核-2026-10-22/XamlContrast-快照變動說明.md`，維護者逐項看過、同意之後才跑 `-Update`。
   其中 `celflow.json` 早在 1.0 之前就是紅的（2026-08-26 實跑：`pairs` 期望 363 實得 353），
   原因是 CelFlow.WPF 在 2026-08-18 改過四個 XAML 檔，不是工具的回歸；這次重凍一併吸收。
   2026-08-28 CelFlow 改名 ZeroCel，腳本已改指 `D:\應用程式\ZeroCel\frontend\ZeroCel.WPF`
   （快照名稱沿用 `celflow.json`）；找不到專案時會紅字點名並繼續。
-  這段歷史暴露了 `verify-baselines.ps1` 的結構性弱點：**受測對象是四個活在 repo 外、會自己演化的
-  專案**，紅燈分不出「工具行為變了」與「被稽核的 App 改了」。目前只能靠人工看 diff 判斷。
-  修法有兩條（都還沒做）：把四個專案的 XAML 快照複製進 repo 當固定素材，
-  或在快照裡記下受測專案的 commit／檔案雜湊，讓腳本自己說「對象變了」。
+  這段歷史暴露了 `verify-baselines.ps1` 的結構性弱點：**受測對象是活在 repo 外、會自己演化的
+  專案**，紅燈分不出「工具行為變了」與「被稽核的 App 改了」。
+  **1.5 做掉了那兩條修法的第二條**：`-Update` 會寫一份對象指紋（`baselines/<name>.project.txt`：
+  專案路徑、git commit、每個稽核輸入檔的 SHA-256 前 16 碼），驗收時重算再比，所以腳本現在自己說得出
+  「對象沒變 → 差異來自工具」或「對象也變了 → 這些檔案動過」。另有 `-UpdateFingerprint`（只補指紋、
+  不動快照，且只在數字一致時才寫）。第一條（把 XAML 複製進 repo 當固定素材）沒做也不打算做 ——
+  那會變成另一份要維護的複本，而公開語料（`verify-corpus.ps1`，釘住 commit）已經補上「固定素材」這個需求。
+  2026-11-15：第四格（ZeroCel）的專案已不在本機，那一格與 `baselines/celflow.json` 一併移除 ——
+  **永遠紅的守門員等於沒有守門員**。
   ⚠ 在判定之前**不要習慣性跑 `-Update` 蓋掉**——那正是這套機制要防的事。
-- **`verify-baselines.ps1` 進不了 CI**（路徑寫死 `D:\應用程式\...`，且那四個是未發佈的
+- **`verify-baselines.ps1` 進不了 CI**（路徑寫死 `D:\應用程式\...`，且那三個是未發佈的
   App）。所以它是「發版前本機關卡」而不是「每次 push 的關卡」，外部貢獻者跑不了
   （CONTRIBUTING 已明講）。RELEASING.md 把它列為發版前提，實務上要記得它可能因上面那個
   原因紅燈。
-- **已知盲區（明文不做，不是 bug）**：VisualStateManager 的顏色動畫（Blend 時代方言，
-  第四輪外部實查測得數十處／專案等級，目前連計數器都沒有，只有文件揭露）、隱含樣式的
-  完整解析（只做「根元素背景」極窄的一格）、`TargetName` 指向模板內部元素的 Setter、
-  跨元素相關聯的觸發器、文字疊在兄弟圖片上。收到相關 issue 時先確認是不是這幾條。
+- **已知盲區（明文不做，不是 bug）**：`TargetName` 指向模板內部元素的 Setter、跨元素相關聯的觸發器、
+  文字疊在兄弟圖片上。1.5 處理掉兩條：VisualStateManager 的狀態顏色**有計數器了**（`summary.stateColors`
+  ＋ `stateColorSites`，照舊不評）、隱含樣式**每個元素都解析**（剩三塊明文不猜：觸發態、模板把底畫在
+  看不到的那一層、同型別有多個互相競爭的全域隱含樣式）。收到相關 issue 時先確認是不是這幾條。
 - **C# 色盤的「第一個是深、第二個是淺」是假設**（`PaletteDetector.CsTuple`，源自 Kindling
   的寫法）。config 的 `csharpPattern` 可以繞過，但自動偵測那條路仍寫死這個順序。
 - **`.editorconfig` 刻意不設 `end_of_line` / `charset`**：既有檔案是 CRLF，強制成 lf 會逼出

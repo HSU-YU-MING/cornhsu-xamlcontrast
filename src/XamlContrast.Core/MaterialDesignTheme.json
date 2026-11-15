@@ -1,0 +1,627 @@
+{
+  "source": "MaterialDesignInXAML/MaterialDesignInXamlToolkit@087728011a8d",
+  "entries": {
+    "Black0": [
+      "#00000000",
+      "#00000000"
+    ],
+    "Black100": [
+      "#19000000",
+      "#19000000"
+    ],
+    "Black1000": [
+      "#FF000000",
+      "#FF000000"
+    ],
+    "Black200": [
+      "#33000000",
+      "#33000000"
+    ],
+    "Black300": [
+      "#4C000000",
+      "#4C000000"
+    ],
+    "Black400": [
+      "#66000000",
+      "#66000000"
+    ],
+    "Black50": [
+      "#0C000000",
+      "#0C000000"
+    ],
+    "Black500": [
+      "#7F000000",
+      "#7F000000"
+    ],
+    "Black600": [
+      "#99000000",
+      "#99000000"
+    ],
+    "Black700": [
+      "#B2000000",
+      "#B2000000"
+    ],
+    "Black800": [
+      "#CC000000",
+      "#CC000000"
+    ],
+    "Black900": [
+      "#E5000000",
+      "#E5000000"
+    ],
+    "MaterialDesign.Brush.Background": [
+      "#FF323232",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesign.Brush.Badged.DarkBackground": [
+      "#FF323232",
+      "#FF323232"
+    ],
+    "MaterialDesign.Brush.Badged.DarkForeground": [
+      "#FFF1F1F1",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesign.Brush.Badged.LightBackground": [
+      "#FFF1F1F1",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesign.Brush.Badged.LightForeground": [
+      "#E5000000",
+      "#E5000000"
+    ],
+    "MaterialDesign.Brush.Button.FlatClick": [
+      "#19757575",
+      "#19757575"
+    ],
+    "MaterialDesign.Brush.Button.FlatRipple": [
+      "#FFB9B9B9",
+      "#FFB9B9B9"
+    ],
+    "MaterialDesign.Brush.Button.Ripple": [
+      "#FFB9B9B9",
+      "#FFB9B9B9"
+    ],
+    "MaterialDesign.Brush.Card.Background": [
+      "#FF454545",
+      "#FFFFFFFF"
+    ],
+    "MaterialDesign.Brush.Card.Border": [
+      "#FF868686",
+      "#FFB9B9B9"
+    ],
+    "MaterialDesign.Brush.CheckBox.Disabled": [
+      "#FF616161",
+      "#FFB9B9B9"
+    ],
+    "MaterialDesign.Brush.CheckBox.Off": [
+      "#7FFFFFFF",
+      "#7F000000"
+    ],
+    "MaterialDesign.Brush.CheckBox.UncheckedBorder": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.Chip.Background": [
+      "#0CFFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesign.Brush.Chip.OutlineBorder": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.ColorZone.DarkBackground": [
+      "#FF323232",
+      "#FF323232"
+    ],
+    "MaterialDesign.Brush.ColorZone.DarkForeground": [
+      "#FFF1F1F1",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesign.Brush.ColorZone.LightBackground": [
+      "#FFF1F1F1",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesign.Brush.ColorZone.LightForeground": [
+      "#E5000000",
+      "#E5000000"
+    ],
+    "MaterialDesign.Brush.ComboBox.Border": [
+      "#7FFFFFFF",
+      "#7F000000"
+    ],
+    "MaterialDesign.Brush.ComboBox.Disabled": [
+      "#FF616161",
+      "#FFB9B9B9"
+    ],
+    "MaterialDesign.Brush.ComboBox.DropDown.Background": [
+      "#FF323232",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesign.Brush.ComboBox.FilledBackground": [
+      "#19FFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesign.Brush.ComboBox.HoverBackground": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.ComboBox.HoverBorder": [
+      "#E5FFFFFF",
+      "#E5000000"
+    ],
+    "MaterialDesign.Brush.ComboBox.OutlineBorder": [
+      "#B2FFFFFF",
+      "#B2000000"
+    ],
+    "MaterialDesign.Brush.ComboBox.OutlineInactiveBorder": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "MaterialDesign.Brush.ComboBox.Popup.DarkBackground": [
+      "#FF323232",
+      "#FF323232"
+    ],
+    "MaterialDesign.Brush.ComboBox.Popup.DarkForeground": [
+      "#FFF1F1F1",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesign.Brush.ComboBox.Popup.LightBackground": [
+      "#FFF1F1F1",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesign.Brush.ComboBox.Popup.LightForeground": [
+      "#E5000000",
+      "#E5000000"
+    ],
+    "MaterialDesign.Brush.DataGrid.Border": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.DataGrid.ButtonPressed": [
+      "#FF757575",
+      "#FFD8D8D8"
+    ],
+    "MaterialDesign.Brush.DataGrid.ColumnHeaderForeground": [
+      "#B2FFFFFF",
+      "#B2000000"
+    ],
+    "MaterialDesign.Brush.DataGrid.ComboBoxHover": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.DataGrid.ComboBoxSelected": [
+      "#FF757575",
+      "#FFD8D8D8"
+    ],
+    "MaterialDesign.Brush.DataGrid.PopupBorder": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.DataGrid.RowHoverBackground": [
+      "#19FFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesign.Brush.DataGrid.Selected": [
+      "#FF757575",
+      "#FFD8D8D8"
+    ],
+    "MaterialDesign.Brush.Foreground": [
+      "#E5FFFFFF",
+      "#E5000000"
+    ],
+    "MaterialDesign.Brush.ForegroundLight": [
+      "#7FFFFFFF",
+      "#7F000000"
+    ],
+    "MaterialDesign.Brush.GridSplitter.Background": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.GridSplitter.PreviewBackground": [
+      "#FF757575",
+      "#FFD8D8D8"
+    ],
+    "MaterialDesign.Brush.Header.Foreground": [
+      "#B2FFFFFF",
+      "#B2000000"
+    ],
+    "MaterialDesign.Brush.Ignored": [
+      "#FF757575",
+      "#FFD8D8D8"
+    ],
+    "MaterialDesign.Brush.ListBox.SegmentedBackground": [
+      "#0CFFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesign.Brush.ListBoxItem.Border": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.ListBoxItem.Selected": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.ListView.Hover": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.ListView.Selected": [
+      "#FF757575",
+      "#FFD8D8D8"
+    ],
+    "MaterialDesign.Brush.ListView.Separator": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.PasswordBox.Border": [
+      "#7FFFFFFF",
+      "#7F000000"
+    ],
+    "MaterialDesign.Brush.PasswordBox.FilledBackground": [
+      "#19FFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesign.Brush.PasswordBox.HoverBackground": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.PasswordBox.HoverBorder": [
+      "#E5FFFFFF",
+      "#E5000000"
+    ],
+    "MaterialDesign.Brush.PasswordBox.OutlineBorder": [
+      "#B2FFFFFF",
+      "#B2000000"
+    ],
+    "MaterialDesign.Brush.PasswordBox.OutlineInactiveBorder": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "MaterialDesign.Brush.RadioButton.Border": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.RadioButton.Checked": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.RadioButton.Chip.CheckedBackground": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.RadioButton.Disabled": [
+      "#FF616161",
+      "#FFB9B9B9"
+    ],
+    "MaterialDesign.Brush.RadioButton.Outline": [
+      "#7FFFFFFF",
+      "#7F000000"
+    ],
+    "MaterialDesign.Brush.ScrollBar.ActiveBackground": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.ScrollBar.Foreground": [
+      "#FF757575",
+      "#FFD8D8D8"
+    ],
+    "MaterialDesign.Brush.ScrollBar.RepeatButtonBackground": [
+      "#FF757575",
+      "#FFD8D8D8"
+    ],
+    "MaterialDesign.Brush.Separator.Background": [
+      "#FF757575",
+      "#FFD8D8D8"
+    ],
+    "MaterialDesign.Brush.SnackBar.Background": [
+      "#FFD8D8D8",
+      "#FF323232"
+    ],
+    "MaterialDesign.Brush.SnackBar.MouseOver": [
+      "#FFB9B9B9",
+      "#FF454545"
+    ],
+    "MaterialDesign.Brush.SnackBar.Ripple": [
+      "#FFB9B9B9",
+      "#FFB9B9B9"
+    ],
+    "MaterialDesign.Brush.StatusBar.Background": [
+      "#FF212121",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesign.Brush.StatusBar.Foreground": [
+      "#E5FFFFFF",
+      "#E5000000"
+    ],
+    "MaterialDesign.Brush.TabControl.Divider": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.TextBox.Border": [
+      "#7FFFFFFF",
+      "#7F000000"
+    ],
+    "MaterialDesign.Brush.TextBox.DisabledBackground": [
+      "#0CFFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesign.Brush.TextBox.FilledBackground": [
+      "#19FFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesign.Brush.TextBox.HoverBackground": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.TextBox.HoverBorder": [
+      "#E5FFFFFF",
+      "#E5000000"
+    ],
+    "MaterialDesign.Brush.TextBox.OutlineBorder": [
+      "#B2FFFFFF",
+      "#B2000000"
+    ],
+    "MaterialDesign.Brush.TextBox.OutlineInactiveBorder": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "MaterialDesign.Brush.ToggleButton.Background": [
+      "#FFD8D8D8",
+      "#FFD8D8D8"
+    ],
+    "MaterialDesign.Brush.ToggleButton.Foreground": [
+      "#FF616161",
+      "#FF616161"
+    ],
+    "MaterialDesign.Brush.ToggleButton.Switch.TrackOffBackground": [
+      "#FF454545",
+      "#FFFFFFFF"
+    ],
+    "MaterialDesign.Brush.ToolBar.Background": [
+      "#FF212121",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesign.Brush.ToolBar.Item.Background": [
+      "#FFD8D8D8",
+      "#FFD8D8D8"
+    ],
+    "MaterialDesign.Brush.ToolBar.Item.Foreground": [
+      "#FF616161",
+      "#FF616161"
+    ],
+    "MaterialDesign.Brush.ToolBar.Overflow.Border": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.ToolBar.Separator": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.ToolBar.Thumb.Foreground": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesign.Brush.ToolTip.Background": [
+      "#FFF1F1F1",
+      "#FF757575"
+    ],
+    "MaterialDesign.Brush.ValidationError": [
+      "#FFCF6679",
+      "#FFB00020"
+    ],
+    "MaterialDesignBackground": [
+      "#FF454545",
+      "#FFFFFFFF"
+    ],
+    "MaterialDesignBody": [
+      "#E5FFFFFF",
+      "#E5000000"
+    ],
+    "MaterialDesignBodyLight": [
+      "#7FFFFFFF",
+      "#7F000000"
+    ],
+    "MaterialDesignCardBackground": [
+      "#FF454545",
+      "#FFFFFFFF"
+    ],
+    "MaterialDesignCheckBoxDisabled": [
+      "#FF616161",
+      "#FFB9B9B9"
+    ],
+    "MaterialDesignCheckBoxOff": [
+      "#7FFFFFFF",
+      "#7F000000"
+    ],
+    "MaterialDesignChipBackground": [
+      "#0CFFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesignColumnHeader": [
+      "#B2FFFFFF",
+      "#B2000000"
+    ],
+    "MaterialDesignDarkBackground": [
+      "#FF303030",
+      "#FF303030"
+    ],
+    "MaterialDesignDarkForeground": [
+      "#FFFAFAFA",
+      "#FFFAFAFA"
+    ],
+    "MaterialDesignDataGridRowHoverBackground": [
+      "#19FFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesignDivider": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesignFlatButtonClick": [
+      "#19757575",
+      "#19757575"
+    ],
+    "MaterialDesignFlatButtonRipple": [
+      "#FFB9B9B9",
+      "#FFB9B9B9"
+    ],
+    "MaterialDesignLightBackground": [
+      "#FFFAFAFA",
+      "#FFFAFAFA"
+    ],
+    "MaterialDesignLightForeground": [
+      "#DD000000",
+      "#DD000000"
+    ],
+    "MaterialDesignPaper": [
+      "#FF323232",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesignSnackbarBackground": [
+      "#FFD8D8D8",
+      "#FF323232"
+    ],
+    "MaterialDesignSnackbarMouseOver": [
+      "#FFB9B9B9",
+      "#FF454545"
+    ],
+    "MaterialDesignSnackbarRipple": [
+      "#FFB9B9B9",
+      "#FFB9B9B9"
+    ],
+    "MaterialDesignTextAreaBorder": [
+      "#B2FFFFFF",
+      "#B2000000"
+    ],
+    "MaterialDesignTextAreaInactiveBorder": [
+      "#33FFFFFF",
+      "#33000000"
+    ],
+    "MaterialDesignTextBoxBorder": [
+      "#7FFFFFFF",
+      "#7F000000"
+    ],
+    "MaterialDesignTextFieldBoxBackground": [
+      "#19FFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesignTextFieldBoxDisabledBackground": [
+      "#0CFFFFFF",
+      "#0C000000"
+    ],
+    "MaterialDesignTextFieldBoxHoverBackground": [
+      "#19FFFFFF",
+      "#19000000"
+    ],
+    "MaterialDesignToolBackground": [
+      "#FFD8D8D8",
+      "#FFD8D8D8"
+    ],
+    "MaterialDesignToolBarBackground": [
+      "#FF212121",
+      "#FFF1F1F1"
+    ],
+    "MaterialDesignToolForeground": [
+      "#FF616161",
+      "#FF616161"
+    ],
+    "MaterialDesignToolTipBackground": [
+      "#FFF1F1F1",
+      "#FF757575"
+    ],
+    "MaterialDesignValidationErrorBrush": [
+      "#FFCF6679",
+      "#FFB00020"
+    ],
+    "Neutral100": [
+      "#FF323232",
+      "#FF323232"
+    ],
+    "Neutral200": [
+      "#FF454545",
+      "#FF454545"
+    ],
+    "Neutral300": [
+      "#FF616161",
+      "#FF616161"
+    ],
+    "Neutral400": [
+      "#FF757575",
+      "#FF757575"
+    ],
+    "Neutral50": [
+      "#FF212121",
+      "#FF212121"
+    ],
+    "Neutral500": [
+      "#FF868686",
+      "#FF868686"
+    ],
+    "Neutral600": [
+      "#FFA8A8A8",
+      "#FFA8A8A8"
+    ],
+    "Neutral700": [
+      "#FFB9B9B9",
+      "#FFB9B9B9"
+    ],
+    "Neutral800": [
+      "#FFD8D8D8",
+      "#FFD8D8D8"
+    ],
+    "Neutral900": [
+      "#FFF1F1F1",
+      "#FFF1F1F1"
+    ],
+    "White0": [
+      "#00FFFFFF",
+      "#00FFFFFF"
+    ],
+    "White100": [
+      "#19FFFFFF",
+      "#19FFFFFF"
+    ],
+    "White1000": [
+      "#FFFFFFFF",
+      "#FFFFFFFF"
+    ],
+    "White200": [
+      "#33FFFFFF",
+      "#33FFFFFF"
+    ],
+    "White300": [
+      "#4CFFFFFF",
+      "#4CFFFFFF"
+    ],
+    "White400": [
+      "#66FFFFFF",
+      "#66FFFFFF"
+    ],
+    "White50": [
+      "#0CFFFFFF",
+      "#0CFFFFFF"
+    ],
+    "White500": [
+      "#7FFFFFFF",
+      "#7FFFFFFF"
+    ],
+    "White600": [
+      "#99FFFFFF",
+      "#99FFFFFF"
+    ],
+    "White700": [
+      "#B2FFFFFF",
+      "#B2FFFFFF"
+    ],
+    "White800": [
+      "#CCFFFFFF",
+      "#CCFFFFFF"
+    ],
+    "White900": [
+      "#E5FFFFFF",
+      "#E5FFFFFF"
+    ]
+  },
+  "colors": {},
+  "runtime": []
+}

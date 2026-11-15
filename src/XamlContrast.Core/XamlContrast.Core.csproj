@@ -16,4 +16,12 @@
     <EmbeddedResource Include="WinUiTheme.json" LogicalName="XamlContrast.Core.WinUiTheme.json" />
   </ItemGroup>
 
+  <!-- 第三方主題函式庫的內建色票(1.5)。各由那個函式庫自己的主題檔產生(都是 MIT,見 THIRD-PARTY-NOTICES.md),
+       產生方式見 LibraryThemeTests。⚠ MahApps 不在這裡:它的主題檔是建置時產生的,見 LibraryThemes 的註解 -->
+  <ItemGroup>
+    <EmbeddedResource Include="WpfUiTheme.json" LogicalName="XamlContrast.Core.WpfUiTheme.json" />
+    <EmbeddedResource Include="MaterialDesignTheme.json" LogicalName="XamlContrast.Core.MaterialDesignTheme.json" />
+    <EmbeddedResource Include="HandyControlTheme.json" LogicalName="XamlContrast.Core.HandyControlTheme.json" />
+  </ItemGroup>
+
 </Project>

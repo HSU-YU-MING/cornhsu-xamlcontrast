@@ -62,12 +62,14 @@ internal static class WinUiTheme
     {
         if (!UsesThemeResource(root)) return;
         var data = Current;
+        // 同 WpfUiTheme：補進來的鍵要記著是工具給的（覆蓋率提示會引用它）
+        foreach (var k in data.Entries.Keys.Where(k => !d.Palette.Entries.ContainsKey(k))) d.FrameworkKeys.Add(k);
         var added = Augment(d.Palette, d.DroppedKeys, data);
         foreach (var scope in d.Scopes ?? []) Augment(scope.Palette, d.DroppedKeys, data);
         if (added == 0) return;
-        var runtime = data.Runtime.Count(k => !d.Palette.Entries.ContainsKey(k));
-        d.Description += $"; + {added} WinUI default theme resource(s) the project doesn't define (Fluent theme, {data.Source})"
-                         + (runtime > 0 ? $"; {runtime} key(s) that follow the user's Windows accent colour stay unresolved" : "");
+        // 色盤那一行怎麼寫交給 LibraryThemes.Note —— 專案自己沒有色盤時不能只把句子接在後面（會自相矛盾）
+        LibraryThemes.Note(d, added, $"WinUI default theme resource(s) (Fluent theme)", data.Source,
+            data.Runtime.Count(k => !d.Palette.Entries.ContainsKey(k)));
     }
 
     /// <summary>補進一個色盤。回傳補了幾個色票鍵。</summary>

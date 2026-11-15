@@ -1,0 +1,400 @@
+# XamlContrast 公開語料摘要 —— 由 scripts/verify-corpus.ps1 -Update 產生，不要手改。
+# 語料釘死（corpus.txt 的 commit）+ 這份凍結 = 紅燈只有一個可能：工具自己變了。
+project: maa
+repo: https://github.com/MaaAssistantArknights/MaaAssistantArknights.git
+commit: b666b84a317c603c561401ab5e5c7b12203d8271
+tool-commit: 07be1dd+dirty
+frozen: 2026-11-16
+exit: 3
+palette-mode: pair
+palette-degraded: False
+palette-keys: 279
+single-theme: False
+files: 87
+pairs: 101
+coverage: 28.1
+unresolved: 258
+skipped: 0
+dead-foreground: 0
+disabled-exempt: 0
+converter-pairs: 0
+ui-component-pairs: 0
+parse-errors: 0
+suppressed: 0
+state-colors: 0
+fail: 13
+warn: 28
+ok: 45
+decorative: 15
+unresolved-by.bound-or-gradient: 10
+unresolved-by.no-ancestor-background: 86
+unresolved-by.over-sibling-content: 7
+unresolved-by.translucent-uncomposited: 142
+unresolved-by.unknown-palette-key: 13
+unknown-keys.CongratulationsFlowBrush: 1
+unknown-keys.DangerBrush: 1
+unknown-keys.InfoBrush: 6
+unknown-keys.RainbowFlowBrush: 3
+unknown-keys.SuccessBrush: 1
+unknown-keys.WarningBrush: 1
+# F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
+F  decorative  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:1108  Path  {DynamicResource PrimaryBrush} on {RegionBrush}  3.71/3.71  
+F  decorative  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:146  Path  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  
+F  decorative  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:1089  Ellipse  {DynamicResource NewBadgeBrush} on {RegionBrush}  4.89/4.89  
+F  decorative  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:328  Ellipse  {DynamicResource NewBadgeBrush} on {RegionBrushOpacity25} over {RegionBrush}  4.89/2.14  
+F  decorative  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:353  Path  {DynamicResource NewBadgeBrush} on {RegionBrushOpacity25} over {RegionBrush}  4.89/2.14  
+F  decorative  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:362  Path  {DynamicResource NewBadgeBrush} on {RegionBrushOpacity25} over {RegionBrush}  4.89/2.14  
+F  decorative  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:403  Ellipse  {DynamicResource NewBadgeBrush} on {RegionBrushOpacity25} over {RegionBrush}  4.89/2.14  
+F  decorative  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:451  Path  {DynamicResource PrimaryBrush} on {RegionBrushOpacity25} over {RegionBrush}  3.71/1.62  
+F  decorative  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:508  Ellipse  {DynamicResource NewBadgeBrush} on {RegionBrushOpacity25} over {RegionBrush}  4.89/2.14  
+F  decorative  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:613  Ellipse  {DynamicResource NewBadgeBrush} on {RegionBrushOpacity25} over {RegionBrush}  4.89/2.14  
+F  decorative  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:708  Ellipse  {DynamicResource NewBadgeBrush} on {RegionBrush}  4.89/4.89  
+F  decorative  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:766  Ellipse  {DynamicResource NewBadgeBrush} on {RegionBrush}  4.89/4.89  
+F  decorative  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:800  Ellipse  {DynamicResource NewBadgeBrush} on {RegionBrush}  4.89/4.89  
+F  decorative  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:828  Ellipse  {DynamicResource NewBadgeBrush} on {RegionBrushOpacity25} over {RegionBrush}  4.89/2.14  
+F  decorative  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:884  Ellipse  {DynamicResource NewBadgeBrush} on {RegionBrush}  4.89/4.89  
+F  fail  src/MaaWpfGui/Res/Styles/ToolTip.xaml:3  Style[MaaToolTipDefaultStyle]/base  {DynamicResource PrimaryTextBrush} on {MouseOverRegionBrush}  11.29/1.12  light-fails
+F  fail  src/MaaWpfGui/Views/Dialogs/AchievementListDialogView.xaml:114  Style[ListBoxItem]/trigger  {DynamicResource PrimaryTextBrush} on {MdXamlBackground}  11.00/1.25  light-fails
+F  fail  src/MaaWpfGui/Views/Dialogs/AchievementListDialogView.xaml:75  TextBlock  {DynamicResource InfoLogBrush} ×0.7 on {MdXamlBackground}  3.99/2.63  both-low
+F  fail  src/MaaWpfGui/Views/Dialogs/AnnouncementDialogView.xaml:140  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {MdXamlBackground}  11.63/1.25  light-fails
+F  fail  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:380  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  3.70/1.62  light-fails
+F  fail  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:386  Button⊕Style[TaskActionButtonStyle]/base  {DynamicResource SecondaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  3.70/1.62  light-fails
+F  fail  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:386  Button⊕Style[TaskActionButtonStyle]/trigger  {DynamicResource PrimaryBrush} on {RegionBrushOpacity25} over {RegionBrush}  3.71/1.62  light-fails
+F  fail  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:395  Button⊕Style[TaskActionButtonStyle]/base  {DynamicResource SecondaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  3.70/1.62  light-fails
+F  fail  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:395  Button⊕Style[TaskActionButtonStyle]/trigger  {DynamicResource PrimaryBrush} on {RegionBrushOpacity25} over {RegionBrush}  3.71/1.62  light-fails
+F  fail  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:413  Button⊕Style[TaskActionButtonStyle]/base  {DynamicResource SecondaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  3.70/1.62  light-fails
+F  fail  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:413  Button⊕Style[TaskActionButtonStyle]/trigger  {DynamicResource PrimaryBrush} on {RegionBrushOpacity25} over {RegionBrush}  3.71/1.62  light-fails
+F  fail  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:676  TextBlock  {DynamicResource ThirdlyTextBrush} on {RegionBrush}  4.37/1.13  light-fails
+F  fail  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:778  TextBlock  {DynamicResource ThirdlyTextBrush} on {RegionBrush}  4.37/1.13  light-fails
+F  ok  src/MaaWpfGui/Res/Styles/MdXaml.xaml:8  Style[MdXamlStyle]/trigger  {DynamicResource MdXamlForeground} on {MdXamlBackground}  11.00/16.10  
+F  ok  src/MaaWpfGui/Res/Styles/MdXaml.xaml:8  Style[MdXamlStyle]/trigger  {DynamicResource MdXamlForeground} on {MdXamlBackground}  11.00/16.10  
+F  ok  src/MaaWpfGui/Res/Styles/MdXaml.xaml:8  Style[MdXamlStyle]/trigger  {DynamicResource MdXamlForeground} on {MdXamlBackground}  11.00/16.10  
+F  ok  src/MaaWpfGui/Res/Styles/MdXaml.xaml:8  Style[MdXamlStyle]/trigger  {DynamicResource MdXamlForeground} on {MdXamlBackground}  11.00/16.10  
+F  ok  src/MaaWpfGui/Views/Dialogs/AchievementListDialogView.xaml:42  TextBlock  {DynamicResource MessageLogBrush} on {MdXamlBackground}  11.00/21.00  
+F  ok  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:1049  TextBlock  {DynamicResource PrimaryTextBrush} on {RegionBrush}  13.65/13.65  
+F  ok  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:1067  TextBlock  {DynamicResource PrimaryTextBrush} on {RegionBrush}  13.65/13.65  
+F  ok  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:1078  TextBlock  {DynamicResource PrimaryTextBrush} on {RegionBrush}  13.65/13.65  
+F  ok  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:116  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:336  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:344  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/Dialogs/EasterEggDialogView.xaml:25  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/Dialogs/ItemSelectionDialogView.xaml:42  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/Dialogs/ItemSelectionDialogView.xaml:48  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/Dialogs/ProcessPickerDialogView.xaml:27  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/Dialogs/ProcessPickerDialogView.xaml:32  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/Dialogs/ProcessPickerDialogView.xaml:38  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/Dialogs/TextDialogView.xaml:45  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/Dialogs/TextDialogView.xaml:52  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/Dialogs/TextWithTimerDialogView.xaml:36  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/UI/CopilotView.xaml:369  DataGridTextColumn  {DynamicResource PrimaryTextBrush} on {RegionBrush}  13.65/13.65  
+F  ok  src/MaaWpfGui/Views/UI/CopilotView.xaml:403  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/UI/CopilotView.xaml:423  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/UI/CopilotView.xaml:431  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/UI/CopilotView.xaml:438  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:102  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:113  TextBlock  {DynamicResource WarningLogBrush} on {RegionBrush}  7.62/5.24  
+F  ok  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:132  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:145  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:27  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:655  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:738  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:759  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrush}  13.65/5.97  
+F  ok  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:187  TextBlock  White on #555555  7.46/7.46  
+F  ok  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:206  TextBlock  White on #6969AA  5.00/5.00  
+F  ok  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:222  TextBlock  White on #555555  7.46/7.46  
+F  ok  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:241  TextBlock  White on #6969AA  5.00/5.00  
+F  ok  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:257  TextBlock  White on #555555  7.46/7.46  
+F  ok  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:276  TextBlock  White on #6969AA  5.00/5.00  
+F  ok  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:291  TextBlock  White on #555555  7.46/7.46  
+F  ok  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:309  TextBlock  White on #6969AA  5.00/5.00  
+F  ok  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:336  TextBlock  White on #555555  7.46/7.46  
+F  ok  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:354  TextBlock  White on #6969AA  5.00/5.00  
+F  ok  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:370  TextBlock  White on #555555  7.46/7.46  
+F  ok  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:388  TextBlock  White on #6969AA  5.00/5.00  
+F  warn  src/MaaWpfGui/Res/Styles/MdXaml.xaml:8  Style[MdXamlStyle]/trigger  {DynamicResource HyperlinkHoverBrush} on {MdXamlBackground}  3.74/4.00  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/AchievementListDialogView.xaml:53  TextBlock  {DynamicResource InfoLogBrush} on {MouseOverRegionBrushOpacity75} over {MdXamlBackground}  6.40/3.70  light-fails
+F  warn  src/MaaWpfGui/Views/Dialogs/AchievementListDialogView.xaml:62  TextBlock  {DynamicResource TraceLogBrush} on {MdXamlBackground}  5.84/3.95  light-fails
+F  warn  src/MaaWpfGui/Views/Dialogs/AchievementListDialogView.xaml:71  TextBlock  {DynamicResource InfoLogBrush} on {MdXamlBackground}  6.60/4.15  light-fails
+F  warn  src/MaaWpfGui/Views/Dialogs/AnnouncementDialogView.xaml:55  TextBlock  {DynamicResource NewBadgeBrush} on {RegionBrushOpacity25} over {MdXamlBackground}  4.17/3.48  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:1063  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:1073  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:1117  TextBlock  {DynamicResource PrimaryBrush} on {RegionBrush}  3.71/3.71  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:39  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:416  Button⊕Style[→ButtonIcon]/base  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:499  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:517  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:532  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:592  TextBlock  {DynamicResource PrimaryBrush} on {RegionBrush}  3.71/3.71  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:633  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:677  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:682  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:753  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:882  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:896  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:931  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:944  TextBlock  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:992  TextBlock⊕Style[inline]/base  {DynamicResource SecondaryTextBrush} on {RegionBrush}  3.70/3.70  both-low
+F  warn  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:1086  TextBlock⊕Style[HyperlinkTextBlockStyle]/base  {DynamicResource HyperlinkBrush} on {RegionBrush}  3.71/3.71  both-low
+F  warn  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:1086  TextBlock⊕Style[HyperlinkTextBlockStyle]/trigger  {DynamicResource HyperlinkHoverBrush} on {RegionBrush}  4.65/4.26  both-low
+F  warn  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:535  MenuButton⊕Style[MaaButtonDefaultStyle]/base  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrushOpacity25} over {RegionBrush}  13.65/3.16  light-fails
+F  warn  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:623  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrushOpacity25} over {RegionBrush}  13.65/3.16  light-fails
+F  warn  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:633  Button  {DynamicResource PrimaryTextBrush} on {RegionBrushOpacity25} over {RegionBrushOpacity25} over {RegionBrush}  13.65/3.16  light-fails
+# U  原因  檔案:行  值
+U  bound-or-gradient  src/MaaWpfGui/Views/Dialogs/ErrorDialogView.xaml:125  <ImageBrush>
+U  bound-or-gradient  src/MaaWpfGui/Views/Dialogs/ErrorDialogView.xaml:135  <ImageBrush>
+U  bound-or-gradient  src/MaaWpfGui/Views/Dialogs/ErrorDialogView.xaml:148  <ImageBrush>
+U  bound-or-gradient  src/MaaWpfGui/Views/Dialogs/ErrorDialogView.xaml:180  <ImageBrush>
+U  bound-or-gradient  src/MaaWpfGui/Views/Dialogs/ErrorDialogView.xaml:90  <ImageBrush>
+U  bound-or-gradient  src/MaaWpfGui/Views/UI/RootView.xaml:141  {Binding OtherButtonBackground, RelativeSource={RelativeSource AncestorType=hc:Window}}
+U  bound-or-gradient  src/MaaWpfGui/Views/UI/RootView.xaml:141  {Binding OtherButtonBackground, RelativeSource={RelativeSource AncestorType=hc:Window}}
+U  bound-or-gradient  src/MaaWpfGui/Views/UI/RootView.xaml:141  {Binding OtherButtonHoverBackground, RelativeSource={RelativeSource AncestorType=hc:Window}}
+U  bound-or-gradient  src/MaaWpfGui/Views/UserControl/Settings/BackgroundSettings.xaml:212  {Binding CurrentMonetColor}
+U  bound-or-gradient  src/MaaWpfGui/Views/UserControl/Settings/GameSettingsUserControl.xaml:46  <LinearGradientBrush>
+U  no-ancestor-background  src/MaaWpfGui/Styles/Controls/LogSectionDivider.xaml:16  {DynamicResource BorderBrush}
+U  no-ancestor-background  src/MaaWpfGui/Styles/Controls/LogSectionDivider.xaml:22  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Styles/Controls/LogSectionDivider.xaml:22  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Styles/Controls/LogSectionDivider.xaml:22  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Styles/Controls/LogSectionDivider.xaml:44  {DynamicResource BorderBrush}
+U  no-ancestor-background  src/MaaWpfGui/Styles/Controls/TreeComboBox.xaml:59  {DynamicResource PrimaryTextBrush}
+U  no-ancestor-background  src/MaaWpfGui/Styles/Controls/TreeComboBox.xaml:77  {DynamicResource PrimaryTextBrush}
+U  no-ancestor-background  src/MaaWpfGui/Styles/Controls/UpdateCredentialInput.xaml:79  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Styles/Controls/UpdateCredentialInput.xaml:79  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Styles/Controls/UpdateCredentialInput.xaml:79  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/Dialogs/ErrorDialogView.xaml:73  {DynamicResource ErrorLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/CopilotView.xaml:472  {DynamicResource SecondaryTextBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/CopilotView.xaml:703  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/CopilotView.xaml:703  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/CopilotView.xaml:711  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/CopilotView.xaml:711  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/CopilotView.xaml:736  {DynamicResource PrimaryTextBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/CopilotView.xaml:801  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/CopilotView.xaml:862  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/CopilotView.xaml:862  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/RootView.xaml:158  {DynamicResource RegionBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/RootView.xaml:86  Red
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/RootView.xaml:97  Red
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/SettingsView.xaml:150  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/SettingsView.xaml:350  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:1077  {DynamicResource PrimaryTextBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:499  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:509  {DynamicResource SecondaryTextBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:802  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:922  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:110  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:110  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:32  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:32  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:44  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:44  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:56  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:56  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:75  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:75  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:87  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:87  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:98  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:98  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/ConnectSettingsUserControl.xaml:459  {DynamicResource PrimaryTextBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/ConnectSettingsUserControl.xaml:84  {DynamicResource ErrorLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:103  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:165  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:44  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/GameSettingsUserControl.xaml:92  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/GameSettingsUserControl.xaml:92  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/GuiSettingsUserControl.xaml:115  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/GuiSettingsUserControl.xaml:140  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/GuiSettingsUserControl.xaml:182  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/GuiSettingsUserControl.xaml:231  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/GuiSettingsUserControl.xaml:24  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/GuiSettingsUserControl.xaml:52  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/GuiSettingsUserControl.xaml:81  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/IssueReportUserControl.xaml:59  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/IssueReportUserControl.xaml:59  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/IssueReportUserControl.xaml:68  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/IssueReportUserControl.xaml:68  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/NotificationSettingsUserControl.xaml:45  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/RemoteControlUserControl.xaml:154  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/RemoteControlUserControl.xaml:154  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/StartSettingsUserControl.xaml:46  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/ThirdPartyServiceSettingsUserControl.xaml:22  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/ThirdPartyServiceSettingsUserControl.xaml:40  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/ThirdPartyServiceSettingsUserControl.xaml:77  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/ThirdPartyServiceSettingsUserControl.xaml:77  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:472  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:472  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/CustomTaskUserControl.xaml:27  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/DepotMaintainTaskUserControl.xaml:393  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/DepotMaintainTaskUserControl.xaml:425  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/DepotMaintainTaskUserControl.xaml:439  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/InfrastTaskUserControl.xaml:77  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/InfrastTaskUserControl.xaml:77  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/MallTaskUserControl.xaml:99  {DynamicResource ThirdlyTextBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/OperProgressTaskUserControl.xaml:40  {DynamicResource HyperlinkBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/OperProgressTaskUserControl.xaml:40  {DynamicResource HyperlinkHoverBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/PostActionUserControl.xaml:114  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/PostActionUserControl.xaml:39  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/PostActionUserControl.xaml:76  {DynamicResource TraceLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/StartUpTaskUserControl.xaml:111  {DynamicResource ErrorLogBrush}
+U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/StartUpTaskUserControl.xaml:206  {DynamicResource PrimaryTextBrush}
+U  over-sibling-content  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1075  <Image>
+U  over-sibling-content  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1199  <Image>
+U  over-sibling-content  src/MaaWpfGui/Views/UI/ToolboxView.xaml:444  <Image>
+U  over-sibling-content  src/MaaWpfGui/Views/UI/ToolboxView.xaml:566  <Image>
+U  over-sibling-content  src/MaaWpfGui/Views/UI/ToolboxView.xaml:616  <Image>
+U  over-sibling-content  src/MaaWpfGui/Views/UI/ToolboxView.xaml:645  <Image>
+U  over-sibling-content  src/MaaWpfGui/Views/UI/ToolboxView.xaml:661  <Image>
+U  translucent-uncomposited  src/MaaWpfGui/Res/Styles/ListBox.xaml:28  {DynamicResource MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Res/Styles/ListBox.xaml:44  {DynamicResource RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Res/Styles/SplitButton.xaml:3  {DynamicResource RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Styles/Controls/TooltipBlock.xaml:35  MouseOverRegionBrushOpacity75
+U  translucent-uncomposited  src/MaaWpfGui/Styles/Controls/UpdateCredentialInput.xaml:52  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/CopilotView.xaml:146  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/CopilotView.xaml:156  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/CopilotView.xaml:203  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/CopilotView.xaml:210  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/CopilotView.xaml:300  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/CopilotView.xaml:480  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/CopilotView.xaml:589  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/CopilotView.xaml:604  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/CopilotView.xaml:638  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/CopilotView.xaml:654  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/CopilotView.xaml:756  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/CopilotView.xaml:838  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/CopilotView.xaml:845  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/OverlayWindow.xaml:46  RegionBrushOpacity75
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/SettingsView.xaml:77  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/SettingsView.xaml:95  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:1005  MouseOverRegionBrushOpacity10
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:1024  MouseOverRegionBrushOpacity10
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:1097  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:144  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:238  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:286  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:286  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:294  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:294  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:301  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:301  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:338  {DynamicResource RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:418  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:428  {RegionBrushOpacity25} over {RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:438  {RegionBrushOpacity25} over {RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:471  {RegionBrushOpacity25} over {RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:531  {DynamicResource RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:531  {DynamicResource RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:563  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:572  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:719  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:853  MouseOverRegionBrushOpacity10
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1021  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1029  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1118  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1141  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1149  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1157  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1215  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1309  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1319  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1498  MouseOverRegionBrushOpacity75
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:322  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:744  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:840  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:903  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:911  {RegionBrushOpacity25} over {MouseOverRegionBrushOpacity75}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/AboutUserControl.xaml:59  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/AchievementSettingsUserControl.xaml:23  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/AchievementSettingsUserControl.xaml:28  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/AchievementSettingsUserControl.xaml:32  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/AchievementSettingsUserControl.xaml:57  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/AchievementSettingsUserControl.xaml:61  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/BackgroundSettings.xaml:224  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/BackgroundSettings.xaml:62  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/BackgroundSettings.xaml:89  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ConfigurationMgrUserControl.xaml:45  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ConfigurationMgrUserControl.xaml:77  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ConnectSettingsUserControl.xaml:127  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ConnectSettingsUserControl.xaml:162  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ConnectSettingsUserControl.xaml:358  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ConnectSettingsUserControl.xaml:365  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ConnectSettingsUserControl.xaml:372  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ConnectSettingsUserControl.xaml:381  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ConnectSettingsUserControl.xaml:469  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ConnectSettingsUserControl.xaml:55  {DynamicResource RegionBrushOpacity50}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ConnectSettingsUserControl.xaml:55  {DynamicResource RegionBrushOpacity50}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:174  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:198  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:262  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:266  {RegionBrushOpacity25} over {RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:303  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:307  {RegionBrushOpacity25} over {RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:356  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:360  {RegionBrushOpacity25} over {RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:411  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:415  {RegionBrushOpacity25} over {RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:460  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:464  {RegionBrushOpacity25} over {RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:547  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:551  {RegionBrushOpacity25} over {RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:594  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:598  {RegionBrushOpacity25} over {RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:653  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:657  {RegionBrushOpacity25} over {RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:700  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ExternalNotificationSettingsUserControl.xaml:704  {RegionBrushOpacity25} over {RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/GuiSettingsUserControl.xaml:220  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/IssueReportUserControl.xaml:77  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/IssueReportUserControl.xaml:83  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/IssueReportUserControl.xaml:89  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/RemoteControlUserControl.xaml:101  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/RemoteControlUserControl.xaml:126  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/StartSettingsUserControl.xaml:121  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/StartSettingsUserControl.xaml:126  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/StartSettingsUserControl.xaml:178  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/StartSettingsUserControl.xaml:183  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/ThirdPartyServiceSettingsUserControl.xaml:62  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:404  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:409  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Settings/VersionUpdateSettingsUserControl.xaml:418  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/DepotMaintainTaskUserControl.xaml:215  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/DepotMaintainTaskUserControl.xaml:38  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/DepotMaintainTaskUserControl.xaml:44  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/DepotMaintainTaskUserControl.xaml:50  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/DepotMaintainTaskUserControl.xaml:56  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/DepotMaintainTaskUserControl.xaml:70  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/DepotMaintainTaskUserControl.xaml:88  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/FightTaskUserControl.xaml:310  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/FightTaskUserControl.xaml:372  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/FightTaskUserControl.xaml:428  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/FightTaskUserControl.xaml:442  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/InfrastTaskUserControl.xaml:204  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/InfrastTaskUserControl.xaml:213  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/InfrastTaskUserControl.xaml:92  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/OperProgressTaskUserControl.xaml:107  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/OperProgressTaskUserControl.xaml:47  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/OperProgressTaskUserControl.xaml:53  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/OperProgressTaskUserControl.xaml:59  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/PostActionUserControl.xaml:32  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/StartUpTaskUserControl.xaml:138  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/StartUpTaskUserControl.xaml:173  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/StartUpTaskUserControl.xaml:356  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/StartUpTaskUserControl.xaml:362  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/StartUpTaskUserControl.xaml:45  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/StartUpTaskUserControl.xaml:93  {DynamicResource RegionBrushOpacity50}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/StartUpTaskUserControl.xaml:93  {DynamicResource RegionBrushOpacity50}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/TaskQueue/SwitchThemeTaskUserControl.xaml:80  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Toolbox/PixelPaintUserControl.xaml:104  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Toolbox/PixelPaintUserControl.xaml:78  RegionBrushOpacity25
+U  translucent-uncomposited  src/MaaWpfGui/Views/UserControl/Toolbox/PixelPaintUserControl.xaml:91  RegionBrushOpacity25
+U  unknown-palette-key  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:512  SuccessBrush
+U  unknown-palette-key  src/MaaWpfGui/Views/Dialogs/DailyReportDialogView.xaml:527  WarningBrush
+U  unknown-palette-key  src/MaaWpfGui/Views/Dialogs/ErrorDialogView.xaml:158  CongratulationsFlowBrush
+U  unknown-palette-key  src/MaaWpfGui/Views/UI/CopilotView.xaml:672  DangerBrush
+U  unknown-palette-key  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1098  RainbowFlowBrush
+U  unknown-palette-key  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:216  InfoBrush
+U  unknown-palette-key  src/MaaWpfGui/Views/UserControl/GuideUserControl.xaml:902  InfoBrush
+U  unknown-palette-key  src/MaaWpfGui/Views/UserControl/Settings/ConnectSettingsUserControl.xaml:90  RainbowFlowBrush
+U  unknown-palette-key  src/MaaWpfGui/Views/UserControl/TaskQueue/RoguelikeTaskUserControl.xaml:123  InfoBrush
+U  unknown-palette-key  src/MaaWpfGui/Views/UserControl/TaskQueue/RoguelikeTaskUserControl.xaml:279  InfoBrush
+U  unknown-palette-key  src/MaaWpfGui/Views/UserControl/TaskQueue/RoguelikeTaskUserControl.xaml:585  InfoBrush
+U  unknown-palette-key  src/MaaWpfGui/Views/UserControl/TaskQueue/RoguelikeTaskUserControl.xaml:645  InfoBrush
+U  unknown-palette-key  src/MaaWpfGui/Views/UserControl/TaskQueue/StartUpTaskUserControl.xaml:117  RainbowFlowBrush

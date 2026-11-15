@@ -203,6 +203,16 @@ tried in this order, and the one that ran is always named on the first line of t
    (MIT, see THIRD-PARTY-NOTICES.md); the commit is named on the palette line. WPF projects are not affected.
    A page's background usually comes from the window (Mica or the default page brush), which the tool can't see —
    set `rootBackground` for that.
+   **Theme libraries:** a project that references WPF-UI, MaterialDesignInXamlToolkit or HandyControl gets that
+   library's built-in theme colours the same way (310 / 124 / 27 brushes, read from each library's own theme files
+   at a pinned commit, MIT). Same rules: only for the projects that reference it, lowest layer, the project's own
+   definition always wins, accent-derived keys are not guessed, high-contrast themes are not included, and the
+   palette line names the commit. Measured on a public WPF-UI app (Bloxstrap): unresolvable keys 111 → 37, and with
+   `rootBackground` set as the tool now suggests, 0 graded pairs → 55 at 46.2% coverage.
+   **MahApps.Metro has no such table on purpose:** its theme files are generated at build time (1077 keys, 112
+   placeholders), so its repository holds no file with real colours, and the values depend on the accent the app
+   merged. Guessing them is exactly what this tool doesn't do — MahApps projects get the `rootBackground` hint,
+   measured at 9.4% → 83.5% coverage on a real one.
    **Aliases** — `<StaticResource x:Key="A" ResourceKey="B"/>` (also the `DynamicResource` / `ThemeResource` elements) —
    are followed per theme, through chains, and after WinUI's defaults are in, so an alias to a framework key resolves;
    one whose target can't be found is `unknown-palette-key` naming the target. A **colour key inside a brush**
@@ -467,7 +477,8 @@ are **open sets** that a 1.x release may extend — the unresolved reasons (`unr
 lists them as strings with the current values in their description.
 
 - Top level: `toolVersion`, `exitCode` (the audit verdict: 0, 1 or 3), `summary`,
-  `unresolvedSites`, `findings`.
+  `unresolvedSites`, `stateColorSites` (from 1.5: every `VisualStateManager` state colour found and
+  deliberately not graded — `file`, `line`, `state`, `kind`, `property`, `target`), `findings`.
 - `summary` carries the gate in effect (`failOn`, `minCoverage`, `strictPalette`, and from 1.3
   `failOnNewUnresolved`) and every
   degradation signal — `paletteDegraded`, `coverage`, `unresolved` (with `unresolvedBy`), `skipped`,
@@ -508,7 +519,7 @@ doesn't tell you whether anything can be done about it:
 | `no-ancestor-background` | nothing up the tree declares a background — often a root container relying on an app-level implicit style, or vector artwork in a resource dictionary |
 | `bound-or-gradient` | the colour comes from `{Binding}` / `{TemplateBinding}` / a gradient or image brush — only knowable at runtime. Also anything else the tool can't read as a colour (every WPF colour literal — `#RGB`, `#ARGB`, `#RRGGBB`, `#AARRGGBB`, the named colours, and `{x:Static Colors.Red}` / `{x:Static Brushes.Red}` — is read; `{x:Static SystemColors.…}` follows the operating system's theme and high-contrast setting, and a static member of your own class needs C#, so both stay here) |
 | `unknown-palette-key` | the resource key isn't in the detected palette — a typo, or palette detection missed a file |
-| `translucent-uncomposited` | a transparent or translucent background with nothing underneath to composite against — a translucent `Background` with no background above it, a style's own `Background="Transparent"` at its definition when no use site grades it (an implicit style, or a named style no element references with `Style=`; a used style is graded where it's used instead), or an `Opacity`-faded layer over nothing. `rootBackground` (below) fixes the first kind |
+| `translucent-uncomposited` | a transparent or translucent background with nothing underneath to composite against — a translucent `Background` with no background above it, a style's own `Background="Transparent"` at its definition when no use site grades it (a named style no element references with `Style=`, or an implicit style for a type the project has no element of; both implicit and referenced styles are graded where they are used instead), or an `Opacity`-faded layer over nothing. `rootBackground` (below) fixes the first kind |
 | `same-brush-pair` | a style sets `Foreground` and `Background` to the *same* brush — the Material template-opacity idiom (the template paints the background at 10–12% opacity as a tint); literally 1:1, not at runtime, and the opacity animation is invisible statically |
 | `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio |
 | `in-style-template` | a text element with its own `Foreground` inside a style's `Template` setter (`<Setter Property="Template"><Setter.Value><ControlTemplate>`) — not graded yet (see Known limitations), counted so the gap shows in coverage |
@@ -543,19 +554,23 @@ static analysis (colours that flow through `{TemplateBinding}` and `{Binding}` e
 which is why control libraries resolve poorly) — lower the floor to what the project can reach
 (`--min-coverage 20`, or `"minCoverage"` in the config) and treat the resolved subset as a sample.
 
-**Apps built on a theme library** (MahApps, HandyControl, MaterialDesign…) are a special,
-fixable case: your window background *key* lives in your repo's theme files, but the implicit
-style that connects it to your windows lives inside the NuGet package, invisible to static
-analysis. Declare it once in `xamlcontrast.config.json`:
+**Apps built on a theme library** (MahApps.Metro, HandyControl, MaterialDesignInXamlToolkit,
+WPF-UI…) are a special, fixable case: your window background *key* usually lives in your repo's
+theme files, but the implicit style that connects it to your windows lives inside the NuGet package
+— compiled into the assembly, invisible to static analysis. Declare it once in
+`xamlcontrast.config.json`:
 
 ```json
-{ "rootBackground": "MahApps.Brushes.Window.Background" }
+{ "rootBackground": "MahApps.Brushes.ThemeBackground" }
 ```
 
-Measured on NETworkManager (a MahApps app, 154 XAML files): coverage went from **8.8% to
-87.2%** with that one line — surfacing 284 genuine light-theme failures the tool was
-previously blind to. A key not present in the detected palette is a config error (exit 2),
-never a silent no-op.
+Measured on NETworkManager (a MahApps app, 163 XAML files): **135 graded pairs at 9.4% coverage
+became 1161 at 83.5%** with that one line, surfacing 249 failures the tool was previously blind to.
+A key not present in the detected palette is a config error (exit 2), never a silent no-op — so the
+hint checks first: it names the library it detected (from the pack URI, or `<BundledTheme/>` /
+`<ControlsDictionary/>` / `<ThemesDictionary/>`) and prints the exact key when your theme files
+declare one of that library's background keys. When they don't — the keys only exist inside the
+package — it asks for a literal colour instead, and you run once per theme.
 
 **Colours fixed inside a value converter** (opt-in, from 1.2). A toolbar button that changes colour
 when selected is often written `Background="{Binding ActiveTool, Converter={StaticResource ActiveBrush}, ConverterParameter=Pen}"`,
@@ -750,13 +765,24 @@ Honest list — full blind-spot table with per-case evidence in the
   `file:line` and the foreground), so coverage shows the gap; the host's own foreground, which the
   template renders through `{TemplateBinding Foreground}` or a `ContentPresenter`, is graded through
   the style chain as before
-- Implicit styles (beyond the document root's background) — e.g. a button inside a `DataGrid` row
-  is graded against the grid's background, not the selected row's highlight that the implicit
-  `DataGridRow` style paints (measured: a ghost button reported ok is 4.06:1 on a selected row)
-- `VisualStateManager` colour animations (`ColorAnimation` in state storyboards) are not
-  audited **and not yet counted** — a Blend-era styling dialect (measured: dozens of sites
-  in kaxaml/snoop-class projects, zero in modern ones). A counter is planned; until then
-  this line is the disclosure.
+- Implicit styles (`<Style TargetType="X">` with no `x:Key`) **are** resolved — for every element's
+  background and foreground, following WPF's scope rules: a style in a nested `<X.Resources>` applies
+  only inside that element's subtree, the innermost scope wins, an element with its own `Style` takes no
+  implicit style, and a style assigned to a property (`ItemContainerStyle`, `DataGridTextColumn.ElementStyle`,
+  an inline `<X.Style>`) is not an implicit style. A style's own `<Style.Resources>` is resolved too, for the
+  content of the elements that use that style — WPF's standard way to override a global implicit style for one
+  control — and it beats the file's and the global one, is inherited through `BasedOn`, and does not reach the
+  styled element itself. Three parts still say nothing rather than guess:
+  the **trigger states** of an implicit style (the base state is graded), a **templated control** whose
+  template paints the background out of sight (`<hc:Shield Color="#1182c3"/>` — the label is on the badge,
+  not on the ancestor), and a type with **several competing global implicit styles**, where the winner
+  depends on the merge order at runtime
+- `VisualStateManager` state colours — state storyboards (`ColorAnimation`, brush key frames) and
+  WinUI's `<VisualState.Setters>` — are **counted and listed, not graded**: `summary.stateColors` and
+  `stateColorSites` in `report.json` name every site, and the console, Markdown and HTML reports say how
+  many there are. What the control looks like in that state is only knowable at runtime; the base state is
+  graded as usual. `Opacity` animations are not counted (focus and shadow fades would bury the signal).
+  Measured: WinUI Gallery 44 sites, wpfui 18, HandyControl 15, Playnite 8 — and 0 in all four maintainer apps
 - `Binding` / `TemplateBinding` colors are reported as *unresolved*, never guessed —
   guessing would trade honest uncertainty for false confidence
 

@@ -95,6 +95,16 @@ four closed-source applications on the maintainer's machine and compares against
 snapshots. It runs before every release. If your change moves those numbers I will see it
 there, so don't be surprised if I come back with questions about a project you can't see.
 
+`scripts/verify-corpus.ps1` you *can* run, if you have the network and about 52 MB of disk:
+it sparse-clones thirteen public projects at the commits pinned in
+`baselines/corpus/corpus.txt`, audits each one, and diffs every finding and unresolved site
+against the frozen digests next to it. **Run it for any change to palette detection or a
+resolution rule** — those four closed-source apps are all WPF *applications*, so they cannot
+show you what your change does to a control library, to WinUI, or to a theme built at build time.
+The digests are plain text, one line per site, so `git diff baselines/corpus/` tells you which
+finding moved. If the new behaviour is right, re-freeze with `-Update` and include that diff
+in your PR with the attribution — one line per group of changes, saying why.
+
 CI runs the tests on Linux, Windows and macOS, checks formatting (`dotnet format`), packs
 the tool and installs it, and audits the deliberately-broken demo project expecting exit 1.
 

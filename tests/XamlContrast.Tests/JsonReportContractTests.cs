@@ -30,6 +30,21 @@ public class JsonReportContractTests
             "findings[].colors.light.bg:String",
             "findings[].colors.light.fg:String",
         ],
+        // 1.5：VisualStateManager 的狀態顏色 —— 明文盲區的計數器與逐筆位置。
+        // 不進 pairs／unresolved／coverage（見 StateColorSite），所以既有欄位的數字一個都不動
+        ["1.5"] =
+        [
+            "summary.stateColors:Number",
+            "stateColorSites:Array",
+            "stateColorSites[]:Object",
+            "stateColorSites[].file:String",
+            "stateColorSites[].kind:String",
+            "stateColorSites[].line:Number",
+            "stateColorSites[].property:String",
+            "stateColorSites[].state:String",
+            "stateColorSites[].target:Null",
+            "stateColorSites[].target:String",
+        ],
     };
 
     /// <summary>
@@ -211,7 +226,7 @@ public class JsonReportContractTests
                 </Style>
               </Grid.Resources>
               <!-- 排成一列：Grid 的子元素會疊在同一格，佔滿格子的兄弟（下面的 Binding 底）會變成後面兄弟的背板（規則 17） -->
-              <StackPanel>
+              <StackPanel x:Name="Rows">
               <TextBlock Foreground="{DynamicResource Fg}" Text="ok"/>
               <TextBlock Foreground="{DynamicResource Dim}" FontSize="12" Text="fail, 12px"/>
               <TextBlock Foreground="{DynamicResource Zed}" Text="unknown key 1"/>
@@ -225,6 +240,24 @@ public class JsonReportContractTests
               <TextBlock Foreground="{DynamicResource Dim}" Text="suppressed"/>
               <TextBlock Opacity="0" Foreground="#FFFFFF" Text="skipped"/>
               </StackPanel>
+              <!-- 1.5 的明文盲區：狀態顏色兩種寫法各一處（animation／setter）。
+                   刻意擺在最後、也不多加任何文字元素 —— 這份 fixture 的行號與計數被同檔其他測試釘著，
+                   而「狀態顏色不動任何既有數字」正是這個計數器的設計前提 -->
+              <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup x:Name="CommonStates">
+                  <VisualState x:Name="MouseOver">
+                    <Storyboard>
+                      <ColorAnimation Storyboard.TargetName="Rows"
+                                      Storyboard.TargetProperty="(Panel.Background).(SolidColorBrush.Color)" To="#303030"/>
+                    </Storyboard>
+                  </VisualState>
+                  <VisualState x:Name="Pressed">
+                    <VisualState.Setters>
+                      <Setter Target="Background" Value="#101010"/>
+                    </VisualState.Setters>
+                  </VisualState>
+                </VisualStateGroup>
+              </VisualStateManager.VisualStateGroups>
             </Grid>
             """);
         return fx;
@@ -287,6 +320,7 @@ public class JsonReportContractTests
         Same(p.GetProperty("summary").GetProperty("properties").GetProperty("thresholds"), root.GetProperty("summary").GetProperty("thresholds"), "thresholds");
         Same(p.GetProperty("summary").GetProperty("properties").GetProperty("counts"), root.GetProperty("summary").GetProperty("counts"), "counts");
         Same(p.GetProperty("unresolvedSites").GetProperty("items"), root.GetProperty("unresolvedSites")[0], "unresolvedSites[]");
+        Same(p.GetProperty("stateColorSites").GetProperty("items"), root.GetProperty("stateColorSites")[0], "stateColorSites[]");
         Same(p.GetProperty("findings").GetProperty("items"), root.GetProperty("findings")[0], "findings[]");
         var colors = root.GetProperty("findings")[0].GetProperty("colors");
         Same(p.GetProperty("findings").GetProperty("items").GetProperty("properties").GetProperty("colors"), colors, "findings[].colors");

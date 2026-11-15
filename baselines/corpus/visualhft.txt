@@ -1,0 +1,219 @@
+# XamlContrast 公開語料摘要 —— 由 scripts/verify-corpus.ps1 -Update 產生，不要手改。
+# 語料釘死（corpus.txt 的 commit）+ 這份凍結 = 紅燈只有一個可能：工具自己變了。
+project: visualhft
+repo: https://github.com/visualHFT/VisualHFT
+commit: 65b1d1270336864768180f5fbf8bae348694847f
+tool-commit: 07be1dd+dirty
+frozen: 2026-11-16
+exit: 3
+palette-mode: single
+palette-degraded: False
+palette-keys: 160
+single-theme: False
+files: 49
+pairs: 83
+coverage: 44.6
+unresolved: 103
+skipped: 0
+dead-foreground: 0
+disabled-exempt: 0
+converter-pairs: 0
+ui-component-pairs: 0
+parse-errors: 0
+suppressed: 0
+state-colors: 0
+fail: 44
+warn: 7
+ok: 29
+decorative: 3
+unresolved-by.bound-or-gradient: 65
+unresolved-by.no-ancestor-background: 37
+unresolved-by.translucent-uncomposited: 1
+# F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
+F  decorative  View/Dashboard.xaml:103  Ellipse  Red on {MaterialDesignPaper}  3.21/3.54  
+F  decorative  View/ucPositions.xaml:182  ProgressBar⊕Style[inline]/base  Yellow on {MaterialDesignPaper}  11.94/1.05  
+F  decorative  View/ucPositions.xaml:182  ProgressBar⊕Style[inline]/trigger  Green on {MaterialDesignPaper}  2.50/4.55  
+F  fail  TriggerEngine/View/AddAPISetting.xaml:31  TextBlock  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/AddAPISetting.xaml:61  TextBox  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/AddAPISetting.xaml:62  ComboBox  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/AddAPISetting.xaml:69  TextBlock  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/AddAPISetting.xaml:70  TextBlock  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/AddAPISetting.xaml:73  TextBlock  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/AddAPISetting.xaml:74  TextBox  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/AddAPISetting.xaml:78  TextBlock  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/AddAPISetting.xaml:79  TextBox  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/AddAPISetting.xaml:82  TextBlock  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/AddUIAlertSetting.xaml:29  TextBlock  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/AddUIAlertSetting.xaml:59  TextBox  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/AddUIAlertSetting.xaml:60  ComboBox  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:231  Label  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:232  TextBlock  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:305  TextBlock  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:309  TextBlock  #CCCCCC on {MaterialDesignPaper}  7.98/1.42  light-fails
+F  fail  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:327  TextBlock  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:328  TextBlock  LightGray on {MaterialDesignPaper}  8.56/1.33  light-fails
+F  fail  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:333  TextBlock  #CCCCCC on {MaterialDesignPaper}  7.98/1.42  light-fails
+F  fail  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:50  TextBlock  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:51  TextBox  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:60  Label  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:61  TextBlock  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  View/Dashboard.xaml:104  TextBlock  Black on {MaterialDesignPaper}  1.64/18.59  dark-fails
+F  fail  View/Dashboard.xaml:51  TextBlock⊕Style[inline]/trigger  Orange on {MaterialDesignPaper}  6.49/1.75  light-fails
+F  fail  View/Dashboard.xaml:70  Run  Black on {MaterialDesignPaper}  1.64/18.59  dark-fails
+F  fail  View/Dashboard.xaml:71  Run  Black on {MaterialDesignPaper}  1.64/18.59  dark-fails
+F  fail  View/Dashboard.xaml:72  Run  Black on {MaterialDesignPaper}  1.64/18.59  dark-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:100  Label⊕Style[CardTitles]/base  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:105  Label⊕Style[CardItems]/base  LightGray on {MaterialDesignPaper}  8.56/1.33  light-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:46  Label⊕Style[CardTitles]/base  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:51  Label⊕Style[CardItems]/base  LightGray on {MaterialDesignPaper}  8.56/1.33  light-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:52  Label⊕Style[CardItems]/base  LightGray on {MaterialDesignPaper}  8.56/1.33  light-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:53  Label⊕Style[CardItems]/base  LightGray on {MaterialDesignPaper}  8.56/1.33  light-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:64  Label⊕Style[CardTitles]/base  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:69  Label⊕Style[CardItems]/base  LightGray on {MaterialDesignPaper}  8.56/1.33  light-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:70  Label⊕Style[CardItems]/base  LightGray on {MaterialDesignPaper}  8.56/1.33  light-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:71  Label⊕Style[CardItems]/base  LightGray on {MaterialDesignPaper}  8.56/1.33  light-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:82  Label⊕Style[CardTitles]/base  White on {MaterialDesignPaper}  12.82/1.13  light-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:87  Label⊕Style[CardItems]/base  LightGray on {MaterialDesignPaper}  8.56/1.33  light-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:88  Label⊕Style[CardItems]/base  LightGray on {MaterialDesignPaper}  8.56/1.33  light-fails
+F  fail  View/StatisticsView/ucStrategyOverview.xaml:89  Label⊕Style[CardItems]/base  LightGray on {MaterialDesignPaper}  8.56/1.33  light-fails
+F  fail  View/ucPositions.xaml:205  TextBlock  Black on {MaterialDesignPaper}  1.64/18.59  dark-fails
+F  ok  AnalyticReports/ReportDictionary.xaml:64  Style[GridDataStyle]/base  #4d4e3a on #FFFFFF  8.51/8.51  
+F  ok  AnalyticReports/ReportDictionary.xaml:95  Style[ToolTip]/base  Black on #F8F8FF  19.86/19.86  
+F  ok  GlobalStyle.xaml:8  Style[BaseChartStyle]/base  {DynamicResource MaterialDesignBody} on {MaterialDesignPaper}  10.66/15.57  
+F  ok  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:24  TextBlock  White on #2D2D30  13.73/13.73  
+F  ok  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:25  TextBlock  #FF00FF7F on #2D2D30  10.21/10.21  
+F  ok  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:57  TextBlock  White on #2D2D30  13.73/13.73  
+F  ok  TriggerEngine/View/AddAPISetting.xaml:37  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  TriggerEngine/View/AddUIAlertSetting.xaml:35  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:237  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:66  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  View/Dashboard.xaml:118  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  View/Dashboard.xaml:121  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  View/Dashboard.xaml:124  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  View/Dashboard.xaml:51  TextBlock⊕Style[inline]/trigger  Red on {MaterialDesignPaper}  3.21/3.54  
+F  ok  View/ucOrderBook.xaml:124  TextBlock  #39AEDD on #434D4C  3.44/3.44  
+F  ok  View/ucOrderBook.xaml:125  TextBlock  #39AEDD on #434D4C  3.44/3.44  
+F  ok  View/ucOrderBook.xaml:126  TextBlock  #39AEDD on #434D4C  3.44/3.44  
+F  ok  View/ucOrderBook.xaml:145  TextBlock  #39AEDD on #434D4C  3.44/3.44  
+F  ok  View/ucOrderBook.xaml:146  TextBlock  #39AEDD on #434D4C  3.44/3.44  
+F  ok  View/ucOrderBook.xaml:147  TextBlock  #39AEDD on #434D4C  3.44/3.44  
+F  ok  View/ucOrderBook.xaml:161  TextBlock  White on #434D4C  8.73/8.73  
+F  ok  View/ucPositions.xaml:249  Style[TextBlock]/trigger  Black on #ADFF2F  17.12/17.12  
+F  ok  VisualHFT.Plugins/MarketConnectors.Binance/UserControls/PluginSettingsView.xaml:24  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  VisualHFT.Plugins/MarketConnectors.BitStamp/UserControls/PluginSettingsView.xaml:24  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  VisualHFT.Plugins/MarketConnectors.Bitfinex/UserControls/PluginSettingsView.xaml:24  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  VisualHFT.Plugins/MarketConnectors.Coinbase/UserControls/PluginSettingsView.xaml:24  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  VisualHFT.Plugins/MarketConnectors.Gemini/MarketConnectors.Gemini/UserControls/PluginSettingsView.xaml:24  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  VisualHFT.Plugins/MarketConnectors.Kraken/UserControls/PluginSettingsView.xaml:24  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  ok  VisualHFT.Plugins/MarketConnectors.KuCoin/UserControls/PluginSettingsView.xaml:24  TextBlock  Black on #FFFFFF  21.00/21.00  
+F  warn  AnalyticReports/ReportDictionary.xaml:34  Style[ExpanderHeaderStyle]/base  White on #898A75  3.53/3.53  both-low
+F  warn  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:56  TextBlock  Gray on #2D2D30  3.48/3.48  both-low
+F  warn  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:58  TextBlock  Gray on #2D2D30  3.48/3.48  both-low
+F  warn  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:59  TextBlock  Gray on #2D2D30  3.48/3.48  both-low
+F  warn  View/Dashboard.xaml:75  TextBlock  Gray on {MaterialDesignPaper}  3.25/3.50  both-low
+F  warn  View/ucOrderBook.xaml:127  TextBlock  #39AEDD on #434D4C  3.44/3.44  both-low
+F  warn  View/ucOrderBook.xaml:148  TextBlock  #39AEDD on #434D4C  3.44/3.44  both-low
+# U  原因  檔案:行  值
+U  bound-or-gradient  AnalyticReports/AnalyticReports.xaml:37  {Binding GlobalEntries[0].Fill}
+U  bound-or-gradient  AnalyticReports/AnalyticReports.xaml:38  {Binding GlobalEntries[1].Fill}
+U  bound-or-gradient  AnalyticReports/AnalyticReports.xaml:39  {Binding GlobalEntries[2].Fill}
+U  bound-or-gradient  AnalyticReports/AnalyticReports.xaml:40  {Binding GlobalEntries[3].Fill}
+U  bound-or-gradient  AnalyticReports/AnalyticReports.xaml:41  {Binding GlobalEntries[4].Fill}
+U  bound-or-gradient  AnalyticReports/AnalyticReports.xaml:42  {Binding GlobalEntries[5].Fill}
+U  bound-or-gradient  AnalyticReports/AnalyticReports.xaml:43  {Binding GlobalEntries[6].Fill}
+U  bound-or-gradient  AnalyticReports/AnalyticReports.xaml:44  {Binding GlobalEntries[7].Fill}
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:38  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:40  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:42  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:44  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:46  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:48  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:50  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:52  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:54  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:56  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:58  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:60  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:63  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:65  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:67  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:69  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:71  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:74  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:75  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:78  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:81  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:82  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:86  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucOverview.xaml:89  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:102  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:105  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:109  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:112  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:115  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:118  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:122  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:125  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:128  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:131  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:135  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:138  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:141  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:144  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:24  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:43  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:46  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:49  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:52  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:57  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:60  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:63  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:66  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:70  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:73  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:76  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStats.xaml:80  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStrategyHeader.xaml:26  <LinearGradientBrush>
+U  bound-or-gradient  AnalyticReports/View/ucStrategyHeader.xaml:28  <LinearGradientBrush>
+U  bound-or-gradient  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:35  {Binding ValueColor}
+U  bound-or-gradient  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:40  {Binding IndicatorColor}
+U  bound-or-gradient  UserControls/MetricTile.xaml:39  {Binding ValueColor}
+U  bound-or-gradient  View/ucOrderBook.xaml:183  <LinearGradientBrush>
+U  no-ancestor-background  SDK-MarketConnectorTemplate/UserControls/PluginSettingsView.xaml:26  Gray
+U  no-ancestor-background  SDK-MarketConnectorTemplate/UserControls/PluginSettingsView.xaml:49  Gray
+U  no-ancestor-background  SDK-MarketConnectorTemplate/UserControls/PluginSettingsView.xaml:60  Red
+U  no-ancestor-background  SDK-StudyTemplate/UserControls/PluginSettingsView.xaml:70  Red
+U  no-ancestor-background  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:34  Gray
+U  no-ancestor-background  UserControls/Block.xaml:6  #FF5482A1
+U  no-ancestor-background  View/ucDepth.xaml:105  LightGreen
+U  no-ancestor-background  View/ucDepth.xaml:106  LightGreen
+U  no-ancestor-background  View/ucDepth.xaml:107  LightGreen
+U  no-ancestor-background  View/ucDepth.xaml:142  White
+U  no-ancestor-background  View/ucDepth.xaml:143  White
+U  no-ancestor-background  View/ucDepth.xaml:144  White
+U  no-ancestor-background  View/ucDepth.xaml:190  Pink
+U  no-ancestor-background  View/ucDepth.xaml:191  Pink
+U  no-ancestor-background  View/ucDepth.xaml:192  Pink
+U  no-ancestor-background  View/ucDepth.xaml:57  White
+U  no-ancestor-background  View/ucDepth.xaml:58  White
+U  no-ancestor-background  View/ucDepth.xaml:59  White
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.Binance/UserControls/PluginSettingsView.xaml:128  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.Binance/UserControls/PluginSettingsView.xaml:18  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.BitStamp/UserControls/PluginSettingsView.xaml:124  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.BitStamp/UserControls/PluginSettingsView.xaml:18  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.Bitfinex/UserControls/PluginSettingsView.xaml:124  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.Bitfinex/UserControls/PluginSettingsView.xaml:18  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.Coinbase/UserControls/PluginSettingsView.xaml:127  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.Coinbase/UserControls/PluginSettingsView.xaml:18  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.Gemini/MarketConnectors.Gemini/UserControls/PluginSettingsView.xaml:120  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.Gemini/MarketConnectors.Gemini/UserControls/PluginSettingsView.xaml:18  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.Kraken/UserControls/PluginSettingsView.xaml:124  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.Kraken/UserControls/PluginSettingsView.xaml:18  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.KuCoin/UserControls/PluginSettingsView.xaml:127  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.KuCoin/UserControls/PluginSettingsView.xaml:18  Red
+U  no-ancestor-background  VisualHFT.Plugins/MarketConnectors.WebSocket/UserControls/PluginSettingsView.xaml:23  Red
+U  no-ancestor-background  VisualHFT.Plugins/Studies.LOBImbalance/UserControls/PluginSettingsView.xaml:57  Red
+U  no-ancestor-background  VisualHFT.Plugins/Studies.MarketResilience/UserControls/PluginSettingsView.xaml:36  Red
+U  no-ancestor-background  VisualHFT.Plugins/Studies.OTT_Ratio/UserControls/PluginSettingsView.xaml:56  Red
+U  no-ancestor-background  VisualHFT.Plugins/Studies.VPIN/UserControls/PluginSettingsView.xaml:142  Red
+U  translucent-uncomposited  View/ucOrderBook.xaml:263  #20FFFFFF

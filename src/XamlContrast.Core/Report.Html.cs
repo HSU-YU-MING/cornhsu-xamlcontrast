@@ -205,6 +205,8 @@ public static partial class Report
             ("excluded (dead Foreground setter)", Num(r.DeadForeground)),
             ("exempted (IsEnabled=False; WCAG 1.4.3)", Num(r.DisabledExempt)),
             ("suppressed via xamlcontrast-ignore", Num(r.Suppressed)),
+            // 1.5：明文盲區。是 0 也列 —— 這份報告被當成全貌看，不列就分不出「這個專案沒有」與「工具沒算」
+            ("VisualStateManager state colours (painted at runtime)", Num(r.StateColors.Count)),
             ("parse errors", Num(r.ParseErrors.Count)),
             ("invalid ignore comments", Num(r.InvalidIgnores.Count)),
         };

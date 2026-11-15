@@ -159,7 +159,7 @@ WCAG 2.x AA。`failFactor` 是「破」的分界（門檻 × `failFactor`，預�
 | `strictPalette` | `false` | `true` = 色盤偵測失敗（退回寫死色碼模式）時 exit 3（結果不可信） |
 | `failOnNewUnresolved` | `false` | 1.3 新增。`true` = `--baseline` 模式下，工具解析不了的配對比 baseline 記的多（新的檔＋原因＋值，或同一組變多處）就 exit 1。沒有 `--baseline` 時不作用，stderr 說一聲；baseline 是 1.3 之前寫的（沒有 `unresolved` 段）→ exit 2，要重跑 `--write-baseline`。見下面說明 |
 | `minCoverage` | `50` | 解析成功的配對低於此百分比即 exit 3（結果不可信）—— 只解析到一小部分的「通過」沒有意義。設 `0` 關閉。比的是報告上印的那個數（四捨五入到一位） |
-| `rootBackground` | — | 文件根元素的預設背景:色票鍵(`"MahApps.Brushes.Window.Background"`)或色碼(`"#FF202020"`)。給**主題函式庫的使用者**:視窗底色鍵在 repo 的主題檔裡,但「視窗 → 那個鍵」的隱含樣式住在 NuGet 套件裡,工具看不到。鍵不在偵測到的色盤裡 → exit 2。實測:NETworkManager 一行設定,覆蓋率 8.8% → 87.2% |
+| `rootBackground` | — | 文件根元素的預設背景:色票鍵(`"MahApps.Brushes.ThemeBackground"`)或色碼(`"#FF202020"`)。給**主題函式庫的使用者**:視窗底色鍵多半在 repo 的主題檔裡,但「視窗 → 那個鍵」的隱含樣式住在 NuGet 套件裡(編譯成 BAML),工具看不到。鍵不在偵測到的色盤裡 → exit 2(所以覆蓋率提示會先確認你的色盤真的有那個鍵,沒有就叫你給色碼)。實測:NETworkManager 一行設定,135 組配對、覆蓋率 9.4% → 1161 組、83.5% |
 
 配對數為 0 時 exit 3 是**不可設定的預設** —— 空掃綠燈就是謊報健康。
 `minCoverage` 是同一條原則的推廣:那條線原本是二元的,而八個公開專案實測有三個

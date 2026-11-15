@@ -1,0 +1,30 @@
+# XamlContrast 公開語料摘要 —— 由 scripts/verify-corpus.ps1 -Update 產生，不要手改。
+# 語料釘死（corpus.txt 的 commit）+ 這份凍結 = 紅燈只有一個可能：工具自己變了。
+project: ilspy
+repo: https://github.com/icsharpcode/ILSpy
+commit: caff1a9549afc1a97b5319454fe602bfbde5ccde
+tool-commit: 07be1dd+dirty
+frozen: 2026-11-16
+exit: 3
+palette-mode: single
+palette-degraded: False
+palette-keys: 20
+single-theme: True
+files: 22
+pairs: 0
+coverage: 0
+unresolved: 0
+skipped: 0
+dead-foreground: 0
+disabled-exempt: 0
+converter-pairs: 0
+ui-component-pairs: 0
+parse-errors: 0
+suppressed: 0
+state-colors: 0
+fail: 0
+warn: 0
+ok: 0
+decorative: 0
+# F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
+# U  原因  檔案:行  值

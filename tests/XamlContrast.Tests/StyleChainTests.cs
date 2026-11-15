@@ -270,8 +270,10 @@ public class StyleChainTests
 
     // ── Style 定義處的透明底：只有「不會在任何使用處被評到」的才記 unresolved（審查最後一輪 3）──
     //    ac7e903 讓定義處一律記 unresolved，但具名 Style 與行內 Style 在使用處都評了 —— 同一組被重複計算，
-    //    QuillNest 的覆蓋率被多扣。隱含樣式（沒有 x:Key）、以及沒有任何元素用 Style= 引用的具名 Style
-    //    （只透過 ItemContainerStyle 之類套用、或根本沒用到）在使用處不會被評到，這些才記
+    //    QuillNest 的覆蓋率被多扣。沒有任何元素用 Style= 引用的具名 Style（只透過 ItemContainerStyle 之類套用、
+    //    或根本沒用到）在使用處不會被評到，這些才記。
+    //    1.5 起隱含樣式（沒有 x:Key）的基礎 Setter 在使用處評得到，所以它也不再記 —— 但前提是專案裡真的有
+    //    那個型別的元素（StyleIndex.AppliesToSomeElement）：一個都沒有的話執行期套不到它，那一組不存在，照舊記
     [Theory]
     [InlineData("""<Style x:Key="Ghost" TargetType="Button"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#EEEEEE"/></Style>""",
                 """<Button Style="{StaticResource Ghost}" Content="x"/>""", 0)]                   // 用到了：使用處評
@@ -280,7 +282,9 @@ public class StyleChainTests
     [InlineData("""<Style x:Key="Ghost" TargetType="Button"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#EEEEEE"/></Style>""",
                 """<ListBox ItemContainerStyle="{StaticResource Ghost}"/>""", 1)]                 // 沒有元素用 Style= 引用它：哪裡都評不到
     [InlineData("""<Style TargetType="ToggleButton"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#EEEEEE"/></Style>""",
-                """<ToggleButton Content="x"/>""", 1)]                                            // 隱含樣式：使用處不評
+                """<ToggleButton Content="x"/>""", 0)]                                            // 隱含樣式：1.5 起使用處也評（有那個型別的元素）
+    [InlineData("""<Style TargetType="ToggleButton"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#EEEEEE"/></Style>""",
+                """<Button Content="x"/>""", 1)]                                                  // 隱含樣式但專案裡沒有那個型別的元素：執行期套不到，照舊記 unresolved
     public void SeeThroughStyleDefinitionIsUnresolvedOnlyWhenNoUseSiteGradesIt(string styles, string use, int unresolved)
     {
         using var fx = new Fixture();

@@ -1,0 +1,157 @@
+# XamlContrast 公開語料摘要 —— 由 scripts/verify-corpus.ps1 -Update 產生，不要手改。
+# 語料釘死（corpus.txt 的 commit）+ 這份凍結 = 紅燈只有一個可能：工具自己變了。
+project: bloxstrap
+repo: https://github.com/pizzaboxer/bloxstrap
+commit: 02db76006741f039b79ac7547b8054d7f3ccfc05
+tool-commit: 07be1dd+dirty
+frozen: 2026-11-16
+exit: 3
+palette-mode: pair
+palette-degraded: False
+palette-keys: 313
+single-theme: False
+files: 38
+pairs: 0
+coverage: 0
+unresolved: 121
+skipped: 0
+dead-foreground: 1
+disabled-exempt: 2
+converter-pairs: 0
+ui-component-pairs: 0
+parse-errors: 0
+suppressed: 0
+state-colors: 0
+fail: 0
+warn: 0
+ok: 0
+decorative: 0
+unresolved-by.bound-or-gradient: 27
+unresolved-by.no-ancestor-background: 54
+unresolved-by.translucent-uncomposited: 3
+unresolved-by.unknown-palette-key: 37
+unknown-keys.SystemAccentColorSecondary: 36
+unknown-keys.SystemAccentColorTertiary: 1
+# F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
+# U  原因  檔案:行  值
+U  bound-or-gradient  Bloxstrap/UI/Elements/About/Pages/SupportersPage.xaml:113  <ImageBrush>
+U  bound-or-gradient  Bloxstrap/UI/Elements/About/Pages/SupportersPage.xaml:84  <ImageBrush>
+U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ByfronDialog.xaml:24  {Binding IconColor}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ByfronDialog.xaml:30  {Binding Foreground}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ByfronDialog.xaml:31  {Binding IconColor}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ByfronDialog.xaml:41  {Binding Foreground}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ByfronDialog.xaml:46  {Binding Foreground}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ClassicFluentDialog.xaml:50  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/FluentDialog.xaml:57  {Binding Path=BackgroundColourBrush, Mode=OneTime}
+U  bound-or-gradient  Bloxstrap/UI/Elements/ContextMenu/ServerHistory.xaml:95  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/ContextMenu/ServerHistory.xaml:96  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/ContextMenu/ServerInformation.xaml:44  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/ContextMenu/ServerInformation.xaml:47  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/ContextMenu/ServerInformation.xaml:50  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/AddCustomThemeDialog.xaml:132  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/AddCustomThemeDialog.xaml:81  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/AddFastFlagDialog.xaml:59  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/AddFastFlagDialog.xaml:59  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/ConnectivityDialog.xaml:35  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/ConnectivityDialog.xaml:36  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/ConnectivityDialog.xaml:37  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/ExceptionDialog.xaml:36  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/ExceptionDialog.xaml:38  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/ExceptionDialog.xaml:44  {ui:ThemeResource SolidBackgroundFillColorSecondaryBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/FluentMessageBox.xaml:37  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:50  {ui:ThemeResource ApplicationBackgroundBrush}
+U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:85  {ui:ThemeResource ApplicationBackgroundBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:43  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:45  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:72  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:75  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:78  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:79  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:85  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:90  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/LicensesPage.xaml:31  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/LicensesPage.xaml:37  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/LicensesPage.xaml:43  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/LicensesPage.xaml:50  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/LicensesPage.xaml:56  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/LicensesPage.xaml:62  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/LicensesPage.xaml:69  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/LicensesPage.xaml:75  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/LicensesPage.xaml:81  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/SupportersPage.xaml:18  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:16  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/ContextMenu/MenuContainer.xaml:34  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Controls/OptionControl.xaml:61  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Controls/OptionControl.xaml:61  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Installer/Pages/CompletionPage.xaml:21  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Installer/Pages/CompletionPage.xaml:28  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Installer/Pages/InstallPage.xaml:38  {DynamicResource SystemFillColorCriticalBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Installer/Pages/InstallPage.xaml:38  {DynamicResource SystemFillColorCriticalBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/AppearancePage.xaml:15  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/AppearancePage.xaml:153  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/AppearancePage.xaml:168  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/AppearancePage.xaml:170  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/AppearancePage.xaml:171  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/AppearancePage.xaml:180  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/AppearancePage.xaml:41  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/BloxstrapPage.xaml:18  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/BloxstrapPage.xaml:49  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/BootstrapperPage.xaml:18  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/FastFlagEditorPage.xaml:24  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/FastFlagEditorPage.xaml:25  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/FastFlagsPage.xaml:16  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/FastFlagsPage.xaml:27  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/FastFlagsPage.xaml:67  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/IntegrationsPage.xaml:101  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/IntegrationsPage.xaml:110  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/IntegrationsPage.xaml:16  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/IntegrationsPage.xaml:45  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/IntegrationsPage.xaml:70  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/IntegrationsPage.xaml:99  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/ModsPage.xaml:17  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/ModsPage.xaml:32  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/ModsPage.xaml:39  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/ModsPage.xaml:46  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/ShortcutsPage.xaml:18  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/ShortcutsPage.xaml:28  {DynamicResource TextFillColorSecondaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/Settings/Pages/ShortcutsPage.xaml:46  {DynamicResource TextFillColorSecondaryBrush}
+U  translucent-uncomposited  Bloxstrap/UI/Elements/Settings/Pages/AppearancePage.xaml:46  {DynamicResource ControlFillColorDefault}
+U  translucent-uncomposited  Bloxstrap/UI/Elements/Settings/Pages/AppearancePage.xaml:56  ControlFillColorDefault
+U  translucent-uncomposited  Bloxstrap/UI/Elements/Settings/Pages/AppearancePage.xaml:96  ControlFillColorDefault
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:140  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:169  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:183  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:208  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:220  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:242  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:264  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:282  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:313  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:334  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:346  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:36  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:367  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:376  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:393  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:420  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:477  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:490  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:561  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:596  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:60  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:612  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:633  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:652  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:666  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:685  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:697  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:707  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:75  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:96  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/Controls/OptionControl.xaml:37  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/Controls/OptionControl.xaml:38  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/Controls/OptionControl.xaml:38  SystemAccentColorTertiary
+U  unknown-palette-key  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:55  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:56  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:57  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/Settings/Pages/FastFlagEditorPage.xaml:68  SystemAccentColorSecondary

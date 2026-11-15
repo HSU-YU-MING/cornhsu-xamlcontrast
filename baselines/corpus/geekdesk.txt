@@ -1,0 +1,79 @@
+# XamlContrast 公開語料摘要 —— 由 scripts/verify-corpus.ps1 -Update 產生，不要手改。
+# 語料釘死（corpus.txt 的 commit）+ 這份凍結 = 紅燈只有一個可能：工具自己變了。
+project: geekdesk
+repo: https://github.com/BookerLiu/GeekDesk
+commit: 7f0e228f7827d0cb2b18a72549494f4fa637b990
+tool-commit: 07be1dd+dirty
+frozen: 2026-11-16
+exit: 3
+palette-mode: none
+palette-degraded: True
+palette-keys: 27
+single-theme: False
+files: 33
+pairs: 4
+coverage: 9.1
+unresolved: 40
+skipped: 0
+dead-foreground: 0
+disabled-exempt: 0
+converter-pairs: 0
+ui-component-pairs: 0
+parse-errors: 0
+suppressed: 0
+state-colors: 0
+fail: 0
+warn: 0
+ok: 4
+decorative: 0
+unresolved-by.bound-or-gradient: 20
+unresolved-by.no-ancestor-background: 8
+unresolved-by.translucent-uncomposited: 10
+unresolved-by.unknown-palette-key: 2
+unknown-keys.BtnBG: 2
+# F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
+F  ok  Control/UserControls/Config/OtherControl.xaml:100  RadioButton⊕Style[MyRadioBtnStyle]/trigger  Black on #FFFFFF  21.00/21.00  
+F  ok  Control/UserControls/Config/OtherControl.xaml:95  RadioButton⊕Style[MyRadioBtnStyle]/trigger  #B32225 on #FFFFFF  6.62/6.62  
+F  ok  Control/Windows/GlobalColorPickerWindow.xaml:27  Button⊕Style[→MyBtnStyle]/base  Black on #BF8EF6  8.42/8.42  
+F  ok  Control/Windows/GlobalColorPickerWindow.xaml:41  Button⊕Style[→MyBtnStyle]/base  Black on #EEEEEE  18.10/18.10  
+# U  原因  檔案:行  值
+U  bound-or-gradient  Control/Other/BGNmaeDialog.xaml:24  {DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}
+U  bound-or-gradient  Control/Other/GradientBGDialog.xaml:67  <LinearGradientBrush>
+U  bound-or-gradient  Control/Other/IconInfoDialog.xaml:24  {DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}
+U  bound-or-gradient  Control/Other/IconInfoUrlDialog.xaml:22  {DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}
+U  bound-or-gradient  Control/Other/SearchResControl.xaml:165  {Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type Window}},Path=DataContext.AppConfig.TextColor}
+U  bound-or-gradient  Control/Other/SearchResControl.xaml:174  {Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type Window}},Path=DataContext.AppConfig.TextColor}
+U  bound-or-gradient  Control/UserControls/Config/ThemeControl.xaml:232  {Binding Path=TextColor, Converter={StaticResource TextToColorConverter}}
+U  bound-or-gradient  Control/UserControls/Config/ThemeControl.xaml:233  {Binding TextColor}
+U  bound-or-gradient  Control/UserControls/Config/ThemeControl.xaml:74  {Binding Path=GradientBGParam.Color1, Converter={StaticResource TextToColorConverter}}
+U  bound-or-gradient  Control/UserControls/Config/ThemeControl.xaml:88  {Binding Path=GradientBGParam.Color2, Converter={StaticResource TextToColorConverter}}
+U  bound-or-gradient  Control/UserControls/PannelCard/LeftCardControl.xaml:148  {x:Null}
+U  bound-or-gradient  Control/UserControls/PannelCard/LeftCardControl.xaml:210  {Binding GeometryColor}
+U  bound-or-gradient  Control/UserControls/PannelCard/RightCardControl.xaml:272  {Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type Window}},Path=DataContext.AppConfig.TextColor}
+U  bound-or-gradient  Control/UserControls/PannelCard/RightCardControl.xaml:314  <SolidColorBrush Color=AliceBlue Opacity={Binding AppConfig.CardOpacity, Mode=TwoWay, Converter={StaticResource OpcityConvert}}>
+U  bound-or-gradient  Control/Windows/ConfigWindow.xaml:128  {DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}
+U  bound-or-gradient  Control/Windows/PixelColorPickerWindow.xaml:40  <SolidColorBrush>
+U  bound-or-gradient  Control/Windows/PixelColorPickerWindow.xaml:57  <VisualBrush>
+U  bound-or-gradient  Control/Windows/ToDoInfoWindow.xaml:108  {DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}
+U  bound-or-gradient  Control/Windows/ToDoWindow.xaml:90  {DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}
+U  bound-or-gradient  Resource/Dictionary/CommonStyle.xaml:28  <LinearGradientBrush>
+U  no-ancestor-background  Control/Other/CustomIconUrlDialog.xaml:24  Red
+U  no-ancestor-background  Control/Other/CustomIconUrlDialog.xaml:32  Red
+U  no-ancestor-background  Control/Other/CustomIconUrlDialog.xaml:36  Red
+U  no-ancestor-background  Control/Other/GradientBGDialog.xaml:26  Gray
+U  no-ancestor-background  Control/Windows/ToDoInfoWindow.xaml:46  Red
+U  no-ancestor-background  Control/Windows/ToDoInfoWindow.xaml:76  Red
+U  no-ancestor-background  Control/Windows/ToDoInfoWindow.xaml:88  Red
+U  no-ancestor-background  Plugins/ShowSeconds/SecondsWindow.xaml:24  White
+U  translucent-uncomposited  Control/Other/PasswordDialog.xaml:42  #B2FFFFFF
+U  translucent-uncomposited  Control/Other/PasswordDialog.xaml:58  #B2FFFFFF
+U  translucent-uncomposited  Control/Other/PasswordDialog.xaml:70  #B2FFFFFF
+U  translucent-uncomposited  Control/Other/PasswordDialog.xaml:70  #B2FFFFFF
+U  translucent-uncomposited  Control/Other/PasswordDialog.xaml:71  #B2FFFFFF
+U  translucent-uncomposited  Control/Other/PasswordDialog.xaml:71  #B2FFFFFF
+U  translucent-uncomposited  Control/UserControls/Config/OtherControl.xaml:100  #B2FFFFFF
+U  translucent-uncomposited  Control/UserControls/Config/OtherControl.xaml:95  #B2FFFFFF
+U  translucent-uncomposited  Control/UserControls/PannelCard/LeftCardControl.xaml:17  #00FFFFFF
+U  translucent-uncomposited  Control/UserControls/ToDo/TodoControl.xaml:152  Transparent
+U  unknown-palette-key  Resource/Dictionary/CommonStyle.xaml:28  BtnBG
+U  unknown-palette-key  Resource/Dictionary/CommonStyle.xaml:28  BtnBG

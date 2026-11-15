@@ -1,0 +1,33 @@
+# XamlContrast 受測對象指紋 —— 由 scripts/verify-baselines.ps1 -Update 產生，不要手改。
+# 旁邊那份快照是對這個版本的專案凍結的。驗收時重算一次再比：對象沒變 → 差異來自工具本身；
+# 對象也變了 → 先看下面哪些檔案動過（快照紅燈曾經兩個月都是 App 自己改了，不是工具回歸）。
+project: D:\應用程式\Cornea
+frozen: 2026-11-15
+git-repo: D:/應用程式/Cornea
+git-commit: e63b33b6f9c0a39e6c5def22b3be745d5df6818b
+git-dirty: 0
+inputs: 23
+# sha256(前 16 碼)  專案內相對路徑
+A8226112E671A826  App.xaml
+69E338C90E5250E6  App.xaml.cs
+9F58407A466CA81D  Capture/RecentCaptures.cs
+3C93039DF99B6E90  Capture/ScreenCapture.cs
+75F645F697306671  Capture/SelectionOverlayWindow.xaml
+2E0F27AA067AD5FA  Capture/SelectionOverlayWindow.xaml.cs
+830A482978D556B8  Capture/WindowPlacement.cs
+E7DAE9CBC585B623  Cornea.Tests/CsvParserTests.cs
+BF846E824FB42639  Cornea.Tests/OcrTextBuildTests.cs
+1A121640E4EF6141  Cornea.Tests/StripCodeFenceTests.cs
+1EBEE2443C46EC9B  HotKey/GlobalHotkey.cs
+D7871A2B93EE7050  Ocr/OcrService.cs
+548E97584DA5DCAD  Ollama/OllamaStatus.cs
+8524244F8F8AE6B4  Settings/AppSettings.cs
+35D4F8F81ECDA8C2  Settings/SettingsWindow.xaml
+A5B8549E32793400  Settings/SettingsWindow.xaml.cs
+0CB35447BE2A5C74  Translation/TranslationService.cs
+BAA4C3822B2B8D46  UI/ResultWindow.xaml
+CB7B36A065911310  UI/ResultWindow.xaml.cs
+F52866211A7DB5C2  UI/SetupGuideWindow.xaml
+850ADE00B7AF90D1  UI/SetupGuideWindow.xaml.cs
+F9901F845FAA2FD2  Vision/CsvParser.cs
+59534630C706F224  Vision/VisionService.cs

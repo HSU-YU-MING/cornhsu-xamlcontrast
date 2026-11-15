@@ -30,6 +30,21 @@ public sealed class PaletteDetection
     /// </summary>
     public List<PaletteScope>? Scopes { get; init; }
 
+    /// <summary>
+    /// 色盤裡「不是專案自己定義、而是工具補進來的框架／函式庫預設值」的鍵（1.5）——
+    /// WinUI 的 Fluent 預設色（<see cref="WinUiTheme"/>）或 WPF-UI 的內建色票（<see cref="WpfUiTheme"/>）。
+    ///
+    /// ⚠ 存在的理由是「不要說謊」：覆蓋率提示會告訴使用者「你的主題檔有這個鍵、設上去就好」，
+    /// 而如果那個鍵其實是工具補的，那句話是假的（Bloxstrap 實測：它一個鍵都沒自己定義）。
+    /// 建議照樣給 —— 那一行設定真的有效 —— 但要說清楚值是從哪裡來的。
+    /// </summary>
+    internal HashSet<string> FrameworkKeys { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>這個專案引用到的第三方主題函式庫（1.5，<see cref="ThemeLibraries.DetectInProject"/>）。
+    /// ⚠ 這是**唯一的真相源**：補色票與覆蓋率提示都讀它。之前兩邊各自偵測一次，
+    /// 於是色盤補了 MaterialDesign 的值、提示卻說「你用的是 HandyControl」（MaaAssistantArknights 實測）。</summary>
+    internal IReadOnlyList<string> Libraries { get; set; } = [];
+
     /// <summary>檔案該用哪個色盤：最深的包含它的 App 目錄；都不包含 → 共用區；
     /// 沒有作用域資訊 → 全域色盤。</summary>
     public Palette PaletteFor(string fullPath)
@@ -1091,6 +1106,9 @@ public static partial class PaletteDetector
         // 要在框架預設色之前收：專案用別名定義的鍵優先於框架的同名鍵
         foreach (var (k, v) in CollectAliases(root))
             if (!d.Palette.Entries.ContainsKey(k) && !d.DroppedKeys.Contains(k)) d.Palette.Aliases.TryAdd(k, v);
+        // 第三方主題函式庫的內建色票當最底層(1.5,見 LibraryThemes)。排在 WinUiTheme 前面 ——
+        // 鍵名彼此大量重疊但值不一樣,引用哪個函式庫就該拿那個函式庫的值
+        LibraryThemes.Apply(root, d);
         // WinUI／UWP 專案:框架的預設主題色當最底層(專案自己定義的優先)。WPF 專案不碰(見 WinUiTheme)
         WinUiTheme.Apply(root, d);
         // 別名最後解：它常指向框架的預設主題色（上一步才補進來）

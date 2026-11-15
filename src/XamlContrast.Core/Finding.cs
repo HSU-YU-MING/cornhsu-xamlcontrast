@@ -128,6 +128,27 @@ public sealed record ConverterUse(string Key, ConverterInfo Info);
 /// unknown-key 更是只要點名鍵就是免費的死引用/打字錯誤偵測器。</summary>
 public sealed record UnresolvedSite(UnresolvedReason Reason, string File, int Line, string Value);
 
+/// <summary>
+/// VisualStateManager 的狀態把顏色換掉的一處（1.5）：哪個檔、哪一行、哪個狀態、怎麼換的、換的是哪個屬性、目標元素是誰。
+///
+/// 這是**明文的盲區**，不是找到的問題：狀態下那個元素長什麼樣只有執行期才畫得出來，
+/// 照「不猜」的規矩不評。但 1.4 之前連**計數器都沒有**：第四輪外部實查測得數十處／專案等級，
+/// 而報告裡一個字都沒有 —— 等於把工具的邊界藏起來（CLAUDE.md「已知盲區」第一條）。
+///
+/// <para><see cref="Kind"/> 兩種，刻意都收：
+/// <c>animation</c> 是 Blend 時代的 WPF 方言（狀態 storyboard 裡的 <c>ColorAnimation</c>、
+/// brush 的 <c>ObjectAnimationUsingKeyFrames</c>）；<c>setter</c> 是 WinUI／UWP 現在的寫法
+/// （<c>&lt;VisualState.Setters&gt;&lt;Setter Target="Root.Background" …&gt;</c>）。
+/// ⚠ 只收 animation 的話，WinUI 專案的狀態顏色全在 Setters 裡 → 計數器報 0 →
+/// 「這個專案沒有這種盲區」是假的安心，正好是本工具最怕的那種謊報。</para>
+///
+/// ⚠ 刻意**不**併進 unresolved：unresolved 的語意是「看到一組配對、解不出顏色」，它進覆蓋率的分母、
+/// 而覆蓋率是 exit 3 的那道門。狀態顏色不是一組解不出來的配對（基礎態照舊評得到），
+/// 把它塞進分母會讓每個用 VSM 的專案覆蓋率無聲下降、有人直接變紅，而換到的資訊是零。
+/// 所以它自己一個計數器 + 自己一份位置清單，不動任何既有數字。
+/// </summary>
+public sealed record StateColorSite(string File, int Line, string State, string Kind, string Property, string? Target);
+
 public sealed class AuditResult
 {
     public required PaletteDetection Detection { get; init; }
@@ -167,10 +188,17 @@ public sealed class AuditResult
     public int UiComponentPairs { get; init; }
     /// <summary>這次稽核拿來當顏色的轉換器（資源鍵 → 分析結果）：哪些是固定顏色、哪些不是、為什麼。沒打開是 null。</summary>
     public IReadOnlyList<ConverterUse>? ConvertersUsed { get; init; }
+    /// <summary>VisualStateManager 的狀態把顏色換掉的位置（1.5）—— 明文的盲區，不評、只點名。
+    /// 不進 <see cref="Pairs"/>／<see cref="Unresolved"/>／覆蓋率，見 <see cref="StateColorSite"/>。</summary>
+    public IReadOnlyList<StateColorSite> StateColors { get; init; } = [];
     /// <summary>`Application` 或 `Window` 上宣告的 WPF `ThemeMode`（.NET 9+ 的內建 Fluent 主題）的值；
     /// 沒宣告是 null。只用在覆蓋率提示上 —— 見 <see cref="Report.CoverageHint"/>：
     /// 這種專案的色票在框架裡而不在 repo 裡，叫人去找第三方主題庫的 brush 鍵是找不到的。</summary>
     public string? ThemeMode { get; init; }
+    /// <summary>這個專案引用到的第三方 WPF 主題函式庫（<see cref="ThemeLibraries"/> 的常數；可能不只一個）。
+    /// 跟 <see cref="ThemeMode"/> 同一個用途：只用在覆蓋率提示上，讓它說得出「你用的是哪些、該設哪個鍵」。
+    /// ⚠ 與補色票讀的是同一份（<c>PaletteDetection.Libraries</c>）—— 兩邊各自偵測會說出互相矛盾的話。</summary>
+    public IReadOnlyList<string> ThemeLibraries { get; init; } = [];
 
     /// <summary>本次生效的設定（分級門檻等；預設值 = 沒有 config 檔）</summary>
     public ToolConfig Config { get; init; } = new();

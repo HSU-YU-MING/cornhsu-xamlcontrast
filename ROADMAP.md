@@ -42,10 +42,19 @@
 
 - WinUI 3 / Uno / Avalonia（解析邏輯大致共用，差在色盤慣例與內建樣式 ——
   比純 WPF 大得多的市場）。**前置條件：要有真實專案當驗證白老鼠** ——
-  「每條規則來自實查」是本專案的憲法，沒有白老鼠的平台支援只是沒驗證過的猜測
-- 隱含樣式解析
-- VisualStateManager 顏色動畫的計數器(目前是靜默盲區,僅文件揭露 ——
-  Blend 時代方言,第四輪外部實查測得數十處/專案等級)
+  「每條規則來自實查」是本專案的憲法，沒有白老鼠的平台支援只是沒驗證過的猜測。
+  WinUI 3 的 `{ThemeResource}`／ThemeDictionaries／框架預設主題色已在 1.4 做掉（白老鼠：WinUI Gallery）
+- [x] 隱含樣式解析 —— 1.5：每個元素的底與字色都查隱含樣式，作用範圍照 WPF 的資源範圍走
+      （巢狀 `<X.Resources>` 只管子樹、最內層優先、元素有自己的 Style 就不套）。
+      實證價值：維護者自己的 Kindling 有一筆「按鈕上的白字其實是深色字、2.49:1」被 1.4 報成 21:1 ✓
+- [x] VisualStateManager 狀態顏色的計數器 —— 1.5：`summary.stateColors` ＋ `stateColorSites` 逐筆點名
+      （含 WinUI 的 `<VisualState.Setters>`）。照舊不評，只是不再靜默。
+      實測 WinUI Gallery 44 處、wpfui 18、HandyControl 15，而自家四個專案是 0
+- **隱含樣式的觸發態**（1.5 只做基礎 Setter）：要評它得讓元素走 `GradeChain` 的逐狀態路徑，
+  那會改變 finding 的 `element` 標籤 = **baseline 的鍵**，所以必須跟 `Baseline.KeyVersion` 的遞增、
+  Parity 儀表板那份手刻的鍵一起規劃成一次協調過的發版
+- **帶模板的控制項：模板裡哪一層畫底**（1.5 的三塊「不猜」之一，隱含與具名 Style 都一樣）——
+  現在只看模板根；根沒設底時字配到祖先，HandyControl 的 Shield 證明那可能是編出來的
 
 ## 與 Parity 的交會點（構想，尚未排程）
 

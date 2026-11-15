@@ -1,0 +1,252 @@
+{
+  "source": "HandyOrg/HandyControl@e9ad3d701b90",
+  "entries": {
+    "AccentBrush": [
+      "#FF5722",
+      "#F8491E"
+    ],
+    "BackgroundBrush": [
+      "#EEEEEE",
+      "#EEEEEE"
+    ],
+    "BorderBrush": [
+      "#3F3F46",
+      "#E0E0E0"
+    ],
+    "DarkAccentBrush": [
+      "#D43F3A",
+      "#F8491E"
+    ],
+    "DarkDangerBrush": [
+      "#DB3340",
+      "#DB3340"
+    ],
+    "DarkDefaultBrush": [
+      "#686868",
+      "#F5F5F5"
+    ],
+    "DarkInfoBrush": [
+      "#00BCD4",
+      "#00BCD4"
+    ],
+    "DarkMaskBrush": [
+      "#40000000",
+      "#20000000"
+    ],
+    "DarkOpacityBrush": [
+      "#40000000",
+      "#40000000"
+    ],
+    "DarkPrimaryBrush": [
+      "#326CF3",
+      "#326CF3"
+    ],
+    "DarkSuccessBrush": [
+      "#2DB84D",
+      "#2DB84D"
+    ],
+    "DarkWarningBrush": [
+      "#E9AF20",
+      "#E9AF20"
+    ],
+    "DefaultBrush": [
+      "#686868",
+      "#FFFFFF"
+    ],
+    "LightDangerBrush": [
+      "#450C0F",
+      "#FFF6F7"
+    ],
+    "LightInfoBrush": [
+      "#003C44",
+      "#F1FDFF"
+    ],
+    "LightPrimaryBrush": [
+      "#044289",
+      "#F3FBFF"
+    ],
+    "LightSuccessBrush": [
+      "#113A1B",
+      "#F3FFF6"
+    ],
+    "LightWarningBrush": [
+      "#4C3A0F",
+      "#FFFCF5"
+    ],
+    "PrimaryTextBrush": [
+      "#FFFFFF",
+      "#212121"
+    ],
+    "RegionBrush": [
+      "#1C1C1C",
+      "#FFFFFF"
+    ],
+    "ReverseTextBrush": [
+      "#212121",
+      "#212121"
+    ],
+    "SecondaryBorderBrush": [
+      "#555555",
+      "#757575"
+    ],
+    "SecondaryRegionBrush": [
+      "#2D2D30",
+      "#EEEEEE"
+    ],
+    "SecondaryTextBrush": [
+      "#757575",
+      "#757575"
+    ],
+    "TextIconBrush": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ],
+    "ThirdlyRegionBrush": [
+      "#424242",
+      "#FFFFFF"
+    ],
+    "ThirdlyTextBrush": [
+      "#3F3F46",
+      "#BDBDBD"
+    ]
+  },
+  "colors": {
+    "AccentColor": [
+      "#FF5722",
+      "#F8491E"
+    ],
+    "BackgroundColor": [
+      "#EEEEEE",
+      "#EEEEEE"
+    ],
+    "BorderColor": [
+      "#3F3F46",
+      "#E0E0E0"
+    ],
+    "DangerColor": [
+      "#DB3340",
+      "#DB3340"
+    ],
+    "DarkAccentColor": [
+      "#D43F3A",
+      "#F8491E"
+    ],
+    "DarkDangerColor": [
+      "#DB3340",
+      "#DB3340"
+    ],
+    "DarkDefaultColor": [
+      "#686868",
+      "#F5F5F5"
+    ],
+    "DarkInfoColor": [
+      "#00BCD4",
+      "#00BCD4"
+    ],
+    "DarkMaskColor": [
+      "#40000000",
+      "#20000000"
+    ],
+    "DarkOpacityColor": [
+      "#40000000",
+      "#40000000"
+    ],
+    "DarkPrimaryColor": [
+      "#326CF3",
+      "#326CF3"
+    ],
+    "DarkSuccessColor": [
+      "#2DB84D",
+      "#2DB84D"
+    ],
+    "DarkWarningColor": [
+      "#E9AF20",
+      "#E9AF20"
+    ],
+    "DefaultColor": [
+      "#686868",
+      "#FFFFFF"
+    ],
+    "InfoColor": [
+      "#00BCD4",
+      "#00BCD4"
+    ],
+    "LightDangerColor": [
+      "#450C0F",
+      "#FFF6F7"
+    ],
+    "LightInfoColor": [
+      "#003C44",
+      "#F1FDFF"
+    ],
+    "LightPrimaryColor": [
+      "#044289",
+      "#F3FBFF"
+    ],
+    "LightSuccessColor": [
+      "#113A1B",
+      "#F3FFF6"
+    ],
+    "LightWarningColor": [
+      "#4C3A0F",
+      "#FFFCF5"
+    ],
+    "PrimaryColor": [
+      "#326CF3",
+      "#326CF3"
+    ],
+    "PrimaryTextColor": [
+      "#FFFFFF",
+      "#212121"
+    ],
+    "RegionColor": [
+      "#1C1C1C",
+      "#FFFFFF"
+    ],
+    "ReverseTextColor": [
+      "#212121",
+      "#212121"
+    ],
+    "SecondaryBorderColor": [
+      "#555555",
+      "#757575"
+    ],
+    "SecondaryRegionColor": [
+      "#2D2D30",
+      "#EEEEEE"
+    ],
+    "SecondaryTextColor": [
+      "#757575",
+      "#757575"
+    ],
+    "SecondaryTitleColor": [
+      "#326CF3",
+      "#326CF3"
+    ],
+    "SuccessColor": [
+      "#2DB84D",
+      "#2DB84D"
+    ],
+    "TextIconColor": [
+      "#FFFFFF",
+      "#FFFFFF"
+    ],
+    "ThirdlyRegionColor": [
+      "#424242",
+      "#FFFFFF"
+    ],
+    "ThirdlyTextColor": [
+      "#3F3F46",
+      "#BDBDBD"
+    ],
+    "TitleColor": [
+      "#326CF3",
+      "#326CF3"
+    ],
+    "WarningColor": [
+      "#E9AF20",
+      "#E9AF20"
+    ]
+  },
+  "runtime": []
+}

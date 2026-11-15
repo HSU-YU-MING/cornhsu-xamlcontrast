@@ -360,6 +360,7 @@ public sealed partial class Auditor
                     auditor._themeMode = themeMode;
                 }
 
+
                 auditor._curFile = f;
                 // 多 App repo:這個檔案屬於哪個 App,就用哪個 App 的色盤
                 // (單 App 或無作用域資訊時 PaletteFor 回傳全域色盤,行為不變)
@@ -376,6 +377,8 @@ public sealed partial class Auditor
                     auditor._pal = WithLocalOverrides(auditor._pal, local);
                 auditor.Walk(doc.Root, default, name, 1.0, suppressedBy: null);
                 auditor.WalkStyles(doc, name);
+                // 盲區的計數器：不評、只點名（整份文件掃一次 —— VSM 可以掛在元素上、Style 裡、模板裡）
+                auditor.CountStateColors(doc, name);
             }
         }
 
@@ -383,6 +386,9 @@ public sealed partial class Auditor
         {
             Detection = detection,
             ThemeMode = auditor._themeMode,
+            // ⚠ 從色盤偵測那邊讀,不要自己再掃一次 —— 兩邊各掃各的會得到不同的答案
+            //   (MaaAssistantArknights 同時用 MaterialDesign 與 HandyControl,色盤補了一個、提示說另一個)
+            ThemeLibraries = detection.Libraries,
             FileCount = files.Count,
             Findings = auditor._findings,
             Pairs = auditor._pairs,
@@ -399,6 +405,7 @@ public sealed partial class Auditor
             ConverterPairs = auditor._converterPairs,
             UiComponentPairs = auditor._uiComponentPairs,
             ConvertersUsed = auditor._converters?.Used.Select(u => new ConverterUse(u.Key, u.Info)).ToList(),
+            StateColors = auditor._stateColors,
             InvalidIgnores = auditor._invalidIgnores,
             Config = auditor._cfg,
             UnmatchedLayoutNames = auditor._cfg.Layout.Overlap.Concat(auditor._cfg.Layout.SideBySide)
@@ -418,6 +425,26 @@ public sealed partial class Auditor
     //   Opacity 是繼「Foreground 色票」「背景 alpha」之後第三種讓文字變暗的方式。
     private readonly Dictionary<UnresolvedReason, int> _unresolvedBy = new();
     private readonly List<UnresolvedSite> _unresolvedSites = new();
+    private readonly List<StateColorSite> _stateColors = new();
+    /// <summary>
+    /// 祖先元素的 Style 鏈帶下來的 <c>&lt;Style.Resources&gt;</c> 隱含樣式（1.5）—— 最後一個是最內層。
+    /// WPF 修「全域隱含樣式蓋掉按鈕字色」的標準手法就是這個，看不到它等於看不到那個修正
+    /// （Kindling 的 AccentBtn 實例，見 StyleIndex.Record.ScopedImplicit）。
+    /// </summary>
+    private readonly List<(StyleIndex.Merged? Dark, StyleIndex.Merged? Light)> _scopedStyles = new();
+
+    /// <summary>作用中的 scoped 隱含樣式裡，這個型別最內層的那一條（兩個主題各一條；都沒有是 (null, null)）。</summary>
+    private (StyleIndex.Merged? Dark, StyleIndex.Merged? Light) ScopedImplicitFor(string typeName, ThemeSide? dark, ThemeSide? light)
+    {
+        for (var i = _scopedStyles.Count - 1; i >= 0; i--)
+        {
+            var (od, ol) = _scopedStyles[i];
+            var d = od is null ? null : _styles.ScopedImplicitChain(od, typeName, dark);
+            var l = ol is null ? null : _styles.ScopedImplicitChain(ol, typeName, light);
+            if (d is not null || l is not null) return (d, l);
+        }
+        return (null, null);
+    }
 
     private static int LineOf(XElement el) => el is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
 
@@ -471,19 +498,57 @@ public sealed partial class Auditor
         // 逐狀態再畫就是疊兩層
         var ancestorBd = bd;
 
+        // ── 隱含樣式（1.5）：無 x:Key、TargetType 是這個型別的 Style，自動套用到每個實例 ──
+        // WPF 只在元素**沒有自己的 Style** 時套用隱含樣式，所以 chain 是 null 才查（兩個主題各自判斷）。
+        // 1.4 之前只補「檔案根元素的背景」那一格（理由見 StyleIndex.ImplicitRootBackground）；1.5 起
+        // 每個元素的底與字色都查得到它。
+        // ⚠ 刻意只取**基礎 Setter**，不走 GradeChain 的逐狀態路徑：那會把元素送進鏈路徑，
+        //   finding 的 element 標籤從 `TextBlock` 變成 `TextBlock⊕Style[implicit TextBlock]/base`，
+        //   也就是 baseline 的鍵變了 → 要遞增 Baseline.KeyVersion、所有使用者重寫 baseline，
+        //   還要連動 Parity 儀表板手刻的那份鍵。觸發態（hover 等）留到那一次一起做（ROADMAP）。
+        //   這樣的代價是「隱含樣式的觸發態不評」，好處是這一版沒有任何既有的鍵會動。
+        // 查找順序 = WPF 的資源查找方向：祖先元素的 Style 帶下來的 <Style.Resources>（最內層優先）
+        // 勝過檔案／全域的隱含樣式 —— 它離元素更近
+        var darkSide = splitThemes ? ThemeSide.Dark : _curSide;
+        var (scopedDark, scopedLight) = ScopedImplicitFor(el.Name.LocalName, darkSide, ThemeSide.Light);
+        var implicitChain = chain is null
+            ? scopedDark ?? _styles.GetImplicitChain(el.Name.LocalName, _curFile, LineOf(el), darkSide) : null;
+        var implicitLight = splitThemes
+            ? (chainLight is null ? scopedLight ?? _styles.GetImplicitChain(el.Name.LocalName, _curFile, LineOf(el), ThemeSide.Light) : null)
+            : implicitChain;
+
         var localBgRaw = XamlBrush.Read(el, "Background");
-        string? BackgroundOf(StyleIndex.Merged? ch, ThemeSide? side) => localBgRaw
+        // FromImplicit：這個底是不是來自隱含樣式 —— 字色也來自同一個隱含樣式時，那一組由定義處（WalkStyles）評，
+        // 使用處不能再評一次（同 GradeChain 的同源判定）
+        (string? V, bool FromImplicit) BackgroundOf(StyleIndex.Merged? ch, StyleIndex.Merged? im, ThemeSide? side)
+        {
+            var own = localBgRaw
                     ?? (ch is not null && ch.Props.TryGetValue("Background", out var chainBg) ? chainBg.V : null)
-                    ?? ch?.TemplateRootBg // 模板根的背景管到內容
-                                          // 「地板」：根元素沒寫 Background 時，查該型別的隱含樣式（僅此一格，
-                                          // 不是完整的隱含樣式解析 —— 理由見 StyleIndex.ImplicitRootBackground）
-                    ?? (el.Parent is null ? _styles.ImplicitRootBackground(el.Name.LocalName, _curFile, side) : null)
-                    // 最後一層地板：config 的 rootBackground —— 主題函式庫使用者的逃生口
-                    // （視窗底色鍵在 repo、把它連到視窗的隱含樣式在 NuGet 套件裡:
-                    //   工具看不到、使用者知道。使用者宣告的就是事實）
-                    ?? (el.Parent is null ? NormalizedRootBackground : null);
-        var bgVal = BackgroundOf(chain, splitThemes ? ThemeSide.Dark : _curSide);
-        var bgValLight = splitThemes ? BackgroundOf(chainLight, ThemeSide.Light) : bgVal;
+                    ?? ch?.TemplateRootBg; // 模板根的背景管到內容
+            if (own is not null) return (own, false);
+            // 隱含樣式的底（元素沒有自己的 Style 時才套 —— im 只在那種情況下非 null）。
+            // ⚠ `{TemplateBinding Background}` 不算「一個看不懂的顏色」：它的意思是「控制項自己的 Background」，
+            //   而那一格上面已經查過了（Props["Background"]）。沒設就是 WPF 的預設（實質上沒有底），
+            //   所以要往祖先穿透，不是記成解析不出來。
+            //   實測：少了這一條，ScreenToGif 的 Editor.xaml 有 163 處原本評得出來的配對變成 unresolved
+            //   —— 數字看起來「誠實」，實際上是把算得出來的答案丟掉。
+            var impl = NotTemplateBound(im is not null && im.Props.TryGetValue("Background", out var implBg) ? implBg.V : null)
+                    ?? NotTemplateBound(im?.TemplateRootBg);
+            if (impl is not null) return (impl, true);
+            // 根元素保留 1.4 的路徑：有自己的 Style 但那個 Style 沒設底時也查隱含樣式。
+            // ⚠ 不要「順手收斂」成只走上面那條 —— 那會讓這形狀的底消失，既有的 finding 跟著不見
+            return (el.Parent is null
+                    ? _styles.ImplicitRootBackground(el.Name.LocalName, _curFile, LineOf(el), side)
+                      // 最後一層地板：config 的 rootBackground —— 主題函式庫使用者的逃生口
+                      // （視窗底色鍵在 repo、把它連到視窗的隱含樣式在 NuGet 套件裡:
+                      //   工具看不到、使用者知道。使用者宣告的就是事實）
+                      ?? NormalizedRootBackground
+                    : null, false);
+        }
+        var (bgVal, bgFromImplicit) = BackgroundOf(chain, implicitChain, splitThemes ? ThemeSide.Dark : _curSide);
+        var (bgValLight, bgLightFromImplicit) = splitThemes
+            ? BackgroundOf(chainLight, implicitLight, ThemeSide.Light)
+            : (bgVal, bgFromImplicit);
         bd = bgVal == bgValLight
             ? NextBackground(bgVal, _pal, bd, op)
             // 兩個主題的底來自不同的 Style（或不同的隱含樣式）：各自在自己的主題視圖裡算，再拼回深淺兩欄
@@ -515,9 +580,34 @@ public sealed partial class Auditor
 
         if (_cfg.NonText.UiComponents) GradeUiComponent(el, chain, chainLight, splitThemes, ancestorBd, localBgRaw, file, op, suppressedBy);
 
-        // 這個元素的字型（WPF 優先序：本地 > Style > 繼承）—— 它自己的 Foreground／Fill 用它評，子元素繼承它
-        var elementFont = LocalFontFamily(el) ?? ChainFont(chain) ?? ChainFont(chainLight) ?? _inheritedFont;
-        WalkForegroundAndChildren(el, bd, file, op, suppressedBy, handledFg, elementFont);
+        // 這個元素的字型（WPF 優先序：本地 > Style > 隱含樣式 > 繼承）—— 它自己的 Foreground／Fill 用它評，子元素繼承它
+        var elementFont = LocalFontFamily(el) ?? ChainFont(chain) ?? ChainFont(chainLight)
+                          ?? ChainFont(implicitChain) ?? ChainFont(implicitLight) ?? _inheritedFont;
+        // 隱含樣式的字色（1.5）：元素沒寫 Foreground 時，WPF 畫的是這一個。
+        // ⚠ 兩個主題的隱含樣式給不同的值時不用（Dark.xaml 與 Light.xaml 各定義一個隱含 TextBlock 樣式）——
+        //   這條舊路徑一個元素只有一個字色、表達不了「深淺不同源」，拿其中一邊去配兩欄就是編造
+        static string? ImplicitFg(StyleIndex.Merged? im)
+            => im is not null && im.Props.TryGetValue("Foreground", out var v) ? v.V : null;
+        var implicitFg = ImplicitFg(implicitChain) == ImplicitFg(implicitLight) ? ImplicitFg(implicitChain) : null;
+        // 字與底都出自同一個隱含樣式 → 定義處（WalkStyles）已經評過，使用處不再評，否則同一組算兩次。
+        // 例外與 GradeChain 相同：底是透明／半透明時定義處沒有底下那層可疊，那一組要在使用處對著祖先的底評
+        if (implicitFg is not null && (bgFromImplicit || bgLightFromImplicit) &&
+            ColorResolver.Resolve(bgVal, _pal) is not { Kind: ColorKind.Transparent or ColorKind.Alpha })
+            implicitFg = null;
+        // ⚠ 隱含樣式帶 ControlTemplate、而底不是它自己給的 → 不評。
+        //   這種控制項的字畫在模板裡某一層上，那一層是什麼顏色靜態看不到（模板根沒設底、或從控制項自己的
+        //   屬性 TemplateBinding 進來）—— 拿祖先的底去配就是編造一個執行期不存在的組合。
+        //   實測（HandyControl，1.5 開發中）：`<hc:Shield Color="#1182c3"/>` 的白字其實在藍色徽章上，
+        //   配祖先的白底報出三筆 1:1 的假 fail。底由隱含樣式自己給（含 Transparent 穿透到祖先）時照評 ——
+        //   MaterialDesign 的扁平按鈕（Background=Transparent、字是 Primary）就是那條路，2.63:1 是真的。
+        if (implicitFg is not null && implicitChain is { HasTemplate: true } && !bgFromImplicit && !bgLightFromImplicit)
+            implicitFg = null;
+        // ⚠ 推在「走子元素之前」：Style.Resources 管的是套了這個 Style 的元素的**內容**，不是元素自己
+        var pushed = (chain?.ScopedImplicit.Count > 0 || chainLight?.ScopedImplicit.Count > 0)
+                     || (implicitChain?.ScopedImplicit.Count > 0 || implicitLight?.ScopedImplicit.Count > 0);
+        if (pushed) _scopedStyles.Add((chain ?? implicitChain, chainLight ?? implicitLight));
+        WalkForegroundAndChildren(el, bd, file, op, suppressedBy, handledFg, elementFont, implicitFg, implicitChain);
+        if (pushed) _scopedStyles.RemoveAt(_scopedStyles.Count - 1);
         _inheritedFont = outerFont;
     }
 
@@ -1022,7 +1112,7 @@ public sealed partial class Auditor
         var explicitStyle = el.Attribute("Style") is not null ||
                             el.Elements().Any(e => e.Name.LocalName == name + ".Style");
         StyleIndex.Merged? Effective(StyleIndex.Merged? ch, ThemeSide? side)
-            => ch ?? (explicitStyle ? null : _styles.GetImplicitChain(name, _curFile, side));
+            => ch ?? (explicitStyle ? null : _styles.GetImplicitChain(name, _curFile, LineOf(el), side));
         var dark = Effective(chain, splitThemes ? ThemeSide.Dark : _curSide);
         var light = splitThemes ? Effective(chainLight, ThemeSide.Light) : dark;
         var perSide = splitThemes && (dark?.SideSpecific == true || light?.SideSpecific == true);
@@ -1160,8 +1250,11 @@ public sealed partial class Auditor
         }
     }
 
-    /// <summary>元素自己的 Foreground／Fill（沒有 Style 鏈接手時）與子元素（含規則 17 的兄弟背板）。</summary>
-    private void WalkForegroundAndChildren(XElement el, Backdrop bd, string file, double op, string? suppressedBy, bool handledFg, string? font)
+    /// <summary>元素自己的 Foreground／Fill（沒有 Style 鏈接手時）與子元素（含規則 17 的兄弟背板）。
+    /// <paramref name="implicitFg"/>／<paramref name="implicitStyle"/>：該型別隱含樣式的基礎 Setter（1.5）——
+    /// 元素沒寫 Foreground／FontSize／FontWeight 時 WPF 用的就是它們。</summary>
+    private void WalkForegroundAndChildren(XElement el, Backdrop bd, string file, double op, string? suppressedBy, bool handledFg,
+        string? font, string? implicitFg = null, StyleIndex.Merged? implicitStyle = null)
     {
         // 螢幕上實際看到的底（Opacity 群組一層一層疊出去之後）；底來自固定顏色的轉換器時，每個候選色一個
         var backdrops = BackdropVariants(bd);
@@ -1169,6 +1262,9 @@ public sealed partial class Auditor
         {
             if (attrName == "Foreground" && handledFg) continue;
             var fgRaw = XamlBrush.Read(el, attrName);
+            // 1.5：沒寫 Foreground 的元素，字色可能來自該型別的隱含樣式（Fill 沒有這條 —— 隱含樣式設 Fill 不是常見寫法，
+            // 而且 Shape 的 Fill 由 nonText 那條路管）
+            if (fgRaw is null && attrName == "Foreground") fgRaw = implicitFg;
             if (fgRaw is null) continue;
             var fgAll = ResolveColour(fgRaw, _pal);
             if (fgAll is null) continue;
@@ -1210,9 +1306,13 @@ public sealed partial class Auditor
                     //    換算要 ×0.75。18pt = 24px、14pt = 18.67px —— 少了這一步會把
                     //    18px 的字誤判成大字級而放過它。
                     var fs = 0.0;
-                    var fsRaw = el.Attribute("FontSize")?.Value;
+                    // 1.5：元素沒寫就看隱含樣式（WPF 的優先序）—— 隱含樣式把字放大到大字級時，
+                    // 門檻是 3:1 不是 4.5:1；不看它就會報一筆站不住的 fail
+                    var fsRaw = el.Attribute("FontSize")?.Value
+                                ?? (implicitStyle is not null && implicitStyle.Props.TryGetValue("FontSize", out var isf) ? isf.V : null);
                     if (fsRaw is not null) ParseFontSize(fsRaw, out fs);
-                    var fw = el.Attribute("FontWeight")?.Value;
+                    var fw = el.Attribute("FontWeight")?.Value
+                             ?? (implicitStyle is not null && implicitStyle.Props.TryGetValue("FontWeight", out var isw) ? isw.V : null);
                     var bold = IsBold(fw);
                     var pt = fs * 0.75;
                     var isLarge = pt >= 18 || (bold && pt >= 14);
@@ -1385,6 +1485,68 @@ public sealed partial class Auditor
     }
 
     // Style 裡成對的 Setter（Background + Foreground 同時存在）
+    /// <summary><c>{TemplateBinding X}</c> 的值 → null（那是宿主自己的屬性值，不是一個顏色）。</summary>
+    private static string? NotTemplateBound(string? v)
+        => v is not null && v.TrimStart().StartsWith("{TemplateBinding", StringComparison.Ordinal) ? null : v;
+
+    private static readonly XName XamlName = XName.Get("Name", "http://schemas.microsoft.com/winfx/2006/xaml");
+
+    /// <summary>
+    /// VisualStateManager 的狀態顏色：計數並點名，**不評**（明文盲區，見 <see cref="StateColorSite"/>）。
+    ///
+    /// 認兩種寫法：
+    /// <list type="bullet">
+    /// <item>WPF／Blend 方言：狀態 storyboard 裡的 <c>ColorAnimation</c>／<c>ColorAnimationUsingKeyFrames</c>，
+    ///   或 <c>ObjectAnimationUsingKeyFrames</c> 而 TargetProperty 指到畫顏色的屬性（整個 brush 換掉）。</item>
+    /// <item>WinUI／UWP：<c>&lt;VisualState.Setters&gt;</c> 裡 Target 指到畫顏色的屬性的 Setter。</item>
+    /// </list>
+    ///
+    /// ⚠ 不認動 Opacity 的 <c>DoubleAnimation</c>：VSM 裡的 Opacity 動畫幾乎都是焦點框／陰影的淡入淡出，
+    ///   全收會讓這個計數器變成雜訊（函式庫一個檔就幾十處），而雜訊計數器沒人看，等於沒有。
+    ///   顏色先喊，Opacity 留在 README 的盲區清單裡。
+    /// ⚠ 一個動畫／Setter 算一處，keyframe 不另計 —— 計數要跟「要去看幾個地方」同單位。
+    /// ⚠ 壓抑註解不影響這個計數（跟 unresolved 同一條規矩）：這不是判定，是工具的邊界，壓不掉。
+    /// </summary>
+    private void CountStateColors(XDocument doc, string file)
+    {
+        foreach (var state in doc.Descendants().Where(e => e.Name.LocalName == "VisualState"))
+        {
+            // x:Name 是 WPF／WinUI 的寫法，Name 是舊的；兩個都沒有也要記（「不知道哪個狀態」好過不記）
+            var stateName = state.Attribute(XamlName)?.Value ?? state.Attribute("Name")?.Value ?? "(unnamed)";
+            foreach (var el in state.Descendants())
+            {
+                var kind = el.Name.LocalName;
+                if (kind == "Setter")
+                {
+                    // VisualState.Setters：Target="Root.Background"（WinUI）
+                    var target = el.Attribute("Target")?.Value;
+                    if (target is not null && PaintsColor(target))
+                    {
+                        var dot = target.LastIndexOf('.');
+                        _stateColors.Add(new StateColorSite(file, LineOf(el), stateName, "setter", target,
+                            dot > 0 ? target[..dot] : null));
+                    }
+                    continue;
+                }
+                var prop = el.Attribute("Storyboard.TargetProperty")?.Value;
+                var isColor = kind is "ColorAnimation" or "ColorAnimationUsingKeyFrames"
+                    || (kind == "ObjectAnimationUsingKeyFrames" && prop is not null && PaintsColor(prop));
+                if (!isColor) continue;
+                _stateColors.Add(new StateColorSite(file, LineOf(el), stateName, "animation",
+                    prop ?? $"({kind})", el.Attribute("Storyboard.TargetName")?.Value));
+            }
+        }
+    }
+
+    /// <summary>這個屬性路徑畫的是顏色嗎（<c>(Border.Background).(SolidColorBrush.Color)</c> 這種寫法也要算到）。</summary>
+    private static bool PaintsColor(string prop)
+        => prop.Contains("Background", StringComparison.OrdinalIgnoreCase)
+        || prop.Contains("Foreground", StringComparison.OrdinalIgnoreCase)
+        || prop.Contains("BorderBrush", StringComparison.OrdinalIgnoreCase)
+        || prop.Contains("Fill", StringComparison.OrdinalIgnoreCase)
+        || prop.Contains("Stroke", StringComparison.OrdinalIgnoreCase)
+        || prop.Contains("Color", StringComparison.OrdinalIgnoreCase);
+
     /// <summary>
     /// Style 的 Template setter（含觸發器裡換模板的 setter）裡的 ControlTemplate：樹走訪不進 Style（Setter.Value 是屬性值），
     /// 模板裡自己帶 Foreground 的文字元素從來沒有被評過 —— 靜默退化（審查 1.0 最終驗證 S3）。
@@ -1519,7 +1681,10 @@ public sealed partial class Auditor
                         {
                             var gradedWhereUsed = key is not null
                                 ? _styles.IsUsedByAnElement(key)
-                                : style.Parent?.Name.LocalName.EndsWith(".Style", StringComparison.Ordinal) == true;
+                                : style.Parent?.Name.LocalName.EndsWith(".Style", StringComparison.Ordinal) == true
+                                  // 1.5：隱含樣式的基礎 Setter 現在在使用處評得到（元素 × 隱含樣式），所以這裡不再另外記 ——
+                                  // 前提是專案裡真的有那個型別的元素；一個都沒有的話執行期套不到它，那一組不存在，照舊記 unresolved
+                                  || (ttName is not null && _styles.AppliesToSomeElement(ttName));
                             if (!gradedWhereUsed) Unres(UnresolvedReason.TranslucentUncomposited, file, line, bgv);
                             continue;
                         }

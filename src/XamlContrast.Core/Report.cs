@@ -89,10 +89,38 @@ public static partial class Report
         if (r.Config.RootBackground is not null || r.Unresolved == 0) return null;
         var noBg = r.UnresolvedBy.GetValueOrDefault(UnresolvedReason.NoAncestorBackground);
         var overNothing = r.TranslucentOverNothing;
-        if ((noBg + overNothing) * 2 < r.Unresolved) return null;
-
         var inv = System.Globalization.CultureInfo.InvariantCulture;
         var sb = new StringBuilder();
+
+        // 另一種形狀（1.5，Bloxstrap 實測）：unresolved 幾乎都是 unknown-palette-key，而那些鍵是主題函式庫的。
+        // 這種專案直接用函式庫的鍵、自己一個都沒抄，所以 rootBackground 救不了（它只補視窗底色那一層）——
+        // 原本這裡什麼都不印，使用者只看到「0 組配對、exit 3」而不知道為什麼，也不知道還有沒有救。
+        var unknownKeys = r.UnresolvedBy.GetValueOrDefault(UnresolvedReason.UnknownPaletteKey);
+        if (r.ThemeLibraries.Count > 0 && unknownKeys * 2 >= r.Unresolved && unknownKeys > noBg + overNothing)
+        {
+            var keyLib = string.Join(" and ", r.ThemeLibraries);
+            sb.AppendLine(string.Create(inv, $"  hint: {unknownKeys} of them are 'unknown-palette-key' — this project uses"));
+            sb.AppendLine(string.Create(inv, $"        {keyLib}'s keys directly, and those brushes are defined inside the NuGet"));
+            sb.AppendLine("        package, not here — so there is nothing for static analysis to read, and");
+            sb.AppendLine("        rootBackground won't recover them (it only supplies the window background).");
+            sb.AppendLine("        The honest options are to declare the keys you care about in your own theme files");
+            sb.AppendLine("        (which is what most apps on these libraries already do), or to accept that this");
+            sb.Append("        project isn't statically auditable yet — exit 3 says exactly that, and it is not a pass.");
+            return sb.ToString();
+        }
+
+        // 門檻：rootBackground 補得回來的那一類要是**單一最大原因**，而且不是零星幾筆。
+        // ⚠ 1.5 之前是「過半」，而實測（Bloxstrap）原因分散時就什麼都不印：
+        //   no-ancestor-background 54、unknown-palette-key 37、bound-or-gradient 27 —— 一個都不過半，
+        //   於是使用者只看到「0 組配對、exit 3」，沒有任何下一步。而那個專案照提示設一行 rootBackground
+        //   就從 0 組配對變成 55 組、覆蓋率 46.2%。
+        //   「rootBackground 幫不上忙」才是不印的理由（硬邊界佔大宗那條測試顧的就是這個），
+        //   不是「它只能幫一半」。
+        var fixable = noBg + overNothing;
+        var otherCauses = r.UnresolvedBy
+            .Where(kv => kv.Key is not (UnresolvedReason.NoAncestorBackground or UnresolvedReason.TranslucentUncomposited))
+            .Select(kv => kv.Value).DefaultIfEmpty(0).Max();
+        if (fixable == 0 || fixable < otherCauses || fixable * 4 < r.Unresolved) return null;
         var counts = overNothing == 0
             ? string.Create(inv, $"{noBg} of them are 'no-ancestor-background'")
             : string.Create(inv, $"{noBg + overNothing} of them have nothing underneath " +
@@ -115,12 +143,49 @@ public static partial class Report
             return sb.ToString();
         }
 
+        // 1.5：偵測到是哪一個主題函式庫就說那一個，而且只在「這個專案的色盤真的有那個鍵」時叫人去設它。
+        // ⚠ 這是 1.4.2 那個教訓的同一層：原本一律印 MahApps 的鍵當範例，用 WPF-UI 或 HandyControl 的人
+        //   照做就是 exit 2（rootBackground 的鍵在色盤裡解析不出來）—— 錯方向的提示比沒有提示更糟。
+        if (r.ThemeLibraries.Count > 0)
+        {
+            // 專案同時用兩個函式庫時兩個都說（實測 MaaAssistantArknights）—— 說一個就是在挑,而挑錯會讓人
+            // 去設一個救不了他的鍵。底色鍵就依序找第一個「這個專案的色盤真的有」的
+            var lib = string.Join(" and ", r.ThemeLibraries);
+            sb.AppendLine(string.Create(inv, $"  hint: {counts} — this project merges {lib}'s theme"));
+            sb.AppendLine("        dictionaries, and the implicit style that paints your windows lives inside that");
+            sb.AppendLine("        NuGet package (compiled into the assembly), invisible to static analysis.");
+            if (r.ThemeLibraries.Select(l => ThemeLibraries.BackgroundKeyIn(l, r.Detection.Palette))
+                    .FirstOrDefault(k => k is not null) is { } key)
+            {
+                // ⚠ 那個鍵可能是工具自己補的（WPF-UI 的內建色票,見 WpfUiTheme）——
+                //   說成「你的主題檔有宣告」就是假話。那一行設定照樣有效,但要說清楚值從哪來
+                sb.AppendLine(r.Detection.FrameworkKeys.Contains(key)
+                    ? "        Its window background key resolves here from the library defaults this tool ships"
+                    : "        Your own theme files do declare its window background key, so one line in");
+                sb.AppendLine(r.Detection.FrameworkKeys.Contains(key)
+                    ? "        (your repo doesn't declare it), so one line in xamlcontrast.config.json is enough:"
+                    : "        xamlcontrast.config.json is enough:");
+                sb.AppendLine(string.Create(inv, $$"""          { "rootBackground": "{{key}}" }"""));
+                sb.Append("        Measured on a public MahApps app: 135 pairs at 9.4% coverage -> 1161 at 83.5%.");
+            }
+            else
+            {
+                var keys = string.Join(" / ", r.ThemeLibraries.SelectMany(ThemeLibraries.BackgroundKeysOf));
+                sb.AppendLine(string.Create(inv, $"        Your repo declares none of its background keys ({keys}),"));
+                sb.AppendLine("        so they only exist inside the package. Give rootBackground the window colour you");
+                sb.AppendLine("        actually render, as a literal, and run once per theme (one config each):");
+                sb.AppendLine("""          { "rootBackground": "#FFFFFF" }""");
+                sb.Append("        A key the palette doesn't have is a usage error (exit 2), not a shortcut.");
+            }
+            return sb.ToString();
+        }
+
         sb.AppendLine(string.Create(inv, $"  hint: {counts} — typical of an app built on a theme"));
-        sb.AppendLine("        library (MahApps, HandyControl, MaterialDesign...), where the implicit style that");
-        sb.AppendLine("        paints your windows lives inside the NuGet package, invisible to static analysis.");
+        sb.AppendLine("        library (MahApps, HandyControl, MaterialDesign, WPF-UI...), where the implicit style");
+        sb.AppendLine("        that paints your windows lives inside the NuGet package, invisible to static analysis.");
         sb.AppendLine("        Declare your window background key once in xamlcontrast.config.json:");
-        sb.AppendLine("""          { "rootBackground": "MahApps.Brushes.Window.Background" }""");
-        sb.Append("        Use a key from your own theme files. Measured on NETworkManager: 8.8% -> 87.2%.");
+        sb.AppendLine("""          { "rootBackground": "YourWindowBackgroundKey" }""");
+        sb.Append("        Use a key from your own theme files. Measured on NETworkManager: 9.4% -> 83.5%.");
         return sb.ToString();
     }
 
@@ -280,6 +345,10 @@ public static partial class Report
                 parseErrors = r.ParseErrors.Count,
                 parseErrorFiles = r.ParseErrors,
                 suppressed = r.Suppressed,
+                // 1.5：VisualStateManager 的狀態顏色 —— 明文盲區的計數器。
+                // ⚠ 刻意不進 pairs／unresolved／coverage：那會讓每個用 VSM 的專案覆蓋率無聲下降
+                // （覆蓋率是 exit 3 的門），而換到的資訊是零。逐筆位置在 stateColorSites
+                stateColors = r.StateColors.Count,
                 // 與 parseErrors／parseErrorFiles 同一個樣子：計數＋清單
                 invalidIgnoreCount = r.InvalidIgnores.Count,
                 invalidIgnores = r.InvalidIgnores,
@@ -301,6 +370,18 @@ public static partial class Report
                 value = s.Value,
                 // 1.3：跟 baseline 的 unresolved 段比的結果（known／new／worsened）；沒有比（沒有 --baseline、baseline 沒有這一段）是 null
                 baseline = ctx.UnresolvedBaselineStatus is { } us && us.TryGetValue(s, out var ub) ? ub : null,
+            }),
+            // 1.5：VisualStateManager 的狀態顏色，逐筆。跟 unresolvedSites 一樣是盲區地圖，
+            // 但分開一個陣列：unresolved 是「本來要評、解不出來」，這些是「整個狀態不在稽核範圍內」
+            stateColorSites = r.StateColors.Select(s => new
+            {
+                file = s.File,
+                line = s.Line,
+                state = s.State,
+                // animation = 狀態 storyboard（WPF／Blend 方言）；setter = VisualState.Setters（WinUI／UWP）
+                kind = s.Kind,
+                property = s.Property,
+                target = s.Target,
             }),
             findings = r.Findings.Select(f => new
             {
@@ -456,6 +537,18 @@ public static partial class Report
         if (r.DisabledExempt > 0)
             SafeLine(sb, string.Create(inv,
                 $"exempted {r.DisabledExempt} disabled-state pair(s) (IsEnabled=False; WCAG 1.4.3 does not require contrast for disabled controls)"));
+        if (r.StateColors.Count > 0)
+        {
+            // 盲區自己喊：「不評」不等於「沒有」。1.4 之前這一類連計數器都沒有 —— 報告看起來很完整，
+            // 而使用 VSM 的專案有數十處狀態顏色從頭到尾沒被提過一個字
+            var where = r.StateColors.Select(s => s.File).Distinct(StringComparer.Ordinal).Count();
+            SafeLine(sb, string.Create(inv,
+                $"not audited: {r.StateColors.Count} VisualStateManager state colour(s) in {where} file(s) — state storyboards and VisualState setters paint at runtime; the base state above is audited, these states are not"));
+            foreach (var s in r.StateColors.Take(3))
+                SafeLine(sb, $"  {s.File}:{s.Line} {s.State} ({s.Property})");
+            if (r.StateColors.Count > 3)
+                SafeLine(sb, string.Create(inv, $"  … and {r.StateColors.Count - 3} more — every one is listed in the JSON report (stateColorSites)"));
+        }
         foreach (var e in r.ParseErrors)
             SafeLine(sb, $"!! parse failed: {e}"); // 檔案不能從報告裡靜默消失
         if (r.Suppressed > 0)
@@ -618,6 +711,9 @@ public static partial class Report
         if (r.DeadForeground > 0) notes.Add(string.Create(inv, $"{r.DeadForeground} excluded (dead Foreground setter)"));
         if (r.DisabledExempt > 0) notes.Add(string.Create(inv, $"{r.DisabledExempt} exempted (IsEnabled=False; WCAG 1.4.3)"));
         if (r.Suppressed > 0) notes.Add(string.Create(inv, $"{r.Suppressed} suppressed via xamlcontrast-ignore"));
+        // 1.5：盲區也算「沒評到的東西」—— PR 留言與 job summary 看到的就是這一行
+        if (r.StateColors.Count > 0)
+            notes.Add(string.Create(inv, $"{r.StateColors.Count} VisualStateManager state colour(s) not audited (painted at runtime)"));
         if (notes.Count > 0)
         {
             sb.AppendLine($"**Not evaluated:** {string.Join(" · ", notes)}");
