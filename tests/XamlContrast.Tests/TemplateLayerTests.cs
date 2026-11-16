@@ -918,4 +918,60 @@ public class TemplateLayerTests
             """);
         Assert.Contains(fx.Run().UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
     }
+
+    /// <summary>狀態把模板內部某個具名元素的字色換掉（1.8）。<paramref name="target"/> 是那個 Setter 指的名字。</summary>
+    private static Fixture PressedFg(string target, string extra = "") => new Fixture().File("Main.xaml", $$"""
+        <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+          <Grid.Resources>
+            <Style x:Key="Card" TargetType="Button">
+              <Setter Property="Foreground" Value="#000000"/>
+              <Setter Property="Template">
+                <Setter.Value>
+                  <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root" Background="#FFFFFF">
+                      <StackPanel>
+                        <TextBlock x:Name="Label" Foreground="#555555" Text="label"/>
+                        <ContentPresenter x:Name="Content"/>
+                      </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                      <Trigger Property="IsPressed" Value="True">
+                        {{extra}}
+                        <Setter TargetName="{{target}}" Property="Foreground" Value="#FFFFFF"/>
+                      </Trigger>
+                    </ControlTemplate.Triggers>
+                  </ControlTemplate>
+                </Setter.Value>
+              </Setter>
+            </Style>
+          </Grid.Resources>
+          <Button Style="{StaticResource Card}" Content="hi"/>
+        </Grid>
+        """);
+
+    [Fact] // 1.7 之前這個 Setter 整個被丟掉：按下態的底換成黑、字色卻沿用基礎狀態的黑 →
+           // 報一筆執行期不存在的 1:1 假 fail。wpfui 的 CardAction 就是這形狀（實測 14.94 → 9.49）
+    public void AStatesForegroundOnTheContentElementIsUsedForThatState()
+    {
+        using var fx = PressedFg("Content", """<Setter TargetName="Root" Property="Background" Value="#000000"/>""");
+        var r = fx.Run();
+        Assert.DoesNotContain(r.Findings, f => f.RatioDark < 1.5); // 沒有那筆 1:1
+        Assert.Contains(r.Findings, f => f.Fg == "#FFFFFF" && f.Bg == "#000000");
+        Assert.Contains(r.Findings, f => f.Fg == "#000000" && f.Bg == "#FFFFFF"); // 基礎狀態照舊
+    }
+
+    [Fact] // 狀態裡只有這一個 Setter 時，1.7 之前整個狀態被略過（盲區）—— 現在評得到
+    public void AStateWhoseOnlyChangeIsThatForegroundIsNoLongerSkipped()
+    {
+        using var fx = PressedFg("Content");
+        Assert.Contains(fx.Run().Findings, f => f.Fg == "#FFFFFF" && f.Bg == "#FFFFFF");
+    }
+
+    [Fact] // 指向「自己帶字色」的元素（模板裡的說明文字、圖示）不是宿主的文字 —— 不能拿來當宿主的字色
+    public void AForegroundOnAnElementThatIsNotAContentPositionIsNotTheHostsText()
+    {
+        using var fx = PressedFg("Label", """<Setter TargetName="Root" Property="Background" Value="#000000"/>""");
+        var r = fx.Run();
+        Assert.DoesNotContain(r.Findings, f => f.Fg == "#FFFFFF");
+    }
 }

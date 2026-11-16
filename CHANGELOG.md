@@ -3,6 +3,66 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 1.8.0 — 2026-11-16
+
+### Upgrading（覆蓋率會掉，而且是**修掉編造**掉的）
+
+- **In short:** a state that changes the foreground of a **named element inside a template**
+  (`<Setter TargetName="Content" Property="Foreground" …/>`) is now used for that state. Until now that
+  setter was thrown away: if the state changed nothing else, the whole state was silently skipped; if it
+  *also* changed the host's background, the state was graded with the **base** foreground — a colour
+  combination that does not exist at runtime. The corpus has 489 of these setters.
+  **`Baseline.KeyVersion` stays 2 and `schemaVersion` stays 6.**
+  Measured on seventeen public projects and the maintainer's three apps: **the three local apps are
+  identical**, nine of the seventeen are identical, and every one of the eleven changed findings is
+  attributed below. What moves: **coverage drops** wherever the state's real foreground turns out to be a
+  binding or a key the palette doesn't have (MaterialDesign 9% → 6.7%, wpfui 9.1% → 8.8%, HandyControl
+  19.7% → 19.2%). Those pairs used to be reported against the wrong foreground.
+  **有用 `--min-coverage` 把關的請先確認。**
+  *簡單說：狀態把模板裡某個具名元素的字色換掉時，那個值現在算數了。以前那個 Setter 是丟掉的 ——
+  狀態如果沒改別的，整個狀態被悄悄略過；狀態如果同時改了宿主的底，就拿**基礎狀態的字色**去配，
+  報出一個執行期不存在的組合。語料裡有 489 個這種 Setter。*
+
+### Fixed
+
+- **狀態換掉模板內部某個具名元素的字色 → 那個值就是這個狀態的字色。**
+  逐筆驗過的四個形狀：
+  - **Flow Launcher**（`CustomControlTemplate.xaml:1639`）：RepeatButton 的按下態把底換成 `NumberBoxColor24B`、
+    字色換成 `NumberBoxColor25B`。舊版拿基礎狀態的 `NumberBoxColor26B` 去配，報 14.94:1 **ok**；
+    正確的組合是 **2.27:1 fail** —— 一個真的無障礙問題，被編造的配對蓋住了。
+  - **WPF-UI**（`SimpleView.xaml:19`）：CardAction 按下態 `CardForeground` → `CardForegroundPressed`，
+    14.94/16.67 → 9.49/6.12；ToggleButton 的勾選態與勾選按下態同形狀（其中一筆的 fail 從
+    15.58/1.32 變成 1.22/8.13 —— 一樣是 fail，但終於是那個狀態真正的兩個顏色）。
+  - **HandyControl**（TabControl）：6 筆 `PrimaryTextBrush on RegionBrush` 的 **ok 消失**。那幾個狀態真正的
+    字色是 `PrimaryBrush`（色盤裡沒有）或 `{Binding …TitleElement.Foreground…}`，所以改記 unresolved ——
+    舊版那 6 筆 17.04:1 是編的。
+  - **MahApps**：`PART_FloatingMessage`／`PART_Button` 的字色換成 `MahApps.Brushes.Accent`。報出 1:1 是
+    MahApps **自己的 repo** 色盤退化的老問題（它的主題檔是建置時產生的，Accent 與 Control.Background
+    都解析成 `#2D2D30`），同形狀的 finding 1.7 就已經有一筆。
+  - ⚠ 指向「自己帶字色」的元素（模板裡的說明文字、圖示）不算 —— 那不是宿主的文字。
+    只有那個名字正好是模板裡**放內容的位置**時才生效。
+
+### Changed
+
+- **版面未知的容器在模板裡與在畫面裡給同一個答案。**
+  自訂 `*Panel`、衍生命名的 `*Canvas`／`*Grid`：標記樹的規則 17 對它的答案是「可能是背板的兄弟之後的字 →
+  `over-sibling-content`」，而模板裡那條路原本只認 `Overlap`、把整個容器跳過、落到祖先。
+  ⚠ 這正是 `Panels` 被抽出來要防的事 —— 抽了共用的判定，但**呼叫端對 `Unknown` 的處理各寫各的**，一樣會漂開。
+  17 個公開專案與三個本機專案一個數字都沒變。
+
+- **一疊兄弟整個被放棄時，它們的名字照樣記進鏈。**
+  放棄的理由（內容元素、帶 `Opacity` 的兄弟）正是「它可能蓋在字底下、只是算不出來」，所以 1.7 的
+  「重畫碰不到內容就放行」不能把它當成無關。HandyControl 的 Calendar 就是這形狀：`Opacity="0"` 的
+  Rectangle 被選取態打開之後才是字真正的底。同樣一個數字都沒變。
+
+### Measured and deliberately not done
+
+- **VisualStateManager 的狀態顏色照舊只計數、不評分。** 1.8 先補的那個洞正是它的前置條件：語料 88 處 VSM 裡，
+  改字色的 40 處**全部**指向具名元素。做完這一版之後 VSM 才接得上去，但還缺一塊 —— **非顏色的動畫**也會
+  換掉字的底（HandyControl 的 Calendar 用 `DoubleAnimation` 把 `Opacity="0"` 的 Rectangle 打開）。
+  試過「碰到具名元素就記不可知」的保守翻譯：語料多 971 筆 unresolved、**0 組新配對**、Flow Launcher 覆蓋率
+  29.8% → 14.8%。那些位置本來就在 `stateColors` 裡誠實列著，換成 971 筆 unresolved 只是同一件事報兩次。
+
 ## 1.7.0 — 2026-11-16
 
 ### Upgrading（unresolved 的原因會大批換位置；baseline 的鍵不動）

@@ -945,11 +945,11 @@ public sealed partial class Auditor
     /// 換掉的那一層，來源就是那個 Setter 的 Style 節點；其餘是 "tmpl"（寫在模板裡，定義處看不到）。
     /// ⚠ 一律標 "tmpl" 的話，Kindling CellDeleteBtn 那個 hover 形狀會在定義處與使用處各報一次。</summary>
     private static List<TemplateChoice> TemplateChoices(
-        StyleIndex.Merged chain, StyleIndex.State st, Func<string, string?> hostProp)
+        IReadOnlyList<StyleIndex.TemplateLayer> layers, StyleIndex.State st, Func<string, string?> hostProp)
     {
         var rooted = st.Set.TryGetValue("Background", out var v) && st.RootTargeted.Contains("Background");
         var list = new List<TemplateChoice>();
-        foreach (var layer in chain.TemplateLayers)
+        foreach (var layer in layers)
         {
             var fromTrigger = layer.Root && rooted;
             var raw = fromTrigger ? v : layer.Bg;
@@ -1048,11 +1048,32 @@ public sealed partial class Auditor
             var allStates = new List<StyleIndex.State> { new() };
             // 元素自己換掉模板 → Style 模板裡的觸發器不存在（見上面 ownTemplate）
             allStates.AddRange(ownTemplate ? chain.States.Where(st => !st.FromTemplate) : chain.States);
-            foreach (var st in allStates)
+            // 「狀態把某個放內容位置的字色換掉了」要展開（1.8）：同一個狀態下不同的位置可能有不同的字色，
+            // 那是兩組不同的配對。⚠ 絕大多數狀態沒有這種 Setter，展開後就是原本那一組、Over 是 null，
+            //   走的程式碼與 1.7 完全相同（語料與三個本機專案逐筆一致可以證明這件事）。
+            IEnumerable<(StyleIndex.State St, string? Over, object? OverSrc, List<StyleIndex.TemplateLayer> Layers)>
+                Expand(StyleIndex.State st)
             {
-                // WPF 優先序：元素屬性 > Style 觸發 > Style Setter
+                var layers = chain.TemplateLayers;
+                if (st.ElementFg.Count == 0 || layers.Count == 0)
+                    return [(st, null, null, layers.ToList())];
+                (string? V, object? Src) Of(StyleIndex.TemplateLayer l)
+                {
+                    foreach (var n in l.ContentNames ?? [])
+                        if (st.ElementFg.TryGetValue(n, out var fg))
+                            return (fg, st.ElementFgSrc.TryGetValue(n, out var sid) ? sid : null);
+                    return (null, null);
+                }
+                return layers.GroupBy(Of).Select(g => (st, g.Key.V, g.Key.Src, g.ToList()));
+            }
+            foreach (var (st, fgOver, fgOverSrc, stLayers) in allStates.SelectMany(Expand))
+            {
+                // WPF 優先序：元素屬性 > Style 觸發 > Style Setter。
+                // ⚠ 模板內部那個元素自己的字色（TargetName Setter）贏過宿主的本地字色 ——
+                //   執行期它是設在那個元素上的，不是繼承來的。
                 string? fgV = null; object? fgSrc = null;
-                if (localFgRaw is not null) { fgV = localFgRaw; fgSrc = "local"; }
+                if (fgOver is not null) { fgV = fgOver; fgSrc = fgOverSrc; }
+                else if (localFgRaw is not null) { fgV = localFgRaw; fgSrc = "local"; }
                 else if (st.Set.TryGetValue("Foreground", out var sf)) { fgV = sf; fgSrc = st.SetSrc["Foreground"]; }
                 else if (chain.Props.TryGetValue("Foreground", out var pf)) { fgV = pf.V; fgSrc = pf.Src; }
                 if (fgV is null) continue;
@@ -1081,9 +1102,9 @@ public sealed partial class Auditor
                 //   Primary 底上 —— 元素明寫的值被一個「模板某層是透明的」推論蓋掉，等於編造。
                 // ⚠ 1.5 這一步只看模板根（TemplateRootBg），根沒設底就落到祖先 ——
                 //   HandyControl 的 <hc:Shield Color="#1182c3"/> 證明那是編出來的（白字其實在藍色徽章上）。
-                else if (!ownTemplate && chain.TemplateLayers.Count > 0)
+                else if (!ownTemplate && stLayers.Count > 0)
                 {
-                    tmplLayers = TemplateChoices(chain, st, HostProp);
+                    tmplLayers = TemplateChoices(stLayers, st, HostProp);
                     bgV = tmplLayers[0].V; bgSrc = tmplLayers[0].Src;
                 }
                 else if (!ownTemplate && chain.TemplateRootBg is not null)
@@ -1781,6 +1802,19 @@ public sealed partial class Auditor
             {
                 string? Prop(string p, out int src)
                 {
+                    // 狀態把模板裡放內容的那個元素的字色換掉了（1.8）—— 定義處也要看得到，
+                    // 否則按下態的底換了、字色卻沿用基礎狀態的，報出執行期不存在的組合
+                    // （wpfui 的 CardAction 實測 14.94:1 → 9.49:1）。
+                    // ⚠ 只在「整條鏈上只有一個這樣的字色」時套用：好幾個放內容的位置各換各的時，
+                    //   定義處一筆報不完，交給使用處逐層評（元素端的 Expand）。
+                    if (p == "Foreground" && st is not null && st.ElementFg.Count > 0)
+                    {
+                        var hits = chain.TemplateLayers.SelectMany(l => l.ContentNames ?? [])
+                            .Select(n => st.ElementFg.TryGetValue(n, out var v) ? (Name: n, V: v) : default)
+                            .Where(x => x.V is not null).ToList();
+                        if (hits.Select(x => x.V).Distinct(StringComparer.Ordinal).Count() == 1)
+                        { src = st.ElementFgSrc[hits[0].Name]; return hits[0].V; }
+                    }
                     if (st is not null && st.Set.TryGetValue(p, out var sv)) { src = st.SetSrc[p]; return sv; }
                     if (chain.Props.TryGetValue(p, out var pv)) { src = pv.Src; return pv.V; }
                     src = -1; return null;

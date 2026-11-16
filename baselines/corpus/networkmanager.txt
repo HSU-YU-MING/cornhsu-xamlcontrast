@@ -3,7 +3,7 @@
 project: networkmanager
 repo: https://github.com/BornToBeRoot/NETworkManager.git
 commit: 350d81fa7257d1f436187c767706e789013c077a
-tool-commit: a74bb86+dirty
+tool-commit: f1a7204+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair
@@ -13,7 +13,7 @@ single-theme: False
 files: 163
 pairs: 139
 coverage: 9
-unresolved: 1404
+unresolved: 1408
 skipped: 0
 dead-foreground: 0
 disabled-exempt: 140
@@ -29,6 +29,7 @@ decorative: 7
 unresolved-by.bound-or-gradient: 98
 unresolved-by.in-style-template: 11
 unresolved-by.no-ancestor-background: 1008
+unresolved-by.template-painted: 4
 unresolved-by.translucent-uncomposited: 97
 unresolved-by.unknown-palette-key: 190
 unknown-keys.Brushes.Button.Background: 58
@@ -1296,6 +1297,10 @@ U  no-ancestor-background  Source/NETworkManager/Views/WiFiView.xaml:957  {Dynam
 U  no-ancestor-background  Source/NETworkManager/Views/WiFiView.xaml:970  {DynamicResource MahApps.Brushes.Gray3}
 U  no-ancestor-background  Source/NETworkManager/Views/WiFiView.xaml:974  {DynamicResource MahApps.Brushes.Gray3}
 U  no-ancestor-background  Source/NETworkManager/Views/WindowsCredentialsChildWindow.xaml:23  {DynamicResource MahApps.Brushes.Text}
+U  template-painted  Source/NETworkManager/Resources/Styles/ComboBoxStyles.xaml:87  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.ActiveSelectionForegroundBrush), Mode=OneWay}
+U  template-painted  Source/NETworkManager/Resources/Styles/ComboBoxStyles.xaml:87  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  Source/NETworkManager/Resources/Styles/ComboBoxStyles.xaml:87  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverSelectedForegroundBrush), Mode=OneWay}
+U  template-painted  Source/NETworkManager/Resources/Styles/ComboBoxStyles.xaml:87  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.SelectedForegroundBrush), Mode=OneWay}
 U  translucent-uncomposited  Source/NETworkManager/Resources/Styles/DragablzStyles.xaml:104  Transparent
 U  translucent-uncomposited  Source/NETworkManager/Resources/Styles/TabControlStyles.xaml:3  Transparent
 U  translucent-uncomposited  Source/NETworkManager/Resources/Styles/TabControlStyles.xaml:3  Transparent

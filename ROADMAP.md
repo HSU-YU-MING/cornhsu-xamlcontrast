@@ -47,9 +47,19 @@
 - [x] 隱含樣式解析 —— 1.5：每個元素的底與字色都查隱含樣式，作用範圍照 WPF 的資源範圍走
       （巢狀 `<X.Resources>` 只管子樹、最內層優先、元素有自己的 Style 就不套）。
       實證價值：維護者自己的 Kindling 有一筆「按鈕上的白字其實是深色字、2.49:1」被 1.4 報成 21:1 ✓
-- **狀態裡「某個具名模板元素的顏色變了」—— 這是 VSM 評分的前置條件，不是 VSM 本身**（2026-11-16 實作一輪後得到的結論）。
-  `State` 現在只表達得出兩種改動：設在宿主上的，與 `TargetName` ＝模板根的（規則 13）。指向模板**內部**元素的，
-  底色進 `LayerPaints`（1.6），**字色直接丟掉**。
+- [x] **狀態裡「某個具名模板元素的字色變了」** —— 1.8 做掉了。這是 VSM 評分的前置條件，而且它自己就是一個
+      活著的編造來源：語料 489 個 `<Setter TargetName="X" Property="Foreground">`，狀態如果沒改別的就被整個
+      略過，同時改了宿主底的就拿基礎狀態的字色去配。逐筆驗過四個形狀（Flow Launcher 的 RepeatButton 按下態
+      14.94:1 ok → **2.27:1 真 fail**、WPF-UI 的 CardAction 與 ToggleButton、HandyControl 的 TabControl
+      6 筆編造的 ok 改記 unresolved、MahApps 的 PART_FloatingMessage）。
+      `State.ElementFg` ＋ `TemplateLayer.ContentNames` ＋ 評分處按層展開；定義處（`WalkStyles`）也要看得到，
+      不然它會照舊用基礎字色評出那一筆編造的。
+- **VSM 還缺的那一塊：非顏色的動畫也會換掉字的底**（1.8 新明文化）。
+  `State` 現在表達得出「哪個具名元素的字色／底色變成什麼」，但 VSM 還要能說「哪個具名元素**被打開了**」：
+  HandyControl 的 Calendar 用 `DoubleAnimation` 把 `Opacity="0"` 的 Rectangle 打開，字真正的底是它 ——
+  只看顏色動畫就會拿祖先的底去配白字。1.8 已經先補好鏈的記錄（被放棄的那一疊上的名字照樣收），
+  所以那種狀態至少會停在「不知道」而不是編造。
+  原本的說明保留如下，因為它說明了為什麼不能照現在的模型直接接上去：
   - 量出來的：語料 88 處 VSM 裡，改字色的 40 處**全部 40 處**都指向具名元素，只有 4 處動宿主自己。
     所以照現在的模型評 VSM，字色會用基礎狀態的值 —— 那個組合執行期不存在，正是 1.6 花整版修掉的那類編造。
   - 同一個洞在**觸發器**上也活著：語料有 489 個 `<Setter TargetName="X" Property="Foreground">`。

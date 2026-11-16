@@ -60,6 +60,13 @@ internal sealed partial class StyleIndex
         /// <c>OpacityMask</c> 那種「畫得出來但讀不懂」的目標 —— 問的是「它在不在字底下那一疊上」，
         /// 不是「它畫成什麼顏色」，所以讀不懂的也要收。</summary>
         public HashSet<string> LayerTouched = new(StringComparer.Ordinal);
+        /// <summary>這個狀態把**模板內部某個具名元素**的字色換掉了（1.8）：TargetName → 新的字色。
+        /// 1.7 之前這種 Setter 是直接丟掉的 —— 狀態如果只有它，整個狀態被略過（盲區）；
+        /// 狀態如果同時還改了宿主的底，狀態會成立而字色用基礎值，那是**編造**。
+        /// 只有「那個名字正好是模板裡一個放內容的位置」時才生效（<see cref="TemplateLayer.ContentNames"/>）——
+        /// 指到圖示、勾勾之類的不是宿主的文字，不歸這裡管。</summary>
+        public Dictionary<string, string> ElementFg = new(StringComparer.Ordinal);
+        public Dictionary<string, int> ElementFgSrc = new(StringComparer.Ordinal);
         /// <summary>這個狀態的不可知**不是**來自某個指得出來的 TargetName（1.7）：整個換掉 <c>Template</c>、
         /// 或視覺是另一份模板畫的。這兩種沒有可查的目標，所以永遠不能用「重畫的不在這一疊上」放行。</summary>
         public bool UnknownBeyondLayers;
@@ -76,7 +83,7 @@ internal sealed partial class StyleIndex
     /// 沒有任何觸發器碰模板內部時（絕大多數的 Style）這兩格一律是 null，那條路就是單純的分層。
     /// 觸發器重畫的元素對得上這兩格時，那個狀態的底就算得出來（<c>Auditor.TemplateChoices</c>）。</summary>
     internal sealed record TemplateLayer(string? Bg, bool Primary, bool Root,
-        string? Name = null, IReadOnlyList<string>? Above = null);
+        string? Name = null, IReadOnlyList<string>? Above = null, IReadOnlyList<string>? ContentNames = null);
 
     /// <summary>把宿主的內容整個接過去的自訂元素（<c>Content="{TemplateBinding Content}"</c>）——
     /// 不是 ContentPresenter 也一樣在畫宿主的內容，標記裡的子元素就落在這裡。
@@ -385,6 +392,13 @@ internal sealed partial class StyleIndex
         return (dot >= 0 ? prop[(dot + 1)..] : prop) is "Background" or "Fill";
     }
 
+    /// <summary>字色屬性（含 <c>TextElement.Foreground</c> 這種帶型別前綴的寫法）。</summary>
+    private static bool IsForegroundProp(string prop)
+    {
+        var dot = prop.LastIndexOf('.');
+        return (dot >= 0 ? prop[(dot + 1)..] : prop) == "Foreground";
+    }
+
     private static bool PaintsLayer(string prop)
     {
         var dot = prop.LastIndexOf('.');
@@ -473,14 +487,20 @@ internal sealed partial class StyleIndex
             if (bg is null && name is null && above.Count == 0) continue;
             // 同一層被兩個內容位置共用時只記一次（鍵要含重畫目標：同一個底、不同的重畫鏈是兩層）
             var key = $"{bg}|{name}|{string.Join(",", above)}";
+            // 放內容的那個元素自己的名字（1.8）：狀態換掉「它的」字色時，這一層的字色就是那個值。
+            // ⚠ 合併成同一層的位置會有好幾個名字，全部留著 —— 評分處再看它們是不是指向同一個字色。
+            var hostName = NameOf(host);
             if (byBg.TryGetValue(key, out var at))
             {
                 if (primary) layers[at] = layers[at] with { Primary = true };
+                if (hostName is not null && layers[at].ContentNames is List<string> cn && !cn.Contains(hostName))
+                    cn.Add(hostName);
                 continue;
             }
             byBg[key] = layers.Count;
             layers.Add(new TemplateLayer(bg, primary, root, name,
-                above.Count > 0 ? above : null));
+                above.Count > 0 ? above : null,
+                hostName is null ? new List<string>() : new List<string> { hostName }));
         }
         return layers;
     }
@@ -662,6 +682,7 @@ internal sealed partial class StyleIndex
             var rootTargeted = new HashSet<string>();
             var layerPaints = new Dictionary<string, string>();
             var layerTouched = new HashSet<string>(StringComparer.Ordinal);
+            var elementFg = new Dictionary<string, string>(StringComparer.Ordinal);
             var unknownLayer = false;
             var beyondLayers = false;
             foreach (var s in t.Elements().Where(e => e.Name.LocalName == "Setter"))
@@ -680,8 +701,11 @@ internal sealed partial class StyleIndex
                     layerTouched.Add(tn);
                     if (IsBackdropProp(p)) layerPaints[tn] = v;
                 }
+                // 指向模板內部某個元素的**字色**（1.8）：之前整個丟掉。它只在「那個名字正好是放內容的位置」
+                // 時生效，所以不設 unknownLayer —— 換字色不會動到底下那一層。
+                else if (IsForegroundProp(p)) elementFg[tn] = v;
             }
-            if (set.Count == 0 && !unknownLayer) continue;
+            if (set.Count == 0 && !unknownLayer && elementFg.Count == 0) continue;
             // 整個換掉模板：這個狀態的視覺是另一份模板畫的（ScreenToGif 的 ExtendedMenuItem Role 觸發器）
             if (set.ContainsKey("Template") || set.ContainsKey("Control.Template")) unknownLayer = beyondLayers = true;
             var inTmpl = false;
@@ -719,6 +743,8 @@ internal sealed partial class StyleIndex
                 LayerPaintSrc = layerPaints.Keys.ToDictionary(k => k, _ => rec.Id),
                 UnknownLayer = unknownLayer,
                 LayerTouched = layerTouched,
+                ElementFg = elementFg,
+                ElementFgSrc = elementFg.Keys.ToDictionary(k => k, _ => rec.Id, StringComparer.Ordinal),
                 UnknownBeyondLayers = beyondLayers,
                 Cond = cond,
             });
@@ -913,6 +939,8 @@ internal sealed partial class StyleIndex
                 LayerPaintSrc = new Dictionary<string, int>(s.LayerPaintSrc),
                 UnknownLayer = s.UnknownLayer,
                 LayerTouched = new HashSet<string>(s.LayerTouched, StringComparer.Ordinal),
+                ElementFg = new Dictionary<string, string>(s.ElementFg, StringComparer.Ordinal),
+                ElementFgSrc = new Dictionary<string, int>(s.ElementFgSrc, StringComparer.Ordinal),
                 UnknownBeyondLayers = s.UnknownBeyondLayers,
                 Cond = s.Cond,
             });
@@ -954,6 +982,8 @@ internal sealed partial class StyleIndex
                     LayerPaintSrc = new Dictionary<string, int>(s.LayerPaintSrc),
                     UnknownLayer = s.UnknownLayer,
                     LayerTouched = new HashSet<string>(s.LayerTouched, StringComparer.Ordinal),
+                    ElementFg = new Dictionary<string, string>(s.ElementFg, StringComparer.Ordinal),
+                    ElementFgSrc = new Dictionary<string, int>(s.ElementFgSrc, StringComparer.Ordinal),
                     UnknownBeyondLayers = s.UnknownBeyondLayers,
                     Cond = s.Cond,
                 };
@@ -983,6 +1013,7 @@ internal sealed partial class StyleIndex
             t.Disabled = t.Disabled || s.Disabled;
             t.UnknownLayer = t.UnknownLayer || s.UnknownLayer; // 同條件的狀態有一邊重畫了看不到的那層 → 整個不評
             t.LayerTouched.UnionWith(s.LayerTouched);
+            foreach (var (k, v) in s.ElementFg) { t.ElementFg[k] = v; t.ElementFgSrc[k] = s.ElementFgSrc[k]; }
             t.UnknownBeyondLayers = t.UnknownBeyondLayers || s.UnknownBeyondLayers;
             t.Nested = t.Nested && s.Nested; // 有一半是自己的狀態就算自己的
         }

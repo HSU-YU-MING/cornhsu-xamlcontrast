@@ -793,6 +793,13 @@ Honest list — full blind-spot table with per-case evidence in the
   opaque repaint is the backdrop, a translucent one is composited over the layer it covers (ScreenToGif's
   selected tab paints `#90FFFFFF` over the panel's level-3 brush, where 1.5 graded it against the colour the
   repaint covers and reported 1.46:1).
+  A state that changes the **foreground of a named element inside the template**
+  (`<Setter TargetName="Content" Property="Foreground" …/>`) uses that value for that state (1.8), as long as
+  the name is one of the template's content positions — a named element with its own colour (a hint label, an
+  icon) is not the host's text. Before this, such a setter was thrown away: a state that changed nothing else
+  was skipped silently, and one that *also* changed the host's background was graded with the **base**
+  foreground, a combination that does not exist at runtime (Flow Launcher's RepeatButton reported 14.94:1 for
+  a pressed state that is really 2.27:1).
   A repaint that lands on **no** content position's chain at all is not under this text, so the state keeps
   the backdrop it already had (1.7) — wpfui's `CheckBox` repaints the bullet square, a different branch from
   the label, and 1.6 discarded every checked state because of it. A same-cell sibling that doesn't fill its

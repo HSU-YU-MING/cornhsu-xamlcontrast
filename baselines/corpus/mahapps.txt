@@ -3,7 +3,7 @@
 project: mahapps
 repo: https://github.com/MahApps/MahApps.Metro
 commit: 9466e8acd96591e1f552841bc5357f376552bb57
-tool-commit: a74bb86+dirty
+tool-commit: f1a7204+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: single
@@ -11,27 +11,27 @@ palette-degraded: False
 palette-keys: 107
 single-theme: True
 files: 309
-pairs: 88
-coverage: 6.4
-unresolved: 1285
+pairs: 89
+coverage: 6.2
+unresolved: 1358
 skipped: 4
-dead-foreground: 104
-disabled-exempt: 230
+dead-foreground: 110
+disabled-exempt: 271
 converter-pairs: 0
 ui-component-pairs: 0
 parse-errors: 0
 suppressed: 0
 state-colors: 0
-fail: 1
+fail: 3
 warn: 5
-ok: 80
+ok: 79
 decorative: 2
-unresolved-by.bound-or-gradient: 203
+unresolved-by.bound-or-gradient: 204
 unresolved-by.in-style-template: 27
-unresolved-by.no-ancestor-background: 192
-unresolved-by.template-painted: 257
+unresolved-by.no-ancestor-background: 228
+unresolved-by.template-painted: 241
 unresolved-by.translucent-uncomposited: 11
-unresolved-by.unknown-palette-key: 595
+unresolved-by.unknown-palette-key: 647
 unknown-keys.MahApps.Brushes.Accent2: 2
 unknown-keys.MahApps.Brushes.Accent3: 2
 unknown-keys.MahApps.Brushes.Accent4: 2
@@ -47,13 +47,13 @@ unknown-keys.MahApps.Brushes.Gray: 1
 unknown-keys.MahApps.Brushes.Gray1: 9
 unknown-keys.MahApps.Brushes.Gray10: 5
 unknown-keys.MahApps.Brushes.Gray2: 49
-unknown-keys.MahApps.Brushes.Gray3: 42
+unknown-keys.MahApps.Brushes.Gray3: 52
 unknown-keys.MahApps.Brushes.Gray5: 1
 unknown-keys.MahApps.Brushes.Gray7: 3
 unknown-keys.MahApps.Brushes.Gray8: 5
 unknown-keys.MahApps.Brushes.Gray9: 7
 unknown-keys.MahApps.Brushes.Highlight: 5
-unknown-keys.MahApps.Brushes.IdealForeground: 19
+unknown-keys.MahApps.Brushes.IdealForeground: 20
 unknown-keys.MahApps.Brushes.InfoBar.Informational.IconForeground: 1
 unknown-keys.MahApps.Brushes.Progress: 2
 unknown-keys.MahApps.Brushes.ProgressBar.Win10.Paused: 2
@@ -64,7 +64,7 @@ unknown-keys.MahApps.Brushes.SystemControlForegroundAltMediumHigh: 3
 unknown-keys.MahApps.Brushes.SystemControlForegroundBaseHigh: 69
 unknown-keys.MahApps.Brushes.SystemControlForegroundBaseMedium: 7
 unknown-keys.MahApps.Brushes.SystemControlForegroundBaseMediumHigh: 2
-unknown-keys.MahApps.Brushes.SystemControlForegroundChromeBlackHigh: 5
+unknown-keys.MahApps.Brushes.SystemControlForegroundChromeBlackHigh: 2
 unknown-keys.MahApps.Brushes.SystemControlForegroundChromeWhite: 1
 unknown-keys.MahApps.Brushes.SystemControlHighlightAccent: 5
 unknown-keys.MahApps.Brushes.SystemControlHighlightAltAccent: 2
@@ -75,14 +75,17 @@ unknown-keys.MahApps.Brushes.SystemControlHighlightBaseHigh: 4
 unknown-keys.MahApps.Brushes.SystemControlPageTextBaseHigh: 1
 unknown-keys.MahApps.Brushes.SystemControlPageTextBaseMedium: 50
 unknown-keys.MahApps.Brushes.SystemControlPageTextChromeBlackMediumLow: 1
-unknown-keys.MahApps.Brushes.SystemControlTransparent: 6
+unknown-keys.MahApps.Brushes.SystemControlTransparent: 8
+unknown-keys.MahApps.Brushes.TextBlock.FloatingMessage: 30
+unknown-keys.MahApps.Brushes.TextControl.Background: 2
 unknown-keys.MahApps.Brushes.TextControl.Foreground: 21
 unknown-keys.MahApps.Brushes.TextControl.ForegroundFocused: 1
-unknown-keys.MahApps.Brushes.TextControl.WinUI.ButtonForeground: 3
-unknown-keys.MahApps.Brushes.TextControl.WinUI.ButtonForegroundPointerOver: 1
-unknown-keys.MahApps.Brushes.TextControl.WinUI.ButtonForegroundPressed: 1
+unknown-keys.MahApps.Brushes.TextControl.WinUI.Background: 2
+unknown-keys.MahApps.Brushes.TextControl.WinUI.ButtonForeground: 1
+unknown-keys.MahApps.Brushes.TextControl.WinUI.ButtonForegroundPointerOver: 2
+unknown-keys.MahApps.Brushes.TextControl.WinUI.ButtonForegroundPressed: 2
 unknown-keys.MahApps.Brushes.TextControl.WinUI.Foreground: 32
-unknown-keys.MahApps.Brushes.TextControl.WinUI.ForegroundFocused: 6
+unknown-keys.MahApps.Brushes.TextControl.WinUI.ForegroundFocused: 3
 unknown-keys.MahApps.Brushes.TextControl.WinUI.ForegroundPointerOver: 4
 unknown-keys.MahApps.Brushes.Transparent: 4
 unknown-keys.MahApps.Brushes.Validation: 1
@@ -91,8 +94,8 @@ unknown-keys.MahApps.Brushes.Window.Background.Backdrop.Auto: 1
 unknown-keys.MahApps.Brushes.WinUI.AccentFillDefault: 9
 unknown-keys.MahApps.Brushes.WinUI.AccentTextFillSecondary: 1
 unknown-keys.MahApps.Brushes.WinUI.AccentTextFillTertiary: 1
-unknown-keys.MahApps.Brushes.WinUI.CardBackgroundFillSecondary: 24
-unknown-keys.MahApps.Brushes.WinUI.ControlStrongFillDefault: 9
+unknown-keys.MahApps.Brushes.WinUI.CardBackgroundFillSecondary: 32
+unknown-keys.MahApps.Brushes.WinUI.ControlStrongFillDefault: 11
 unknown-keys.MahApps.Brushes.WinUI.SolidBackgroundFillBase: 2
 unknown-keys.MahApps.Brushes.WinUI.SystemFillAttention: 1
 unknown-keys.MahApps.Brushes.WinUI.SystemFillCaution: 2
@@ -101,11 +104,13 @@ unknown-keys.MahApps.Brushes.WinUI.TextInverse: 1
 unknown-keys.MahApps.Brushes.WinUI.TextOnAccentPrimary: 4
 unknown-keys.MahApps.Brushes.WinUI.TextOnAccentSecondary: 1
 unknown-keys.MahApps.Brushes.WinUI.TextPrimary: 60
-unknown-keys.MahApps.Brushes.WinUI.TextSecondary: 18
+unknown-keys.MahApps.Brushes.WinUI.TextSecondary: 19
 # F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
 F  decorative  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:303  MetroProgressBar  {DynamicResource MahApps.Brushes.Accent} on {MahApps.Brushes.ThemeBackground}  1.00/1.00  
 F  decorative  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SliderPage.xaml:85  Slider⊕Style[MahApps.Styles.Slider.Flat]/base  #FF66BB6A on #C8E6C9  1.76/1.76  
 F  fail  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/SplitViewExamples.xaml:109  TextBlock  White on #90EE90  1.42/1.42  single-theme
+F  fail  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MultiSelectionComboBoxPage.xaml:37  MultiSelectionComboBox⊕Style[MahApps.Styles.MultiSelectionComboBox.Horizontal]/trigger  {DynamicResource MahApps.Brushes.Accent} on {MahApps.Brushes.Control.Background}  1.00/1.00  single-theme
+F  fail  src/MahApps.Metro/Themes/ColorPicker/ColorPicker.xaml:73  Style[MahApps.Styles.ColorPicker]/trigger  {DynamicResource MahApps.Brushes.Accent} on {MahApps.Brushes.Control.Background}  1.00/1.00  single-theme
 F  ok  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HamburgerMenuDefault.xaml:251  TextBlock  White on #7A7A7A  4.29/4.29  
 F  ok  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/SplitViewExamples.xaml:121  TextBlock  Black on #6495ED  7.06/7.06  
 F  ok  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/SizeToContentDemo.xaml:13  PackIconModern  White on #B22222  6.68/6.68  
@@ -166,7 +171,6 @@ F  ok  src/MahApps.Metro/Styles/VS/MetroWindow.xaml:36  Style[MahApps.Styles.But
 F  ok  src/MahApps.Metro/Styles/VS/TabControl.xaml:14  Style[MahApps.Styles.TabControl.VisualStudio]/base  {DynamicResource MahApps.Brushes.Foreground} on {MahApps.Brushes.Background}  17.04/17.04  
 F  ok  src/MahApps.Metro/Themes/ColorPicker/ColorPicker.xaml:73  Style[MahApps.Styles.ColorPicker]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.Control.Background}  13.73/13.73  
 F  ok  src/MahApps.Metro/Themes/ContentDialog.xaml:946  Style[MahApps.Styles.Button.ContentDialog.Close.WinUI]/trigger  #FFFFFFFF on #C42B1C  5.66/5.66  
-F  ok  src/MahApps.Metro/Themes/DateTimePicker.xaml:591  Style[MahApps.Styles.ComboBoxItem.TimePickerBase.Win10]/trigger  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.Accent}  13.73/13.73  
 F  ok  src/MahApps.Metro/Themes/DateTimePicker.xaml:66  Style[MahApps.Styles.TimePickerBase]/base  {DynamicResource MahApps.Brushes.Text} on {MahApps.Brushes.Control.Background}  13.73/13.73  
 F  ok  src/MahApps.Metro/Themes/Dialogs/BaseMetroDialog.xaml:132  Style[MahApps.Styles.BaseMetroDialog]/base  {DynamicResource MahApps.Brushes.Dialog.Foreground} on {MahApps.Brushes.Dialog.Background}  13.73/13.73  
 F  ok  src/MahApps.Metro/Themes/DropDownButton.xaml:182  Style[MahApps.Styles.DropDownButton]/base  {DynamicResource MahApps.Brushes.ThemeForeground} on {MahApps.Brushes.ThemeBackground}  13.73/13.73  
@@ -269,6 +273,7 @@ U  bound-or-gradient  src/MahApps.Metro/Styles/VS/MenuItem.xaml:25  {Binding Pat
 U  bound-or-gradient  src/MahApps.Metro/Styles/VS/MenuItem.xaml:25  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
 U  bound-or-gradient  src/MahApps.Metro/Styles/VS/MenuItem.xaml:25  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
 U  bound-or-gradient  src/MahApps.Metro/Styles/VS/MenuItem.xaml:25  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
+U  bound-or-gradient  src/MahApps.Metro/Themes/AutoSuggestBox.xaml:42  {TemplateBinding Foreground}
 U  bound-or-gradient  src/MahApps.Metro/Themes/AutoSuggestBox.xaml:42  {TemplateBinding Foreground}
 U  bound-or-gradient  src/MahApps.Metro/Themes/AutoSuggestBox.xaml:98  {TemplateBinding Foreground}
 U  bound-or-gradient  src/MahApps.Metro/Themes/ChildWindow.xaml:132  <MultiBinding>
@@ -438,38 +443,64 @@ U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleV
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:292  {DynamicResource MahApps.Brushes.Accent}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:305  {DynamicResource MahApps.Brushes.Accent}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:100  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:100  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:124  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:124  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:138  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:138  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:144  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:144  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:26  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:26  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:51  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:51  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:74  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:74  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/CustomDialogExample.xaml:21  {DynamicResource MahApps.Brushes.Text}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/CustomDialogExample.xaml:31  {DynamicResource MahApps.Brushes.Text}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HamburgerMenuDefault.xaml:193  White
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:240  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:240  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:288  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:288  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:317  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:317  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:360  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:360  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:403  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:403  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:403  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:403  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:409  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:409  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:409  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:409  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:409  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:421  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:421  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:421  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:421  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:421  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:429  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:429  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:429  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:429  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:429  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:105  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:105  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:137  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:137  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:171  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:171  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:206  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:206  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:223  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:223  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:231  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:231  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:242  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:242  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:279  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/MultiSelectionComboBoxExample.xaml:279  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:241  {DynamicResource MahApps.Brushes.Text}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:252  {DynamicResource MahApps.Brushes.Text}
@@ -482,15 +513,25 @@ U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleV
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:334  {DynamicResource MahApps.Brushes.Text}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:347  {DynamicResource MahApps.Brushes.ThemeBackground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:217  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:217  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:270  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:270  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:311  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:311  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:384  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:384  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:412  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:412  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:464  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:464  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:512  Red
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:530  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:530  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:601  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:601  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:629  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:629  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:79  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:79  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TransitionExamples.xaml:94  {DynamicResource MahApps.Brushes.Text}
 U  no-ancestor-background  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/StyleSetsDemo.xaml:245  {DynamicResource MahApps.Brushes.Accent}
@@ -614,6 +655,14 @@ U  no-ancestor-background  src/Mahapps.Metro.Tests/Views/DialogCustomTitleWindow
 U  no-ancestor-background  src/Mahapps.Metro.Tests/Views/DialogCustomTitleWindow.xaml:20  Blue
 U  no-ancestor-background  src/Mahapps.Metro.Tests/Views/ProgressBarWindow.xaml:16  Red
 U  no-ancestor-background  src/Mahapps.Metro.Tests/Views/ProgressBarWindow.xaml:25  Blue
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:422  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:422  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:425  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:425  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:428  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:428  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:431  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:431  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPressed)}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:100  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:124  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ColorPickerExample.xaml:138  {DynamicResource MahApps.Brushes.ThemeForeground}
@@ -670,14 +719,14 @@ U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/N
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/NumericUpDownExamples.xaml:255  {DynamicResource MahApps.Brushes.ToggleSwitch.ContentForeground}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/NumericUpDownExamples.xaml:337  {DynamicResource MahApps.Brushes.ToggleSwitch.ContentForeground}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/NumericUpDownExamples.xaml:337  {DynamicResource MahApps.Brushes.ToggleSwitch.ContentForeground}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:26  {Binding RelativeSource={RelativeSource Self}, Path=Owner.Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:26  {Binding RelativeSource={RelativeSource Self}, Path=Owner.Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:355  {Binding RelativeSource={RelativeSource Self}, Path=Owner.Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:355  {Binding RelativeSource={RelativeSource Self}, Path=Owner.Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:365  {Binding RelativeSource={RelativeSource Self}, Path=Owner.Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:365  {Binding RelativeSource={RelativeSource Self}, Path=Owner.Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:372  {Binding RelativeSource={RelativeSource Self}, Path=Owner.Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:372  {Binding RelativeSource={RelativeSource Self}, Path=Owner.Foreground, Mode=OneWay}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:26  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:26  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:355  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:355  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:365  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:365  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/OtherExamples.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/Sliders.xaml:251  {DynamicResource MahApps.Brushes.Gray2}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/Sliders.xaml:256  {DynamicResource MahApps.Brushes.Gray1}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/Sliders.xaml:269  {DynamicResource MahApps.Brushes.Gray2}
@@ -726,6 +775,14 @@ U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/T
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:601  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:629  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:79  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:40  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:40  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:45  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:45  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:58  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:58  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:63  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:63  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPressed)}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RangeSliderPage.xaml:35  {DynamicResource MahApps.Brushes.Slider.WinUI.TickBarFill}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SliderPage.xaml:31  {DynamicResource MahApps.Brushes.Slider.WinUI.TickBarFill}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SliderPage.xaml:43  {DynamicResource MahApps.Brushes.Gray1}
@@ -748,17 +805,13 @@ U  template-painted  src/MahApps.Metro/Styles/Controls.CheckBox.xaml:13  {Dynami
 U  template-painted  src/MahApps.Metro/Styles/Controls.CheckBox.xaml:13  {DynamicResource MahApps.Brushes.CheckBox.ForegroundUnchecked}
 U  template-painted  src/MahApps.Metro/Styles/Controls.CheckBox.xaml:13  {DynamicResource MahApps.Brushes.CheckBox.ForegroundUnchecked}
 U  template-painted  src/MahApps.Metro/Styles/Controls.CheckBox.xaml:13  {DynamicResource MahApps.Brushes.CheckBox.ForegroundUnchecked}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:1025  {DynamicResource MahApps.Brushes.ComboBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:1025  {DynamicResource MahApps.Brushes.ComboBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:1025  {DynamicResource MahApps.Brushes.ComboBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:1025  {DynamicResource MahApps.Brushes.ComboBox.Win10.ItemForeground}
 U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:1238  {DynamicResource MahApps.Brushes.ComboBox.Win10.Foreground}
 U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:1379  {DynamicResource MahApps.Brushes.ComboBox.WinUI.Foreground}
 U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:281  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:729  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:729  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:729  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:729  {DynamicResource MahApps.Brushes.Text}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:729  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.ActiveSelectionForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:729  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:729  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverSelectedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:729  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.SelectedForegroundBrush), Mode=OneWay}
 U  template-painted  src/MahApps.Metro/Styles/Controls.DataGrid.xaml:1201  {DynamicResource MahApps.Brushes.DataGrid.Win10.HeaderForeground}
 U  template-painted  src/MahApps.Metro/Styles/Controls.DataGrid.xaml:1201  {DynamicResource MahApps.Brushes.DataGrid.Win10.HeaderForeground}
 U  template-painted  src/MahApps.Metro/Styles/Controls.DataGrid.xaml:1631  {DynamicResource MahApps.Brushes.DataGrid.Win10.GroupHeaderForeground}
@@ -775,36 +828,28 @@ U  template-painted  src/MahApps.Metro/Styles/Controls.DatePicker.xaml:532  {Dyn
 U  template-painted  src/MahApps.Metro/Styles/Controls.DatePicker.xaml:532  {DynamicResource MahApps.Brushes.TextControl.WinUI.Foreground}
 U  template-painted  src/MahApps.Metro/Styles/Controls.FlatSlider.xaml:153  {DynamicResource MahApps.Brushes.Accent}
 U  template-painted  src/MahApps.Metro/Styles/Controls.FlatSlider.xaml:153  {DynamicResource MahApps.Brushes.Accent}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:247  {DynamicResource MahApps.Brushes.ListBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:247  {DynamicResource MahApps.Brushes.ListBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:247  {DynamicResource MahApps.Brushes.ListBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:247  {DynamicResource MahApps.Brushes.ListBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:247  {DynamicResource MahApps.Brushes.ListBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:247  {DynamicResource MahApps.Brushes.ListBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:247  {DynamicResource MahApps.Brushes.ListBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:247  {DynamicResource MahApps.Brushes.ListBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:188  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:188  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:188  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:188  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:188  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:188  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {DynamicResource MahApps.Brushes.ListView.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {DynamicResource MahApps.Brushes.ListView.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {DynamicResource MahApps.Brushes.ListView.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {DynamicResource MahApps.Brushes.ListView.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {DynamicResource MahApps.Brushes.ListView.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {DynamicResource MahApps.Brushes.ListView.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {DynamicResource MahApps.Brushes.ListView.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {DynamicResource MahApps.Brushes.ListView.Win10.ItemForeground}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.ActiveSelectionForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverSelectedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.MouseLeftButtonPressedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.MouseRightButtonPressedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.PressedSelectedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.PressedSelectedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListBox.xaml:92  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.SelectedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:188  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.ActiveSelectionForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:188  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:188  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverSelectedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:188  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.MouseLeftButtonPressedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:188  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.MouseRightButtonPressedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:188  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.SelectedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.ActiveSelectionForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverSelectedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.MouseLeftButtonPressedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.MouseRightButtonPressedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.PressedSelectedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.PressedSelectedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.ListView.xaml:706  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.SelectedForegroundBrush), Mode=OneWay}
 U  template-painted  src/MahApps.Metro/Styles/Controls.MenuItem.xaml:1017  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
 U  template-painted  src/MahApps.Metro/Styles/Controls.MenuItem.xaml:1017  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
 U  template-painted  src/MahApps.Metro/Styles/Controls.MenuItem.xaml:1017  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
@@ -815,12 +860,8 @@ U  template-painted  src/MahApps.Metro/Styles/Controls.MenuItem.xaml:1053  {Dyna
 U  template-painted  src/MahApps.Metro/Styles/Controls.MenuItem.xaml:1053  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
 U  template-painted  src/MahApps.Metro/Styles/Controls.PasswordBox.xaml:64  {DynamicResource MahApps.Brushes.Text}
 U  template-painted  src/MahApps.Metro/Styles/Controls.PasswordBox.xaml:64  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.RadioButton.xaml:191  {DynamicResource MahApps.Brushes.RadioButton.Foreground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.RadioButton.xaml:191  {DynamicResource MahApps.Brushes.RadioButton.Foreground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.RadioButton.xaml:260  {DynamicResource MahApps.Brushes.RadioButton.WinUI.Foreground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.RadioButton.xaml:260  {DynamicResource MahApps.Brushes.RadioButton.WinUI.Foreground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.RadioButton.xaml:7  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.RadioButton.xaml:7  {DynamicResource MahApps.Brushes.Text}
+U  template-painted  src/MahApps.Metro/Styles/Controls.RadioButton.xaml:7  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
+U  template-painted  src/MahApps.Metro/Styles/Controls.RadioButton.xaml:7  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPressed)}
 U  template-painted  src/MahApps.Metro/Styles/Controls.RichTextBox.xaml:7  {DynamicResource MahApps.Brushes.Text}
 U  template-painted  src/MahApps.Metro/Styles/Controls.RichTextBox.xaml:7  {DynamicResource MahApps.Brushes.Text}
 U  template-painted  src/MahApps.Metro/Styles/Controls.Slider.xaml:839  {DynamicResource MahApps.Brushes.Slider.WinUI.TickBarFill}
@@ -828,37 +869,21 @@ U  template-painted  src/MahApps.Metro/Styles/Controls.TextBox.xaml:16  {Dynamic
 U  template-painted  src/MahApps.Metro/Styles/Controls.TextBox.xaml:16  {DynamicResource MahApps.Brushes.Text}
 U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:12  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:12  {DynamicResource MahApps.Brushes.ThemeForeground}
-U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {DynamicResource MahApps.Brushes.Text}
+U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.ActiveSelectionForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverSelectedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.MouseLeftButtonPressedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.MouseRightButtonPressedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.SelectedForegroundBrush), Mode=OneWay}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:66  {DynamicResource MahApps.Brushes.Text}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:66  {DynamicResource MahApps.Brushes.Text}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:677  {DynamicResource MahApps.Brushes.TextControl.Foreground}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:677  {DynamicResource MahApps.Brushes.TextControl.Foreground}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:739  {DynamicResource MahApps.Brushes.TextControl.WinUI.Foreground}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:739  {DynamicResource MahApps.Brushes.TextControl.WinUI.Foreground}
-U  template-painted  src/MahApps.Metro/Themes/FlipView.xaml:386  {Binding RelativeSource={RelativeSource Self}, Path=Owner.Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro/Themes/FlipView.xaml:386  {Binding RelativeSource={RelativeSource Self}, Path=Owner.Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro/Themes/HamburgerMenuTemplate.xaml:240  {Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}, Path=Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro/Themes/HamburgerMenuTemplate.xaml:240  {Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}, Path=Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro/Themes/HamburgerMenuTemplate.xaml:240  {Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}, Path=Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro/Themes/HamburgerMenuTemplate.xaml:240  {Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}, Path=Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro/Themes/HamburgerMenuTemplate.xaml:240  {Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}, Path=Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro/Themes/HamburgerMenuTemplate.xaml:240  {Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}, Path=Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro/Themes/HamburgerMenuTemplate.xaml:240  {Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}, Path=Foreground, Mode=OneWay}
-U  template-painted  src/MahApps.Metro/Themes/HamburgerMenuTemplate.xaml:240  {Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ItemsControl}}, Path=Foreground, Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Themes/FlipView.xaml:386  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Themes/FlipView.xaml:386  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
 U  template-painted  src/MahApps.Metro/Themes/MetroWindow.xaml:630  {DynamicResource MahApps.Brushes.ThemeForeground}
-U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:149  {DynamicResource MahApps.Brushes.ComboBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:149  {DynamicResource MahApps.Brushes.ComboBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:149  {DynamicResource MahApps.Brushes.ComboBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:149  {DynamicResource MahApps.Brushes.ComboBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:149  {DynamicResource MahApps.Brushes.ComboBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:149  {DynamicResource MahApps.Brushes.ComboBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:149  {DynamicResource MahApps.Brushes.ComboBox.Win10.ItemForeground}
-U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:149  {DynamicResource MahApps.Brushes.ComboBox.Win10.ItemForeground}
 U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:879  {DynamicResource MahApps.Brushes.ComboBox.Win10.Foreground}
 U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:969  {DynamicResource MahApps.Brushes.ComboBox.WinUI.Foreground}
 U  template-painted  src/MahApps.Metro/Themes/RangeSlider.xaml:281  {DynamicResource MahApps.Brushes.Gray1}
@@ -901,7 +926,9 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleView
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:207  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:211  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DateExamples.xaml:110  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DateExamples.xaml:111  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DateExamples.xaml:118  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DateExamples.xaml:119  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DateExamples.xaml:135  MahApps.Brushes.Gray3
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DateExamples.xaml:142  MahApps.Brushes.Gray3
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DateExamples.xaml:148  MahApps.Brushes.Gray3
@@ -1016,7 +1043,9 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleView
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:455  MahApps.Brushes.SystemControlPageTextBaseMedium
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:466  MahApps.Brushes.SystemControlPageTextBaseMedium
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:471  MahApps.Brushes.SystemControlPageTextBaseMedium
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:474  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:479  MahApps.Brushes.SystemControlPageTextBaseMedium
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:482  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:487  MahApps.Brushes.SystemControlPageTextBaseMedium
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:495  MahApps.Brushes.SystemControlPageTextBaseMedium
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:503  MahApps.Brushes.SystemControlPageTextBaseMedium
@@ -1041,6 +1070,7 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWind
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:218  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:223  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:48  MahApps.Brushes.IdealForeground
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/VSDemo.xaml:36  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/Styles/XamlDisplay.xaml:24  MahApps.Brushes.Gray10
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
@@ -1048,8 +1078,12 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWind
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/AnalogClockPage.xaml:39  MahApps.Brushes.Gray10
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/AutoSuggestBoxPage.xaml:33  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/AutoSuggestBoxPage.xaml:33  MahApps.Brushes.TextControl.Foreground
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/AutoSuggestBoxPage.xaml:47  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/AutoSuggestBoxPage.xaml:47  MahApps.Brushes.TextControl.WinUI.Foreground
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ButtonPage.xaml:100  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ButtonPage.xaml:114  MahApps.Brushes.Button.Flat.Foreground.Pressed
@@ -1058,9 +1092,19 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/Bu
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ButtonPage.xaml:139  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ButtonPage.xaml:96  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ColorPage.xaml:20  MahApps.Brushes.WinUI.TextSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ColorPickerPage.xaml:33  MahApps.Brushes.TextControl.Background
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ColorPickerPage.xaml:47  MahApps.Brushes.TextControl.WinUI.Background
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ComboBoxPage.xaml:65  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ComboBoxPage.xaml:65  MahApps.Brushes.TextControl.Foreground
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ComboBoxPage.xaml:80  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ComboBoxPage.xaml:80  MahApps.Brushes.TextControl.WinUI.Foreground
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DataGridPage.xaml:170  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DatePickerPage.xaml:32  MahApps.Brushes.TextBlock.FloatingMessage
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DatePickerPage.xaml:44  MahApps.Brushes.TextBlock.FloatingMessage
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DateTimePickerPage.xaml:31  MahApps.Brushes.TextBlock.FloatingMessage
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DateTimePickerPage.xaml:43  MahApps.Brushes.TextBlock.FloatingMessage
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
@@ -1073,6 +1117,10 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/Ex
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
@@ -1093,9 +1141,12 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/Li
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ListViewPage.xaml:208  MahApps.Brushes.Gray7
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ListViewPage.xaml:89  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ListViewPage.xaml:89  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MultiSelectionComboBoxPage.xaml:107  MahApps.Brushes.TextControl.WinUI.Background
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MultiSelectionComboBoxPage.xaml:107  MahApps.Brushes.TextControl.WinUI.Foreground
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MultiSelectionComboBoxPage.xaml:37  MahApps.Brushes.Gray9
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MultiSelectionComboBoxPage.xaml:94  MahApps.Brushes.TextControl.Background
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MultiSelectionComboBoxPage.xaml:94  MahApps.Brushes.TextControl.Foreground
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/PasswordBoxPage.xaml:32  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ProgressRingPage.xaml:31  MahApps.Brushes.SystemControlHighlightAltAccent
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ProgressRingPage.xaml:32  MahApps.Brushes.SystemControlHighlightAltAccent
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ProgressRingPage.xaml:47  MahApps.Brushes.WinUI.AccentFillDefault
@@ -1119,6 +1170,8 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/Se
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:83  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:83  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:83  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:83  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:83  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:99  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SliderPage.xaml:31  MahApps.Brushes.WinUI.ControlStrongFillDefault
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SliderPage.xaml:43  MahApps.Brushes.Gray1
@@ -1129,6 +1182,8 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/Te
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/TextPage.xaml:37  MahApps.Brushes.IdealForeground
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/TextPage.xaml:64  MahApps.Brushes.SystemControlPageTextBaseMedium
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/TextPage.xaml:64  MahApps.Brushes.SystemControlPageTextChromeBlackMediumLow
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/TimePickerPage.xaml:58  MahApps.Brushes.TextBlock.FloatingMessage
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/TimePickerPage.xaml:70  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ToggleButtonPage.xaml:101  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ToggleButtonPage.xaml:32  MahApps.Brushes.IdealForeground
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ToggleButtonPage.xaml:32  MahApps.Brushes.WinUI.SolidBackgroundFillBase
@@ -1199,6 +1254,7 @@ U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:1379  Ma
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:1379  MahApps.Brushes.TextControl.WinUI.Foreground
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:1379  MahApps.Brushes.TextControl.WinUI.ForegroundFocused
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:281  MahApps.Brushes.Gray9
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.ComboBox.xaml:281  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.ContextMenu.xaml:139  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.ContextMenu.xaml:139  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.ContextMenu.xaml:82  MahApps.Brushes.SystemControlForegroundBaseHigh
@@ -1222,6 +1278,7 @@ U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.DataGrid.xaml:2523  Ma
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.DataGrid.xaml:425  MahApps.Brushes.DataGrid.Selection.Text
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.DataGrid.xaml:425  MahApps.Brushes.DataGrid.Selection.Text.MouseOver
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.DataGrid.xaml:425  MahApps.Brushes.DataGrid.Selection.Text.MouseOver
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.DatePicker.xaml:11  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.DatePicker.xaml:499  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.DatePicker.xaml:532  MahApps.Brushes.TextControl.WinUI.Foreground
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.FlatSlider.xaml:153  MahApps.Brushes.Accent2
@@ -1243,12 +1300,13 @@ U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.MenuItem.xaml:665  Mah
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.MenuItem.xaml:672  MahApps.Brushes.SystemControlForegroundBaseMediumHigh
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.MenuItem.xaml:894  MahApps.Brushes.WinUI.TextSecondary
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.MenuItem.xaml:901  MahApps.Brushes.WinUI.TextSecondary
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.PasswordBox.xaml:1124  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.PasswordBox.xaml:1124  MahApps.Brushes.TextControl.WinUI.Foreground
-U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.PasswordBox.xaml:1124  MahApps.Brushes.TextControl.WinUI.ForegroundFocused
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.PasswordBox.xaml:1124  MahApps.Brushes.TextControl.WinUI.ForegroundPointerOver
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.PasswordBox.xaml:64  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.PasswordBox.xaml:736  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.PasswordBox.xaml:736  MahApps.Brushes.SystemControlForegroundBaseHigh
-U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.PasswordBox.xaml:736  MahApps.Brushes.SystemControlForegroundChromeBlackHigh
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.PasswordBox.xaml:736  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.ProgressBar.xaml:140  MahApps.Brushes.ProgressBar.Win10.Paused
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.ProgressBar.xaml:140  MahApps.Brushes.SystemControlErrorTextForeground
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.ProgressBar.xaml:140  MahApps.Brushes.SystemControlHighlightAccent
@@ -1265,10 +1323,11 @@ U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.RadioButton.xaml:260  
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.RadioButton.xaml:260  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.RichTextBox.xaml:336  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.RichTextBox.xaml:336  MahApps.Brushes.SystemControlForegroundBaseHigh
-U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.RichTextBox.xaml:336  MahApps.Brushes.SystemControlForegroundChromeBlackHigh
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.RichTextBox.xaml:336  MahApps.Brushes.TextBlock.FloatingMessage
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.RichTextBox.xaml:642  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.RichTextBox.xaml:642  MahApps.Brushes.TextControl.WinUI.Foreground
-U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.RichTextBox.xaml:642  MahApps.Brushes.TextControl.WinUI.ForegroundFocused
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.RichTextBox.xaml:642  MahApps.Brushes.TextControl.WinUI.ForegroundPointerOver
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.RichTextBox.xaml:7  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Scrollbars.xaml:1019  MahApps.Brushes.Gray2
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Scrollbars.xaml:1109  MahApps.Brushes.Gray2
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Scrollbars.xaml:1137  MahApps.Brushes.Gray2
@@ -1288,15 +1347,26 @@ U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:1175  
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:1175  MahApps.Brushes.WinUI.TextSecondary
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:1175  MahApps.Brushes.WinUI.TextSecondary
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:683  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:683  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:683  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:726  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:726  MahApps.Brushes.Gray3
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:726  MahApps.Brushes.Gray3
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:732  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:732  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:732  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:748  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:748  MahApps.Brushes.Gray3
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:748  MahApps.Brushes.Gray3
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:754  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:754  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TabControl.xaml:754  MahApps.Brushes.Gray3
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TextBox.xaml:16  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TextBox.xaml:340  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TextBox.xaml:340  MahApps.Brushes.SystemControlForegroundBaseHigh
-U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TextBox.xaml:340  MahApps.Brushes.SystemControlForegroundChromeBlackHigh
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TextBox.xaml:340  MahApps.Brushes.TextBlock.FloatingMessage
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TextBox.xaml:644  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TextBox.xaml:644  MahApps.Brushes.TextControl.WinUI.Foreground
-U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TextBox.xaml:644  MahApps.Brushes.TextControl.WinUI.ForegroundFocused
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.TextBox.xaml:644  MahApps.Brushes.TextControl.WinUI.ForegroundPointerOver
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:378  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:378  MahApps.Brushes.SystemControlForegroundBaseHigh
@@ -1320,6 +1390,7 @@ U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Tooltip.xaml:177  MahA
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Tooltip.xaml:177  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro/Themes/AnalogClock.xaml:17  MahApps.Brushes.Accent3
 U  unknown-palette-key  src/MahApps.Metro/Themes/AnalogClock.xaml:31  MahApps.Brushes.Accent4
+U  unknown-palette-key  src/MahApps.Metro/Themes/AutoSuggestBox.xaml:42  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro/Themes/ColorPicker/ColorEyeDropper.xaml:192  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Themes/ColorPicker/ColorEyeDropper.xaml:192  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Themes/ColorPicker/ColorEyeDropper.xaml:192  MahApps.Brushes.SystemControlHighlightBaseHigh
@@ -1343,6 +1414,8 @@ U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:22  MahApps
 U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:22  MahApps.Brushes.Gray9
 U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:22  MahApps.Brushes.Transparent
 U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:591  MahApps.Brushes.Gray8
+U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:591  MahApps.Brushes.IdealForeground
+U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:66  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:677  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:739  MahApps.Brushes.TextControl.WinUI.Foreground
 U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/BaseMetroDialog.xaml:132  MahApps.Brushes.Dialog.Foreground.Accent
@@ -1386,6 +1459,7 @@ U  unknown-palette-key  src/MahApps.Metro/Themes/FlipView.xaml:941  MahApps.Brus
 U  unknown-palette-key  src/MahApps.Metro/Themes/Flyout.xaml:266  MahApps.Brushes.Flyout.Background
 U  unknown-palette-key  src/MahApps.Metro/Themes/Flyout.xaml:266  MahApps.Brushes.Flyout.Background
 U  unknown-palette-key  src/MahApps.Metro/Themes/Flyout.xaml:266  MahApps.Brushes.Flyout.Background
+U  unknown-palette-key  src/MahApps.Metro/Themes/HamburgerMenuTemplate.xaml:619  MahApps.Brushes.WinUI.TextSecondary
 U  unknown-palette-key  src/MahApps.Metro/Themes/HotKeyBox.xaml:111  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Themes/HotKeyBox.xaml:111  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Themes/HotKeyBox.xaml:111  MahApps.Brushes.SystemControlForegroundBaseHigh
@@ -1441,8 +1515,8 @@ U  unknown-palette-key  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:969
 U  unknown-palette-key  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:969  MahApps.Brushes.TextControl.WinUI.Foreground
 U  unknown-palette-key  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:969  MahApps.Brushes.TextControl.WinUI.Foreground
 U  unknown-palette-key  src/MahApps.Metro/Themes/NumericUpDown.xaml:441  MahApps.Brushes.TextControl.WinUI.ButtonForeground
-U  unknown-palette-key  src/MahApps.Metro/Themes/NumericUpDown.xaml:441  MahApps.Brushes.TextControl.WinUI.ButtonForeground
-U  unknown-palette-key  src/MahApps.Metro/Themes/NumericUpDown.xaml:441  MahApps.Brushes.TextControl.WinUI.ButtonForeground
+U  unknown-palette-key  src/MahApps.Metro/Themes/NumericUpDown.xaml:441  MahApps.Brushes.TextControl.WinUI.ButtonForegroundPointerOver
+U  unknown-palette-key  src/MahApps.Metro/Themes/NumericUpDown.xaml:441  MahApps.Brushes.TextControl.WinUI.ButtonForegroundPressed
 U  unknown-palette-key  src/MahApps.Metro/Themes/NumericUpDown.xaml:489  MahApps.Brushes.TextControl.Foreground
 U  unknown-palette-key  src/MahApps.Metro/Themes/NumericUpDown.xaml:489  MahApps.Brushes.TextControl.Foreground
 U  unknown-palette-key  src/MahApps.Metro/Themes/NumericUpDown.xaml:489  MahApps.Brushes.TextControl.Foreground
@@ -1451,6 +1525,8 @@ U  unknown-palette-key  src/MahApps.Metro/Themes/NumericUpDown.xaml:576  MahApps
 U  unknown-palette-key  src/MahApps.Metro/Themes/NumericUpDown.xaml:576  MahApps.Brushes.TextControl.WinUI.Foreground
 U  unknown-palette-key  src/MahApps.Metro/Themes/NumericUpDown.xaml:576  MahApps.Brushes.TextControl.WinUI.Foreground
 U  unknown-palette-key  src/MahApps.Metro/Themes/NumericUpDown.xaml:576  MahApps.Brushes.TextControl.WinUI.ForegroundFocused
+U  unknown-palette-key  src/MahApps.Metro/Themes/PipsPager.xaml:303  MahApps.Brushes.WinUI.ControlStrongFillDefault
+U  unknown-palette-key  src/MahApps.Metro/Themes/PipsPager.xaml:303  MahApps.Brushes.WinUI.ControlStrongFillDefault
 U  unknown-palette-key  src/MahApps.Metro/Themes/PipsPager.xaml:303  MahApps.Brushes.WinUI.ControlStrongFillDefault
 U  unknown-palette-key  src/MahApps.Metro/Themes/PipsPager.xaml:303  MahApps.Brushes.WinUI.ControlStrongFillDefault
 U  unknown-palette-key  src/MahApps.Metro/Themes/ProgressRing.xaml:358  MahApps.Brushes.WinUI.AccentFillDefault
@@ -1477,3 +1553,4 @@ U  unknown-palette-key  src/Mahapps.Metro.Tests/Views/SliderWindow.xaml:13  MahA
 U  unknown-palette-key  src/Mahapps.Metro.Tests/Views/SliderWindow.xaml:19  MahApps.Brushes.Gray2
 U  unknown-palette-key  src/Mahapps.Metro.Tests/Views/SliderWindow.xaml:32  MahApps.Brushes.Gray1
 U  unknown-palette-key  src/Mahapps.Metro.Tests/Views/SliderWindow.xaml:39  MahApps.Brushes.Gray2
+U  unknown-palette-key  src/Mahapps.Metro.Tests/Views/TextBoxHelperTestWindow.xaml:25  MahApps.Brushes.TextBlock.FloatingMessage
