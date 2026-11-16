@@ -5,23 +5,38 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ## 1.8.0 — 2026-11-16
 
-### Upgrading（覆蓋率會掉，而且是**修掉編造**掉的）
+### Upgrading（覆蓋率會掉，而且掉的是**本來就算錯**的那些；baseline 的鍵不動）
 
-- **In short:** a state that changes the foreground of a **named element inside a template**
-  (`<Setter TargetName="Content" Property="Foreground" …/>`) is now used for that state. Until now that
-  setter was thrown away: if the state changed nothing else, the whole state was silently skipped; if it
-  *also* changed the host's background, the state was graded with the **base** foreground — a colour
-  combination that does not exist at runtime. The corpus has 489 of these setters.
-  **`Baseline.KeyVersion` stays 2 and `schemaVersion` stays 6.**
+- **In short:** one release, one question — *what colour is this text actually sitting on, in this state?*
+  Five answers changed. A state that sets the foreground of a **named element inside a template**
+  (`<Setter TargetName="Content" Property="Foreground" …/>`) now uses that value instead of the base one;
+  a trigger that repaints a layer the text is provably not sitting on no longer discards the whole state;
+  the "is it under the text" test uses that layer's own stack instead of a union; namespace-prefixed
+  resource extensions (`{ui:ThemeResource K}`) resolve like the plain ones; and elements that are
+  `Visibility="Collapsed"` or a sibling `Image` inside a template are no longer treated as the backdrop.
+  **`Baseline.KeyVersion` stays 2 and `schemaVersion` stays 6** — no key changes its spelling, so your
+  `baseline.json` keeps working.
   Measured on seventeen public projects and the maintainer's three apps: **the three local apps are
-  identical**, nine of the seventeen are identical, and every one of the eleven changed findings is
-  attributed below. What moves: **coverage drops** wherever the state's real foreground turns out to be a
-  binding or a key the palette doesn't have (MaterialDesign 9% → 6.7%, wpfui 9.1% → 8.8%, HandyControl
-  19.7% → 19.2%). Those pairs used to be reported against the wrong foreground.
-  **有用 `--min-coverage` 把關的請先確認。**
-  *簡單說：狀態把模板裡某個具名元素的字色換掉時，那個值現在算數了。以前那個 Setter 是丟掉的 ——
-  狀態如果沒改別的，整個狀態被悄悄略過；狀態如果同時改了宿主的底，就拿**基礎狀態的字色**去配，
-  報出一個執行期不存在的組合。語料裡有 489 個這種 Setter。*
+  byte-identical**, eight of the seventeen are identical, and all 57 changed findings are attributed below.
+  Three real failures that were previously hidden behind a fabricated pair: Flow Launcher's pressed
+  RepeatButton (**2.27:1**, reported as 14.94:1), MaterialDesign's validation-error state (**1.76:1**, ten
+  of them, the whole state was skipped), and Playnite's menu text (matched against a collapsed hover
+  highlight). Bloxstrap goes from **0 graded pairs and "nothing was audited"** to 18 pairs.
+  What moves against you: **coverage drops** wherever a state's real foreground turns out to be a binding or
+  a key the palette doesn't have (MaterialDesign 9% → 6.8%, wpfui 9% → 8.8%, HandyControl 19.7% → 19.2%).
+  Those pairs used to be reported against the wrong colour. **有用 `--min-coverage` 把關的請先確認。**
+  *簡單說：一版，一個問題 —— 這段文字在這個狀態下到底疊在什麼顏色上。五個答案變了：狀態換掉模板裡
+  某個具名元素的字色時那個值算數了；觸發器重畫的那一層證明得出來不在字底下時不再丟掉整個狀態；
+  「在不在字底下」改用那一層自己那一疊判定；帶命名空間前綴的資源引用解得開；看不見的元素
+  （`Visibility="Collapsed"`、模板裡的兄弟 `Image`）不再被當成字的底。
+  `Baseline.KeyVersion` 維持 2、`schemaVersion` 維持 6，舊的 `baseline.json` 照用。
+  三個本機專案一個位元都沒動，17 個公開專案裡 8 個逐筆一致，57 筆變動全部歸因。*
+
+- **181 筆 unresolved 換了原因**，從 `template-painted` 換成真正卡住它的那個東西（色盤裡沒有的鍵、
+  執行期才知道的 Binding）。原因終於指對地方：`template-painted` 使用者無能為力，「這個鍵你沒定義」修得動。
+
+- ⚠ **打開 `--fail-on-new-unresolved`／`failOnNewUnresolved` 的人要重跑 `--write-baseline`**：unresolved 的鍵是
+  `file|reason|value`，原因換了就等於一筆新增加一筆消失。fail／warn 的 baseline 不受影響。
 
 ### Fixed
 
@@ -38,12 +53,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
     舊版那 6 筆 17.04:1 是編的。
   - **MahApps**：`PART_FloatingMessage`／`PART_Button` 的字色換成 `MahApps.Brushes.Accent`。報出 1:1 是
     MahApps **自己的 repo** 色盤退化的老問題（它的主題檔是建置時產生的，Accent 與 Control.Background
-    都解析成 `#2D2D30`），同形狀的 finding 1.7 就已經有一筆。
+    都解析成 `#2D2D30`），同形狀的 finding 這一版之前就已經有一筆。
   - ⚠ 指向「自己帶字色」的元素（模板裡的說明文字、圖示）不算 —— 那不是宿主的文字。
     只有那個名字正好是模板裡**放內容的位置**時才生效。
 
 - **「這個狀態動到的東西在不在字底下」改用這一層自己那一疊判定，不是整份記錄的 union。**
-  1.7 的那一格問的是記錄層的問題（整個狀態要不要丟掉），union 是對的；但**逐層**判定時 union 太寬 ——
+  上面那一格問的是記錄層的問題（整個狀態要不要丟掉），union 是對的；但**逐層**判定時 union 太寬 ——
   WinUI 風格的模板把圖示、勾勾、文字放在同一個 Grid 裡，union 會讓每一層都被判成「可能被動到」。
   收緊之後分得出「在另一個格子」（照舊評）與「同一格但撐不滿那一格」（仍然不評，靜態分不出來）。
   **實測**：MaterialDesign 多出 **10 筆真 fail** —— `Validation.HasError` 同時換 `Graphic` 的 `Fill` 與
@@ -56,62 +71,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   hover 高亮（`HoverBrush`）當成選單文字的底，現在誠實記「上面沒有底」；MaaAssistantArknights 有一筆
   收起來的內容元素同理。⚠ 只認寫死的值，`{Binding}` 照舊當成看得見（往嚴格那邊錯）。
   判定放在 `Panels`，標記樹與模板裡那條鏈共用一份。
-
-### Changed
-
-- **版面未知的容器在模板裡與在畫面裡給同一個答案。**
-  自訂 `*Panel`、衍生命名的 `*Canvas`／`*Grid`：標記樹的規則 17 對它的答案是「可能是背板的兄弟之後的字 →
-  `over-sibling-content`」，而模板裡那條路原本只認 `Overlap`、把整個容器跳過、落到祖先。
-  ⚠ 這正是 `Panels` 被抽出來要防的事 —— 抽了共用的判定，但**呼叫端對 `Unknown` 的處理各寫各的**，一樣會漂開。
-  17 個公開專案與三個本機專案一個數字都沒變。
-
-- **一疊兄弟整個被放棄時，它們的名字照樣記進鏈。**
-  放棄的理由（內容元素、帶 `Opacity` 的兄弟）正是「它可能蓋在字底下、只是算不出來」，所以 1.7 的
-  「重畫碰不到內容就放行」不能把它當成無關。HandyControl 的 Calendar 就是這形狀：`Opacity="0"` 的
-  Rectangle 被選取態打開之後才是字真正的底。同樣一個數字都沒變。
-
-### Measured and deliberately not done
-
-- **VisualStateManager 的狀態顏色照舊只計數、不評分 —— 這一版把前兩個前置條件都補掉了，還是不行。**
-  1.8 做的兩件事（具名元素的字色算數、逐層判定改用這一層自己那一疊）正是 VSM 卡住的兩個原因，
-  補完之後把 VSM 翻譯成同一個 State 模型再量一次：語料多 **959 筆 unresolved、0 組新配對**，
-  Flow Launcher 覆蓋率 29.8% → 14.8%。逐筆看過新增的 unresolved：它們**確實落在真的元素上**
-  （`PluginSettingsWindow.xaml:110` 的 ToggleSwitch 之類），不是空轉 —— 卡住的是第三個原因：
-  **非顏色的動畫也會換掉字的底**。HandyControl 的 Calendar 用 `DoubleAnimation` 把 `Opacity="0"` 的
-  Rectangle 打開，字真正的底是它；不把這種動畫算進去就會拿祖先的底去配白字，算進去（保守記不可知）
-  就是上面那 959 筆。**在能說出「哪一層被打開了」之前，VSM 接上去只會讓報告更吵。**
-  那些位置本來就在 `stateColors` 裡誠實列著，換成 959 筆 unresolved 只是同一件事報兩次、外加打爛
-  `--min-coverage`。
-
-- **「哪一層被狀態打開了」也做過一輪，一樣不划算。** 那是 VSM 缺的第三塊，而且觸發器也用得很兇
-  （語料 1715 個 `TargetName` + `Visibility` 的 Setter、831 個 `Opacity`）。實作出來：模板裡記下
-  「現在看不見、但狀態可能打開」的候選層，狀態打開它就拿它當底。**量出來是 +0 組配對、+0 筆 finding、
-  +111 筆 unresolved。** 中途看起來很漂亮的 +134 組配對／42 筆 finding 是假的 —— 那些狀態打開的是箭頭、
-  勾勾之類根本不是底的東西，只是讓同一組配對**又被算了一次**，6 筆「新 fail」逐筆查下去全是既有配對的
-  重複計數。加上「只有可能當底的元素才算」這道閘之後，收益歸零。
-  **0 筆編造被修掉、0 個新問題被找到**，所以不收。
-
-## 1.7.0 — 2026-11-16
-
-### Upgrading（unresolved 的原因會大批換位置；baseline 的鍵不動）
-
-- **In short:** three changes, all about *what a piece of text is actually sitting on*. A trigger that
-  repaints a layer **inside** a template no longer discards the whole state when that layer is provably not
-  under this text; namespace-prefixed resource extensions (`{ui:ThemeResource K}`) now resolve like the plain
-  ones; and text over a sibling `Image` **inside a template** is now `over-sibling-content`, the same answer
-  the markup tree has always given. **`Baseline.KeyVersion` stays 2 and `schemaVersion` stays 6** — no key
-  changes its spelling, so your `baseline.json` keeps working. Measured on the same seventeen public projects
-  and the maintainer's three apps: the three local apps and thirteen of the seventeen are identical, and
-  **no existing finding was lost or changed**. What moves: **181 unresolved sites change reason**, from
-  `template-painted` to whatever was really blocking them, and Bloxstrap goes from **0 graded pairs and
-  "nothing was audited"** to 18 pairs (2 fail, 6 warn, 10 ok).
-  *簡單說：三件事都在回答「這段文字到底疊在什麼上面」。觸發器重畫模板**內部**某一層時，如果那一層證明得出來
-  不在這段文字底下，就不再把整個狀態丟掉；帶命名空間前綴的資源引用（`{ui:ThemeResource K}`）跟不帶前綴的
-  一樣解析；模板裡字疊在兄弟 `Image` 上改記 `over-sibling-content`，跟標記樹本來就給的答案一致。
-  `Baseline.KeyVersion` 維持 2、`schemaVersion` 維持 6 —— 沒有任何鍵換寫法，舊的 `baseline.json` 照用。*
-
-- ⚠ **打開 `--fail-on-new-unresolved`／`failOnNewUnresolved` 的人要重跑 `--write-baseline`**：unresolved 的鍵是
-  `file|reason|value`，原因換了就等於一筆新增加一筆消失。fail／warn 的 baseline 不受影響。
 
 ### Changed
 
@@ -155,6 +114,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   排在圖後面、又畫了底的兄弟照舊蓋過那張圖（不是看到圖就放棄）。
   **17 個公開專案與三個本機專案一個數字都沒變** —— 它關掉的是一條編造路徑，不是一批新數字。
 
+- **版面未知的容器在模板裡與在畫面裡給同一個答案。**
+  自訂 `*Panel`、衍生命名的 `*Canvas`／`*Grid`：標記樹的規則 17 對它的答案是「可能是背板的兄弟之後的字 →
+  `over-sibling-content`」，而模板裡那條路原本只認 `Overlap`、把整個容器跳過、落到祖先。
+  ⚠ 這正是 `Panels` 被抽出來要防的事 —— 抽了共用的判定，但**呼叫端對 `Unknown` 的處理各寫各的**，一樣會漂開。
+  17 個公開專案與三個本機專案一個數字都沒變。
+
+- **一疊兄弟整個被放棄時，它們的名字照樣記進鏈。**
+  放棄的理由（內容元素、帶 `Opacity` 的兄弟）正是「它可能蓋在字底下、只是算不出來」，所以上面那條
+  「重畫碰不到內容就放行」不能把它當成無關。HandyControl 的 Calendar 就是這形狀：`Opacity="0"` 的
+  Rectangle 被選取態打開之後才是字真正的底。同樣一個數字都沒變。
+
 ### Measured and deliberately not done
 
 - **帶 `Opacity` 的兄弟仍然不疊合。** 量過了：17 個公開專案裡只有 **2 處**（都在 MaterialDesign），
@@ -167,6 +137,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   「重畫在別的分支」。真正的大宗是前者，所以這一版做的是它，不是原先 ROADMAP 上寫的那條。
   ⚠ 這段量測救了一次：第一版的判定因為漏抄一個欄位而從未生效，語料顯示「零變化」，差點被當成
   「野外不存在這種形狀」而放棄。
+
+- **VisualStateManager 的狀態顏色照舊只計數、不評分 —— 這一版把前兩個前置條件都補掉了，還是不行。**
+  1.8 做的兩件事（具名元素的字色算數、逐層判定改用這一層自己那一疊）正是 VSM 卡住的兩個原因，
+  補完之後把 VSM 翻譯成同一個 State 模型再量一次：語料多 **959 筆 unresolved、0 組新配對**，
+  Flow Launcher 覆蓋率 29.8% → 14.8%。逐筆看過新增的 unresolved：它們**確實落在真的元素上**
+  （`PluginSettingsWindow.xaml:110` 的 ToggleSwitch 之類），不是空轉 —— 卡住的是第三個原因：
+  **非顏色的動畫也會換掉字的底**。HandyControl 的 Calendar 用 `DoubleAnimation` 把 `Opacity="0"` 的
+  Rectangle 打開，字真正的底是它；不把這種動畫算進去就會拿祖先的底去配白字，算進去（保守記不可知）
+  就是上面那 959 筆。**在能說出「哪一層被打開了」之前，VSM 接上去只會讓報告更吵。**
+  那些位置本來就在 `stateColors` 裡誠實列著，換成 959 筆 unresolved 只是同一件事報兩次、外加打爛
+  `--min-coverage`。
+
+- **「哪一層被狀態打開了」也做過一輪，一樣不划算。** 那是 VSM 缺的第三塊，而且觸發器也用得很兇
+  （語料 1715 個 `TargetName` + `Visibility` 的 Setter、831 個 `Opacity`）。實作出來：模板裡記下
+  「現在看不見、但狀態可能打開」的候選層，狀態打開它就拿它當底。**量出來是 +0 組配對、+0 筆 finding、
+  +111 筆 unresolved。** 中途看起來很漂亮的 +134 組配對／42 筆 finding 是假的 —— 那些狀態打開的是箭頭、
+  勾勾之類根本不是底的東西，只是讓同一組配對**又被算了一次**，6 筆「新 fail」逐筆查下去全是既有配對的
+  重複計數。加上「只有可能當底的元素才算」這道閘之後，收益歸零。
+  **0 筆編造被修掉、0 個新問題被找到**，所以不收。
 
 ## 1.6.0 — 2026-11-16
 

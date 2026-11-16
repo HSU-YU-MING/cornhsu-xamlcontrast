@@ -145,7 +145,7 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
    定義的 key，另一個主題記 `unknown-palette-key`）。
    **WinUI／UWP：** 字典裡的 `<ResourceDictionary.ThemeDictionaries>` 依 `x:Key` 拆開 —— `Dark`（沒有 `Dark` 時用
    `Default`）是深色主題、`Light`（或 `Default`）是淺色主題，`HighContrast…` 不評（那是使用者的系統色）；
-   檔案其他部分照舊兩個主題共用。`{ThemeResource Key}` 跟 `{DynamicResource Key}` 一樣查色盤；1.7 起**帶命名空間
+   檔案其他部分照舊兩個主題共用。`{ThemeResource Key}` 跟 `{DynamicResource Key}` 一樣查色盤；1.8 起**帶命名空間
    前綴的也一樣**（`{ui:ThemeResource Key}` —— WPF-UI 把這個 markup extension 宣告在自己的命名空間裡。不認前綴的話，
    這種專案的底與字色全變成「執行期才知道」，Bloxstrap 實測 0 組配對）。用到 `{ThemeResource`
    的專案，**WinUI 內建的 Fluent 主題資源**（`TextFillColorPrimaryBrush`、`SolidBackgroundFillColorBaseBrush`、舊名的
@@ -422,10 +422,10 @@ fail／warn 另標 `symmetry: single-theme`。
 | `unknown-palette-key` | 資源鍵不在偵測到的色盤裡 —— 打字錯誤,或色盤偵測漏了某個檔 |
 | `translucent-uncomposited` | 透明或半透明的背景、底下沒有可疊的顏色 —— 半透明的 `Background`、上面的祖先都沒有底；Style 定義處自己的 `Background="Transparent"`，而且沒有任何使用處會評到它（沒有元素以 `Style=` 引用的具名 Style，或專案裡根本沒有那個型別元素的隱含樣式；隱含樣式與被引用的 Style 都在使用處評）；或以 `Opacity` 變淡、底下什麼都沒有的一層。第一種用下面的 `rootBackground` 補得回來 |
 | `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
-| `over-sibling-content` | 文字墊在同格子的兄弟 `Image`/媒體元素上 —— 真正的底是一張圖,靜態不可知;硬配祖先背景等於編造比值。1.7 起**控制項模板裡**的 `Image` 兄弟也歸這一類（之前會落到那張圖蓋住的那一層） |
+| `over-sibling-content` | 文字墊在同格子的兄弟 `Image`/媒體元素上 —— 真正的底是一張圖,靜態不可知;硬配祖先背景等於編造比值。1.8 起**控制項模板裡**的 `Image` 兄弟也歸這一類（之前會落到那張圖蓋住的那一層） |
 | `in-style-template` | Style 的 `Template` setter（`<Setter Property="Template"><Setter.Value><ControlTemplate>`）裡自己帶 `Foreground` 的文字元素 —— 還沒有評分（見已知限制），計入這裡讓覆蓋率反映這個缺口 |
 | `unknown-style-key` | 色盤來自分開的深／淺字典，而元素的 Style —— `Style="{StaticResource K}"`，或它鏈上的 `BasedOn` —— 只在其中一個字典裡定義，另一個主題下這個元素長什麼樣不知道；值是那個 Style 的鍵。1.2 之前算成 `unknown-palette-key`（`BasedOn` 的那一種則是拿元素後面的底去評） |
-| `template-painted` | 字畫在控制項模板**內部**某一層上，而那一層的顏色靜態看不到：來自宿主自己的屬性而沒人設過（函式庫控制項的預設值寫在 C# 裡）、那一層的底本身是 Binding／漸層，或是被觸發器重畫了而那一層定不出來（整個換掉 `Template`、視覺由另一份模板畫、元素自己帶 `Template`、模板裡找不到任何放內容的位置，或重畫的值是漸層或 Binding）。這一類**不退回祖先的底** —— 模板畫了一層蓋在上面，祖先的顏色根本沒露出來。1.6 新增；在那之前這些是拿「被重畫蓋掉的底」算出來的。「重畫的元素正好就在字底下那一疊」的情形算得出來，不歸這一類；1.7 起「重畫的目標一個放內容的位置都沾不到」也算得出來 —— 它不在這段文字底下，底照舊成立 |
+| `template-painted` | 字畫在控制項模板**內部**某一層上，而那一層的顏色靜態看不到：來自宿主自己的屬性而沒人設過（函式庫控制項的預設值寫在 C# 裡）、那一層的底本身是 Binding／漸層，或是被觸發器重畫了而那一層定不出來（整個換掉 `Template`、視覺由另一份模板畫、元素自己帶 `Template`、模板裡找不到任何放內容的位置，或重畫的值是漸層或 Binding）。這一類**不退回祖先的底** —— 模板畫了一層蓋在上面，祖先的顏色根本沒露出來。1.6 新增；在那之前這些是拿「被重畫蓋掉的底」算出來的。「重畫的元素正好就在字底下那一疊」的情形算得出來，不歸這一類；1.8 起「重畫的目標一個放內容的位置都沾不到」也算得出來 —— 它不在這段文字底下，底照舊成立 |
 
 `summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 3** ——
 只掃到一小部分的「通過」不算通過,這是「0 組配對不算通過」那條不可設定規則的推廣。
@@ -631,7 +631,7 @@ Style 的 `Template` setter 裡自己帶 `Foreground` 的文字元素**還沒有
 （說明文字、圖示）不是宿主的文字。在這之前那個 Setter 是丟掉的：狀態沒改別的就被整個略過，
 同時改了宿主的底就拿**基礎狀態的字色**去配，報出執行期不存在的組合
 （Flow Launcher 的 RepeatButton 按下態實測 14.94:1 → 真正的 2.27:1）。
-重畫的目標**一個放內容的位置都沾不到**時，那次重畫不在這段文字底下，所以底照舊算得出來（1.7）——
+重畫的目標**一個放內容的位置都沾不到**時，那次重畫不在這段文字底下，所以底照舊算得出來（1.8）——
 wpfui 的 `CheckBox` 重畫的是 `BulletDecorator.Bullet` 裡那顆打勾的方塊，跟放文字的那一支是不同分支，
 1.6 卻因此把每一個勾選態都丟掉。⚠ 同一格、但撐不滿那一格的兄弟（強調色條）照樣算在鏈上 ——
 它在不在字底下，正好就是靜態分不出來的那件事。
@@ -640,7 +640,7 @@ wpfui 的 `CheckBox` 重畫的是 `BulletDecorator.Bullet` 裡那顆打勾的方
 重畫的值是漸層或 Binding、半透明的重畫層而它蓋住的那一層本身讀不懂、模板裡帶 `Opacity` 的兄弟
 （量過：17 個公開專案只有 2 處，而且兩處已經是誠實的 —— 為它在模板那條路上再寫一份會跟標記樹漂開的
 Opacity 疊合不划算），以及畫在內容**後面**的兄弟 —— 那是蓋住字，不是當字的底;
-模板裡的 `Image` 兄弟 1.7 起歸 `over-sibling-content`，跟標記樹同一個答案;
+模板裡的 `Image` 兄弟 1.8 起歸 `over-sibling-content`，跟標記樹同一個答案;
 sibling 背景已解析 `Grid` 格子裡「佔滿格子的兄弟」(純色直接用;
 半透明的 —— 不論來自 brush 的 alpha 或元素自己的 `Opacity` —— 合成;Binding／漸層計入無法解析),
 文字疊兄弟 Image 誠實歸 `over-sibling-content`;版面無法得知的自訂 `*Panel`、衍生命名的 `*Canvas`／`*Grid` 裡,

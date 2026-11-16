@@ -85,7 +85,7 @@
     每一筆既有 finding 都流經它 —— 要獨立一版、獨立量測
   - 做完之後 VSM 才值得接上：翻譯成同一個 State 模型（`ColorAnimation` 的 `To`／keyframe、
     `(TextElement.Foreground).(SolidColorBrush.Color)` 這類路徑取出真正改的屬性、WinUI 的 `<VisualState.Setters>`），
-    1.6／1.7 的守門就全部原封不動適用。⚠ 還要把**非顏色的動畫**算進去：HandyControl 的 Calendar 用
+    1.6／1.8 的守門就全部原封不動適用。⚠ 還要把**非顏色的動畫**算進去：HandyControl 的 Calendar 用
     `DoubleAnimation` 把 `Opacity="0"` 的 Rectangle 打開，字真正的底是它 —— 只看顏色動畫就會拿祖先的底配白字。
     1.8 已經先補好這一塊的鏈記錄（被放棄的那一疊上的名字照樣收）
   - ⚠ **先試過一次「保守翻譯」：不可行。** 把 VSM 狀態翻成 State、碰到任何具名元素就記不可知，
@@ -110,7 +110,7 @@
       不透明的重畫就是這個狀態的底；半透明的疊在它蓋住的那一層上（ScreenToGif 的 `AwareTabItem` 選取態把
       `ContentBorder` 畫成 `#90FFFFFF`，疊在面板的 Level3 上 → 7 筆 `8.23/20.29` 的 ok；1.5 拿被蓋掉的顏色報 1.46:1）。另有 13 筆（MahApps 3、MaterialDesign 10）從 `template-painted` 改成
       `bound-or-gradient` —— 那一層解開之後，真正卡住的是字色的 Binding，原因終於指對地方
-- [x] **重畫的元素不在那一疊上** —— 1.7：動工前先量，而量測改掉了計畫。2370 筆 `template-painted` 的子類是
+- [x] **重畫的元素不在那一疊上** —— 1.8：動工前先量，而量測改掉了計畫。2370 筆 `template-painted` 的子類是
       84.8%「完全沒有模板分層可查」、13.4% 定義處、**只有 1.5%（36 筆）**是原先以為的「重畫在別的分支」。
       所以做的是前者：重畫的目標**一個放內容的位置都沾不到**時，那次重畫不在這段文字底下，底照舊算得出來。
       白老鼠是 wpfui 的 `CheckBox` —— 重畫的是 `BulletDecorator.Bullet` 裡那顆方塊，跟放文字的那一支是不同分支，
@@ -121,10 +121,10 @@
       底下那條有尺寸的底線。
       ⚠ 第一版因為漏抄一個欄位而從未生效，語料顯示「零變化」，差點被當成「野外不存在這種形狀」而放棄；
       是針對性測試抓到它是死碼。**語料說「沒變化」時，先確認那條路真的跑得到。**
-- [x] **模板裡的 Image 兄弟** —— 1.7：改記 `over-sibling-content`，跟標記樹的規則 17(b) 同一個答案。
+- [x] **模板裡的 Image 兄弟** —— 1.8：改記 `over-sibling-content`，跟標記樹的規則 17(b) 同一個答案。
       之前是「看到內容元素就整層放棄、往外找」，等於拿圖後面那一層的顏色報比值。17 個公開專案與三個本機專案
       一個數字都沒變 —— 它關掉的是一條編造路徑。排在圖後面又畫了底的兄弟照舊蓋過那張圖
-- **帶 Opacity 的兄弟（模板裡）**：量過了（1.7），17 個公開專案只有 **2 處**，都在 MaterialDesign，
+- **帶 Opacity 的兄弟（模板裡）**：量過了（1.8），17 個公開專案只有 **2 處**，都在 MaterialDesign，
   而且兩處現在**已經是誠實的** `no-ancestor-background`、不是編造。要算出來得在模板那條路上再寫一份
   Opacity 疊合（標記樹那一份在 `Auditor.SiblingBackdrop`，拿不到色盤），為 2 處維護兩份會漂開的判定不划算
 - **重畫的值是漸層或 Binding、半透明的重畫層而它蓋住的那一層本身讀不懂**：維持誠實的 `template-painted`

@@ -497,7 +497,7 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - ⚠ **重畫那一層的 `Src` 要留 `"tmpl"`**，不能用那個 Setter 的 Style Id：定義處（`WalkStyles`）看不到模板
   內部那一層，掛上 Style Id 會讓同源判定把整組讓給定義處，而定義處也不評 —— 那一組在哪裡都消失
   （本機測試抓到）。規則 13 的「TargetName=模板根」不一樣，它等同設在宿主上，定義處真的評得到。
-- **重畫的目標一個內容位置都沾不到 → 不要丟掉整組**（1.7，`StyleIndex.ContentChainNames`／`State.LayerTouched`／
+- **重畫的目標一個內容位置都沾不到 → 不要丟掉整組**（1.8，`StyleIndex.ContentChainNames`／`State.LayerTouched`／
   `State.UnknownBeyondLayers` + `Auditor` 的 `repaintOffContent`）：1.6 的「這個狀態重畫了看不到的那一層 → 整組不評」
   切得太寬。wpfui 的 CheckBox 勾選態重畫 `ControlBorderIconPresenter`（`BulletDecorator.Bullet` 裡那顆方塊），
   跟放文字的 `ContentPresenter` 是不同分支，整個勾選態卻被丟掉。現在索引記下「哪些具名元素在某個內容位置底下
@@ -514,7 +514,7 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
     第一版漏了中間那個，`LayerTouched` 永遠是空的 → 整條路是死碼，而語料顯示「零變化」，看起來像
     「野外不存在這種形狀」。**語料說沒變化時，先寫一個針對性測試確認那條路跑得到。**
 - **狀態換掉模板內部某個具名元素的字色**（1.8，`State.ElementFg`／`ElementFgSrc`、`TemplateLayer.ContentNames`、
-  `Auditor` 的 `Expand`）：1.7 之前這種 Setter 直接丟掉 —— 狀態只有它就整個略過（盲區），同時改了宿主底的
+  `Auditor` 的 `Expand`）：1.8 之前這種 Setter 直接丟掉 —— 狀態只有它就整個略過（盲區），同時改了宿主底的
   就拿**基礎狀態的字色**去配（**編造**）。語料 489 個，逐筆驗過四個形狀（Flow Launcher 的 RepeatButton
   按下態 14.94:1 ok → 2.27:1 真 fail）。
   - ⚠ **只有那個名字正好是模板裡「放內容的位置」時才生效**（`ContentNames`）：指到圖示、說明文字那種
@@ -525,7 +525,7 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   - ⚠ **展開是按層分組的**（`Expand`）：同一個狀態下不同的放內容位置可能有不同的字色，那是兩組配對。
     沒有這種 Setter 的狀態（絕大多數）展開後就是原本那一組，走的程式碼完全相同。
 - **逐層判定要用「這一層自己那一疊」，不是整份記錄的 union**（1.8，`TemplateLayer.ChainNames`）：
-  1.7 的狀態層守門問的是記錄層的問題，union 是對的；`TemplateChoices` 逐層判定時 union 太寬 ——
+  那一格狀態層守門問的是記錄層的問題，union 是對的；`TemplateChoices` 逐層判定時 union 太寬 ——
   WinUI 風格的模板把圖示、勾勾、文字放同一個 Grid，union 會讓每一層都判成「可能被動到」。
   收緊後分得出「在另一個格子」（照舊評）與「同一格但撐不滿」（仍然不評）。
   實測 MaterialDesign 多出 10 筆真 fail（`Validation.HasError` 同時換 `Graphic` 的 Fill 與
@@ -547,13 +547,13 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   整個跳過、落到祖先；標記樹的規則 17 則記 `over-sibling-content`。⚠ 這正是 `Panels` 被抽出來要防的事
   —— 抽了共用的判定，但**呼叫端對 `Unknown` 的處理各寫各的**，一樣會漂開。
 - **一疊兄弟被放棄時名字照樣要收進 `ContentChainNames`**（1.8）：放棄的理由就是「可能蓋在字底下、只是算不出來」。
-  少了這一條，1.7 的「重畫碰不到內容就放行」會把 HandyControl Calendar 那種
+  少了這一條，「重畫碰不到內容就放行」會把 HandyControl Calendar 那種
   （`Opacity="0"` 的 Rectangle 被狀態打開）判成無關。
-- **模板裡的 Image 兄弟 → `over-sibling-content`**（1.7）：跟標記樹的規則 17(b) 同一個答案。
+- **模板裡的 Image 兄弟 → `over-sibling-content`**（1.8）：跟標記樹的規則 17(b) 同一個答案。
   ⚠ 記號是 `ColorResolver.SiblingContentMark`（控制字元開頭）**不是 `<Image>`**：`<Tag>` 早就是 `XamlBrush`
   給「元素寫法、讀不懂的 brush」的寫法（`<LinearGradientBrush>`、`<VisualBrush>`），第一版用它當記號，
   那些**字色**整批被分類成「底是一張圖」，合成時拿到 null 直接崩潰（GeekDesk 實測）。
-- **帶命名空間前綴的資源引用**（1.7）：`{ui:ThemeResource K}`（WPF-UI）。元素寫法的正則本來就有 `(?:\w+:)?`，
+- **帶命名空間前綴的資源引用**（1.8）：`{ui:ThemeResource K}`（WPF-UI）。元素寫法的正則本來就有 `(?:\w+:)?`，
   markup extension 的四個沒有 —— 不認的話整個專案的底與字色全變成「執行期才知道」（Bloxstrap 0 組配對、
   exit 3）。四個正則（Auditor／ColorResolver／StyleIndex／PaletteDetector）＋ `IconFonts` 的字串比對要一起改。
 - ⚠ **`offChain` 的 `Raw` 留 null，讓它點名字色**（1.6 狀態層守門的寫法）。改成點名那一層的原始寫法
