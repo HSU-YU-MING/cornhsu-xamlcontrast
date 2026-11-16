@@ -3,6 +3,160 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 1.8.0 — 2026-11-16
+
+### Upgrading（覆蓋率會掉，而且掉的是**本來就算錯**的那些；baseline 的鍵不動）
+
+- **In short:** one release, one question — *what colour is this text actually sitting on, in this state?*
+  Five answers changed. A state that sets the foreground of a **named element inside a template**
+  (`<Setter TargetName="Content" Property="Foreground" …/>`) now uses that value instead of the base one;
+  a trigger that repaints a layer the text is provably not sitting on no longer discards the whole state;
+  the "is it under the text" test uses that layer's own stack instead of a union; namespace-prefixed
+  resource extensions (`{ui:ThemeResource K}`) resolve like the plain ones; and elements that are
+  `Visibility="Collapsed"` or a sibling `Image` inside a template are no longer treated as the backdrop.
+  **`Baseline.KeyVersion` stays 2 and `schemaVersion` stays 6** — no key changes its spelling, so your
+  `baseline.json` keeps working.
+  Measured on seventeen public projects and the maintainer's three apps: **the three local apps are
+  byte-identical**, eight of the seventeen are identical, and all 57 changed findings are attributed below.
+  Three real failures that were previously hidden behind a fabricated pair: Flow Launcher's pressed
+  RepeatButton (**2.27:1**, reported as 14.94:1), MaterialDesign's validation-error state (**1.76:1**, ten
+  of them, the whole state was skipped), and Playnite's menu text (matched against a collapsed hover
+  highlight). Bloxstrap goes from **0 graded pairs and "nothing was audited"** to 18 pairs.
+  What moves against you: **coverage drops** wherever a state's real foreground turns out to be a binding or
+  a key the palette doesn't have (MaterialDesign 9% → 6.8%, wpfui 9% → 8.8%, HandyControl 19.7% → 19.2%).
+  Those pairs used to be reported against the wrong colour. **有用 `--min-coverage` 把關的請先確認。**
+  *簡單說：一版，一個問題 —— 這段文字在這個狀態下到底疊在什麼顏色上。五個答案變了：狀態換掉模板裡
+  某個具名元素的字色時那個值算數了；觸發器重畫的那一層證明得出來不在字底下時不再丟掉整個狀態；
+  「在不在字底下」改用那一層自己那一疊判定；帶命名空間前綴的資源引用解得開；看不見的元素
+  （`Visibility="Collapsed"`、模板裡的兄弟 `Image`）不再被當成字的底。
+  `Baseline.KeyVersion` 維持 2、`schemaVersion` 維持 6，舊的 `baseline.json` 照用。
+  三個本機專案一個位元都沒動，17 個公開專案裡 8 個逐筆一致，57 筆變動全部歸因。*
+
+- **181 筆 unresolved 換了原因**，從 `template-painted` 換成真正卡住它的那個東西（色盤裡沒有的鍵、
+  執行期才知道的 Binding）。原因終於指對地方：`template-painted` 使用者無能為力，「這個鍵你沒定義」修得動。
+
+- ⚠ **打開 `--fail-on-new-unresolved`／`failOnNewUnresolved` 的人要重跑 `--write-baseline`**：unresolved 的鍵是
+  `file|reason|value`，原因換了就等於一筆新增加一筆消失。fail／warn 的 baseline 不受影響。
+
+### Fixed
+
+- **狀態換掉模板內部某個具名元素的字色 → 那個值就是這個狀態的字色。**
+  逐筆驗過的四個形狀：
+  - **Flow Launcher**（`CustomControlTemplate.xaml:1639`）：RepeatButton 的按下態把底換成 `NumberBoxColor24B`、
+    字色換成 `NumberBoxColor25B`。舊版拿基礎狀態的 `NumberBoxColor26B` 去配，報 14.94:1 **ok**；
+    正確的組合是 **2.27:1 fail** —— 一個真的無障礙問題，被編造的配對蓋住了。
+  - **WPF-UI**（`SimpleView.xaml:19`）：CardAction 按下態 `CardForeground` → `CardForegroundPressed`，
+    14.94/16.67 → 9.49/6.12；ToggleButton 的勾選態與勾選按下態同形狀（其中一筆的 fail 從
+    15.58/1.32 變成 1.22/8.13 —— 一樣是 fail，但終於是那個狀態真正的兩個顏色）。
+  - **HandyControl**（TabControl）：6 筆 `PrimaryTextBrush on RegionBrush` 的 **ok 消失**。那幾個狀態真正的
+    字色是 `PrimaryBrush`（色盤裡沒有）或 `{Binding …TitleElement.Foreground…}`，所以改記 unresolved ——
+    舊版那 6 筆 17.04:1 是編的。
+  - **MahApps**：`PART_FloatingMessage`／`PART_Button` 的字色換成 `MahApps.Brushes.Accent`。報出 1:1 是
+    MahApps **自己的 repo** 色盤退化的老問題（它的主題檔是建置時產生的，Accent 與 Control.Background
+    都解析成 `#2D2D30`），同形狀的 finding 這一版之前就已經有一筆。
+  - ⚠ 指向「自己帶字色」的元素（模板裡的說明文字、圖示）不算 —— 那不是宿主的文字。
+    只有那個名字正好是模板裡**放內容的位置**時才生效。
+
+- **「這個狀態動到的東西在不在字底下」改用這一層自己那一疊判定，不是整份記錄的 union。**
+  上面那一格問的是記錄層的問題（整個狀態要不要丟掉），union 是對的；但**逐層**判定時 union 太寬 ——
+  WinUI 風格的模板把圖示、勾勾、文字放在同一個 Grid 裡，union 會讓每一層都被判成「可能被動到」。
+  收緊之後分得出「在另一個格子」（照舊評）與「同一格但撐不滿那一格」（仍然不評，靜態分不出來）。
+  **實測**：MaterialDesign 多出 **10 筆真 fail** —— `Validation.HasError` 同時換 `Graphic` 的 `Fill` 與
+  `contentPresenter` 的 `Control.Foreground`，紅色的錯誤字疊在深色卡片上 **1.76:1**。
+  舊版因為 `Graphic` 也在 union 裡，整個驗證錯誤態都不評。配對 +10、unresolved −10、覆蓋率微升。
+
+- **`Visibility="Collapsed"`／`"Hidden"` 的元素不是字的底。**
+  在這之前工具**完全沒看過 `Visibility`** —— 一個收起來的 `<Border Background="…" Visibility="Collapsed"/>`
+  照樣被當成背板（語料裡這種元素有 105 個）。實測兩筆換了原因：Playnite 的選單把收起來的
+  hover 高亮（`HoverBrush`）當成選單文字的底，現在誠實記「上面沒有底」；MaaAssistantArknights 有一筆
+  收起來的內容元素同理。⚠ 只認寫死的值，`{Binding}` 照舊當成看得見（往嚴格那邊錯）。
+  判定放在 `Panels`，標記樹與模板裡那條鏈共用一份。
+
+### Changed
+
+- **觸發器重畫模板內部那一層：重畫的目標不在這段文字底下時，不再丟掉整個狀態。**
+  1.6 的做法是「這個狀態重畫了看不到的那一層 → 整組不評」，因為拿被蓋掉的底評分就是編造。但那一刀切得太寬：
+  WPF-UI 的 CheckBox 在 `IsChecked` 時重畫的是 `ControlBorderIconPresenter` —— `BulletDecorator.Bullet`
+  裡那顆打勾的方塊，跟放文字的 `ContentPresenter` 是**不同的分支**。那次重畫完全不會動到文字的底，而整個
+  勾選態卻被丟掉。現在索引會記下「哪些具名元素在某個放內容的位置底下那一疊上」（`ContentChainNames`），
+  重畫的目標一個都不在上面時照舊評分。
+  ⚠ 只有**名字指得出來**的重畫能這樣放行：整個換掉 `Template`、視覺由另一份模板畫的那兩種沒有可查的目標，
+  一律維持不知道；元素自己換掉 `Template` 時 Style 那份模板的分層執行期不存在，也不能拿來比；模板裡一個
+  放內容的位置都找不到時更不能比。收的是**所有**內容位置的鏈，收多了只會讓更多狀態維持「不知道」。
+  ⚠ **同一格、但撐不滿那一格的兄弟（強調色條）照樣算在鏈上** —— `BackdropChain` 不把它當背板，但觸發器重畫它時
+  它在不在字底下靜態分不出來。這一條不是理論上的保守：少了它，MaterialDesign 有 402 筆會被放行，而那些重畫的
+  正是文字欄位底下那條有尺寸的底線。
+  **實測（17 個公開專案）**：181 筆 unresolved 從 `template-painted` 換成真正的阻塞原因 ——
+  WPF-UI 170 筆、MahApps 10 筆（卡在色盤裡沒有的 `MahApps.Brushes.*`）、MaterialDesign 1 筆。
+  原因終於指對地方：`template-painted` 使用者無能為力，「這個鍵你沒定義」則是修得動的。
+
+- **帶命名空間前綴的資源引用（`{ui:ThemeResource K}`）跟不帶前綴的一樣解析。**
+  WPF-UI 把 `ThemeResource` 宣告在自己的命名空間裡。元素寫法（`<ui:ThemeResource/>`）本來就認前綴，
+  markup extension 的那四個正則不認 —— 於是整個專案的底與字色全變成「執行期才知道」。
+  **實測**：Bloxstrap 從 **0 組配對、exit 3「什麼都沒稽核到」**變成 18 組配對、覆蓋率 14.4%，
+  浮出 6 筆 WinUI 三級文字色在淺色主題下的真 warn（3.31:1）。WPF-UI 的 `bound-or-gradient` 從 304 掉到 31，
+  其中 12 筆變成 `unknown-palette-key StripedBackgroundBrush` —— 一個誰都沒定義的鍵，本來藏在
+  「執行期才知道」後面。`{x:Static …}` 之類的其他 markup extension 不受影響（剝掉前綴後仍然對不上三個關鍵字）。
+
+- **版面未知的容器在模板裡與在畫面裡給同一個答案。**
+  自訂 `*Panel`、衍生命名的 `*Canvas`／`*Grid`：標記樹的規則 17 對它的答案是「可能是背板的兄弟之後的字 →
+  `over-sibling-content`」，而模板裡那條路原本只認 `Overlap`、把整個容器跳過、落到祖先 —— 同一段 XAML 寫在
+  畫面裡與寫在模板裡會得到不同的答案，而且模板那一邊是編的。17 個公開專案與三個本機專案一個數字都沒變。
+
+- **一疊兄弟整個被放棄時，它們的名字照樣記進鏈。**
+  放棄的理由（內容元素、帶 `Opacity` 的兄弟）正是「它可能蓋在字底下、只是算不出來」，所以觸發器重畫它的時候
+  更不能當成「跟這段文字無關」而放行。HandyControl 的 Calendar 就是這形狀：`Opacity="0"` 的 Rectangle
+  被選取態打開之後才是字真正的底。同樣一個數字都沒變 —— 這是把上面那條新規則的逃生口補起來。
+
+- **模板裡字疊在兄弟 `Image` 上 → `over-sibling-content`。**
+  1.6 的做法是「看到內容元素就整層放棄、往外找」，等於拿圖後面那一層的顏色報一個比值，而字其實疊在圖上 ——
+  標記樹的規則 17(b) 早就不這樣做了。同一段 XAML 寫在畫面裡與寫在模板裡本來會得到不同的答案，現在一致。
+  排在圖後面、又畫了底的兄弟照舊蓋過那張圖（不是看到圖就放棄）。
+  **17 個公開專案與三個本機專案一個數字都沒變** —— 它關掉的是一條編造路徑，不是一批新數字。
+
+- **版面未知的容器在模板裡與在畫面裡給同一個答案。**
+  自訂 `*Panel`、衍生命名的 `*Canvas`／`*Grid`：標記樹的規則 17 對它的答案是「可能是背板的兄弟之後的字 →
+  `over-sibling-content`」，而模板裡那條路原本只認 `Overlap`、把整個容器跳過、落到祖先。
+  ⚠ 這正是 `Panels` 被抽出來要防的事 —— 抽了共用的判定，但**呼叫端對 `Unknown` 的處理各寫各的**，一樣會漂開。
+  17 個公開專案與三個本機專案一個數字都沒變。
+
+- **一疊兄弟整個被放棄時，它們的名字照樣記進鏈。**
+  放棄的理由（內容元素、帶 `Opacity` 的兄弟）正是「它可能蓋在字底下、只是算不出來」，所以上面那條
+  「重畫碰不到內容就放行」不能把它當成無關。HandyControl 的 Calendar 就是這形狀：`Opacity="0"` 的
+  Rectangle 被選取態打開之後才是字真正的底。同樣一個數字都沒變。
+
+### Measured and deliberately not done
+
+- **帶 `Opacity` 的兄弟仍然不疊合。** 量過了：17 個公開專案裡只有 **2 處**（都在 MaterialDesign），
+  而且兩處現在**已經是誠實的** `no-ancestor-background`，不是編造。要把它算出來得在模板那條路上再寫一份
+  Opacity 疊合（標記樹那一份在 `Auditor.SiblingBackdrop`，拿不到色盤），為 2 處維護兩份會漂開的判定不划算。
+  留在盲區表。
+
+- **「重畫的目標不在這一疊上」只佔 1.5%。** 動工前先量了 2370 筆 `template-painted` 的子類：
+  84.8% 是「完全沒有模板分層可查」、13.4% 是定義處（`WalkStyles`）、**只有 36 筆（1.5%）**是原本以為的
+  「重畫在別的分支」。真正的大宗是前者，所以這一版做的是它，不是原先 ROADMAP 上寫的那條。
+  ⚠ 這段量測救了一次：第一版的判定因為漏抄一個欄位而從未生效，語料顯示「零變化」，差點被當成
+  「野外不存在這種形狀」而放棄。
+
+- **VisualStateManager 的狀態顏色照舊只計數、不評分 —— 這一版把前兩個前置條件都補掉了，還是不行。**
+  1.8 做的兩件事（具名元素的字色算數、逐層判定改用這一層自己那一疊）正是 VSM 卡住的兩個原因，
+  補完之後把 VSM 翻譯成同一個 State 模型再量一次：語料多 **959 筆 unresolved、0 組新配對**，
+  Flow Launcher 覆蓋率 29.8% → 14.8%。逐筆看過新增的 unresolved：它們**確實落在真的元素上**
+  （`PluginSettingsWindow.xaml:110` 的 ToggleSwitch 之類），不是空轉 —— 卡住的是第三個原因：
+  **非顏色的動畫也會換掉字的底**。HandyControl 的 Calendar 用 `DoubleAnimation` 把 `Opacity="0"` 的
+  Rectangle 打開，字真正的底是它；不把這種動畫算進去就會拿祖先的底去配白字，算進去（保守記不可知）
+  就是上面那 959 筆。**在能說出「哪一層被打開了」之前，VSM 接上去只會讓報告更吵。**
+  那些位置本來就在 `stateColors` 裡誠實列著，換成 959 筆 unresolved 只是同一件事報兩次、外加打爛
+  `--min-coverage`。
+
+- **「哪一層被狀態打開了」也做過一輪，一樣不划算。** 那是 VSM 缺的第三塊，而且觸發器也用得很兇
+  （語料 1715 個 `TargetName` + `Visibility` 的 Setter、831 個 `Opacity`）。實作出來：模板裡記下
+  「現在看不見、但狀態可能打開」的候選層，狀態打開它就拿它當底。**量出來是 +0 組配對、+0 筆 finding、
+  +111 筆 unresolved。** 中途看起來很漂亮的 +134 組配對／42 筆 finding 是假的 —— 那些狀態打開的是箭頭、
+  勾勾之類根本不是底的東西，只是讓同一組配對**又被算了一次**，6 筆「新 fail」逐筆查下去全是既有配對的
+  重複計數。加上「只有可能當底的元素才算」這道閘之後，收益歸零。
+  **0 筆編造被修掉、0 個新問題被找到**，所以不收。
+
 ## 1.6.0 — 2026-11-16
 
 ### Upgrading（這一版動到 baseline 的鍵，所有使用者都要重寫一次，而且覆蓋率會下降）

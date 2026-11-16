@@ -3,7 +3,7 @@
 project: handycontrol
 repo: https://github.com/HandyOrg/HandyControl
 commit: e9ad3d701b90e724399a413569fbd7f35a141053
-tool-commit: 4a1e23d+dirty
+tool-commit: 46454a7+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair
@@ -11,9 +11,9 @@ palette-degraded: False
 palette-keys: 38
 single-theme: False
 files: 332
-pairs: 736
-coverage: 19.7
-unresolved: 2997
+pairs: 721
+coverage: 19.2
+unresolved: 3036
 skipped: 39
 dead-foreground: 112
 disabled-exempt: 1126
@@ -24,20 +24,20 @@ suppressed: 0
 state-colors: 15
 fail: 49
 warn: 8
-ok: 655
+ok: 640
 decorative: 24
-unresolved-by.bound-or-gradient: 1101
+unresolved-by.bound-or-gradient: 1113
 unresolved-by.in-style-template: 129
 unresolved-by.no-ancestor-background: 39
 unresolved-by.over-sibling-content: 6
 unresolved-by.template-painted: 504
 unresolved-by.translucent-uncomposited: 18
-unresolved-by.unknown-palette-key: 1200
+unresolved-by.unknown-palette-key: 1227
 unknown-keys.DangerBrush: 215
 unknown-keys.EmptySimpleLogo: 3
 unknown-keys.InfoBrush: 186
 unknown-keys.MenuButtonBorderBrush: 7
-unknown-keys.PrimaryBrush: 383
+unknown-keys.PrimaryBrush: 410
 unknown-keys.SuccessBrush: 190
 unknown-keys.TitleBrush: 15
 unknown-keys.WarningBrush: 201
@@ -142,15 +142,10 @@ F  ok  extension/visual studio/WpfCoreApp/MainWindow.xaml:30  MenuItem⊕Style[i
 F  ok  src/Net_40/HandyControl_Net_40/Themes/Styles/Window.xaml:267  Style[WindowWin10]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Net_40/HandyControl_Net_40/Themes/Styles/Window.xaml:44  Style[Window]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10669  Style[TabItemStyle]/base  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10669  Style[TabItemStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10669  Style[TabItemStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10669  Style[TabItemStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10669  Style[TabItemStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
 F  ok  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10788  Style[TabItemCapsuleBaseStyle]/base  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
 F  ok  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10788  Style[TabItemCapsuleBaseStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
 F  ok  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10788  Style[TabItemCapsuleBaseStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
 F  ok  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10788  Style[TabItemCapsuleBaseStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10788  Style[TabItemCapsuleBaseStyle]/trigger  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10834  Style[TabItemPlusBaseStyle]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10917  ContextMenuToggleButton⊕Style[ToggleButtonIconTransparent]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10938  RepeatButton⊕Style[RepeatButtonIcon]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
@@ -650,7 +645,6 @@ F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xam
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:124  Style[TabItemCapsuleBaseStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:124  Style[TabItemCapsuleBaseStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:124  Style[TabItemCapsuleBaseStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:124  Style[TabItemCapsuleBaseStyle]/trigger  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:172  MenuItem⊕Style[implicit MenuItem]/base  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:173  MenuItem⊕Style[implicit MenuItem]/base  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:174  MenuItem⊕Style[implicit MenuItem]/base  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
@@ -658,10 +652,6 @@ F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xam
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:261  ContextMenuToggleButton⊕Style[ToggleButtonIconTransparent]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:283  RepeatButton⊕Style[RepeatButtonIcon]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:3  Style[TabItemStyle]/base  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:3  Style[TabItemStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:3  Style[TabItemStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:3  Style[TabItemStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:3  Style[TabItemStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:303  RepeatButton⊕Style[RepeatButtonIcon]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:305  ContextMenuToggleButton⊕Style[ToggleButtonIconTransparent]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Base/ToolBarBaseStyle.xaml:111  ToggleButton⊕Style[ToolBarOverflowButtonStyle]/trigger  {DynamicResource PrimaryTextBrush} on {BorderBrush}  10.44/12.20  
@@ -699,15 +689,10 @@ F  ok  src/Shared/HandyControl_Shared/Themes/Styles/ToggleButton.xaml:83  Style[
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Window.xaml:266  Style[WindowWin10]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Shared/HandyControl_Shared/Themes/Styles/Window.xaml:43  Style[Window]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10788  Style[TabItemStyle]/base  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10788  Style[TabItemStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10788  Style[TabItemStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10788  Style[TabItemStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10788  Style[TabItemStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
 F  ok  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10907  Style[TabItemCapsuleBaseStyle]/base  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
 F  ok  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10907  Style[TabItemCapsuleBaseStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
 F  ok  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10907  Style[TabItemCapsuleBaseStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
 F  ok  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10907  Style[TabItemCapsuleBaseStyle]/trigger  {DynamicResource PrimaryTextBrush} on {RegionBrush}  17.04/16.10  
-F  ok  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10907  Style[TabItemCapsuleBaseStyle]/trigger  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10953  Style[TabItemPlusBaseStyle]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Shared/HandyControl_Shared/Themes/Theme.xaml:11036  ContextMenuToggleButton⊕Style[ToggleButtonIconTransparent]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
 F  ok  src/Shared/HandyControl_Shared/Themes/Theme.xaml:11057  RepeatButton⊕Style[RepeatButtonIcon]/base  {DynamicResource PrimaryTextBrush} on {SecondaryRegionBrush}  13.73/13.88  
@@ -886,7 +871,7 @@ U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Styles/Window.xaml:6
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Styles/Window.xaml:74  {Binding Path=(hc:BackgroundSwitchElement.MouseDownBackground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Styles/Window.xaml:74  {Binding Path=(hc:BackgroundSwitchElement.MouseHoverBackground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Styles/Window.xaml:74  {TemplateBinding NonClientAreaBackground}
-U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10788  {Binding Path=(hc:TitleElement.Background),RelativeSource={RelativeSource TemplatedParent}}
+U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10788  {Binding Path=(hc:TitleElement.Foreground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:11076  {Binding BorderBrush,ElementName=border}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:11076  {Binding BorderBrush,ElementName=border}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:11076  {Binding BorderBrush,ElementName=border}
@@ -911,6 +896,8 @@ U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:11258  {B
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:11259  {TemplateBinding Foreground}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:11404  {TemplateBinding Background}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:11436  {TemplateBinding Background}
+U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:13056  {Binding Path=(hc:VisualElement.HighlightForeground),RelativeSource={RelativeSource TemplatedParent}}
+U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:13536  {Binding Path=(hc:TitleElement.Foreground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:14037  {TemplateBinding Foreground}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:14038  {TemplateBinding Foreground}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:14041  {TemplateBinding Background}
@@ -921,12 +908,14 @@ U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:14284  {T
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:14285  {TemplateBinding Foreground}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:14341  {TemplateBinding Foreground}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:14342  {TemplateBinding Foreground}
+U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:1893  {Binding Path=(hc:VisualElement.HighlightForeground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:2206  {TemplateBinding Background}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:2207  {TemplateBinding Background}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:2302  {TemplateBinding Background}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:2303  {TemplateBinding Background}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:2727  {TemplateBinding Background}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:2728  {TemplateBinding Foreground}
+U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:3091  {Binding Path=(hc:VisualElement.HighlightForeground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:4095  {TemplateBinding Background}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:4095  {TemplateBinding Background}
 U  bound-or-gradient  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:4095  {TemplateBinding Background}
@@ -1466,6 +1455,7 @@ U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/Progress
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/ProgressBarBaseStyle.xaml:188  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/ProgressBarBaseStyle.xaml:189  {TemplateBinding Foreground}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/ProgressBarBaseStyle.xaml:190  {TemplateBinding Foreground}
+U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/RadioButtonBaseStyle.xaml:197  {Binding Path=(hc:VisualElement.HighlightForeground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/ScrollViewerBaseStyle.xaml:277  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/ScrollViewerBaseStyle.xaml:278  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/ScrollViewerBaseStyle.xaml:377  {TemplateBinding Background}
@@ -1502,7 +1492,7 @@ U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/SliderBa
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/SliderBaseStyle.xaml:789  {TemplateBinding Foreground}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/SliderBaseStyle.xaml:846  {TemplateBinding Foreground}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/SliderBaseStyle.xaml:847  {TemplateBinding Foreground}
-U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:124  {Binding Path=(hc:TitleElement.Background),RelativeSource={RelativeSource TemplatedParent}}
+U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:124  {Binding Path=(hc:TitleElement.Foreground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/TextBoxBaseStyle.xaml:140  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/TextBoxBaseStyle.xaml:142  {Binding BorderBrush,ElementName=border}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/TextBoxBaseStyle.xaml:142  {Binding BorderBrush,ElementName=border}
@@ -1536,14 +1526,17 @@ U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/TimePick
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/TimePickerBaseStyle.xaml:73  {Binding BorderBrush,ElementName=border}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/TimePickerBaseStyle.xaml:73  {Binding BorderBrush,ElementName=border}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/TimePickerBaseStyle.xaml:74  {TemplateBinding Foreground}
+U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/ToggleButtonBaseStyle.xaml:194  {Binding Path=(hc:VisualElement.HighlightForeground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/ToolBarBaseStyle.xaml:111  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Base/ToolBarBaseStyle.xaml:144  {TemplateBinding Background}
+U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Pagination.xaml:9  {Binding Path=(hc:VisualElement.HighlightForeground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/ScrollViewer.xaml:25  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/ScrollViewer.xaml:25  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/ScrollViewer.xaml:25  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/ScrollViewer.xaml:36  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/ScrollViewer.xaml:36  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/ScrollViewer.xaml:36  {TemplateBinding Background}
+U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/TabControl.xaml:7  {Binding Path=(hc:TitleElement.Foreground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Window.xaml:171  {TemplateBinding OtherButtonForeground}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Window.xaml:171  {TemplateBinding OtherButtonForeground}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Styles/Window.xaml:171  {TemplateBinding OtherButtonForeground}
@@ -1581,7 +1574,7 @@ U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10029  {T
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10030  {TemplateBinding BorderBrush}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10030  {TemplateBinding BorderBrush}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10030  {TemplateBinding BorderBrush}
-U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10907  {Binding Path=(hc:TitleElement.Background),RelativeSource={RelativeSource TemplatedParent}}
+U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10907  {Binding Path=(hc:TitleElement.Foreground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:11195  {Binding BorderBrush,ElementName=border}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:11195  {Binding BorderBrush,ElementName=border}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:11195  {Binding BorderBrush,ElementName=border}
@@ -1606,6 +1599,8 @@ U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:11377  {B
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:11378  {TemplateBinding Foreground}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:11523  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:11555  {TemplateBinding Background}
+U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:13208  {Binding Path=(hc:VisualElement.HighlightForeground),RelativeSource={RelativeSource TemplatedParent}}
+U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:13688  {Binding Path=(hc:TitleElement.Foreground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:14189  {TemplateBinding Foreground}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:14190  {TemplateBinding Foreground}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:14193  {TemplateBinding Background}
@@ -1616,12 +1611,14 @@ U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:14436  {T
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:14437  {TemplateBinding Foreground}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:14493  {TemplateBinding Foreground}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:14494  {TemplateBinding Foreground}
+U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:1893  {Binding Path=(hc:VisualElement.HighlightForeground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:2206  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:2207  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:2302  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:2303  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:2727  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:2728  {TemplateBinding Foreground}
+U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:3091  {Binding Path=(hc:VisualElement.HighlightForeground),RelativeSource={RelativeSource TemplatedParent}}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:4095  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:4095  {TemplateBinding Background}
 U  bound-or-gradient  src/Shared/HandyControl_Shared/Themes/Theme.xaml:4095  {TemplateBinding Background}
@@ -2585,14 +2582,23 @@ U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10629  
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10629  PrimaryBrush
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10635  PrimaryBrush
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10635  PrimaryBrush
+U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10669  PrimaryBrush
+U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10669  PrimaryBrush
+U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10669  PrimaryBrush
+U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10669  PrimaryBrush
+U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:10788  PrimaryBrush
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:11685  PrimaryBrush
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:11868  PrimaryBrush
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:1189  DangerBrush
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:12291  DangerBrush
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:12291  DangerBrush
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:12381  PrimaryBrush
+U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:1293  PrimaryBrush
+U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:13056  PrimaryBrush
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:13260  PrimaryBrush
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:13780  TitleBrush
+U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:1893  PrimaryBrush
+U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:3091  PrimaryBrush
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:4597  PrimaryBrush
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:4597  PrimaryBrush
 U  unknown-palette-key  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:5596  PrimaryBrush
@@ -3735,10 +3741,12 @@ U  unknown-palette-key  src/Shared/HandyControlDemo_Shared/Window/NoNonClientAre
 U  unknown-palette-key  src/Shared/HandyControlDemo_Shared/Window/NoNonClientAreaDragableWindow.xaml:22  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/AutoCompleteTextBoxBaseStyle.xaml:5  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/BaseStyle.xaml:53  DangerBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/ButtonBaseStyle.xaml:71  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/ChatBubbleBaseStyle.xaml:58  DangerBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/DataGridBaseStyle.xaml:96  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/EmptyBaseStyle.xaml:19  EmptySimpleLogo
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/ListBoxBaseStyle.xaml:6  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/RadioButtonBaseStyle.xaml:197  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/RateBaseStyle.xaml:52  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/StepBarBaseStyle.xaml:73  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/StepBarBaseStyle.xaml:73  PrimaryBrush
@@ -3746,10 +3754,17 @@ U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/StepBa
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/StepBarBaseStyle.xaml:80  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/StepBarBaseStyle.xaml:87  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/StepBarBaseStyle.xaml:87  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:124  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:3  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:3  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:3  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/TabControlBaseStyle.xaml:3  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Base/ToggleButtonBaseStyle.xaml:194  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Clock.xaml:100  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Clock.xaml:7  DangerBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Clock.xaml:7  DangerBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/FlipClock.xaml:4  TitleBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/Pagination.xaml:9  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/ProgressBar.xaml:216  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/ProgressBar.xaml:216  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Styles/PropertyGrid.xaml:9  PrimaryBrush
@@ -3762,14 +3777,23 @@ U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10748  
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10748  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10754  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10754  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10788  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10788  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10788  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10788  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:10907  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:11821  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:1189  DangerBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:12004  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:12427  DangerBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:12427  DangerBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:12517  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:1293  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:13208  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:13412  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:13932  TitleBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:1893  PrimaryBrush
+U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:3091  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:4597  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:4597  PrimaryBrush
 U  unknown-palette-key  src/Shared/HandyControl_Shared/Themes/Theme.xaml:5638  PrimaryBrush

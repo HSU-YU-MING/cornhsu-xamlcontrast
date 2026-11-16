@@ -3,7 +3,7 @@
 project: flowlauncher
 repo: https://github.com/Flow-Launcher/Flow.Launcher
 commit: 236c847977abfe72d73de8cd8d2d0e4896c53647
-tool-commit: 4a1e23d+dirty
+tool-commit: 46454a7+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair
@@ -12,8 +12,8 @@ palette-keys: 76
 single-theme: False
 files: 372
 pairs: 101
-coverage: 29.8
-unresolved: 238
+coverage: 29.7
+unresolved: 239
 skipped: 1
 dead-foreground: 21
 disabled-exempt: 46
@@ -22,9 +22,9 @@ ui-component-pairs: 0
 parse-errors: 0
 suppressed: 0
 state-colors: 2
-fail: 4
+fail: 5
 warn: 5
-ok: 88
+ok: 87
 decorative: 4
 unresolved-by.bound-or-gradient: 8
 unresolved-by.in-style-template: 5
@@ -32,12 +32,13 @@ unresolved-by.no-ancestor-background: 71
 unresolved-by.over-sibling-content: 1
 unresolved-by.template-painted: 86
 unresolved-by.translucent-uncomposited: 16
-unresolved-by.unknown-palette-key: 51
+unresolved-by.unknown-palette-key: 52
 unknown-keys.AccentButtonBackground: 1
 unknown-keys.AccentButtonForegroundPointerOver: 1
 unknown-keys.MenuFlyoutItemForeground: 3
 unknown-keys.MenuFlyoutSubItemForeground: 1
 unknown-keys.NavigationViewItemForeground: 3
+unknown-keys.NavigationViewItemForegroundSelected: 1
 unknown-keys.RepeatButtonBackground: 1
 unknown-keys.ToggleSwitchContentForeground: 41
 # F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
@@ -48,6 +49,7 @@ F  decorative  Flow.Launcher/SelectFileManagerWindow.xaml:99  Rectangle  {Static
 F  fail  Flow.Launcher/Msg.xaml:60  TextBlock  #8e94a4 on #EBEBEB  2.54/2.54  both-low
 F  fail  Flow.Launcher/MsgWithButton.xaml:61  TextBlock  #8e94a4 on #EBEBEB  2.54/2.54  both-low
 F  fail  Flow.Launcher/MsgWithButton.xaml:77  Button  #dcdcdc on #EBEBEB  1.15/1.15  both-low
+F  fail  Flow.Launcher/Resources/CustomControlTemplate.xaml:1639  Style[DefaultRepeatButtonStyle]/trigger  {DynamicResource NumberBoxColor25B} on {NumberBoxColor24B}  2.27/3.30  both-low
 F  fail  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:368  ContentControl⊕Style[implicit ContentControl]/base  {DynamicResource Color05B} on #2F2F2F  13.39/1.29  light-fails
 F  ok  Flow.Launcher/ActionKeywords.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
 F  ok  Flow.Launcher/ActionKeywords.xaml:70  TextBox  {DynamicResource Color05B} on {PopuBGColor}  16.29/17.22  
@@ -93,7 +95,6 @@ F  ok  Flow.Launcher/Resources/CustomControlTemplate.xaml:102  Style[TitleBarBut
 F  ok  Flow.Launcher/Resources/CustomControlTemplate.xaml:136  Style[TitleBarCloseButtonStyle]/trigger  {DynamicResource MouseOverWindowCloseButtonForegroundBrush} on {Color10B}  5.66/5.66  
 F  ok  Flow.Launcher/Resources/CustomControlTemplate.xaml:136  Style[TitleBarCloseButtonStyle]/trigger  {DynamicResource MouseOverWindowCloseButtonForegroundBrush} on {Color11B}  5.06/5.06  
 F  ok  Flow.Launcher/Resources/CustomControlTemplate.xaml:1639  Style[DefaultRepeatButtonStyle]/trigger  {DynamicResource NumberBoxColor26B} on {NumberBoxColor23B}  11.03/15.39  
-F  ok  Flow.Launcher/Resources/CustomControlTemplate.xaml:1639  Style[DefaultRepeatButtonStyle]/trigger  {DynamicResource NumberBoxColor26B} on {NumberBoxColor24B}  14.94/15.80  
 F  ok  Flow.Launcher/Resources/CustomControlTemplate.xaml:1721  Style[ContentDialog]/base  {DynamicResource PopupTextColor} on {PopupBGColor}  10.46/17.22  
 F  ok  Flow.Launcher/Resources/Pages/WelcomePage2.xaml:72  TextBox⊕Style[QueryBoxStyle]/base  #FFFFFFFF on #2F2F2F  13.39/13.39  
 F  ok  Flow.Launcher/Resources/Pages/WelcomePage4.xaml:109  TextBlock⊕Style[QueryText]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
@@ -234,10 +235,10 @@ U  template-painted  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xam
 U  template-painted  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:136  {DynamicResource ToggleSwitchContentForeground}
 U  template-painted  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:146  {DynamicResource ToggleSwitchContentForeground}
 U  template-painted  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:146  {DynamicResource ToggleSwitchContentForeground}
-U  template-painted  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  {DynamicResource NavigationViewItemForeground}
-U  template-painted  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  {DynamicResource NavigationViewItemForeground}
-U  template-painted  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  {DynamicResource NavigationViewItemForeground}
-U  template-painted  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  {DynamicResource NavigationViewItemForeground}
+U  template-painted  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  {DynamicResource NavigationViewItemForegroundPointerOver}
+U  template-painted  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  {DynamicResource NavigationViewItemForegroundPressed}
+U  template-painted  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  {DynamicResource NavigationViewItemForegroundSelectedPointerOver}
+U  template-painted  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  {DynamicResource NavigationViewItemForegroundSelectedPressed}
 U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:103  {DynamicResource ToggleSwitchContentForeground}
 U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:103  {DynamicResource ToggleSwitchContentForeground}
 U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:184  {DynamicResource ToggleSwitchContentForeground}
@@ -338,6 +339,7 @@ U  unknown-palette-key  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.
 U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:1639  RepeatButtonBackground
 U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  NavigationViewItemForeground
 U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  NavigationViewItemForeground
+U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  NavigationViewItemForegroundSelected
 U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:245  MenuFlyoutItemForeground
 U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:245  MenuFlyoutItemForeground
 U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:245  MenuFlyoutItemForeground

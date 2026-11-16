@@ -3,7 +3,7 @@
 project: screentogif
 repo: https://github.com/NickeManarin/ScreenToGif
 commit: a4d0a67c2131cd048ceec86cd40afc2f1a06f2fd
-tool-commit: 4a1e23d+dirty
+tool-commit: 46454a7+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair
@@ -11,7 +11,7 @@ palette-degraded: False
 palette-keys: 109
 single-theme: False
 files: 113
-pairs: 1032
+pairs: 1035
 coverage: 24.4
 unresolved: 3199
 skipped: 6
@@ -24,7 +24,7 @@ suppressed: 0
 state-colors: 1
 fail: 147
 warn: 73
-ok: 798
+ok: 801
 decorative: 14
 unresolved-by.bound-or-gradient: 117
 unresolved-by.in-style-template: 34
@@ -204,6 +204,8 @@ F  ok  Other/Translator/ExceptionDialog.xaml:25  TextBlock  #FF003399 on {Panel.
 F  ok  Other/Translator/ExceptionDialog.xaml:40  TextBlock  #E0000060 on {Panel.Background}  13.98/13.98  
 F  ok  Other/Translator/ExceptionDialog.xaml:42  TextBlock  #E0000000 on {Panel.Background}  16.48/16.48  
 F  ok  Other/Translator/ExceptionViewer.xaml:27  Label  {DynamicResource Element.Foreground.Header} on {Panel.Background.Level4}  10.36/10.36  
+F  ok  Other/Translator/Themes/Buttons.xaml:110  Style[Style.Button.Horizontal]/trigger  Black on #D5E1F2  15.88/15.88  
+F  ok  Other/Translator/Themes/Buttons.xaml:185  Style[Style.Button.Horizontal.Fade]/trigger  Black on #D5E1F2  15.88/15.88  
 F  ok  Other/Translator/Themes/ComboBox.xaml:239  Style[{x:Type ComboBox}]/base  Black on #F0F0F0  18.43/18.43  
 F  ok  Other/Translator/Themes/DataGridStyle.xaml:165  Style[CellDireita]/trigger  Black on #FFFFFF  21.00/21.00  
 F  ok  Other/Translator/Themes/DataGridStyle.xaml:165  Style[CellDireita]/trigger  Black on #FFFFFF  21.00/21.00  
@@ -262,6 +264,7 @@ F  ok  ScreenToGif/Themes/Generic.xaml:2905  Style[{x:Type n:DisplayTimer}]/trig
 F  ok  ScreenToGif/Themes/Generic.xaml:2905  Style[{x:Type n:DisplayTimer}]/trigger  White on #8B0000  10.01/10.01  
 F  ok  ScreenToGif/Themes/Generic.xaml:3117  Style[Style.Button.TitleBar]/trigger  {DynamicResource Element.Foreground} on {Element.Background.Hover}  10.27/15.88  
 F  ok  ScreenToGif/Themes/Generic.xaml:3187  Style[{x:Type n:ExWindow}]/base  {DynamicResource Element.Foreground} on {Panel.Background}  13.30/21.00  
+F  ok  ScreenToGif/Themes/Generic.xaml:3187  Style[{x:Type n:ExWindow}]/trigger  {DynamicResource Element.Foreground} on {Panel.Background}  13.30/21.00  
 F  ok  ScreenToGif/Themes/Generic.xaml:3187  Style[{x:Type n:ExWindow}]/trigger  {DynamicResource Element.Foreground} on {Panel.Background}  13.30/21.00  
 F  ok  ScreenToGif/Themes/Generic.xaml:3187  Style[{x:Type n:ExWindow}]/trigger  {DynamicResource Element.Foreground} on {Panel.Background}  13.30/21.00  
 F  ok  ScreenToGif/Themes/Generic.xaml:3307  Style[{x:Type n:ExListViewItem}]/trigger  {DynamicResource Element.Foreground} on {Element.Background.Checked}  7.67/14.09  

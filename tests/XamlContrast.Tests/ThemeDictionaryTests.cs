@@ -174,4 +174,40 @@ public class ThemeDictionaryTests
         // 只有深色主題定義的鍵：淺色主題下往外層找、工具不知道 —— 不拿深色的值補
         Assert.Equal(1, r.Unresolved);
     }
+
+    [Fact] // {ui:ThemeResource K}：wpfui 把 ThemeResource 宣告在自己的命名空間裡（1.7）。
+           // 不認前綴的話整個專案的底與字色全是「執行期才知道」—— Bloxstrap 實測 0 組配對、
+           // exit 3「什麼都沒稽核到」，補上之後 18 組配對、6 筆 WinUI 三級文字色的真 warn。
+    public void APrefixedResourceExtensionResolvesLikeThePlainOne()
+    {
+        using var fx = new Fixture()
+            .File("Themes/Dark.xaml", """
+                <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                  <SolidColorBrush x:Key="PageBg" Color="#202020"/>
+                  <SolidColorBrush x:Key="Text" Color="#5A5A5A"/>
+                  <SolidColorBrush x:Key="Extra" Color="#303030"/>
+                </ResourceDictionary>
+                """)
+            .File("Themes/Light.xaml", """
+                <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                  <SolidColorBrush x:Key="PageBg" Color="#FFFFFF"/>
+                  <SolidColorBrush x:Key="Text" Color="#767676"/>
+                  <SolidColorBrush x:Key="Extra" Color="#F0F0F0"/>
+                </ResourceDictionary>
+                """)
+            .File("Main.xaml", """
+                <Page xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                      Background="{ui:ThemeResource PageBg}">
+                  <TextBlock Foreground="{ui:ThemeResource Text}" Text="a"/>
+                </Page>
+                """);
+
+        var r = fx.Run();
+
+        var text = Assert.Single(r.Findings);
+        Assert.Equal(new ContrastColors("#5A5A5A", "#202020"), text.ColorsDark);
+        Assert.Equal(new ContrastColors("#767676", "#FFFFFF"), text.ColorsLight);
+        Assert.Equal(0, r.Unresolved);
+    }
 }

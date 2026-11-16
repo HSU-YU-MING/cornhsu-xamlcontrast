@@ -497,6 +497,65 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - ⚠ **重畫那一層的 `Src` 要留 `"tmpl"`**，不能用那個 Setter 的 Style Id：定義處（`WalkStyles`）看不到模板
   內部那一層，掛上 Style Id 會讓同源判定把整組讓給定義處，而定義處也不評 —— 那一組在哪裡都消失
   （本機測試抓到）。規則 13 的「TargetName=模板根」不一樣，它等同設在宿主上，定義處真的評得到。
+- **重畫的目標一個內容位置都沾不到 → 不要丟掉整組**（1.8，`StyleIndex.ContentChainNames`／`State.LayerTouched`／
+  `State.UnknownBeyondLayers` + `Auditor` 的 `repaintOffContent`）：1.6 的「這個狀態重畫了看不到的那一層 → 整組不評」
+  切得太寬。wpfui 的 CheckBox 勾選態重畫 `ControlBorderIconPresenter`（`BulletDecorator.Bullet` 裡那顆方塊），
+  跟放文字的 `ContentPresenter` 是不同分支，整個勾選態卻被丟掉。現在索引記下「哪些具名元素在某個內容位置底下
+  那一疊上」，重畫的目標一個都不在上面時照舊評分。
+  - ⚠ **只有名字指得出來的重畫能放行**：`UnknownBeyondLayers`（整個換掉 Template、視覺由另一份模板畫）沒有可查的
+    目標；`ownTemplate`（元素自己帶模板）時 Style 那份模板的分層執行期不存在；`TemplateLayers` 是空的時候根本
+    沒有鏈可以比。三種都維持不知道。
+  - ⚠ **`LayerTouched` 要收 `PaintsLayer` 的全部（含 OpacityMask），不是只收 `IsBackdropProp`**：問的是
+    「它在不在字底下」，不是「它畫成什麼顏色」。
+  - ⚠ **撐不滿那一格的同格子兄弟（強調色條）也要記進 `ContentChainNames`**：`BackdropChain` 不把它當背板，
+    但觸發器重畫它時它在不在字底下靜態分不出來 —— 不記就會被判成無關而放行，那就是編造。
+    `ContentChainNames` 收多了只會讓更多狀態維持「不知道」，收少了才會編造。
+  - ⚠ **`State` 有三個複製點**（`CreateRecord`、`merged.States.Add`、`byCond`），新欄位三個都要抄。
+    第一版漏了中間那個，`LayerTouched` 永遠是空的 → 整條路是死碼，而語料顯示「零變化」，看起來像
+    「野外不存在這種形狀」。**語料說沒變化時，先寫一個針對性測試確認那條路跑得到。**
+- **狀態換掉模板內部某個具名元素的字色**（1.8，`State.ElementFg`／`ElementFgSrc`、`TemplateLayer.ContentNames`、
+  `Auditor` 的 `Expand`）：1.8 之前這種 Setter 直接丟掉 —— 狀態只有它就整個略過（盲區），同時改了宿主底的
+  就拿**基礎狀態的字色**去配（**編造**）。語料 489 個，逐筆驗過四個形狀（Flow Launcher 的 RepeatButton
+  按下態 14.94:1 ok → 2.27:1 真 fail）。
+  - ⚠ **只有那個名字正好是模板裡「放內容的位置」時才生效**（`ContentNames`）：指到圖示、說明文字那種
+    自己帶字色的元素不是宿主的文字。
+  - ⚠ **定義處（`WalkStyles`）也要套**，不然它照舊用基礎字色評出那一筆編造的 —— 元素端會因為同源判定
+    （字與底都出自同一個 Style 節點）讓給定義處，兩邊不一致就等於沒修。只在「整條鏈上只有一個這樣的字色」
+    時在定義處套用，好幾個位置各換各的時交給使用處逐層評。
+  - ⚠ **展開是按層分組的**（`Expand`）：同一個狀態下不同的放內容位置可能有不同的字色，那是兩組配對。
+    沒有這種 Setter 的狀態（絕大多數）展開後就是原本那一組，走的程式碼完全相同。
+- **逐層判定要用「這一層自己那一疊」，不是整份記錄的 union**（1.8，`TemplateLayer.ChainNames`）：
+  那一格狀態層守門問的是記錄層的問題，union 是對的；`TemplateChoices` 逐層判定時 union 太寬 ——
+  WinUI 風格的模板把圖示、勾勾、文字放同一個 Grid，union 會讓每一層都判成「可能被動到」。
+  收緊後分得出「在另一個格子」（照舊評）與「同一格但撐不滿」（仍然不評）。
+  實測 MaterialDesign 多出 10 筆真 fail（`Validation.HasError` 同時換 `Graphic` 的 Fill 與
+  `contentPresenter` 的 Foreground，紅字疊深色卡片 1.76:1），配對 +10、unresolved −10。
+- **看不見的東西不是底**（1.8，`Panels.IsHidden`）：`Visibility="Collapsed"`／`"Hidden"`。
+  在這之前工具**完全沒看過 `Visibility`**，收起來的 `<Border Background="…"/>` 照樣被當成字的底
+  （語料 105 個這種元素；Playnite 的選單把收起來的 hover 高亮當成選單文字的底）。
+  ⚠ 只認寫死的值，`{Binding}` 照舊當成看得見（往嚴格那邊錯）。判定放 `Panels`，兩條路共用。
+- ⚠ **「哪一層被狀態打開了」做過一輪，量出來不划算（2026-11-16），不要再做一次。**
+  `State.LayerShown` ＋ 候選層那套：野外形狀不缺（1715 個 `TargetName`+`Visibility`、831 個 `Opacity`），
+  但 **+0 組配對、+0 筆 finding、+111 筆 unresolved**。中途看到的 +134 配對／42 finding 是假的 ——
+  打開的是箭頭、勾勾這種不是底的東西，只是讓同一組配對再被算一次。細節在 ROADMAP。
+- ⚠ **VSM 評分：三次量測都說不要接。** 1.8 補掉了前兩個前置條件（具名元素的字色、逐層判定），
+  補完再翻譯一次 VSM：**959 筆新 unresolved、0 組新配對**、Flow Launcher 覆蓋率 29.8% → 14.8%。
+  逐筆看過，那些 unresolved 落在真的元素上，不是空轉 —— 卡住的是第三個原因：**非顏色的動畫也會換掉字的底**
+  （HandyControl 的 Calendar 用 `DoubleAnimation` 打開 `Opacity="0"` 的 Rectangle）。
+  要先能說出「哪一層被打開了」。**`stateColors` 已經是誠實的信號，把它換成更吵的信號不是改進。**
+- **版面未知的容器兩條路要給同一個答案**（1.8）：`BackdropChain` 原本只認 `Layout.Overlap`，把自訂 `*Panel`
+  整個跳過、落到祖先；標記樹的規則 17 則記 `over-sibling-content`。⚠ 這正是 `Panels` 被抽出來要防的事
+  —— 抽了共用的判定，但**呼叫端對 `Unknown` 的處理各寫各的**，一樣會漂開。
+- **一疊兄弟被放棄時名字照樣要收進 `ContentChainNames`**（1.8）：放棄的理由就是「可能蓋在字底下、只是算不出來」。
+  少了這一條，「重畫碰不到內容就放行」會把 HandyControl Calendar 那種
+  （`Opacity="0"` 的 Rectangle 被狀態打開）判成無關。
+- **模板裡的 Image 兄弟 → `over-sibling-content`**（1.8）：跟標記樹的規則 17(b) 同一個答案。
+  ⚠ 記號是 `ColorResolver.SiblingContentMark`（控制字元開頭）**不是 `<Image>`**：`<Tag>` 早就是 `XamlBrush`
+  給「元素寫法、讀不懂的 brush」的寫法（`<LinearGradientBrush>`、`<VisualBrush>`），第一版用它當記號，
+  那些**字色**整批被分類成「底是一張圖」，合成時拿到 null 直接崩潰（GeekDesk 實測）。
+- **帶命名空間前綴的資源引用**（1.8）：`{ui:ThemeResource K}`（WPF-UI）。元素寫法的正則本來就有 `(?:\w+:)?`，
+  markup extension 的四個沒有 —— 不認的話整個專案的底與字色全變成「執行期才知道」（Bloxstrap 0 組配對、
+  exit 3）。四個正則（Auditor／ColorResolver／StyleIndex／PaletteDetector）＋ `IconFonts` 的字串比對要一起改。
 - ⚠ **`offChain` 的 `Raw` 留 null，讓它點名字色**（1.6 狀態層守門的寫法）。改成點名那一層的原始寫法
   （多半是 `{TemplateBinding Background}`）看起來精確，其實沒資訊，而且 unresolved 的鍵是
   `file|reason|value` —— 換個寫法就得再遞增 `Baseline.KeyVersion`，叫使用者重寫兩次 baseline。

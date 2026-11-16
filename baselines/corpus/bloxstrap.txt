@@ -3,7 +3,7 @@
 project: bloxstrap
 repo: https://github.com/pizzaboxer/bloxstrap
 commit: 02db76006741f039b79ac7547b8054d7f3ccfc05
-tool-commit: 4a1e23d+dirty
+tool-commit: 46454a7+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair
@@ -11,9 +11,9 @@ palette-degraded: False
 palette-keys: 313
 single-theme: False
 files: 38
-pairs: 0
-coverage: 0
-unresolved: 126
+pairs: 18
+coverage: 14.4
+unresolved: 107
 skipped: 0
 dead-foreground: 1
 disabled-exempt: 2
@@ -22,17 +22,35 @@ ui-component-pairs: 0
 parse-errors: 0
 suppressed: 0
 state-colors: 0
-fail: 0
-warn: 0
-ok: 0
+fail: 2
+warn: 6
+ok: 10
 decorative: 0
-unresolved-by.bound-or-gradient: 27
+unresolved-by.bound-or-gradient: 8
 unresolved-by.no-ancestor-background: 55
 unresolved-by.translucent-uncomposited: 3
 unresolved-by.unknown-palette-key: 41
 unknown-keys.SystemAccentColorSecondary: 36
 unknown-keys.SystemAccentColorTertiary: 5
 # F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
+F  fail  Bloxstrap/UI/Elements/ContextMenu/ServerHistory.xaml:96  Button  White on {ApplicationBackgroundBrush}  16.29/1.04  light-fails
+F  fail  Bloxstrap/UI/Elements/Dialogs/AddFastFlagDialog.xaml:59  TextBlock⊕Style[inline]/base  DarkGray on {ApplicationBackgroundBrush}  6.93/2.25  light-fails
+F  ok  Bloxstrap/UI/Elements/Bootstrapper/ClassicFluentDialog.xaml:50  TextBlock  {DynamicResource TextFillColorPrimaryBrush} on {ApplicationBackgroundBrush}  16.29/16.67  
+F  ok  Bloxstrap/UI/Elements/ContextMenu/ServerHistory.xaml:95  TextBlock  {DynamicResource TextFillColorSecondaryBrush} on {ApplicationBackgroundBrush}  10.15/6.12  
+F  ok  Bloxstrap/UI/Elements/Dialogs/AddCustomThemeDialog.xaml:132  TextBlock  {DynamicResource SystemFillColorCriticalBrush} on {ApplicationBackgroundBrush}  8.03/5.42  
+F  ok  Bloxstrap/UI/Elements/Dialogs/AddCustomThemeDialog.xaml:81  TextBlock  {DynamicResource SystemFillColorCriticalBrush} on {ApplicationBackgroundBrush}  8.03/5.42  
+F  ok  Bloxstrap/UI/Elements/Dialogs/ConnectivityDialog.xaml:35  TextBlock  {DynamicResource TextFillColorPrimaryBrush} on {ApplicationBackgroundBrush}  16.29/16.67  
+F  ok  Bloxstrap/UI/Elements/Dialogs/ConnectivityDialog.xaml:36  MarkdownTextBlock  {DynamicResource TextFillColorPrimaryBrush} on {ApplicationBackgroundBrush}  16.29/16.67  
+F  ok  Bloxstrap/UI/Elements/Dialogs/ConnectivityDialog.xaml:37  TextBlock  {DynamicResource TextFillColorPrimaryBrush} on {ApplicationBackgroundBrush}  16.29/16.67  
+F  ok  Bloxstrap/UI/Elements/Dialogs/ExceptionDialog.xaml:36  TextBlock  {DynamicResource TextFillColorPrimaryBrush} on {ApplicationBackgroundBrush}  16.29/16.67  
+F  ok  Bloxstrap/UI/Elements/Dialogs/ExceptionDialog.xaml:38  MarkdownTextBlock  {DynamicResource TextFillColorPrimaryBrush} on {ApplicationBackgroundBrush}  16.29/16.67  
+F  ok  Bloxstrap/UI/Elements/Dialogs/FluentMessageBox.xaml:37  MarkdownTextBlock  {DynamicResource TextFillColorPrimaryBrush} on {ApplicationBackgroundBrush}  16.29/16.67  
+F  warn  Bloxstrap/UI/Elements/ContextMenu/ServerInformation.xaml:44  TextBlock  {DynamicResource TextFillColorTertiaryBrush} on {ApplicationBackgroundBrush}  5.51/3.31  light-fails
+F  warn  Bloxstrap/UI/Elements/ContextMenu/ServerInformation.xaml:47  TextBlock  {DynamicResource TextFillColorTertiaryBrush} on {ApplicationBackgroundBrush}  5.51/3.31  light-fails
+F  warn  Bloxstrap/UI/Elements/ContextMenu/ServerInformation.xaml:50  TextBlock  {DynamicResource TextFillColorTertiaryBrush} on {ApplicationBackgroundBrush}  5.51/3.31  light-fails
+F  warn  Bloxstrap/UI/Elements/Dialogs/ExceptionDialog.xaml:44  TextBlock  {DynamicResource TextFillColorTertiaryBrush} on {SolidBackgroundFillColorSecondaryBrush}  5.62/3.22  light-fails
+F  warn  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:50  TextBlock  {DynamicResource TextFillColorTertiaryBrush} on {ApplicationBackgroundBrush}  5.51/3.31  light-fails
+F  warn  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:85  TextBlock  {DynamicResource TextFillColorTertiaryBrush} on {ApplicationBackgroundBrush}  5.51/3.31  light-fails
 # U  原因  檔案:行  值
 U  bound-or-gradient  Bloxstrap/UI/Elements/About/Pages/SupportersPage.xaml:113  <ImageBrush>
 U  bound-or-gradient  Bloxstrap/UI/Elements/About/Pages/SupportersPage.xaml:84  <ImageBrush>
@@ -41,26 +59,7 @@ U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ByfronDialog.xaml:30  {
 U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ByfronDialog.xaml:31  {Binding IconColor}
 U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ByfronDialog.xaml:41  {Binding Foreground}
 U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ByfronDialog.xaml:46  {Binding Foreground}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ClassicFluentDialog.xaml:50  {ui:ThemeResource ApplicationBackgroundBrush}
 U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/FluentDialog.xaml:57  {Binding Path=BackgroundColourBrush, Mode=OneTime}
-U  bound-or-gradient  Bloxstrap/UI/Elements/ContextMenu/ServerHistory.xaml:95  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/ContextMenu/ServerHistory.xaml:96  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/ContextMenu/ServerInformation.xaml:44  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/ContextMenu/ServerInformation.xaml:47  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/ContextMenu/ServerInformation.xaml:50  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/AddCustomThemeDialog.xaml:132  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/AddCustomThemeDialog.xaml:81  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/AddFastFlagDialog.xaml:59  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/AddFastFlagDialog.xaml:59  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/ConnectivityDialog.xaml:35  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/ConnectivityDialog.xaml:36  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/ConnectivityDialog.xaml:37  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/ExceptionDialog.xaml:36  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/ExceptionDialog.xaml:38  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/ExceptionDialog.xaml:44  {ui:ThemeResource SolidBackgroundFillColorSecondaryBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/FluentMessageBox.xaml:37  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:50  {ui:ThemeResource ApplicationBackgroundBrush}
-U  bound-or-gradient  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:85  {ui:ThemeResource ApplicationBackgroundBrush}
 U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:43  {DynamicResource TextFillColorTertiaryBrush}
 U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:45  {DynamicResource TextFillColorTertiaryBrush}
 U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:72  {DynamicResource TextFillColorTertiaryBrush}

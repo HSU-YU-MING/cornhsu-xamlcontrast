@@ -613,9 +613,9 @@ public class TemplateLayerTests
         Assert.Equal("#444444", Assert.Single(fx.Run().Findings).Bg);
     }
 
-    [Fact] // 底是一張圖：模板裡還沒有 over-sibling-content 的計數器，收了會讓這些配對悄悄變成不可知 ——
-           // 維持 1.6 的答案（配祖先），留在盲區表
-    public void AnImageSiblingKeepsTheNineteenSixBehaviour()
+    [Fact] // 底是一張圖 → over-sibling-content（1.7）。往外找等於拿圖後面那一層的顏色報一個比值，
+           // 而字其實疊在圖上 —— 跟標記樹的規則 17(b) 同一個答案
+    public void AnImageSiblingIsOverSiblingContent()
     {
         using var fx = SiblingBackdrop("""
             <Grid>
@@ -623,7 +623,22 @@ public class TemplateLayerTests
               <ContentPresenter/>
             </Grid>
             """);
-        Assert.Equal("#FFFFFF", Assert.Single(fx.Run().Findings).Bg);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Equal("<Image>", Assert.Single(r.UnresolvedSites, u => u.Reason == UnresolvedReason.OverSiblingContent).Value);
+    }
+
+    [Fact] // 排在圖後面、又畫了底的兄弟蓋過那張圖 —— 不是「看到圖就整層放棄」
+    public void AnOpaqueSiblingAfterTheImageWinsAgain()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid>
+              <Image Source="bg.png"/>
+              <Border Background="#222222"/>
+              <ContentPresenter/>
+            </Grid>
+            """);
+        Assert.Equal("#222222", Assert.Single(fx.Run().Findings).Bg);
     }
 
     [Fact] // 半透明的兄弟要疊到它底下那一層才算得出來，而這一步回傳的是原始寫法 —— 猜一個不透明的值
@@ -710,8 +725,10 @@ public class TemplateLayerTests
         Assert.DoesNotContain(r.Findings, f => f.RatioDark == Wcag.Contrast("#000000", "#FFFFFF"));
     }
 
-    [Fact] // 重畫的元素不在這個位置的鏈上(別的分支、或撐不滿那一格)→ 維持 1.6 的誠實不知道
-    public void ARepaintOfAnElementOffThisPositionsChainStaysUnresolved()
+    [Fact] // 重畫的元素在**另一個 Grid 格子**：它不可能在這段文字底下，所以這個狀態照舊評得到（1.8 收緊）。
+           // 1.6～1.7 這裡是整組不評，因為當時比的是整份記錄的 union；改成比這一層自己那一疊之後，
+           // 分得出「別的格子」與「同一格但撐不滿」—— 後者仍然不評，見下一個測試
+    public void ARepaintInAnotherCellDoesNotDiscardTheState()
     {
         using var fx = new Fixture().File("Main.xaml", """
             <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
@@ -730,6 +747,7 @@ public class TemplateLayerTests
                         <ControlTemplate.Triggers>
                           <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="Badge" Property="Background" Value="#CCCCCC"/>
+                            <Setter Property="Foreground" Value="#FFFFFF"/>
                           </Trigger>
                         </ControlTemplate.Triggers>
                       </ControlTemplate>
@@ -741,8 +759,8 @@ public class TemplateLayerTests
             </Grid>
             """);
         var r = fx.Run();
-        Assert.Contains(r.UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
-        Assert.DoesNotContain(r.Findings, f => f.Bg == "#CCCCCC"); // 那一塊不在字底下
+        Assert.DoesNotContain(r.UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+        Assert.Contains(r.Findings, f => f.Fg == "#FFFFFF" && f.Bg == "#000000");
     }
 
     [Fact] // OpacityMask 不是一個底色 —— 收了就得猜它把下面那層挖成什麼
@@ -776,4 +794,255 @@ public class TemplateLayerTests
         Assert.All(r.Findings, f => Assert.Equal("#000000", f.Bg));
     }
 
+    /// <summary>宿主自己有底、模板裡的重畫打在別的地方（1.7）：<c>Elsewhere</c> 在另一格、
+    /// 不在 ContentPresenter 底下那一疊上，所以那次重畫跟這段文字無關。</summary>
+    private static Fixture HostBgRepaint(string targetName) => new Fixture().File("Main.xaml", $$"""
+        <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+          <Grid.Resources>
+            <Style x:Key="Btn" TargetType="Button">
+              <Setter Property="Foreground" Value="#777777"/>
+              <Setter Property="Template">
+                <Setter.Value>
+                  <ControlTemplate TargetType="Button">
+                    <Grid>
+                      <Border x:Name="Under" Grid.Column="0" Background="{TemplateBinding Background}">
+                        <ContentPresenter/>
+                      </Border>
+                      <Border x:Name="Elsewhere" Grid.Column="1" Width="8" Background="#111111"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                      <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="{{targetName}}" Property="Background" Value="#222222"/>
+                      </Trigger>
+                    </ControlTemplate.Triggers>
+                  </ControlTemplate>
+                </Setter.Value>
+              </Setter>
+            </Style>
+          </Grid.Resources>
+          <Button Style="{StaticResource Btn}" Background="#FFFFFF" Content="hi"/>
+        </Grid>
+        """);
+
+    [Fact] // 重畫打在別的分支上 → 宿主自己的底照舊算得出來，不要連同整個狀態一起丟掉
+    public void ARepaintOffEveryContentPositionKeepsTheHostsOwnBackground()
+    {
+        using var fx = HostBgRepaint("Elsewhere");
+        var r = fx.Run();
+        Assert.DoesNotContain(r.UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+        Assert.Contains(r.Findings, f => f.Bg == "#FFFFFF" && f.Fg == "#777777");
+    }
+
+    [Fact] // 重畫打在內容底下那一層 → 宿主的底被蓋掉了，拿它評分就是編造
+    public void ARepaintUnderTheContentStillDiscardsTheState()
+    {
+        using var fx = HostBgRepaint("Under");
+        var r = fx.Run();
+        Assert.Contains(r.UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+    }
+
+    [Fact] // 同一格、但撐不滿那一格的兄弟（強調色條）：它在不在字底下靜態分不出來 ——
+           // 不能因為「它不是背板」就當成跟這段文字無關
+    public void ARepaintOfAPartialCellSiblingInTheSameCellStillDiscardsTheState()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Btn" TargetType="Button">
+                  <Setter Property="Foreground" Value="#777777"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Grid>
+                          <Border x:Name="Bar" Width="4" HorizontalAlignment="Left" Background="#111111"/>
+                          <ContentPresenter/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bar" Property="Background" Value="#222222"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Btn}" Background="#FFFFFF" Content="hi"/>
+            </Grid>
+            """);
+        Assert.Contains(fx.Run().UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+    }
+
+    [Fact] // 版面未知的容器（自訂 *Panel）在模板裡要跟標記樹的規則 17 給同一個答案（1.8）——
+           // 原本只認 Overlap，把整個容器跳過、落到祖先，等於同一段 XAML 寫在畫面裡與寫在模板裡
+           // 得到不同的答案，而且模板那一邊是編的
+    public void AnUnknownLayoutContainerInATemplateIsOverSiblingContent()
+    {
+        using var fx = SiblingBackdrop("""
+            <SimplePanel>
+              <Border Background="#222222"/>
+              <ContentPresenter/>
+            </SimplePanel>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Contains(r.UnresolvedSites, u => u.Reason == UnresolvedReason.OverSiblingContent);
+    }
+
+    [Fact] // 這一疊整個被放棄（帶 Opacity 的兄弟）時，它的名字照樣要記進鏈 —— 放棄的理由正是
+           // 「它可能蓋在字底下、只是算不出來」，觸發器動它的時候更不能當成無關。
+           // HandyControl 的 Calendar 就是這形狀：Opacity=0 的 Rectangle 被狀態打開之後才是字的底
+    public void ARepaintOfASiblingOnAnAbandonedLevelStillDiscardsTheState()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Btn" TargetType="Button">
+                  <Setter Property="Foreground" Value="#777777"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Grid>
+                          <Border x:Name="Hidden" Background="#111111" Opacity="0"/>
+                          <ContentPresenter/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Hidden" Property="Background" Value="#222222"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Btn}" Background="#FFFFFF" Content="hi"/>
+            </Grid>
+            """);
+        Assert.Contains(fx.Run().UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+    }
+
+    /// <summary>狀態把模板內部某個具名元素的字色換掉（1.8）。<paramref name="target"/> 是那個 Setter 指的名字。</summary>
+    private static Fixture PressedFg(string target, string extra = "") => new Fixture().File("Main.xaml", $$"""
+        <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+          <Grid.Resources>
+            <Style x:Key="Card" TargetType="Button">
+              <Setter Property="Foreground" Value="#000000"/>
+              <Setter Property="Template">
+                <Setter.Value>
+                  <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root" Background="#FFFFFF">
+                      <StackPanel>
+                        <TextBlock x:Name="Label" Foreground="#555555" Text="label"/>
+                        <ContentPresenter x:Name="Content"/>
+                      </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                      <Trigger Property="IsPressed" Value="True">
+                        {{extra}}
+                        <Setter TargetName="{{target}}" Property="Foreground" Value="#FFFFFF"/>
+                      </Trigger>
+                    </ControlTemplate.Triggers>
+                  </ControlTemplate>
+                </Setter.Value>
+              </Setter>
+            </Style>
+          </Grid.Resources>
+          <Button Style="{StaticResource Card}" Content="hi"/>
+        </Grid>
+        """);
+
+    [Fact] // 1.7 之前這個 Setter 整個被丟掉：按下態的底換成黑、字色卻沿用基礎狀態的黑 →
+           // 報一筆執行期不存在的 1:1 假 fail。wpfui 的 CardAction 就是這形狀（實測 14.94 → 9.49）
+    public void AStatesForegroundOnTheContentElementIsUsedForThatState()
+    {
+        using var fx = PressedFg("Content", """<Setter TargetName="Root" Property="Background" Value="#000000"/>""");
+        var r = fx.Run();
+        Assert.DoesNotContain(r.Findings, f => f.RatioDark < 1.5); // 沒有那筆 1:1
+        Assert.Contains(r.Findings, f => f.Fg == "#FFFFFF" && f.Bg == "#000000");
+        Assert.Contains(r.Findings, f => f.Fg == "#000000" && f.Bg == "#FFFFFF"); // 基礎狀態照舊
+    }
+
+    [Fact] // 狀態裡只有這一個 Setter 時，1.7 之前整個狀態被略過（盲區）—— 現在評得到
+    public void AStateWhoseOnlyChangeIsThatForegroundIsNoLongerSkipped()
+    {
+        using var fx = PressedFg("Content");
+        Assert.Contains(fx.Run().Findings, f => f.Fg == "#FFFFFF" && f.Bg == "#FFFFFF");
+    }
+
+    [Fact] // 指向「自己帶字色」的元素（模板裡的說明文字、圖示）不是宿主的文字 —— 不能拿來當宿主的字色
+    public void AForegroundOnAnElementThatIsNotAContentPositionIsNotTheHostsText()
+    {
+        using var fx = PressedFg("Label", """<Setter TargetName="Root" Property="Background" Value="#000000"/>""");
+        var r = fx.Run();
+        Assert.DoesNotContain(r.Findings, f => f.Fg == "#FFFFFF");
+    }
+
+    [Fact] // 狀態動到的元素在**別的分支**上時，這一層照舊評得到（1.8）。
+           // ⚠ 用的是這一層自己的那一疊，不是整份記錄的 union —— union 在「圖示、勾勾、文字同一個 Grid」
+           //   的模板裡會讓每一層都被判成可能被動到，整批狀態不評。
+           //   MaterialDesign 的 Validation.HasError 就是這形狀：同時換 Graphic 的 Fill 與 contentPresenter
+           //   的 Foreground，實測 10 筆紅字配深色卡片 1.76:1 的真 fail 靠這一條才浮出來
+    public void AStateThatTouchesAnotherBranchStillGradesThisLayer()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Chk" TargetType="CheckBox">
+                  <Setter Property="Foreground" Value="#000000"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="CheckBox">
+                        <Grid>
+                          <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                          <Border Grid.Column="0" Background="#EEEEEE">
+                            <Path x:Name="Graphic" Fill="{TemplateBinding Foreground}"/>
+                          </Border>
+                          <Border Grid.Column="1" Background="#FFFFFF">
+                            <ContentPresenter x:Name="Content"/>
+                          </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Graphic" Property="Fill" Value="#CC0000"/>
+                            <Setter TargetName="Content" Property="Control.Foreground" Value="#DDDDDD"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <CheckBox Style="{StaticResource Chk}" Content="hi"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        // 勾選態的文字：#DDDDDD 疊在它自己那一格的白底上（Graphic 那一格跟它無關）
+        Assert.Contains(r.Findings, f => f.Fg == "#DDDDDD" && f.Bg == "#FFFFFF");
+    }
+
+    [Fact] // Visibility="Collapsed" 的元素看不見，就不是字的底（1.8）。在這之前工具完全沒看過
+           // Visibility，所以一個收起來的 Border 照樣被當成背板 —— 語料裡有 105 個這種元素
+    public void ACollapsedSiblingIsNotABackdrop()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid Background="#444444">
+              <Border Background="#222222" Visibility="Collapsed"/>
+              <ContentPresenter/>
+            </Grid>
+            """);
+        Assert.Equal("#444444", Assert.Single(fx.Run().Findings).Bg);
+    }
+
+    [Fact] // 看得見的照舊是背板（上一條不能把整個規則關掉）
+    public void AVisibleSiblingIsStillABackdrop()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid Background="#444444">
+              <Border Background="#222222" Visibility="Visible"/>
+              <ContentPresenter/>
+            </Grid>
+            """);
+        Assert.Equal("#222222", Assert.Single(fx.Run().Findings).Bg);
+    }
 }

@@ -64,6 +64,16 @@ public static class IconFonts
     /// <summary>{StaticResource K}／{DynamicResource K}／{ThemeResource K}（WinUI，1.4）的 K；其他 markup（Binding 之類）是 null。</summary>
     private static string? ResourceKey(string value)
     {
+        // 前綴形式（wpfui 的 {ui:ThemeResource K}，1.7）先剝掉：`{` 之後到第一個冒號之間只有識別字元才算
+        var open = value.IndexOf('{');
+        if (open >= 0)
+        {
+            var colon = value.IndexOf(':', open + 1);
+            var space = value.IndexOf(' ', open + 1);
+            if (colon > open + 1 && (space < 0 || colon < space) &&
+                value.AsSpan(open + 1, colon - open - 1).ToString().All(c => char.IsLetterOrDigit(c) || c == '_'))
+                value = value[..(open + 1)] + value[(colon + 1)..];
+        }
         foreach (var prefix in (ReadOnlySpan<string>)["{StaticResource ", "{DynamicResource ", "{ThemeResource "])
             if (value.StartsWith(prefix, StringComparison.Ordinal) && value.EndsWith('}'))
                 return value[prefix.Length..^1].Trim() is { Length: > 0 } k && !k.Contains(' ') && !k.Contains('{') ? k : null;

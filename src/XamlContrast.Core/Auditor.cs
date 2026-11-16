@@ -68,7 +68,7 @@ public sealed partial class Auditor
     private static bool IsBold(string? fw) => fw is not null && BoldWeight().IsMatch(fw);
 
     // ThemeResource 是 WinUI／UWP 的寫法（1.4），跟 DynamicResource 一樣是「依目前主題查資源」
-    [GeneratedRegex(@"^\{(Dynamic|Static|Theme)Resource\s+(?<k>[\w\.]+)\}$")]
+    [GeneratedRegex(@"^\{(?:\w+:)?(Dynamic|Static|Theme)Resource\s+(?<k>[\w\.]+)\}$")] // 前綴：wpfui 的 {ui:ThemeResource K}（1.7）
     private static partial Regex StyleResourceRef();
 
     /// <summary>元素 Style="{StaticResource X}" 的 X（行內 Style 或其他寫法回傳 null）。</summary>
@@ -945,11 +945,11 @@ public sealed partial class Auditor
     /// 換掉的那一層，來源就是那個 Setter 的 Style 節點；其餘是 "tmpl"（寫在模板裡，定義處看不到）。
     /// ⚠ 一律標 "tmpl" 的話，Kindling CellDeleteBtn 那個 hover 形狀會在定義處與使用處各報一次。</summary>
     private static List<TemplateChoice> TemplateChoices(
-        StyleIndex.Merged chain, StyleIndex.State st, Func<string, string?> hostProp)
+        IReadOnlyList<StyleIndex.TemplateLayer> layers, StyleIndex.State st, Func<string, string?> hostProp)
     {
         var rooted = st.Set.TryGetValue("Background", out var v) && st.RootTargeted.Contains("Background");
         var list = new List<TemplateChoice>();
-        foreach (var layer in chain.TemplateLayers)
+        foreach (var layer in layers)
         {
             var fromTrigger = layer.Root && rooted;
             var raw = fromTrigger ? v : layer.Bg;
@@ -974,6 +974,12 @@ public sealed partial class Auditor
                     raw = st.LayerPaints[hit];
                 }
                 else if (layer.Name is { } ln && st.LayerPaints.ContainsKey(ln)) raw = st.LayerPaints[ln];
+                // 這個狀態動到的那些元素，**一個都不在這一層這一疊上** → 跟這一層無關，照舊評（1.9）。
+                // ⚠ 條件跟狀態層那一格同形狀，但用的是**這一層自己**的鏈，不是整份記錄的 union ——
+                //   union 在 WinUI 風格的模板（開關、勾勾、文字同一個 Grid）會讓每一層都被判成可能被動到。
+                // ⚠ UnknownBeyondLayers（換掉整份 Template、別的模板畫的）沒有可查的目標，照舊不評。
+                else if (!st.UnknownBeyondLayers && st.LayerTouched.Count > 0
+                         && layer.ChainNames is { } cn && !st.LayerTouched.Overlaps(cn)) { }
                 else offChain = true;
                 // ⚠ 來源照舊是 "tmpl"，不是那個 Setter 的 Style 節點：定義處（WalkStyles）看不到模板
                 //   內部那一層，讓給它等於這一組在哪裡都沒被評分。規則 13 的「TargetName=模板根」不一樣
@@ -1048,11 +1054,32 @@ public sealed partial class Auditor
             var allStates = new List<StyleIndex.State> { new() };
             // 元素自己換掉模板 → Style 模板裡的觸發器不存在（見上面 ownTemplate）
             allStates.AddRange(ownTemplate ? chain.States.Where(st => !st.FromTemplate) : chain.States);
-            foreach (var st in allStates)
+            // 「狀態把某個放內容位置的字色換掉了」要展開（1.8）：同一個狀態下不同的位置可能有不同的字色，
+            // 那是兩組不同的配對。⚠ 絕大多數狀態沒有這種 Setter，展開後就是原本那一組、Over 是 null，
+            //   走的程式碼與 1.7 完全相同（語料與三個本機專案逐筆一致可以證明這件事）。
+            IEnumerable<(StyleIndex.State St, string? Over, object? OverSrc, List<StyleIndex.TemplateLayer> Layers)>
+                Expand(StyleIndex.State st)
             {
-                // WPF 優先序：元素屬性 > Style 觸發 > Style Setter
+                var layers = chain.TemplateLayers;
+                if (st.ElementFg.Count == 0 || layers.Count == 0)
+                    return [(st, null, null, layers.ToList())];
+                (string? V, object? Src) Of(StyleIndex.TemplateLayer l)
+                {
+                    foreach (var n in l.ContentNames ?? [])
+                        if (st.ElementFg.TryGetValue(n, out var fg))
+                            return (fg, st.ElementFgSrc.TryGetValue(n, out var sid) ? sid : null);
+                    return (null, null);
+                }
+                return layers.GroupBy(Of).Select(g => (st, g.Key.V, g.Key.Src, g.ToList()));
+            }
+            foreach (var (st, fgOver, fgOverSrc, stLayers) in allStates.SelectMany(Expand))
+            {
+                // WPF 優先序：元素屬性 > Style 觸發 > Style Setter。
+                // ⚠ 模板內部那個元素自己的字色（TargetName Setter）贏過宿主的本地字色 ——
+                //   執行期它是設在那個元素上的，不是繼承來的。
                 string? fgV = null; object? fgSrc = null;
-                if (localFgRaw is not null) { fgV = localFgRaw; fgSrc = "local"; }
+                if (fgOver is not null) { fgV = fgOver; fgSrc = fgOverSrc; }
+                else if (localFgRaw is not null) { fgV = localFgRaw; fgSrc = "local"; }
                 else if (st.Set.TryGetValue("Foreground", out var sf)) { fgV = sf; fgSrc = st.SetSrc["Foreground"]; }
                 else if (chain.Props.TryGetValue("Foreground", out var pf)) { fgV = pf.V; fgSrc = pf.Src; }
                 if (fgV is null) continue;
@@ -1081,9 +1108,9 @@ public sealed partial class Auditor
                 //   Primary 底上 —— 元素明寫的值被一個「模板某層是透明的」推論蓋掉，等於編造。
                 // ⚠ 1.5 這一步只看模板根（TemplateRootBg），根沒設底就落到祖先 ——
                 //   HandyControl 的 <hc:Shield Color="#1182c3"/> 證明那是編出來的（白字其實在藍色徽章上）。
-                else if (!ownTemplate && chain.TemplateLayers.Count > 0)
+                else if (!ownTemplate && stLayers.Count > 0)
                 {
-                    tmplLayers = TemplateChoices(chain, st, HostProp);
+                    tmplLayers = TemplateChoices(stLayers, st, HostProp);
                     bgV = tmplLayers[0].V; bgSrc = tmplLayers[0].Src;
                 }
                 else if (!ownTemplate && chain.TemplateRootBg is not null)
@@ -1113,7 +1140,17 @@ public sealed partial class Auditor
                 //   不分這一刀的話 ScreenToGif 連同 76 筆算得出來的 ok 一起被丟掉
                 // ⚠ 有模板分層可查時是逐層判定（下面那個 layerUnknown）—— 重畫的元素對得上
                 //   這個位置的那一層時算得出來，對不上才記。整個狀態一起丟掉會連同算得出來的層一起丟。
-                if (st.UnknownLayer && !st.Set.ContainsKey("Background") && tmplLayers is null)
+                // ⚠ 1.7：重畫的那個元素**不在任何一個放內容的位置底下**時不算（量出來的：17 個公開專案裡，
+                //   這一格擋掉的 2010 組有 1435 組是「宿主自己有底、模板也找得到放內容的位置」——
+                //   把整組丟掉等於拿一個跟這段文字無關的觸發器，抹掉一個算得出來的答案）。
+                //   只有名字指得出來的重畫能這樣放行：整個換掉 Template、視覺由另一份模板畫的那兩種
+                //   沒有可查的目標（UnknownBeyondLayers）；元素自己換掉 Template 時 Style 那份模板的
+                //   分層在執行期不存在，也不能拿來比；模板裡一個放內容的位置都找不到時更不能比。
+                //   ContentChainNames 收的是所有內容位置的鏈，收多了只會讓更多狀態維持「不知道」。
+                var repaintOffContent = !ownTemplate && !st.UnknownBeyondLayers
+                                        && st.LayerTouched.Count > 0 && chain.TemplateLayers.Count > 0
+                                        && !st.LayerTouched.Overlaps(chain.ContentChainNames);
+                if (st.UnknownLayer && !st.Set.ContainsKey("Background") && tmplLayers is null && !repaintOffContent)
                 { Unres(UnresolvedReason.TemplatePainted, file, LineOf(el), fgV); continue; }
 
                 var fgAll = ResolveColour(fgV, pal);
@@ -1562,6 +1599,7 @@ public sealed partial class Auditor
     private Resolved? SiblingBackdrop(XElement child, bool stretches)
     {
         var name = child.Name.LocalName;
+        if (Panels.IsHidden(child)) return null; // 看不見的東西不是背板，也不遮字（1.8）
         // (b) 內容元素:底變成一張圖,不可知
         if (Panels.IsContentElement(name))
             return new Resolved(ColorKind.SiblingContent, Raw: "<" + name + ">");
@@ -1771,6 +1809,19 @@ public sealed partial class Auditor
             {
                 string? Prop(string p, out int src)
                 {
+                    // 狀態把模板裡放內容的那個元素的字色換掉了（1.8）—— 定義處也要看得到，
+                    // 否則按下態的底換了、字色卻沿用基礎狀態的，報出執行期不存在的組合
+                    // （wpfui 的 CardAction 實測 14.94:1 → 9.49:1）。
+                    // ⚠ 只在「整條鏈上只有一個這樣的字色」時套用：好幾個放內容的位置各換各的時，
+                    //   定義處一筆報不完，交給使用處逐層評（元素端的 Expand）。
+                    if (p == "Foreground" && st is not null && st.ElementFg.Count > 0)
+                    {
+                        var hits = chain.TemplateLayers.SelectMany(l => l.ContentNames ?? [])
+                            .Select(n => st.ElementFg.TryGetValue(n, out var v) ? (Name: n, V: v) : default)
+                            .Where(x => x.V is not null).ToList();
+                        if (hits.Select(x => x.V).Distinct(StringComparer.Ordinal).Count() == 1)
+                        { src = st.ElementFgSrc[hits[0].Name]; return hits[0].V; }
+                    }
                     if (st is not null && st.Set.TryGetValue(p, out var sv)) { src = st.SetSrc[p]; return sv; }
                     if (chain.Props.TryGetValue(p, out var pv)) { src = pv.Src; return pv.V; }
                     src = -1; return null;
