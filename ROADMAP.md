@@ -47,6 +47,12 @@
 - [x] 隱含樣式解析 —— 1.5：每個元素的底與字色都查隱含樣式，作用範圍照 WPF 的資源範圍走
       （巢狀 `<X.Resources>` 只管子樹、最內層優先、元素有自己的 Style 就不套）。
       實證價值：維護者自己的 Kindling 有一筆「按鈕上的白字其實是深色字、2.49:1」被 1.4 報成 21:1 ✓
+- **VisualStateManager 狀態顏色的「評分」**（計數在 1.5 已有，見下一條）：下一版最有價值的一塊，而且 1.6／1.7
+  已經把狀態層該有的守門建好（重畫了哪一層、定不出來就不評），接得上去。2026-11-16 量過語料：88 處，
+  屬性有五種寫法（`Foreground`、`Background`、`Background.Color`、`(TextElement.Foreground).(SolidColorBrush.Color)`、
+  `(TextBlock.Foreground)`），所以要一套 `TargetProperty` 路徑解析；狀態裡 12 處是 Disabled（WCAG 1.4.3 豁免）、
+  11 Pressed、7 PointerOver。WinUI 控制項的 hover／按下／勾選全走 VSM，所以這也是 WinUI 支援真正的缺口
+  （WinUI Gallery 自己佔 44 處）。**這是一個獨立的版本，不要順手塞進別的改動** —— 做半套就是會編造狀態的數字
 - [x] VisualStateManager 狀態顏色的計數器 —— 1.5：`summary.stateColors` ＋ `stateColorSites` 逐筆點名
       （含 WinUI 的 `<VisualState.Setters>`）。照舊不評，只是不再靜默。
       實測 WinUI Gallery 44 處、wpfui 18、HandyControl 15，而自家四個專案是 0
@@ -65,13 +71,25 @@
       不透明的重畫就是這個狀態的底；半透明的疊在它蓋住的那一層上（ScreenToGif 的 `AwareTabItem` 選取態把
       `ContentBorder` 畫成 `#90FFFFFF`，疊在面板的 Level3 上 → 7 筆 `8.23/20.29` 的 ok；1.5 拿被蓋掉的顏色報 1.46:1）。另有 13 筆（MahApps 3、MaterialDesign 10）從 `template-painted` 改成
       `bound-or-gradient` —— 那一層解開之後，真正卡住的是字色的 Binding，原因終於指對地方
-- **重畫的元素不在那一疊上**（1.6 新明文化）：`TargetName` 指的元素可能在模板的別的分支（跟這段內容無關），
-  也可能在那一疊上但撐不滿它那一格 —— 靜態分不出來，所以維持誠實的 `template-painted`。
-  同一類還有：重畫的值是漸層或 Binding（ScreenToGif 另有 7 筆 `RadialGradientBrush`，現在誠實點名那支 brush）、
-  半透明的重畫層而它蓋住的那一層本身讀不懂
-- **模板裡的 Image 兄弟與帶 Opacity 的兄弟**（1.6 新明文化）：前者的底是一張圖（標記樹裡記
-  `over-sibling-content`，模板裡還沒有對應的計數器，收了會讓那些配對悄悄變成不可知）；後者要把半透明疊到
-  它底下那一層才算得出來，而那一步回傳的是原始寫法。兩種都維持 1.6 的答案，不是編造，但也還沒算出來
+- [x] **重畫的元素不在那一疊上** —— 1.7：動工前先量，而量測改掉了計畫。2370 筆 `template-painted` 的子類是
+      84.8%「完全沒有模板分層可查」、13.4% 定義處、**只有 1.5%（36 筆）**是原先以為的「重畫在別的分支」。
+      所以做的是前者：重畫的目標**一個放內容的位置都沾不到**時，那次重畫不在這段文字底下，底照舊算得出來。
+      白老鼠是 wpfui 的 `CheckBox` —— 重畫的是 `BulletDecorator.Bullet` 裡那顆方塊，跟放文字的那一支是不同分支，
+      1.6 卻把每一個勾選態都丟掉。實測 181 筆 unresolved 從 `template-painted` 換成真正的阻塞原因
+      （wpfui 170、MahApps 10 卡在色盤裡沒有的鍵、MaterialDesign 1）。
+      ⚠ 同一格但撐不滿那一格的兄弟照樣算在鏈上 —— 它在不在字底下正好是靜態分不出來的那件事。
+      這條保守規則是量出來的：少了它，MaterialDesign 有 402 筆會被放行，而那些重畫的正是文字欄位
+      底下那條有尺寸的底線。
+      ⚠ 第一版因為漏抄一個欄位而從未生效，語料顯示「零變化」，差點被當成「野外不存在這種形狀」而放棄；
+      是針對性測試抓到它是死碼。**語料說「沒變化」時，先確認那條路真的跑得到。**
+- [x] **模板裡的 Image 兄弟** —— 1.7：改記 `over-sibling-content`，跟標記樹的規則 17(b) 同一個答案。
+      之前是「看到內容元素就整層放棄、往外找」，等於拿圖後面那一層的顏色報比值。17 個公開專案與三個本機專案
+      一個數字都沒變 —— 它關掉的是一條編造路徑。排在圖後面又畫了底的兄弟照舊蓋過那張圖
+- **帶 Opacity 的兄弟（模板裡）**：量過了（1.7），17 個公開專案只有 **2 處**，都在 MaterialDesign，
+  而且兩處現在**已經是誠實的** `no-ancestor-background`、不是編造。要算出來得在模板那條路上再寫一份
+  Opacity 疊合（標記樹那一份在 `Auditor.SiblingBackdrop`，拿不到色盤），為 2 處維護兩份會漂開的判定不划算
+- **重畫的值是漸層或 Binding、半透明的重畫層而它蓋住的那一層本身讀不懂**：維持誠實的 `template-painted`
+  （ScreenToGif 另有 7 筆 `RadialGradientBrush`，現在誠實點名那支 brush）
 - **畫在內容後面的兄弟**：那是蓋在字上面，不是當字的底 —— 文字被遮住多少靜態不可知
 
 ## 與 Parity 的交會點（構想，尚未排程）

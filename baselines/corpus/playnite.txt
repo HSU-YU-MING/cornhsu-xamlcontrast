@@ -3,7 +3,7 @@
 project: playnite
 repo: https://github.com/JosefNemec/Playnite
 commit: e2e6efcda311fea38fcd92f61c8ca90811d97f28
-tool-commit: 4a1e23d+dirty
+tool-commit: a74bb86+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: single

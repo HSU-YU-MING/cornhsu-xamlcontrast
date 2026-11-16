@@ -68,7 +68,7 @@ public sealed partial class Auditor
     private static bool IsBold(string? fw) => fw is not null && BoldWeight().IsMatch(fw);
 
     // ThemeResource 是 WinUI／UWP 的寫法（1.4），跟 DynamicResource 一樣是「依目前主題查資源」
-    [GeneratedRegex(@"^\{(Dynamic|Static|Theme)Resource\s+(?<k>[\w\.]+)\}$")]
+    [GeneratedRegex(@"^\{(?:\w+:)?(Dynamic|Static|Theme)Resource\s+(?<k>[\w\.]+)\}$")] // 前綴：wpfui 的 {ui:ThemeResource K}（1.7）
     private static partial Regex StyleResourceRef();
 
     /// <summary>元素 Style="{StaticResource X}" 的 X（行內 Style 或其他寫法回傳 null）。</summary>
@@ -1113,7 +1113,17 @@ public sealed partial class Auditor
                 //   不分這一刀的話 ScreenToGif 連同 76 筆算得出來的 ok 一起被丟掉
                 // ⚠ 有模板分層可查時是逐層判定（下面那個 layerUnknown）—— 重畫的元素對得上
                 //   這個位置的那一層時算得出來，對不上才記。整個狀態一起丟掉會連同算得出來的層一起丟。
-                if (st.UnknownLayer && !st.Set.ContainsKey("Background") && tmplLayers is null)
+                // ⚠ 1.7：重畫的那個元素**不在任何一個放內容的位置底下**時不算（量出來的：17 個公開專案裡，
+                //   這一格擋掉的 2010 組有 1435 組是「宿主自己有底、模板也找得到放內容的位置」——
+                //   把整組丟掉等於拿一個跟這段文字無關的觸發器，抹掉一個算得出來的答案）。
+                //   只有名字指得出來的重畫能這樣放行：整個換掉 Template、視覺由另一份模板畫的那兩種
+                //   沒有可查的目標（UnknownBeyondLayers）；元素自己換掉 Template 時 Style 那份模板的
+                //   分層在執行期不存在，也不能拿來比；模板裡一個放內容的位置都找不到時更不能比。
+                //   ContentChainNames 收的是所有內容位置的鏈，收多了只會讓更多狀態維持「不知道」。
+                var repaintOffContent = !ownTemplate && !st.UnknownBeyondLayers
+                                        && st.LayerTouched.Count > 0 && chain.TemplateLayers.Count > 0
+                                        && !st.LayerTouched.Overlaps(chain.ContentChainNames);
+                if (st.UnknownLayer && !st.Set.ContainsKey("Background") && tmplLayers is null && !repaintOffContent)
                 { Unres(UnresolvedReason.TemplatePainted, file, LineOf(el), fgV); continue; }
 
                 var fgAll = ResolveColour(fgV, pal);

@@ -123,7 +123,7 @@ public static partial class ColorResolver
 
     /// <summary>資源引用。ThemeResource 是 WinUI／UWP 的寫法（1.4）：跟 DynamicResource 一樣依目前主題查資源 ——
     /// 之前落到「Binding／漸層」的 unresolved，WinUI 專案幾乎每個顏色都是這樣寫（GitHub 上約 134,000 個 XAML 檔）。</summary>
-    [GeneratedRegex(@"^\{(Dynamic|Static|Theme)Resource\s+(?<k>[\w\.]+)\}$")]
+    [GeneratedRegex(@"^\{(?:\w+:)?(Dynamic|Static|Theme)Resource\s+(?<k>[\w\.]+)\}$")] // 前綴：wpfui 的 {ui:ThemeResource K}（1.7）
     private static partial Regex ResourceRef();
 
     /// <summary>
@@ -145,12 +145,24 @@ public static partial class ColorResolver
     [GeneratedRegex(@"^\{x:Static\s+(?:Member\s*=\s*)?(?:[A-Za-z_]\w*:)?(?:Colors|Brushes)\.(?<n>[A-Za-z]+)\s*\}$")]
     private static partial Regex StaticNamed();
 
+    /// <summary>「這一層底下墊的是內容元素（Image 等）」的內部記號，後面接元素名。
+    /// 控制字元開頭，所以不可能跟任何 XAML 寫法相撞（見 <see cref="Resolve"/> 裡那一段）。</summary>
+    internal const string SiblingContentMark = "content:";
+
     public static Resolved? Resolve(string? value, Palette palette)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
         var v = value.Trim();
 
         if (IsTransparent(v)) return new Resolved(ColorKind.Transparent);
+        // 工具自己放的記號：底下墊的是內容元素（Image 等）。標記樹是直接造 Resolved（Auditor.SiblingBackdrop），
+        // 模板裡那條路（StyleIndex.BackdropChain）只傳得了字串，所以在這裡轉回同一種 Kind ——
+        // ⚠ 兩條路要給同一個答案，不然同一段 XAML 寫在畫面裡與寫在模板裡會分類不同。
+        // ⚠ 記號刻意用控制字元開頭：第一版寫成 `<Image>`，而 `<Tag>` 早就是 XamlBrush 給「元素寫法、
+        //   讀不懂的 brush」的寫法（<LinearGradientBrush>、<VisualBrush>），於是那些**字色**整批被
+        //   分類成「底是一張圖」，合成時拿到 null 直接崩潰（GeekDesk 的 PixelColorPickerWindow 實測）。
+        if (v.StartsWith(SiblingContentMark, StringComparison.Ordinal))
+            return new Resolved(ColorKind.SiblingContent, Raw: "<" + v[SiblingContentMark.Length..] + ">");
         if (v.StartsWith('#') && NormalizeHex(v) is { } n)
         {
             if (n.Length == 7) return new Resolved(ColorKind.Hard, n, n);

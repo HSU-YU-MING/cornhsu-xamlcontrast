@@ -3,7 +3,7 @@
 project: mahapps
 repo: https://github.com/MahApps/MahApps.Metro
 commit: 9466e8acd96591e1f552841bc5357f376552bb57
-tool-commit: 4a1e23d+dirty
+tool-commit: a74bb86+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: single
@@ -29,9 +29,9 @@ decorative: 2
 unresolved-by.bound-or-gradient: 203
 unresolved-by.in-style-template: 27
 unresolved-by.no-ancestor-background: 192
-unresolved-by.template-painted: 267
+unresolved-by.template-painted: 257
 unresolved-by.translucent-uncomposited: 11
-unresolved-by.unknown-palette-key: 585
+unresolved-by.unknown-palette-key: 595
 unknown-keys.MahApps.Brushes.Accent2: 2
 unknown-keys.MahApps.Brushes.Accent3: 2
 unknown-keys.MahApps.Brushes.Accent4: 2
@@ -75,7 +75,7 @@ unknown-keys.MahApps.Brushes.SystemControlHighlightBaseHigh: 4
 unknown-keys.MahApps.Brushes.SystemControlPageTextBaseHigh: 1
 unknown-keys.MahApps.Brushes.SystemControlPageTextBaseMedium: 50
 unknown-keys.MahApps.Brushes.SystemControlPageTextChromeBlackMediumLow: 1
-unknown-keys.MahApps.Brushes.SystemControlTransparent: 4
+unknown-keys.MahApps.Brushes.SystemControlTransparent: 6
 unknown-keys.MahApps.Brushes.TextControl.Foreground: 21
 unknown-keys.MahApps.Brushes.TextControl.ForegroundFocused: 1
 unknown-keys.MahApps.Brushes.TextControl.WinUI.ButtonForeground: 3
@@ -91,7 +91,7 @@ unknown-keys.MahApps.Brushes.Window.Background.Backdrop.Auto: 1
 unknown-keys.MahApps.Brushes.WinUI.AccentFillDefault: 9
 unknown-keys.MahApps.Brushes.WinUI.AccentTextFillSecondary: 1
 unknown-keys.MahApps.Brushes.WinUI.AccentTextFillTertiary: 1
-unknown-keys.MahApps.Brushes.WinUI.CardBackgroundFillSecondary: 16
+unknown-keys.MahApps.Brushes.WinUI.CardBackgroundFillSecondary: 24
 unknown-keys.MahApps.Brushes.WinUI.ControlStrongFillDefault: 9
 unknown-keys.MahApps.Brushes.WinUI.SolidBackgroundFillBase: 2
 unknown-keys.MahApps.Brushes.WinUI.SystemFillAttention: 1
@@ -726,17 +726,7 @@ U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/T
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:601  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:629  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/TextExamples.xaml:79  {DynamicResource MahApps.Brushes.ThemeForeground}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  {DynamicResource MahApps.Brushes.ThemeForeground}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  {DynamicResource MahApps.Brushes.ThemeForeground}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  {DynamicResource MahApps.Brushes.ThemeForeground}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  {DynamicResource MahApps.Brushes.ThemeForeground}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  {DynamicResource MahApps.Brushes.ThemeForeground}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  {DynamicResource MahApps.Brushes.ThemeForeground}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  {DynamicResource MahApps.Brushes.ThemeForeground}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RangeSliderPage.xaml:35  {DynamicResource MahApps.Brushes.Slider.WinUI.TickBarFill}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:83  {DynamicResource MahApps.Brushes.ThemeForeground}
-U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:83  {DynamicResource MahApps.Brushes.ThemeForeground}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SliderPage.xaml:31  {DynamicResource MahApps.Brushes.Slider.WinUI.TickBarFill}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SliderPage.xaml:43  {DynamicResource MahApps.Brushes.Gray1}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SliderPage.xaml:85  #FF66BB6A
@@ -1056,6 +1046,8 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWind
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/AnalogClockPage.xaml:39  MahApps.Brushes.Gray10
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/AutoSuggestBoxPage.xaml:33  MahApps.Brushes.TextControl.Foreground
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/AutoSuggestBoxPage.xaml:47  MahApps.Brushes.TextControl.WinUI.Foreground
@@ -1073,10 +1065,16 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/Ex
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
@@ -1115,6 +1113,8 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/Se
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:41  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:52  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:81  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:83  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:83  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:83  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:83  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:83  MahApps.Brushes.WinUI.CardBackgroundFillSecondary

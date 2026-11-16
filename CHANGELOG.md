@@ -3,6 +3,73 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 1.7.0 — 2026-11-16
+
+### Upgrading（unresolved 的原因會大批換位置；baseline 的鍵不動）
+
+- **In short:** three changes, all about *what a piece of text is actually sitting on*. A trigger that
+  repaints a layer **inside** a template no longer discards the whole state when that layer is provably not
+  under this text; namespace-prefixed resource extensions (`{ui:ThemeResource K}`) now resolve like the plain
+  ones; and text over a sibling `Image` **inside a template** is now `over-sibling-content`, the same answer
+  the markup tree has always given. **`Baseline.KeyVersion` stays 2 and `schemaVersion` stays 6** — no key
+  changes its spelling, so your `baseline.json` keeps working. Measured on the same seventeen public projects
+  and the maintainer's three apps: the three local apps and thirteen of the seventeen are identical, and
+  **no existing finding was lost or changed**. What moves: **181 unresolved sites change reason**, from
+  `template-painted` to whatever was really blocking them, and Bloxstrap goes from **0 graded pairs and
+  "nothing was audited"** to 18 pairs (2 fail, 6 warn, 10 ok).
+  *簡單說：三件事都在回答「這段文字到底疊在什麼上面」。觸發器重畫模板**內部**某一層時，如果那一層證明得出來
+  不在這段文字底下，就不再把整個狀態丟掉；帶命名空間前綴的資源引用（`{ui:ThemeResource K}`）跟不帶前綴的
+  一樣解析；模板裡字疊在兄弟 `Image` 上改記 `over-sibling-content`，跟標記樹本來就給的答案一致。
+  `Baseline.KeyVersion` 維持 2、`schemaVersion` 維持 6 —— 沒有任何鍵換寫法，舊的 `baseline.json` 照用。*
+
+- ⚠ **打開 `--fail-on-new-unresolved`／`failOnNewUnresolved` 的人要重跑 `--write-baseline`**：unresolved 的鍵是
+  `file|reason|value`，原因換了就等於一筆新增加一筆消失。fail／warn 的 baseline 不受影響。
+
+### Changed
+
+- **觸發器重畫模板內部那一層：重畫的目標不在這段文字底下時，不再丟掉整個狀態。**
+  1.6 的做法是「這個狀態重畫了看不到的那一層 → 整組不評」，因為拿被蓋掉的底評分就是編造。但那一刀切得太寬：
+  WPF-UI 的 CheckBox 在 `IsChecked` 時重畫的是 `ControlBorderIconPresenter` —— `BulletDecorator.Bullet`
+  裡那顆打勾的方塊，跟放文字的 `ContentPresenter` 是**不同的分支**。那次重畫完全不會動到文字的底，而整個
+  勾選態卻被丟掉。現在索引會記下「哪些具名元素在某個放內容的位置底下那一疊上」（`ContentChainNames`），
+  重畫的目標一個都不在上面時照舊評分。
+  ⚠ 只有**名字指得出來**的重畫能這樣放行：整個換掉 `Template`、視覺由另一份模板畫的那兩種沒有可查的目標，
+  一律維持不知道；元素自己換掉 `Template` 時 Style 那份模板的分層執行期不存在，也不能拿來比；模板裡一個
+  放內容的位置都找不到時更不能比。收的是**所有**內容位置的鏈，收多了只會讓更多狀態維持「不知道」。
+  ⚠ **同一格、但撐不滿那一格的兄弟（強調色條）照樣算在鏈上** —— `BackdropChain` 不把它當背板，但觸發器重畫它時
+  它在不在字底下靜態分不出來。這一條不是理論上的保守：少了它，MaterialDesign 有 402 筆會被放行，而那些重畫的
+  正是文字欄位底下那條有尺寸的底線。
+  **實測（17 個公開專案）**：181 筆 unresolved 從 `template-painted` 換成真正的阻塞原因 ——
+  WPF-UI 170 筆、MahApps 10 筆（卡在色盤裡沒有的 `MahApps.Brushes.*`）、MaterialDesign 1 筆。
+  原因終於指對地方：`template-painted` 使用者無能為力，「這個鍵你沒定義」則是修得動的。
+
+- **帶命名空間前綴的資源引用（`{ui:ThemeResource K}`）跟不帶前綴的一樣解析。**
+  WPF-UI 把 `ThemeResource` 宣告在自己的命名空間裡。元素寫法（`<ui:ThemeResource/>`）本來就認前綴，
+  markup extension 的那四個正則不認 —— 於是整個專案的底與字色全變成「執行期才知道」。
+  **實測**：Bloxstrap 從 **0 組配對、exit 3「什麼都沒稽核到」**變成 18 組配對、覆蓋率 14.4%，
+  浮出 6 筆 WinUI 三級文字色在淺色主題下的真 warn（3.31:1）。WPF-UI 的 `bound-or-gradient` 從 304 掉到 31，
+  其中 12 筆變成 `unknown-palette-key StripedBackgroundBrush` —— 一個誰都沒定義的鍵，本來藏在
+  「執行期才知道」後面。`{x:Static …}` 之類的其他 markup extension 不受影響（剝掉前綴後仍然對不上三個關鍵字）。
+
+- **模板裡字疊在兄弟 `Image` 上 → `over-sibling-content`。**
+  1.6 的做法是「看到內容元素就整層放棄、往外找」，等於拿圖後面那一層的顏色報一個比值，而字其實疊在圖上 ——
+  標記樹的規則 17(b) 早就不這樣做了。同一段 XAML 寫在畫面裡與寫在模板裡本來會得到不同的答案，現在一致。
+  排在圖後面、又畫了底的兄弟照舊蓋過那張圖（不是看到圖就放棄）。
+  **17 個公開專案與三個本機專案一個數字都沒變** —— 它關掉的是一條編造路徑，不是一批新數字。
+
+### Measured and deliberately not done
+
+- **帶 `Opacity` 的兄弟仍然不疊合。** 量過了：17 個公開專案裡只有 **2 處**（都在 MaterialDesign），
+  而且兩處現在**已經是誠實的** `no-ancestor-background`，不是編造。要把它算出來得在模板那條路上再寫一份
+  Opacity 疊合（標記樹那一份在 `Auditor.SiblingBackdrop`，拿不到色盤），為 2 處維護兩份會漂開的判定不划算。
+  留在盲區表。
+
+- **「重畫的目標不在這一疊上」只佔 1.5%。** 動工前先量了 2370 筆 `template-painted` 的子類：
+  84.8% 是「完全沒有模板分層可查」、13.4% 是定義處（`WalkStyles`）、**只有 36 筆（1.5%）**是原本以為的
+  「重畫在別的分支」。真正的大宗是前者，所以這一版做的是它，不是原先 ROADMAP 上寫的那條。
+  ⚠ 這段量測救了一次：第一版的判定因為漏抄一個欄位而從未生效，語料顯示「零變化」，差點被當成
+  「野外不存在這種形狀」而放棄。
+
 ## 1.6.0 — 2026-11-16
 
 ### Upgrading（這一版動到 baseline 的鍵，所有使用者都要重寫一次，而且覆蓋率會下降）

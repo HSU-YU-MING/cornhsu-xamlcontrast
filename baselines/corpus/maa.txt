@@ -3,7 +3,7 @@
 project: maa
 repo: https://github.com/MaaAssistantArknights/MaaAssistantArknights.git
 commit: b666b84a317c603c561401ab5e5c7b12203d8271
-tool-commit: 4a1e23d+dirty
+tool-commit: a74bb86+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair

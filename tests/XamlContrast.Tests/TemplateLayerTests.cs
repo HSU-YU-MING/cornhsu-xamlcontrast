@@ -613,9 +613,9 @@ public class TemplateLayerTests
         Assert.Equal("#444444", Assert.Single(fx.Run().Findings).Bg);
     }
 
-    [Fact] // 底是一張圖：模板裡還沒有 over-sibling-content 的計數器，收了會讓這些配對悄悄變成不可知 ——
-           // 維持 1.6 的答案（配祖先），留在盲區表
-    public void AnImageSiblingKeepsTheNineteenSixBehaviour()
+    [Fact] // 底是一張圖 → over-sibling-content（1.7）。往外找等於拿圖後面那一層的顏色報一個比值，
+           // 而字其實疊在圖上 —— 跟標記樹的規則 17(b) 同一個答案
+    public void AnImageSiblingIsOverSiblingContent()
     {
         using var fx = SiblingBackdrop("""
             <Grid>
@@ -623,7 +623,22 @@ public class TemplateLayerTests
               <ContentPresenter/>
             </Grid>
             """);
-        Assert.Equal("#FFFFFF", Assert.Single(fx.Run().Findings).Bg);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Equal("<Image>", Assert.Single(r.UnresolvedSites, u => u.Reason == UnresolvedReason.OverSiblingContent).Value);
+    }
+
+    [Fact] // 排在圖後面、又畫了底的兄弟蓋過那張圖 —— 不是「看到圖就整層放棄」
+    public void AnOpaqueSiblingAfterTheImageWinsAgain()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid>
+              <Image Source="bg.png"/>
+              <Border Background="#222222"/>
+              <ContentPresenter/>
+            </Grid>
+            """);
+        Assert.Equal("#222222", Assert.Single(fx.Run().Findings).Bg);
     }
 
     [Fact] // 半透明的兄弟要疊到它底下那一層才算得出來，而這一步回傳的是原始寫法 —— 猜一個不透明的值
@@ -776,4 +791,82 @@ public class TemplateLayerTests
         Assert.All(r.Findings, f => Assert.Equal("#000000", f.Bg));
     }
 
+    /// <summary>宿主自己有底、模板裡的重畫打在別的地方（1.7）：<c>Elsewhere</c> 在另一格、
+    /// 不在 ContentPresenter 底下那一疊上，所以那次重畫跟這段文字無關。</summary>
+    private static Fixture HostBgRepaint(string targetName) => new Fixture().File("Main.xaml", $$"""
+        <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+          <Grid.Resources>
+            <Style x:Key="Btn" TargetType="Button">
+              <Setter Property="Foreground" Value="#777777"/>
+              <Setter Property="Template">
+                <Setter.Value>
+                  <ControlTemplate TargetType="Button">
+                    <Grid>
+                      <Border x:Name="Under" Grid.Column="0" Background="{TemplateBinding Background}">
+                        <ContentPresenter/>
+                      </Border>
+                      <Border x:Name="Elsewhere" Grid.Column="1" Width="8" Background="#111111"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                      <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="{{targetName}}" Property="Background" Value="#222222"/>
+                      </Trigger>
+                    </ControlTemplate.Triggers>
+                  </ControlTemplate>
+                </Setter.Value>
+              </Setter>
+            </Style>
+          </Grid.Resources>
+          <Button Style="{StaticResource Btn}" Background="#FFFFFF" Content="hi"/>
+        </Grid>
+        """);
+
+    [Fact] // 重畫打在別的分支上 → 宿主自己的底照舊算得出來，不要連同整個狀態一起丟掉
+    public void ARepaintOffEveryContentPositionKeepsTheHostsOwnBackground()
+    {
+        using var fx = HostBgRepaint("Elsewhere");
+        var r = fx.Run();
+        Assert.DoesNotContain(r.UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+        Assert.Contains(r.Findings, f => f.Bg == "#FFFFFF" && f.Fg == "#777777");
+    }
+
+    [Fact] // 重畫打在內容底下那一層 → 宿主的底被蓋掉了，拿它評分就是編造
+    public void ARepaintUnderTheContentStillDiscardsTheState()
+    {
+        using var fx = HostBgRepaint("Under");
+        var r = fx.Run();
+        Assert.Contains(r.UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+    }
+
+    [Fact] // 同一格、但撐不滿那一格的兄弟（強調色條）：它在不在字底下靜態分不出來 ——
+           // 不能因為「它不是背板」就當成跟這段文字無關
+    public void ARepaintOfAPartialCellSiblingInTheSameCellStillDiscardsTheState()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Btn" TargetType="Button">
+                  <Setter Property="Foreground" Value="#777777"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Grid>
+                          <Border x:Name="Bar" Width="4" HorizontalAlignment="Left" Background="#111111"/>
+                          <ContentPresenter/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bar" Property="Background" Value="#222222"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Btn}" Background="#FFFFFF" Content="hi"/>
+            </Grid>
+            """);
+        Assert.Contains(fx.Run().UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+    }
 }

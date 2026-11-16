@@ -497,6 +497,29 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - ⚠ **重畫那一層的 `Src` 要留 `"tmpl"`**，不能用那個 Setter 的 Style Id：定義處（`WalkStyles`）看不到模板
   內部那一層，掛上 Style Id 會讓同源判定把整組讓給定義處，而定義處也不評 —— 那一組在哪裡都消失
   （本機測試抓到）。規則 13 的「TargetName=模板根」不一樣，它等同設在宿主上，定義處真的評得到。
+- **重畫的目標一個內容位置都沾不到 → 不要丟掉整組**（1.7，`StyleIndex.ContentChainNames`／`State.LayerTouched`／
+  `State.UnknownBeyondLayers` + `Auditor` 的 `repaintOffContent`）：1.6 的「這個狀態重畫了看不到的那一層 → 整組不評」
+  切得太寬。wpfui 的 CheckBox 勾選態重畫 `ControlBorderIconPresenter`（`BulletDecorator.Bullet` 裡那顆方塊），
+  跟放文字的 `ContentPresenter` 是不同分支，整個勾選態卻被丟掉。現在索引記下「哪些具名元素在某個內容位置底下
+  那一疊上」，重畫的目標一個都不在上面時照舊評分。
+  - ⚠ **只有名字指得出來的重畫能放行**：`UnknownBeyondLayers`（整個換掉 Template、視覺由另一份模板畫）沒有可查的
+    目標；`ownTemplate`（元素自己帶模板）時 Style 那份模板的分層執行期不存在；`TemplateLayers` 是空的時候根本
+    沒有鏈可以比。三種都維持不知道。
+  - ⚠ **`LayerTouched` 要收 `PaintsLayer` 的全部（含 OpacityMask），不是只收 `IsBackdropProp`**：問的是
+    「它在不在字底下」，不是「它畫成什麼顏色」。
+  - ⚠ **撐不滿那一格的同格子兄弟（強調色條）也要記進 `ContentChainNames`**：`BackdropChain` 不把它當背板，
+    但觸發器重畫它時它在不在字底下靜態分不出來 —— 不記就會被判成無關而放行，那就是編造。
+    `ContentChainNames` 收多了只會讓更多狀態維持「不知道」，收少了才會編造。
+  - ⚠ **`State` 有三個複製點**（`CreateRecord`、`merged.States.Add`、`byCond`），新欄位三個都要抄。
+    第一版漏了中間那個，`LayerTouched` 永遠是空的 → 整條路是死碼，而語料顯示「零變化」，看起來像
+    「野外不存在這種形狀」。**語料說沒變化時，先寫一個針對性測試確認那條路跑得到。**
+- **模板裡的 Image 兄弟 → `over-sibling-content`**（1.7）：跟標記樹的規則 17(b) 同一個答案。
+  ⚠ 記號是 `ColorResolver.SiblingContentMark`（控制字元開頭）**不是 `<Image>`**：`<Tag>` 早就是 `XamlBrush`
+  給「元素寫法、讀不懂的 brush」的寫法（`<LinearGradientBrush>`、`<VisualBrush>`），第一版用它當記號，
+  那些**字色**整批被分類成「底是一張圖」，合成時拿到 null 直接崩潰（GeekDesk 實測）。
+- **帶命名空間前綴的資源引用**（1.7）：`{ui:ThemeResource K}`（WPF-UI）。元素寫法的正則本來就有 `(?:\w+:)?`，
+  markup extension 的四個沒有 —— 不認的話整個專案的底與字色全變成「執行期才知道」（Bloxstrap 0 組配對、
+  exit 3）。四個正則（Auditor／ColorResolver／StyleIndex／PaletteDetector）＋ `IconFonts` 的字串比對要一起改。
 - ⚠ **`offChain` 的 `Raw` 留 null，讓它點名字色**（1.6 狀態層守門的寫法）。改成點名那一層的原始寫法
   （多半是 `{TemplateBinding Background}`）看起來精確，其實沒資訊，而且 unresolved 的鍵是
   `file|reason|value` —— 換個寫法就得再遞增 `Baseline.KeyVersion`，叫使用者重寫兩次 baseline。

@@ -56,6 +56,13 @@ internal sealed partial class StyleIndex
         ///   對不上的一律記 unresolved（template-painted），不評。
         /// </summary>
         public bool UnknownLayer;
+        /// <summary>這個狀態重畫的模板內部元素的名字（1.7）：<see cref="LayerPaints"/> 的鍵再加上
+        /// <c>OpacityMask</c> 那種「畫得出來但讀不懂」的目標 —— 問的是「它在不在字底下那一疊上」，
+        /// 不是「它畫成什麼顏色」，所以讀不懂的也要收。</summary>
+        public HashSet<string> LayerTouched = new(StringComparer.Ordinal);
+        /// <summary>這個狀態的不可知**不是**來自某個指得出來的 TargetName（1.7）：整個換掉 <c>Template</c>、
+        /// 或視覺是另一份模板畫的。這兩種沒有可查的目標，所以永遠不能用「重畫的不在這一疊上」放行。</summary>
+        public bool UnknownBeyondLayers;
         public string? Cond;
     }
 
@@ -116,6 +123,12 @@ internal sealed partial class StyleIndex
         /// 巢狀模板裡的位置不收 —— 那是別的控制項的內容。
         /// </summary>
         public List<TemplateLayer> TemplateLayers = new();
+        /// <summary>模板裡「在某個放內容的位置底下那一疊上」的每個具名元素（1.7）。
+        /// 觸發器重畫了模板內部某一層時，拿這一份問「它在不在字底下」—— 不在的話那次重畫跟這段文字無關，
+        /// 底照舊算得出來。⚠ 收的是**所有**內容位置的鏈，含沒進 <see cref="TemplateLayers"/> 的那些
+        /// （那些位置的鏈上沒有畫底的祖先、也沒有被重畫的名字，但它底下仍然是內容的位置）——
+        /// 收多了只會讓更多狀態維持「不知道」，收少了才會編造。</summary>
+        public HashSet<string> ContentChainNames = new(StringComparer.Ordinal);
         /// <summary>這個 Style 當成 FocusVisualStyle 時畫的焦點框（1.4）：模板裡第一個帶 Stroke（Rectangle 之類）或 BorderBrush 的元素。</summary>
         public string? FocusStroke;
         /// <summary>那個焦點框的 Margin 有負值：畫在控制項外面（旁邊是周圍的底），不是疊在控制項的底上。</summary>
@@ -162,6 +175,8 @@ internal sealed partial class StyleIndex
         public bool HasTemplate;
         /// <summary>生效模板裡放內容的那幾層（1.6，同 <see cref="TemplateRootBg"/>：衍生自帶模板時整個換掉）。</summary>
         public List<TemplateLayer> TemplateLayers = new();
+        /// <summary>生效模板裡「在內容底下那一疊上」的具名元素（1.7）—— 見 <see cref="Record.ContentChainNames"/>。</summary>
+        public HashSet<string> ContentChainNames = new(StringComparer.Ordinal);
         public string? TemplateRootBorderThickness;
         public required string Label;
         /// <summary>鏈上有任何一層定義在只屬於一個主題的字典檔裡 —— 另一個主題下解析到的是別的 Style（或沒有）</summary>
@@ -172,7 +187,7 @@ internal sealed partial class StyleIndex
         public string? MissingBase;
     }
 
-    [GeneratedRegex(@"^\{(Dynamic|Static|Theme)Resource\s+(?<k>[\w\.]+)\}$")] // ThemeResource：WinUI／UWP（1.4）
+    [GeneratedRegex(@"^\{(?:\w+:)?(Dynamic|Static|Theme)Resource\s+(?<k>[\w\.]+)\}$")] // ThemeResource：WinUI／UWP（1.4）；前綴：wpfui 的 {ui:ThemeResource K}（1.7）
     private static partial Regex ResourceRef();
 
     [GeneratedRegex(@"(^|\.)IsEnabled$")]
@@ -430,7 +445,7 @@ internal sealed partial class StyleIndex
     ///   （工具列字 1.55、扁平鈕 2.63）連同另外 41 筆一起消失。模板裡的兄弟背板是另一塊盲區
     ///   （樹走訪的規則 17 只管標記裡的兄弟），不在這一版的範圍。
     /// </summary>
-    private List<TemplateLayer> ContentLayers(XElement tmpl, IReadOnlySet<string> repainted)
+    private List<TemplateLayer> ContentLayers(XElement tmpl, IReadOnlySet<string> repainted, HashSet<string> chainNames)
     {
         var layers = new List<TemplateLayer>();
         var byBg = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -445,7 +460,8 @@ internal sealed partial class StyleIndex
                 continue;
             var primary = ln is "ContentPresenter" or "ContentControl" || IsHostContentHolder(host);
             if (!primary && !IsHostTextHolder(host, ln) && !IsHostForegroundShape(host)) continue;
-            var chain = BackdropChain(tmpl, host);
+            // chainNames：這個位置底下那一疊上的每個具名元素（1.7）—— 連「這一格之後被跳過」的位置也要收
+            var chain = BackdropChain(tmpl, host, chainNames);
             var painter = chain.Count > 0 && chain[^1].Bg is not null ? chain[^1] : default;
             var bg = painter.El is null ? null : painter.Bg;
             var root = painter.El?.Parent is { } pp && ReferenceEquals(pp, tmpl);
@@ -491,7 +507,7 @@ internal sealed partial class StyleIndex
     /// 疊合在 Auditor 那邊做。猜一個不透明的值會往寬鬆那邊錯</item>
     /// </list>
     /// </summary>
-    private List<(XElement El, string? Bg)> BackdropChain(XElement tmpl, XElement host)
+    private List<(XElement El, string? Bg)> BackdropChain(XElement tmpl, XElement host, HashSet<string>? names = null)
     {
         var chain = new List<(XElement El, string? Bg)>();
         for (var node = host; node.Parent is not null && !ReferenceEquals(node, tmpl); node = node.Parent)
@@ -510,14 +526,22 @@ internal sealed partial class StyleIndex
                     var ln = sib.Name.LocalName;
                     if (ln.Contains('.') || Panels.Styleish.Contains(ln)) continue;
                     if (Panels.CellOf(sib, isGrid) != cell) continue; // 不同格子不相疊
-                    // 這一層整個放棄，往外找（見方法註解）
-                    if (Panels.IsContentElement(ln)) { level.Clear(); painted = -1; break; }
-                    if (!Panels.FillsCell(sib, stretches)) continue;
+                    // 內容元素（Image 等）：底是一張圖、靜態不可知 —— 跟標記樹的規則 17(b) 同一個答案
+                    // （ColorResolver 會把這個記號轉回 ColorKind.SiblingContent）。
+                    // ⚠ 不是「放棄這一層往外找」：往外找等於拿圖後面那一層的顏色報一個比值，而字其實疊在圖上
+                    //   （HandyControl 的 Carousel 在標記樹那邊就是這個形狀）。排在它後面又畫了底的兄弟會蓋過
+                    //   它，所以照舊往後掃、讓 painted 自己往後移。
+                    if (Panels.IsContentElement(ln)) { painted = level.Count; level.Add((sib, ColorResolver.SiblingContentMark + ln)); continue; }
+                    // ⚠ 撐不滿那一格的兄弟不算背板（強調色條之類），但它的名字照樣要記進 names（1.7）：
+                    //   觸發器重畫它時，它在不在字底下靜態分不出來 —— 不記的話會被判成「跟這段文字無關」而放行，
+                    //   那就是編造。記了只是讓那個狀態維持「不知道」。
+                    if (!Panels.FillsCell(sib, stretches)) { AddName(names, sib); continue; }
                     var sraw = Panels.BackdropBrush(sib);
                     if (sraw is not null && sib.Attribute("Opacity") is not null) { level.Clear(); painted = -1; break; }
                     if (sraw is not null) painted = level.Count;
                     level.Add((sib, sraw));
                 }
+                foreach (var (el, _) in level) AddName(names, el);
                 if (painted >= 0)
                 {
                     // 畫了底的那一個以下看不到；它以上（文件順序在它後面）的候選由上而下排
@@ -531,10 +555,16 @@ internal sealed partial class StyleIndex
             }
             if (ReferenceEquals(box, tmpl)) return chain; // 模板外的事由呼叫端（祖先的底）決定
             var v = XamlBrush.Read(box, "Background") ?? XamlBrush.Read(box, "Fill");
+            AddName(names, box);
             chain.Add((box, v));
             if (v is not null) return chain;
         }
         return chain;
+    }
+
+    private static void AddName(HashSet<string>? names, XElement el)
+    {
+        if (names is not null && NameOf(el) is { } n) names.Add(n);
     }
 
     /// <summary><c>x:Name</c> 或 <c>Name</c> —— 觸發 Setter 的 TargetName 指的就是這個。</summary>
@@ -599,7 +629,7 @@ internal sealed partial class StyleIndex
                 if (st.Attribute("TargetName")?.Value is { } tname && st.Attribute("Property")?.Value is { } tp
                     && IsBackdropProp(tp) && XamlBrush.SetterValue(st) is not null)
                     repainted.Add(tname);
-        if (ownTmpl is not null) rec.TemplateLayers = ContentLayers(ownTmpl, repainted);
+        if (ownTmpl is not null) rec.TemplateLayers = ContentLayers(ownTmpl, repainted, rec.ContentChainNames);
         var focusEl = ownTmpl?.Descendants()
             .FirstOrDefault(e => NotTemplateBound(XamlBrush.Read(e, "Stroke") ?? XamlBrush.Read(e, "BorderBrush")) is not null);
         if (focusEl is not null)
@@ -617,7 +647,9 @@ internal sealed partial class StyleIndex
             var set = new Dictionary<string, string>();
             var rootTargeted = new HashSet<string>();
             var layerPaints = new Dictionary<string, string>();
+            var layerTouched = new HashSet<string>(StringComparer.Ordinal);
             var unknownLayer = false;
+            var beyondLayers = false;
             foreach (var s in t.Elements().Where(e => e.Name.LocalName == "Setter"))
             {
                 var p = s.Attribute("Property")?.Value;
@@ -631,12 +663,13 @@ internal sealed partial class StyleIndex
                 else if (PaintsLayer(p))
                 {
                     unknownLayer = true;
+                    layerTouched.Add(tn);
                     if (IsBackdropProp(p)) layerPaints[tn] = v;
                 }
             }
             if (set.Count == 0 && !unknownLayer) continue;
             // 整個換掉模板：這個狀態的視覺是另一份模板畫的（ScreenToGif 的 ExtendedMenuItem Role 觸發器）
-            if (set.ContainsKey("Template") || set.ContainsKey("Control.Template")) unknownLayer = true;
+            if (set.ContainsKey("Template") || set.ContainsKey("Control.Template")) unknownLayer = beyondLayers = true;
             var inTmpl = false;
             var otherStyle = false;
             var otherTemplate = false;
@@ -657,7 +690,7 @@ internal sealed partial class StyleIndex
             //   - 被觸發器換掉的另一份模板裡的（Role 觸發器那種）：宿主真的會進那個狀態，但視覺是另一份模板畫的
             //     → 記 unresolved（同 UnknownLayer）。
             if (otherStyle) continue;
-            if (otherTemplate) unknownLayer = true;
+            if (otherTemplate) unknownLayer = beyondLayers = true;
             var nested = otherTemplate;
             // 條件簽名：同條件的狀態之後要跨節點合併
             var cond = CondSignature(t);
@@ -671,6 +704,8 @@ internal sealed partial class StyleIndex
                 LayerPaints = layerPaints,
                 LayerPaintSrc = layerPaints.Keys.ToDictionary(k => k, _ => rec.Id),
                 UnknownLayer = unknownLayer,
+                LayerTouched = layerTouched,
+                UnknownBeyondLayers = beyondLayers,
                 Cond = cond,
             });
         }
@@ -842,6 +877,7 @@ internal sealed partial class StyleIndex
                 merged.TemplateRootBorder = m.TemplateRootBorder;
                 merged.TemplateRootBorderThickness = m.TemplateRootBorderThickness;
                 merged.TemplateLayers = m.TemplateLayers;
+                merged.ContentChainNames = m.ContentChainNames;
                 merged.HasTemplate = merged.HasTemplate || m.HasTemplate;
                 foreach (var (k, v) in m.ScopedImplicit) merged.ScopedImplicit[k] = v; // 基底的先進，下面讓衍生蓋掉
             }
@@ -862,6 +898,8 @@ internal sealed partial class StyleIndex
                 LayerPaints = new Dictionary<string, string>(s.LayerPaints),
                 LayerPaintSrc = new Dictionary<string, int>(s.LayerPaintSrc),
                 UnknownLayer = s.UnknownLayer,
+                LayerTouched = new HashSet<string>(s.LayerTouched, StringComparer.Ordinal),
+                UnknownBeyondLayers = s.UnknownBeyondLayers,
                 Cond = s.Cond,
             });
         }
@@ -874,7 +912,7 @@ internal sealed partial class StyleIndex
         }
         // 模板分層與「有沒有人畫宿主的字」只跟**自己的**模板有關（1.6）：rec.HasTemplate 連巢狀 Style
         // 的模板也算，拿它當條件會把基底模板的分層清掉
-        if (rec.OwnTemplate) merged.TemplateLayers = rec.TemplateLayers;
+        if (rec.OwnTemplate) { merged.TemplateLayers = rec.TemplateLayers; merged.ContentChainNames = rec.ContentChainNames; }
         return merged;
     }
 
@@ -901,6 +939,8 @@ internal sealed partial class StyleIndex
                     LayerPaints = new Dictionary<string, string>(s.LayerPaints),
                     LayerPaintSrc = new Dictionary<string, int>(s.LayerPaintSrc),
                     UnknownLayer = s.UnknownLayer,
+                    LayerTouched = new HashSet<string>(s.LayerTouched, StringComparer.Ordinal),
+                    UnknownBeyondLayers = s.UnknownBeyondLayers,
                     Cond = s.Cond,
                 };
                 order.Add(c);
@@ -928,6 +968,8 @@ internal sealed partial class StyleIndex
             foreach (var (k, v) in s.LayerPaints) { t.LayerPaints[k] = v; t.LayerPaintSrc[k] = s.LayerPaintSrc[k]; }
             t.Disabled = t.Disabled || s.Disabled;
             t.UnknownLayer = t.UnknownLayer || s.UnknownLayer; // 同條件的狀態有一邊重畫了看不到的那層 → 整個不評
+            t.LayerTouched.UnionWith(s.LayerTouched);
+            t.UnknownBeyondLayers = t.UnknownBeyondLayers || s.UnknownBeyondLayers;
             t.Nested = t.Nested && s.Nested; // 有一半是自己的狀態就算自己的
         }
         return order.Select(c => byCond[c]).ToList();

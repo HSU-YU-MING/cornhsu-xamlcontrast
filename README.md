@@ -194,7 +194,10 @@ tried in this order, and the one that ran is always named on the first line of t
    **WinUI / UWP:** a dictionary's `<ResourceDictionary.ThemeDictionaries>` is split by `x:Key` —
    `Dark` (or `Default` when there is no `Dark`) is the dark theme, `Light` (or `Default`) the light one,
    `HighContrast…` is not graded (it is the user's system colours); the rest of the file is shared by both
-   themes as before. `{ThemeResource Key}` is read like `{DynamicResource Key}`. In a project that uses
+   themes as before. `{ThemeResource Key}` is read like `{DynamicResource Key}`, and since 1.7 so is a
+   namespace-prefixed one (`{ui:ThemeResource Key}` — WPF-UI declares the extension in its own namespace;
+   without this, every background and foreground in such a project was "only knowable at runtime", and
+   Bloxstrap audited 0 pairs). In a project that uses
    `{ThemeResource`, **WinUI's own Fluent theme resources** (`TextFillColorPrimaryBrush`,
    `SolidBackgroundFillColorBaseBrush`, the older `SystemControl…` brushes — 557 brushes in all) are filled in with the
    framework's default dark and light values wherever the project doesn't define the key itself; the project's own
@@ -521,10 +524,10 @@ doesn't tell you whether anything can be done about it:
 | `unknown-palette-key` | the resource key isn't in the detected palette — a typo, or palette detection missed a file |
 | `translucent-uncomposited` | a transparent or translucent background with nothing underneath to composite against — a translucent `Background` with no background above it, a style's own `Background="Transparent"` at its definition when no use site grades it (a named style no element references with `Style=`, or an implicit style for a type the project has no element of; both implicit and referenced styles are graded where they are used instead), or an `Opacity`-faded layer over nothing. `rootBackground` (below) fixes the first kind |
 | `same-brush-pair` | a style sets `Foreground` and `Background` to the *same* brush — the Material template-opacity idiom (the template paints the background at 10–12% opacity as a tint); literally 1:1, not at runtime, and the opacity animation is invisible statically |
-| `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio |
+| `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio. Since 1.7 this also covers an `Image` sibling **inside a control template**, which used to fall through to whatever the picture covers |
 | `in-style-template` | a text element with its own `Foreground` inside a style's `Template` setter (`<Setter Property="Template"><Setter.Value><ControlTemplate>`) — not graded yet (see Known limitations), counted so the gap shows in coverage |
 | `unknown-style-key` | the palette comes from separate dark and light dictionaries, and the element's style — `Style="{StaticResource K}"`, or a `BasedOn` in its chain — is defined in only one of them, so how the element looks in the other theme is unknown; the value is the style key. Before 1.2 this was counted as `unknown-palette-key` (and a `BasedOn` like this was graded against the background behind the element instead) |
-| `template-painted` | the text sits on a layer **inside** the control's template whose colour isn't knowable statically: it comes from a host property nobody set (a library control's default, which lives in C#), that layer's own background is a binding or gradient, or a trigger repainted it and that layer can't be placed (the `TargetName` names an element that isn't on the chain beneath the text, the repainted value is a gradient or a binding, or the trigger swaps the whole `Template`). The ancestor's colour is **not** a fallback here — the template painted over it. New in 1.6; before that these were graded against a background the repaint covers. A repaint of an element that *is* on the chain beneath the text is resolved and does not land here |
+| `template-painted` | the text sits on a layer **inside** the control's template whose colour isn't knowable statically: it comes from a host property nobody set (a library control's default, which lives in C#), that layer's own background is a binding or gradient, or a trigger repainted it and that layer can't be placed (the trigger swaps the whole `Template`, the visual comes from another template, the element carries its own `Template`, the template offers no content position to compare against, or the repainted value is a gradient or a binding). The ancestor's colour is **not** a fallback here — the template painted over it. New in 1.6; before that these were graded against a background the repaint covers. A repaint of an element that *is* on the chain beneath the text is resolved and does not land here, and since 1.7 so is a repaint that touches **no** content position's chain at all — it isn't under this text, so the backdrop stands |
 
 `summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
 (default 50%) exits 3**, because a pass over a fraction of the project is not a pass — the same
@@ -790,12 +793,20 @@ Honest list — full blind-spot table with per-case evidence in the
   opaque repaint is the backdrop, a translucent one is composited over the layer it covers (ScreenToGif's
   selected tab paints `#90FFFFFF` over the panel's level-3 brush, where 1.5 graded it against the colour the
   repaint covers and reported 1.46:1).
+  A repaint that lands on **no** content position's chain at all is not under this text, so the state keeps
+  the backdrop it already had (1.7) — wpfui's `CheckBox` repaints the bullet square, a different branch from
+  the label, and 1.6 discarded every checked state because of it. A same-cell sibling that doesn't fill its
+  cell (an accent bar) still counts as on-chain: whether it sits under the text is exactly what cannot be
+  known statically.
   What is still out of reach, all honestly `template-painted` rather than matched against something the
-  template covered: a repaint whose `TargetName` is **not** on that chain (it may be in another branch, or on
-  a part that doesn't fill its cell — statically indistinguishable), a repaint whose value is a gradient or a
-  binding, a translucent repaint over a layer that is itself unreadable, an `Image` or an `Opacity`-carrying
-  sibling inside a template (both keep 1.6's answer instead), and a sibling painted **after** the content,
-  which covers the text rather than backing it
+  template covered: a repaint the tool cannot place at all (the state swaps the whole `Template`, the visual
+  comes from another template, the element carries its own `Template`, or the template has no content position
+  to compare against), a repaint whose value is a gradient or a binding, a translucent repaint over a layer
+  that is itself unreadable, an `Opacity`-carrying sibling inside a template (measured: two sites in seventeen
+  public projects, both already honest, so compositing it would mean a second copy of the markup tree's
+  opacity rule for no gain), and a sibling painted **after** the content, which covers the text rather than
+  backing it. Text over a sibling `Image` inside a template is `over-sibling-content` (1.7), the same answer
+  the markup tree gives
 - `VisualStateManager` state colours — state storyboards (`ColorAnimation`, brush key frames) and
   WinUI's `<VisualState.Setters>` — are **counted and listed, not graded**: `summary.stateColors` and
   `stateColorSites` in `report.json` name every site, and the console, Markdown and HTML reports say how

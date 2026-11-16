@@ -3,7 +3,7 @@
 project: materialdesign
 repo: https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit
 commit: 087728011a8d71926ccf86cb28dc99439e9b1c3f
-tool-commit: 4a1e23d+dirty
+tool-commit: a74bb86+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair
@@ -26,11 +26,11 @@ fail: 117
 warn: 42
 ok: 218
 decorative: 8
-unresolved-by.bound-or-gradient: 2508
+unresolved-by.bound-or-gradient: 2509
 unresolved-by.in-style-template: 27
 unresolved-by.no-ancestor-background: 312
 unresolved-by.same-brush-pair: 7
-unresolved-by.template-painted: 870
+unresolved-by.template-painted: 869
 unresolved-by.translucent-uncomposited: 95
 unresolved-by.unknown-palette-key: 54
 unknown-keys.MahApps.Brushes.Text: 46
@@ -2801,6 +2801,7 @@ U  bound-or-gradient  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.Co
 U  bound-or-gradient  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.ComboBox.xaml:205  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.ComboBox.xaml:312  {TemplateBinding Foreground}
 U  bound-or-gradient  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.ComboBox.xaml:312  {TemplateBinding Foreground}
+U  bound-or-gradient  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.ComboBox.xaml:312  {TemplateBinding Foreground}
 U  bound-or-gradient  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.ComboBox.xaml:475  {TemplateBinding Foreground}
 U  bound-or-gradient  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.ComboBox.xaml:888  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.ComboBox.xaml:888  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
@@ -4105,7 +4106,6 @@ U  template-painted  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.Che
 U  template-painted  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.CheckBox.xaml:66  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.CheckBox.xaml:66  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.ComboBox.xaml:205  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
-U  template-painted  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.ComboBox.xaml:312  {TemplateBinding Foreground}
 U  template-painted  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.DataGrid.ComboBox.xaml:195  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.DataGrid.ComboBox.xaml:321  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MaterialDesignThemes.Wpf/Themes/MaterialDesignTheme.DataGrid.ComboBox.xaml:380  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}

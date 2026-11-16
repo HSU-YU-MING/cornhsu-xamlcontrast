@@ -134,7 +134,7 @@ public static partial class PaletteDetector
 
     /// <summary>色票值引用另一個 Color 資源。⚠ 舊版只認 StaticResource ——
     /// HandyControl 全用 DynamicResource 跨檔引用，色盤偵測因此完全失敗。</summary>
-    [GeneratedRegex("""^\{(?:Static|Dynamic|Theme)Resource\s+(?<c>[\w.]+)\}$""")] // ThemeResource：WinUI／UWP（1.4）
+    [GeneratedRegex("""^\{(?:\w+:)?(?:Static|Dynamic|Theme)Resource\s+(?<c>[\w.]+)\}$""")] // ThemeResource：WinUI／UWP（1.4）；前綴：wpfui 的 {ui:ThemeResource K}（1.7）
     private static partial Regex ResourceRefValue();
 
     /// <summary>C# 真相源：("Key", "#深色", "#淺色") 三元組。
