@@ -189,6 +189,9 @@ internal sealed partial class StyleIndex
         [ThemeSide.Light] = new(StringComparer.Ordinal),
     };
     private Func<string, ThemeSide?>? _sideOf;
+    /// <summary>模板裡的兄弟背板要跟標記樹的規則 17 同一套疊層判定（<see cref="Panels"/>），
+    /// 包含 config 宣告的自訂容器版面 —— 同一段 XAML 寫在畫面裡與寫在模板裡不該得到不同的答案。</summary>
+    private ToolConfig _cfg = new();
     private int _seq;
 
     /// <summary>有沒有「只屬於一個主題」的字典檔（色盤來自分開的深／淺 XAML 字典時才有）。</summary>
@@ -404,7 +407,7 @@ internal sealed partial class StyleIndex
     ///   （工具列字 1.55、扁平鈕 2.63）連同另外 41 筆一起消失。模板裡的兄弟背板是另一塊盲區
     ///   （樹走訪的規則 17 只管標記裡的兄弟），不在這一版的範圍。
     /// </summary>
-    private static List<TemplateLayer> ContentLayers(XElement tmpl)
+    private List<TemplateLayer> ContentLayers(XElement tmpl)
     {
         var layers = new List<TemplateLayer>();
         var byBg = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -421,12 +424,18 @@ internal sealed partial class StyleIndex
             if (!primary && !IsHostTextHolder(host, ln) && !IsHostForegroundShape(host)) continue;
             string? bg = null;
             var root = false;
-            for (var a = host.Parent; a is not null && !ReferenceEquals(a, tmpl); a = a.Parent)
+            // 由內而外找「畫在這個位置底下的那一層」。每一層的順序照 WPF 的繪製順序：
+            // 先同一格裡文件順序在它前面的兄弟（愈後面的愈上層），再才是容器自己的底。
+            // ⚠ 兄弟要排在容器的底之前：容器的 Background 畫在它所有子元素的下面。
+            for (var node = host; node.Parent is not null && !ReferenceEquals(node, tmpl); node = node.Parent)
             {
-                var v = XamlBrush.Read(a, "Background") ?? XamlBrush.Read(a, "Fill");
+                var box = node.Parent;
+                if (SiblingBackdropIn(box, node) is { } sib) { bg = sib; break; }
+                if (ReferenceEquals(box, tmpl)) break; // 模板外的事由呼叫端（祖先的底）決定
+                var v = XamlBrush.Read(box, "Background") ?? XamlBrush.Read(box, "Fill");
                 if (v is null) continue;
                 bg = v;
-                root = a.Parent is not null && ReferenceEquals(a.Parent, tmpl);
+                root = box.Parent is not null && ReferenceEquals(box.Parent, tmpl);
                 break;
             }
             if (bg is null) continue; // 模板裡沒有一層畫底 —— 照舊走 1.5 的優先序（見方法註解）
@@ -439,6 +448,47 @@ internal sealed partial class StyleIndex
             layers.Add(new TemplateLayer(bg, primary, root));
         }
         return layers;
+    }
+
+    /// <summary>
+    /// <paramref name="box"/> 裡，排在 <paramref name="node"/> 前面而且會成為它的背板的那個兄弟（1.7）。
+    /// 回傳的是最靠上的那一個（文件順序最後的）—— 底下還有別的背板也看不到了。
+    ///
+    /// 這是規則 17 的 (a) 半搬進模板裡，判定全部走 <see cref="Panels"/>，跟標記樹同一套。
+    /// ⚠ 這一格是語料逼出來的：MaterialDesign 的按鈕模板把底畫在
+    /// <c>&lt;Border Background="{TemplateBinding Background}"/&gt;</c>，而它是內容（<c>wpf:Ripple</c>）的
+    /// **兄弟**、不是祖先。1.6 只往祖先找，所以這形狀收不到任何一層；宿主自己有設底時還接得住
+    /// （宿主的 Background 優先序在前），**宿主沒設底時就配到祖先** —— 編出來的數字。
+    ///
+    /// 刻意不收的兩種（照舊往外找，維持 1.6 的答案）：
+    /// <list type="bullet">
+    /// <item>內容元素（Image）：底是一張圖。它在標記樹裡記 <c>over-sibling-content</c>，模板裡還沒有
+    /// 對應的計數器，收了會讓那些配對悄悄變成不可知 —— 留在盲區表</item>
+    /// <item>帶 <c>Opacity</c> 的兄弟：半透明要疊到它底下那一層才算得出來，而這裡回傳的是**原始寫法**、
+    /// 疊合在 Auditor 那邊做（規則 17 自己建 <c>Resolved</c> 所以做得到）。猜一個不透明的值會往寬鬆那邊錯</item>
+    /// </list>
+    /// </summary>
+    private string? SiblingBackdropIn(XElement box, XElement node)
+    {
+        if (Panels.LayoutOf(box.Name.LocalName, _cfg) != Panels.Layout.Overlap) return null;
+        var stretches = Panels.StretchesChildren(box.Name.LocalName);
+        var isGrid = box.Name.LocalName == "Grid";
+        var cell = Panels.CellOf(node, isGrid);
+        string? found = null;
+        foreach (var sib in box.Elements())
+        {
+            if (ReferenceEquals(sib, node)) break; // 只看排在前面的
+            var ln = sib.Name.LocalName;
+            if (ln.Contains('.')) continue;                       // 屬性元素（<Border.Background> 之類）
+            if (Panels.Styleish.Contains(ln)) continue;            // Style／Trigger 不是視覺樹
+            if (Panels.CellOf(sib, isGrid) != cell) continue;     // 不同格子不相疊
+            if (Panels.IsContentElement(ln)) return null;         // 底是一張圖 —— 見方法註解
+            if (!Panels.FillsCell(sib, stretches)) continue;      // 撐不滿那一格的不是背板
+            if (Panels.BackdropBrush(sib) is not { } raw) continue;
+            if (sib.Attribute("Opacity") is not null) return null; // 半透明 —— 見方法註解
+            found = raw;                                           // 愈後面的愈上層
+        }
+        return found;
     }
 
     /// <summary>模板裡字色由宿主決定的文字元素（自己沒寫 Foreground，或寫的是 <c>{TemplateBinding Foreground}</c>）。</summary>
@@ -578,9 +628,9 @@ internal sealed partial class StyleIndex
     /// 全域查找另外依主題各建一張表 —— Dark.xaml 與 Light.xaml 各定義一個 Chip 時，深色主題下只看得到
     /// Dark 的、淺色主題下只看得到 Light 的（執行期一次只載入一個主題字典）。
     /// </summary>
-    public static StyleIndex Build(string root, Func<string, ThemeSide?>? sideOf = null)
+    public static StyleIndex Build(string root, Func<string, ThemeSide?>? sideOf = null, ToolConfig? cfg = null)
     {
-        var idx = new StyleIndex { _sideOf = sideOf };
+        var idx = new StyleIndex { _sideOf = sideOf, _cfg = cfg ?? new ToolConfig() };
         foreach (var f in PaletteDetector.EnumerateFiles(root, "*.xaml"))
         {
             XDocument doc;

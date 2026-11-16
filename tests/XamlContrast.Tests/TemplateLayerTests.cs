@@ -464,4 +464,187 @@ public class TemplateLayerTests
         Assert.Equal("#CC3A3A", hover.Bg);
         Assert.Empty(r.UnresolvedSites); // 根那一層換底看得見，不是 template-painted
     }
+    // ──────────────────────────────────────────────────────────────────────────
+    // 1.7:模板裡畫底的那一層是內容的「兄弟」而不是祖先
+    //
+    // 1.6 只往祖先找。MaterialDesign 的按鈕模板是另一個形狀 ——
+    //   <Grid><Border Background="{TemplateBinding Background}"/><wpf:Ripple Content="…"/></Grid>
+    // 畫底的 Border 是內容的兄弟。1.6 當成「模板裡沒有一層畫底」，靠「宿主自己的 Background」
+    // 接住（所以那 43 筆沒事），但宿主沒設底時就配到祖先 —— 編出來的數字。
+    // 判定全部走 Panels，跟標記樹的規則 17 同一套。
+    // ──────────────────────────────────────────────────────────────────────────
+
+    /// <summary>MaterialDesign 的按鈕形狀，但底寫死在兄弟上 —— 1.6 配祖先的白（白字 1:1 假 fail）。</summary>
+    private static Fixture SiblingBackdrop(string template, string element = """<Button Style="{StaticResource Flat}" Content="go"/>""")
+        => new Fixture().File("Main.xaml", $$"""
+        <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+          <Grid.Resources>
+            <Style x:Key="Flat" TargetType="Button">
+              <Setter Property="Foreground" Value="#FFFFFF"/>
+              <Setter Property="Template">
+                <Setter.Value>
+                  <ControlTemplate TargetType="Button">
+                    {{template}}
+                  </ControlTemplate>
+                </Setter.Value>
+              </Setter>
+            </Style>
+          </Grid.Resources>
+          {{element}}
+        </Grid>
+        """);
+
+    [Fact] // 核心：排在內容前面、撐滿同一格的兄弟才是字真正的底
+    public void ASiblingThatPaintsBeforeTheContentIsTheBackdrop()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid>
+              <Border Background="#222222"/>
+              <ContentPresenter/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var f = Assert.Single(r.Findings);
+        Assert.Equal("#222222", f.Bg);
+        Assert.DoesNotContain(r.Findings, x => x.Bg == "#FFFFFF"); // 祖先的白＝1.6 的那個 1:1
+    }
+
+    [Fact] // 兄弟畫的是 {TemplateBinding Background} 而宿主沒設底 ＝ 那一層實質上透明 → 穿透到祖先。
+           // 這是 1.5 那條規則（ScreenToGif 的 163 組靠它），兄弟這條路不能把它弄壞
+    public void ATemplateBoundSiblingWithAnUnsetHostBackgroundStillPiercesToTheAncestor()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid>
+              <Border Background="{TemplateBinding Background}"/>
+              <ContentPresenter/>
+            </Grid>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+        Assert.Equal("#FFFFFF", f.Bg); // 祖先 —— 這一層沒畫東西，不是「看不懂」
+    }
+
+    [Fact] // 好幾個兄弟都畫底時，文件順序最後的那個在最上面
+    public void TheTopmostOfSeveralEarlierSiblingsWins()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid>
+              <Border Background="#111111"/>
+              <Border Background="#222222"/>
+              <ContentPresenter/>
+            </Grid>
+            """);
+        Assert.Equal("#222222", Assert.Single(fx.Run().Findings).Bg);
+    }
+
+    [Fact] // 排在內容後面的兄弟畫在字「上面」，不是它的底 —— 當成底就是編造
+    public void ASiblingAfterTheContentIsNotTheBackdrop()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid>
+              <ContentPresenter/>
+              <Border Background="#222222"/>
+            </Grid>
+            """);
+        Assert.Equal("#FFFFFF", Assert.Single(fx.Run().Findings).Bg);
+    }
+
+    [Fact] // 同一格才相疊（規則 17 的格子判定，這裡共用）
+    public void ASiblingInAnotherGridCellIsNotTheBackdrop()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid>
+              <Border Grid.Column="0" Background="#222222"/>
+              <ContentPresenter Grid.Column="1"/>
+            </Grid>
+            """);
+        Assert.Equal("#FFFFFF", Assert.Single(fx.Run().Findings).Bg);
+    }
+
+    [Fact] // 有明確尺寸的兄弟撐不滿那一格（強調色條 Width="4"）—— 字不一定落在它上面
+    public void ASizedSiblingIsNotABackdrop()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid>
+              <Border Width="4" Background="#222222"/>
+              <ContentPresenter/>
+            </Grid>
+            """);
+        Assert.Equal("#FFFFFF", Assert.Single(fx.Run().Findings).Bg);
+    }
+
+    [Fact] // StackPanel 把子元素排開，不疊 —— 旁邊的色塊不是字的底
+    public void SiblingsInASideBySidePanelAreNotBackdrops()
+    {
+        using var fx = SiblingBackdrop("""
+            <StackPanel>
+              <Border Background="#222222"/>
+              <ContentPresenter/>
+            </StackPanel>
+            """);
+        Assert.Equal("#FFFFFF", Assert.Single(fx.Run().Findings).Bg);
+    }
+
+    [Fact] // 兄弟排在容器自己的 Background 之前：容器的底畫在它所有子元素的下面
+    public void TheSiblingBeatsTheContainersOwnBackground()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid Background="#444444">
+              <Border Background="#222222"/>
+              <ContentPresenter/>
+            </Grid>
+            """);
+        Assert.Equal("#222222", Assert.Single(fx.Run().Findings).Bg);
+    }
+
+    [Fact] // 外層容器的底照舊找得到（兄弟那一格沒有候選時不能擋住往外找）
+    public void TheOuterContainersBackgroundIsStillFoundThroughTheSiblingStep()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid Background="#444444">
+              <Grid>
+                <ContentPresenter/>
+              </Grid>
+            </Grid>
+            """);
+        Assert.Equal("#444444", Assert.Single(fx.Run().Findings).Bg);
+    }
+
+    [Fact] // 底是一張圖：模板裡還沒有 over-sibling-content 的計數器，收了會讓這些配對悄悄變成不可知 ——
+           // 維持 1.6 的答案（配祖先），留在盲區表
+    public void AnImageSiblingKeepsTheNineteenSixBehaviour()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid>
+              <Image Source="bg.png"/>
+              <ContentPresenter/>
+            </Grid>
+            """);
+        Assert.Equal("#FFFFFF", Assert.Single(fx.Run().Findings).Bg);
+    }
+
+    [Fact] // 半透明的兄弟要疊到它底下那一層才算得出來，而這一步回傳的是原始寫法 —— 猜一個不透明的值
+           // 會往寬鬆那邊錯，所以不收
+    public void ASiblingWithOpacityIsNotTakenAsAnOpaqueBackdrop()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid>
+              <Border Background="#222222" Opacity="0.5"/>
+              <ContentPresenter/>
+            </Grid>
+            """);
+        Assert.Equal("#FFFFFF", Assert.Single(fx.Run().Findings).Bg);
+    }
+
+    [Fact] // 接走宿主內容的自訂宿主（MaterialDesign 的 wpf:Ripple）也吃這條
+    public void ACustomContentHolderGetsTheSiblingBackdropToo()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid>
+              <Border Background="#222222"/>
+              <Ripple Content="{TemplateBinding Content}"/>
+            </Grid>
+            """);
+        Assert.Equal("#222222", Assert.Single(fx.Run().Findings).Bg);
+    }
+
 }

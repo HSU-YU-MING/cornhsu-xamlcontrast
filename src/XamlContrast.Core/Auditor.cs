@@ -48,11 +48,6 @@ public sealed partial class Auditor
         "Line", "Border", "Separator", "Slider", "Thumb", "Track", "ScrollBar",
     };
 
-    private static readonly HashSet<string> StyleishEls = new()
-    {
-        "Style", "Setter", "Trigger", "DataTrigger", "MultiTrigger", "MultiDataTrigger",
-    };
-
     private static readonly XName XKey = XName.Get("Key", "http://schemas.microsoft.com/winfx/2006/xaml");
 
     [GeneratedRegex(@"(?<t>\w+)\s*\}?\s*$")]
@@ -313,7 +308,7 @@ public sealed partial class Auditor
         var auditor = new Auditor(detection.Palette, config ?? new ToolConfig());
         // 具名 Style 索引含色盤／主題字典 ——「排除出 UI 掃描」不等於「排除出索引」
         // 主題字典的歸屬一併交給索引：同 key 的 Style 依主題各自解析
-        auditor._styles = StyleIndex.Build(root, detection.ThemeFileSides.Count > 0 ? detection.SideOf : null);
+        auditor._styles = StyleIndex.Build(root, detection.ThemeFileSides.Count > 0 ? detection.SideOf : null, auditor._cfg);
         // 讀 *.cs 找轉換器是擴大稽核範圍（凍結面第 9 面）：只在 config 打開時做
         if (auditor._cfg.Converters.ConstantBrushes) auditor._converters = ConverterIndex.Build(root);
         auditor._parseErrors.AddRange(detection.ReadErrors); // 偵測時讀不到的檔（被鎖住的 .cs 之類）一樣要喊
@@ -1474,65 +1469,33 @@ public sealed partial class Auditor
         //       報假警報(HandyControl Carousel:白字疊照片被配 RegionBrush,light=1)
         // 防呆:有明確尺寸或非 Stretch 對齊的兄弟不算背板(強調色條 Width="4" 之類)。
         //   Canvas 只套 (b):它不把子元素撐滿,(a) 的「佔滿格子」前提不成立。
-        var layout = LayoutOf(el.Name.LocalName);
-        var overlap = layout != PanelLayout.SideBySide;
+        var layout = Panels.LayoutOf(el.Name.LocalName, _cfg);
+        var overlap = layout != Panels.Layout.SideBySide;
         Dictionary<(int Row, int Col), Backdrop>? cellBg = overlap ? new() : null;
         var parentFont = _inheritedFont;
         _inheritedFont = font; // 子元素繼承這個元素的字型
         foreach (var child in el.Elements())
         {
             // Style / Setter / Trigger 這些不是視覺樹，個別處理（WalkStyles），這裡跳過
-            if (StyleishEls.Contains(child.Name.LocalName)) continue;
+            if (Panels.Styleish.Contains(child.Name.LocalName)) continue;
             // <Border.Background> 之類是屬性值（上面已由 XamlBrush 讀進來），不是視覺子樹
             if (XamlBrush.IsColorPropertyElement(el, child)) continue;
             var childBd = bd;
             (int, int) cell = default;
             if (overlap)
             {
-                cell = CellOf(child, el.Name.LocalName == "Grid");
+                cell = Panels.CellOf(child, el.Name.LocalName == "Grid");
                 if (cellBg!.TryGetValue(cell, out var sb)) childBd = sb;
             }
             Walk(child, childBd, file, op, suppressedBy);
             // 兄弟背板畫在容器那一層（容器的累乘透明度）；它自己的 Opacity 已折進 alpha（見 SiblingBackdrop）
-            if (overlap && SiblingBackdrop(child, stretches: StretchesChildren(el.Name.LocalName)) is { } backdrop)
-                cellBg![cell] = layout == PanelLayout.Unknown
+            if (overlap && SiblingBackdrop(child, stretches: Panels.StretchesChildren(el.Name.LocalName)) is { } backdrop)
+                cellBg![cell] = layout == Panels.Layout.Unknown
                     // 版面未知的自訂面板：它若是疊層，這就是後面兄弟的背板；若是排開，就不是 —— 靜態不可知，不猜
                     ? Paint(childBd, op, new Resolved(ColorKind.SiblingContent, Raw: $"<{child.Name.LocalName}> in <{el.Name.LocalName}>"), "")
                     : Paint(childBd, op, backdrop, backdrop.Raw ?? "");
         }
         _inheritedFont = parentFont;
-    }
-
-    private enum PanelLayout { SideBySide, Overlap, Unknown }
-
-    /// <summary>容器的子元素會不會疊在一起。Grid（同一格）、Canvas 會；StackPanel／WrapPanel／DockPanel／
-    /// UniformGrid／ToolBarPanel／TabPanel 系（含衍生命名，例 VirtualizingWrapPanel、MyDockPanel）會排開。
-    /// ⚠ 其他自訂 *Panel 的版面靜態不可知：舊版「保守視為疊層」，在排開的面板裡就是捏造背板
-    ///   （VirtualizingWrapPanel 裡的黑色方塊被當成旁邊白字的底）；當成排開一樣是猜 → Unknown。
-    /// ⚠ 衍生命名的 *Canvas／*Grid 同理（審查素材 m7）：舊版只看 *Panel，ZoomCanvas 與 CardGrid 落到「排開」——
-    ///   疊在 Image 上的字報 21:1 ok、疊在黑色方塊上的白字配祖先白底編出 1:1 fail。它們是不是真的衍生自
-    ///   Canvas／Grid、Grid 的格子怎麼切，靜態都不知道 → Unknown。InkCanvas 是 WPF 內建，跟 Canvas 一樣疊在一起。</summary>
-    private PanelLayout LayoutOf(string name)
-    {
-        // config 的宣告優先（使用者知道自己的容器怎麼排）
-        if (_cfg.Layout.Overlap.Contains(name, StringComparer.Ordinal)) return PanelLayout.Overlap;
-        if (_cfg.Layout.SideBySide.Contains(name, StringComparer.Ordinal)) return PanelLayout.SideBySide;
-        if (name is "Grid" or "Canvas" or "InkCanvas") return PanelLayout.Overlap;
-        if (name.EndsWith("StackPanel") || name.EndsWith("WrapPanel") || name.EndsWith("DockPanel") ||
-            name.EndsWith("UniformGrid") || name.EndsWith("ToolBarPanel") || name.EndsWith("TabPanel") ||
-            name.EndsWith("ToolBarOverflowPanel") || name.EndsWith("DataGrid")) return PanelLayout.SideBySide;
-        return name.EndsWith("Panel") || name.EndsWith("Canvas") || name.EndsWith("Grid")
-            ? PanelLayout.Unknown : PanelLayout.SideBySide;
-    }
-
-    /// <summary>Canvas 系不把子元素撐滿（沒有尺寸的 Border 實際是 0×0），見 <see cref="SiblingBackdrop"/>。</summary>
-    private static bool StretchesChildren(string name) => name is not ("Canvas" or "InkCanvas");
-
-    private static (int, int) CellOf(XElement child, bool isGrid)
-    {
-        if (!isGrid) return default; // Canvas/自訂 Panel:全部視為同一層
-        int P(string attr) => int.TryParse(child.Attribute(attr)?.Value, out var v) ? v : 0;
-        return (P("Grid.Row"), P("Grid.Column"));
     }
 
     /// <summary>這個兄弟元素會不會成為「後面同格子兄弟」的背板（Raw 帶著它的原始寫法，合成時當標籤）。
@@ -1541,20 +1504,15 @@ public sealed partial class Auditor
     {
         var name = child.Name.LocalName;
         // (b) 內容元素:底變成一張圖,不可知
-        if (name is "Image" or "MediaElement" || name.EndsWith("Image"))
+        if (Panels.IsContentElement(name))
             return new Resolved(ColorKind.SiblingContent, Raw: "<" + name + ">");
 
         // (a) 純色背板候選:要佔滿格子 —— 有明確尺寸或非 Stretch 對齊的不算
         // ⚠ Canvas 不套 Stretch:沒內容、沒尺寸的 Border 在 Canvas 裡實際是 0×0。舊版照樣套 17(a),
         //   把一塊不存在的背板捏造出來(白字疊祖先白底 1:1,報成 21:1 合格)。有尺寸的也不行 ——
         //   Canvas.Left/Top 與文字範圍靜態不可知,它在不在字底下判定不了(同 Grid 裡的強調色條)。
-        if (!stretches) return null;
-        static bool Stretchy(XElement e, string attr)
-            => e.Attribute(attr)?.Value is null or "Stretch";
-        if (child.Attribute("Width") is not null || child.Attribute("Height") is not null ||
-            !Stretchy(child, "HorizontalAlignment") || !Stretchy(child, "VerticalAlignment"))
-            return null;
-        var raw = XamlBrush.Read(child, name == "Rectangle" ? "Fill" : "Background");
+        if (!Panels.FillsCell(child, stretches)) return null;
+        var raw = Panels.BackdropBrush(child);
         if (raw is null) return null;
         var r = ColorResolver.Resolve(raw, _pal);
         // 透明（含 alpha 0 的色碼）的兄弟不管 Opacity 是多少都看不見 —— 先排除，再看 Opacity。
