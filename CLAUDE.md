@@ -108,7 +108,12 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
   - **1.6 的新增（凍結面，minor）**：unresolved 原因多一個 `template-painted`（開放集，第 3 面；協定不認得的值送 `other`）。
     **`Baseline.KeyVersion` 1 → 2**：隱含樣式改走鏈路徑（`element` 多 `⊕Style[implicit …]/base`）＋帶模板的控制項
     改配模板裡那一層（`bg` 的值變了），兩件都動到鍵的寫法。凍的是 baseline 檔的**格式**、不是鍵的寫法，所以是 minor。
-    ⚠ Parity 儀表板手刻的那份鍵要一起改（見下面「baseline 的鍵」）。CLI 旗標、JSON 欄位、Action input、config 都沒動。
+    ⚠ Parity 儀表板手刻的那份鍵要一起改（見下面「baseline 的鍵」；`ContrastCompare.KeyVersionOf` 的邊界，2026-11-16 已改）。
+    CLI 旗標、JSON 欄位、Action input、config 都沒動。
+    這一版一口氣做掉 ROADMAP 上剩的四條模板／隱含樣式盲區，所以**稽核語意動得比一般 minor 多**：
+    13 筆 unresolved 的原因從 `template-painted` 換成 `bound-or-gradient`（那一層解開之後，真正卡住的是字色的 Binding）。
+    unresolved 的鍵是 `file|reason|value`，原因換了等於一筆新增加一筆消失 —— 開 `failOnNewUnresolved` 的人要重寫 baseline。
+    ⚠ **鍵的寫法沒有因此再變一次**：`KeyVersion` 維持 2（刻意的，見「誰畫在這段內容底下」最後那條 offChain 的點名決定）。
   - **1.3 的新增（凍結面，minor）**：`--fail-on-new-unresolved`（第 1 面）、`summary.failOnNewUnresolved`／`unresolvedSites[].baseline`
     （第 3 面）、config 的 `failOnNewUnresolved`（第 5 面）、baseline 檔的頂層 `unresolved` 段（第 6 面；舊版不認得的頂層欄位一律忽略，
     所以 1.3 寫的檔 1.2 照讀）。**不加 Action input**（一加就凍結），Action 使用者寫在 config。unresolved 段的鍵 = `file|reason|value`，
@@ -462,11 +467,11 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - **不評 hover／pressed**：WCAG 1.4.11 的 Understanding 不要求這兩個狀態看得出來。條件名去掉型別前綴再比（`UIElement.IsMouseOver`）。
 - 範圍外（README 有寫）：按鈕、三樣顏色都沒寫的控制項（系統主題）、WinUI 的 VisualStateManager。
 
-### 誰畫在這段內容底下（1.7，`StyleIndex.BackdropChain`／`Panels` + `State.LayerPaints`）
+### 誰畫在這段內容底下（1.6 後半，`StyleIndex.BackdropChain`／`Panels` + `State.LayerPaints`）
 
-1.6 的模板分層只往**祖先**找，而觸發器重畫模板內部那一層時整個狀態記 `template-painted`。
-1.7 把兩件事併成一條鏈：由內而外列出「畫在這個內容位置底下」的那些層，到第一個真的畫了底的為止。
-兩條盲區共用這一個機制，所以一起做。
+上一節那兩格只往**祖先**找，而觸發器重畫模板內部那一層時整個狀態不評。
+這一節把兩件事併成一條鏈：由內而外列出「畫在這個內容位置底下」的那些層，到第一個真的畫了底的為止。
+兩條盲區共用這一個機制，所以一起做（ROADMAP 上的最後兩條）。
 
 - **疊層判定只有一份（`Panels`）**：哪些容器會疊（Grid 同格子／Canvas／自訂 `*Panel` 判 Unknown）、
   `Grid` 的格子、撐不撐滿那一格、`Rectangle` 讀 `Fill`、`Styleish` 不是視覺樹 —— 標記樹的規則 17
@@ -475,10 +480,11 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   （config 宣告的 `layout` 在模板裡也要生效）。
 - **順序是「兄弟先、容器的底後」**：容器的 `Background` 畫在它所有子元素的下面。反過來的話
   兄弟背板永遠拿不到。排在內容**後面**的兄弟不收 —— 那是蓋在字上面。
-- **`Bg` 可以是 null**：那是「這一疊上沒有人畫底」（穿透到祖先）。1.6 的宣告是非 null、註解卻寫
-  「null = 沒有一層畫底」，1.7 讓它對上了。
+- **`Bg` 可以是 null**：那是「這一疊上沒有人畫底」（穿透到祖先）。宣告曾經是非 null、註解卻寫
+  「null = 沒有一層畫底」，現在對上了。
 - **名字只收「真的會被重畫」的**（`CreateRecord` 先掃一遍 `repainted`）：沒有任何觸發器碰模板內部的
-  Style（絕大多數）`Name`／`Above` 一律 null，1.6 的鍵與數字一個位元都不會變。這一條是刻意的風險控制。
+  Style（絕大多數）`Name`／`Above` 一律 null，那條路就是單純的分層、鍵與數字不受影響。
+  這一條是刻意的風險控制。
 - **重畫的層與原本那一層的關係要分清**：重畫的在原本那一層**上面**（`Above`）→ 半透明要疊在原本那一層上；
   重畫的就是那一層本身（`Name`）→ 底下是什麼由鏈外決定（祖先）。⚠ 實測 ScreenToGif 的 `AwareTabItem`：
   `ContentBorder` 的底是 `{TemplateBinding Background}`（宿主沒設 → 透明）、模板根 `Panel` 是 `Transparent`，
@@ -495,7 +501,7 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   （多半是 `{TemplateBinding Background}`）看起來精確，其實沒資訊，而且 unresolved 的鍵是
   `file|reason|value` —— 換個寫法就得再遞增 `Baseline.KeyVersion`，叫使用者重寫兩次 baseline。
   實測差別：MahApps 有 40 筆只是標籤變動，修掉之後語料的差異只剩真正有新資訊的那些。
-- **還沒做的（1.7 新明文化，不是 bug）**：重畫的 `TargetName` 不在那一疊上（別的分支、或撐不滿那一格，
+- **還沒做的（新明文化，不是 bug）**：重畫的 `TargetName` 不在那一疊上（別的分支、或撐不滿那一格，
   靜態分不出來）、重畫的值是漸層／Binding、半透明的重畫層而它蓋住的那一層讀不懂、模板裡的 `Image` 兄弟
   與帶 `Opacity` 的兄弟（兩種維持 1.6 的答案 —— 前者標記樹有 `over-sibling-content`、模板裡還沒有計數器，
   後者要疊合而這一步回傳的是原始寫法）。
@@ -615,7 +621,7 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - **已知盲區（明文不做，不是 bug）**：跨元素相關聯的觸發器、文字疊在兄弟圖片上、同型別有多個互相競爭的
   全域隱含樣式、重畫的 `TargetName` 不在字底下那一疊上、模板裡的 `Image`／帶 `Opacity` 的兄弟、
   畫在內容後面的兄弟（那是蓋住字）。1.5 處理掉兩條（VSM 狀態顏色**有計數器了**、隱含樣式**每個元素都解析**），
-  1.6 再兩條（隱含樣式的**觸發態**、模板裡哪一層畫底），1.7 再兩條（模板裡的**兄弟**背板、
+  1.6 一次做掉四條（隱含樣式的**觸發態**、模板裡哪一層畫底、模板裡的**兄弟**背板、
   觸發器重畫模板內部那一層）。收到相關 issue 時先確認是不是這幾條。
 - **觸發器條件是「App 自己的旗標」時會報出執行期不存在的組合**（明文盲區，1.0 就在，1.6 只是變多）：
   ScreenToGif 用 `<Condition Property="DarkMode" Value="True"/>` 分深淺兩套字色，工具不知道那個屬性與主題相關，

@@ -313,7 +313,7 @@ public class TemplateLayerTests
         // 基礎態照樣評（#EEEEEE 疊在模板那一層的 #222222 上）
         Assert.Contains(r.Findings, f => f.Fg == "#EEEEEE" && f.Bg == "#222222");
         // 選取態：ContentBorder 被重畫成 #F0F0F0，黑字其實在那上面。
-        // ⚠ 1.6 到這裡只能記 template-painted（誠實但沒答案）；1.7 知道重畫的是哪一個元素，
+        // ⚠ 1.5 之前拿已經被蓋掉的 #222222 去配（編出來的）；現在知道重畫的是哪一個元素，
         //   而它正好就是畫這個內容位置的那一層 → 算得出來。
         //   這一筆原本的保證沒有變：**不能拿已經被蓋掉的 #222222 去配選取態的黑字**。
         Assert.Contains(r.Findings, f => f.Fg == "#000000" && f.Bg == "#F0F0F0");
@@ -469,12 +469,12 @@ public class TemplateLayerTests
         Assert.Empty(r.UnresolvedSites); // 根那一層換底看得見，不是 template-painted
     }
     // ──────────────────────────────────────────────────────────────────────────
-    // 1.7:模板裡畫底的那一層是內容的「兄弟」而不是祖先
+    // 模板裡畫底的那一層是內容的「兄弟」而不是祖先
     //
-    // 1.6 只往祖先找。MaterialDesign 的按鈕模板是另一個形狀 ——
+    // 只往祖先找不夠。MaterialDesign 的按鈕模板是另一個形狀 ——
     //   <Grid><Border Background="{TemplateBinding Background}"/><wpf:Ripple Content="…"/></Grid>
-    // 畫底的 Border 是內容的兄弟。1.6 當成「模板裡沒有一層畫底」，靠「宿主自己的 Background」
-    // 接住（所以那 43 筆沒事），但宿主沒設底時就配到祖先 —— 編出來的數字。
+    // 畫底的 Border 是內容的兄弟。當成「模板裡沒有一層畫底」的話，只有「宿主自己的 Background」
+    // 那一步接得住（所以那 43 筆沒事），宿主沒設底時就配到祖先 —— 編出來的數字。
     // 判定全部走 Panels，跟標記樹的規則 17 同一套。
     // ──────────────────────────────────────────────────────────────────────────
 
@@ -652,10 +652,10 @@ public class TemplateLayerTests
     }
 
     // ──────────────────────────────────────────────────────────────────────────
-    // 1.7:觸發器重畫模板內部那一層
+    // 觸發器重畫模板內部那一層
     //
-    // 1.6 只知道「有重畫」(State.UnknownLayer),所以整個狀態記 template-painted —— 誠實，
-    // 但那些答案其實靜態看得見(ScreenToGif 的 AwareTabItem 把 ContentBorder 寫死 #90FFFFFF)。
+    // 1.5 之前把那個 Setter 丟掉、照舊拿基礎狀態的底評分 —— 編出來的數字
+    // (ScreenToGif 的 AwareTabItem 把 ContentBorder 寫死 #90FFFFFF,報出 1.46:1)。
     // 現在記下重畫了哪一個元素、換成什麼,再看它是不是正好畫在這個內容位置底下。
     // ──────────────────────────────────────────────────────────────────────────
 

@@ -956,9 +956,9 @@ public sealed partial class Auditor
             object? src = fromTrigger ? st.SetSrc["Background"] : "tmpl";
             string? under = null;
             var offChain = false;
-            // ── 觸發器重畫了模板內部那一層（1.7）──
-            // 1.6 只知道「有重畫」，所以整個狀態記 template-painted。現在看重畫的是不是正好在
-            // 這個內容位置底下：最靠近字的那一個贏（它蓋在原本那一層上面）。
+            // ── 觸發器重畫了模板內部那一層 ──
+            // 1.5 之前把那個 Setter 丟掉、照舊拿基礎狀態的底評分（編出來的數字）。現在看重畫的是不是
+            // 正好在這個內容位置底下：最靠近字的那一個贏（它蓋在原本那一層上面）。
             // ⚠ 重畫的元素不在這條鏈上時照舊不評：可能在別的分支（跟這個位置無關），也可能在這條鏈上
             //   但撐不滿那一格 —— 靜態分不出來，所以維持 1.6 的誠實不知道。
             // ⚠ 條件是 UnknownLayer 而不是「LayerPaints 有東西」：OpacityMask、整個換掉 Template、
@@ -980,7 +980,7 @@ public sealed partial class Auditor
                 //   —— 那等同設在宿主上，定義處真的評得到，所以它才帶 Style Id。
             }
             var (val, unknown) = TemplateLayerValue(raw, hostProp);
-            // ⚠ offChain 的 Raw 刻意留 null，讓呼叫端點名**字色**（1.6 的狀態層守門就是這樣點的）。
+            // ⚠ offChain 的 Raw 刻意留 null，讓呼叫端點名**字色**（狀態層守門就是這樣點的）。
             //   指向那一層的原始寫法（多半是 {TemplateBinding Background}）看起來比較精確，其實沒資訊
             //   —— 它不會說是哪個元素被重畫了 —— 而且 unresolved 的鍵是 file|reason|value，
             //   換個寫法就得再遞增一次 Baseline.KeyVersion，叫使用者重寫兩次 baseline。
@@ -990,12 +990,12 @@ public sealed partial class Auditor
         return list;
     }
 
-    /// <summary>這個狀態下、模板裡某一個放內容的位置的底（1.7 把 1.6 的四元組具名化，多了 Under）。
+    /// <summary>這個狀態下、模板裡某一個放內容的位置的底（1.6）。
     /// <paramref name="Under"/> ＝這一層是觸發器畫上去的、而它底下原本那一層的寫法（半透明時要疊在它上面）。</summary>
     private readonly record struct TemplateChoice(
         string? V, string? Raw, bool Unknown, object? Src, string? Under = null);
 
-    /// <summary>觸發器畫上去的那一層底下原本那一層當成底（1.7）。
+    /// <summary>觸發器畫上去的那一層底下原本那一層當成底（1.6）。
     /// 透明＝沒遮住，看到的是祖先；不透明／半透明＝疊上去；看不懂＝null，由呼叫端記 template-painted
     /// （上面是半透明時，底下那一層的顏色就是答案的一部分，猜不得）。</summary>
     private Backdrop? UnderLayer(string under, Palette pal, Backdrop ancestorBd, double op)
@@ -1111,7 +1111,7 @@ public sealed partial class Auditor
                 // ⚠ 狀態自己設了 Background 時照舊評：那個值是這個狀態的，至少不是別的狀態的顏色
                 //   （裡面那一層蓋在它上面仍是明文盲區，同 1.5）。這條界線是語料量出來的：
                 //   不分這一刀的話 ScreenToGif 連同 76 筆算得出來的 ok 一起被丟掉
-                // ⚠ 1.7：有模板分層可查時改成逐層判定（下面那個 layerUnknown）—— 重畫的元素對得上
+                // ⚠ 有模板分層可查時是逐層判定（下面那個 layerUnknown）—— 重畫的元素對得上
                 //   這個位置的那一層時算得出來，對不上才記。整個狀態一起丟掉會連同算得出來的層一起丟。
                 if (st.UnknownLayer && !st.Set.ContainsKey("Background") && tmplLayers is null)
                 { Unres(UnresolvedReason.TemplatePainted, file, LineOf(el), fgV); continue; }
@@ -1152,7 +1152,7 @@ public sealed partial class Auditor
                             continue;
                         }
                         // 這個狀態的底畫在元素自己身上：半透明的疊在祖先的底上；元素有 Opacity 時連底一起變淡
-                        // ⚠ 1.7：這一層是觸發器畫上去的、而它底下原本還有一層（layerUnder）時，半透明要疊在
+                        // ⚠ 這一層是觸發器畫上去的、而它底下原本還有一層（layerUnder）時，半透明要疊在
                         //   那一層上 —— 疊到祖先上就是跳過中間那一層，報一個執行期不存在的比值。
                         //   ScreenToGif 的 AwareTabItem 就是這形狀（選取態把 ContentBorder 畫成 #90FFFFFF）。
                         // 不透明的重畫層把底下那一層完全蓋住，所以底下讀不懂也不影響（Paint 會忽略底）

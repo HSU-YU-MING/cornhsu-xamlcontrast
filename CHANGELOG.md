@@ -3,66 +3,6 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
-## 1.7.0 — 未發布
-
-把 ROADMAP 上最後兩條「模板內部那一層」的盲區做完。兩條共用同一套機制 —— **誰畫在這段內容底下** ——
-所以一起做：前者是靜態就看得見的那一層，後者是觸發器換掉它之後的那一層。
-
-### Upgrading（計數會動，但方向是「更多算得出來」）
-
-- **覆蓋率會上升、unresolved 會下降**（實測 ScreenToGif：配對 1025 → 1032、覆蓋率 24.2% → 24.4%、
-  unresolved 3213 → 3199）。新解出來的配對**可能是 fail**，所以 CI 可能變紅 —— 那是真的違規，不是回歸。
-- **unresolved 的原因會換**：13 筆（MahApps 3、MaterialDesign 10）從 `template-painted` 改成
-  `bound-or-gradient`。那一層解開之後，真正卡住的是字色的 Binding。
-  ⚠ 打開 `--fail-on-new-unresolved`／`failOnNewUnresolved` 的使用者請**重跑一次 `--write-baseline`**：
-  baseline 的 unresolved 鍵是 `file|reason|value`，原因換了就等於一筆新增加一筆消失。
-- **`Baseline.KeyVersion` 不動（維持 2）**：既有 finding 的鍵一個都沒變（17 個公開專案逐筆確認，
-  沒有任何 finding 消失或改寫），新解出來的是新的鍵。fail／warn 的 baseline 不必重寫。
-
-### 模板裡畫底的那一層可以是內容的「兄弟」
-
-1.6 的模板分層只往**祖先**找。MaterialDesign 的按鈕模板是另一個形狀 ——
-`<Grid><Border Background="{TemplateBinding Background}"/><wpf:Ripple Content="…"/></Grid>`，
-畫底的 `Border` 是內容的**兄弟**。1.6 當成「模板裡沒有一層畫底」，靠「宿主自己的 `Background`」那一步接住
-（所以 1.4 逐筆驗過的 43 筆沒事），但**宿主沒設底時就配到祖先** —— 編出來的數字。
-
-現在這一步照 WPF 的繪製順序走：同一格裡文件順序在前的兄弟先（愈後面的愈上層），再才是容器自己的底。
-疊層判定（哪些容器會疊、`Grid` 的格子、撐不撐滿那一格）抽進 `Panels`，**與標記樹的規則 17 共用同一份** ——
-抄一份的話同一段 XAML 寫在畫面裡與寫在模板裡會得到不同的答案，而且沒有任何測試會紅。
-
-**實測：17 個公開專案＋三個本機專案逐筆完全一致。** 這個形狀在野外沒有出現，所以它關掉的是一條編造路徑，
-不是一批新數字。12 筆回歸測試釘住每一條界線。
-
-### 觸發器重畫模板內部那一層
-
-1.6 只知道「有重畫」（`TargetName` 指向模板內部的顏色 Setter），所以整個狀態記 `template-painted` ——
-誠實，但那些答案其實靜態看得見。現在記下**重畫了哪一個元素、換成什麼**，再看它是不是正好在那段內容
-底下那一疊上：不透明的重畫就是這個狀態的底，半透明的**疊在它蓋住的那一層上**。
-
-實測（ScreenToGif 的 `AwareTabItem`，7 處）：選取態把 `ContentBorder` 畫成 `#90FFFFFF`，而它底下的模板根
-是 `Transparent`，所以疊到視窗的 Level3 上 → `#FF000000 on #90FFFFFF over {Panel.Background.Level3}`，
-**8.23/20.29 的 ok**。1.6 只能說 `template-painted`；1.5 拿被蓋掉的顏色去配，報出 1.46:1 的假 fail。
-
-同一個 Style 的另外兩個狀態是這條規則的另一半：一個把 `ContentBorder` 換成 `<RadialGradientBrush>`
-→ 照舊不知道，但原因**點名那支 brush**而不是字色；一個換成 `Transparent` → 穿透到祖先，算得出來。
-
-**刻意不做的**（維持誠實的 `template-painted`，不拿被模板蓋住的顏色去配）：重畫的 `TargetName` 不在那一疊上
-（可能在別的分支，也可能在那一疊上但撐不滿那一格 —— 靜態分不出來）、重畫的值是漸層或 Binding、
-半透明的重畫層而它蓋住的那一層本身讀不懂、`OpacityMask`（它不是一個底色）。
-
-### Guards
-
-- `scripts/verify-baselines.ps1` 的對象指紋也記 `tool-commit`／`tool-dirty`（1.6 補的，語料腳本本來就有）。
-- 新增 19 筆回歸測試（`TemplateLayerTests`）。兩筆 1.0／1.6 時代的測試改寫：它們釘的是「這裡我們不知道」，
-  而這一版知道了 —— 原本的保證（不能拿已經被蓋掉的底去評）照舊釘著。
-
-### Interfaces
-
-九個凍結面都沒動：沒有新旗標、沒有新 JSON 欄位、`schemaVersion` 仍是 6、unresolved 原因沒有新值
-（`template-painted` 是 1.6 加的）、`Baseline.KeyVersion` 維持 2。稽核語意的改進讓計數移動，見 Upgrading。
-
----
-
 ## 1.6.0 — 2026-11-16
 
 ### Upgrading（這一版動到 baseline 的鍵，所有使用者都要重寫一次，而且覆蓋率會下降）
@@ -75,8 +15,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   Measured on seventeen public projects and the maintainer's three apps, **no finding was lost or changed
   except where this release deliberately stopped fabricating one** (103 of them — every single one attributed
   below), and 370 existing findings keep their colours and ratios but get a new `element` label.
-  What will move for you: more pairs are graded (ScreenToGif 620 → 1025), and **coverage drops** wherever a
-  trigger repaints a layer the tool cannot see (wpfui 17.4% → 9.0%, Flow Launcher 47.2% → 29.8%,
+  What will move for you: more pairs are graded (ScreenToGif 620 → 1032), and **coverage drops** wherever a
+  trigger repaints a layer the tool cannot *place* (wpfui 17.4% → 9.0%, Flow Launcher 47.2% → 29.8%,
   MaterialDesign 14% → 9%). Those pairs used to be reported against a background that the repaint covers —
   a confident wrong number. **If you gate on `--min-coverage`, check it before upgrading.**
   *簡單說：隱含樣式改走跟具名 Style 同一條鏈路徑，所以**觸發態**也評得到了；帶模板的控制項，字改成配
@@ -84,9 +24,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   舊的 `baseline.json` 會被拒絕並叫你重跑 `--write-baseline`（`schemaVersion` 仍是 6，JSON 欄位一個都沒搬）。
   十七個公開專案＋維護者三個 App 逐筆比對：除了這一版**刻意不再編造**的那 103 筆（下面每一筆都有歸因），
   沒有任何 finding 消失或改變；另有 370 筆顏色與比值完全相同、只有 `element` 標籤變了。
-  你會看到的變化：配對變多，而**覆蓋率會下降** —— 凡是觸發器重畫了工具看不到的那一層，那一組現在記
+  你會看到的變化：配對變多，而**覆蓋率會下降** —— 凡是觸發器重畫了工具**定不出位置**的那一層，那一組現在記
   unresolved。那些配對過去是拿「被重畫蓋掉的底」算出來的，一個很篤定的錯數字。
   **有用 `--min-coverage` 把關的請先確認。***
+
+- **unresolved 的原因會換**：13 筆（MahApps 3、MaterialDesign 10）從 `template-painted` 改成
+  `bound-or-gradient` —— 模板裡那一層解開之後，真正卡住的是字色的 Binding，原因終於指對地方。
+  ⚠ 打開 `--fail-on-new-unresolved`／`failOnNewUnresolved` 的使用者請一併重跑 `--write-baseline`：
+  baseline 的 unresolved 鍵是 `file|reason|value`，原因換了就等於一筆新增加一筆消失。
 
 - **Implicit styles go through the chain path, so their trigger states are graded.**
   1.5 deliberately read only an implicit style's base setters, because the chain path changes a finding's
@@ -122,6 +67,37 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   is **not** a fallback for these: the template painted over it. `unresolvedSites` names every one.
   It is an open set, so a 1.x consumer must already tolerate the new value; `docs/report.schema.json`
   documents it.
+
+### 模板裡畫底的那一層可以是內容的「兄弟」
+
+模板分層只往**祖先**找是不夠的。MaterialDesign 的按鈕模板是另一個形狀 ——
+`<Grid><Border Background="{TemplateBinding Background}"/><wpf:Ripple Content="…"/></Grid>`，
+畫底的 `Border` 是內容的**兄弟**。當成「模板裡沒有一層畫底」的話，只有「宿主自己的 `Background`」
+那一步接得住（1.4 逐筆驗過的 43 筆靠它），而**宿主沒設底時就配到祖先** —— 編出來的數字。
+
+所以這一步照 WPF 的繪製順序走：同一格裡文件順序在前的兄弟先（愈後面的愈上層），再才是容器自己的底。
+疊層判定（哪些容器會疊、`Grid` 的格子、撐不撐滿那一格）抽進 `Panels`，**與標記樹的規則 17 共用同一份** ——
+抄一份的話同一段 XAML 寫在畫面裡與寫在模板裡會得到不同的答案，而且沒有任何測試會紅。
+
+⚠ 這一格在語料上**一筆數字都沒動**（17 個公開專案＋三個本機專案逐筆一致）：它關掉的是一條編造路徑，
+不是一批新數字。12 筆回歸測試釘住每一條界線。
+
+### 觸發器重畫模板內部那一層
+
+`TargetName` 指向模板內部的顏色 Setter 從 1.0 起就是明文盲區：那個 Setter 被丟掉，那個狀態照舊拿
+**基礎狀態的底**評分。現在記下重畫了哪一個元素、換成什麼，再看它是不是正好在那段內容底下那一疊上：
+不透明的重畫就是這個狀態的底，半透明的**疊在它蓋住的那一層上**。
+
+實測（ScreenToGif 的 `AwareTabItem`，7 處）：選取態把 `ContentBorder` 畫成 `#90FFFFFF`，而它底下的模板根
+是 `Transparent`，所以疊到視窗的 Level3 上 → `#FF000000 on #90FFFFFF over {Panel.Background.Level3}`，
+**8.23/20.29 的 ok**。1.5 拿被蓋掉的顏色去配，報的是 1.46:1 的假 fail。
+
+同一個 Style 的另外兩個狀態是這條規則的另一半：一個把 `ContentBorder` 換成 `<RadialGradientBrush>`
+→ 照舊不知道，但原因**點名那支 brush**；一個換成 `Transparent` → 穿透到祖先，算得出來。
+
+**刻意不做的**（維持誠實的 `template-painted`，不拿被模板蓋住的顏色去配）：重畫的 `TargetName` 不在那一疊上
+（可能在別的分支，也可能在那一疊上但撐不滿那一格 —— 靜態分不出來）、重畫的值是漸層或 Binding、
+半透明的重畫層而它蓋住的那一層本身讀不懂、`OpacityMask`（它不是一個底色）。
 
 ### Fixed — four places that fabricated a ratio, all found by the corpus guard
 
@@ -159,6 +135,9 @@ quietly since before 1.0. Together they account for every one of the 103 finding
 
 ### Guards
 
+- 31 new regression tests in `TemplateLayerTests`. Two older ones (one from 1.0, one from this release's
+  own first half) were rewritten: they pinned "here we don't know", and now the tool does — their real
+  guarantee, never grading a state against a background the repaint covers, still holds.
 - `scripts/verify-baselines.ps1` now records **which build of the tool froze the snapshot**
   (`tool-commit` / `tool-dirty` in `baselines/<name>.project.txt`), and prints it when the audited project
   is byte-identical but the numbers differ. The object fingerprint alone had a gap: it could say "the
@@ -174,7 +153,7 @@ finding is attributed above; no project lost a finding for any other reason.
 
 | project | pairs | fail | unresolved | coverage |
 |---|---|---|---|---|
-| ScreenToGif | 620 → 1025 | 62 → 147 | 1637 → 3213 | 27.5% → 24.2% |
+| ScreenToGif | 620 → 1032 | 62 → 147 | 1637 → 3199 | 27.5% → 24.4% |
 | HandyControl | 545 → 736 | 35 → 49 | 2497 → 2997 | 17.9% → 19.7% |
 | MaterialDesign | 386 → 385 | 112 → 117 | 2372 → 3873 | 14% → 9% |
 | wpfui | 94 → 96 | 16 → 16 | 446 → 969 | 17.4% → 9% |

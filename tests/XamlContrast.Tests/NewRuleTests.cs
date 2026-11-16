@@ -360,10 +360,10 @@ public class NewRuleTests
         Assert.Equal("#CC3A3A", hover.Bg);
     }
 
-    [Fact] // 規則 13 的邊界（1.7 推進了）：TargetName 指向「非根」的內部元素。
+    [Fact] // 規則 13 的邊界（1.6 推進了）：TargetName 指向「非根」的內部元素。
            // 1.0～1.5 把那個 Setter 丟掉、照舊拿模板根的底評分（編出來的數字）；
-           // 1.6 改成誠實記 template-painted；1.7 知道重畫的是哪一個元素、它畫在內容的哪一側，
-           // 所以算得出來。界線與疊合規則在 TemplateLayerTests。
+           // 1.6 知道重畫的是哪一個元素、它畫在內容的哪一側，所以算得出來。
+           // 界線與疊合規則在 TemplateLayerTests。
     public void NonRootTargetNameIsResolvedAgainstTheLayerItCovers()
     {
         using var fx = new Fixture();

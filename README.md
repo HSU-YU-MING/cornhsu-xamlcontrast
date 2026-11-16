@@ -524,7 +524,7 @@ doesn't tell you whether anything can be done about it:
 | `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio |
 | `in-style-template` | a text element with its own `Foreground` inside a style's `Template` setter (`<Setter Property="Template"><Setter.Value><ControlTemplate>`) — not graded yet (see Known limitations), counted so the gap shows in coverage |
 | `unknown-style-key` | the palette comes from separate dark and light dictionaries, and the element's style — `Style="{StaticResource K}"`, or a `BasedOn` in its chain — is defined in only one of them, so how the element looks in the other theme is unknown; the value is the style key. Before 1.2 this was counted as `unknown-palette-key` (and a `BasedOn` like this was graded against the background behind the element instead) |
-| `template-painted` | the text sits on a layer **inside** the control's template whose colour isn't knowable statically: it comes from a host property nobody set (a library control's default, which lives in C#), that layer's own background is a binding or gradient, or a trigger repainted it and that layer can't be placed (the `TargetName` names an element that isn't on the chain beneath the text, the repainted value is a gradient or a binding, or the trigger swaps the whole `Template`). The ancestor's colour is **not** a fallback here — the template painted over it. New in 1.6; before that these were graded against a background the repaint covers. From 1.7, a repaint of an element that *is* on that chain is resolved and no longer lands here |
+| `template-painted` | the text sits on a layer **inside** the control's template whose colour isn't knowable statically: it comes from a host property nobody set (a library control's default, which lives in C#), that layer's own background is a binding or gradient, or a trigger repainted it and that layer can't be placed (the `TargetName` names an element that isn't on the chain beneath the text, the repainted value is a gradient or a binding, or the trigger swaps the whole `Template`). The ancestor's colour is **not** a fallback here — the template painted over it. New in 1.6; before that these were graded against a background the repaint covers. A repaint of an element that *is* on the chain beneath the text is resolved and does not land here |
 
 `summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
 (default 50%) exits 3**, because a pass over a fraction of the project is not a pass — the same
@@ -782,14 +782,14 @@ Honest list — full blind-spot table with per-case evidence in the
   `Content="{TemplateBinding Content}"`, a text element whose colour comes from the host, a shape painting
   `{TemplateBinding Foreground}` — the nearest painting ancestor **inside the template** is the backdrop, and
   `{TemplateBinding P}` resolves against the host's own `P`. Two layers holding content are two findings; both
-  exist at runtime. From 1.7 the search follows WPF's paint order, so a layer that is the content's
+  exist at runtime. The search follows WPF's paint order, so a layer that is the content's
   **sibling** counts too (MaterialDesign's button paints `{TemplateBinding Background}` on a `Border` next to
   the content, not above it), using the same overlap rules as the markup tree's rule 17 — same `Grid` cell,
   full-cell only, the topmost one wins. A **trigger that repaints a layer** through a `TargetName` pointing
   into the template is resolved as well, when the element it names sits on that content's backdrop chain: an
   opaque repaint is the backdrop, a translucent one is composited over the layer it covers (ScreenToGif's
-  selected tab paints `#90FFFFFF` over the panel's level-3 brush — 1.6 could only say `template-painted`,
-  1.5 graded it against the covered colour and reported 1.46:1).
+  selected tab paints `#90FFFFFF` over the panel's level-3 brush, where 1.5 graded it against the colour the
+  repaint covers and reported 1.46:1).
   What is still out of reach, all honestly `template-painted` rather than matched against something the
   template covered: a repaint whose `TargetName` is **not** on that chain (it may be in another branch, or on
   a part that doesn't fill its cell — statically indistinguishable), a repaint whose value is a gradient or a

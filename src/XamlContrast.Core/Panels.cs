@@ -3,10 +3,10 @@ using System.Xml.Linq;
 namespace XamlContrast.Core;
 
 /// <summary>
-/// 「同一個容器裡誰疊在誰上面」的判定（1.7 從 <see cref="Auditor"/> 抽出來）。
+/// 「同一個容器裡誰疊在誰上面」的判定（1.6 從 <see cref="Auditor"/> 抽出來）。
 ///
 /// 兩個地方要用同一套答案：標記樹的規則 17（<c>Auditor.Walk</c> 的兄弟背板）與**模板裡**的同一個形狀
-/// （<c>StyleIndex.ContentLayers</c>，1.7）。1.6 之前只有前者，所以這些判斷長在 Auditor 裡；
+/// （<c>StyleIndex.ContentLayers</c>，1.6）。1.5 之前只有前者，所以這些判斷長在 Auditor 裡；
 /// 模板那條路接上來之後再抄一份是最糟的做法 —— 「哪些容器會疊在一起」漂開的話，同一段 XAML
 /// 寫在畫面裡與寫在模板裡會得到不同的答案，而且沒有任何測試會紅。
 /// </summary>

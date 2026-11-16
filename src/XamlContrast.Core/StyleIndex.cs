@@ -33,8 +33,8 @@ internal sealed partial class StyleIndex
         /// WPF 屬性優先序會蓋過經 TemplateBinding 進來的宿主本地值</summary>
         public HashSet<string> RootTargeted = new();
         /// <summary>
-        /// 這個狀態把模板內部哪個元素的底重畫成什麼（1.7）：<c>TargetName</c> → 新的底。
-        /// 1.6 只記「有沒有重畫」（<see cref="UnknownLayer"/>），所以整個狀態都不評；現在記下是誰、
+        /// 這個狀態把模板內部哪個元素的底重畫成什麼（1.6）：<c>TargetName</c> → 新的底。
+        /// 1.5 之前只知道有沒有重畫，而且照舊拿基礎狀態的底評分（編出來的）；現在記下是誰、
         /// 換成什麼，使用處就能看那個元素是不是正好畫在這個內容位置底下（<see cref="TemplateLayer.Name"/>／
         /// <see cref="TemplateLayer.Above"/>）—— 對得上就算得出來，對不上才記 template-painted。
         /// ⚠ 只收 Background／Fill。<c>OpacityMask</c> 不是一個底色，收了就得猜它把下面那層變成什麼。
@@ -52,7 +52,8 @@ internal sealed partial class StyleIndex
         ///   （<c>AwareTabItem</c> 的選取態把 <c>ContentBorder</c> 重畫成 <c>#90FFFFFF</c>，
         ///   黑字其實在那層淺底上，工具卻拿深色主題的 Level3 去配，報 1.46:1）。
         ///   另外 72 筆是 <c>ExtendedMenuItem</c> 的 <c>Role</c> 觸發器整個換掉 Template。
-        ///   現在這種狀態一律記 unresolved（template-painted），不評。
+        ///   現在這種狀態只有在重畫的元素對得上字底下那一疊時才評（<see cref="LayerPaints"/>），
+        ///   對不上的一律記 unresolved（template-painted），不評。
         /// </summary>
         public bool UnknownLayer;
         public string? Cond;
@@ -63,9 +64,9 @@ internal sealed partial class StyleIndex
     /// <paramref name="Primary"/> ＝那個位置是 ContentPresenter／ContentControl：元素在標記裡的子元素會落在這裡，
     /// 所以子元素的底要用這一層。<paramref name="Root"/> ＝畫底的是模板根（或沒有任何一層畫底）——
     /// 「TargetName=模板根」的觸發 Setter 換底時換掉的就是這一層（規則 13）。
-    /// <paramref name="Name"/>（1.7）＝畫這一層的那個元素的名字，<paramref name="Above"/> ＝在它與內容之間、
+    /// <paramref name="Name"/>（1.6）＝畫這一層的那個元素的名字，<paramref name="Above"/> ＝在它與內容之間、
     /// 自己沒畫底的那些元素（由內而外）。兩者都只收「真的有觸發器重畫它」的名字 ——
-    /// 沒有任何觸發器碰模板內部時，這兩格一律是 null，1.6 的行為一個位元都不會變。
+    /// 沒有任何觸發器碰模板內部時（絕大多數的 Style）這兩格一律是 null，那條路就是單純的分層。
     /// 觸發器重畫的元素對得上這兩格時，那個狀態的底就算得出來（<c>Auditor.TemplateChoices</c>）。</summary>
     internal sealed record TemplateLayer(string? Bg, bool Primary, bool Root,
         string? Name = null, IReadOnlyList<string>? Above = null);
@@ -448,7 +449,7 @@ internal sealed partial class StyleIndex
             var painter = chain.Count > 0 && chain[^1].Bg is not null ? chain[^1] : default;
             var bg = painter.El is null ? null : painter.Bg;
             var root = painter.El?.Parent is { } pp && ReferenceEquals(pp, tmpl);
-            // 名字只收「真的會被重畫」的（repainted）—— 其餘一律 null，1.6 的鍵與數字都不動
+            // 名字只收「真的會被重畫」的（repainted）—— 其餘一律 null，沒有觸發器的 Style 不受這一格影響
             var name = painter.El is not null && NameOf(painter.El) is { } pn && repainted.Contains(pn) ? pn : null;
             var above = chain.Where(c => c.Bg is null)
                 .Select(c => NameOf(c.El)).OfType<string>().Where(repainted.Contains).ToList();
@@ -469,7 +470,7 @@ internal sealed partial class StyleIndex
     }
 
     /// <summary>
-    /// 由內而外列出「畫在這個內容位置底下」的那些層（1.7），每一層是一個元素與它靜態寫的底
+    /// 由內而外列出「畫在這個內容位置底下」的那些層（1.6），每一層是一個元素與它靜態寫的底
     /// （null ＝它自己沒畫底，但有觸發器可能把它畫起來）。到第一個真的畫了底的那一層為止 ——
     /// 再往下就看不到了。
     ///
@@ -479,10 +480,10 @@ internal sealed partial class StyleIndex
     ///
     /// ⚠ 兄弟這一步是語料逼出來的：MaterialDesign 的按鈕模板把底畫在
     /// <c>&lt;Border Background="{TemplateBinding Background}"/&gt;</c>，而它是內容（<c>wpf:Ripple</c>）的
-    /// **兄弟**、不是祖先。1.6 只往祖先找，所以這形狀收不到任何一層；宿主自己有設底時還接得住
+    /// **兄弟**、不是祖先。只往祖先找的話這形狀收不到任何一層；宿主自己有設底時還接得住
     /// （宿主的 Background 優先序在前），**宿主沒設底時就配到祖先** —— 編出來的數字。
     ///
-    /// 刻意放棄那一層、照舊往外找的兩種（維持 1.6 的答案，留在盲區表）：
+    /// 刻意放棄那一層、往外找的兩種（留在盲區表）：
     /// <list type="bullet">
     /// <item>內容元素（Image）：底是一張圖。標記樹裡記 <c>over-sibling-content</c>，模板裡還沒有對應的
     /// 計數器，收了會讓那些配對悄悄變成不可知</item>
@@ -590,7 +591,7 @@ internal sealed partial class StyleIndex
             rec.TemplateRootBorderThickness = NotTemplateBound(ownRoot.Attribute("BorderThickness")?.Value);
         }
         rec.OwnTemplate = ownTmpl is not null;
-        // 1.7：先掃一遍「哪些模板內部元素會被觸發器重畫底」（Background／Fill 的 TargetName Setter）。
+        // 先掃一遍「哪些模板內部元素會被觸發器重畫底」（Background／Fill 的 TargetName Setter）。
         // 分層只記這些名字 —— 沒有任何觸發器碰模板內部的 Style（絕大多數）行為完全不變。
         var repainted = new HashSet<string>(StringComparer.Ordinal);
         foreach (var t in style.Descendants().Where(IsTriggerElement))
