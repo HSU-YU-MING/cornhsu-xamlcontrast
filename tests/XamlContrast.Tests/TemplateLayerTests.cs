@@ -725,8 +725,10 @@ public class TemplateLayerTests
         Assert.DoesNotContain(r.Findings, f => f.RatioDark == Wcag.Contrast("#000000", "#FFFFFF"));
     }
 
-    [Fact] // 重畫的元素不在這個位置的鏈上(別的分支、或撐不滿那一格)→ 維持 1.6 的誠實不知道
-    public void ARepaintOfAnElementOffThisPositionsChainStaysUnresolved()
+    [Fact] // 重畫的元素在**另一個 Grid 格子**：它不可能在這段文字底下，所以這個狀態照舊評得到（1.8 收緊）。
+           // 1.6～1.7 這裡是整組不評，因為當時比的是整份記錄的 union；改成比這一層自己那一疊之後，
+           // 分得出「別的格子」與「同一格但撐不滿」—— 後者仍然不評，見下一個測試
+    public void ARepaintInAnotherCellDoesNotDiscardTheState()
     {
         using var fx = new Fixture().File("Main.xaml", """
             <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
@@ -745,6 +747,7 @@ public class TemplateLayerTests
                         <ControlTemplate.Triggers>
                           <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="Badge" Property="Background" Value="#CCCCCC"/>
+                            <Setter Property="Foreground" Value="#FFFFFF"/>
                           </Trigger>
                         </ControlTemplate.Triggers>
                       </ControlTemplate>
@@ -756,8 +759,8 @@ public class TemplateLayerTests
             </Grid>
             """);
         var r = fx.Run();
-        Assert.Contains(r.UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
-        Assert.DoesNotContain(r.Findings, f => f.Bg == "#CCCCCC"); // 那一塊不在字底下
+        Assert.DoesNotContain(r.UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+        Assert.Contains(r.Findings, f => f.Fg == "#FFFFFF" && f.Bg == "#000000");
     }
 
     [Fact] // OpacityMask 不是一個底色 —— 收了就得猜它把下面那層挖成什麼
@@ -973,5 +976,48 @@ public class TemplateLayerTests
         using var fx = PressedFg("Label", """<Setter TargetName="Root" Property="Background" Value="#000000"/>""");
         var r = fx.Run();
         Assert.DoesNotContain(r.Findings, f => f.Fg == "#FFFFFF");
+    }
+
+    [Fact] // 狀態動到的元素在**別的分支**上時，這一層照舊評得到（1.8）。
+           // ⚠ 用的是這一層自己的那一疊，不是整份記錄的 union —— union 在「圖示、勾勾、文字同一個 Grid」
+           //   的模板裡會讓每一層都被判成可能被動到，整批狀態不評。
+           //   MaterialDesign 的 Validation.HasError 就是這形狀：同時換 Graphic 的 Fill 與 contentPresenter
+           //   的 Foreground，實測 10 筆紅字配深色卡片 1.76:1 的真 fail 靠這一條才浮出來
+    public void AStateThatTouchesAnotherBranchStillGradesThisLayer()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Chk" TargetType="CheckBox">
+                  <Setter Property="Foreground" Value="#000000"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="CheckBox">
+                        <Grid>
+                          <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                          <Border Grid.Column="0" Background="#EEEEEE">
+                            <Path x:Name="Graphic" Fill="{TemplateBinding Foreground}"/>
+                          </Border>
+                          <Border Grid.Column="1" Background="#FFFFFF">
+                            <ContentPresenter x:Name="Content"/>
+                          </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Graphic" Property="Fill" Value="#CC0000"/>
+                            <Setter TargetName="Content" Property="Control.Foreground" Value="#DDDDDD"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <CheckBox Style="{StaticResource Chk}" Content="hi"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        // 勾選態的文字：#DDDDDD 疊在它自己那一格的白底上（Graphic 那一格跟它無關）
+        Assert.Contains(r.Findings, f => f.Fg == "#DDDDDD" && f.Bg == "#FFFFFF");
     }
 }

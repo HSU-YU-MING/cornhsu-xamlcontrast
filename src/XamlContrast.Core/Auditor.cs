@@ -974,6 +974,12 @@ public sealed partial class Auditor
                     raw = st.LayerPaints[hit];
                 }
                 else if (layer.Name is { } ln && st.LayerPaints.ContainsKey(ln)) raw = st.LayerPaints[ln];
+                // 這個狀態動到的那些元素，**一個都不在這一層這一疊上** → 跟這一層無關，照舊評（1.9）。
+                // ⚠ 條件跟狀態層那一格同形狀，但用的是**這一層自己**的鏈，不是整份記錄的 union ——
+                //   union 在 WinUI 風格的模板（開關、勾勾、文字同一個 Grid）會讓每一層都被判成可能被動到。
+                // ⚠ UnknownBeyondLayers（換掉整份 Template、別的模板畫的）沒有可查的目標，照舊不評。
+                else if (!st.UnknownBeyondLayers && st.LayerTouched.Count > 0
+                         && layer.ChainNames is { } cn && !st.LayerTouched.Overlaps(cn)) { }
                 else offChain = true;
                 // ⚠ 來源照舊是 "tmpl"，不是那個 Setter 的 Style 節點：定義處（WalkStyles）看不到模板
                 //   內部那一層，讓給它等於這一組在哪裡都沒被評分。規則 13 的「TargetName=模板根」不一樣

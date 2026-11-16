@@ -3,7 +3,7 @@
 project: bloxstrap
 repo: https://github.com/pizzaboxer/bloxstrap
 commit: 02db76006741f039b79ac7547b8054d7f3ccfc05
-tool-commit: f1a7204+dirty
+tool-commit: 34562ff+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair

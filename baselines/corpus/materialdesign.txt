@@ -3,7 +3,7 @@
 project: materialdesign
 repo: https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit
 commit: 087728011a8d71926ccf86cb28dc99439e9b1c3f
-tool-commit: f1a7204+dirty
+tool-commit: 34562ff+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair
@@ -11,9 +11,9 @@ palette-degraded: False
 palette-keys: 183
 single-theme: False
 files: 214
-pairs: 385
-coverage: 6.7
-unresolved: 5384
+pairs: 395
+coverage: 6.8
+unresolved: 5374
 skipped: 2
 dead-foreground: 67
 disabled-exempt: 713
@@ -22,7 +22,7 @@ ui-component-pairs: 0
 parse-errors: 0
 suppressed: 0
 state-colors: 0
-fail: 117
+fail: 127
 warn: 42
 ok: 218
 decorative: 8
@@ -30,7 +30,7 @@ unresolved-by.bound-or-gradient: 3974
 unresolved-by.in-style-template: 27
 unresolved-by.no-ancestor-background: 312
 unresolved-by.same-brush-pair: 7
-unresolved-by.template-painted: 915
+unresolved-by.template-painted: 905
 unresolved-by.translucent-uncomposited: 95
 unresolved-by.unknown-palette-key: 54
 unknown-keys.MahApps.Brushes.Text: 46
@@ -50,6 +50,11 @@ F  fail  src/MainDemo.Wpf/Cards.xaml:117  PopupBox⊕Style[MaterialDesignToolPop
 F  fail  src/MainDemo.Wpf/Cards.xaml:157  RatingBar⊕Style[implicit RatingBar]/base  Gold on {MaterialDesign.Brush.Card.Background}  6.84/1.40  light-fails
 F  fail  src/MainDemo.Wpf/Cards.xaml:212  Button⊕Style[MaterialDesignFlatButton]/base  {DynamicResource MaterialDesign.Brush.Primary} on {MaterialDesign.Brush.Card.Background}  5.88/2.63  light-fails
 F  fail  src/MainDemo.Wpf/Cards.xaml:224  Card⊕Style[implicit Card]/base  {DynamicResource PrimaryHueDarkForegroundBrush} on #03A9F4  6.98/2.31  light-fails
+F  fail  src/MainDemo.Wpf/Cards.xaml:301  CheckBox⊕Style[MaterialDesignUserForegroundCheckBox]/trigger  {DynamicResource MaterialDesign.Brush.ValidationError} on {PrimaryHueDarkBrush}  1.76/1.90  both-low
+F  fail  src/MainDemo.Wpf/Cards.xaml:304  CheckBox⊕Style[MaterialDesignUserForegroundCheckBox]/trigger  {DynamicResource MaterialDesign.Brush.ValidationError} on {PrimaryHueDarkBrush}  1.76/1.90  both-low
+F  fail  src/MainDemo.Wpf/Cards.xaml:307  CheckBox⊕Style[MaterialDesignUserForegroundCheckBox]/trigger  {DynamicResource MaterialDesign.Brush.ValidationError} on {PrimaryHueDarkBrush}  1.76/1.90  both-low
+F  fail  src/MainDemo.Wpf/Cards.xaml:310  RadioButton⊕Style[MaterialDesignUserForegroundRadioButton]/trigger  {DynamicResource MaterialDesign.Brush.ValidationError} on {PrimaryHueDarkBrush}  1.76/1.90  both-low
+F  fail  src/MainDemo.Wpf/Cards.xaml:313  RadioButton⊕Style[MaterialDesignUserForegroundRadioButton]/trigger  {DynamicResource MaterialDesign.Brush.ValidationError} on {PrimaryHueDarkBrush}  1.76/1.90  both-low
 F  fail  src/MainDemo.Wpf/Cards.xaml:347  Button⊕Style[MaterialDesignFlatButton]/base  {DynamicResource MaterialDesign.Brush.Primary} on {MaterialDesign.Brush.Card.Background}  5.88/2.63  light-fails
 F  fail  src/MainDemo.Wpf/Cards.xaml:354  Button⊕Style[MaterialDesignFlatButton]/base  {DynamicResource MaterialDesign.Brush.Primary} on {MaterialDesign.Brush.Card.Background}  5.88/2.63  light-fails
 F  fail  src/MainDemo.Wpf/Cards.xaml:381  Button⊕Style[MaterialDesignFlatButton]/base  {DynamicResource MaterialDesign.Brush.Primary} on {MaterialDesign.Brush.Card.Background}  5.88/2.63  light-fails
@@ -92,6 +97,11 @@ F  fail  src/MainDemo.Wpf/Toggles.xaml:335  ToggleButton⊕Style[MaterialDesignS
 F  fail  src/MaterialDesign3.Demo.Wpf/Cards.xaml:107  RatingBar⊕Style[implicit RatingBar]/base  Gold on {MaterialDesign.Brush.Card.Background}  6.84/1.40  light-fails
 F  fail  src/MaterialDesign3.Demo.Wpf/Cards.xaml:162  Button⊕Style[MaterialDesignFlatButton]/base  {DynamicResource MaterialDesign.Brush.Primary} on {MaterialDesign.Brush.Card.Background}  5.88/2.63  light-fails
 F  fail  src/MaterialDesign3.Demo.Wpf/Cards.xaml:175  Card⊕Style[implicit Card]/base  {DynamicResource MaterialDesign.Brush.Primary.Dark.Foreground} on #03A9F4  6.98/2.31  light-fails
+F  fail  src/MaterialDesign3.Demo.Wpf/Cards.xaml:253  CheckBox⊕Style[MaterialDesignUserForegroundCheckBox]/trigger  {DynamicResource MaterialDesign.Brush.ValidationError} on {MaterialDesign.Brush.Primary.Dark}  1.76/1.90  both-low
+F  fail  src/MaterialDesign3.Demo.Wpf/Cards.xaml:256  CheckBox⊕Style[MaterialDesignUserForegroundCheckBox]/trigger  {DynamicResource MaterialDesign.Brush.ValidationError} on {MaterialDesign.Brush.Primary.Dark}  1.76/1.90  both-low
+F  fail  src/MaterialDesign3.Demo.Wpf/Cards.xaml:259  CheckBox⊕Style[MaterialDesignUserForegroundCheckBox]/trigger  {DynamicResource MaterialDesign.Brush.ValidationError} on {MaterialDesign.Brush.Primary.Dark}  1.76/1.90  both-low
+F  fail  src/MaterialDesign3.Demo.Wpf/Cards.xaml:262  RadioButton⊕Style[MaterialDesignUserForegroundRadioButton]/trigger  {DynamicResource MaterialDesign.Brush.ValidationError} on {MaterialDesign.Brush.Primary.Dark}  1.76/1.90  both-low
+F  fail  src/MaterialDesign3.Demo.Wpf/Cards.xaml:265  RadioButton⊕Style[MaterialDesignUserForegroundRadioButton]/trigger  {DynamicResource MaterialDesign.Brush.ValidationError} on {MaterialDesign.Brush.Primary.Dark}  1.76/1.90  both-low
 F  fail  src/MaterialDesign3.Demo.Wpf/Cards.xaml:294  Button⊕Style[MaterialDesignFlatButton]/base  {DynamicResource MaterialDesign.Brush.Primary} on {MaterialDesign.Brush.Card.Background}  5.88/2.63  light-fails
 F  fail  src/MaterialDesign3.Demo.Wpf/Cards.xaml:301  Button⊕Style[MaterialDesignFlatButton]/base  {DynamicResource MaterialDesign.Brush.Primary} on {MaterialDesign.Brush.Card.Background}  5.88/2.63  light-fails
 F  fail  src/MaterialDesign3.Demo.Wpf/Cards.xaml:331  Button⊕Style[MaterialDesignFlatButton]/base  {DynamicResource MaterialDesign.Brush.Primary} on {MaterialDesign.Brush.Card.Background}  5.88/2.63  light-fails
@@ -4784,11 +4794,6 @@ U  template-painted  src/MainDemo.Wpf/Buttons.xaml:802  {Binding RelativeSource=
 U  template-painted  src/MainDemo.Wpf/Buttons.xaml:802  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MainDemo.Wpf/Buttons.xaml:802  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MainDemo.Wpf/Cards.xaml:212  {DynamicResource MaterialDesign.Brush.Primary}
-U  template-painted  src/MainDemo.Wpf/Cards.xaml:301  {DynamicResource MaterialDesign.Brush.ValidationError}
-U  template-painted  src/MainDemo.Wpf/Cards.xaml:304  {DynamicResource MaterialDesign.Brush.ValidationError}
-U  template-painted  src/MainDemo.Wpf/Cards.xaml:307  {DynamicResource MaterialDesign.Brush.ValidationError}
-U  template-painted  src/MainDemo.Wpf/Cards.xaml:310  {DynamicResource MaterialDesign.Brush.ValidationError}
-U  template-painted  src/MainDemo.Wpf/Cards.xaml:313  {DynamicResource MaterialDesign.Brush.ValidationError}
 U  template-painted  src/MainDemo.Wpf/Cards.xaml:347  {DynamicResource MaterialDesign.Brush.Primary}
 U  template-painted  src/MainDemo.Wpf/Cards.xaml:354  {DynamicResource MaterialDesign.Brush.Primary}
 U  template-painted  src/MainDemo.Wpf/Cards.xaml:381  {DynamicResource MaterialDesign.Brush.Primary}
@@ -5345,11 +5350,6 @@ U  template-painted  src/MaterialDesign3.Demo.Wpf/Buttons.xaml:842  {Binding Rel
 U  template-painted  src/MaterialDesign3.Demo.Wpf/Buttons.xaml:842  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MaterialDesign3.Demo.Wpf/Buttons.xaml:842  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:162  {DynamicResource MaterialDesign.Brush.Primary}
-U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:253  {DynamicResource MaterialDesign.Brush.ValidationError}
-U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:256  {DynamicResource MaterialDesign.Brush.ValidationError}
-U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:259  {DynamicResource MaterialDesign.Brush.ValidationError}
-U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:262  {DynamicResource MaterialDesign.Brush.ValidationError}
-U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:265  {DynamicResource MaterialDesign.Brush.ValidationError}
 U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:294  {DynamicResource MaterialDesign.Brush.Primary}
 U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:301  {DynamicResource MaterialDesign.Brush.Primary}
 U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:331  {DynamicResource MaterialDesign.Brush.Primary}

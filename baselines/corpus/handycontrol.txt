@@ -3,7 +3,7 @@
 project: handycontrol
 repo: https://github.com/HandyOrg/HandyControl
 commit: e9ad3d701b90e724399a413569fbd7f35a141053
-tool-commit: f1a7204+dirty
+tool-commit: 34562ff+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair

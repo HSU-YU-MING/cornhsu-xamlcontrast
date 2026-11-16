@@ -83,7 +83,8 @@ internal sealed partial class StyleIndex
     /// 沒有任何觸發器碰模板內部時（絕大多數的 Style）這兩格一律是 null，那條路就是單純的分層。
     /// 觸發器重畫的元素對得上這兩格時，那個狀態的底就算得出來（<c>Auditor.TemplateChoices</c>）。</summary>
     internal sealed record TemplateLayer(string? Bg, bool Primary, bool Root,
-        string? Name = null, IReadOnlyList<string>? Above = null, IReadOnlyList<string>? ContentNames = null);
+        string? Name = null, IReadOnlyList<string>? Above = null, IReadOnlyList<string>? ContentNames = null,
+        IReadOnlySet<string>? ChainNames = null);
 
     /// <summary>把宿主的內容整個接過去的自訂元素（<c>Content="{TemplateBinding Content}"</c>）——
     /// 不是 ContentPresenter 也一樣在畫宿主的內容，標記裡的子元素就落在這裡。
@@ -474,8 +475,12 @@ internal sealed partial class StyleIndex
                 continue;
             var primary = ln is "ContentPresenter" or "ContentControl" || IsHostContentHolder(host);
             if (!primary && !IsHostTextHolder(host, ln) && !IsHostForegroundShape(host)) continue;
-            // chainNames：這個位置底下那一疊上的每個具名元素（1.7）—— 連「這一格之後被跳過」的位置也要收
-            var chain = BackdropChain(tmpl, host, chainNames);
+            // chainNames：這個位置底下那一疊上的每個具名元素（1.7）—— 連「這一格之後被跳過」的位置也要收。
+            // own：**只有這個位置**那一疊上的名字（1.9）。狀態層的守門問的是記錄層的問題（union 才對），
+            // 但逐層判定時 union 太寬 —— WinUI 風格的模板把開關、勾勾、文字全放在同一個 Grid 裡，
+            // union 會讓每一層都判成「可能被動到」，於是整批狀態不評（實測 Flow Launcher 的 ToggleSwitch）。
+            var own = new HashSet<string>(StringComparer.Ordinal);
+            var chain = BackdropChain(tmpl, host, chainNames, own);
             var painter = chain.Count > 0 && chain[^1].Bg is not null ? chain[^1] : default;
             var bg = painter.El is null ? null : painter.Bg;
             var root = painter.El?.Parent is { } pp && ReferenceEquals(pp, tmpl);
@@ -500,7 +505,8 @@ internal sealed partial class StyleIndex
             byBg[key] = layers.Count;
             layers.Add(new TemplateLayer(bg, primary, root, name,
                 above.Count > 0 ? above : null,
-                hostName is null ? new List<string>() : new List<string> { hostName }));
+                hostName is null ? new List<string>() : new List<string> { hostName },
+                own));
         }
         return layers;
     }
@@ -527,7 +533,8 @@ internal sealed partial class StyleIndex
     /// 疊合在 Auditor 那邊做。猜一個不透明的值會往寬鬆那邊錯</item>
     /// </list>
     /// </summary>
-    private List<(XElement El, string? Bg)> BackdropChain(XElement tmpl, XElement host, HashSet<string>? names = null)
+    private List<(XElement El, string? Bg)> BackdropChain(
+        XElement tmpl, XElement host, HashSet<string>? names = null, HashSet<string>? own = null)
     {
         var chain = new List<(XElement El, string? Bg)>();
         for (var node = host; node.Parent is not null && !ReferenceEquals(node, tmpl); node = node.Parent)
@@ -556,7 +563,7 @@ internal sealed partial class StyleIndex
                     //   兄弟），而放棄的理由正是「它可能蓋在字底下、只是算不出來」。觸發器或 VSM 動它的時候
                     //   更不能當成無關 —— HandyControl 的 Calendar 就是這形狀：Selected 狀態用 DoubleAnimation
                     //   把 Opacity=0 的 SelectedBackground 打開，字的底其實是它。
-                    AddName(names, sib);
+                    AddName(names, sib, own);
                     // 內容元素（Image 等）：底是一張圖、靜態不可知 —— 跟標記樹的規則 17(b) 同一個答案
                     // （ColorResolver 會把這個記號轉回 ColorKind.SiblingContent）。
                     // ⚠ 不是「放棄這一層往外找」：往外找等於拿圖後面那一層的顏色報一個比值，而字其實疊在圖上
@@ -588,16 +595,18 @@ internal sealed partial class StyleIndex
             }
             if (ReferenceEquals(box, tmpl)) return chain; // 模板外的事由呼叫端（祖先的底）決定
             var v = XamlBrush.Read(box, "Background") ?? XamlBrush.Read(box, "Fill");
-            AddName(names, box);
+            AddName(names, box, own);
             chain.Add((box, v));
             if (v is not null) return chain;
         }
         return chain;
     }
 
-    private static void AddName(HashSet<string>? names, XElement el)
+    private static void AddName(HashSet<string>? names, XElement el, HashSet<string>? own = null)
     {
-        if (names is not null && NameOf(el) is { } n) names.Add(n);
+        if (NameOf(el) is not { } n) return;
+        names?.Add(n);
+        own?.Add(n);
     }
 
     /// <summary><c>x:Name</c> 或 <c>Name</c> —— 觸發 Setter 的 TargetName 指的就是這個。</summary>
@@ -616,6 +625,7 @@ internal sealed partial class StyleIndex
     /// <summary>把宿主的字色畫成圖形的模板元素（圖示按鈕的 <c>&lt;Path Fill="{TemplateBinding Foreground}"/&gt;</c>）。</summary>
     private static bool IsHostForegroundShape(XElement el)
         => (XamlBrush.Read(el, "Fill") ?? XamlBrush.Read(el, "Stroke")) is { } v && TemplateBindingFg().IsMatch(v);
+
 
 
     internal Record CreateRecord(XElement style, string file)

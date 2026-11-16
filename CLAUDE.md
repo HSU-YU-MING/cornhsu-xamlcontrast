@@ -524,11 +524,17 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
     時在定義處套用，好幾個位置各換各的時交給使用處逐層評。
   - ⚠ **展開是按層分組的**（`Expand`）：同一個狀態下不同的放內容位置可能有不同的字色，那是兩組配對。
     沒有這種 Setter 的狀態（絕大多數）展開後就是原本那一組，走的程式碼完全相同。
-  - ⚠ **VSM 評分還是不要碰**：1.8 補的是它的前置條件，但還缺「非顏色的動畫也會換掉字的底」
-    （HandyControl 的 Calendar 用 `DoubleAnimation` 打開 `Opacity="0"` 的 Rectangle）。試過「保守翻譯」
-    （碰到具名元素就記不可知）：語料多 971 筆 unresolved、0 組新配對、Flow Launcher 覆蓋率 29.8% → 14.8%。
-    那些位置本來就在 `stateColors` 裡誠實列著，換成 971 筆 unresolved 只是同一件事報兩次、外加打爛
-    `--min-coverage`。**計數器已經是誠實的信號，把它換成更吵的信號不是改進。**
+- **逐層判定要用「這一層自己那一疊」，不是整份記錄的 union**（1.8，`TemplateLayer.ChainNames`）：
+  1.7 的狀態層守門問的是記錄層的問題，union 是對的；`TemplateChoices` 逐層判定時 union 太寬 ——
+  WinUI 風格的模板把圖示、勾勾、文字放同一個 Grid，union 會讓每一層都判成「可能被動到」。
+  收緊後分得出「在另一個格子」（照舊評）與「同一格但撐不滿」（仍然不評）。
+  實測 MaterialDesign 多出 10 筆真 fail（`Validation.HasError` 同時換 `Graphic` 的 Fill 與
+  `contentPresenter` 的 Foreground，紅字疊深色卡片 1.76:1），配對 +10、unresolved −10。
+- ⚠ **VSM 評分：三次量測都說不要接。** 1.8 補掉了前兩個前置條件（具名元素的字色、逐層判定），
+  補完再翻譯一次 VSM：**959 筆新 unresolved、0 組新配對**、Flow Launcher 覆蓋率 29.8% → 14.8%。
+  逐筆看過，那些 unresolved 落在真的元素上，不是空轉 —— 卡住的是第三個原因：**非顏色的動畫也會換掉字的底**
+  （HandyControl 的 Calendar 用 `DoubleAnimation` 打開 `Opacity="0"` 的 Rectangle）。
+  要先能說出「哪一層被打開了」。**`stateColors` 已經是誠實的信號，把它換成更吵的信號不是改進。**
 - **版面未知的容器兩條路要給同一個答案**（1.8）：`BackdropChain` 原本只認 `Layout.Overlap`，把自訂 `*Panel`
   整個跳過、落到祖先；標記樹的規則 17 則記 `over-sibling-content`。⚠ 這正是 `Panels` 被抽出來要防的事
   —— 抽了共用的判定，但**呼叫端對 `Unknown` 的處理各寫各的**，一樣會漂開。

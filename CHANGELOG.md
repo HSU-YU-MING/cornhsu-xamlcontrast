@@ -42,6 +42,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   - ⚠ 指向「自己帶字色」的元素（模板裡的說明文字、圖示）不算 —— 那不是宿主的文字。
     只有那個名字正好是模板裡**放內容的位置**時才生效。
 
+- **「這個狀態動到的東西在不在字底下」改用這一層自己那一疊判定，不是整份記錄的 union。**
+  1.7 的那一格問的是記錄層的問題（整個狀態要不要丟掉），union 是對的；但**逐層**判定時 union 太寬 ——
+  WinUI 風格的模板把圖示、勾勾、文字放在同一個 Grid 裡，union 會讓每一層都被判成「可能被動到」。
+  收緊之後分得出「在另一個格子」（照舊評）與「同一格但撐不滿那一格」（仍然不評，靜態分不出來）。
+  **實測**：MaterialDesign 多出 **10 筆真 fail** —— `Validation.HasError` 同時換 `Graphic` 的 `Fill` 與
+  `contentPresenter` 的 `Control.Foreground`，紅色的錯誤字疊在深色卡片上 **1.76:1**。
+  舊版因為 `Graphic` 也在 union 裡，整個驗證錯誤態都不評。配對 +10、unresolved −10、覆蓋率微升。
+
 ### Changed
 
 - **版面未知的容器在模板裡與在畫面裡給同一個答案。**
@@ -57,11 +65,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
 
 ### Measured and deliberately not done
 
-- **VisualStateManager 的狀態顏色照舊只計數、不評分。** 1.8 先補的那個洞正是它的前置條件：語料 88 處 VSM 裡，
-  改字色的 40 處**全部**指向具名元素。做完這一版之後 VSM 才接得上去，但還缺一塊 —— **非顏色的動畫**也會
-  換掉字的底（HandyControl 的 Calendar 用 `DoubleAnimation` 把 `Opacity="0"` 的 Rectangle 打開）。
-  試過「碰到具名元素就記不可知」的保守翻譯：語料多 971 筆 unresolved、**0 組新配對**、Flow Launcher 覆蓋率
-  29.8% → 14.8%。那些位置本來就在 `stateColors` 裡誠實列著，換成 971 筆 unresolved 只是同一件事報兩次。
+- **VisualStateManager 的狀態顏色照舊只計數、不評分 —— 這一版把前兩個前置條件都補掉了，還是不行。**
+  1.8 做的兩件事（具名元素的字色算數、逐層判定改用這一層自己那一疊）正是 VSM 卡住的兩個原因，
+  補完之後把 VSM 翻譯成同一個 State 模型再量一次：語料多 **959 筆 unresolved、0 組新配對**，
+  Flow Launcher 覆蓋率 29.8% → 14.8%。逐筆看過新增的 unresolved：它們**確實落在真的元素上**
+  （`PluginSettingsWindow.xaml:110` 的 ToggleSwitch 之類），不是空轉 —— 卡住的是第三個原因：
+  **非顏色的動畫也會換掉字的底**。HandyControl 的 Calendar 用 `DoubleAnimation` 把 `Opacity="0"` 的
+  Rectangle 打開，字真正的底是它；不把這種動畫算進去就會拿祖先的底去配白字，算進去（保守記不可知）
+  就是上面那 959 筆。**在能說出「哪一層被打開了」之前，VSM 接上去只會讓報告更吵。**
+  那些位置本來就在 `stateColors` 裡誠實列著，換成 959 筆 unresolved 只是同一件事報兩次、外加打爛
+  `--min-coverage`。
 
 ## 1.7.0 — 2026-11-16
 
