@@ -105,6 +105,15 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
       `~/.dotnet/tools` 寫進 `GITHUB_PATH`、Run audit 的 `--json` 落點固定在 `$RUNNER_TEMP/xamlcontrast-report.json`。
       改了任何一個，README 的那一步就安靜失效。
     - 協定跟 Parity repo 的伺服器端一起定，**不要單方面改**（伺服器照這個形狀實作，`CliPushTests` 釘住線上的樣子）。
+  - **1.6 的新增（凍結面，minor）**：unresolved 原因多一個 `template-painted`（開放集，第 3 面；協定不認得的值送 `other`）。
+    **`Baseline.KeyVersion` 1 → 2**：隱含樣式改走鏈路徑（`element` 多 `⊕Style[implicit …]/base`）＋帶模板的控制項
+    改配模板裡那一層（`bg` 的值變了），兩件都動到鍵的寫法。凍的是 baseline 檔的**格式**、不是鍵的寫法，所以是 minor。
+    ⚠ Parity 儀表板手刻的那份鍵要一起改（見下面「baseline 的鍵」；`ContrastCompare.KeyVersionOf` 的邊界，2026-11-16 已改）。
+    CLI 旗標、JSON 欄位、Action input、config 都沒動。
+    這一版一口氣做掉 ROADMAP 上剩的四條模板／隱含樣式盲區，所以**稽核語意動得比一般 minor 多**：
+    13 筆 unresolved 的原因從 `template-painted` 換成 `bound-or-gradient`（那一層解開之後，真正卡住的是字色的 Binding）。
+    unresolved 的鍵是 `file|reason|value`，原因換了等於一筆新增加一筆消失 —— 開 `failOnNewUnresolved` 的人要重寫 baseline。
+    ⚠ **鍵的寫法沒有因此再變一次**：`KeyVersion` 維持 2（刻意的，見「誰畫在這段內容底下」最後那條 offChain 的點名決定）。
   - **1.3 的新增（凍結面，minor）**：`--fail-on-new-unresolved`（第 1 面）、`summary.failOnNewUnresolved`／`unresolvedSites[].baseline`
     （第 3 面）、config 的 `failOnNewUnresolved`（第 5 面）、baseline 檔的頂層 `unresolved` 段（第 6 面；舊版不認得的頂層欄位一律忽略，
     所以 1.3 寫的檔 1.2 照讀）。**不加 Action input**（一加就凍結），Action 使用者寫在 config。unresolved 段的鍵 = `file|reason|value`，
@@ -377,12 +386,59 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 - **`{TemplateBinding Background}` 不是「一個看不懂的顏色」**：它的意思是「控制項自己的 Background」，
   沒設就是實質上沒有底 → 往祖先穿透。⚠ 當成未解析的話，ScreenToGif 的 Editor.xaml 有 163 處原本評得出來的
   配對變成 unresolved —— 看起來「更誠實」，實際上是把算得出來的答案丟掉。
-- **刻意只取基礎 Setter、不走 `GradeChain` 的逐狀態路徑**：走鏈路徑會讓 finding 的 `element` 從 `TextBlock`
-  變成 `TextBlock⊕Style[implicit TextBlock]/base`，等於 **baseline 的鍵變了** → 要遞增 `Baseline.KeyVersion`、
-  所有使用者重寫 baseline，還要連動 Parity 儀表板手刻的那份鍵。觸發態留到那一次一起做（ROADMAP）。
+- **1.6 起走 `GradeChain` 的逐狀態路徑**（觸發態也評得到），代價就是上面那條預言的：`element` 從 `TextBlock`
+  變成 `TextBlock⊕Style[implicit TextBlock]/base`，`Baseline.KeyVersion` 1 → 2。
+  ⚠ **只有 `Auditor.AffectsColour` 為真的隱含樣式走這條**：只設 Margin／FontSize 的不走，否則每一筆 finding
+  的 `element` 都掛上 ⊕Style[implicit …]，白白動掉一批鍵（而且那個標籤沒有任何資訊）。
+  ⚠ 兩個主題各解析到不同的隱含樣式時各評一側（`implicitSame`，@dark／@light）；**只有一側有**的時候兩側都不走
+  鏈路徑 —— 「這個主題沒有隱含樣式」＝控制項預設值，本工具不模擬，拿另一側的字色填就是編造。
 - 定義處與使用處**不能同時記**：隱含樣式的基礎 Setter 現在在使用處評得到，所以 `WalkStyles` 的
   translucent-uncomposited 那一段多一個條件 `_styles.AppliesToSomeElement(ttName)` —— 專案裡真的有那個型別的元素
   才算「使用處評得到」；一個都沒有的話執行期套不到它，那一組不存在，照舊記 unresolved。
+
+### 模板裡哪一層畫底（1.6，`StyleIndex.ContentLayers`／`TemplateLayer` + `Auditor.TemplateChoices`／`TemplateLayerValue`）
+
+1.5 只看模板根（`TemplateRootBg`），根沒設底就讓字配**祖先**。1.6 把「模板裡放宿主內容的位置」找出來，
+對著它在模板裡最近一層畫底的祖先評。五個地雷全是語料量出來的：
+
+- **這一步排在「宿主自己的 Background」之後**，不能往前挪。模板分層是推論，元素寫的 `Background` 是事實。
+  ⚠ 實測（MaterialDesign 的 MenusAndToolBars）：挪到前面的話，
+  `<MenuItem Background="{DynamicResource SecondaryHueMidBrush}">` 的字被配到**外層選單**的 Primary 底上 ——
+  元素明寫的值被「模板某層是透明的」這個推論蓋掉。
+- **只收「在模板裡找得到畫底的祖先」的位置**，找不到的不收（所以這一格是純加法）。
+  ⚠ MaterialDesign 的按鈕模板把底畫在 `<Border Background="{TemplateBinding Background}"/>`，而它是內容
+  （`wpf:Ripple`）的**兄弟**不是祖先。當成「模板裡沒有底 → 穿透到祖先」的話，宿主的 Background Setter
+  整個被跳過，**43 筆逐筆驗過的 finding 一起消失**（含 1.4 驗過的工具列字 1.55、扁平鈕 2.63）。
+  模板裡的兄弟背板是另一塊盲區（規則 17 只管標記樹），不在 1.6 的範圍。
+- **`IsHostContentHolder` 要逐字比 `{TemplateBinding Content}`／`{TemplateBinding Text}`**。放寬成「任何
+  `{TemplateBinding …}`」的話，Shield 模板裡 `Text="{TemplateBinding Subject}"` 那顆 TextBlock 會被當成
+  放內容的**主要**位置，標記裡的子元素就被配到 `#555` 而不是 ContentPresenter 那一層。
+- **`{TemplateBinding P}` 回宿主身上解**（`TemplateLayerValue`）：`Background` 查不到 = 宿主沒設底 → 穿透到
+  祖先（1.5 那條規則，ScreenToGif 的 163 組靠它）；**其他屬性**查不到 = 控制項自己的預設值（函式庫寫在 C#
+  metadata 裡）→ `template-painted`，不是退回祖先。
+- **元素自己換掉 `Template`**（`Auditor.HasOwnTemplate`）→ Style 那份模板的 `ControlTemplate.Triggers` 與分層
+  在執行期都不存在。`MergeChain` 對 `BasedOn` 早就有這條，元素端 1.6 才補。⚠ 實測（Kindling）：
+  `<Button Background="Transparent">` 自帶一份只有 ContentPresenter 的模板，卻被套上 `DarkBtn` 模板裡
+  IsPressed 的白字，底又因為本地 Transparent 穿透到視窗 —— 兩筆假 fail，而且讓維護者自己的專案變紅。
+
+### 觸發態不能拿「已經被蓋掉的底」去評（1.6，`StyleIndex.State.UnknownLayer`）
+
+逐狀態路徑一直有一個會編造數值的洞：**觸發器把模板內部那一層重畫了，而那個 Setter 被丟掉**
+（規則 13 只收模板根），於是那個狀態照舊用基礎狀態的底評分。1.5 之前只有具名 Style 走這條路所以零星；
+1.6 隱含樣式也走之後一口氣爆出 100 筆假 fail。現在三種情形記 `template-painted`：
+
+- `TargetName` 指向模板內部、而且畫的是 `Background`／`Fill`／`OpacityMask`（`PaintsLayer`）。
+  ⚠ **刻意不收 `BorderBrush`／`Stroke`**：框線畫在邊上、不是字底下那一面，收了的話 MahApps 的 TextBox
+  一進焦點態就整組不評，而那一組的底其實算得出來。
+- 整個換掉 `Template` 的觸發 Setter（ScreenToGif 的 `ExtendedMenuItem` 用 `Role` 換三份模板，72 筆假 fail）。
+- ⚠ **只在「這個狀態自己沒給底」時才記**。狀態自己設了 `Background` 就照評：那個值至少是這個狀態的。
+  不分這一刀的話 ScreenToGif 連同 76 筆算得出來的 ok 一起被丟掉。
+- **巢狀 Style 裡的觸發器整個不收**（`otherStyle`）：`ItemContainerStyle`、`DataGridTextColumn.ElementStyle`、
+  `<Style.Resources>` 裡的那些是**別的元素**的狀態。⚠ ScreenToGif 的 `ListView` 本來被套上 `ListViewItem`
+  的 hover／選取底色，報出 ListView 根本沒有的配對。那些 Style 自己會被 `WalkStyles` 走到，不是靜默丟掉。
+- **`IsDisabledTrigger` 的值比對不分大小寫**（1.6）：XAML 的布林轉換器收 `"false"` 也收 `"False"`，
+  舊版逐字比 `"False"` → 寫小寫的停用態被當成普通狀態評分，報出 WCAG 1.4.3 明文豁免的灰字
+  （ScreenToGif 2.14:1、MaterialDesign 16 處）。**這條同時修掉具名 Style 的同一個毛病。**
 
 ### 轉換器的固定顏色（1.2，`ConverterIndex.cs`、config 的 `converters.constantBrushes`，預設關）
 
@@ -410,6 +466,45 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   (3) 焦點框 `Margin` 是負的（畫在控制項外面）→ 對著周圍的底，不是控制項的底。
 - **不評 hover／pressed**：WCAG 1.4.11 的 Understanding 不要求這兩個狀態看得出來。條件名去掉型別前綴再比（`UIElement.IsMouseOver`）。
 - 範圍外（README 有寫）：按鈕、三樣顏色都沒寫的控制項（系統主題）、WinUI 的 VisualStateManager。
+
+### 誰畫在這段內容底下（1.6 後半，`StyleIndex.BackdropChain`／`Panels` + `State.LayerPaints`）
+
+上一節那兩格只往**祖先**找，而觸發器重畫模板內部那一層時整個狀態不評。
+這一節把兩件事併成一條鏈：由內而外列出「畫在這個內容位置底下」的那些層，到第一個真的畫了底的為止。
+兩條盲區共用這一個機制，所以一起做（ROADMAP 上的最後兩條）。
+
+- **疊層判定只有一份（`Panels`）**：哪些容器會疊（Grid 同格子／Canvas／自訂 `*Panel` 判 Unknown）、
+  `Grid` 的格子、撐不撐滿那一格、`Rectangle` 讀 `Fill`、`Styleish` 不是視覺樹 —— 標記樹的規則 17
+  與模板裡這條路共用。⚠ **不要為了方便在 StyleIndex 裡再抄一份**：漂開的話同一段 XAML 寫在畫面裡
+  與寫在模板裡會得到不同的答案，而且沒有任何測試會紅。`StyleIndex.Build` 為此收 `ToolConfig`
+  （config 宣告的 `layout` 在模板裡也要生效）。
+- **順序是「兄弟先、容器的底後」**：容器的 `Background` 畫在它所有子元素的下面。反過來的話
+  兄弟背板永遠拿不到。排在內容**後面**的兄弟不收 —— 那是蓋在字上面。
+- **`Bg` 可以是 null**：那是「這一疊上沒有人畫底」（穿透到祖先）。宣告曾經是非 null、註解卻寫
+  「null = 沒有一層畫底」，現在對上了。
+- **名字只收「真的會被重畫」的**（`CreateRecord` 先掃一遍 `repainted`）：沒有任何觸發器碰模板內部的
+  Style（絕大多數）`Name`／`Above` 一律 null，那條路就是單純的分層、鍵與數字不受影響。
+  這一條是刻意的風險控制。
+- **重畫的層與原本那一層的關係要分清**：重畫的在原本那一層**上面**（`Above`）→ 半透明要疊在原本那一層上；
+  重畫的就是那一層本身（`Name`）→ 底下是什麼由鏈外決定（祖先）。⚠ 實測 ScreenToGif 的 `AwareTabItem`：
+  `ContentBorder` 的底是 `{TemplateBinding Background}`（宿主沒設 → 透明）、模板根 `Panel` 是 `Transparent`，
+  所以 `#90FFFFFF` 正確地疊到視窗的 Level3 上，8.23/20.29。
+- **不透明的重畫層不需要底下那一層**：`Paint` 遇到不透明的顏色會忽略底，所以底下讀不懂也不影響。
+  少這一條會讓「底是 Binding、重畫是純色」整組變成 unresolved（本機測試抓到）。
+- ⚠ **`TemplateChoices` 的條件是 `st.UnknownLayer`，不是「LayerPaints 有東西」**：`OpacityMask`、
+  整個換掉 `Template`、另一份模板畫的那三種都讓那一層不可知，而它們不會留下可查的底。用後者當條件的話
+  那三種會拿基礎狀態的底評分 —— 正好是 1.6 修掉的那個編造（本機測試抓到）。
+- ⚠ **重畫那一層的 `Src` 要留 `"tmpl"`**，不能用那個 Setter 的 Style Id：定義處（`WalkStyles`）看不到模板
+  內部那一層，掛上 Style Id 會讓同源判定把整組讓給定義處，而定義處也不評 —— 那一組在哪裡都消失
+  （本機測試抓到）。規則 13 的「TargetName=模板根」不一樣，它等同設在宿主上，定義處真的評得到。
+- ⚠ **`offChain` 的 `Raw` 留 null，讓它點名字色**（1.6 狀態層守門的寫法）。改成點名那一層的原始寫法
+  （多半是 `{TemplateBinding Background}`）看起來精確，其實沒資訊，而且 unresolved 的鍵是
+  `file|reason|value` —— 換個寫法就得再遞增 `Baseline.KeyVersion`，叫使用者重寫兩次 baseline。
+  實測差別：MahApps 有 40 筆只是標籤變動，修掉之後語料的差異只剩真正有新資訊的那些。
+- **還沒做的（新明文化，不是 bug）**：重畫的 `TargetName` 不在那一疊上（別的分支、或撐不滿那一格，
+  靜態分不出來）、重畫的值是漸層／Binding、半透明的重畫層而它蓋住的那一層讀不懂、模板裡的 `Image` 兄弟
+  與帶 `Opacity` 的兄弟（兩種維持 1.6 的答案 —— 前者標記樹有 `over-sibling-content`、模板裡還沒有計數器，
+  後者要疊合而這一步回傳的是原始寫法）。
 
 ### baseline 的鍵
 
@@ -512,15 +607,27 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   那會變成另一份要維護的複本，而公開語料（`verify-corpus.ps1`，釘住 commit）已經補上「固定素材」這個需求。
   2026-11-15：第四格（ZeroCel）的專案已不在本機，那一格與 `baselines/celflow.json` 一併移除 ——
   **永遠紅的守門員等於沒有守門員**。
+  **1.6 補上指紋的第二半：`tool-commit`／`tool-dirty`（凍結這份快照的工具版本）。**
+  只記受測對象時還差一步 —— 對象沒變、數字卻差了，腳本說得出「差異來自工具」，卻說不出是從哪一版開始差的。
+  2026-11-16 實際踩到：指紋顯示 Kindling 一個位元都沒改，而 `Themes/DarkTheme.xaml` 的行號整批 +2，
+  要重建一份 1.5.0 實跑才查得出那份快照是用 1.5.0 發版前的建置凍的（位移在 1.5.0 就已經是對的）。
+  現在那一行直接給 `git log <tool-commit>..HEAD -- src/`。⚠ **推論「對象沒變 → 差異來自工具」是對的，
+  但「差異來自這次的改動」不是** —— 快照可能是上一版發版前凍的。
   ⚠ 在判定之前**不要習慣性跑 `-Update` 蓋掉**——那正是這套機制要防的事。
 - **`verify-baselines.ps1` 進不了 CI**（路徑寫死 `D:\應用程式\...`，且那三個是未發佈的
   App）。所以它是「發版前本機關卡」而不是「每次 push 的關卡」，外部貢獻者跑不了
   （CONTRIBUTING 已明講）。RELEASING.md 把它列為發版前提，實務上要記得它可能因上面那個
   原因紅燈。
-- **已知盲區（明文不做，不是 bug）**：`TargetName` 指向模板內部元素的 Setter、跨元素相關聯的觸發器、
-  文字疊在兄弟圖片上。1.5 處理掉兩條：VisualStateManager 的狀態顏色**有計數器了**（`summary.stateColors`
-  ＋ `stateColorSites`，照舊不評）、隱含樣式**每個元素都解析**（剩三塊明文不猜：觸發態、模板把底畫在
-  看不到的那一層、同型別有多個互相競爭的全域隱含樣式）。收到相關 issue 時先確認是不是這幾條。
+- **已知盲區（明文不做，不是 bug）**：跨元素相關聯的觸發器、文字疊在兄弟圖片上、同型別有多個互相競爭的
+  全域隱含樣式、重畫的 `TargetName` 不在字底下那一疊上、模板裡的 `Image`／帶 `Opacity` 的兄弟、
+  畫在內容後面的兄弟（那是蓋住字）。1.5 處理掉兩條（VSM 狀態顏色**有計數器了**、隱含樣式**每個元素都解析**），
+  1.6 一次做掉四條（隱含樣式的**觸發態**、模板裡哪一層畫底、模板裡的**兄弟**背板、
+  觸發器重畫模板內部那一層）。收到相關 issue 時先確認是不是這幾條。
+- **觸發器條件是「App 自己的旗標」時會報出執行期不存在的組合**（明文盲區，1.0 就在，1.6 只是變多）：
+  ScreenToGif 用 `<Condition Property="DarkMode" Value="True"/>` 分深淺兩套字色，工具不知道那個屬性與主題相關，
+  於是兩個狀態各對兩欄各評一次 —— 黑字配深色底、白字配淺色底各一筆。猜屬性名就違反「不猜」，所以照報，
+  使用者用壓抑註解處理。1.5 在具名 Style 上就已經這樣（screentogif 的 baseline 本來就有 7 筆），
+  隱含樣式接上逐狀態路徑之後同一個形狀變多。
 - **C# 色盤的「第一個是深、第二個是淺」是假設**（`PaletteDetector.CsTuple`，源自 Kindling
   的寫法）。config 的 `csharpPattern` 可以繞過，但自動偵測那條路仍寫死這個順序。
 - **`.editorconfig` 刻意不設 `end_of_line` / `charset`**：既有檔案是 CRLF，強制成 lf 會逼出

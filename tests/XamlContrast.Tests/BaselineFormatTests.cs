@@ -27,7 +27,10 @@ public class BaselineFormatTests
     private const string FailText = """<TextBlock Foreground="#EEEEEE" Text="fail"/>""";
 
     /// <summary>手寫一份 baseline（數值經 JsonSerializer，不吃 locale）。</summary>
-    private static string BaselineJson(params object[] entries) => JsonSerializer.Serialize(new { schemaVersion = 1, entries });
+    // keyVersion 寫目前這個版本產生鍵的方式 —— 這些測試驗的是別的東西（欄位、型別、範圍、重複鍵），
+    // 寫死 1 的話每次 Baseline.KeyVersion 遞增就整批紅在「叫你重寫 baseline」上
+    private static string BaselineJson(params object[] entries)
+        => JsonSerializer.Serialize(new { schemaVersion = 1, keyVersion = Baseline.KeyVersion, entries });
 
     [Fact] // 寫出格式：根只有 schemaVersion（1.0 起）＋ comment ＋ entries；欄位 camelCase；收「低於 AA」的每一組（fail＋warn，1.0 起）；同鍵聚合
            // （count／worst=最差）；依 file、element、fg、bg 以 ordinal 排序 —— 跨 OS 寫出的檔逐字相同，diff 才看得懂
@@ -104,6 +107,7 @@ public class BaselineFormatTests
         var cmp = Baseline.Compare(r, JsonSerializer.Serialize(new
         {
             schemaVersion = 1,
+            keyVersion = Baseline.KeyVersion,
             entries = new[] { new { File = f.File, Element = f.Element, Fg = f.Fg, Bg = f.Bg, Count = 1, Worst = f.Worst } },
         }));
         Assert.True(cmp.Passes);
@@ -119,6 +123,7 @@ public class BaselineFormatTests
         var cmp = Baseline.Compare(r, JsonSerializer.Serialize(new
         {
             SchemaVersion = 1,
+            KeyVersion = Baseline.KeyVersion,
             Entries = new[] { new { File = f.File, Element = f.Element, Fg = f.Fg, Bg = f.Bg, Count = 1, Worst = f.Worst } },
         }));
         Assert.True(cmp.Passes);
@@ -129,7 +134,7 @@ public class BaselineFormatTests
     public void MissingEntriesSaysSo()
     {
         var r = Run(("Main.xaml", OnWhite(FailText)));
-        var ex = Assert.ThrowsAny<Exception>(() => Baseline.Compare(r, """{ "schemaVersion": 1, "nope": [] }"""));
+        var ex = Assert.ThrowsAny<Exception>(() => Baseline.Compare(r, $$"""{ "schemaVersion": 1, "keyVersion": {{Baseline.KeyVersion}}, "nope": [] }"""));
         Assert.Contains("'entries'", ex.Message);
     }
 
@@ -218,7 +223,7 @@ public class BaselineFormatTests
     [InlineData("\"count\": 1, \"worst\": \"1.49\"", "entry 1 has 'worst' \"1.49\" — it must be a number")]
     public void EntryFieldTypesAreNamed(string countAndWorst, string expected)
     {
-        var json = $$"""{ "schemaVersion": 1, "entries": [ { "file": "Main.xaml", "element": "TextBlock", "fg": "#EEEEEE", "bg": "#FFFFFF", {{countAndWorst}} } ] }""";
+        var json = $$"""{ "schemaVersion": 1, "keyVersion": {{Baseline.KeyVersion}}, "entries": [ { "file": "Main.xaml", "element": "TextBlock", "fg": "#EEEEEE", "bg": "#FFFFFF", {{countAndWorst}} } ] }""";
         var ex = Assert.ThrowsAny<FormatException>(() => Baseline.Parse(json));
         Assert.Contains(expected, ex.Message);
         Assert.DoesNotContain("XamlContrast.Core", ex.Message);
@@ -228,8 +233,9 @@ public class BaselineFormatTests
     [Fact]
     public void EntryTextFieldsMustBeStrings()
     {
-        var ex = Assert.ThrowsAny<FormatException>(() => Baseline.Parse(
-            """{ "schemaVersion": 1, "entries": [ { "file": 3, "element": "TextBlock", "fg": "#EEEEEE", "bg": "#FFFFFF", "count": 1, "worst": 1.2 } ] }"""));
+        var ex = Assert.ThrowsAny<FormatException>(() => Baseline.Parse($$"""
+            { "schemaVersion": 1, "keyVersion": {{Baseline.KeyVersion}}, "entries": [ { "file": 3, "element": "TextBlock", "fg": "#EEEEEE", "bg": "#FFFFFF", "count": 1, "worst": 1.2 } ] }
+            """));
         Assert.Contains("entry 1 has 'file' 3 — it must be a string", ex.Message);
     }
 
@@ -254,14 +260,21 @@ public class BaselineFormatTests
     //    屬稽核語意，1.x 的 minor 可以改。改的那一版遞增 keyVersion；讀到舊的 keyVersion 就明確叫人重寫，
     //    不是冒出一整排假的 NEW（同一組配對、新的鍵）加一整排假的 paid off ──
 
-    [Fact] // 缺 keyVersion 視為 1（手寫的檔、只帶 schemaVersion 的檔照樣讀得進）
+    [Fact] // 缺 keyVersion 視為 1（手寫的檔、只帶 schemaVersion 的檔）——
+           // 所以 1.6（keyVersion 2）之後那種檔會被拒並叫人重寫，不是靜默當成同一套鍵
     public void MissingKeyVersionIsReadAsOne()
     {
         var r = Run(("Main.xaml", OnWhite(FailText)));
         var f = r.Findings.Single();
-        var known = Baseline.Parse(BaselineJson(new { file = f.File, element = f.Element, fg = f.Fg, bg = f.Bg, count = 1, worst = f.Worst }));
-        Assert.Single(known.Entries);
-        Assert.True(Baseline.Compare(r, known).Passes);
+        var entry = new { file = f.File, element = f.Element, fg = f.Fg, bg = f.Bg, count = 1, worst = f.Worst };
+        var noVersion = JsonSerializer.Serialize(new { schemaVersion = 1, entries = new[] { entry } });
+
+        var asOne = Baseline.Parse(noVersion, currentKeyVersion: 1);
+        Assert.Single(asOne.Entries);
+        Assert.True(Baseline.Compare(r, asOne).Passes);
+
+        var ex = Assert.ThrowsAny<FormatException>(() => Baseline.Parse(noVersion, currentKeyVersion: 2));
+        Assert.Contains("keyVersion 1", ex.Message);
     }
 
     [Fact] // 這個版本產生鍵的方式比檔案新：鍵對不上，照讀會把每一筆既有債報成 NEW —— 改成點名並叫人重寫
@@ -273,7 +286,7 @@ public class BaselineFormatTests
     }
 
     [Theory] // 比自己新的 keyVersion，或不是正整數：不猜著讀。比自己新的要叫人升級工具，不是叫人用舊工具重寫（審查 1.0 最終驗證 S7）
-    [InlineData("2", "upgrade XamlContrast")]
+    [InlineData("3", "upgrade XamlContrast")]
     [InlineData("0", "positive integer")]
     [InlineData("\"1\"", "positive integer")]
     [InlineData("1.5", "positive integer")]
@@ -298,7 +311,7 @@ public class BaselineFormatTests
     [Theory] // 比這個版本新的 baseline（schemaVersion 或 keyVersion）：該做的是升級工具。舊版的 CLI 一律補一行
              // 「regenerate it with --write-baseline」—— 照做的話，是用舊工具把新工具寫的債清單蓋掉（審查 1.0 最終驗證 S7）
     [InlineData("""{ "schemaVersion": 2, "entries": [] }""")]
-    [InlineData("""{ "schemaVersion": 1, "keyVersion": 2, "entries": [] }""")]
+    [InlineData("""{ "schemaVersion": 1, "keyVersion": 3, "entries": [] }""")]
     public void BaselineFromANewerVersionAsksForAnUpgrade(string json)
     {
         using var fx = CliProjects.Failing();

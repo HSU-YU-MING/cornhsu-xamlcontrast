@@ -3,7 +3,7 @@
 project: bloxstrap
 repo: https://github.com/pizzaboxer/bloxstrap
 commit: 02db76006741f039b79ac7547b8054d7f3ccfc05
-tool-commit: 07be1dd+dirty
+tool-commit: 4a1e23d+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair
@@ -13,7 +13,7 @@ single-theme: False
 files: 38
 pairs: 0
 coverage: 0
-unresolved: 121
+unresolved: 126
 skipped: 0
 dead-foreground: 1
 disabled-exempt: 2
@@ -27,11 +27,11 @@ warn: 0
 ok: 0
 decorative: 0
 unresolved-by.bound-or-gradient: 27
-unresolved-by.no-ancestor-background: 54
+unresolved-by.no-ancestor-background: 55
 unresolved-by.translucent-uncomposited: 3
-unresolved-by.unknown-palette-key: 37
+unresolved-by.unknown-palette-key: 41
 unknown-keys.SystemAccentColorSecondary: 36
-unknown-keys.SystemAccentColorTertiary: 1
+unknown-keys.SystemAccentColorTertiary: 5
 # F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
 # U  原因  檔案:行  值
 U  bound-or-gradient  Bloxstrap/UI/Elements/About/Pages/SupportersPage.xaml:113  <ImageBrush>
@@ -66,6 +66,7 @@ U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:45  
 U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:72  {DynamicResource TextFillColorTertiaryBrush}
 U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:75  {DynamicResource TextFillColorTertiaryBrush}
 U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:78  {DynamicResource TextFillColorTertiaryBrush}
+U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:79  {DynamicResource TextFillColorTertiaryBrush}
 U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:79  {DynamicResource TextFillColorTertiaryBrush}
 U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:85  {DynamicResource TextFillColorTertiaryBrush}
 U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:90  {DynamicResource TextFillColorTertiaryBrush}
@@ -149,9 +150,13 @@ U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:7
 U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:75  SystemAccentColorSecondary
 U  unknown-palette-key  Bloxstrap/UI/Elements/About/Pages/TranslatorsPage.xaml:96  SystemAccentColorSecondary
 U  unknown-palette-key  Bloxstrap/UI/Elements/Controls/OptionControl.xaml:37  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/Controls/OptionControl.xaml:37  SystemAccentColorTertiary
 U  unknown-palette-key  Bloxstrap/UI/Elements/Controls/OptionControl.xaml:38  SystemAccentColorSecondary
 U  unknown-palette-key  Bloxstrap/UI/Elements/Controls/OptionControl.xaml:38  SystemAccentColorTertiary
 U  unknown-palette-key  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:55  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:55  SystemAccentColorTertiary
 U  unknown-palette-key  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:56  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:56  SystemAccentColorTertiary
 U  unknown-palette-key  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:57  SystemAccentColorSecondary
+U  unknown-palette-key  Bloxstrap/UI/Elements/Dialogs/LaunchMenuDialog.xaml:57  SystemAccentColorTertiary
 U  unknown-palette-key  Bloxstrap/UI/Elements/Settings/Pages/FastFlagEditorPage.xaml:68  SystemAccentColorSecondary

@@ -19,7 +19,7 @@
     "strictPalette": false,
     "failOnNewUnresolved": false,
     "files": 15,
-    "pairs": 222,
+    "pairs": 225,
     "coverage": 97.8,
     "unresolved": 5,
     "unresolvedBy": {
@@ -29,7 +29,7 @@
     "unknownKeys": {},
     "skipped": 1,
     "deadForeground": 2,
-    "disabledExempt": 6,
+    "disabledExempt": 37,
     "converterPairs": 0,
     "uiComponentPairs": 0,
     "parseErrors": 0,
@@ -41,7 +41,7 @@
     "counts": {
       "fail": 0,
       "warn": 0,
-      "ok": 219,
+      "ok": 222,
       "decorative": 3
     }
   },
@@ -55,14 +55,14 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 268,
+      "line": 270,
       "reason": "in-style-template",
       "value": "{DynamicResource Fg1}",
       "baseline": null
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 370,
+      "line": 372,
       "reason": "in-style-template",
       "value": "{DynamicResource Fg1}",
       "baseline": null
@@ -254,7 +254,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 223,
+      "line": 225,
       "element": "Style[DangerBtn]/base",
       "fg": "{DynamicResource DangerFg}",
       "bg": "{DangerBg}",
@@ -282,7 +282,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 223,
+      "line": 225,
       "element": "Style[DangerBtn]/trigger",
       "fg": "{DynamicResource DangerFg}",
       "bg": "{DangerBgHover}",
@@ -310,7 +310,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 223,
+      "line": 225,
       "element": "Style[DangerBtn]/trigger",
       "fg": "White",
       "bg": "{DangerSolid}",
@@ -338,7 +338,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 246,
+      "line": 248,
       "element": "Style[ComboBox]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg2}",
@@ -366,7 +366,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 301,
+      "line": 303,
       "element": "Style[ComboBoxItem]/trigger",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg3}",
@@ -394,7 +394,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 354,
+      "line": 356,
       "element": "Style[MenuItem]/trigger",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg3}",
@@ -422,7 +422,7 @@
     },
     {
       "file": "Themes/DarkTheme.xaml",
-      "line": 415,
+      "line": 417,
       "element": "Style[ToolTip]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg2}",
@@ -451,7 +451,7 @@
     {
       "file": "Views/ApiKeyDialog.xaml",
       "line": 1,
-      "element": "Window",
+      "element": "Window\u2295Style[implicit Window]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -479,7 +479,7 @@
     {
       "file": "Views/ApiKeyDialog.xaml",
       "line": 23,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -507,7 +507,7 @@
     {
       "file": "Views/ApiKeyDialog.xaml",
       "line": 27,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -563,7 +563,7 @@
     {
       "file": "Views/ApiKeyDialog.xaml",
       "line": 37,
-      "element": "CheckBox",
+      "element": "CheckBox\u2295Style[implicit CheckBox]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -591,7 +591,7 @@
     {
       "file": "Views/ApiKeyDialog.xaml",
       "line": 38,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -619,7 +619,7 @@
     {
       "file": "Views/ApiKeyDialog.xaml",
       "line": 41,
-      "element": "CheckBox",
+      "element": "CheckBox\u2295Style[implicit CheckBox]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -647,7 +647,7 @@
     {
       "file": "Views/ApiKeyDialog.xaml",
       "line": 42,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -675,7 +675,7 @@
     {
       "file": "Views/ApiKeyDialog.xaml",
       "line": 47,
-      "element": "CheckBox",
+      "element": "CheckBox\u2295Style[implicit CheckBox]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -703,7 +703,7 @@
     {
       "file": "Views/ApiKeyDialog.xaml",
       "line": 48,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -731,7 +731,7 @@
     {
       "file": "Views/ApiKeyDialog.xaml",
       "line": 50,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -759,7 +759,7 @@
     {
       "file": "Views/ApiKeyDialog.xaml",
       "line": 54,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -787,7 +787,7 @@
     {
       "file": "Views/ChoiceDialog.xaml",
       "line": 1,
-      "element": "Window",
+      "element": "Window\u2295Style[implicit Window]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -815,7 +815,7 @@
     {
       "file": "Views/ChoiceDialog.xaml",
       "line": 9,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -843,7 +843,7 @@
     {
       "file": "Views/ClipLibraryView.xaml",
       "line": 12,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -871,7 +871,7 @@
     {
       "file": "Views/ClipLibraryView.xaml",
       "line": 17,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -899,7 +899,7 @@
     {
       "file": "Views/ClipLibraryView.xaml",
       "line": 19,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -927,7 +927,7 @@
     {
       "file": "Views/ClipLibraryView.xaml",
       "line": 74,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -954,8 +954,36 @@
     },
     {
       "file": "Views/ClipLibraryView.xaml",
+      "line": 82,
+      "element": "Button\u2295Style[implicit Button]/base",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg0}",
+      "ratioDark": 16.28,
+      "ratioLight": 14.32,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/ClipLibraryView.xaml",
       "line": 109,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "#ECEAFB",
       "bg": "{PurpleD}",
       "ratioDark": 5.85,
@@ -983,7 +1011,7 @@
     {
       "file": "Views/ClipLibraryView.xaml",
       "line": 113,
-      "element": "Button",
+      "element": "Button\u2295Style[implicit Button]/base",
       "fg": "{DynamicResource DangerFg}",
       "bg": "{DangerBg}",
       "ratioDark": 6.84,
@@ -1011,7 +1039,7 @@
     {
       "file": "Views/ClipLibraryView.xaml",
       "line": 122,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{DangerBg}",
       "ratioDark": 8.02,
@@ -1039,7 +1067,7 @@
     {
       "file": "Views/ClipLibraryView.xaml",
       "line": 125,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -1067,7 +1095,7 @@
     {
       "file": "Views/ClipLibraryView.xaml",
       "line": 143,
-      "element": "ListBox",
+      "element": "ListBox\u2295Style[implicit ListBox]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg0}",
       "ratioDark": 16.28,
@@ -1095,7 +1123,7 @@
     {
       "file": "Views/ClipLibraryView.xaml",
       "line": 178,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg0}",
       "ratioDark": 16.28,
@@ -1123,7 +1151,7 @@
     {
       "file": "Views/ClipLibraryView.xaml",
       "line": 181,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -1151,7 +1179,7 @@
     {
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 1,
-      "element": "Window",
+      "element": "Window\u2295Style[implicit Window]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -1179,7 +1207,7 @@
     {
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 20,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -1207,7 +1235,7 @@
     {
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 62,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -1235,7 +1263,7 @@
     {
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 107,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -1263,7 +1291,7 @@
     {
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 109,
-      "element": "CheckBox",
+      "element": "CheckBox\u2295Style[implicit CheckBox]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -1319,7 +1347,7 @@
     {
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 145,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -1347,7 +1375,7 @@
     {
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 151,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -1375,7 +1403,7 @@
     {
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 206,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -1403,7 +1431,7 @@
     {
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 207,
-      "element": "CheckBox",
+      "element": "CheckBox\u2295Style[implicit CheckBox]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -1431,7 +1459,7 @@
     {
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 210,
-      "element": "CheckBox",
+      "element": "CheckBox\u2295Style[implicit CheckBox]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -1459,7 +1487,7 @@
     {
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 213,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -1711,7 +1739,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 1,
-      "element": "Window",
+      "element": "Window\u2295Style[implicit Window]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -1739,7 +1767,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 27,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -1767,7 +1795,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 46,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg2}",
       "ratioDark": 5.94,
@@ -1795,7 +1823,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 47,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg2}",
       "ratioDark": 5.94,
@@ -1823,7 +1851,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 54,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Purple}",
       "bg": "{Bg1}",
       "ratioDark": 4.63,
@@ -1851,7 +1879,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 67,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg2}",
       "ratioDark": 5.94,
@@ -1879,7 +1907,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 68,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg2}",
       "ratioDark": 5.94,
@@ -1907,7 +1935,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 86,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{InfoBarWarningBackground}",
       "ratioDark": 10.27,
@@ -1935,7 +1963,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 91,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -1963,7 +1991,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 105,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -1991,7 +2019,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 110,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -2019,7 +2047,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 115,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -2047,7 +2075,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 117,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Purple}",
       "bg": "{Bg1}",
       "ratioDark": 4.63,
@@ -2075,7 +2103,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 120,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -2103,7 +2131,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 178,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -2131,7 +2159,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 180,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Amber}",
       "bg": "{Bg1}",
       "ratioDark": 10.54,
@@ -2159,7 +2187,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 186,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -2187,7 +2215,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 222,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -2215,7 +2243,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 224,
-      "element": "CheckBox",
+      "element": "CheckBox\u2295Style[implicit CheckBox]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -2243,7 +2271,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 226,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -2271,7 +2299,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 233,
-      "element": "CheckBox",
+      "element": "CheckBox\u2295Style[implicit CheckBox]/base",
       "fg": "{DynamicResource InfoBarWarningForeground}",
       "bg": "{InfoBarWarningBackground}",
       "ratioDark": 11.92,
@@ -2299,7 +2327,7 @@
     {
       "file": "Views/GenerateDialog.xaml",
       "line": 235,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{InfoBarWarningBackground}",
       "ratioDark": 10.27,
@@ -2439,7 +2467,7 @@
     {
       "file": "Views/MainWindow.xaml",
       "line": 1,
-      "element": "Window",
+      "element": "Window\u2295Style[implicit Window]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -2467,7 +2495,7 @@
     {
       "file": "Views/MessageDialog.xaml",
       "line": 1,
-      "element": "Window",
+      "element": "Window\u2295Style[implicit Window]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -2495,7 +2523,7 @@
     {
       "file": "Views/MessageDialog.xaml",
       "line": 21,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -2523,7 +2551,7 @@
     {
       "file": "Views/MessageDialog.xaml",
       "line": 26,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -2551,7 +2579,7 @@
     {
       "file": "Views/MessageDialog.xaml",
       "line": 29,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -2579,7 +2607,7 @@
     {
       "file": "Views/PreviewView.xaml",
       "line": 12,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -2607,7 +2635,7 @@
     {
       "file": "Views/PreviewView.xaml",
       "line": 25,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "#A0A0A0",
       "bg": "#000000",
       "ratioDark": 8.03,
@@ -2635,7 +2663,7 @@
     {
       "file": "Views/PreviewView.xaml",
       "line": 34,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "White",
       "bg": "#CC000000 over #000000",
       "ratioDark": 21,
@@ -2663,7 +2691,7 @@
     {
       "file": "Views/ProjectWallView.xaml",
       "line": 84,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Purple}",
       "bg": "{Bg1}",
       "ratioDark": 4.63,
@@ -2691,7 +2719,7 @@
     {
       "file": "Views/ProjectWallView.xaml",
       "line": 86,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -2719,7 +2747,7 @@
     {
       "file": "Views/ProjectWallView.xaml",
       "line": 109,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -2747,7 +2775,7 @@
     {
       "file": "Views/ProjectWallView.xaml",
       "line": 111,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -2775,7 +2803,7 @@
     {
       "file": "Views/ProjectWallView.xaml",
       "line": 138,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg2}",
       "ratioDark": 13.38,
@@ -2803,7 +2831,7 @@
     {
       "file": "Views/ProjectWallView.xaml",
       "line": 141,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg2}",
       "ratioDark": 5.94,
@@ -2831,7 +2859,7 @@
     {
       "file": "Views/ProjectWallView.xaml",
       "line": 143,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg2}",
       "ratioDark": 5.94,
@@ -2971,7 +2999,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 1,
-      "element": "Window",
+      "element": "Window\u2295Style[implicit Window]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -2999,7 +3027,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 56,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -3027,7 +3055,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 60,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Purple}",
       "bg": "{BgDeep}",
       "ratioDark": 5.17,
@@ -3083,7 +3111,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 82,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -3110,8 +3138,36 @@
     },
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
+      "line": 90,
+      "element": "Button\u2295Style[implicit Button]/base",
+      "fg": "{DynamicResource Fg0}",
+      "bg": "{Bg0}",
+      "ratioDark": 16.28,
+      "ratioLight": 14.32,
+      "colors": {
+        "dark": {
+          "fg": "#EEEEEE",
+          "bg": "#111111"
+        },
+        "light": {
+          "fg": "#1B1B1B",
+          "bg": "#EAEAEA"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 12,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 121,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "#ECEAFB",
       "bg": "{PurpleD}",
       "ratioDark": 5.85,
@@ -3223,7 +3279,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 176,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -3251,7 +3307,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 198,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -3279,7 +3335,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 201,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -3391,7 +3447,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 315,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -3419,7 +3475,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 340,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
       "ratioDark": 7.43,
@@ -3475,7 +3531,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 374,
-      "element": "RadioButton",
+      "element": "RadioButton\u2295Style[implicit RadioButton]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
       "ratioDark": 7.43,
@@ -3503,7 +3559,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 379,
-      "element": "RadioButton",
+      "element": "RadioButton\u2295Style[implicit RadioButton]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
       "ratioDark": 7.43,
@@ -3531,7 +3587,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 383,
-      "element": "RadioButton",
+      "element": "RadioButton\u2295Style[implicit RadioButton]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
       "ratioDark": 7.43,
@@ -3643,7 +3699,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 410,
-      "element": "CheckBox",
+      "element": "CheckBox\u2295Style[implicit CheckBox]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
       "ratioDark": 7.43,
@@ -3671,7 +3727,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 415,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{BgDeep}",
       "ratioDark": 16.75,
@@ -3755,7 +3811,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 433,
-      "element": "TextBox",
+      "element": "TextBox\u2295Style[implicit TextBox]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{BgDeep}",
       "ratioDark": 16.75,
@@ -3783,7 +3839,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 443,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -3811,7 +3867,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 448,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Purple}",
       "bg": "{Bg1}",
       "ratioDark": 4.63,
@@ -3839,7 +3895,7 @@
     {
       "file": "Views/RegenerateWorkspaceWindow.xaml",
       "line": 467,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "White",
       "bg": "#99000000 over {Bg1}",
       "ratioDark": 19.8,
@@ -3895,7 +3951,7 @@
     {
       "file": "Views/SequenceTrackView.xaml",
       "line": 10,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -3923,7 +3979,7 @@
     {
       "file": "Views/SequenceTrackView.xaml",
       "line": 61,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Amber}",
       "bg": "{Bg3}",
       "ratioDark": 8.23,
@@ -3951,7 +4007,7 @@
     {
       "file": "Views/SequenceTrackView.xaml",
       "line": 68,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "#AFA9EC",
       "bg": "#2A2640",
       "ratioDark": 6.7,
@@ -3979,7 +4035,7 @@
     {
       "file": "Views/SequenceTrackView.xaml",
       "line": 71,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg2}",
       "ratioDark": 13.38,
@@ -4007,7 +4063,7 @@
     {
       "file": "Views/TextInputDialog.xaml",
       "line": 1,
-      "element": "Window",
+      "element": "Window\u2295Style[implicit Window]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -4035,7 +4091,7 @@
     {
       "file": "Views/TextInputDialog.xaml",
       "line": 15,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -4063,7 +4119,7 @@
     {
       "file": "Views/TimelineView.xaml",
       "line": 105,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -4091,7 +4147,7 @@
     {
       "file": "Views/TimelineView.xaml",
       "line": 114,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
       "ratioDark": 7.43,
@@ -4119,7 +4175,7 @@
     {
       "file": "Views/TimelineView.xaml",
       "line": 120,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{DangerBg}",
       "ratioDark": 8.02,
@@ -4146,8 +4202,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 133,
-      "element": "TextBlock",
+      "line": 129,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "White",
       "bg": "{PurpleD}",
       "ratioDark": 6.93,
@@ -4174,8 +4230,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 157,
-      "element": "TextBlock",
+      "line": 152,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Purple}",
       "bg": "{BgDeep}",
       "ratioDark": 5.17,
@@ -4202,8 +4258,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 159,
-      "element": "TextBlock",
+      "line": 154,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
       "ratioDark": 7.43,
@@ -4224,6 +4280,62 @@
       "isText": true,
       "isLargeText": false,
       "fontSize": 13,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 156,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{BgDeep}",
+      "ratioDark": 7.43,
+      "ratioLight": 6.9,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#0D0D0D"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#FFFFFF"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 13,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 158,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{BgDeep}",
+      "ratioDark": 7.43,
+      "ratioLight": 6.9,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#0D0D0D"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#FFFFFF"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": 11,
       "theme": null,
       "component": null,
       "baseline": null
@@ -4231,7 +4343,7 @@
     {
       "file": "Views/TimelineView.xaml",
       "line": 161,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
       "ratioDark": 7.43,
@@ -4251,7 +4363,7 @@
       "symmetry": null,
       "isText": true,
       "isLargeText": false,
-      "fontSize": 13,
+      "fontSize": 11,
       "theme": null,
       "component": null,
       "baseline": null
@@ -4259,7 +4371,7 @@
     {
       "file": "Views/TimelineView.xaml",
       "line": 163,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
       "ratioDark": 7.43,
@@ -4286,64 +4398,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 166,
-      "element": "TextBlock",
-      "fg": "{DynamicResource Fg1}",
-      "bg": "{BgDeep}",
-      "ratioDark": 7.43,
-      "ratioLight": 6.9,
-      "colors": {
-        "dark": {
-          "fg": "#A0A0A0",
-          "bg": "#0D0D0D"
-        },
-        "light": {
-          "fg": "#5A5A5A",
-          "bg": "#FFFFFF"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 11,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/TimelineView.xaml",
-      "line": 168,
-      "element": "TextBlock",
-      "fg": "{DynamicResource Fg1}",
-      "bg": "{BgDeep}",
-      "ratioDark": 7.43,
-      "ratioLight": 6.9,
-      "colors": {
-        "dark": {
-          "fg": "#A0A0A0",
-          "bg": "#0D0D0D"
-        },
-        "light": {
-          "fg": "#5A5A5A",
-          "bg": "#FFFFFF"
-        }
-      },
-      "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
-      "isText": true,
-      "isLargeText": false,
-      "fontSize": 11,
-      "theme": null,
-      "component": null,
-      "baseline": null
-    },
-    {
-      "file": "Views/TimelineView.xaml",
-      "line": 176,
-      "element": "TextBlock",
+      "line": 171,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -4370,8 +4426,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 181,
-      "element": "TextBlock",
+      "line": 176,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -4398,8 +4454,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 195,
-      "element": "CheckBox",
+      "line": 190,
+      "element": "CheckBox\u2295Style[implicit CheckBox]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -4426,8 +4482,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 205,
-      "element": "TextBlock",
+      "line": 200,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Green}",
       "bg": "{BgDeep}",
       "ratioDark": 8.43,
@@ -4454,8 +4510,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 219,
-      "element": "TextBlock",
+      "line": 214,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -4482,8 +4538,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 224,
-      "element": "TextBlock",
+      "line": 219,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{BgDeep}",
       "ratioDark": 16.75,
@@ -4510,8 +4566,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 230,
-      "element": "TextBlock",
+      "line": 225,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -4538,8 +4594,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 249,
-      "element": "TextBlock",
+      "line": 244,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -4566,7 +4622,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 255,
+      "line": 250,
       "element": "Button\u2295Style[\u2192IconBtn]/base",
       "fg": "{DynamicResource Green}",
       "bg": "{Bg3}",
@@ -4594,7 +4650,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 255,
+      "line": 250,
       "element": "Button\u2295Style[\u2192IconBtn]/trigger",
       "fg": "{DynamicResource Green}",
       "bg": "{Bg4}",
@@ -4622,7 +4678,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 255,
+      "line": 250,
       "element": "Button\u2295Style[\u2192IconBtn]/trigger",
       "fg": "White",
       "bg": "{PurpleD}",
@@ -4650,7 +4706,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 255,
+      "line": 250,
       "element": "Button\u2295Style[\u2192IconBtn]/trigger",
       "fg": "{DynamicResource RedOnBtn}",
       "bg": "{Bg3}",
@@ -4678,7 +4734,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 285,
+      "line": 280,
       "element": "Button\u2295Style[\u2192IconBtn]/base",
       "fg": "{DynamicResource BlueOnBtn}",
       "bg": "{Bg3}",
@@ -4706,7 +4762,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 285,
+      "line": 280,
       "element": "Button\u2295Style[\u2192IconBtn]/trigger",
       "fg": "{DynamicResource BlueOnBtn}",
       "bg": "{Bg4}",
@@ -4734,7 +4790,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 285,
+      "line": 280,
       "element": "Button\u2295Style[\u2192IconBtn]/trigger",
       "fg": "White",
       "bg": "{PurpleD}",
@@ -4762,7 +4818,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 285,
+      "line": 280,
       "element": "Button\u2295Style[\u2192IconBtn]/trigger",
       "fg": "{DynamicResource RedOnBtn}",
       "bg": "{Bg3}",
@@ -4790,8 +4846,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 336,
-      "element": "TextBlock",
+      "line": 331,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -4818,8 +4874,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 367,
-      "element": "MenuItem",
+      "line": 361,
+      "element": "ContextMenu\u2295Style[implicit ContextMenu]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -4846,8 +4902,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 369,
-      "element": "MenuItem",
+      "line": 362,
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -4874,8 +4930,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 371,
-      "element": "MenuItem",
+      "line": 364,
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -4902,8 +4958,36 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 384,
-      "element": "TextBlock",
+      "line": 366,
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
+      "fg": "{DynamicResource Fg1}",
+      "bg": "{Bg1}",
+      "ratioDark": 6.66,
+      "ratioLight": 6.22,
+      "colors": {
+        "dark": {
+          "fg": "#A0A0A0",
+          "bg": "#1A1A1A"
+        },
+        "light": {
+          "fg": "#5A5A5A",
+          "bg": "#F3F3F3"
+        }
+      },
+      "threshold": 4.5,
+      "category": "ok",
+      "symmetry": null,
+      "isText": true,
+      "isLargeText": false,
+      "fontSize": null,
+      "theme": null,
+      "component": null,
+      "baseline": null
+    },
+    {
+      "file": "Views/TimelineView.xaml",
+      "line": 379,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "#9A9A9A",
       "bg": "#000000",
       "ratioDark": 7.46,
@@ -4930,7 +5014,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 428,
+      "line": 423,
       "element": "Button\u2295Style[CellDeleteBtn]/base",
       "fg": "#FFFFFF",
       "bg": "{DangerSolid}",
@@ -4958,8 +5042,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 442,
-      "element": "TextBlock",
+      "line": 437,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "#7AA87A",
       "bg": "#0A180A",
       "ratioDark": 6.72,
@@ -4986,8 +5070,8 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 458,
-      "element": "TextBlock",
+      "line": 453,
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "#7A7AA8",
       "bg": "#0A0A18",
       "ratioDark": 4.84,
@@ -5014,7 +5098,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 473,
+      "line": 468,
       "element": "Polygon",
       "fg": "{DynamicResource Red}",
       "bg": "{Bg0}",
@@ -5042,7 +5126,7 @@
     },
     {
       "file": "Views/TimelineView.xaml",
-      "line": 475,
+      "line": 470,
       "element": "Rectangle",
       "fg": "{DynamicResource Red}",
       "bg": "{Bg0}",
@@ -5099,7 +5183,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 24,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Purple}",
       "bg": "{Bg0}",
       "ratioDark": 5.02,
@@ -5127,7 +5211,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 29,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5155,7 +5239,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 35,
-      "element": "Menu",
+      "element": "Menu\u2295Style[implicit Menu]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5183,7 +5267,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 36,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5211,7 +5295,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 37,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5239,7 +5323,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 38,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5267,7 +5351,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 39,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5295,7 +5379,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 41,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5323,7 +5407,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 42,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5351,7 +5435,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 43,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5379,7 +5463,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 45,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5407,7 +5491,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 46,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5435,7 +5519,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 48,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5463,7 +5547,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 49,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5491,7 +5575,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 51,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5519,7 +5603,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 55,
-      "element": "Menu",
+      "element": "Menu\u2295Style[implicit Menu]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5547,7 +5631,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 56,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5575,7 +5659,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 57,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5603,7 +5687,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 58,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5631,7 +5715,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 60,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5659,7 +5743,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 61,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5687,7 +5771,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 63,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5715,7 +5799,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 67,
-      "element": "Menu",
+      "element": "Menu\u2295Style[implicit Menu]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5743,7 +5827,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 68,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5771,7 +5855,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 69,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5799,7 +5883,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 70,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5827,7 +5911,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 72,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5855,7 +5939,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 73,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5883,7 +5967,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 74,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5911,7 +5995,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 75,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5939,7 +6023,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 79,
-      "element": "Menu",
+      "element": "Menu\u2295Style[implicit Menu]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5967,7 +6051,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 80,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -5995,7 +6079,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 81,
-      "element": "MenuItem",
+      "element": "MenuItem\u2295Style[implicit MenuItem]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg0}",
       "ratioDark": 7.22,
@@ -6023,7 +6107,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 94,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "#AFA9EC",
       "bg": "#2A2640",
       "ratioDark": 6.7,
@@ -6051,7 +6135,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 154,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -6079,7 +6163,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 174,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -6107,7 +6191,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 184,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg0}",
       "bg": "{Bg1}",
       "ratioDark": 15,
@@ -6135,7 +6219,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 187,
-      "element": "CheckBox",
+      "element": "CheckBox\u2295Style[implicit CheckBox]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -6163,7 +6247,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 189,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -6191,7 +6275,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 208,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -6219,7 +6303,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 221,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{Bg1}",
       "ratioDark": 6.66,
@@ -6275,7 +6359,7 @@
     {
       "file": "Views/WorkspaceView.xaml",
       "line": 251,
-      "element": "TextBlock",
+      "element": "TextBlock\u2295Style[implicit TextBlock]/base",
       "fg": "{DynamicResource Fg1}",
       "bg": "{BgDeep}",
       "ratioDark": 7.43,

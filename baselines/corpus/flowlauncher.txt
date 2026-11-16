@@ -3,7 +3,7 @@
 project: flowlauncher
 repo: https://github.com/Flow-Launcher/Flow.Launcher
 commit: 236c847977abfe72d73de8cd8d2d0e4896c53647
-tool-commit: 07be1dd+dirty
+tool-commit: 4a1e23d+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair
@@ -12,11 +12,11 @@ palette-keys: 76
 single-theme: False
 files: 372
 pairs: 101
-coverage: 47.2
-unresolved: 113
+coverage: 29.8
+unresolved: 238
 skipped: 1
-dead-foreground: 23
-disabled-exempt: 3
+dead-foreground: 21
+disabled-exempt: 46
 converter-pairs: 0
 ui-component-pairs: 0
 parse-errors: 0
@@ -26,18 +26,20 @@ fail: 4
 warn: 5
 ok: 88
 decorative: 4
-unresolved-by.bound-or-gradient: 10
+unresolved-by.bound-or-gradient: 8
 unresolved-by.in-style-template: 5
 unresolved-by.no-ancestor-background: 71
 unresolved-by.over-sibling-content: 1
+unresolved-by.template-painted: 86
 unresolved-by.translucent-uncomposited: 16
-unresolved-by.unknown-palette-key: 10
+unresolved-by.unknown-palette-key: 51
 unknown-keys.AccentButtonBackground: 1
 unknown-keys.AccentButtonForegroundPointerOver: 1
 unknown-keys.MenuFlyoutItemForeground: 3
 unknown-keys.MenuFlyoutSubItemForeground: 1
 unknown-keys.NavigationViewItemForeground: 3
 unknown-keys.RepeatButtonBackground: 1
+unknown-keys.ToggleSwitchContentForeground: 41
 # F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
 F  decorative  Flow.Launcher/PluginUpdateWindow.xaml:59  Rectangle  {DynamicResource SeparatorForeground} on {PopuBGColor}  1.55/1.33  
 F  decorative  Flow.Launcher/SelectBrowserWindow.xaml:89  Rectangle  {DynamicResource SeparatorForeground} on {PopuBGColor}  1.55/1.33  
@@ -46,7 +48,7 @@ F  decorative  Flow.Launcher/SelectFileManagerWindow.xaml:99  Rectangle  {Static
 F  fail  Flow.Launcher/Msg.xaml:60  TextBlock  #8e94a4 on #EBEBEB  2.54/2.54  both-low
 F  fail  Flow.Launcher/MsgWithButton.xaml:61  TextBlock  #8e94a4 on #EBEBEB  2.54/2.54  both-low
 F  fail  Flow.Launcher/MsgWithButton.xaml:77  Button  #dcdcdc on #EBEBEB  1.15/1.15  both-low
-F  fail  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:368  ContentControl  {DynamicResource Color05B} on #2F2F2F  13.39/1.29  light-fails
+F  fail  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:368  ContentControl⊕Style[implicit ContentControl]/base  {DynamicResource Color05B} on #2F2F2F  13.39/1.29  light-fails
 F  ok  Flow.Launcher/ActionKeywords.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
 F  ok  Flow.Launcher/ActionKeywords.xaml:70  TextBox  {DynamicResource Color05B} on {PopuBGColor}  16.29/17.22  
 F  ok  Flow.Launcher/CustomQueryHotkeySetting.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
@@ -65,9 +67,9 @@ F  ok  Flow.Launcher/PluginSettingsWindow.xaml:151  TextBlock⊕Style[PluginSett
 F  ok  Flow.Launcher/PluginSettingsWindow.xaml:154  TextBlock⊕Style[PluginSettingsRowLabelStyle]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
 F  ok  Flow.Launcher/PluginSettingsWindow.xaml:171  TextBlock⊕Style[PluginSettingsRowGlyphStyle]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
 F  ok  Flow.Launcher/PluginSettingsWindow.xaml:174  TextBlock⊕Style[PluginSettingsRowLabelStyle]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
-F  ok  Flow.Launcher/PluginSettingsWindow.xaml:204  ContentControl  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
-F  ok  Flow.Launcher/PluginSettingsWindow.xaml:221  ContentControl  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
-F  ok  Flow.Launcher/PluginSettingsWindow.xaml:229  ContentControl  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:204  ContentControl⊕Style[implicit ContentControl]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:221  ContentControl⊕Style[implicit ContentControl]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/PluginSettingsWindow.xaml:229  ContentControl⊕Style[implicit ContentControl]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
 F  ok  Flow.Launcher/PluginSettingsWindow.xaml:80  TextBlock  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
 F  ok  Flow.Launcher/PluginSettingsWindow.xaml:87  TextBlock  {DynamicResource Color04B} on {Color01B}  10.46/5.75  
 F  ok  Flow.Launcher/PluginUpdateWindow.xaml:1  Window  {DynamicResource PopupTextColor} on {PopuBGColor}  10.46/17.22  
@@ -77,7 +79,7 @@ F  ok  Flow.Launcher/ReportWindow.xaml:1  Window  {DynamicResource PopupTextColo
 F  ok  Flow.Launcher/Resources/Controls/CustomWindowTitleBar.xaml:35  Button⊕Style[TitleBarButtonStyle]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
 F  ok  Flow.Launcher/Resources/Controls/CustomWindowTitleBar.xaml:46  Button⊕Style[TitleBarButtonStyle]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
 F  ok  Flow.Launcher/Resources/Controls/CustomWindowTitleBar.xaml:56  Button⊕Style[TitleBarButtonStyle]/base  {DynamicResource Color05B} on {Color01B}  16.29/15.52  
-F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:174  ContentControl  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
+F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:174  ContentControl⊕Style[implicit ContentControl]/base  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
 F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:52  TextBlock⊕Style[LinkBtnStyle]/base  {DynamicResource PluginInfoColor} on {Color00B}  3.94/3.10  
 F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:52  TextBlock⊕Style[LinkBtnStyle]/trigger  {DynamicResource Color05B} on {Color00B}  14.16/16.50  
 F  ok  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:61  TextBlock⊕Style[LinkBtnStyle]/base  {DynamicResource PluginInfoColor} on {Color00B}  3.94/3.10  
@@ -142,9 +144,7 @@ F  warn  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:
 F  warn  Flow.Launcher/Resources/Controls/InstalledPluginDisplayBottomData.xaml:46  TextBlock  {DynamicResource PluginInfoColor} on {Color00B}  3.94/3.10  both-low
 # U  原因  檔案:行  值
 U  bound-or-gradient  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:18  {DynamicResource {x:Static SystemColors.ControlTextBrushKey}}
-U  bound-or-gradient  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:18  {DynamicResource {x:Static SystemColors.GrayTextBrushKey}}
 U  bound-or-gradient  Flow.Launcher/Resources/CustomControlTemplate.xaml:1520  {DynamicResource {x:Static SystemColors.ControlTextBrushKey}}
-U  bound-or-gradient  Flow.Launcher/Resources/CustomControlTemplate.xaml:1520  {DynamicResource {x:Static SystemColors.GrayTextBrushKey}}
 U  bound-or-gradient  Flow.Launcher/ResultListBox.xaml:166  {Binding Result.ProgressBarColor}
 U  bound-or-gradient  Flow.Launcher/ResultListBox.xaml:166  {Binding Result.ProgressBarColor}
 U  bound-or-gradient  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:386  {Binding PreviewBackground}
@@ -228,6 +228,92 @@ U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.Shell/Views/ShellSetting
 U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.WebSearch/SettingsControl.xaml:19  gray
 U  no-ancestor-background  Plugins/Flow.Launcher.Plugin.WebSearch/SettingsControl.xaml:29  gray
 U  over-sibling-content  Flow.Launcher/ResultListBox.xaml:134  <Image>
+U  template-painted  Flow.Launcher/PluginSettingsWindow.xaml:110  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/PluginSettingsWindow.xaml:110  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:136  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:136  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:146  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:146  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  {DynamicResource NavigationViewItemForeground}
+U  template-painted  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  {DynamicResource NavigationViewItemForeground}
+U  template-painted  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  {DynamicResource NavigationViewItemForeground}
+U  template-painted  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  {DynamicResource NavigationViewItemForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:103  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:103  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:184  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:184  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:198  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:198  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:213  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:213  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:227  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:227  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:282  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:282  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:296  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:296  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:310  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:310  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:324  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:324  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:334  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:334  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:341  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:341  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:386  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:386  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:39  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:39  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:415  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:415  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:426  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:426  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:46  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:46  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:515  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:515  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:529  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:529  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:546  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:546  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:573  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:573  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:588  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:588  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:62  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:62  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:627  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:627  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:69  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:69  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:79  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:79  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:89  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:89  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneHotkey.xaml:77  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneHotkey.xaml:77  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneProxy.xaml:34  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneProxy.xaml:34  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:517  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:517  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:539  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:539  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:583  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:583  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:608  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:608  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:624  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:624  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:648  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:648  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:685  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:685  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:758  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:758  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:773  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:773  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:780  {DynamicResource ToggleSwitchContentForeground}
+U  template-painted  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:780  {DynamicResource ToggleSwitchContentForeground}
 U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:222  #E6000000
 U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:230  #E6000000
 U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:244  #E6000000
@@ -245,7 +331,10 @@ U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:548  #E6000000
 U  translucent-uncomposited  Flow.Launcher/MainWindow.xaml:558  #E6000000
 U  translucent-uncomposited  Flow.Launcher/ResultListBox.xaml:76  #138A8A8A
 U  unknown-palette-key  Flow.Launcher/HotkeyControlDialog.xaml:63  AccentButtonBackground
+U  unknown-palette-key  Flow.Launcher/PluginSettingsWindow.xaml:110  ToggleSwitchContentForeground
 U  unknown-palette-key  Flow.Launcher/Resources/Controls/HotkeyDisplay.xaml:66  AccentButtonForegroundPointerOver
+U  unknown-palette-key  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:136  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/Resources/Controls/InstalledPluginDisplay.xaml:146  ToggleSwitchContentForeground
 U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:1639  RepeatButtonBackground
 U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  NavigationViewItemForeground
 U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:2168  NavigationViewItemForeground
@@ -254,3 +343,41 @@ U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:245  
 U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:245  MenuFlyoutItemForeground
 U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:245  MenuFlyoutSubItemForeground
 U  unknown-palette-key  Flow.Launcher/Resources/CustomControlTemplate.xaml:2923  NavigationViewItemForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:103  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:184  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:198  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:213  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:227  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:282  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:296  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:310  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:324  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:334  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:341  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:386  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:39  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:415  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:426  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:46  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:515  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:529  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:546  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:573  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:588  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:62  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:627  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:69  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:79  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneGeneral.xaml:89  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneHotkey.xaml:77  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneProxy.xaml:34  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:517  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:539  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:583  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:608  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:624  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:648  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:685  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:758  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:773  ToggleSwitchContentForeground
+U  unknown-palette-key  Flow.Launcher/SettingPages/Views/SettingsPaneTheme.xaml:780  ToggleSwitchContentForeground

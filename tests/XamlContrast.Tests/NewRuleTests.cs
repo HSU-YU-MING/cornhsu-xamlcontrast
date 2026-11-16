@@ -360,8 +360,11 @@ public class NewRuleTests
         Assert.Equal("#CC3A3A", hover.Bg);
     }
 
-    [Fact] // 規則 13 的邊界：TargetName 指向「非根」的內部元素 → 維持不做
-    public void NonRootTargetNameIsStillIgnored()
+    [Fact] // 規則 13 的邊界（1.6 推進了）：TargetName 指向「非根」的內部元素。
+           // 1.0～1.5 把那個 Setter 丟掉、照舊拿模板根的底評分（編出來的數字）；
+           // 1.6 知道重畫的是哪一個元素、它畫在內容的哪一側，所以算得出來。
+           // 界線與疊合規則在 TemplateLayerTests。
+    public void NonRootTargetNameIsResolvedAgainstTheLayerItCovers()
     {
         using var fx = new Fixture();
         fx.File("Main.xaml", """
@@ -389,9 +392,13 @@ public class NewRuleTests
             </Grid>
             """);
         var r = fx.Run();
-        // inner 的換底解析不到（要模板內部樹的版面關係）—— 不猜，
-        // hover 狀態沒有可歸屬的底變更 → 與基礎同組（白字疊模板根黑底）
-        Assert.All(r.Findings, f => Assert.Equal("#000000", f.Bg));
+        // 基礎態：白字疊模板根的黑底
+        Assert.Contains(r.Findings, f => f.Bg == "#000000");
+        // hover：inner 被畫成不透明的白，字就在那上面 —— 白字疊白底 1:1，是真的不合格
+        var hover = Assert.Single(r.Findings, f => f.Bg == "#FFFFFF");
+        Assert.Equal(Category.Fail, hover.Category);
+        // ⚠ 1.5 之前的那個編造不能回來：hover 不能拿已經被蓋掉的 #000000 去配
+        Assert.Equal(2, r.Findings.Count);
     }
 
     [Theory] // 規則 13 的模板根名字有 x:Name 與 Name 兩種寫法（FrameworkElement 都認）——
@@ -496,6 +503,7 @@ public class NewRuleTests
            //   0.x 定義處記 skipped → 整組從報告消失、覆蓋率照樣 100%（謊報健康）
            //   1.0 定義處記 unresolved → 看得見「有一組沒評到」，覆蓋率照實掉下來，但那個 1.16:1 還是沒人說
            //   1.5 使用處評得到（隱含樣式套到元素身上）→ 直接報出 1.16:1 的 fail，覆蓋率回到 100%
+           //   1.6 改走鏈路徑（觸發態也評得到），所以標籤帶 ⊕Style[implicit …]（= baseline 的鍵，KeyVersion 2）
            // 不變的那條線：這一組**不能**是 skipped —— 它不是「看不見的東西」
     public void ImplicitStyleWithASeeThroughBackgroundIsGradedWhereItIsUsed()
     {
@@ -517,7 +525,7 @@ public class NewRuleTests
         Assert.Empty(r.UnresolvedSites);          // 使用處評到了 —— 定義處再記一筆就是同一組算兩次
         Assert.Equal(1.0, r.Coverage);
         var fail = Assert.Single(r.Findings, f => f.Category == Category.Fail);
-        Assert.Equal("ToggleButton", fail.Element);
+        Assert.Equal("ToggleButton⊕Style[implicit ToggleButton]/base", fail.Element);
         Assert.Equal("#EEEEEE", fail.Fg);
         Assert.Equal("#FFFFFF", fail.Bg);         // Transparent 只是穿透：真正的底是 Grid 的白
         Assert.Equal(Wcag.Contrast("#EEEEEE", "#FFFFFF"), fail.RatioDark);

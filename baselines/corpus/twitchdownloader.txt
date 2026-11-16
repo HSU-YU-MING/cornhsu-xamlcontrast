@@ -3,7 +3,7 @@
 project: twitchdownloader
 repo: https://github.com/lay295/TwitchDownloader
 commit: 8adfd8e5d31984ae1918b1fa0273f019dc29899f
-tool-commit: 07be1dd+dirty
+tool-commit: 4a1e23d+dirty
 frozen: 2026-11-16
 exit: 1
 palette-mode: pair

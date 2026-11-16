@@ -32,8 +32,54 @@ internal sealed partial class StyleIndex
         /// <summary>來自「TargetName=模板根」Setter 的屬性 —— 直接設在根元素上，
         /// WPF 屬性優先序會蓋過經 TemplateBinding 進來的宿主本地值</summary>
         public HashSet<string> RootTargeted = new();
+        /// <summary>
+        /// 這個狀態把模板內部哪個元素的底重畫成什麼（1.6）：<c>TargetName</c> → 新的底。
+        /// 1.5 之前只知道有沒有重畫，而且照舊拿基礎狀態的底評分（編出來的）；現在記下是誰、
+        /// 換成什麼，使用處就能看那個元素是不是正好畫在這個內容位置底下（<see cref="TemplateLayer.Name"/>／
+        /// <see cref="TemplateLayer.Above"/>）—— 對得上就算得出來，對不上才記 template-painted。
+        /// ⚠ 只收 Background／Fill。<c>OpacityMask</c> 不是一個底色，收了就得猜它把下面那層變成什麼。
+        /// </summary>
+        public Dictionary<string, string> LayerPaints = new();
+        public Dictionary<string, int> LayerPaintSrc = new(); // TargetName → 來源 Style Id
+        /// <summary>
+        /// 這個狀態把「看不到的那一層」重畫了（1.6）：Setter 的 <c>TargetName</c> 指向模板**內部**的元素
+        /// 而且畫的是顏色，或是整個換掉 <c>Template</c>。兩種都讓這個狀態下字底下那一層變成靜態不可知。
+        ///
+        /// ⚠ 這一格是語料逼出來的。指向內部元素的 TargetName 一直是明文盲區（規則 13 只收模板根），
+        ///   而舊版的做法是**把那個 Setter 丟掉、照舊用基礎狀態的底評分** —— 等於拿一個已經被蓋掉的底
+        ///   去配觸發態的字色，報出執行期不存在的比值。1.5 之前只有具名 Style 走逐狀態路徑，所以零星；
+        ///   1.6 隱含樣式也走這條之後，ScreenToGif 一口氣冒出 28 筆假 fail
+        ///   （<c>AwareTabItem</c> 的選取態把 <c>ContentBorder</c> 重畫成 <c>#90FFFFFF</c>，
+        ///   黑字其實在那層淺底上，工具卻拿深色主題的 Level3 去配，報 1.46:1）。
+        ///   另外 72 筆是 <c>ExtendedMenuItem</c> 的 <c>Role</c> 觸發器整個換掉 Template。
+        ///   現在這種狀態只有在重畫的元素對得上字底下那一疊時才評（<see cref="LayerPaints"/>），
+        ///   對不上的一律記 unresolved（template-painted），不評。
+        /// </summary>
+        public bool UnknownLayer;
         public string? Cond;
     }
+
+    /// <summary>模板裡一個放內容的位置，與它底下最近一層畫底的值（1.6，見 <see cref="Record.TemplateLayers"/>）。
+    /// <paramref name="Bg"/> 是 null ＝模板裡沒有任何一層畫底（實質上沒有底，穿透到祖先）。
+    /// <paramref name="Primary"/> ＝那個位置是 ContentPresenter／ContentControl：元素在標記裡的子元素會落在這裡，
+    /// 所以子元素的底要用這一層。<paramref name="Root"/> ＝畫底的是模板根（或沒有任何一層畫底）——
+    /// 「TargetName=模板根」的觸發 Setter 換底時換掉的就是這一層（規則 13）。
+    /// <paramref name="Name"/>（1.6）＝畫這一層的那個元素的名字，<paramref name="Above"/> ＝在它與內容之間、
+    /// 自己沒畫底的那些元素（由內而外）。兩者都只收「真的有觸發器重畫它」的名字 ——
+    /// 沒有任何觸發器碰模板內部時（絕大多數的 Style）這兩格一律是 null，那條路就是單純的分層。
+    /// 觸發器重畫的元素對得上這兩格時，那個狀態的底就算得出來（<c>Auditor.TemplateChoices</c>）。</summary>
+    internal sealed record TemplateLayer(string? Bg, bool Primary, bool Root,
+        string? Name = null, IReadOnlyList<string>? Above = null);
+
+    /// <summary>把宿主的內容整個接過去的自訂元素（<c>Content="{TemplateBinding Content}"</c>）——
+    /// 不是 ContentPresenter 也一樣在畫宿主的內容，標記裡的子元素就落在這裡。
+    /// ⚠ 少了這一條，MaterialDesign 的按鈕模板（內容在 <c>wpf:Ripple</c> 裡）看不出內容放在哪一層上。
+    /// ⚠ 要**逐字比**是不是綁到 Content／Text 自己：放寬成「任何 {TemplateBinding …}」的話，
+    ///   HandyControl 的 Shield 模板裡 <c>Text="{TemplateBinding Subject}"</c> 的那顆 TextBlock
+    ///   會被當成放內容的主要位置，標記裡的子元素就被配到它那一層（#555）而不是 ContentPresenter 那一層。</summary>
+    private static bool IsHostContentHolder(XElement el)
+        => el.Attribute("Content")?.Value.Trim() == "{TemplateBinding Content}"
+           || el.Attribute("Text")?.Value.Trim() == "{TemplateBinding Text}";
 
     internal sealed class Record
     {
@@ -53,6 +99,23 @@ internal sealed partial class StyleIndex
         /// <c>{TemplateBinding …}</c> 不算 —— 那就是宿主自己的值，照 Style 的 Setter 走。</summary>
         public string? TemplateRootBorder;
         public string? TemplateRootBorderThickness;
+        /// <summary>這個 Style 自己帶 ControlTemplate（<see cref="HasTemplate"/> 連巢狀 Style 的模板也算）——
+        /// 只有自己的模板才決定 <see cref="TemplateLayers"/>。</summary>
+        public bool OwnTemplate;
+        /// <summary>
+        /// 模板裡「宿主的文字畫在哪一層上」（1.6）。
+        ///
+        /// <see cref="TemplateRootBg"/> 只看模板根，根沒設底時字就配到祖先的底 —— 而帶模板的控制項幾乎都把
+        /// 內容放在模板**內部**某一層上面。⚠ 實測（HandyControl 的 <c>&lt;hc:Shield Color="#1182c3"/&gt;</c>）：
+        /// 模板根是沒設底的 Grid，白字其實畫在兩個 Border 上（<c>#555</c> 與 <c>{TemplateBinding Color}</c>），
+        /// 配祖先的白底報出三筆 1:1 的假 fail。1.5 的做法是「帶模板、底又不是它自己給的就不評」（而且只對隱含樣式），
+        /// 1.6 改成把那一層真的找出來。
+        ///
+        /// 每個「放內容的位置」（ContentPresenter，或字色由宿主決定的文字／圖形元素）配一筆，值是它**在模板裡**
+        /// 最近一層畫底（Background／Fill）的祖先的值；同值的合併成一筆。
+        /// 巢狀模板裡的位置不收 —— 那是別的控制項的內容。
+        /// </summary>
+        public List<TemplateLayer> TemplateLayers = new();
         /// <summary>這個 Style 當成 FocusVisualStyle 時畫的焦點框（1.4）：模板裡第一個帶 Stroke（Rectangle 之類）或 BorderBrush 的元素。</summary>
         public string? FocusStroke;
         /// <summary>那個焦點框的 Margin 有負值：畫在控制項外面（旁邊是周圍的底），不是疊在控制項的底上。</summary>
@@ -97,6 +160,8 @@ internal sealed partial class StyleIndex
         /// <summary>鏈上有任何一層帶 ControlTemplate —— 這個控制項的視覺是模板畫的（1.5 用它判斷
         /// 「字到底畫在什麼上面」：模板裡哪一層畫底靜默看不到時，拿祖先的底去配就是編造）。</summary>
         public bool HasTemplate;
+        /// <summary>生效模板裡放內容的那幾層（1.6，同 <see cref="TemplateRootBg"/>：衍生自帶模板時整個換掉）。</summary>
+        public List<TemplateLayer> TemplateLayers = new();
         public string? TemplateRootBorderThickness;
         public required string Label;
         /// <summary>鏈上有任何一層定義在只屬於一個主題的字典檔裡 —— 另一個主題下解析到的是別的 Style（或沒有）</summary>
@@ -139,6 +204,9 @@ internal sealed partial class StyleIndex
         [ThemeSide.Light] = new(StringComparer.Ordinal),
     };
     private Func<string, ThemeSide?>? _sideOf;
+    /// <summary>模板裡的兄弟背板要跟標記樹的規則 17 同一套疊層判定（<see cref="Panels"/>），
+    /// 包含 config 宣告的自訂容器版面 —— 同一段 XAML 寫在畫面裡與寫在模板裡不該得到不同的答案。</summary>
+    private ToolConfig _cfg = new();
     private int _seq;
 
     /// <summary>有沒有「只屬於一個主題」的字典檔（色盤來自分開的深／淺 XAML 字典時才有）。</summary>
@@ -199,24 +267,28 @@ internal sealed partial class StyleIndex
     private static partial Regex TargetTypeName();
 
     /// <summary>IsEnabled=False 觸發 = 停用態。WCAG 1.4.3 明文豁免停用中的控制項。
-    /// Multi(Data)Trigger 的條件是 AND：任一條是 IsEnabled=False，整個狀態就只在停用時成立。</summary>
+    /// Multi(Data)Trigger 的條件是 AND：任一條是 IsEnabled=False，整個狀態就只在停用時成立。
+    ///
+    /// ⚠ 值的比對**不分大小寫**（1.6）：XAML 的布林轉換器收 <c>"false"</c> 也收 <c>"False"</c>，
+    ///   而舊版是逐字比 <c>"False"</c> —— 寫小寫的停用態（ScreenToGif 的隱含 ScrollViewer 樣式就是
+    ///   <c>Value="false"</c>）被當成普通狀態評分，報出「停用態的灰字配底」這種必然假的 fail。
+    ///   1.5 之前隱含樣式不走逐狀態路徑，所以這個 bug 只在具名 Style 上零星發作、沒被抓到。</summary>
     internal static bool IsDisabledTrigger(XElement t)
     {
+        static bool IsFalse(string? v) => string.Equals(v, "False", StringComparison.OrdinalIgnoreCase);
         if (t.Name.LocalName == "Trigger")
         {
             var p = t.Attribute("Property")?.Value;
-            var v = t.Attribute("Value")?.Value;
-            return p is not null && v == "False" && IsEnabledProp().IsMatch(p);
+            return p is not null && IsFalse(t.Attribute("Value")?.Value) && IsEnabledProp().IsMatch(p);
         }
         if (t.Name.LocalName == "DataTrigger")
         {
             var b = t.Attribute("Binding")?.Value;
-            var v = t.Attribute("Value")?.Value;
-            return b is not null && v == "False" && IsOwnIsEnabledBinding(b);
+            return b is not null && IsFalse(t.Attribute("Value")?.Value) && IsOwnIsEnabledBinding(b);
         }
         if (t.Name.LocalName is "MultiTrigger" or "MultiDataTrigger")
             return ConditionsOf(t).Any(c =>
-                c.Attribute("Value")?.Value == "False" &&
+                IsFalse(c.Attribute("Value")?.Value) &&
                 (c.Attribute("Property")?.Value is { } p && IsEnabledProp().IsMatch(p) ||
                  c.Attribute("Binding")?.Value is { } b && IsOwnIsEnabledBinding(b)));
         return false;
@@ -285,6 +357,25 @@ internal sealed partial class StyleIndex
         return parts;
     }
 
+    /// <summary>這個 Setter 的屬性會不會重畫「字底下那一層」（<c>Border.Background</c> 這種帶型別前綴的寫法也算）。
+    /// 只給 <see cref="State.UnknownLayer"/> 用：指向模板內部元素時那一層就看不到了。
+    /// ⚠ 刻意**不收 BorderBrush／Stroke**：框線畫在邊上，不是字底下那一面 ——
+    ///   收了的話 MahApps 的 TextBox 只要進焦點態（基底模板換 BorderElement 的框色）就整組不評，
+    ///   而那一組的底其實算得出來（衍生樣式自己設了宿主的 Background）。</summary>
+    /// <summary>重畫的是一個「底色」—— 收得進 <see cref="State.LayerPaints"/> 當另一個狀態的底。
+    /// <c>OpacityMask</c> 不算（它不是顏色，是把下面那層挖掉多少）。</summary>
+    private static bool IsBackdropProp(string prop)
+    {
+        var dot = prop.LastIndexOf('.');
+        return (dot >= 0 ? prop[(dot + 1)..] : prop) is "Background" or "Fill";
+    }
+
+    private static bool PaintsLayer(string prop)
+    {
+        var dot = prop.LastIndexOf('.');
+        return (dot >= 0 ? prop[(dot + 1)..] : prop) is "Background" or "Fill" or "OpacityMask";
+    }
+
     private static IEnumerable<XElement> ConditionsOf(XElement t)
         => t.Descendants().Where(e => e.Name.LocalName == "Condition");
 
@@ -310,6 +401,158 @@ internal sealed partial class StyleIndex
             .ToList();
         return parts.Count > 0 ? string.Join("&", parts) : null;
     }
+
+    /// <summary>模板裡會渲染宿主 Foreground 的元素。⚠ 不能只看 ContentPresenter：
+    /// Foreground 是繼承屬性，模板裡一顆沒指定 Foreground 的裸 TextBlock 一樣會繼承到。
+    /// 規則 8（定義處的死 setter 過濾，<c>Auditor.WalkStyles</c>）與模板分層（<see cref="ContentLayers"/>）
+    /// 共用這一份 —— 兩邊對「誰會畫宿主的字」要有同一個答案。</summary>
+    internal static readonly HashSet<string> FgConsumers = new(StringComparer.Ordinal)
+    {
+        "ContentPresenter", "ContentControl", "TextBlock", "AccessText", "Label",
+    };
+
+    [GeneratedRegex(@"TemplateBinding\s+Foreground")]
+    internal static partial Regex TemplateBindingFg();
+
+    /// <summary>
+    /// 模板裡每個「放內容的位置」底下最近一層畫底的值（1.6，見 <see cref="Record.TemplateLayers"/>）。
+    ///
+    /// 放內容的位置有四種：ContentPresenter／ContentControl、把宿主的內容整個接過去的自訂宿主
+    /// （<c>Content="{TemplateBinding Content}"</c>，MaterialDesign 的 <c>wpf:Ripple</c> 就是）、
+    /// 字色由宿主決定的文字元素（自己沒寫 Foreground，或寫的是 <c>{TemplateBinding Foreground}</c>），
+    /// 以及把宿主字色畫成圖形的 Fill／Stroke（圖示按鈕的 Path）。自己帶字色的文字元素不收 ——
+    /// 那不是宿主的配對，由 <c>Auditor.CountStyleTemplateText</c> 記成 in-style-template。
+    ///
+    /// ⚠ **只收在模板裡找得到「畫底的祖先」的位置**，找不到的不收 —— 那種形狀照舊走 1.5 的優先序，
+    ///   所以這一格是純加法。這條界線是語料逼出來的：MaterialDesign 的按鈕模板把底畫在
+    ///   <c>&lt;Border Background="{TemplateBinding Background}"/&gt;</c>，而它是內容（Ripple）的**兄弟**、不是祖先。
+    ///   當成「模板裡沒有底 → 穿透到祖先」的話，宿主的 Background Setter 整個被跳過，1.4 逐筆驗過的兩筆真 fail
+    ///   （工具列字 1.55、扁平鈕 2.63）連同另外 41 筆一起消失。模板裡的兄弟背板是另一塊盲區
+    ///   （樹走訪的規則 17 只管標記裡的兄弟），不在這一版的範圍。
+    /// </summary>
+    private List<TemplateLayer> ContentLayers(XElement tmpl, IReadOnlySet<string> repainted)
+    {
+        var layers = new List<TemplateLayer>();
+        var byBg = new Dictionary<string, int>(StringComparer.Ordinal);
+        foreach (var host in tmpl.Descendants())
+        {
+            var ln = host.Name.LocalName;
+            if (ln.Contains('.')) continue; // 屬性元素
+            // 巢狀模板裡的位置是別的控制項的內容（ComboBox 模板裡 ToggleButton 的模板、ItemTemplate 的 DataTemplate）
+            if (host.Ancestors().TakeWhile(a => !ReferenceEquals(a, tmpl))
+                    .Any(a => !a.Name.LocalName.Contains('.') &&
+                              a.Name.LocalName.EndsWith("Template", StringComparison.Ordinal)))
+                continue;
+            var primary = ln is "ContentPresenter" or "ContentControl" || IsHostContentHolder(host);
+            if (!primary && !IsHostTextHolder(host, ln) && !IsHostForegroundShape(host)) continue;
+            var chain = BackdropChain(tmpl, host);
+            var painter = chain.Count > 0 && chain[^1].Bg is not null ? chain[^1] : default;
+            var bg = painter.El is null ? null : painter.Bg;
+            var root = painter.El?.Parent is { } pp && ReferenceEquals(pp, tmpl);
+            // 名字只收「真的會被重畫」的（repainted）—— 其餘一律 null，沒有觸發器的 Style 不受這一格影響
+            var name = painter.El is not null && NameOf(painter.El) is { } pn && repainted.Contains(pn) ? pn : null;
+            var above = chain.Where(c => c.Bg is null)
+                .Select(c => NameOf(c.El)).OfType<string>().Where(repainted.Contains).ToList();
+            // 模板裡沒有一層畫底，又沒有任何可能被重畫的元素 —— 照舊走 1.5 的優先序（見方法註解）
+            if (bg is null && name is null && above.Count == 0) continue;
+            // 同一層被兩個內容位置共用時只記一次（鍵要含重畫目標：同一個底、不同的重畫鏈是兩層）
+            var key = $"{bg}|{name}|{string.Join(",", above)}";
+            if (byBg.TryGetValue(key, out var at))
+            {
+                if (primary) layers[at] = layers[at] with { Primary = true };
+                continue;
+            }
+            byBg[key] = layers.Count;
+            layers.Add(new TemplateLayer(bg, primary, root, name,
+                above.Count > 0 ? above : null));
+        }
+        return layers;
+    }
+
+    /// <summary>
+    /// 由內而外列出「畫在這個內容位置底下」的那些層（1.6），每一層是一個元素與它靜態寫的底
+    /// （null ＝它自己沒畫底，但有觸發器可能把它畫起來）。到第一個真的畫了底的那一層為止 ——
+    /// 再往下就看不到了。
+    ///
+    /// 順序照 WPF 的繪製順序：同一格裡文件順序在前的兄弟先（愈後面的愈上層），再才是容器自己的底 ——
+    /// 容器的 Background 畫在它所有子元素的下面。疊層判定全部走 <see cref="Panels"/>，跟標記樹的
+    /// 規則 17 同一套。
+    ///
+    /// ⚠ 兄弟這一步是語料逼出來的：MaterialDesign 的按鈕模板把底畫在
+    /// <c>&lt;Border Background="{TemplateBinding Background}"/&gt;</c>，而它是內容（<c>wpf:Ripple</c>）的
+    /// **兄弟**、不是祖先。只往祖先找的話這形狀收不到任何一層；宿主自己有設底時還接得住
+    /// （宿主的 Background 優先序在前），**宿主沒設底時就配到祖先** —— 編出來的數字。
+    ///
+    /// 刻意放棄那一層、往外找的兩種（留在盲區表）：
+    /// <list type="bullet">
+    /// <item>內容元素（Image）：底是一張圖。標記樹裡記 <c>over-sibling-content</c>，模板裡還沒有對應的
+    /// 計數器，收了會讓那些配對悄悄變成不可知</item>
+    /// <item>帶 <c>Opacity</c> 的兄弟：半透明要疊到它底下那一層才算得出來，而這裡回傳的是**原始寫法**、
+    /// 疊合在 Auditor 那邊做。猜一個不透明的值會往寬鬆那邊錯</item>
+    /// </list>
+    /// </summary>
+    private List<(XElement El, string? Bg)> BackdropChain(XElement tmpl, XElement host)
+    {
+        var chain = new List<(XElement El, string? Bg)>();
+        for (var node = host; node.Parent is not null && !ReferenceEquals(node, tmpl); node = node.Parent)
+        {
+            var box = node.Parent;
+            if (Panels.LayoutOf(box.Name.LocalName, _cfg) == Panels.Layout.Overlap)
+            {
+                var isGrid = box.Name.LocalName == "Grid";
+                var cell = Panels.CellOf(node, isGrid);
+                var stretches = Panels.StretchesChildren(box.Name.LocalName);
+                var level = new List<(XElement El, string? Bg)>();
+                var painted = -1;
+                foreach (var sib in box.Elements())
+                {
+                    if (ReferenceEquals(sib, node)) break; // 只看排在前面的（後面的畫在字上面，不是底）
+                    var ln = sib.Name.LocalName;
+                    if (ln.Contains('.') || Panels.Styleish.Contains(ln)) continue;
+                    if (Panels.CellOf(sib, isGrid) != cell) continue; // 不同格子不相疊
+                    // 這一層整個放棄，往外找（見方法註解）
+                    if (Panels.IsContentElement(ln)) { level.Clear(); painted = -1; break; }
+                    if (!Panels.FillsCell(sib, stretches)) continue;
+                    var sraw = Panels.BackdropBrush(sib);
+                    if (sraw is not null && sib.Attribute("Opacity") is not null) { level.Clear(); painted = -1; break; }
+                    if (sraw is not null) painted = level.Count;
+                    level.Add((sib, sraw));
+                }
+                if (painted >= 0)
+                {
+                    // 畫了底的那一個以下看不到；它以上（文件順序在它後面）的候選由上而下排
+                    level.RemoveRange(0, painted);
+                    level.Reverse();
+                    chain.AddRange(level);
+                    return chain;
+                }
+                level.Reverse();
+                chain.AddRange(level); // 都沒畫底：全是「可能被重畫」的候選
+            }
+            if (ReferenceEquals(box, tmpl)) return chain; // 模板外的事由呼叫端（祖先的底）決定
+            var v = XamlBrush.Read(box, "Background") ?? XamlBrush.Read(box, "Fill");
+            chain.Add((box, v));
+            if (v is not null) return chain;
+        }
+        return chain;
+    }
+
+    /// <summary><c>x:Name</c> 或 <c>Name</c> —— 觸發 Setter 的 TargetName 指的就是這個。</summary>
+    private static string? NameOf(XElement el)
+        => el.Attribute(XName.Get("Name", "http://schemas.microsoft.com/winfx/2006/xaml"))?.Value
+           ?? el.Attribute("Name")?.Value;
+
+    /// <summary>模板裡字色由宿主決定的文字元素（自己沒寫 Foreground，或寫的是 <c>{TemplateBinding Foreground}</c>）。</summary>
+    private static bool IsHostTextHolder(XElement el, string localName)
+    {
+        if (!FgConsumers.Contains(localName)) return false;
+        var own = XamlBrush.Read(el, "Foreground");
+        return own is null || own.TrimStart().StartsWith("{TemplateBinding", StringComparison.Ordinal);
+    }
+
+    /// <summary>把宿主的字色畫成圖形的模板元素（圖示按鈕的 <c>&lt;Path Fill="{TemplateBinding Foreground}"/&gt;</c>）。</summary>
+    private static bool IsHostForegroundShape(XElement el)
+        => (XamlBrush.Read(el, "Fill") ?? XamlBrush.Read(el, "Stroke")) is { } v && TemplateBindingFg().IsMatch(v);
 
     internal Record CreateRecord(XElement style, string file)
     {
@@ -347,6 +590,16 @@ internal sealed partial class StyleIndex
             rec.TemplateRootBorder = NotTemplateBound(XamlBrush.Read(ownRoot, "BorderBrush"));
             rec.TemplateRootBorderThickness = NotTemplateBound(ownRoot.Attribute("BorderThickness")?.Value);
         }
+        rec.OwnTemplate = ownTmpl is not null;
+        // 先掃一遍「哪些模板內部元素會被觸發器重畫底」（Background／Fill 的 TargetName Setter）。
+        // 分層只記這些名字 —— 沒有任何觸發器碰模板內部的 Style（絕大多數）行為完全不變。
+        var repainted = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var t in style.Descendants().Where(IsTriggerElement))
+            foreach (var st in t.Elements().Where(e => e.Name.LocalName == "Setter"))
+                if (st.Attribute("TargetName")?.Value is { } tname && st.Attribute("Property")?.Value is { } tp
+                    && IsBackdropProp(tp) && XamlBrush.SetterValue(st) is not null)
+                    repainted.Add(tname);
+        if (ownTmpl is not null) rec.TemplateLayers = ContentLayers(ownTmpl, repainted);
         var focusEl = ownTmpl?.Descendants()
             .FirstOrDefault(e => NotTemplateBound(XamlBrush.Read(e, "Stroke") ?? XamlBrush.Read(e, "BorderBrush")) is not null);
         if (focusEl is not null)
@@ -363,6 +616,8 @@ internal sealed partial class StyleIndex
         {
             var set = new Dictionary<string, string>();
             var rootTargeted = new HashSet<string>();
+            var layerPaints = new Dictionary<string, string>();
+            var unknownLayer = false;
             foreach (var s in t.Elements().Where(e => e.Name.LocalName == "Setter"))
             {
                 var p = s.Attribute("Property")?.Value;
@@ -372,17 +627,38 @@ internal sealed partial class StyleIndex
                 // 無 TargetName＝套宿主；TargetName=模板根＝實質也是宿主的視覺（規則 13）
                 if (tn is null) { set[p] = v; rootTargeted.Remove(p); }
                 else if (rootName is not null && tn == rootName) { set[p] = v; rootTargeted.Add(p); }
+                // 指向模板內部元素的顏色 Setter（見 State.UnknownLayer／State.LayerPaints）
+                else if (PaintsLayer(p))
+                {
+                    unknownLayer = true;
+                    if (IsBackdropProp(p)) layerPaints[tn] = v;
+                }
             }
-            if (set.Count == 0) continue;
+            if (set.Count == 0 && !unknownLayer) continue;
+            // 整個換掉模板：這個狀態的視覺是另一份模板畫的（ScreenToGif 的 ExtendedMenuItem Role 觸發器）
+            if (set.ContainsKey("Template") || set.ContainsKey("Control.Template")) unknownLayer = true;
             var inTmpl = false;
-            var nested = false;
+            var otherStyle = false;
+            var otherTemplate = false;
             for (var anc = t.Parent; anc is not null && !ReferenceEquals(anc, style); anc = anc.Parent)
             {
                 var ln = anc.Name.LocalName;
                 if (ln == "ControlTemplate") inTmpl = true;
-                if (ln == "Style" || ln.EndsWith("Template", StringComparison.Ordinal) && !ln.Contains('.') && !ReferenceEquals(anc, ownTmpl))
-                    nested = true;
+                if (ln == "Style") otherStyle = true;
+                else if (ln.EndsWith("Template", StringComparison.Ordinal) && !ln.Contains('.') && !ReferenceEquals(anc, ownTmpl))
+                    otherTemplate = true;
             }
+            // ⚠ 1.6：觸發器從 Style 的**所有後代**收，所以會收到兩種不屬於這個元素的狀態。1.5 之前兩種都
+            //   照樣當成宿主的狀態評分（只有 nonText 那條路看 Nested），1.6 隱含樣式也走逐狀態路徑之後
+            //   就爆出來了 —— ScreenToGif 的 ExtendedMenuItem 一口氣 72 筆假 fail。
+            //   - 巢狀 Style 裡的（ItemContainerStyle、DataGridTextColumn.ElementStyle、<Style.Resources> 裡的）：
+            //     那是**別的元素**的狀態，宿主根本沒有這一組 → 整個不收。那些 Style 自己會被 WalkStyles 走到，
+            //     不是靜默丟掉。
+            //   - 被觸發器換掉的另一份模板裡的（Role 觸發器那種）：宿主真的會進那個狀態，但視覺是另一份模板畫的
+            //     → 記 unresolved（同 UnknownLayer）。
+            if (otherStyle) continue;
+            if (otherTemplate) unknownLayer = true;
+            var nested = otherTemplate;
             // 條件簽名：同條件的狀態之後要跨節點合併
             var cond = CondSignature(t);
             rec.States.Add(new State
@@ -392,6 +668,9 @@ internal sealed partial class StyleIndex
                 Nested = nested,
                 Set = set,
                 RootTargeted = rootTargeted,
+                LayerPaints = layerPaints,
+                LayerPaintSrc = layerPaints.Keys.ToDictionary(k => k, _ => rec.Id),
+                UnknownLayer = unknownLayer,
                 Cond = cond,
             });
         }
@@ -415,9 +694,9 @@ internal sealed partial class StyleIndex
     /// 全域查找另外依主題各建一張表 —— Dark.xaml 與 Light.xaml 各定義一個 Chip 時，深色主題下只看得到
     /// Dark 的、淺色主題下只看得到 Light 的（執行期一次只載入一個主題字典）。
     /// </summary>
-    public static StyleIndex Build(string root, Func<string, ThemeSide?>? sideOf = null)
+    public static StyleIndex Build(string root, Func<string, ThemeSide?>? sideOf = null, ToolConfig? cfg = null)
     {
-        var idx = new StyleIndex { _sideOf = sideOf };
+        var idx = new StyleIndex { _sideOf = sideOf, _cfg = cfg ?? new ToolConfig() };
         foreach (var f in PaletteDetector.EnumerateFiles(root, "*.xaml"))
         {
             XDocument doc;
@@ -525,7 +804,9 @@ internal sealed partial class StyleIndex
     {
         if (candidates.Count == 0) return null;
         static object Shape(Record r) => (r.BasedOn, r.Setters.GetValueOrDefault("Foreground"),
-            r.Setters.GetValueOrDefault("Background"), r.HasTemplate, r.TemplateRootBg);
+            r.Setters.GetValueOrDefault("Background"), r.HasTemplate, r.TemplateRootBg,
+            // 模板把內容畫在不同的層上 = 不同的底（1.6），同樣是「不知道是哪一個」
+            string.Join("|", r.TemplateLayers.Select(l => l.Bg)));
         var first = Shape(candidates[0]);
         return candidates.All(c => Shape(c).Equals(first)) ? candidates[0] : null;
     }
@@ -560,6 +841,7 @@ internal sealed partial class StyleIndex
                 merged.TemplateRootBg = m.TemplateRootBg;
                 merged.TemplateRootBorder = m.TemplateRootBorder;
                 merged.TemplateRootBorderThickness = m.TemplateRootBorderThickness;
+                merged.TemplateLayers = m.TemplateLayers;
                 merged.HasTemplate = merged.HasTemplate || m.HasTemplate;
                 foreach (var (k, v) in m.ScopedImplicit) merged.ScopedImplicit[k] = v; // 基底的先進，下面讓衍生蓋掉
             }
@@ -577,6 +859,9 @@ internal sealed partial class StyleIndex
                 Set = new Dictionary<string, string>(s.Set),
                 SetSrc = srcMap,
                 RootTargeted = new HashSet<string>(s.RootTargeted),
+                LayerPaints = new Dictionary<string, string>(s.LayerPaints),
+                LayerPaintSrc = new Dictionary<string, int>(s.LayerPaintSrc),
+                UnknownLayer = s.UnknownLayer,
                 Cond = s.Cond,
             });
         }
@@ -587,6 +872,9 @@ internal sealed partial class StyleIndex
             merged.TemplateRootBorder = rec.TemplateRootBorder;
             merged.TemplateRootBorderThickness = rec.TemplateRootBorderThickness;
         }
+        // 模板分層與「有沒有人畫宿主的字」只跟**自己的**模板有關（1.6）：rec.HasTemplate 連巢狀 Style
+        // 的模板也算，拿它當條件會把基底模板的分層清掉
+        if (rec.OwnTemplate) merged.TemplateLayers = rec.TemplateLayers;
         return merged;
     }
 
@@ -610,6 +898,9 @@ internal sealed partial class StyleIndex
                     Set = new Dictionary<string, string>(s.Set),
                     SetSrc = new Dictionary<string, int>(s.SetSrc),
                     RootTargeted = new HashSet<string>(s.RootTargeted),
+                    LayerPaints = new Dictionary<string, string>(s.LayerPaints),
+                    LayerPaintSrc = new Dictionary<string, int>(s.LayerPaintSrc),
+                    UnknownLayer = s.UnknownLayer,
                     Cond = s.Cond,
                 };
                 order.Add(c);
@@ -634,7 +925,9 @@ internal sealed partial class StyleIndex
                 }
                 t.FromTemplate = t.FromTemplate && s.FromTemplate;
             }
+            foreach (var (k, v) in s.LayerPaints) { t.LayerPaints[k] = v; t.LayerPaintSrc[k] = s.LayerPaintSrc[k]; }
             t.Disabled = t.Disabled || s.Disabled;
+            t.UnknownLayer = t.UnknownLayer || s.UnknownLayer; // 同條件的狀態有一邊重畫了看不到的那層 → 整個不評
             t.Nested = t.Nested && s.Nested; // 有一半是自己的狀態就算自己的
         }
         return order.Select(c => byCond[c]).ToList();

@@ -1,3 +1,5 @@
+using XamlContrast.Core;
+
 namespace XamlContrast.Tests;
 
 /// <summary>
@@ -176,7 +178,7 @@ public class CliExitDecisionTests
         };
         var baselineFile = Path.Combine(fx.Root, "baseline.json");
         string[] args = [fx.Root, mode, baselineFile];
-        if (mode == "--baseline") fx.File("baseline.json", """{ "schemaVersion": 1, "entries": [] }"""); // 沒有已知債 → 單看 ratchet 會過
+        if (mode == "--baseline") fx.File("baseline.json", $$"""{ "schemaVersion": 1, "keyVersion": {{Baseline.KeyVersion}}, "entries": [] }"""); // 沒有已知債 → 單看 ratchet 會過
         if (shape == "degraded-strict") args = [.. args, "--strict-palette"];
 
         var r = Cli.Run(args);

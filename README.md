@@ -524,6 +524,7 @@ doesn't tell you whether anything can be done about it:
 | `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio |
 | `in-style-template` | a text element with its own `Foreground` inside a style's `Template` setter (`<Setter Property="Template"><Setter.Value><ControlTemplate>`) — not graded yet (see Known limitations), counted so the gap shows in coverage |
 | `unknown-style-key` | the palette comes from separate dark and light dictionaries, and the element's style — `Style="{StaticResource K}"`, or a `BasedOn` in its chain — is defined in only one of them, so how the element looks in the other theme is unknown; the value is the style key. Before 1.2 this was counted as `unknown-palette-key` (and a `BasedOn` like this was graded against the background behind the element instead) |
+| `template-painted` | the text sits on a layer **inside** the control's template whose colour isn't knowable statically: it comes from a host property nobody set (a library control's default, which lives in C#), that layer's own background is a binding or gradient, or a trigger repainted it and that layer can't be placed (the `TargetName` names an element that isn't on the chain beneath the text, the repainted value is a gradient or a binding, or the trigger swaps the whole `Template`). The ancestor's colour is **not** a fallback here — the template painted over it. New in 1.6; before that these were graded against a background the repaint covers. A repaint of an element that *is* on the chain beneath the text is resolved and does not land here |
 
 `summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
 (default 50%) exits 3**, because a pass over a fraction of the project is not a pass — the same
@@ -746,7 +747,6 @@ How that trust was earned — the highlights, with the full story in the
 Honest list — full blind-spot table with per-case evidence in the
 [planning doc](https://github.com/HSU-YU-MING/cornhsu-xamlcontrast/blob/main/XamlContrast專案規畫書.md) (zh-Hant):
 
-- `TargetName` setters aimed at **inner** template parts (root-targeted ones are resolved)
 - Cross-element correlated triggers (same condition flips fg on one element, bg on another) — false alarms
 - Trigger states are graded one at a time, never combined: a style whose `IsMouseOver` trigger sets
   the foreground and whose `IsPressed` trigger sets the background is graded as the pressed
@@ -772,11 +772,30 @@ Honest list — full blind-spot table with per-case evidence in the
   an inline `<X.Style>`) is not an implicit style. A style's own `<Style.Resources>` is resolved too, for the
   content of the elements that use that style — WPF's standard way to override a global implicit style for one
   control — and it beats the file's and the global one, is inherited through `BasedOn`, and does not reach the
-  styled element itself. Three parts still say nothing rather than guess:
-  the **trigger states** of an implicit style (the base state is graded), a **templated control** whose
-  template paints the background out of sight (`<hc:Shield Color="#1182c3"/>` — the label is on the badge,
-  not on the ancestor), and a type with **several competing global implicit styles**, where the winner
-  depends on the merge order at runtime
+  styled element itself. From 1.6 an implicit style takes the **same chain path as a named one**, so its
+  **trigger states** (hover, selected, checked) are graded as well; the finding's `element` then reads
+  `TextBlock⊕Style[implicit TextBlock]/base`, and an implicit style that touches no colour leaves the plain
+  label alone. One part still says nothing rather than guess: a type with **several competing global implicit
+  styles**, where the winner depends on the merge order at runtime
+- A **templated control**'s text is matched against the layer inside the template that paints it (1.6):
+  wherever the template holds host content — a `ContentPresenter`, a custom host taking
+  `Content="{TemplateBinding Content}"`, a text element whose colour comes from the host, a shape painting
+  `{TemplateBinding Foreground}` — the nearest painting ancestor **inside the template** is the backdrop, and
+  `{TemplateBinding P}` resolves against the host's own `P`. Two layers holding content are two findings; both
+  exist at runtime. The search follows WPF's paint order, so a layer that is the content's
+  **sibling** counts too (MaterialDesign's button paints `{TemplateBinding Background}` on a `Border` next to
+  the content, not above it), using the same overlap rules as the markup tree's rule 17 — same `Grid` cell,
+  full-cell only, the topmost one wins. A **trigger that repaints a layer** through a `TargetName` pointing
+  into the template is resolved as well, when the element it names sits on that content's backdrop chain: an
+  opaque repaint is the backdrop, a translucent one is composited over the layer it covers (ScreenToGif's
+  selected tab paints `#90FFFFFF` over the panel's level-3 brush, where 1.5 graded it against the colour the
+  repaint covers and reported 1.46:1).
+  What is still out of reach, all honestly `template-painted` rather than matched against something the
+  template covered: a repaint whose `TargetName` is **not** on that chain (it may be in another branch, or on
+  a part that doesn't fill its cell — statically indistinguishable), a repaint whose value is a gradient or a
+  binding, a translucent repaint over a layer that is itself unreadable, an `Image` or an `Opacity`-carrying
+  sibling inside a template (both keep 1.6's answer instead), and a sibling painted **after** the content,
+  which covers the text rather than backing it
 - `VisualStateManager` state colours — state storyboards (`ColorAnimation`, brush key frames) and
   WinUI's `<VisualState.Setters>` — are **counted and listed, not graded**: `summary.stateColors` and
   `stateColorSites` in `report.json` name every site, and the console, Markdown and HTML reports say how

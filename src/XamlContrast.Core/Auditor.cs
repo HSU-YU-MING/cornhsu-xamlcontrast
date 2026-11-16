@@ -48,25 +48,15 @@ public sealed partial class Auditor
         "Line", "Border", "Separator", "Slider", "Thumb", "Track", "ScrollBar",
     };
 
-    private static readonly HashSet<string> StyleishEls = new()
-    {
-        "Style", "Setter", "Trigger", "DataTrigger", "MultiTrigger", "MultiDataTrigger",
-    };
-
-    /// <summary>模板裡會渲染 Foreground 的元素。⚠ 不能只看 ContentPresenter：
-    /// Foreground 是繼承屬性，模板裡一顆沒指定 Foreground 的裸 TextBlock 一樣會繼承到。</summary>
-    private static readonly HashSet<string> FgConsumers = new()
-    {
-        "ContentPresenter", "ContentControl", "TextBlock", "AccessText", "Label",
-    };
-
     private static readonly XName XKey = XName.Get("Key", "http://schemas.microsoft.com/winfx/2006/xaml");
 
     [GeneratedRegex(@"(?<t>\w+)\s*\}?\s*$")]
     private static partial Regex TargetTypeName();
 
-    [GeneratedRegex(@"TemplateBinding\s+Foreground")]
-    private static partial Regex TemplateBindingFg();
+    /// <summary><c>{TemplateBinding P}</c> 的屬性名 —— 模板裡那一層底的值要回到宿主身上查（1.6，見
+    /// <see cref="TemplateLayerValue"/>）。</summary>
+    [GeneratedRegex(@"^\{TemplateBinding\s+(?<p>[\w\.]+)\s*\}$")]
+    private static partial Regex TemplateBoundProp();
 
     // WCAG 大字級的「粗體」指 weight ≥ 700：Bold(700)、ExtraBold/UltraBold(800)、
     // Black/Heavy(900)、ExtraBlack/UltraBlack(950)、數字 700–999。
@@ -318,7 +308,7 @@ public sealed partial class Auditor
         var auditor = new Auditor(detection.Palette, config ?? new ToolConfig());
         // 具名 Style 索引含色盤／主題字典 ——「排除出 UI 掃描」不等於「排除出索引」
         // 主題字典的歸屬一併交給索引：同 key 的 Style 依主題各自解析
-        auditor._styles = StyleIndex.Build(root, detection.ThemeFileSides.Count > 0 ? detection.SideOf : null);
+        auditor._styles = StyleIndex.Build(root, detection.ThemeFileSides.Count > 0 ? detection.SideOf : null, auditor._cfg);
         // 讀 *.cs 找轉換器是擴大稽核範圍（凍結面第 9 面）：只在 config 打開時做
         if (auditor._cfg.Converters.ConstantBrushes) auditor._converters = ConverterIndex.Build(root);
         auditor._parseErrors.AddRange(detection.ReadErrors); // 偵測時讀不到的檔（被鎖住的 .cs 之類）一樣要喊
@@ -501,12 +491,7 @@ public sealed partial class Auditor
         // ── 隱含樣式（1.5）：無 x:Key、TargetType 是這個型別的 Style，自動套用到每個實例 ──
         // WPF 只在元素**沒有自己的 Style** 時套用隱含樣式，所以 chain 是 null 才查（兩個主題各自判斷）。
         // 1.4 之前只補「檔案根元素的背景」那一格（理由見 StyleIndex.ImplicitRootBackground）；1.5 起
-        // 每個元素的底與字色都查得到它。
-        // ⚠ 刻意只取**基礎 Setter**，不走 GradeChain 的逐狀態路徑：那會把元素送進鏈路徑，
-        //   finding 的 element 標籤從 `TextBlock` 變成 `TextBlock⊕Style[implicit TextBlock]/base`，
-        //   也就是 baseline 的鍵變了 → 要遞增 Baseline.KeyVersion、所有使用者重寫 baseline，
-        //   還要連動 Parity 儀表板手刻的那份鍵。觸發態（hover 等）留到那一次一起做（ROADMAP）。
-        //   這樣的代價是「隱含樣式的觸發態不評」，好處是這一版沒有任何既有的鍵會動。
+        // 每個元素的底與字色都查得到它，1.6 起連觸發態都走同一條鏈路徑（見下面的評分分派）。
         // 查找順序 = WPF 的資源查找方向：祖先元素的 Style 帶下來的 <Style.Resources>（最內層優先）
         // 勝過檔案／全域的隱含樣式 —— 它離元素更近
         var darkSide = splitThemes ? ThemeSide.Dark : _curSide;
@@ -516,39 +501,55 @@ public sealed partial class Auditor
         var implicitLight = splitThemes
             ? (chainLight is null ? scopedLight ?? _styles.GetImplicitChain(el.Name.LocalName, _curFile, LineOf(el), ThemeSide.Light) : null)
             : implicitChain;
+        // 兩個主題解析到的是同一個隱含樣式嗎（Dark.xaml 與 Light.xaml 各宣告一個 → 不是，各評各的，
+        // 同具名 Style 的 perSide）。⚠ 只有一側解析得到時兩邊都不走鏈路徑（見下面的評分分派）：
+        // 「這個主題沒有隱含樣式」＝元素用控制項預設值，本工具不模擬那個，拿另一側的字色填就是編造
+        var implicitSame = !splitThemes ||
+            (implicitChain?.SideSpecific != true && implicitLight?.SideSpecific != true &&
+             (implicitChain is null) == (implicitLight is null));
 
         var localBgRaw = XamlBrush.Read(el, "Background");
-        // FromImplicit：這個底是不是來自隱含樣式 —— 字色也來自同一個隱含樣式時，那一組由定義處（WalkStyles）評，
-        // 使用處不能再評一次（同 GradeChain 的同源判定）
-        (string? V, bool FromImplicit) BackgroundOf(StyleIndex.Merged? ch, StyleIndex.Merged? im, ThemeSide? side)
+        var ownTemplateEl = HasOwnTemplate(el);
+        // 宿主自己的那個屬性（同 GradeChain 的 HostProp，少了觸發 Setter —— 樹走訪只看穩態）
+        string? HostPropFor(StyleIndex.Merged? ch, string p) => XamlBrush.Read(el, p)
+            ?? (ch is not null && ch.Props.TryGetValue(p, out var v) ? v.V : null);
+        string? BackgroundOf(StyleIndex.Merged? ch, StyleIndex.Merged? im, ThemeSide? side)
         {
+            // 優先序同 GradeChain：元素自己的 Background → Style 的 Setter → 模板裡放內容的那一層（1.6）
+            // → 模板根。⚠ 模板那一層一定要排在宿主的 Background 後面，理由見 GradeChain 的同一段。
             var own = localBgRaw
-                    ?? (ch is not null && ch.Props.TryGetValue("Background", out var chainBg) ? chainBg.V : null)
-                    ?? ch?.TemplateRootBg; // 模板根的背景管到內容
-            if (own is not null) return (own, false);
+                    ?? (ch is not null && ch.Props.TryGetValue("Background", out var chainBg) ? chainBg.V : null);
+            if (own is not null) return own;
+            // 標記裡的子元素放進模板的 ContentPresenter，所以它們的底是那一層（1.6）。
+            // 元素自己換掉模板時 Style 那份模板沒在用（同 GradeChain 的 ownTemplate）
+            if (!ownTemplateEl)
+            {
+                if (ch is { TemplateLayers.Count: > 0 }) return PrimaryTemplateLayer(ch, p => HostPropFor(ch, p));
+                if (ch?.TemplateRootBg is { } rootBg) return rootBg; // 模板根的背景管到內容
+            }
             // 隱含樣式的底（元素沒有自己的 Style 時才套 —— im 只在那種情況下非 null）。
             // ⚠ `{TemplateBinding Background}` 不算「一個看不懂的顏色」：它的意思是「控制項自己的 Background」，
             //   而那一格上面已經查過了（Props["Background"]）。沒設就是 WPF 的預設（實質上沒有底），
             //   所以要往祖先穿透，不是記成解析不出來。
             //   實測：少了這一條，ScreenToGif 的 Editor.xaml 有 163 處原本評得出來的配對變成 unresolved
             //   —— 數字看起來「誠實」，實際上是把算得出來的答案丟掉。
-            var impl = NotTemplateBound(im is not null && im.Props.TryGetValue("Background", out var implBg) ? implBg.V : null)
-                    ?? NotTemplateBound(im?.TemplateRootBg);
-            if (impl is not null) return (impl, true);
+            var impl = NotTemplateBound(im is not null && im.Props.TryGetValue("Background", out var implBg) ? implBg.V : null);
+            if (impl is not null) return impl;
+            if (im is { TemplateLayers.Count: > 0 }) return PrimaryTemplateLayer(im, p => HostPropFor(im, p));
+            impl = NotTemplateBound(im?.TemplateRootBg);
+            if (impl is not null) return impl;
             // 根元素保留 1.4 的路徑：有自己的 Style 但那個 Style 沒設底時也查隱含樣式。
             // ⚠ 不要「順手收斂」成只走上面那條 —— 那會讓這形狀的底消失，既有的 finding 跟著不見
-            return (el.Parent is null
+            return el.Parent is null
                     ? _styles.ImplicitRootBackground(el.Name.LocalName, _curFile, LineOf(el), side)
                       // 最後一層地板：config 的 rootBackground —— 主題函式庫使用者的逃生口
                       // （視窗底色鍵在 repo、把它連到視窗的隱含樣式在 NuGet 套件裡:
                       //   工具看不到、使用者知道。使用者宣告的就是事實）
                       ?? NormalizedRootBackground
-                    : null, false);
+                    : null;
         }
-        var (bgVal, bgFromImplicit) = BackgroundOf(chain, implicitChain, splitThemes ? ThemeSide.Dark : _curSide);
-        var (bgValLight, bgLightFromImplicit) = splitThemes
-            ? BackgroundOf(chainLight, implicitLight, ThemeSide.Light)
-            : (bgVal, bgFromImplicit);
+        var bgVal = BackgroundOf(chain, implicitChain, splitThemes ? ThemeSide.Dark : _curSide);
+        var bgValLight = splitThemes ? BackgroundOf(chainLight, implicitLight, ThemeSide.Light) : bgVal;
         bd = bgVal == bgValLight
             ? NextBackground(bgVal, _pal, bd, op)
             // 兩個主題的底來自不同的 Style（或不同的隱含樣式）：各自在自己的主題視圖裡算，再拼回深淺兩欄
@@ -577,39 +578,46 @@ public sealed partial class Auditor
                 Unres(UnresolvedReason.UnknownStyleKey, file, LineOf(el), styleKey);
         }
         else if (chain is not null) GradeChain(el, chain, null, bd, ancestorBd, localBgRaw, file, op, suppressedBy);
+        // ── 隱含樣式也走鏈路徑（1.6）──
+        // 1.5 刻意只取基礎 Setter，理由是走鏈路徑會讓 finding 的 element 標籤從 `TextBlock` 變成
+        // `TextBlock⊕Style[implicit TextBlock]/base`，也就是 baseline 的鍵變了。1.6 遞增
+        // Baseline.KeyVersion 把這件事一次做完，所以隱含樣式的觸發態（hover、選取…）現在也評得到。
+        // ⚠ 只有「真的會影響顏色」的隱含樣式才走這條：只設 Margin／FontSize 的隱含樣式不該讓每一筆
+        //   finding 的 element 都掛上 ⊕Style[implicit …]，那只是噪音，而且白白動掉一批鍵
+        else if (implicitSame ? AffectsColour(implicitChain)
+                             : AffectsColour(implicitChain) && AffectsColour(implicitLight))
+        {
+            if (implicitSame) GradeChain(el, implicitChain!, null, bd, ancestorBd, localBgRaw, file, op, suppressedBy);
+            else
+            {
+                GradeChain(el, implicitChain!, ThemeSide.Dark, bd, ancestorBd, localBgRaw, file, op, suppressedBy);
+                GradeChain(el, implicitLight!, ThemeSide.Light, bd, ancestorBd, localBgRaw, file, op, suppressedBy);
+            }
+            handledFg = true;
+        }
 
         if (_cfg.NonText.UiComponents) GradeUiComponent(el, chain, chainLight, splitThemes, ancestorBd, localBgRaw, file, op, suppressedBy);
 
         // 這個元素的字型（WPF 優先序：本地 > Style > 隱含樣式 > 繼承）—— 它自己的 Foreground／Fill 用它評，子元素繼承它
         var elementFont = LocalFontFamily(el) ?? ChainFont(chain) ?? ChainFont(chainLight)
                           ?? ChainFont(implicitChain) ?? ChainFont(implicitLight) ?? _inheritedFont;
-        // 隱含樣式的字色（1.5）：元素沒寫 Foreground 時，WPF 畫的是這一個。
-        // ⚠ 兩個主題的隱含樣式給不同的值時不用（Dark.xaml 與 Light.xaml 各定義一個隱含 TextBlock 樣式）——
-        //   這條舊路徑一個元素只有一個字色、表達不了「深淺不同源」，拿其中一邊去配兩欄就是編造
-        static string? ImplicitFg(StyleIndex.Merged? im)
-            => im is not null && im.Props.TryGetValue("Foreground", out var v) ? v.V : null;
-        var implicitFg = ImplicitFg(implicitChain) == ImplicitFg(implicitLight) ? ImplicitFg(implicitChain) : null;
-        // 字與底都出自同一個隱含樣式 → 定義處（WalkStyles）已經評過，使用處不再評，否則同一組算兩次。
-        // 例外與 GradeChain 相同：底是透明／半透明時定義處沒有底下那層可疊，那一組要在使用處對著祖先的底評
-        if (implicitFg is not null && (bgFromImplicit || bgLightFromImplicit) &&
-            ColorResolver.Resolve(bgVal, _pal) is not { Kind: ColorKind.Transparent or ColorKind.Alpha })
-            implicitFg = null;
-        // ⚠ 隱含樣式帶 ControlTemplate、而底不是它自己給的 → 不評。
-        //   這種控制項的字畫在模板裡某一層上，那一層是什麼顏色靜態看不到（模板根沒設底、或從控制項自己的
-        //   屬性 TemplateBinding 進來）—— 拿祖先的底去配就是編造一個執行期不存在的組合。
-        //   實測（HandyControl，1.5 開發中）：`<hc:Shield Color="#1182c3"/>` 的白字其實在藍色徽章上，
-        //   配祖先的白底報出三筆 1:1 的假 fail。底由隱含樣式自己給（含 Transparent 穿透到祖先）時照評 ——
-        //   MaterialDesign 的扁平按鈕（Background=Transparent、字是 Primary）就是那條路，2.63:1 是真的。
-        if (implicitFg is not null && implicitChain is { HasTemplate: true } && !bgFromImplicit && !bgLightFromImplicit)
-            implicitFg = null;
         // ⚠ 推在「走子元素之前」：Style.Resources 管的是套了這個 Style 的元素的**內容**，不是元素自己
         var pushed = (chain?.ScopedImplicit.Count > 0 || chainLight?.ScopedImplicit.Count > 0)
                      || (implicitChain?.ScopedImplicit.Count > 0 || implicitLight?.ScopedImplicit.Count > 0);
         if (pushed) _scopedStyles.Add((chain ?? implicitChain, chainLight ?? implicitLight));
-        WalkForegroundAndChildren(el, bd, file, op, suppressedBy, handledFg, elementFont, implicitFg, implicitChain);
+        WalkForegroundAndChildren(el, bd, file, op, suppressedBy, handledFg, elementFont, implicitChain);
         if (pushed) _scopedStyles.RemoveAt(_scopedStyles.Count - 1);
         _inheritedFont = outerFont;
     }
+
+    /// <summary>這個隱含樣式會不會改到顏色（1.6）：基礎 Setter 或任何觸發態動到 Foreground／Background，
+    /// 或它帶模板（模板裡那幾層就是底）。只設 Margin／FontSize 的隱含樣式不走鏈路徑 ——
+    /// 走了只會讓每一筆 finding 的 element 都掛上 ⊕Style[implicit …]，白白動掉一批 baseline 的鍵。</summary>
+    private static bool AffectsColour(StyleIndex.Merged? m)
+        => m is not null &&
+           (m.Props.ContainsKey("Foreground") || m.Props.ContainsKey("Background") ||
+            m.TemplateRootBg is not null || m.TemplateLayers.Count > 0 ||
+            m.States.Any(s => s.Set.ContainsKey("Foreground") || s.Set.ContainsKey("Background")));
 
     /// <summary>這一側的鏈缺了一個 BasedOn 基底，而另一側找得到它（另一側沒缺、或缺的是別的）—— 那個基底只定義在另一個主題。
     /// 兩側缺同一個（外部函式庫的基底之類，哪個主題都找不到）不算：照舊略過缺的那一層。</summary>
@@ -910,6 +918,107 @@ public sealed partial class Auditor
         return FromPx(Px(dark, true), Px(light, false), composite ?? (key is null ? null : "{" + key + "}"));
     }
 
+    /// <summary>
+    /// 模板裡那一層底的值，解析到宿主身上（1.6）。
+    ///
+    /// <c>{TemplateBinding P}</c> 不是「一個看不懂的顏色」，它的意思是「宿主自己的 P」—— 所以要回到元素與
+    /// Style 鏈上查（<paramref name="hostProp"/>）。
+    /// <c>Background</c> 查不到 ＝ 宿主沒設底，那一層實質上是透明的 → 穿透到祖先，不是看不懂
+    /// （1.5 的規則：少了它，ScreenToGif 的 Editor.xaml 有 163 組算得出來的配對變成 unresolved）。
+    /// 其他屬性查不到 ＝ 控制項自己的預設值（函式庫寫在 C# metadata 裡），靜態不可知 → Unknown。
+    /// </summary>
+    private static (string? V, bool Unknown) TemplateLayerValue(string? raw, Func<string, string?> hostProp)
+    {
+        if (raw is null) return (null, false);
+        if (TemplateBoundProp().Match(raw.Trim()) is not { Success: true } m) return (raw, false);
+        var p = m.Groups["p"].Value;
+        var dot = p.LastIndexOf('.');
+        if (dot >= 0) p = p[(dot + 1)..]; // Control.Background → Background
+        var v = hostProp(p);
+        return (v, v is null && p != "Background");
+    }
+
+    /// <summary>這個狀態下，模板裡放內容的那幾層各自的底（1.6）：值、要點名的原始寫法、是不是看不懂、來源。
+    /// 「TargetName=模板根」的觸發 Setter 換掉的是根那一層（規則 13），更裡面的層不受影響。
+    ///
+    /// <c>Src</c> 是同源判定要的（字與底都出自同一個 Style 節點 → 定義處已經檢過）：被 TargetName 觸發 Setter
+    /// 換掉的那一層，來源就是那個 Setter 的 Style 節點；其餘是 "tmpl"（寫在模板裡，定義處看不到）。
+    /// ⚠ 一律標 "tmpl" 的話，Kindling CellDeleteBtn 那個 hover 形狀會在定義處與使用處各報一次。</summary>
+    private static List<TemplateChoice> TemplateChoices(
+        StyleIndex.Merged chain, StyleIndex.State st, Func<string, string?> hostProp)
+    {
+        var rooted = st.Set.TryGetValue("Background", out var v) && st.RootTargeted.Contains("Background");
+        var list = new List<TemplateChoice>();
+        foreach (var layer in chain.TemplateLayers)
+        {
+            var fromTrigger = layer.Root && rooted;
+            var raw = fromTrigger ? v : layer.Bg;
+            object? src = fromTrigger ? st.SetSrc["Background"] : "tmpl";
+            string? under = null;
+            var offChain = false;
+            // ── 觸發器重畫了模板內部那一層 ──
+            // 1.5 之前把那個 Setter 丟掉、照舊拿基礎狀態的底評分（編出來的數字）。現在看重畫的是不是
+            // 正好在這個內容位置底下：最靠近字的那一個贏（它蓋在原本那一層上面）。
+            // ⚠ 重畫的元素不在這條鏈上時照舊不評：可能在別的分支（跟這個位置無關），也可能在這條鏈上
+            //   但撐不滿那一格 —— 靜態分不出來，所以維持 1.6 的誠實不知道。
+            // ⚠ 條件是 UnknownLayer 而不是「LayerPaints 有東西」：OpacityMask、整個換掉 Template、
+            //   另一份模板畫的那三種都讓這一層變成不可知，而它們不會留下任何可查的底 —— 用後者當條件的話
+            //   那三種會拿基礎狀態的底評分，正好是 1.6 修掉的那個編造。
+            if (!fromTrigger && st.UnknownLayer)
+            {
+                var hit = layer.Above?.FirstOrDefault(st.LayerPaints.ContainsKey);
+                if (hit is not null)
+                {
+                    // 重畫的那一層在原本那一層「上面」：半透明時要疊在原本那一層上，不是疊在祖先上
+                    under = layer.Bg;
+                    raw = st.LayerPaints[hit];
+                }
+                else if (layer.Name is { } ln && st.LayerPaints.ContainsKey(ln)) raw = st.LayerPaints[ln];
+                else offChain = true;
+                // ⚠ 來源照舊是 "tmpl"，不是那個 Setter 的 Style 節點：定義處（WalkStyles）看不到模板
+                //   內部那一層，讓給它等於這一組在哪裡都沒被評分。規則 13 的「TargetName=模板根」不一樣
+                //   —— 那等同設在宿主上，定義處真的評得到，所以它才帶 Style Id。
+            }
+            var (val, unknown) = TemplateLayerValue(raw, hostProp);
+            // ⚠ offChain 的 Raw 刻意留 null，讓呼叫端點名**字色**（狀態層守門就是這樣點的）。
+            //   指向那一層的原始寫法（多半是 {TemplateBinding Background}）看起來比較精確，其實沒資訊
+            //   —— 它不會說是哪個元素被重畫了 —— 而且 unresolved 的鍵是 file|reason|value，
+            //   換個寫法就得再遞增一次 Baseline.KeyVersion，叫使用者重寫兩次 baseline。
+            list.Add(new TemplateChoice(unknown || offChain ? null : val,
+                offChain ? null : raw, unknown || offChain, src, under));
+        }
+        return list;
+    }
+
+    /// <summary>這個狀態下、模板裡某一個放內容的位置的底（1.6）。
+    /// <paramref name="Under"/> ＝這一層是觸發器畫上去的、而它底下原本那一層的寫法（半透明時要疊在它上面）。</summary>
+    private readonly record struct TemplateChoice(
+        string? V, string? Raw, bool Unknown, object? Src, string? Under = null);
+
+    /// <summary>觸發器畫上去的那一層底下原本那一層當成底（1.6）。
+    /// 透明＝沒遮住，看到的是祖先；不透明／半透明＝疊上去；看不懂＝null，由呼叫端記 template-painted
+    /// （上面是半透明時，底下那一層的顏色就是答案的一部分，猜不得）。</summary>
+    private Backdrop? UnderLayer(string under, Palette pal, Backdrop ancestorBd, double op)
+    {
+        var r = ResolveColour(under, pal);
+        if (r is null) return null;
+        if (r.Kind == ColorKind.Transparent) return ancestorBd;
+        if (r.Kind is ColorKind.UnknownKey || r.Kind is ColorKind.Other) return null;
+        return Paint(ancestorBd, op, r, under);
+    }
+
+    /// <summary>元素在標記裡的子元素落在模板的哪一層上（1.6）：ContentPresenter 那一層，沒有就第一層。
+    /// 子元素（<c>&lt;Button&gt;&lt;TextBlock/&gt;&lt;/Button&gt;</c> 的 TextBlock）是放進 ContentPresenter 的，
+    /// 所以它們的底是那一層，不是祖先。
+    /// 解不開的 <c>{TemplateBinding P}</c> 照原樣回傳 —— 讓子元素走 unresolved，不是悄悄退回祖先。</summary>
+    private static string? PrimaryTemplateLayer(StyleIndex.Merged chain, Func<string, string?> hostProp)
+    {
+        if (chain.TemplateLayers.Count == 0) return null;
+        var layer = chain.TemplateLayers.FirstOrDefault(l => l.Primary) ?? chain.TemplateLayers[0];
+        var (v, unknown) = TemplateLayerValue(layer.Bg, hostProp);
+        return unknown ? layer.Bg : v;
+    }
+
     /// <summary>元素 × Style 鏈的逐狀態檢查。<paramref name="side"/> 不是 null 時只評那一個主題
     /// （同 key 的 Style 依主題各自解析、兩個主題解析到不同的鏈）：色盤用那個主題的視圖、finding 標那個主題（Theme），
     /// 元素名的 Style 標籤帶 @dark／@light。</summary>
@@ -919,6 +1028,13 @@ public sealed partial class Auditor
         var pal = _pal;
         var label = chain.Label;
         var theme = side ?? _curSide;
+        // 元素自己換掉了 Template（<Button.Template> 或 Template="{StaticResource …}"）：
+        // Style 那份模板沒在用，所以它的 ControlTemplate.Triggers 與模板分層在執行期都不存在（1.6）。
+        // ⚠ MergeChain 對 BasedOn 早就有這條（「模板被換掉」），但元素端沒有 —— 實測（Kindling）：
+        //   <Button Background="Transparent"><Button.Template><ControlTemplate><ContentPresenter/>…
+        //   的按鈕被套上 DarkBtn 模板裡 IsPressed 的白字，而本地 Background 又讓底穿透到視窗底色 ——
+        //   報出兩筆「白字配淺色視窗底 1.2:1」的假 fail，而那個狀態根本不存在
+        var ownTemplate = HasOwnTemplate(el);
         if (side is { } s)
         {
             pal = SideView(_pal, s);
@@ -930,7 +1046,8 @@ public sealed partial class Auditor
             var localFgRaw = XamlBrush.Read(el, "Foreground");
             var emitted = new HashSet<string>();
             var allStates = new List<StyleIndex.State> { new() };
-            allStates.AddRange(chain.States);
+            // 元素自己換掉模板 → Style 模板裡的觸發器不存在（見上面 ownTemplate）
+            allStates.AddRange(ownTemplate ? chain.States.Where(st => !st.FromTemplate) : chain.States);
             foreach (var st in allStates)
             {
                 // WPF 優先序：元素屬性 > Style 觸發 > Style Setter
@@ -941,29 +1058,63 @@ public sealed partial class Auditor
                 if (fgV is null) continue;
 
                 string? bgV = null; object? bgSrc = null;
+                // 宿主自己的那個屬性（WPF 優先序：元素屬性 > Style 觸發 > Style Setter）——
+                // 模板裡寫 {TemplateBinding P} 的那一層要回來查它
+                string? HostProp(string p) => XamlBrush.Read(el, p)
+                    ?? (st.Set.TryGetValue(p, out var sv) ? sv : null)
+                    ?? (chain.Props.TryGetValue(p, out var pv) ? pv.V : null);
                 // WPF 屬性優先序的分岔：觸發器「直接設在模板根」的底（TargetName=根）
                 // 蓋過經 TemplateBinding 進來的宿主本地值；「設在宿主」的觸發 Setter
                 // 則輸給宿主的本地屬性（CalendarView 日曆格實證：選取態 DayBorder
                 // 直接換 PrimaryButtonBrush，蓋掉 local SurfaceBrush）
+                List<TemplateChoice>? tmplLayers = null;
                 if (st.Set.TryGetValue("Background", out var rootBg) && st.RootTargeted.Contains("Background"))
                 { bgV = rootBg; bgSrc = st.SetSrc["Background"]; }
                 else if (localBgRaw is not null) { bgV = localBgRaw; bgSrc = "local"; }
                 else if (st.Set.TryGetValue("Background", out var sBg)) { bgV = sBg; bgSrc = st.SetSrc["Background"]; }
                 else if (chain.Props.TryGetValue("Background", out var pb)) { bgV = pb.V; bgSrc = pb.Src; }
-                else if (chain.TemplateRootBg is not null)
+                // ── 模板裡放內容的那幾層（1.6）——取代「只看模板根」那一步 ──
+                // 走到這裡表示宿主自己沒有底：那就看模板把內容放在哪一層上面。
+                // ⚠ 這一步**在宿主的 Background 之後**，不能往前挪：元素自己寫了 Background 時那就是答案。
+                //   實測（MaterialDesign 的 MenusAndToolBars）：挪到前面的話，
+                //   `<MenuItem Background="{DynamicResource SecondaryHueMidBrush}">` 的字被配到外層選單的
+                //   Primary 底上 —— 元素明寫的值被一個「模板某層是透明的」推論蓋掉，等於編造。
+                // ⚠ 1.5 這一步只看模板根（TemplateRootBg），根沒設底就落到祖先 ——
+                //   HandyControl 的 <hc:Shield Color="#1182c3"/> 證明那是編出來的（白字其實在藍色徽章上）。
+                else if (!ownTemplate && chain.TemplateLayers.Count > 0)
                 {
-                    // 模板根元素自帶的背景（CellDeleteBtn 形狀）。來源標 "tmpl" ——
-                    // 它不是 Style 層 setter，WalkStyles 不會在定義處檢到，這裡必須報
+                    tmplLayers = TemplateChoices(chain, st, HostProp);
+                    bgV = tmplLayers[0].V; bgSrc = tmplLayers[0].Src;
+                }
+                else if (!ownTemplate && chain.TemplateRootBg is not null)
+                {
+                    // 模板根元素自帶的背景（CellDeleteBtn 形狀）—— 模板裡找不到放內容的位置時的退路
                     bgV = chain.TemplateRootBg; bgSrc = "tmpl";
                 }
+
+                // 模板分層時每一層各算一組（Shield 的兩個 Border：#555 與 {TemplateBinding Color}）——
+                // 那是執行期真的同時存在的兩塊底，不是互斥的候選，所以兩組都要報
+                var bgChoices = tmplLayers ?? new List<TemplateChoice> { new(bgV, bgV, false, bgSrc) };
 
                 // 字與底都出自同一個 Style 節點 → WalkStyles 在定義處已檢過，不重複。
                 // ⚠ 例外：底是透明／半透明時定義處沒有底下那層可疊（只能記 skipped），這組要在使用處
                 //   對著祖先的底評 —— 否則它在哪裡都沒被評分，也不在覆蓋率裡
-                if (fgSrc is int fi && bgSrc is int bi && fi == bi &&
-                    ColorResolver.Resolve(bgV, pal) is not { Kind: ColorKind.Transparent or ColorKind.Alpha }) continue;
+                bool SameSource(object? src, string? bg)
+                    => fgSrc is int fi && src is int bi && fi == bi &&
+                       ColorResolver.Resolve(bg, pal) is not { Kind: ColorKind.Transparent or ColorKind.Alpha };
+                // 每一層都同源 → 整組讓給定義處（這也是分層前唯一的那一層的行為）
+                if (bgChoices.All(c => SameSource(c.Src, c.V))) continue;
                 // 停用態：WCAG 1.4.3 豁免，計數回報、不評分
                 if (st.Disabled) { _disabled++; continue; }
+                // 這個狀態把模板裡「看不到的那一層」重畫了，而且**自己沒給底**（1.6）：
+                // 那就只剩基礎狀態或祖先的底可用，而那個顏色已經被蓋掉了 —— 拿它評分就是編造。
+                // ⚠ 狀態自己設了 Background 時照舊評：那個值是這個狀態的，至少不是別的狀態的顏色
+                //   （裡面那一層蓋在它上面仍是明文盲區，同 1.5）。這條界線是語料量出來的：
+                //   不分這一刀的話 ScreenToGif 連同 76 筆算得出來的 ok 一起被丟掉
+                // ⚠ 有模板分層可查時是逐層判定（下面那個 layerUnknown）—— 重畫的元素對得上
+                //   這個位置的那一層時算得出來，對不上才記。整個狀態一起丟掉會連同算得出來的層一起丟。
+                if (st.UnknownLayer && !st.Set.ContainsKey("Background") && tmplLayers is null)
+                { Unres(UnresolvedReason.TemplatePainted, file, LineOf(el), fgV); continue; }
 
                 var fgAll = ResolveColour(fgV, pal);
                 if (fgAll is null) continue;
@@ -980,89 +1131,111 @@ public sealed partial class Auditor
                     if (op * VisibleAlpha(fgAll) < 0.01) { _skipped++; continue; }
                 }
 
-                Backdrop stateBd;
-                var bgOwnRaw = bgV; // 卡住時要點名的底：透明的 Setter 只是穿透，卡住的是祖先那一層
-                if (bgV is not null)
+                foreach (var (layerV, layerRaw, layerUnknown, layerSrc, layerUnder) in bgChoices)
                 {
-                    var rb = ResolveColour(bgV, pal);
-                    if (rb is null) continue;
-                    if (rb.Kind == ColorKind.Transparent) { stateBd = bd; bgOwnRaw = null; }
-                    else if (rb.Kind is ColorKind.UnknownKey || rb.Kind is ColorKind.Other && rb.Candidates is null) { Unres(rb, file, LineOf(el), bgV!); continue; }
-                    // 這個狀態的底畫在元素自己身上：半透明的疊在祖先的底上；元素有 Opacity 時連底一起變淡
-                    else stateBd = Paint(ancestorBd, op, rb, bgV);
-                }
-                else stateBd = bd; // Style 鏈沒設底 → 退回祖先背景
-                var backdrops = BackdropVariants(stateBd);
-                // 轉換器的字色：只在底是「一個解得出來的不透明顏色」時展開。底也來自轉換器（哪個字色配哪個底不知道 ——
-                // 全部組合裡有執行期不存在的）或底本身看不懂時，照舊記字色看不懂
-                if (fgConverter && (backdrops is not [{ FromConverter: false, Bg: { } onlyBg }] || !IsOpaque(onlyBg)))
-                { Unres(fgAll, file, LineOf(el), fgV); continue; }
-                var fgVariants = fgConverter ? VisibleForegrounds(fgAll, op) : [(fgAll, fgV, false)];
-
-                foreach (var (fgR, fgLabel, fgFromConverter) in fgVariants)
-                    foreach (var (variantBd, bgObj, bgFromConverter) in backdrops)
+                    if (SameSource(layerSrc, layerV)) continue; // 這一層與字同源 → 定義處檢
+                    // 模板畫了一層底、而那一層的顏色靜態看不到 → 不退回祖先（祖先的顏色根本沒露出來）
+                    if (layerUnknown) { Unres(UnresolvedReason.TemplatePainted, file, LineOf(el), layerRaw ?? fgV); continue; }
+                    Backdrop stateBd;
+                    var bgOwnRaw = layerV; // 卡住時要點名的底：透明的 Setter 只是穿透，卡住的是祖先那一層
+                    if (layerV is not null)
                     {
-                        if (bgObj is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgV); continue; }
-                        // 看不懂的底一定來自祖先或兄弟（這個狀態自己的看不懂的底上面已經記過）：點名卡住的那個值
-                        // （半透明的 hover 底疊在 Background="{Binding …}" 的祖先上 → 點名那個 Binding，不是 hover 的色碼）
-                        if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent)
+                        var rb = ResolveColour(layerV, pal);
+                        if (rb is null) continue;
+                        // 模板裡那一層是透明的 → 看到的是控制項底下那一層。⚠ 不能用 bd：bd 已經把「主要那一層」
+                        // （ContentPresenter 所在的那層）畫進去了，拿它當另一層的底就是把兩層疊起來
+                        if (rb.Kind == ColorKind.Transparent) { stateBd = tmplLayers is not null ? ancestorBd : bd; bgOwnRaw = null; }
+                        else if (rb.Kind is ColorKind.UnknownKey || rb.Kind is ColorKind.Other && rb.Candidates is null)
                         {
-                            Unres(bgObj, file, LineOf(el), IsUnknowable(bgObj) ? bgObj.Raw ?? bgObj.Key ?? fgV : bgOwnRaw ?? bgObj.Key ?? bgObj.Composite ?? bgObj.Raw ?? fgV);
+                            if (tmplLayers is not null) Unres(UnresolvedReason.TemplatePainted, file, LineOf(el), layerV);
+                            else Unres(rb, file, LineOf(el), layerV);
                             continue;
                         }
-
-                        var isTextC = !IsNonTextElement(el.Name.LocalName);
-                        var fsC = 0.0;
-                        var fsRawC = el.Attribute("FontSize")?.Value;
-                        if (fsRawC is not null) ParseFontSize(fsRawC, out fsC);
-                        else if (st.Set.TryGetValue("FontSize", out var sfs)) ParseFontSize(sfs, out fsC);
-                        else if (chain.Props.TryGetValue("FontSize", out var pfs)) ParseFontSize(pfs.V, out fsC);
-                        var fwV = el.Attribute("FontWeight")?.Value
-                                  ?? (chain.Props.TryGetValue("FontWeight", out var pfw) ? pfw.V : null);
-                        var boldC = IsBold(fwV);
-                        var ptC = fsC * 0.75;
-                        var isLargeC = ptC >= 18 || (boldC && ptC >= 14);
-                        var needC = NeedFor(isTextC, isLargeC);
-                        // 圖示字型：本地 > 這個狀態的觸發 Setter > Style Setter > 繼承
-                        var fontC = LocalFontFamily(el)
-                                    ?? (st.Set.TryGetValue("FontFamily", out var sff) ? sff : null)
-                                    ?? ChainFont(chain)
-                                    ?? _inheritedFont;
-                        ApplyIconFont(fontC, ref isTextC, ref isLargeC, ref needC);
-
-                        var (fgDC, fgLC) = TextOnScreen(fgR, op, variantBd);
-
-                        // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複。
-                        // ⚠ 鍵是兩個主題合成後的實際顏色（加上門檻）：舊版只看深色值，hover 換成「深色同值、淺色不同」的色票時，
-                        //   淺色 1.16:1 的真 fail 被當成重複丟掉（審查素材 dedup；半透明色票深色同 alpha、淺色不同 alpha 也一樣）
-                        if (!emitted.Add($"{fgDC}|{fgLC}|{bgObj.Dark}|{bgObj.Light}|{needC}")) continue;
-
-                        _pairs++;
-                        if (fgFromConverter || bgFromConverter) _converterPairs++;
-                        if (suppressedBy is not null) { Suppress(suppressedBy); continue; }
-                        var lineC = el is IXmlLineInfo cli && cli.HasLineInfo() ? cli.LineNumber : 0;
-                        var (ratioDC, colorsDC) = Wcag.Measure(fgDC, bgObj.Dark!);
-                        var (ratioLC, colorsLC) = Wcag.Measure(fgLC, bgObj.Light!);
-                        _findings.Add(new Finding
-                        {
-                            File = file,
-                            Line = lineC,
-                            Element = $"{el.Name.LocalName}⊕{label}/{(st.Cond is null && st.Set.Count == 0 ? "base" : "trigger")}",
-                            Fg = op < 0.999 ? WithOpacityNote(fgLabel, op) : fgLabel,
-                            Bg = LabelOf(bgObj),
-                            Mixed = fgR.Kind != bgObj.Kind,
-                            RatioDark = ratioDC,
-                            RatioLight = ratioLC,
-                            ColorsDark = colorsDC,
-                            ColorsLight = colorsLC,
-                            IsText = isTextC,
-                            Need = needC,
-                            Size = fsC > 0 ? $"{(int)Math.Round(fsC, MidpointRounding.ToEven)}px" : "",
-                            FontSize = fsC > 0 ? fsC : null,
-                            Large = isLargeC,
-                            Theme = theme,
-                        });
+                        // 這個狀態的底畫在元素自己身上：半透明的疊在祖先的底上；元素有 Opacity 時連底一起變淡
+                        // ⚠ 這一層是觸發器畫上去的、而它底下原本還有一層（layerUnder）時，半透明要疊在
+                        //   那一層上 —— 疊到祖先上就是跳過中間那一層，報一個執行期不存在的比值。
+                        //   ScreenToGif 的 AwareTabItem 就是這形狀（選取態把 ContentBorder 畫成 #90FFFFFF）。
+                        // 不透明的重畫層把底下那一層完全蓋住，所以底下讀不懂也不影響（Paint 會忽略底）
+                        else if (layerUnder is null || rb.Kind is not ColorKind.Alpha)
+                            stateBd = Paint(ancestorBd, op, rb, layerV);
+                        else if (UnderLayer(layerUnder, pal, ancestorBd, op) is { } below)
+                            stateBd = Paint(below, op, rb, layerV);
+                        else
+                        { Unres(UnresolvedReason.TemplatePainted, file, LineOf(el), layerUnder); continue; }
                     }
+                    else stateBd = tmplLayers is not null ? ancestorBd : bd; // 沒設底 → 退回祖先背景
+                    var backdrops = BackdropVariants(stateBd);
+                    // 轉換器的字色：只在底是「一個解得出來的不透明顏色」時展開。底也來自轉換器（哪個字色配哪個底不知道 ——
+                    // 全部組合裡有執行期不存在的）或底本身看不懂時，照舊記字色看不懂
+                    if (fgConverter && (backdrops is not [{ FromConverter: false, Bg: { } onlyBg }] || !IsOpaque(onlyBg)))
+                    { Unres(fgAll, file, LineOf(el), fgV); continue; }
+                    var fgVariants = fgConverter ? VisibleForegrounds(fgAll, op) : [(fgAll, fgV, false)];
+
+                    foreach (var (fgR, fgLabel, fgFromConverter) in fgVariants)
+                        foreach (var (variantBd, bgObj, bgFromConverter) in backdrops)
+                        {
+                            if (bgObj is null) { Unres(UnresolvedReason.NoAncestorBackground, file, LineOf(el), fgV); continue; }
+                            // 看不懂的底一定來自祖先或兄弟（這個狀態自己的看不懂的底上面已經記過）：點名卡住的那個值
+                            // （半透明的 hover 底疊在 Background="{Binding …}" 的祖先上 → 點名那個 Binding，不是 hover 的色碼）
+                            if (bgObj.Kind is ColorKind.Other or ColorKind.Alpha or ColorKind.UnknownKey or ColorKind.SiblingContent)
+                            {
+                                Unres(bgObj, file, LineOf(el), IsUnknowable(bgObj) ? bgObj.Raw ?? bgObj.Key ?? fgV : bgOwnRaw ?? bgObj.Key ?? bgObj.Composite ?? bgObj.Raw ?? fgV);
+                                continue;
+                            }
+
+                            var isTextC = !IsNonTextElement(el.Name.LocalName);
+                            var fsC = 0.0;
+                            var fsRawC = el.Attribute("FontSize")?.Value;
+                            if (fsRawC is not null) ParseFontSize(fsRawC, out fsC);
+                            else if (st.Set.TryGetValue("FontSize", out var sfs)) ParseFontSize(sfs, out fsC);
+                            else if (chain.Props.TryGetValue("FontSize", out var pfs)) ParseFontSize(pfs.V, out fsC);
+                            var fwV = el.Attribute("FontWeight")?.Value
+                                      ?? (chain.Props.TryGetValue("FontWeight", out var pfw) ? pfw.V : null);
+                            var boldC = IsBold(fwV);
+                            var ptC = fsC * 0.75;
+                            var isLargeC = ptC >= 18 || (boldC && ptC >= 14);
+                            var needC = NeedFor(isTextC, isLargeC);
+                            // 圖示字型：本地 > 這個狀態的觸發 Setter > Style Setter > 繼承
+                            var fontC = LocalFontFamily(el)
+                                        ?? (st.Set.TryGetValue("FontFamily", out var sff) ? sff : null)
+                                        ?? ChainFont(chain)
+                                        ?? _inheritedFont;
+                            ApplyIconFont(fontC, ref isTextC, ref isLargeC, ref needC);
+
+                            var (fgDC, fgLC) = TextOnScreen(fgR, op, variantBd);
+
+                            // 觸發器只動了無關屬性（如停用態只設 Opacity）→ 與基礎同組，不重複。
+                            // ⚠ 鍵是兩個主題合成後的實際顏色（加上門檻）：舊版只看深色值，hover 換成「深色同值、淺色不同」的色票時，
+                            //   淺色 1.16:1 的真 fail 被當成重複丟掉（審查素材 dedup；半透明色票深色同 alpha、淺色不同 alpha 也一樣）
+                            if (!emitted.Add($"{fgDC}|{fgLC}|{bgObj.Dark}|{bgObj.Light}|{needC}")) continue;
+
+                            _pairs++;
+                            if (fgFromConverter || bgFromConverter) _converterPairs++;
+                            if (suppressedBy is not null) { Suppress(suppressedBy); continue; }
+                            var lineC = el is IXmlLineInfo cli && cli.HasLineInfo() ? cli.LineNumber : 0;
+                            var (ratioDC, colorsDC) = Wcag.Measure(fgDC, bgObj.Dark!);
+                            var (ratioLC, colorsLC) = Wcag.Measure(fgLC, bgObj.Light!);
+                            _findings.Add(new Finding
+                            {
+                                File = file,
+                                Line = lineC,
+                                Element = $"{el.Name.LocalName}⊕{label}/{(st.Cond is null && st.Set.Count == 0 ? "base" : "trigger")}",
+                                Fg = op < 0.999 ? WithOpacityNote(fgLabel, op) : fgLabel,
+                                Bg = LabelOf(bgObj),
+                                Mixed = fgR.Kind != bgObj.Kind,
+                                RatioDark = ratioDC,
+                                RatioLight = ratioLC,
+                                ColorsDark = colorsDC,
+                                ColorsLight = colorsLC,
+                                IsText = isTextC,
+                                Need = needC,
+                                Size = fsC > 0 ? $"{(int)Math.Round(fsC, MidpointRounding.ToEven)}px" : "",
+                                FontSize = fsC > 0 ? fsC : null,
+                                Large = isLargeC,
+                                Theme = theme,
+                            });
+                        }
+                }
             }
         }
     }
@@ -1254,7 +1427,7 @@ public sealed partial class Auditor
     /// <paramref name="implicitFg"/>／<paramref name="implicitStyle"/>：該型別隱含樣式的基礎 Setter（1.5）——
     /// 元素沒寫 Foreground／FontSize／FontWeight 時 WPF 用的就是它們。</summary>
     private void WalkForegroundAndChildren(XElement el, Backdrop bd, string file, double op, string? suppressedBy, bool handledFg,
-        string? font, string? implicitFg = null, StyleIndex.Merged? implicitStyle = null)
+        string? font, StyleIndex.Merged? implicitStyle = null)
     {
         // 螢幕上實際看到的底（Opacity 群組一層一層疊出去之後）；底來自固定顏色的轉換器時，每個候選色一個
         var backdrops = BackdropVariants(bd);
@@ -1262,9 +1435,6 @@ public sealed partial class Auditor
         {
             if (attrName == "Foreground" && handledFg) continue;
             var fgRaw = XamlBrush.Read(el, attrName);
-            // 1.5：沒寫 Foreground 的元素，字色可能來自該型別的隱含樣式（Fill 沒有這條 —— 隱含樣式設 Fill 不是常見寫法，
-            // 而且 Shape 的 Fill 由 nonText 那條路管）
-            if (fgRaw is null && attrName == "Foreground") fgRaw = implicitFg;
             if (fgRaw is null) continue;
             var fgAll = ResolveColour(fgRaw, _pal);
             if (fgAll is null) continue;
@@ -1358,65 +1528,33 @@ public sealed partial class Auditor
         //       報假警報(HandyControl Carousel:白字疊照片被配 RegionBrush,light=1)
         // 防呆:有明確尺寸或非 Stretch 對齊的兄弟不算背板(強調色條 Width="4" 之類)。
         //   Canvas 只套 (b):它不把子元素撐滿,(a) 的「佔滿格子」前提不成立。
-        var layout = LayoutOf(el.Name.LocalName);
-        var overlap = layout != PanelLayout.SideBySide;
+        var layout = Panels.LayoutOf(el.Name.LocalName, _cfg);
+        var overlap = layout != Panels.Layout.SideBySide;
         Dictionary<(int Row, int Col), Backdrop>? cellBg = overlap ? new() : null;
         var parentFont = _inheritedFont;
         _inheritedFont = font; // 子元素繼承這個元素的字型
         foreach (var child in el.Elements())
         {
             // Style / Setter / Trigger 這些不是視覺樹，個別處理（WalkStyles），這裡跳過
-            if (StyleishEls.Contains(child.Name.LocalName)) continue;
+            if (Panels.Styleish.Contains(child.Name.LocalName)) continue;
             // <Border.Background> 之類是屬性值（上面已由 XamlBrush 讀進來），不是視覺子樹
             if (XamlBrush.IsColorPropertyElement(el, child)) continue;
             var childBd = bd;
             (int, int) cell = default;
             if (overlap)
             {
-                cell = CellOf(child, el.Name.LocalName == "Grid");
+                cell = Panels.CellOf(child, el.Name.LocalName == "Grid");
                 if (cellBg!.TryGetValue(cell, out var sb)) childBd = sb;
             }
             Walk(child, childBd, file, op, suppressedBy);
             // 兄弟背板畫在容器那一層（容器的累乘透明度）；它自己的 Opacity 已折進 alpha（見 SiblingBackdrop）
-            if (overlap && SiblingBackdrop(child, stretches: StretchesChildren(el.Name.LocalName)) is { } backdrop)
-                cellBg![cell] = layout == PanelLayout.Unknown
+            if (overlap && SiblingBackdrop(child, stretches: Panels.StretchesChildren(el.Name.LocalName)) is { } backdrop)
+                cellBg![cell] = layout == Panels.Layout.Unknown
                     // 版面未知的自訂面板：它若是疊層，這就是後面兄弟的背板；若是排開，就不是 —— 靜態不可知，不猜
                     ? Paint(childBd, op, new Resolved(ColorKind.SiblingContent, Raw: $"<{child.Name.LocalName}> in <{el.Name.LocalName}>"), "")
                     : Paint(childBd, op, backdrop, backdrop.Raw ?? "");
         }
         _inheritedFont = parentFont;
-    }
-
-    private enum PanelLayout { SideBySide, Overlap, Unknown }
-
-    /// <summary>容器的子元素會不會疊在一起。Grid（同一格）、Canvas 會；StackPanel／WrapPanel／DockPanel／
-    /// UniformGrid／ToolBarPanel／TabPanel 系（含衍生命名，例 VirtualizingWrapPanel、MyDockPanel）會排開。
-    /// ⚠ 其他自訂 *Panel 的版面靜態不可知：舊版「保守視為疊層」，在排開的面板裡就是捏造背板
-    ///   （VirtualizingWrapPanel 裡的黑色方塊被當成旁邊白字的底）；當成排開一樣是猜 → Unknown。
-    /// ⚠ 衍生命名的 *Canvas／*Grid 同理（審查素材 m7）：舊版只看 *Panel，ZoomCanvas 與 CardGrid 落到「排開」——
-    ///   疊在 Image 上的字報 21:1 ok、疊在黑色方塊上的白字配祖先白底編出 1:1 fail。它們是不是真的衍生自
-    ///   Canvas／Grid、Grid 的格子怎麼切，靜態都不知道 → Unknown。InkCanvas 是 WPF 內建，跟 Canvas 一樣疊在一起。</summary>
-    private PanelLayout LayoutOf(string name)
-    {
-        // config 的宣告優先（使用者知道自己的容器怎麼排）
-        if (_cfg.Layout.Overlap.Contains(name, StringComparer.Ordinal)) return PanelLayout.Overlap;
-        if (_cfg.Layout.SideBySide.Contains(name, StringComparer.Ordinal)) return PanelLayout.SideBySide;
-        if (name is "Grid" or "Canvas" or "InkCanvas") return PanelLayout.Overlap;
-        if (name.EndsWith("StackPanel") || name.EndsWith("WrapPanel") || name.EndsWith("DockPanel") ||
-            name.EndsWith("UniformGrid") || name.EndsWith("ToolBarPanel") || name.EndsWith("TabPanel") ||
-            name.EndsWith("ToolBarOverflowPanel") || name.EndsWith("DataGrid")) return PanelLayout.SideBySide;
-        return name.EndsWith("Panel") || name.EndsWith("Canvas") || name.EndsWith("Grid")
-            ? PanelLayout.Unknown : PanelLayout.SideBySide;
-    }
-
-    /// <summary>Canvas 系不把子元素撐滿（沒有尺寸的 Border 實際是 0×0），見 <see cref="SiblingBackdrop"/>。</summary>
-    private static bool StretchesChildren(string name) => name is not ("Canvas" or "InkCanvas");
-
-    private static (int, int) CellOf(XElement child, bool isGrid)
-    {
-        if (!isGrid) return default; // Canvas/自訂 Panel:全部視為同一層
-        int P(string attr) => int.TryParse(child.Attribute(attr)?.Value, out var v) ? v : 0;
-        return (P("Grid.Row"), P("Grid.Column"));
     }
 
     /// <summary>這個兄弟元素會不會成為「後面同格子兄弟」的背板（Raw 帶著它的原始寫法，合成時當標籤）。
@@ -1425,20 +1563,15 @@ public sealed partial class Auditor
     {
         var name = child.Name.LocalName;
         // (b) 內容元素:底變成一張圖,不可知
-        if (name is "Image" or "MediaElement" || name.EndsWith("Image"))
+        if (Panels.IsContentElement(name))
             return new Resolved(ColorKind.SiblingContent, Raw: "<" + name + ">");
 
         // (a) 純色背板候選:要佔滿格子 —— 有明確尺寸或非 Stretch 對齊的不算
         // ⚠ Canvas 不套 Stretch:沒內容、沒尺寸的 Border 在 Canvas 裡實際是 0×0。舊版照樣套 17(a),
         //   把一塊不存在的背板捏造出來(白字疊祖先白底 1:1,報成 21:1 合格)。有尺寸的也不行 ——
         //   Canvas.Left/Top 與文字範圍靜態不可知,它在不在字底下判定不了(同 Grid 裡的強調色條)。
-        if (!stretches) return null;
-        static bool Stretchy(XElement e, string attr)
-            => e.Attribute(attr)?.Value is null or "Stretch";
-        if (child.Attribute("Width") is not null || child.Attribute("Height") is not null ||
-            !Stretchy(child, "HorizontalAlignment") || !Stretchy(child, "VerticalAlignment"))
-            return null;
-        var raw = XamlBrush.Read(child, name == "Rectangle" ? "Fill" : "Background");
+        if (!Panels.FillsCell(child, stretches)) return null;
+        var raw = Panels.BackdropBrush(child);
         if (raw is null) return null;
         var r = ColorResolver.Resolve(raw, _pal);
         // 透明（含 alpha 0 的色碼）的兄弟不管 Opacity 是多少都看不見 —— 先排除，再看 Opacity。
@@ -1486,6 +1619,13 @@ public sealed partial class Auditor
 
     // Style 裡成對的 Setter（Background + Foreground 同時存在）
     /// <summary><c>{TemplateBinding X}</c> 的值 → null（那是宿主自己的屬性值，不是一個顏色）。</summary>
+    /// <summary>元素自己換掉了 ControlTemplate（<c>&lt;Button.Template&gt;</c> 或 <c>Template="{StaticResource …}"</c>）。
+    /// 換掉之後 Style 那份模板的 <c>ControlTemplate.Triggers</c> 與分層在執行期都不存在（1.6）。
+    /// ⚠ <c>ItemTemplate</c>／<c>ContentTemplate</c> 這些不算：它們換的是資料的呈現，不是控制項的視覺。</summary>
+    private static bool HasOwnTemplate(XElement el)
+        => el.Attribute("Template") is not null ||
+           el.Elements().Any(e => e.Name.LocalName.EndsWith(".Template", StringComparison.Ordinal));
+
     private static string? NotTemplateBound(string? v)
         => v is not null && v.TrimStart().StartsWith("{TemplateBinding", StringComparison.Ordinal) ? null : v;
 
@@ -1605,8 +1745,8 @@ public sealed partial class Auditor
             var fgDead = false;
             if (tmpl is not null)
             {
-                var hasConsumer = tmpl.Descendants().Any(e => FgConsumers.Contains(e.Name.LocalName))
-                                  || TemplateBindingFg().IsMatch(tmpl.ToString());
+                var hasConsumer = tmpl.Descendants().Any(e => StyleIndex.FgConsumers.Contains(e.Name.LocalName))
+                                  || StyleIndex.TemplateBindingFg().IsMatch(tmpl.ToString());
                 fgDead = !hasConsumer;
             }
 
@@ -1642,6 +1782,9 @@ public sealed partial class Auditor
                 if (fgDead) { _deadFg++; continue; }
                 // 停用態（IsEnabled=False 觸發）：WCAG 1.4.3 豁免，計數回報、不評分
                 if (stDisabled) { _disabled++; continue; }
+                // 同元素端：狀態重畫了看不到的那一層、而且自己沒給底 → 不能拿基礎狀態的底去配
+                if (st?.UnknownLayer == true && !st.Set.ContainsKey("Background"))
+                { Unres(UnresolvedReason.TemplatePainted, file, line, fgv); continue; }
                 var fgAll = ResolveColour(fgv, _pal);
                 var bgAll = ResolveColour(bgv, _pal);
                 if (fgAll is null || bgAll is null) continue;

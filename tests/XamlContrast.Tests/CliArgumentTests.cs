@@ -1,5 +1,7 @@
 using System.Diagnostics;
 
+using XamlContrast.Core;
+
 namespace XamlContrast.Tests;
 
 /// <summary>
@@ -60,7 +62,7 @@ public class CliArgumentTests
               </Grid>
             </UserControl>
             """);
-        fx.File("baseline.json", """{ "schemaVersion": 1, "entries": [] }""");
+        fx.File("baseline.json", $$"""{ "schemaVersion": 1, "keyVersion": {{Baseline.KeyVersion}}, "entries": [] }""");
         foreach (var args in new[]
         {
             new[] { fx.Root, "--show-unresolved", "--show-ok" },

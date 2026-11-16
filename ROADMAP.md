@@ -50,11 +50,29 @@
 - [x] VisualStateManager 狀態顏色的計數器 —— 1.5：`summary.stateColors` ＋ `stateColorSites` 逐筆點名
       （含 WinUI 的 `<VisualState.Setters>`）。照舊不評，只是不再靜默。
       實測 WinUI Gallery 44 處、wpfui 18、HandyControl 15，而自家四個專案是 0
-- **隱含樣式的觸發態**（1.5 只做基礎 Setter）：要評它得讓元素走 `GradeChain` 的逐狀態路徑，
-  那會改變 finding 的 `element` 標籤 = **baseline 的鍵**，所以必須跟 `Baseline.KeyVersion` 的遞增、
-  Parity 儀表板那份手刻的鍵一起規劃成一次協調過的發版
-- **帶模板的控制項：模板裡哪一層畫底**（1.5 的三塊「不猜」之一，隱含與具名 Style 都一樣）——
-  現在只看模板根；根沒設底時字配到祖先，HandyControl 的 Shield 證明那可能是編出來的
+- [x] **隱含樣式的觸發態** —— 1.6：隱含樣式改走 `GradeChain` 的逐狀態路徑，所以 hover／選取／勾選都評得到。
+      代價如預期是 `element` 標籤（= baseline 的鍵）改變，所以 `Baseline.KeyVersion` 1 → 2，舊 baseline 被拒並叫人重寫。
+      只有「真的會動到顏色」的隱含樣式走這條，否則每一筆 finding 的鍵都會無謂地變
+- [x] **帶模板的控制項：模板裡哪一層畫底** —— 1.6：模板裡放宿主內容的位置，對著它在模板裡最近一層畫底的祖先評，
+      `{TemplateBinding P}` 回宿主身上解；兩層都放內容就兩筆。HandyControl 的 Shield 從「配祖先白底的 1:1 假 fail」
+      變成 7.46:1（#555）與 4.20:1（#1182C3），兩筆都是真的。解不出來的那一層記 `template-painted`，不退回祖先
+- [x] **模板裡的兄弟背板** —— 1.6：模板裡找「畫在內容底下的那一層」照 WPF 的繪製順序走，所以兄弟也算得出來
+      （同一個 `Grid` 格子、撐滿那一格、最靠上的贏）。疊層判定抽進 `Panels`，與標記樹的規則 17 共用一份 ——
+      抄一份的話同一段 XAML 寫在畫面裡與寫在模板裡會得到不同的答案，而且沒有任何測試會紅。
+      實測：17 個公開專案＋三個本機專案**逐筆完全一致**，所以它關掉的是一條編造路徑（宿主沒設底時配到祖先），
+      不是一批新數字 —— MaterialDesign 的按鈕本來就靠「宿主自己的 Background」接住了
+- [x] **觸發器重畫模板內部那一層** —— 1.6：記下重畫了哪一個元素、換成什麼，再看它是不是正好在那段內容底下那一疊上。
+      不透明的重畫就是這個狀態的底；半透明的疊在它蓋住的那一層上（ScreenToGif 的 `AwareTabItem` 選取態把
+      `ContentBorder` 畫成 `#90FFFFFF`，疊在面板的 Level3 上 → 7 筆 `8.23/20.29` 的 ok；1.5 拿被蓋掉的顏色報 1.46:1）。另有 13 筆（MahApps 3、MaterialDesign 10）從 `template-painted` 改成
+      `bound-or-gradient` —— 那一層解開之後，真正卡住的是字色的 Binding，原因終於指對地方
+- **重畫的元素不在那一疊上**（1.6 新明文化）：`TargetName` 指的元素可能在模板的別的分支（跟這段內容無關），
+  也可能在那一疊上但撐不滿它那一格 —— 靜態分不出來，所以維持誠實的 `template-painted`。
+  同一類還有：重畫的值是漸層或 Binding（ScreenToGif 另有 7 筆 `RadialGradientBrush`，現在誠實點名那支 brush）、
+  半透明的重畫層而它蓋住的那一層本身讀不懂
+- **模板裡的 Image 兄弟與帶 Opacity 的兄弟**（1.6 新明文化）：前者的底是一張圖（標記樹裡記
+  `over-sibling-content`，模板裡還沒有對應的計數器，收了會讓那些配對悄悄變成不可知）；後者要把半透明疊到
+  它底下那一層才算得出來，而那一步回傳的是原始寫法。兩種都維持 1.6 的答案，不是編造，但也還沒算出來
+- **畫在內容後面的兄弟**：那是蓋在字上面，不是當字的底 —— 文字被遮住多少靜態不可知
 
 ## 與 Parity 的交會點（構想，尚未排程）
 
