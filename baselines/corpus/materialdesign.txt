@@ -3,7 +3,7 @@
 project: materialdesign
 repo: https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit
 commit: 087728011a8d71926ccf86cb28dc99439e9b1c3f
-tool-commit: 164cda1+dirty
+tool-commit: 4a1e23d+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair
@@ -26,11 +26,11 @@ fail: 117
 warn: 42
 ok: 218
 decorative: 8
-unresolved-by.bound-or-gradient: 2498
+unresolved-by.bound-or-gradient: 2508
 unresolved-by.in-style-template: 27
 unresolved-by.no-ancestor-background: 312
 unresolved-by.same-brush-pair: 7
-unresolved-by.template-painted: 880
+unresolved-by.template-painted: 870
 unresolved-by.translucent-uncomposited: 95
 unresolved-by.unknown-palette-key: 54
 unknown-keys.MahApps.Brushes.Text: 46
@@ -465,12 +465,17 @@ U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:249  {Binding RelativeSource={
 U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:256  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:301  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:301  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
+U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:301  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
+U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:304  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:304  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:304  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:307  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:307  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
+U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:307  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:310  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:310  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
+U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:310  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
+U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:313  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:313  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:313  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MainDemo.Wpf/Cards.xaml:320  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
@@ -2075,12 +2080,17 @@ U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:200  {Binding Rela
 U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:207  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:253  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:253  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
+U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:253  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
+U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:256  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:256  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:256  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:259  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:259  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
+U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:259  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:262  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:262  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
+U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:262  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
+U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:265  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:265  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:265  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  bound-or-gradient  src/MaterialDesign3.Demo.Wpf/Cards.xaml:272  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
@@ -3308,11 +3318,6 @@ U  template-painted  src/MainDemo.Wpf/Buttons.xaml:802  {Binding RelativeSource=
 U  template-painted  src/MainDemo.Wpf/Buttons.xaml:802  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MainDemo.Wpf/Buttons.xaml:802  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MainDemo.Wpf/Cards.xaml:212  {DynamicResource MaterialDesign.Brush.Primary}
-U  template-painted  src/MainDemo.Wpf/Cards.xaml:301  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
-U  template-painted  src/MainDemo.Wpf/Cards.xaml:304  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
-U  template-painted  src/MainDemo.Wpf/Cards.xaml:307  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
-U  template-painted  src/MainDemo.Wpf/Cards.xaml:310  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
-U  template-painted  src/MainDemo.Wpf/Cards.xaml:313  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MainDemo.Wpf/Cards.xaml:347  {DynamicResource MaterialDesign.Brush.Primary}
 U  template-painted  src/MainDemo.Wpf/Cards.xaml:354  {DynamicResource MaterialDesign.Brush.Primary}
 U  template-painted  src/MainDemo.Wpf/Cards.xaml:381  {DynamicResource MaterialDesign.Brush.Primary}
@@ -3842,11 +3847,6 @@ U  template-painted  src/MaterialDesign3.Demo.Wpf/Buttons.xaml:842  {Binding Rel
 U  template-painted  src/MaterialDesign3.Demo.Wpf/Buttons.xaml:842  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MaterialDesign3.Demo.Wpf/Buttons.xaml:842  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:162  {DynamicResource MaterialDesign.Brush.Primary}
-U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:253  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
-U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:256  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
-U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:259  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
-U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:262  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
-U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:265  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground), FallbackValue=Black}
 U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:294  {DynamicResource MaterialDesign.Brush.Primary}
 U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:301  {DynamicResource MaterialDesign.Brush.Primary}
 U  template-painted  src/MaterialDesign3.Demo.Wpf/Cards.xaml:331  {DynamicResource MaterialDesign.Brush.Primary}

@@ -3,7 +3,7 @@
 project: screentogif
 repo: https://github.com/NickeManarin/ScreenToGif
 commit: a4d0a67c2131cd048ceec86cd40afc2f1a06f2fd
-tool-commit: 164cda1+dirty
+tool-commit: 4a1e23d+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair
@@ -11,9 +11,9 @@ palette-degraded: False
 palette-keys: 109
 single-theme: False
 files: 113
-pairs: 1025
-coverage: 24.2
-unresolved: 3213
+pairs: 1032
+coverage: 24.4
+unresolved: 3199
 skipped: 6
 dead-foreground: 101
 disabled-exempt: 401
@@ -24,12 +24,12 @@ suppressed: 0
 state-colors: 1
 fail: 147
 warn: 73
-ok: 791
+ok: 798
 decorative: 14
 unresolved-by.bound-or-gradient: 117
 unresolved-by.in-style-template: 34
 unresolved-by.no-ancestor-background: 1701
-unresolved-by.template-painted: 278
+unresolved-by.template-painted: 264
 unresolved-by.translucent-uncomposited: 1051
 unresolved-by.unknown-palette-key: 32
 unknown-keys.Checker.DrawingBrush: 32
@@ -453,12 +453,15 @@ F  ok  ScreenToGif/Windows/Board.xaml:272  ExtendedToggleButton⊕Style[Style.To
 F  ok  ScreenToGif/Windows/Board.xaml:272  ExtendedToggleButton⊕Style[Style.ToggleButton.NoBorder]/trigger  {DynamicResource Element.Foreground} on {Brush.Button.Background.Pressed} over {Panel.Background}  10.87/11.42  
 F  ok  ScreenToGif/Windows/Editor.xaml:1  ExWindow⊕Style[implicit ExWindow]/base  {DynamicResource Element.Foreground} on {Panel.Background.Level3}  11.71/19.26  
 F  ok  ScreenToGif/Windows/Editor.xaml:1003  AwareTabItem⊕Style[implicit AwareTabItem]/base  {DynamicResource Element.Foreground} on {Panel.Background.Level3}  11.71/19.26  
+F  ok  ScreenToGif/Windows/Editor.xaml:1003  AwareTabItem⊕Style[implicit AwareTabItem]/trigger  #FF000000 on #90FFFFFF over {Panel.Background.Level3}  8.23/20.29  
 F  ok  ScreenToGif/Windows/Editor.xaml:1025  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:1065  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:1115  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:1176  AwareTabItem⊕Style[implicit AwareTabItem]/base  {DynamicResource Element.Foreground} on {Panel.Background.Level3}  11.71/19.26  
+F  ok  ScreenToGif/Windows/Editor.xaml:1176  AwareTabItem⊕Style[implicit AwareTabItem]/trigger  #FF000000 on #90FFFFFF over {Panel.Background.Level3}  8.23/20.29  
 F  ok  ScreenToGif/Windows/Editor.xaml:1194  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:1213  AwareTabItem⊕Style[implicit AwareTabItem]/base  {DynamicResource Element.Foreground} on {Panel.Background.Level3}  11.71/19.26  
+F  ok  ScreenToGif/Windows/Editor.xaml:1213  AwareTabItem⊕Style[implicit AwareTabItem]/trigger  #FF000000 on #90FFFFFF over {Panel.Background.Level3}  8.23/20.29  
 F  ok  ScreenToGif/Windows/Editor.xaml:1244  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:1249  TextBlock  {DynamicResource Element.Foreground} on {Panel.Background.Level2}  12.35/20.12  
 F  ok  ScreenToGif/Windows/Editor.xaml:1253  TextBlock  {DynamicResource Element.Foreground} on {Panel.Background.Level2}  12.35/20.12  
@@ -741,18 +744,21 @@ F  ok  ScreenToGif/Windows/Editor.xaml:4317  ExtendedMenuItem⊕Style[implicit E
 F  ok  ScreenToGif/Windows/Editor.xaml:4318  ExtendedMenuItem⊕Style[implicit ExtendedMenuItem]/base  {DynamicResource Element.Foreground.Medium} on {Element.Background}  6.68/9.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:4318  ExtendedMenuItem⊕Style[implicit ExtendedMenuItem]/trigger  {DynamicResource Element.Foreground} on {Brush.MenuItem.Background.Hover} over {Element.Background}  6.58/17.48  
 F  ok  ScreenToGif/Windows/Editor.xaml:436  AwareTabItem⊕Style[implicit AwareTabItem]/base  {DynamicResource Element.Foreground} on {Panel.Background.Level3}  11.71/19.26  
+F  ok  ScreenToGif/Windows/Editor.xaml:436  AwareTabItem⊕Style[implicit AwareTabItem]/trigger  #FF000000 on #90FFFFFF over {Panel.Background.Level3}  8.23/20.29  
 F  ok  ScreenToGif/Windows/Editor.xaml:4400  Label  {DynamicResource Element.Foreground.Medium} on {Panel.Background.Level3}  7.48/8.93  
 F  ok  ScreenToGif/Windows/Editor.xaml:4419  IntegerUpDown⊕Style[IntegerUpDown.Minimal]/base  {DynamicResource Element.Foreground} on {Panel.Background.Level3}  11.71/19.26  
 F  ok  ScreenToGif/Windows/Editor.xaml:462  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:501  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:540  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:571  AwareTabItem⊕Style[implicit AwareTabItem]/base  {DynamicResource Element.Foreground} on {Panel.Background.Level3}  11.71/19.26  
+F  ok  ScreenToGif/Windows/Editor.xaml:571  AwareTabItem⊕Style[implicit AwareTabItem]/trigger  #FF000000 on #90FFFFFF over {Panel.Background.Level3}  8.23/20.29  
 F  ok  ScreenToGif/Windows/Editor.xaml:596  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:642  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:688  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:712  TextBlock  {DynamicResource Element.Foreground} on {Panel.Background.Level2}  12.35/20.12  
 F  ok  ScreenToGif/Windows/Editor.xaml:737  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:773  AwareTabItem⊕Style[implicit AwareTabItem]/base  {DynamicResource Element.Foreground} on {Panel.Background.Level3}  11.71/19.26  
+F  ok  ScreenToGif/Windows/Editor.xaml:773  AwareTabItem⊕Style[implicit AwareTabItem]/trigger  #FF000000 on #90FFFFFF over {Panel.Background.Level3}  8.23/20.29  
 F  ok  ScreenToGif/Windows/Editor.xaml:796  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:805  ExtendedRepeatButton⊕Style[Style.RepeatButton.Vertical]/base  {DynamicResource Element.Foreground} on {Panel.Background.Level2}  12.35/20.12  
 F  ok  ScreenToGif/Windows/Editor.xaml:805  ExtendedRepeatButton⊕Style[Style.RepeatButton.Vertical]/trigger  {DynamicResource Element.Foreground} on {Brush.Button.Background.Hover} over {Panel.Background.Level2}  10.65/17.18  
@@ -762,6 +768,7 @@ F  ok  ScreenToGif/Windows/Editor.xaml:815  ExtendedRepeatButton⊕Style[Style.R
 F  ok  ScreenToGif/Windows/Editor.xaml:815  ExtendedRepeatButton⊕Style[Style.RepeatButton.Vertical]/trigger  {DynamicResource Element.Foreground} on {Brush.Button.Background.Pressed} over {Panel.Background.Level2}  10.83/11.41  
 F  ok  ScreenToGif/Windows/Editor.xaml:835  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:852  AwareTabItem⊕Style[implicit AwareTabItem]/base  {DynamicResource Element.Foreground} on {Panel.Background.Level3}  11.71/19.26  
+F  ok  ScreenToGif/Windows/Editor.xaml:852  AwareTabItem⊕Style[implicit AwareTabItem]/trigger  #FF000000 on #90FFFFFF over {Panel.Background.Level3}  8.23/20.29  
 F  ok  ScreenToGif/Windows/Editor.xaml:879  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:934  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
 F  ok  ScreenToGif/Windows/Editor.xaml:979  Label  {DynamicResource Element.Foreground.Gray112} on {Panel.Background.Level2}  4.68/4.74  
@@ -3005,15 +3012,9 @@ U  template-painted  ScreenToGif/Views/Settings/PluginSettings.xaml:56  {Dynamic
 U  template-painted  ScreenToGif/Views/Settings/RecorderSettings.xaml:247  {DynamicResource Element.Foreground}
 U  template-painted  ScreenToGif/Views/Settings/RecorderSettings.xaml:279  {DynamicResource Element.Foreground}
 U  template-painted  ScreenToGif/Windows/Board.xaml:272  {DynamicResource Element.Foreground}
-U  template-painted  ScreenToGif/Windows/Editor.xaml:1003  #FF000000
-U  template-painted  ScreenToGif/Windows/Editor.xaml:1003  #FFF8F8FF
-U  template-painted  ScreenToGif/Windows/Editor.xaml:1003  {DynamicResource Element.Foreground}
-U  template-painted  ScreenToGif/Windows/Editor.xaml:1176  #FF000000
-U  template-painted  ScreenToGif/Windows/Editor.xaml:1176  #FFF8F8FF
-U  template-painted  ScreenToGif/Windows/Editor.xaml:1176  {DynamicResource Element.Foreground}
-U  template-painted  ScreenToGif/Windows/Editor.xaml:1213  #FF000000
-U  template-painted  ScreenToGif/Windows/Editor.xaml:1213  #FFF8F8FF
-U  template-painted  ScreenToGif/Windows/Editor.xaml:1213  {DynamicResource Element.Foreground}
+U  template-painted  ScreenToGif/Windows/Editor.xaml:1003  <RadialGradientBrush>
+U  template-painted  ScreenToGif/Windows/Editor.xaml:1176  <RadialGradientBrush>
+U  template-painted  ScreenToGif/Windows/Editor.xaml:1213  <RadialGradientBrush>
 U  template-painted  ScreenToGif/Windows/Editor.xaml:1388  {DynamicResource Element.Foreground.Medium}
 U  template-painted  ScreenToGif/Windows/Editor.xaml:1388  {DynamicResource Element.Foreground.Medium}
 U  template-painted  ScreenToGif/Windows/Editor.xaml:1388  {DynamicResource Element.Foreground.Medium}
@@ -3078,20 +3079,12 @@ U  template-painted  ScreenToGif/Windows/Editor.xaml:4318  {DynamicResource Elem
 U  template-painted  ScreenToGif/Windows/Editor.xaml:4318  {DynamicResource Element.Foreground.Medium}
 U  template-painted  ScreenToGif/Windows/Editor.xaml:4318  {DynamicResource Element.Foreground.Medium}
 U  template-painted  ScreenToGif/Windows/Editor.xaml:4318  {DynamicResource Element.Foreground.Medium}
-U  template-painted  ScreenToGif/Windows/Editor.xaml:436  #FF000000
-U  template-painted  ScreenToGif/Windows/Editor.xaml:436  #FFF8F8FF
-U  template-painted  ScreenToGif/Windows/Editor.xaml:436  {DynamicResource Element.Foreground}
-U  template-painted  ScreenToGif/Windows/Editor.xaml:571  #FF000000
-U  template-painted  ScreenToGif/Windows/Editor.xaml:571  #FFF8F8FF
-U  template-painted  ScreenToGif/Windows/Editor.xaml:571  {DynamicResource Element.Foreground}
-U  template-painted  ScreenToGif/Windows/Editor.xaml:773  #FF000000
-U  template-painted  ScreenToGif/Windows/Editor.xaml:773  #FFF8F8FF
-U  template-painted  ScreenToGif/Windows/Editor.xaml:773  {DynamicResource Element.Foreground}
+U  template-painted  ScreenToGif/Windows/Editor.xaml:436  <RadialGradientBrush>
+U  template-painted  ScreenToGif/Windows/Editor.xaml:571  <RadialGradientBrush>
+U  template-painted  ScreenToGif/Windows/Editor.xaml:773  <RadialGradientBrush>
 U  template-painted  ScreenToGif/Windows/Editor.xaml:805  {DynamicResource Element.Foreground}
 U  template-painted  ScreenToGif/Windows/Editor.xaml:815  {DynamicResource Element.Foreground}
-U  template-painted  ScreenToGif/Windows/Editor.xaml:852  #FF000000
-U  template-painted  ScreenToGif/Windows/Editor.xaml:852  #FFF8F8FF
-U  template-painted  ScreenToGif/Windows/Editor.xaml:852  {DynamicResource Element.Foreground}
+U  template-painted  ScreenToGif/Windows/Editor.xaml:852  <RadialGradientBrush>
 U  template-painted  ScreenToGif/Windows/NewRecorder.xaml:211  {DynamicResource Element.Foreground.Medium}
 U  template-painted  ScreenToGif/Windows/NewRecorder.xaml:211  {DynamicResource Element.Foreground.Medium}
 U  template-painted  ScreenToGif/Windows/NewRecorder.xaml:211  {DynamicResource Element.Foreground.Medium}

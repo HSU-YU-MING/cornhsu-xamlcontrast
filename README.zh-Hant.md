@@ -423,7 +423,7 @@ fail／warn 另標 `symmetry: single-theme`。
 | `over-sibling-content` | 文字墊在同格子的兄弟 `Image`/媒體元素上 —— 真正的底是一張圖,靜態不可知;硬配祖先背景等於編造比值 |
 | `in-style-template` | Style 的 `Template` setter（`<Setter Property="Template"><Setter.Value><ControlTemplate>`）裡自己帶 `Foreground` 的文字元素 —— 還沒有評分（見已知限制），計入這裡讓覆蓋率反映這個缺口 |
 | `unknown-style-key` | 色盤來自分開的深／淺字典，而元素的 Style —— `Style="{StaticResource K}"`，或它鏈上的 `BasedOn` —— 只在其中一個字典裡定義，另一個主題下這個元素長什麼樣不知道；值是那個 Style 的鍵。1.2 之前算成 `unknown-palette-key`（`BasedOn` 的那一種則是拿元素後面的底去評） |
-| `template-painted` | 字畫在控制項模板**內部**某一層上，而那一層的顏色靜態看不到：來自宿主自己的屬性而沒人設過（函式庫控制項的預設值寫在 C# 裡）、那一層的底本身是 Binding／漸層，或是被觸發器重畫了（`TargetName` 指向模板內部元素的 `Setter`，或整個換掉 `Template` 的）。這一類**不退回祖先的底** —— 模板畫了一層蓋在上面，祖先的顏色根本沒露出來。1.6 新增；在那之前這些是拿「被重畫蓋掉的底」算出來的 |
+| `template-painted` | 字畫在控制項模板**內部**某一層上，而那一層的顏色靜態看不到：來自宿主自己的屬性而沒人設過（函式庫控制項的預設值寫在 C# 裡）、那一層的底本身是 Binding／漸層，或是被觸發器重畫了而那一層定不出來（`TargetName` 指的元素不在字底下那一疊上、重畫的值是漸層或 Binding，或整個換掉 `Template`）。這一類**不退回祖先的底** —— 模板畫了一層蓋在上面，祖先的顏色根本沒露出來。1.6 新增；在那之前這些是拿「被重畫蓋掉的底」算出來的。1.7 起「重畫的元素正好就在字底下那一疊」的情形已經算得出來，不再歸這一類 |
 
 `summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 3** ——
 只掃到一小部分的「通過」不算通過,這是「0 組配對不算通過」那條不可設定規則的推廣。
@@ -618,9 +618,17 @@ Style 的 `Template` setter 裡自己帶 `Foreground` 的文字元素**還沒有
 （`ContentPresenter`、接走 `Content="{TemplateBinding Content}"` 的自訂宿主、字色由宿主決定的文字元素、
 畫 `{TemplateBinding Foreground}` 的圖形），都對著它在**模板裡**最近一層畫底的祖先評，
 `{TemplateBinding P}` 回到宿主自己的 `P` 去解；兩層都放內容就是兩筆 finding（執行期兩層都在）。
-還做不到的是：畫底的那一層是內容的**兄弟**而不是祖先（`Grid` 格子裡的兄弟背板在標記樹裡解得出來，模板裡還不行），
-以及被 `TargetName` 指向模板內部的觸發器重畫掉的那一層 —— 兩種都誠實歸 `template-painted`，
-不拿一個被模板蓋住的祖先底去配;
+1.7 起這一步照 WPF 的繪製順序走，所以畫底的那一層是內容的**兄弟**而不是祖先也算得出來
+（MaterialDesign 的按鈕就是把 `{TemplateBinding Background}` 畫在內容旁邊的 `Border` 上），
+疊層判定與標記樹的規則 17 共用一份：同一個 `Grid` 格子、要撐滿那一格、最靠上的那個贏。
+**被觸發器重畫的那一層**（`TargetName` 指向模板內部）也解得出來，條件是它指的元素正好在那段內容的底下那一疊上：
+不透明的重畫就是這個狀態的底，半透明的疊在它蓋住的那一層上
+（ScreenToGif 的選取態把 `#90FFFFFF` 畫在面板的 Level3 上 —— 1.6 只能說 `template-painted`，
+1.5 拿被蓋掉的顏色去配、報出 1.46:1）。
+還做不到的，一律誠實歸 `template-painted`、不拿被模板蓋住的顏色去配：重畫的 `TargetName` **不在**那一疊上
+（可能在別的分支，也可能在那一疊上但撐不滿那一格 —— 靜態分不出來）、重畫的值是漸層或 Binding、
+半透明的重畫層而它蓋住的那一層本身讀不懂、模板裡的 `Image` 兄弟與帶 `Opacity` 的兄弟（兩種維持 1.6 的答案），
+以及畫在內容**後面**的兄弟 —— 那是蓋住字，不是當字的底;
 sibling 背景已解析 `Grid` 格子裡「佔滿格子的兄弟」(純色直接用;
 半透明的 —— 不論來自 brush 的 alpha 或元素自己的 `Opacity` —— 合成;Binding／漸層計入無法解析),
 文字疊兄弟 Image 誠實歸 `over-sibling-content`;版面無法得知的自訂 `*Panel`、衍生命名的 `*Canvas`／`*Grid` 裡,

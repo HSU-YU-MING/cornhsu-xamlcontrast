@@ -312,9 +312,13 @@ public class TemplateLayerTests
         var r = fx.Run();
         // 基礎態照樣評（#EEEEEE 疊在模板那一層的 #222222 上）
         Assert.Contains(r.Findings, f => f.Fg == "#EEEEEE" && f.Bg == "#222222");
-        // 選取態：ContentBorder 被重畫成 #F0F0F0，黑字其實在那上面 —— 不能拿 #222222 去配
-        Assert.DoesNotContain(r.Findings, f => f.Fg == "#000000");
-        Assert.Contains(r.UnresolvedSites, s => s.Reason == UnresolvedReason.TemplatePainted && s.Value == "#000000");
+        // 選取態：ContentBorder 被重畫成 #F0F0F0，黑字其實在那上面。
+        // ⚠ 1.6 到這裡只能記 template-painted（誠實但沒答案）；1.7 知道重畫的是哪一個元素，
+        //   而它正好就是畫這個內容位置的那一層 → 算得出來。
+        //   這一筆原本的保證沒有變：**不能拿已經被蓋掉的 #222222 去配選取態的黑字**。
+        Assert.Contains(r.Findings, f => f.Fg == "#000000" && f.Bg == "#F0F0F0");
+        Assert.DoesNotContain(r.Findings, f => f.Fg == "#000000" && f.Bg == "#222222");
+        Assert.DoesNotContain(r.UnresolvedSites, s => s.Reason == UnresolvedReason.TemplatePainted);
     }
 
     [Fact] // 巢狀 Style（ItemContainerStyle 之類）裡的觸發器是**別的元素**的狀態 —— 宿主沒有這一組。
@@ -645,6 +649,131 @@ public class TemplateLayerTests
             </Grid>
             """);
         Assert.Equal("#222222", Assert.Single(fx.Run().Findings).Bg);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 1.7:觸發器重畫模板內部那一層
+    //
+    // 1.6 只知道「有重畫」(State.UnknownLayer),所以整個狀態記 template-painted —— 誠實，
+    // 但那些答案其實靜態看得見(ScreenToGif 的 AwareTabItem 把 ContentBorder 寫死 #90FFFFFF)。
+    // 現在記下重畫了哪一個元素、換成什麼,再看它是不是正好畫在這個內容位置底下。
+    // ──────────────────────────────────────────────────────────────────────────
+
+    /// <summary>模板:根 Border 畫底(可命名)、裡面一層 ContentBorder 自己不畫底。</summary>
+    private static Fixture Repaint(string rootBg, string setter, string fg = "#000000") => new Fixture().File("Main.xaml", $$"""
+        <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+          <Grid.Resources>
+            <Style x:Key="Tab" TargetType="TabItem">
+              <Setter Property="Foreground" Value="{{fg}}"/>
+              <Setter Property="Template">
+                <Setter.Value>
+                  <ControlTemplate TargetType="TabItem">
+                    <Border x:Name="Root" Background="{{rootBg}}">
+                      <Border x:Name="ContentBorder">
+                        <ContentPresenter/>
+                      </Border>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                      <Trigger Property="IsSelected" Value="True">
+                        {{setter}}
+                      </Trigger>
+                    </ControlTemplate.Triggers>
+                  </ControlTemplate>
+                </Setter.Value>
+              </Setter>
+            </Style>
+          </Grid.Resources>
+          <TabItem Style="{StaticResource Tab}" Header="one"/>
+        </Grid>
+        """);
+
+    [Fact] // 重畫的就是畫底的那一層本身：不透明 → 那就是這個狀態的底
+    public void ATriggerThatRepaintsThePaintingLayerIsResolved()
+    {
+        using var fx = Repaint("#000000", """<Setter TargetName="Root" Property="Background" Value="#CCCCCC"/>""");
+        var r = fx.Run();
+        Assert.DoesNotContain(r.UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+        Assert.Contains(r.Findings, f => f.Bg == "#000000");  // 基礎態：黑字黑底
+        Assert.Contains(r.Findings, f => f.Bg == "#CCCCCC");  // 選取態：重畫之後
+    }
+
+    [Fact] // ScreenToGif 的 AwareTabItem 形狀:重畫的那一層在畫底那一層「上面」,而且是半透明 ——
+           // 要疊在它底下那一層(#000000)上。疊到祖先(白)上的話會報 21:1,是執行期不存在的比值
+    public void ATranslucentRepaintCompositesOverTheLayerItCovers()
+    {
+        using var fx = Repaint("#000000", """<Setter TargetName="ContentBorder" Property="Background" Value="#90FFFFFF"/>""");
+        var r = fx.Run();
+        Assert.DoesNotContain(r.UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+        // 0x90 = 144/255 的白疊在純黑上 = #909090（剛好整數）
+        var expected = Wcag.Contrast("#000000", "#909090");
+        Assert.Contains(r.Findings, f => f.RatioDark == expected);
+        Assert.DoesNotContain(r.Findings, f => f.RatioDark == Wcag.Contrast("#000000", "#FFFFFF"));
+    }
+
+    [Fact] // 重畫的元素不在這個位置的鏈上(別的分支、或撐不滿那一格)→ 維持 1.6 的誠實不知道
+    public void ARepaintOfAnElementOffThisPositionsChainStaysUnresolved()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Tab" TargetType="TabItem">
+                  <Setter Property="Foreground" Value="#000000"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Root" Background="#000000">
+                          <Grid>
+                            <Border x:Name="Badge" Grid.Column="1" Width="8"/>
+                            <ContentPresenter Grid.Column="0"/>
+                          </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Badge" Property="Background" Value="#CCCCCC"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <TabItem Style="{StaticResource Tab}" Header="one"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Contains(r.UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+        Assert.DoesNotContain(r.Findings, f => f.Bg == "#CCCCCC"); // 那一塊不在字底下
+    }
+
+    [Fact] // OpacityMask 不是一個底色 —— 收了就得猜它把下面那層挖成什麼
+    public void AnOpacityMaskRepaintStaysUnresolved()
+    {
+        using var fx = Repaint("#000000", """<Setter TargetName="ContentBorder" Property="OpacityMask" Value="#80000000"/>""");
+        Assert.Contains(fx.Run().UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+    }
+
+    [Fact] // 半透明的重畫層，底下那一層讀不懂 → 那個顏色是答案的一部分，猜不得
+    public void ATranslucentRepaintOverAnUnreadableLayerStaysUnresolved()
+    {
+        using var fx = Repaint("{Binding Tint}", """<Setter TargetName="ContentBorder" Property="Background" Value="#90FFFFFF"/>""");
+        Assert.Contains(fx.Run().UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+    }
+
+    [Fact] // 不透明的重畫層把底下那一層完全蓋住 —— 底下讀不懂也不影響
+    public void AnOpaqueRepaintDoesNotNeedTheLayerBelow()
+    {
+        using var fx = Repaint("{Binding Tint}", """<Setter TargetName="ContentBorder" Property="Background" Value="#CCCCCC"/>""");
+        var r = fx.Run();
+        Assert.Contains(r.Findings, f => f.Bg == "#CCCCCC");
+    }
+
+    [Fact] // 沒有任何觸發器碰模板內部時，分層一個字都不該變（1.6 的鍵與數字不動）
+    public void WithoutAnyInnerRepaintTheLayersAreUnchanged()
+    {
+        using var fx = Repaint("#000000", """<Setter Property="FontWeight" Value="Bold"/>""");
+        var r = fx.Run();
+        Assert.DoesNotContain(r.UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+        Assert.All(r.Findings, f => Assert.Equal("#000000", f.Bg));
     }
 
 }

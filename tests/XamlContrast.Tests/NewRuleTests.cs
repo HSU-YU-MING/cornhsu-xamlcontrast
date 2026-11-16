@@ -360,8 +360,11 @@ public class NewRuleTests
         Assert.Equal("#CC3A3A", hover.Bg);
     }
 
-    [Fact] // 規則 13 的邊界：TargetName 指向「非根」的內部元素 → 維持不做
-    public void NonRootTargetNameIsStillIgnored()
+    [Fact] // 規則 13 的邊界（1.7 推進了）：TargetName 指向「非根」的內部元素。
+           // 1.0～1.5 把那個 Setter 丟掉、照舊拿模板根的底評分（編出來的數字）；
+           // 1.6 改成誠實記 template-painted；1.7 知道重畫的是哪一個元素、它畫在內容的哪一側，
+           // 所以算得出來。界線與疊合規則在 TemplateLayerTests。
+    public void NonRootTargetNameIsResolvedAgainstTheLayerItCovers()
     {
         using var fx = new Fixture();
         fx.File("Main.xaml", """
@@ -389,9 +392,13 @@ public class NewRuleTests
             </Grid>
             """);
         var r = fx.Run();
-        // inner 的換底解析不到（要模板內部樹的版面關係）—— 不猜，
-        // hover 狀態沒有可歸屬的底變更 → 與基礎同組（白字疊模板根黑底）
-        Assert.All(r.Findings, f => Assert.Equal("#000000", f.Bg));
+        // 基礎態：白字疊模板根的黑底
+        Assert.Contains(r.Findings, f => f.Bg == "#000000");
+        // hover：inner 被畫成不透明的白，字就在那上面 —— 白字疊白底 1:1，是真的不合格
+        var hover = Assert.Single(r.Findings, f => f.Bg == "#FFFFFF");
+        Assert.Equal(Category.Fail, hover.Category);
+        // ⚠ 1.5 之前的那個編造不能回來：hover 不能拿已經被蓋掉的 #000000 去配
+        Assert.Equal(2, r.Findings.Count);
     }
 
     [Theory] // 規則 13 的模板根名字有 x:Name 與 Name 兩種寫法（FrameworkElement 都認）——

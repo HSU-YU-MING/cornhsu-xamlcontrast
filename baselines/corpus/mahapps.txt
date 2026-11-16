@@ -3,7 +3,7 @@
 project: mahapps
 repo: https://github.com/MahApps/MahApps.Metro
 commit: 9466e8acd96591e1f552841bc5357f376552bb57
-tool-commit: 164cda1+dirty
+tool-commit: 4a1e23d+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: single
@@ -26,10 +26,10 @@ fail: 1
 warn: 5
 ok: 80
 decorative: 2
-unresolved-by.bound-or-gradient: 200
+unresolved-by.bound-or-gradient: 203
 unresolved-by.in-style-template: 27
 unresolved-by.no-ancestor-background: 192
-unresolved-by.template-painted: 270
+unresolved-by.template-painted: 267
 unresolved-by.translucent-uncomposited: 11
 unresolved-by.unknown-palette-key: 585
 unknown-keys.MahApps.Brushes.Accent2: 2
@@ -251,9 +251,12 @@ U  bound-or-gradient  src/MahApps.Metro/Styles/Controls.Slider.xaml:783  {Bindin
 U  bound-or-gradient  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:72  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
 U  bound-or-gradient  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:72  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
 U  bound-or-gradient  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:72  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
+U  bound-or-gradient  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:72  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
 U  bound-or-gradient  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:73  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
 U  bound-or-gradient  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:73  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
 U  bound-or-gradient  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:73  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
+U  bound-or-gradient  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:73  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
+U  bound-or-gradient  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:74  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
 U  bound-or-gradient  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:74  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
 U  bound-or-gradient  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:74  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
 U  bound-or-gradient  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:74  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
@@ -841,9 +844,6 @@ U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {Dynami
 U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {DynamicResource MahApps.Brushes.Text}
 U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {DynamicResource MahApps.Brushes.Text}
 U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {DynamicResource MahApps.Brushes.Text}
-U  template-painted  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:72  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
-U  template-painted  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:73  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
-U  template-painted  src/MahApps.Metro/Styles/VS/ContextMenu.xaml:74  {Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type MenuBase}}}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:66  {DynamicResource MahApps.Brushes.Text}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:66  {DynamicResource MahApps.Brushes.Text}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:677  {DynamicResource MahApps.Brushes.TextControl.Foreground}

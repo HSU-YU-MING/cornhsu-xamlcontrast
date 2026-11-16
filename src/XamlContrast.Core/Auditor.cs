@@ -944,19 +944,67 @@ public sealed partial class Auditor
     /// <c>Src</c> 是同源判定要的（字與底都出自同一個 Style 節點 → 定義處已經檢過）：被 TargetName 觸發 Setter
     /// 換掉的那一層，來源就是那個 Setter 的 Style 節點；其餘是 "tmpl"（寫在模板裡，定義處看不到）。
     /// ⚠ 一律標 "tmpl" 的話，Kindling CellDeleteBtn 那個 hover 形狀會在定義處與使用處各報一次。</summary>
-    private static List<(string? V, string? Raw, bool Unknown, object? Src)> TemplateChoices(
+    private static List<TemplateChoice> TemplateChoices(
         StyleIndex.Merged chain, StyleIndex.State st, Func<string, string?> hostProp)
     {
         var rooted = st.Set.TryGetValue("Background", out var v) && st.RootTargeted.Contains("Background");
-        var list = new List<(string? V, string? Raw, bool Unknown, object? Src)>();
+        var list = new List<TemplateChoice>();
         foreach (var layer in chain.TemplateLayers)
         {
             var fromTrigger = layer.Root && rooted;
             var raw = fromTrigger ? v : layer.Bg;
+            object? src = fromTrigger ? st.SetSrc["Background"] : "tmpl";
+            string? under = null;
+            var offChain = false;
+            // ── 觸發器重畫了模板內部那一層（1.7）──
+            // 1.6 只知道「有重畫」，所以整個狀態記 template-painted。現在看重畫的是不是正好在
+            // 這個內容位置底下：最靠近字的那一個贏（它蓋在原本那一層上面）。
+            // ⚠ 重畫的元素不在這條鏈上時照舊不評：可能在別的分支（跟這個位置無關），也可能在這條鏈上
+            //   但撐不滿那一格 —— 靜態分不出來，所以維持 1.6 的誠實不知道。
+            // ⚠ 條件是 UnknownLayer 而不是「LayerPaints 有東西」：OpacityMask、整個換掉 Template、
+            //   另一份模板畫的那三種都讓這一層變成不可知，而它們不會留下任何可查的底 —— 用後者當條件的話
+            //   那三種會拿基礎狀態的底評分，正好是 1.6 修掉的那個編造。
+            if (!fromTrigger && st.UnknownLayer)
+            {
+                var hit = layer.Above?.FirstOrDefault(st.LayerPaints.ContainsKey);
+                if (hit is not null)
+                {
+                    // 重畫的那一層在原本那一層「上面」：半透明時要疊在原本那一層上，不是疊在祖先上
+                    under = layer.Bg;
+                    raw = st.LayerPaints[hit];
+                }
+                else if (layer.Name is { } ln && st.LayerPaints.ContainsKey(ln)) raw = st.LayerPaints[ln];
+                else offChain = true;
+                // ⚠ 來源照舊是 "tmpl"，不是那個 Setter 的 Style 節點：定義處（WalkStyles）看不到模板
+                //   內部那一層，讓給它等於這一組在哪裡都沒被評分。規則 13 的「TargetName=模板根」不一樣
+                //   —— 那等同設在宿主上，定義處真的評得到，所以它才帶 Style Id。
+            }
             var (val, unknown) = TemplateLayerValue(raw, hostProp);
-            list.Add((unknown ? null : val, raw, unknown, fromTrigger ? st.SetSrc["Background"] : "tmpl"));
+            // ⚠ offChain 的 Raw 刻意留 null，讓呼叫端點名**字色**（1.6 的狀態層守門就是這樣點的）。
+            //   指向那一層的原始寫法（多半是 {TemplateBinding Background}）看起來比較精確，其實沒資訊
+            //   —— 它不會說是哪個元素被重畫了 —— 而且 unresolved 的鍵是 file|reason|value，
+            //   換個寫法就得再遞增一次 Baseline.KeyVersion，叫使用者重寫兩次 baseline。
+            list.Add(new TemplateChoice(unknown || offChain ? null : val,
+                offChain ? null : raw, unknown || offChain, src, under));
         }
         return list;
+    }
+
+    /// <summary>這個狀態下、模板裡某一個放內容的位置的底（1.7 把 1.6 的四元組具名化，多了 Under）。
+    /// <paramref name="Under"/> ＝這一層是觸發器畫上去的、而它底下原本那一層的寫法（半透明時要疊在它上面）。</summary>
+    private readonly record struct TemplateChoice(
+        string? V, string? Raw, bool Unknown, object? Src, string? Under = null);
+
+    /// <summary>觸發器畫上去的那一層底下原本那一層當成底（1.7）。
+    /// 透明＝沒遮住，看到的是祖先；不透明／半透明＝疊上去；看不懂＝null，由呼叫端記 template-painted
+    /// （上面是半透明時，底下那一層的顏色就是答案的一部分，猜不得）。</summary>
+    private Backdrop? UnderLayer(string under, Palette pal, Backdrop ancestorBd, double op)
+    {
+        var r = ResolveColour(under, pal);
+        if (r is null) return null;
+        if (r.Kind == ColorKind.Transparent) return ancestorBd;
+        if (r.Kind is ColorKind.UnknownKey || r.Kind is ColorKind.Other) return null;
+        return Paint(ancestorBd, op, r, under);
     }
 
     /// <summary>元素在標記裡的子元素落在模板的哪一層上（1.6）：ContentPresenter 那一層，沒有就第一層。
@@ -1019,7 +1067,7 @@ public sealed partial class Auditor
                 // 蓋過經 TemplateBinding 進來的宿主本地值；「設在宿主」的觸發 Setter
                 // 則輸給宿主的本地屬性（CalendarView 日曆格實證：選取態 DayBorder
                 // 直接換 PrimaryButtonBrush，蓋掉 local SurfaceBrush）
-                List<(string? V, string? Raw, bool Unknown, object? Src)>? tmplLayers = null;
+                List<TemplateChoice>? tmplLayers = null;
                 if (st.Set.TryGetValue("Background", out var rootBg) && st.RootTargeted.Contains("Background"))
                 { bgV = rootBg; bgSrc = st.SetSrc["Background"]; }
                 else if (localBgRaw is not null) { bgV = localBgRaw; bgSrc = "local"; }
@@ -1046,7 +1094,7 @@ public sealed partial class Auditor
 
                 // 模板分層時每一層各算一組（Shield 的兩個 Border：#555 與 {TemplateBinding Color}）——
                 // 那是執行期真的同時存在的兩塊底，不是互斥的候選，所以兩組都要報
-                var bgChoices = tmplLayers ?? new List<(string? V, string? Raw, bool Unknown, object? Src)> { (bgV, bgV, false, bgSrc) };
+                var bgChoices = tmplLayers ?? new List<TemplateChoice> { new(bgV, bgV, false, bgSrc) };
 
                 // 字與底都出自同一個 Style 節點 → WalkStyles 在定義處已檢過，不重複。
                 // ⚠ 例外：底是透明／半透明時定義處沒有底下那層可疊（只能記 skipped），這組要在使用處
@@ -1063,7 +1111,9 @@ public sealed partial class Auditor
                 // ⚠ 狀態自己設了 Background 時照舊評：那個值是這個狀態的，至少不是別的狀態的顏色
                 //   （裡面那一層蓋在它上面仍是明文盲區，同 1.5）。這條界線是語料量出來的：
                 //   不分這一刀的話 ScreenToGif 連同 76 筆算得出來的 ok 一起被丟掉
-                if (st.UnknownLayer && !st.Set.ContainsKey("Background"))
+                // ⚠ 1.7：有模板分層可查時改成逐層判定（下面那個 layerUnknown）—— 重畫的元素對得上
+                //   這個位置的那一層時算得出來，對不上才記。整個狀態一起丟掉會連同算得出來的層一起丟。
+                if (st.UnknownLayer && !st.Set.ContainsKey("Background") && tmplLayers is null)
                 { Unres(UnresolvedReason.TemplatePainted, file, LineOf(el), fgV); continue; }
 
                 var fgAll = ResolveColour(fgV, pal);
@@ -1081,7 +1131,7 @@ public sealed partial class Auditor
                     if (op * VisibleAlpha(fgAll) < 0.01) { _skipped++; continue; }
                 }
 
-                foreach (var (layerV, layerRaw, layerUnknown, layerSrc) in bgChoices)
+                foreach (var (layerV, layerRaw, layerUnknown, layerSrc, layerUnder) in bgChoices)
                 {
                     if (SameSource(layerSrc, layerV)) continue; // 這一層與字同源 → 定義處檢
                     // 模板畫了一層底、而那一層的顏色靜態看不到 → 不退回祖先（祖先的顏色根本沒露出來）
@@ -1102,7 +1152,16 @@ public sealed partial class Auditor
                             continue;
                         }
                         // 這個狀態的底畫在元素自己身上：半透明的疊在祖先的底上；元素有 Opacity 時連底一起變淡
-                        else stateBd = Paint(ancestorBd, op, rb, layerV);
+                        // ⚠ 1.7：這一層是觸發器畫上去的、而它底下原本還有一層（layerUnder）時，半透明要疊在
+                        //   那一層上 —— 疊到祖先上就是跳過中間那一層，報一個執行期不存在的比值。
+                        //   ScreenToGif 的 AwareTabItem 就是這形狀（選取態把 ContentBorder 畫成 #90FFFFFF）。
+                        // 不透明的重畫層把底下那一層完全蓋住，所以底下讀不懂也不影響（Paint 會忽略底）
+                        else if (layerUnder is null || rb.Kind is not ColorKind.Alpha)
+                            stateBd = Paint(ancestorBd, op, rb, layerV);
+                        else if (UnderLayer(layerUnder, pal, ancestorBd, op) is { } below)
+                            stateBd = Paint(below, op, rb, layerV);
+                        else
+                        { Unres(UnresolvedReason.TemplatePainted, file, LineOf(el), layerUnder); continue; }
                     }
                     else stateBd = tmplLayers is not null ? ancestorBd : bd; // 沒設底 → 退回祖先背景
                     var backdrops = BackdropVariants(stateBd);
