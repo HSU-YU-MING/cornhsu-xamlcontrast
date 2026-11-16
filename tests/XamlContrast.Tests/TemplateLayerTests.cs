@@ -869,4 +869,53 @@ public class TemplateLayerTests
             """);
         Assert.Contains(fx.Run().UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
     }
+
+    [Fact] // 版面未知的容器（自訂 *Panel）在模板裡要跟標記樹的規則 17 給同一個答案（1.8）——
+           // 原本只認 Overlap，把整個容器跳過、落到祖先，等於同一段 XAML 寫在畫面裡與寫在模板裡
+           // 得到不同的答案，而且模板那一邊是編的
+    public void AnUnknownLayoutContainerInATemplateIsOverSiblingContent()
+    {
+        using var fx = SiblingBackdrop("""
+            <SimplePanel>
+              <Border Background="#222222"/>
+              <ContentPresenter/>
+            </SimplePanel>
+            """);
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Contains(r.UnresolvedSites, u => u.Reason == UnresolvedReason.OverSiblingContent);
+    }
+
+    [Fact] // 這一疊整個被放棄（帶 Opacity 的兄弟）時，它的名字照樣要記進鏈 —— 放棄的理由正是
+           // 「它可能蓋在字底下、只是算不出來」，觸發器動它的時候更不能當成無關。
+           // HandyControl 的 Calendar 就是這形狀：Opacity=0 的 Rectangle 被狀態打開之後才是字的底
+    public void ARepaintOfASiblingOnAnAbandonedLevelStillDiscardsTheState()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Btn" TargetType="Button">
+                  <Setter Property="Foreground" Value="#777777"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Grid>
+                          <Border x:Name="Hidden" Background="#111111" Opacity="0"/>
+                          <ContentPresenter/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Hidden" Property="Background" Value="#222222"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Btn}" Background="#FFFFFF" Content="hi"/>
+            </Grid>
+            """);
+        Assert.Contains(fx.Run().UnresolvedSites, u => u.Reason == UnresolvedReason.TemplatePainted);
+    }
 }

@@ -47,12 +47,26 @@
 - [x] 隱含樣式解析 —— 1.5：每個元素的底與字色都查隱含樣式，作用範圍照 WPF 的資源範圍走
       （巢狀 `<X.Resources>` 只管子樹、最內層優先、元素有自己的 Style 就不套）。
       實證價值：維護者自己的 Kindling 有一筆「按鈕上的白字其實是深色字、2.49:1」被 1.4 報成 21:1 ✓
-- **VisualStateManager 狀態顏色的「評分」**（計數在 1.5 已有，見下一條）：下一版最有價值的一塊，而且 1.6／1.7
-  已經把狀態層該有的守門建好（重畫了哪一層、定不出來就不評），接得上去。2026-11-16 量過語料：88 處，
-  屬性有五種寫法（`Foreground`、`Background`、`Background.Color`、`(TextElement.Foreground).(SolidColorBrush.Color)`、
-  `(TextBlock.Foreground)`），所以要一套 `TargetProperty` 路徑解析；狀態裡 12 處是 Disabled（WCAG 1.4.3 豁免）、
-  11 Pressed、7 PointerOver。WinUI 控制項的 hover／按下／勾選全走 VSM，所以這也是 WinUI 支援真正的缺口
-  （WinUI Gallery 自己佔 44 處）。**這是一個獨立的版本，不要順手塞進別的改動** —— 做半套就是會編造狀態的數字
+- **狀態裡「某個具名模板元素的顏色變了」—— 這是 VSM 評分的前置條件，不是 VSM 本身**（2026-11-16 實作一輪後得到的結論）。
+  `State` 現在只表達得出兩種改動：設在宿主上的，與 `TargetName` ＝模板根的（規則 13）。指向模板**內部**元素的，
+  底色進 `LayerPaints`（1.6），**字色直接丟掉**。
+  - 量出來的：語料 88 處 VSM 裡，改字色的 40 處**全部 40 處**都指向具名元素，只有 4 處動宿主自己。
+    所以照現在的模型評 VSM，字色會用基礎狀態的值 —— 那個組合執行期不存在，正是 1.6 花整版修掉的那類編造。
+  - 同一個洞在**觸發器**上也活著：語料有 489 個 `<Setter TargetName="X" Property="Foreground">`。
+    那個狀態如果只有這一個 Setter，整個狀態會被略過（盲區，不是編造）；但如果同時還改了宿主的底，
+    狀態會成立、而字色用基礎值 —— 那就是編造。**這一條比 VSM 本身更該先做**，它同時解鎖兩邊。
+  - 要做的事：`State` 多一格「哪個具名元素的哪個屬性變成什麼」，`TemplateLayer` 記下該位置的內容元素名字，
+    `GradeChain` 的字色解析從「每個狀態一次」改成「每一層一次」。⚠ 最後那一步動到全專案最敏感的那段程式碼，
+    每一筆既有 finding 都流經它 —— 要獨立一版、獨立量測
+  - 做完之後 VSM 才值得接上：翻譯成同一個 State 模型（`ColorAnimation` 的 `To`／keyframe、
+    `(TextElement.Foreground).(SolidColorBrush.Color)` 這類路徑取出真正改的屬性、WinUI 的 `<VisualState.Setters>`），
+    1.6／1.7 的守門就全部原封不動適用。⚠ 還要把**非顏色的動畫**算進去：HandyControl 的 Calendar 用
+    `DoubleAnimation` 把 `Opacity="0"` 的 Rectangle 打開，字真正的底是它 —— 只看顏色動畫就會拿祖先的底配白字。
+    1.8 已經先補好這一塊的鏈記錄（被放棄的那一疊上的名字照樣收）
+  - ⚠ **先試過一次「保守翻譯」：不可行。** 把 VSM 狀態翻成 State、碰到任何具名元素就記不可知，
+    結果是語料多了 971 筆 unresolved、**0 組新配對**，覆蓋率從 29.8% 掉到 14.8%（Flow Launcher）。
+    那些位置本來就在 `stateColors` 裡誠實列著，換成 971 筆 unresolved 只是同一件事報兩次、外加打爛
+    `--min-coverage`。**計數器已經是誠實的信號，把它換成更吵的信號不是改進。**
 - [x] VisualStateManager 狀態顏色的計數器 —— 1.5：`summary.stateColors` ＋ `stateColorSites` 逐筆點名
       （含 WinUI 的 `<VisualState.Setters>`）。照舊不評，只是不再靜默。
       實測 WinUI Gallery 44 處、wpfui 18、HandyControl 15，而自家四個專案是 0

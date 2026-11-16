@@ -513,6 +513,20 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   - ⚠ **`State` 有三個複製點**（`CreateRecord`、`merged.States.Add`、`byCond`），新欄位三個都要抄。
     第一版漏了中間那個，`LayerTouched` 永遠是空的 → 整條路是死碼，而語料顯示「零變化」，看起來像
     「野外不存在這種形狀」。**語料說沒變化時，先寫一個針對性測試確認那條路跑得到。**
+- **`State` 表達不出「某個具名模板元素的字色變了」**（明文盲區，2026-11-16 實作一輪後確認）：
+  只有「設在宿主上」與「TargetName ＝模板根」兩種，指向模板內部的底色進 `LayerPaints`、**字色直接丟掉**。
+  語料裡 VSM 改字色的 40 處全部指向具名元素，觸發器那邊有 489 個 `<Setter TargetName="X" Property="Foreground">`。
+  只有那個 Setter 的狀態會被整個略過（盲區）；同時還改了宿主底的狀態會成立、而字色用基礎值（**編造**）。
+  補法與風險寫在 ROADMAP —— 要動 `GradeChain` 的字色解析（從每個狀態一次改成每一層一次），獨立一版做。
+  ⚠ **VSM 評分在這之前不要碰**：試過「保守翻譯」（碰到具名元素就記不可知），語料多 971 筆 unresolved、
+  0 組新配對、Flow Launcher 覆蓋率 29.8% → 14.8%。那些位置本來就在 `stateColors` 裡誠實列著，
+  換成 971 筆 unresolved 只是同一件事報兩次、外加打爛 `--min-coverage`。
+- **版面未知的容器兩條路要給同一個答案**（1.8）：`BackdropChain` 原本只認 `Layout.Overlap`，把自訂 `*Panel`
+  整個跳過、落到祖先；標記樹的規則 17 則記 `over-sibling-content`。⚠ 這正是 `Panels` 被抽出來要防的事
+  —— 抽了共用的判定，但**呼叫端對 `Unknown` 的處理各寫各的**，一樣會漂開。
+- **一疊兄弟被放棄時名字照樣要收進 `ContentChainNames`**（1.8）：放棄的理由就是「可能蓋在字底下、只是算不出來」。
+  少了這一條，1.7 的「重畫碰不到內容就放行」會把 HandyControl Calendar 那種
+  （`Opacity="0"` 的 Rectangle 被狀態打開）判成無關。
 - **模板裡的 Image 兄弟 → `over-sibling-content`**（1.7）：跟標記樹的規則 17(b) 同一個答案。
   ⚠ 記號是 `ColorResolver.SiblingContentMark`（控制字元開頭）**不是 `<Image>`**：`<Tag>` 早就是 `XamlBrush`
   給「元素寫法、讀不懂的 brush」的寫法（`<LinearGradientBrush>`、`<VisualBrush>`），第一版用它當記號，

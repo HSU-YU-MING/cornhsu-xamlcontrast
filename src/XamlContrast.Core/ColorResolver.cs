@@ -162,7 +162,7 @@ public static partial class ColorResolver
         //   讀不懂的 brush」的寫法（<LinearGradientBrush>、<VisualBrush>），於是那些**字色**整批被
         //   分類成「底是一張圖」，合成時拿到 null 直接崩潰（GeekDesk 的 PixelColorPickerWindow 實測）。
         if (v.StartsWith(SiblingContentMark, StringComparison.Ordinal))
-            return new Resolved(ColorKind.SiblingContent, Raw: "<" + v[SiblingContentMark.Length..] + ">");
+            return new Resolved(ColorKind.SiblingContent, Raw: v[SiblingContentMark.Length..]);
         if (v.StartsWith('#') && NormalizeHex(v) is { } n)
         {
             if (n.Length == 7) return new Resolved(ColorKind.Hard, n, n);

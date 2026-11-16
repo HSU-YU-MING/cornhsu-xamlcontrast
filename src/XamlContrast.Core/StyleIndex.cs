@@ -513,8 +513,14 @@ internal sealed partial class StyleIndex
         for (var node = host; node.Parent is not null && !ReferenceEquals(node, tmpl); node = node.Parent)
         {
             var box = node.Parent;
-            if (Panels.LayoutOf(box.Name.LocalName, _cfg) == Panels.Layout.Overlap)
+            var layout = Panels.LayoutOf(box.Name.LocalName, _cfg);
+            // ⚠ 版面未知的容器（自訂 *Panel、衍生命名的 *Canvas／*Grid）也要進這一步（1.8）：
+            //   標記樹的規則 17 對它的答案是「可能是背板的兄弟之後的字 → over-sibling-content」，
+            //   而這裡原本只認 Overlap、把整個容器跳過、落到祖先 —— 同一段 XAML 寫在畫面裡與寫在模板裡
+            //   會得到不同的答案，而且模板那一邊是編的（HandyControl 的 hc:SimplePanel 實證）。
+            if (layout != Panels.Layout.SideBySide)
             {
+                var unknownLayout = layout == Panels.Layout.Unknown;
                 var isGrid = box.Name.LocalName == "Grid";
                 var cell = Panels.CellOf(node, isGrid);
                 var stretches = Panels.StretchesChildren(box.Name.LocalName);
@@ -526,22 +532,29 @@ internal sealed partial class StyleIndex
                     var ln = sib.Name.LocalName;
                     if (ln.Contains('.') || Panels.Styleish.Contains(ln)) continue;
                     if (Panels.CellOf(sib, isGrid) != cell) continue; // 不同格子不相疊
+                    // ⚠ 名字在這裡就收，不是等它進 level（1.8）：這一疊可能整個被放棄（內容元素、帶 Opacity 的
+                    //   兄弟），而放棄的理由正是「它可能蓋在字底下、只是算不出來」。觸發器或 VSM 動它的時候
+                    //   更不能當成無關 —— HandyControl 的 Calendar 就是這形狀：Selected 狀態用 DoubleAnimation
+                    //   把 Opacity=0 的 SelectedBackground 打開，字的底其實是它。
+                    AddName(names, sib);
                     // 內容元素（Image 等）：底是一張圖、靜態不可知 —— 跟標記樹的規則 17(b) 同一個答案
                     // （ColorResolver 會把這個記號轉回 ColorKind.SiblingContent）。
                     // ⚠ 不是「放棄這一層往外找」：往外找等於拿圖後面那一層的顏色報一個比值，而字其實疊在圖上
                     //   （HandyControl 的 Carousel 在標記樹那邊就是這個形狀）。排在它後面又畫了底的兄弟會蓋過
                     //   它，所以照舊往後掃、讓 painted 自己往後移。
-                    if (Panels.IsContentElement(ln)) { painted = level.Count; level.Add((sib, ColorResolver.SiblingContentMark + ln)); continue; }
+                    if (Panels.IsContentElement(ln)) { painted = level.Count; level.Add((sib, ColorResolver.SiblingContentMark + "<" + ln + ">")); continue; }
                     // ⚠ 撐不滿那一格的兄弟不算背板（強調色條之類），但它的名字照樣要記進 names（1.7）：
                     //   觸發器重畫它時，它在不在字底下靜態分不出來 —— 不記的話會被判成「跟這段文字無關」而放行，
                     //   那就是編造。記了只是讓那個狀態維持「不知道」。
-                    if (!Panels.FillsCell(sib, stretches)) { AddName(names, sib); continue; }
+                    if (!Panels.FillsCell(sib, stretches)) continue; // 撐不滿那一格就不是背板；名字上面已經收了
                     var sraw = Panels.BackdropBrush(sib);
                     if (sraw is not null && sib.Attribute("Opacity") is not null) { level.Clear(); painted = -1; break; }
                     if (sraw is not null) painted = level.Count;
-                    level.Add((sib, sraw));
+                    // 版面未知：它到底在不在字底下不知道 —— 不猜（同標記樹）
+                    level.Add((sib, sraw is not null && unknownLayout
+                        ? ColorResolver.SiblingContentMark + $"<{ln}> in <{box.Name.LocalName}>"
+                        : sraw));
                 }
-                foreach (var (el, _) in level) AddName(names, el);
                 if (painted >= 0)
                 {
                     // 畫了底的那一個以下看不到；它以上（文件順序在它後面）的候選由上而下排
@@ -583,6 +596,7 @@ internal sealed partial class StyleIndex
     /// <summary>把宿主的字色畫成圖形的模板元素（圖示按鈕的 <c>&lt;Path Fill="{TemplateBinding Foreground}"/&gt;</c>）。</summary>
     private static bool IsHostForegroundShape(XElement el)
         => (XamlBrush.Read(el, "Fill") ?? XamlBrush.Read(el, "Stroke")) is { } v && TemplateBindingFg().IsMatch(v);
+
 
     internal Record CreateRecord(XElement style, string file)
     {
