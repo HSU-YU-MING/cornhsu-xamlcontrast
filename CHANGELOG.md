@@ -50,6 +50,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   `contentPresenter` 的 `Control.Foreground`，紅色的錯誤字疊在深色卡片上 **1.76:1**。
   舊版因為 `Graphic` 也在 union 裡，整個驗證錯誤態都不評。配對 +10、unresolved −10、覆蓋率微升。
 
+- **`Visibility="Collapsed"`／`"Hidden"` 的元素不是字的底。**
+  在這之前工具**完全沒看過 `Visibility`** —— 一個收起來的 `<Border Background="…" Visibility="Collapsed"/>`
+  照樣被當成背板（語料裡這種元素有 105 個）。實測兩筆換了原因：Playnite 的選單把收起來的
+  hover 高亮（`HoverBrush`）當成選單文字的底，現在誠實記「上面沒有底」；MaaAssistantArknights 有一筆
+  收起來的內容元素同理。⚠ 只認寫死的值，`{Binding}` 照舊當成看得見（往嚴格那邊錯）。
+  判定放在 `Panels`，標記樹與模板裡那條鏈共用一份。
+
 ### Changed
 
 - **版面未知的容器在模板裡與在畫面裡給同一個答案。**
@@ -75,6 +82,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semve
   就是上面那 959 筆。**在能說出「哪一層被打開了」之前，VSM 接上去只會讓報告更吵。**
   那些位置本來就在 `stateColors` 裡誠實列著，換成 959 筆 unresolved 只是同一件事報兩次、外加打爛
   `--min-coverage`。
+
+- **「哪一層被狀態打開了」也做過一輪，一樣不划算。** 那是 VSM 缺的第三塊，而且觸發器也用得很兇
+  （語料 1715 個 `TargetName` + `Visibility` 的 Setter、831 個 `Opacity`）。實作出來：模板裡記下
+  「現在看不見、但狀態可能打開」的候選層，狀態打開它就拿它當底。**量出來是 +0 組配對、+0 筆 finding、
+  +111 筆 unresolved。** 中途看起來很漂亮的 +134 組配對／42 筆 finding 是假的 —— 那些狀態打開的是箭頭、
+  勾勾之類根本不是底的東西，只是讓同一組配對**又被算了一次**，6 筆「新 fail」逐筆查下去全是既有配對的
+  重複計數。加上「只有可能當底的元素才算」這道閘之後，收益歸零。
+  **0 筆編造被修掉、0 個新問題被找到**，所以不收。
 
 ## 1.7.0 — 2026-11-16
 

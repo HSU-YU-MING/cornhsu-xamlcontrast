@@ -3,7 +3,7 @@
 project: screentogif
 repo: https://github.com/NickeManarin/ScreenToGif
 commit: a4d0a67c2131cd048ceec86cd40afc2f1a06f2fd
-tool-commit: 34562ff+dirty
+tool-commit: 46454a7+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair

@@ -564,6 +564,7 @@ internal sealed partial class StyleIndex
                     //   更不能當成無關 —— HandyControl 的 Calendar 就是這形狀：Selected 狀態用 DoubleAnimation
                     //   把 Opacity=0 的 SelectedBackground 打開，字的底其實是它。
                     AddName(names, sib, own);
+                    if (Panels.IsHidden(sib)) continue; // 看不見的東西不是背板，也不遮字（1.8）
                     // 內容元素（Image 等）：底是一張圖、靜態不可知 —— 跟標記樹的規則 17(b) 同一個答案
                     // （ColorResolver 會把這個記號轉回 ColorKind.SiblingContent）。
                     // ⚠ 不是「放棄這一層往外找」：往外找等於拿圖後面那一層的顏色報一個比值，而字其實疊在圖上

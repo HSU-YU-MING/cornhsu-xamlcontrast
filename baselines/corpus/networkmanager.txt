@@ -3,7 +3,7 @@
 project: networkmanager
 repo: https://github.com/BornToBeRoot/NETworkManager.git
 commit: 350d81fa7257d1f436187c767706e789013c077a
-tool-commit: 34562ff+dirty
+tool-commit: 46454a7+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair

@@ -3,7 +3,7 @@
 project: playnite
 repo: https://github.com/JosefNemec/Playnite
 commit: e2e6efcda311fea38fcd92f61c8ca90811d97f28
-tool-commit: 34562ff+dirty
+tool-commit: 46454a7+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: single
@@ -28,9 +28,9 @@ ok: 51
 decorative: 6
 unresolved-by.bound-or-gradient: 10
 unresolved-by.in-style-template: 39
-unresolved-by.no-ancestor-background: 374
+unresolved-by.no-ancestor-background: 375
 unresolved-by.template-painted: 4
-unresolved-by.translucent-uncomposited: 16
+unresolved-by.translucent-uncomposited: 15
 unresolved-by.unknown-palette-key: 347
 unknown-keys.ControlBackgroundBrush: 219
 unknown-keys.MainBackgourndBrush: 1
@@ -359,6 +359,7 @@ U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Updates.xaml:33  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Updates.xaml:37  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Updates.xaml:41  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/Menu.xaml:89  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/Menu.xaml:99  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Themes/Desktop/Default/Media.xaml:10  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Themes/Desktop/Default/Media.xaml:11  {DynamicResource TextBrush}
@@ -539,7 +540,6 @@ U  translucent-uncomposited  source/Playnite.DesktopApp/Themes/Desktop/Default/C
 U  translucent-uncomposited  source/Playnite.DesktopApp/Themes/Desktop/Default/CustomControls/TopPanelItem.xaml:4  #990a0e1e
 U  translucent-uncomposited  source/Playnite.DesktopApp/Themes/Desktop/Default/CustomControls/TopPanelItem.xaml:4  #990a0e1e
 U  translucent-uncomposited  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/Menu.xaml:141  HoverBrush
-U  translucent-uncomposited  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/Menu.xaml:89  HoverBrush
 U  translucent-uncomposited  source/Playnite.FullscreenApp/Themes/Fullscreen/Default/CustomControls/FilterPresetSelector.xaml:4  Transparent
 U  translucent-uncomposited  source/Playnite.FullscreenApp/Themes/Fullscreen/Default/CustomControls/FilterPresetSelector.xaml:4  Transparent
 U  translucent-uncomposited  source/Playnite.FullscreenApp/Themes/Fullscreen/Default/Views/FiltersView.xaml:4  Transparent

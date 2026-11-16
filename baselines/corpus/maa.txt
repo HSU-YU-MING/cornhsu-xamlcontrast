@@ -3,7 +3,7 @@
 project: maa
 repo: https://github.com/MaaAssistantArknights/MaaAssistantArknights.git
 commit: b666b84a317c603c561401ab5e5c7b12203d8271
-tool-commit: 34562ff+dirty
+tool-commit: 46454a7+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair
@@ -28,8 +28,8 @@ ok: 41
 decorative: 15
 unresolved-by.bound-or-gradient: 10
 unresolved-by.no-ancestor-background: 86
-unresolved-by.over-sibling-content: 7
-unresolved-by.translucent-uncomposited: 142
+unresolved-by.over-sibling-content: 6
+unresolved-by.translucent-uncomposited: 143
 unresolved-by.unknown-palette-key: 13
 unknown-keys.CongratulationsFlowBrush: 1
 unknown-keys.DangerBrush: 1
@@ -231,7 +231,6 @@ U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/PostActionU
 U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/PostActionUserControl.xaml:76  {DynamicResource TraceLogBrush}
 U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/StartUpTaskUserControl.xaml:111  {DynamicResource ErrorLogBrush}
 U  no-ancestor-background  src/MaaWpfGui/Views/UserControl/TaskQueue/StartUpTaskUserControl.xaml:206  {DynamicResource PrimaryTextBrush}
-U  over-sibling-content  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1075  <Image>
 U  over-sibling-content  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1199  <Image>
 U  over-sibling-content  src/MaaWpfGui/Views/UI/ToolboxView.xaml:444  <Image>
 U  over-sibling-content  src/MaaWpfGui/Views/UI/ToolboxView.xaml:566  <Image>
@@ -283,6 +282,7 @@ U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:719  {Dyn
 U  translucent-uncomposited  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:853  MouseOverRegionBrushOpacity10
 U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1021  {DynamicResource RegionBrushOpacity25}
 U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1029  {DynamicResource RegionBrushOpacity25}
+U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1075  #EE404040 over {MouseOverRegionBrushOpacity75}
 U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1118  {DynamicResource RegionBrushOpacity25}
 U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1141  {DynamicResource RegionBrushOpacity25}
 U  translucent-uncomposited  src/MaaWpfGui/Views/UI/ToolboxView.xaml:1149  {DynamicResource RegionBrushOpacity25}

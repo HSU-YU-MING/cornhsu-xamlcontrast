@@ -530,6 +530,14 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   收緊後分得出「在另一個格子」（照舊評）與「同一格但撐不滿」（仍然不評）。
   實測 MaterialDesign 多出 10 筆真 fail（`Validation.HasError` 同時換 `Graphic` 的 Fill 與
   `contentPresenter` 的 Foreground，紅字疊深色卡片 1.76:1），配對 +10、unresolved −10。
+- **看不見的東西不是底**（1.8，`Panels.IsHidden`）：`Visibility="Collapsed"`／`"Hidden"`。
+  在這之前工具**完全沒看過 `Visibility`**，收起來的 `<Border Background="…"/>` 照樣被當成字的底
+  （語料 105 個這種元素；Playnite 的選單把收起來的 hover 高亮當成選單文字的底）。
+  ⚠ 只認寫死的值，`{Binding}` 照舊當成看得見（往嚴格那邊錯）。判定放 `Panels`，兩條路共用。
+- ⚠ **「哪一層被狀態打開了」做過一輪，量出來不划算（2026-11-16），不要再做一次。**
+  `State.LayerShown` ＋ 候選層那套：野外形狀不缺（1715 個 `TargetName`+`Visibility`、831 個 `Opacity`），
+  但 **+0 組配對、+0 筆 finding、+111 筆 unresolved**。中途看到的 +134 配對／42 finding 是假的 ——
+  打開的是箭頭、勾勾這種不是底的東西，只是讓同一組配對再被算一次。細節在 ROADMAP。
 - ⚠ **VSM 評分：三次量測都說不要接。** 1.8 補掉了前兩個前置條件（具名元素的字色、逐層判定），
   補完再翻譯一次 VSM：**959 筆新 unresolved、0 組新配對**、Flow Launcher 覆蓋率 29.8% → 14.8%。
   逐筆看過，那些 unresolved 落在真的元素上，不是空轉 —— 卡住的是第三個原因：**非顏色的動畫也會換掉字的底**

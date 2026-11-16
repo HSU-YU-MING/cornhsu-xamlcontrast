@@ -3,7 +3,7 @@
 project: v2rayn
 repo: https://github.com/2dust/v2rayN
 commit: 2c90ed1a9438a499aaaea0b612ffd5d705970106
-tool-commit: 34562ff+dirty
+tool-commit: 46454a7+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: none

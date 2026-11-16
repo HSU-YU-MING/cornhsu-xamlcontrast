@@ -3,7 +3,7 @@
 project: winuigallery
 repo: https://github.com/microsoft/WinUI-Gallery
 commit: 6de91feccadfbb0a796b71caedead5a2284f730e
-tool-commit: 34562ff+dirty
+tool-commit: 46454a7+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: pair

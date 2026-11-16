@@ -1020,4 +1020,29 @@ public class TemplateLayerTests
         // 勾選態的文字：#DDDDDD 疊在它自己那一格的白底上（Graphic 那一格跟它無關）
         Assert.Contains(r.Findings, f => f.Fg == "#DDDDDD" && f.Bg == "#FFFFFF");
     }
+
+    [Fact] // Visibility="Collapsed" 的元素看不見，就不是字的底（1.8）。在這之前工具完全沒看過
+           // Visibility，所以一個收起來的 Border 照樣被當成背板 —— 語料裡有 105 個這種元素
+    public void ACollapsedSiblingIsNotABackdrop()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid Background="#444444">
+              <Border Background="#222222" Visibility="Collapsed"/>
+              <ContentPresenter/>
+            </Grid>
+            """);
+        Assert.Equal("#444444", Assert.Single(fx.Run().Findings).Bg);
+    }
+
+    [Fact] // 看得見的照舊是背板（上一條不能把整個規則關掉）
+    public void AVisibleSiblingIsStillABackdrop()
+    {
+        using var fx = SiblingBackdrop("""
+            <Grid Background="#444444">
+              <Border Background="#222222" Visibility="Visible"/>
+              <ContentPresenter/>
+            </Grid>
+            """);
+        Assert.Equal("#222222", Assert.Single(fx.Run().Findings).Bg);
+    }
 }

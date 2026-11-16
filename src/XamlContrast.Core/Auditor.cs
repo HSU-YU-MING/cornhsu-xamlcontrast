@@ -1599,6 +1599,7 @@ public sealed partial class Auditor
     private Resolved? SiblingBackdrop(XElement child, bool stretches)
     {
         var name = child.Name.LocalName;
+        if (Panels.IsHidden(child)) return null; // 看不見的東西不是背板，也不遮字（1.8）
         // (b) 內容元素:底變成一張圖,不可知
         if (Panels.IsContentElement(name))
             return new Resolved(ColorKind.SiblingContent, Raw: "<" + name + ">");

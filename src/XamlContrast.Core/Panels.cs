@@ -50,6 +50,14 @@ internal static class Panels
         return (P("Grid.Row"), P("Grid.Column"));
     }
 
+    /// <summary>這個元素在穩態下根本看不見（1.8）：<c>Visibility</c> 是 <c>Collapsed</c>／<c>Hidden</c>。
+    /// 看不見的東西不是背板，也不會遮住後面的字 —— 在這之前工具**完全沒看過 Visibility**，
+    /// 所以 <c>&lt;Border Background="#333" Visibility="Collapsed"/&gt;</c> 照樣被當成字的底（語料 105 處）。
+    /// ⚠ 只認寫死的值：<c>{Binding}</c> 之類執行期才知道，照舊當成看得見（往嚴格那邊錯）。
+    /// ⚠ 這是兩條路共用的判定（標記樹的規則 17 與模板裡那條鏈），所以放在 <see cref="Panels"/>。</summary>
+    internal static bool IsHidden(XElement el)
+        => el.Attribute("Visibility")?.Value.Trim() is "Collapsed" or "Hidden";
+
     /// <summary>底變成一張圖／一段影片 —— 靜態不可知（規則 17 的 (b) 半）。</summary>
     internal static bool IsContentElement(string name)
         => name is "Image" or "MediaElement" || name.EndsWith("Image", StringComparison.Ordinal);
@@ -68,5 +76,6 @@ internal static class Panels
     /// <summary>畫底的那個屬性的原始寫法。⚠ 只有 <c>Rectangle</c> 讀 Fill：Ellipse 之類的形狀
     /// 不會蓋滿矩形的那一格（四個角露出來），把它當背板就是在猜文字落在哪一塊。</summary>
     internal static string? BackdropBrush(XElement child)
-        => XamlBrush.Read(child, child.Name.LocalName == "Rectangle" ? "Fill" : "Background");
+        => IsHidden(child) ? null
+            : XamlBrush.Read(child, child.Name.LocalName == "Rectangle" ? "Fill" : "Background");
 }
