@@ -81,8 +81,13 @@ public static class Baseline
     /// <summary>鍵的產生方式的版本（審查 1.0 A2）。鍵的文字（element 的標籤、fg 的寫法、bg 的合成描述）屬稽核語意，
     /// 1.x 的 minor 可以改 —— 改的那一版遞增這個數字。讀到舊的就明確叫人重寫，不要冒出一整排假的 NEW 加 paid off
     /// （凍結宣告的演進規則 5）。檔案沒寫這一欄視為 1。
-    /// unresolved 段（1.3）的鍵也算：原因標籤的拼法或 value 的寫法變了，一樣遞增。</summary>
-    public const int KeyVersion = 1;
+    /// unresolved 段（1.3）的鍵也算：原因標籤的拼法或 value 的寫法變了，一樣遞增。
+    ///
+    /// 2（1.6）：隱含樣式改走鏈路徑（<c>element</c> 從 <c>TextBlock</c> 變成
+    /// <c>TextBlock⊕Style[implicit TextBlock]/base</c>），而且帶模板的控制項的底改成模板裡真正畫底的那一層
+    /// （<c>bg</c> 的值變了）。兩件都是 element／bg 的寫法變動，所以舊檔會被拒絕並叫人重寫。
+    /// ⚠ Parity 儀表板手刻了一份同樣的鍵（Parity repo 的 ContrastCompare），遞增時那邊要一起改。</summary>
+    public const int KeyVersion = 2;
 
     public static string Write(AuditResult result)
     {

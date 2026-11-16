@@ -1,0 +1,467 @@
+using XamlContrast.Core;
+
+namespace XamlContrast.Tests;
+
+/// <summary>
+/// 模板裡哪一層畫底（1.6）—— 帶模板的控制項，字畫在模板**內部**某一層上面。
+///
+/// 為什麼值得做：1.5 只看模板根（<c>TemplateRootBg</c>），根沒設底就讓字去配**祖先**的底。
+/// 實測（HandyControl 的 <c>&lt;hc:Shield Color="#1182c3"/&gt;</c>）：模板根是沒設底的 Grid，
+/// 白字其實畫在兩個 Border 上（<c>#555</c> 與 <c>{TemplateBinding Color}</c>），配祖先的白底報出
+/// 三筆 1:1 的假 fail。1.5 的對策是「帶模板、底又不是它自己給的就不評」（而且只對隱含樣式），
+/// 1.6 改成把那一層真的找出來。
+///
+/// 界線（這些測試一起把它釘住）：
+///   • 這一格排在**宿主自己的 Background 之後**：元素明寫了 Background 時那就是答案。
+///     往前挪的話 MaterialDesign 的 MenusAndToolBars 會把 <c>&lt;MenuItem Background="Secondary"&gt;</c>
+///     的字配到外層選單的 Primary 底上 —— 元素寫的值被一個推論蓋掉。
+///   • 只收「在模板裡找得到畫底的祖先」的內容位置。找不到的不收（純加法）——
+///     MaterialDesign 的按鈕模板把底畫在內容的**兄弟** Border 上，當成「模板裡沒有底」會讓
+///     宿主的 Background Setter 整個被跳過，43 筆驗過的 finding 跟著消失。
+///   • 那一層的顏色靜態看不到 → <c>template-painted</c>，不是退回祖先（祖先沒露出來）。
+/// </summary>
+public class TemplateLayerTests
+{
+    /// <summary>HandyControl 的 Shield 形狀：模板根是沒設底的 Grid，內容分別畫在兩個 Border 上。</summary>
+    private const string ShieldStyle = """
+        <Style x:Key="Shield" TargetType="Badge">
+          <Setter Property="Foreground" Value="#FFFFFF"/>
+          <Setter Property="Template">
+            <Setter.Value>
+              <ControlTemplate TargetType="Badge">
+                <Grid>
+                  <Border Grid.Column="0" Background="#555555">
+                    <TextBlock Text="{TemplateBinding Subject}"/>
+                  </Border>
+                  <Border Grid.Column="1" Background="{TemplateBinding Color}">
+                    <ContentPresenter/>
+                  </Border>
+                </Grid>
+              </ControlTemplate>
+            </Setter.Value>
+          </Setter>
+        </Style>
+        """;
+
+    private static Fixture Shield(string element) => new Fixture().File("Main.xaml", $"""
+        <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+          <Grid.Resources>
+            {ShieldStyle}
+          </Grid.Resources>
+          {element}
+        </Grid>
+        """);
+
+    [Fact] // 兩層都報：執行期它們同時存在（不是互斥的候選），而且都不是祖先的白
+    public void BothLayersThatHoldContentAreGraded()
+    {
+        using var fx = Shield("""<Badge Style="{StaticResource Shield}" Color="#1182C3" Subject="build"/>""");
+        var r = fx.Run();
+
+        var bgs = r.Findings.Select(f => f.Bg).OrderBy(b => b).ToList();
+        Assert.Equal(["#1182C3", "#555555"], bgs);
+        // 祖先的白底是 1.5 的那個假 fail（白字配白底 1:1）—— 不能再出現
+        Assert.DoesNotContain(r.Findings, f => f.Bg == "#FFFFFF");
+        Assert.Empty(r.UnresolvedSites);
+    }
+
+    [Fact] // {TemplateBinding P} 是「宿主自己的 P」，不是一個看不懂的顏色 —— 要回到元素上查
+    public void ATemplateBoundLayerResolvesAgainstTheHostsOwnProperty()
+    {
+        using var fx = Shield("""<Badge Style="{StaticResource Shield}" Color="#1182C3"/>""");
+        var finding = Assert.Single(fx.Run().Findings, f => f.Bg == "#1182C3");
+        Assert.Equal(Wcag.Contrast("#FFFFFF", "#1182C3"), finding.RatioDark);
+    }
+
+    [Fact] // 宿主沒設那個屬性 = 控制項自己的預設值（函式庫寫在 C# metadata 裡）→ 靜態不可知。
+           // ⚠ 不能退回祖先：模板畫了一層底在中間，祖先的顏色根本沒露出來
+    public void AnUnsetHostPropertyMakesTheLayerUnknowable()
+    {
+        using var fx = Shield("""<Badge Style="{StaticResource Shield}"/>""");
+        var r = fx.Run();
+
+        Assert.Contains(r.UnresolvedSites, s => s.Reason == UnresolvedReason.TemplatePainted);
+        Assert.DoesNotContain(r.Findings, f => f.Bg == "#FFFFFF"); // 祖先的白不是退路
+        Assert.Contains(r.Findings, f => f.Bg == "#555555");       // 另一層照樣算得出來
+    }
+
+    [Fact] // 元素自己寫了 Background → 那就是答案，模板分層不能蓋掉它。
+           // ⚠ MaterialDesign 的 MenusAndToolBars 實證：挪到前面的話，巢狀 MenuItem 自己的底被忽略，
+           //   字被配到外層選單的底上 —— 元素明寫的值被一個推論蓋掉，等於編造
+    public void TheHostsOwnBackgroundWinsOverTheTemplateLayer()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Chip" TargetType="Button">
+                  <Setter Property="Foreground" Value="#FFFFFF"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Grid>
+                          <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter/>
+                          </Border>
+                        </Grid>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Chip}" Background="#1182C3" Content="x"/>
+            </Grid>
+            """);
+        var finding = Assert.Single(fx.Run().Findings);
+        Assert.Equal("#1182C3", finding.Bg);
+    }
+
+    [Fact] // 模板裡的底綁 {TemplateBinding Background} 而宿主沒設 → 實質上沒有底，穿透到祖先。
+           // ⚠ 這不是「看不懂」：少了這一條，ScreenToGif 的 Editor.xaml 有 163 組算得出來的配對變成 unresolved
+    public void AnUnsetBackgroundPiercesToTheAncestor()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Chip" TargetType="Button">
+                  <Setter Property="Foreground" Value="#EEEEEE"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Grid>
+                          <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter/>
+                          </Border>
+                        </Grid>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Chip}" Content="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var finding = Assert.Single(r.Findings);
+        Assert.Equal("#FFFFFF", finding.Bg);
+        Assert.Empty(r.UnresolvedSites);
+    }
+
+    [Fact] // 內容的底畫在它的**兄弟**上（MaterialDesign 的按鈕模板）：模板裡找不到「畫底的祖先」→
+           // 這一格不收，照舊走宿主的 Background Setter。⚠ 當成「模板裡沒有底」的話，
+           // MaterialDesign 一口氣少掉 43 筆逐筆驗過的 finding（含 1.4 驗過的扁平鈕 2.63:1）
+    public void ASiblingLayerIsNotAnAncestorSoThePrecedenceIsUnchanged()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Raised" TargetType="Button">
+                  <Setter Property="Background" Value="#1182C3"/>
+                  <Setter Property="Foreground" Value="#FFFFFF"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Grid>
+                          <Border Background="{TemplateBinding Background}"/>
+                          <ContentPresenter/>
+                        </Grid>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Raised}" Content="x"/>
+            </Grid>
+            """);
+        var finding = Assert.Single(fx.Run().Findings);
+        Assert.Equal("#1182C3", finding.Bg);
+    }
+
+    [Fact] // 巢狀模板裡的內容位置是**別的控制項**的內容（ComboBox 模板裡 ToggleButton 的模板、ItemTemplate）
+    public void ContentHostsInsideANestedTemplateDoNotCount()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Combo" TargetType="ComboBox">
+                  <Setter Property="Foreground" Value="#EEEEEE"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                          <ToggleButton>
+                            <ToggleButton.Template>
+                              <ControlTemplate TargetType="ToggleButton">
+                                <Border Background="#1182C3"><ContentPresenter/></Border>
+                              </ControlTemplate>
+                            </ToggleButton.Template>
+                          </ToggleButton>
+                        </Grid>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <ComboBox Style="{StaticResource Combo}"/>
+            </Grid>
+            """);
+        // 外層 ComboBox 的字不在那個 ToggleButton 模板的 Border 上 —— 不能拿 #1182C3 去配
+        Assert.DoesNotContain(fx.Run().Findings, f => f.Bg == "#1182C3");
+    }
+
+    [Fact] // 標記裡的子元素放進模板的 ContentPresenter，所以它們的底是那一層
+    public void MarkupChildrenSitOnThePrimaryLayer()
+    {
+        using var fx = Shield("""
+            <Badge Style="{StaticResource Shield}" Color="#1182C3">
+              <TextBlock Foreground="#2A7FBF" Text="子元素"/>
+            </Badge>
+            """);
+        var child = Assert.Single(fx.Run().Findings, f => f.Fg == "#2A7FBF");
+        Assert.Equal("#1182C3", child.Bg); // ContentPresenter 那一層，不是祖先的白
+    }
+
+    [Fact] // 把宿主字色畫成圖形的 Fill 也是一個內容位置（圖示按鈕的 Path）
+    public void AShapeThatPaintsTheHostForegroundIsAContentHost()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="IconBtn" TargetType="Button">
+                  <Setter Property="Foreground" Value="#8A8A8A"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Grid>
+                          <Border Background="#707070">
+                            <Path Fill="{TemplateBinding Foreground}"/>
+                          </Border>
+                        </Grid>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource IconBtn}"/>
+            </Grid>
+            """);
+        var finding = Assert.Single(fx.Run().Findings);
+        Assert.Equal("#707070", finding.Bg);
+    }
+
+    // ── 語料逼出來的三個「不要再編造」──
+    //    三個都是 1.6 把隱含樣式接上逐狀態路徑之後才爆出來的，但三個都同時修掉具名 Style 的同一個毛病。
+
+    [Fact] // XAML 的布林值不分大小寫：Value="false" 也是停用態（WCAG 1.4.3 豁免）。
+           // ⚠ 舊版逐字比 "False"，寫小寫的停用態被當成普通狀態評分 —— ScreenToGif 的隱含 ScrollViewer
+           //   樣式（Value="false" 設灰字）報出 2.14:1 的假 fail，MaterialDesign 有 16 處同形狀
+    public void ALowercaseDisabledTriggerIsStillExempt()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid Background="#FFFFFF">
+              <Grid.Resources>
+                <Style TargetType="TextBlock">
+                  <Setter Property="Foreground" Value="#000000"/>
+                  <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="false">
+                      <Setter Property="Foreground" Value="#F0F0F0"/>
+                    </Trigger>
+                  </Style.Triggers>
+                </Style>
+              </Grid.Resources>
+              <TextBlock Text="停用態的灰字"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(1, r.DisabledExempt);
+        Assert.DoesNotContain(r.Findings, f => f.Fg == "#F0F0F0");
+    }
+
+    [Fact] // 觸發器把模板**內部**元素的底重畫了 → 那個狀態下字底下那一層靜態不可知。
+           // ⚠ 舊版把那個 Setter 丟掉、照舊用基礎狀態的底評分 —— ScreenToGif 的 AwareTabItem
+           //   選取態把 ContentBorder 重畫成 #90FFFFFF，黑字其實在那層淺底上，工具卻拿深色的 Level3
+           //   去配，報 1.46:1。28 筆假 fail
+    public void ATriggerThatRepaintsAnInnerLayerIsNotGradedAgainstTheOldBackground()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#111111">
+              <Grid.Resources>
+                <Style x:Key="Tab" TargetType="TabItem">
+                  <Setter Property="Foreground" Value="#EEEEEE"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="TabItem">
+                        <Grid x:Name="Panel">
+                          <Border x:Name="ContentBorder" Background="#222222">
+                            <ContentPresenter/>
+                          </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Foreground" Value="#000000"/>
+                            <Setter TargetName="ContentBorder" Property="Background" Value="#F0F0F0"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <TabItem Style="{StaticResource Tab}" Header="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        // 基礎態照樣評（#EEEEEE 疊在模板那一層的 #222222 上）
+        Assert.Contains(r.Findings, f => f.Fg == "#EEEEEE" && f.Bg == "#222222");
+        // 選取態：ContentBorder 被重畫成 #F0F0F0，黑字其實在那上面 —— 不能拿 #222222 去配
+        Assert.DoesNotContain(r.Findings, f => f.Fg == "#000000");
+        Assert.Contains(r.UnresolvedSites, s => s.Reason == UnresolvedReason.TemplatePainted && s.Value == "#000000");
+    }
+
+    [Fact] // 巢狀 Style（ItemContainerStyle 之類）裡的觸發器是**別的元素**的狀態 —— 宿主沒有這一組。
+           // ⚠ 舊版照樣當成宿主的狀態評分：ScreenToGif 的 ListView 被套上 ListViewItem 的
+           //   hover／選取底色，報出 ListView 自己根本不存在的配對
+    public void TriggersInsideANestedStyleAreNotTheHostsStates()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Frames" TargetType="ListView">
+                  <Setter Property="Foreground" Value="#333333"/>
+                  <Setter Property="ItemContainerStyle">
+                    <Setter.Value>
+                      <Style TargetType="ListViewItem">
+                        <Style.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#1182C3"/>
+                          </Trigger>
+                        </Style.Triggers>
+                      </Style>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <ListView Style="{StaticResource Frames}"/>
+            </Grid>
+            """);
+        // ListView 自己不會進 ListViewItem 的 hover 態
+        Assert.DoesNotContain(fx.Run().Findings, f => f.Bg == "#1182C3");
+    }
+
+    [Fact] // 觸發器整個換掉 Template → 那個狀態的視覺是另一份模板畫的，底不是基礎狀態的底。
+           // ⚠ ScreenToGif 的 ExtendedMenuItem 用 Role 觸發器換三份模板，舊版把三份模板裡的
+           //   觸發器全當成宿主在基礎底上的狀態 —— 72 筆假 fail
+    public void ATriggerThatSwapsTheWholeTemplateIsUnresolved()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Item" TargetType="MenuItem">
+                  <Setter Property="Foreground" Value="#333333"/>
+                  <Setter Property="Background" Value="#F5F5F5"/>
+                  <Style.Triggers>
+                    <Trigger Property="Role" Value="TopLevelHeader">
+                      <Setter Property="Foreground" Value="#FFFFFF"/>
+                      <Setter Property="Template">
+                        <Setter.Value>
+                          <ControlTemplate TargetType="MenuItem">
+                            <Border Background="#1182C3"><ContentPresenter/></Border>
+                          </ControlTemplate>
+                        </Setter.Value>
+                      </Setter>
+                    </Trigger>
+                  </Style.Triggers>
+                </Style>
+              </Grid.Resources>
+              <MenuItem Style="{StaticResource Item}" Header="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Contains(r.Findings, f => f.Fg == "#333333" && f.Bg == "#F5F5F5"); // 基礎態照樣評
+        // 白字不能拿 #F5F5F5 去配 —— 那個狀態的底是另一份模板畫的
+        Assert.DoesNotContain(r.Findings, f => f.Fg == "#FFFFFF" && f.Bg == "#F5F5F5");
+        Assert.Contains(r.UnresolvedSites, s => s.Reason == UnresolvedReason.TemplatePainted);
+    }
+
+    [Fact] // 元素自己換掉 Template → Style 那份模板的 ControlTemplate.Triggers 在執行期不存在。
+           // ⚠ 實測（Kindling，1.6 開發中）：<Button Background="Transparent"> 自帶一份只有 ContentPresenter
+           //   的模板，卻被套上 DarkBtn 模板裡 IsPressed 的白字，底又因為本地 Transparent 穿透到視窗底色
+           //   —— 兩筆「白字配淺色視窗底 1.2:1」的假 fail，而那個狀態根本不存在。
+           //   MergeChain 對 BasedOn 早就有這條（「模板被換掉」），元素端 1.6 才補上
+    public void AnElementThatReplacesTheTemplateDropsTheStylesTemplateTriggers()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style TargetType="Button">
+                  <Setter Property="Foreground" Value="#111111"/>
+                  <Setter Property="Background" Value="#DDDDDD"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                          <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Foreground" Value="#FFFFFF"/>
+                            <Setter Property="Background" Value="#5B3FA8"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Background="Transparent">
+                <Button.Template>
+                  <ControlTemplate TargetType="Button">
+                    <ContentPresenter/>
+                  </ControlTemplate>
+                </Button.Template>
+              </Button>
+            </Grid>
+            """);
+        var r = fx.Run();
+        // 本地 Background="Transparent" 穿透到祖先的白，基礎態的字色照樣評
+        Assert.Contains(r.Findings, f => f.Fg == "#111111" && f.Bg == "#FFFFFF");
+        // 被換掉的那份模板裡的 IsPressed 在這個元素身上不存在 —— 白字不能配到祖先的白底。
+        // ⚠ 定義處（WalkStyles）那一筆「白字配 #5B3FA8」照舊要有：別的按鈕沒換模板，那一組是真的
+        Assert.DoesNotContain(r.Findings, f => f.Fg == "#FFFFFF" && f.Bg == "#FFFFFF");
+        Assert.Contains(r.Findings, f => f.Fg == "#FFFFFF" && f.Bg == "#5B3FA8" && f.Element.StartsWith("Style["));
+    }
+
+    [Fact] // 規則 13 沒被模板分層蓋掉：TargetName=模板根的觸發 Setter 換掉的是根那一層，
+           // 而且與字同源（定義處已檢過）→ 使用處不重複報
+    public void RuleThirteenStillBeatsTheRootLayer()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Grid.Resources>
+                <Style x:Key="Btn" TargetType="Button">
+                  <Setter Property="Foreground" Value="#111111"/>
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="#EEEEEE">
+                          <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                          <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="#CC3A3A"/>
+                            <Setter Property="Foreground" Value="#FFFFFF"/>
+                          </Trigger>
+                        </ControlTemplate.Triggers>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Style>
+              </Grid.Resources>
+              <Button Style="{StaticResource Btn}" Content="x"/>
+            </Grid>
+            """);
+        var r = fx.Run();
+        var hover = Assert.Single(r.Findings, f => f.Fg == "#FFFFFF");
+        Assert.Equal("#CC3A3A", hover.Bg);
+        Assert.Empty(r.UnresolvedSites); // 根那一層換底看得見，不是 template-painted
+    }
+}

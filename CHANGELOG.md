@@ -3,6 +3,129 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 1.6.0 — 2026-11-16
+
+### Upgrading（這一版動到 baseline 的鍵，所有使用者都要重寫一次，而且覆蓋率會下降）
+
+- **In short:** implicit styles are now graded through the same chain path as named styles, so their
+  **trigger states** are graded too, and a templated control's text is matched against the layer **inside
+  the template** that actually paints it. Both change what goes into a baseline key, so
+  **`Baseline.KeyVersion` goes from 1 to 2**: an older `baseline.json` is rejected with a message telling you
+  to run `--write-baseline` again. `schemaVersion` stays 6 and no JSON field moves.
+  Measured on seventeen public projects and the maintainer's three apps, **no finding was lost or changed
+  except where this release deliberately stopped fabricating one** (103 of them — every single one attributed
+  below), and 370 existing findings keep their colours and ratios but get a new `element` label.
+  What will move for you: more pairs are graded (ScreenToGif 620 → 1025), and **coverage drops** wherever a
+  trigger repaints a layer the tool cannot see (wpfui 17.4% → 9.0%, Flow Launcher 47.2% → 29.8%,
+  MaterialDesign 14% → 9%). Those pairs used to be reported against a background that the repaint covers —
+  a confident wrong number. **If you gate on `--min-coverage`, check it before upgrading.**
+  *簡單說：隱含樣式改走跟具名 Style 同一條鏈路徑，所以**觸發態**也評得到了；帶模板的控制項，字改成配
+  **模板裡真正畫底的那一層**。兩件都會動到 baseline 的鍵，所以 `Baseline.KeyVersion` 從 1 遞增到 2 ——
+  舊的 `baseline.json` 會被拒絕並叫你重跑 `--write-baseline`（`schemaVersion` 仍是 6，JSON 欄位一個都沒搬）。
+  十七個公開專案＋維護者三個 App 逐筆比對：除了這一版**刻意不再編造**的那 103 筆（下面每一筆都有歸因），
+  沒有任何 finding 消失或改變；另有 370 筆顏色與比值完全相同、只有 `element` 標籤變了。
+  你會看到的變化：配對變多，而**覆蓋率會下降** —— 凡是觸發器重畫了工具看不到的那一層，那一組現在記
+  unresolved。那些配對過去是拿「被重畫蓋掉的底」算出來的，一個很篤定的錯數字。
+  **有用 `--min-coverage` 把關的請先確認。***
+
+- **Implicit styles go through the chain path, so their trigger states are graded.**
+  1.5 deliberately read only an implicit style's base setters, because the chain path changes a finding's
+  `element` label from `TextBlock` to `TextBlock⊕Style[implicit TextBlock]/base` — that is a baseline key.
+  This release pays that cost once and gets hover, selected, checked and the rest. Only implicit styles that
+  actually touch colour take the chain path: one that sets nothing but `Margin` and `FontSize` leaves the
+  label — and your baseline key — alone. Where the two themes resolve *different* implicit styles (a
+  `Dark.xaml` and a `Light.xaml` each declaring one), each side is graded on its own with an `@dark` /
+  `@light` label, exactly as a named style already was; where only one side has one, neither side takes the
+  chain path — "this theme has no implicit style" means the control's own default, which this tool does not
+  model, and borrowing the other theme's colour would be fabrication.
+
+- **A templated control's text is matched against the layer inside the template that paints it.**
+  1.5 looked only at the template *root*; when the root painted nothing, the text fell through to the
+  **ancestor**. `<hc:Shield Color="#1182c3"/>` is the proof: the root is a bare `Grid`, and the white label
+  really sits on two `Border`s (`#555` and `{TemplateBinding Color}`) — against the ancestor's white it read
+  1:1. Now every place the template holds host content is matched against its nearest painting ancestor
+  **inside the template**: a `ContentPresenter`, a custom host that takes `Content="{TemplateBinding Content}"`
+  (MaterialDesign puts the content in a `wpf:Ripple`), a text element whose colour comes from the host, or a
+  shape that paints `{TemplateBinding Foreground}`. `{TemplateBinding P}` is resolved against the host's own
+  `P` instead of being treated as an unknown colour, and an unset `Background` still pierces to the ancestor
+  as it did in 1.5. Two layers that both hold content are two findings — at runtime both exist. Shield now
+  reads 7.46:1 on `#555555` and 4.20:1 on `#1182C3`, both real.
+  Two boundaries, both measured: this step sits **after** the host's own `Background` (moving it earlier made
+  MaterialDesign's nested `<MenuItem Background="…Secondary…">` get matched against the outer menu's Primary —
+  an explicit value overridden by an inference), and a layer that is the content's **sibling** rather than its
+  ancestor does not count (MaterialDesign's button template paints there; treating it as "no background in the
+  template" cost 43 verified findings, including the 1.55:1 and 2.63:1 pairs checked by hand for 1.4).
+
+- **New unresolved reason `template-painted`:** the text sits on a layer inside the template whose colour is
+  not knowable statically — it comes from a host property nobody set (a library control's default, which lives
+  in C#), the layer's own background is a binding or gradient, or a trigger repainted it. The ancestor's colour
+  is **not** a fallback for these: the template painted over it. `unresolvedSites` names every one.
+  It is an open set, so a 1.x consumer must already tolerate the new value; `docs/report.schema.json`
+  documents it.
+
+### Fixed — four places that fabricated a ratio, all found by the corpus guard
+
+Each of these also fixes the same fault on the **named**-style path, where it has been producing wrong numbers
+quietly since before 1.0. Together they account for every one of the 103 findings this release removes.
+
+- **`Value="false"` was not recognised as the disabled state.** XAML's boolean converter accepts `false` and
+  `False` alike; the tool compared the string literally against `"False"`. A lowercase disabled trigger was
+  therefore graded as an ordinary state, so the grey text WCAG 1.4.3 explicitly exempts was reported as a real
+  failure — ScreenToGif's implicit `ScrollViewer` style (2.14:1) and sixteen sites in MaterialDesign.
+  17 findings removed; `disabledExempt` rises accordingly (Kindling 6 → 37).
+
+- **Triggers inside a nested style were treated as the host's states.** Trigger collection walks all of a
+  style's descendants, so an `ItemContainerStyle`'s or `DataGridTextColumn.ElementStyle`'s triggers — and those
+  inside `<Style.Resources>` — became states of the outer control. ScreenToGif's `ListView` was reported with
+  its `ListViewItem`'s hover and selected backgrounds, pairs the `ListView` never has. Those styles are walked
+  on their own by the definition-site pass, so nothing goes silent. 23 findings removed.
+
+- **A trigger that repaints a layer the tool cannot see is no longer graded against the old background.**
+  A `Setter` with a `TargetName` pointing *inside* the template has always been a documented blind spot
+  (rule 13 only resolves the template root) — but the old behaviour was to drop that setter and grade the state
+  against the base background anyway. ScreenToGif's `AwareTabItem` repaints `ContentBorder` to `#90FFFFFF` when
+  selected; the black label really sits on that light layer, and the tool matched it against the dark theme's
+  `Level3` and reported 1.46:1. The same goes for a trigger that swaps the whole `Template` (ScreenToGif's
+  `ExtendedMenuItem` has three `Role` templates). Such a state is now `template-painted` **when it gives no
+  background of its own** — if it does set one, that value is at least this state's, and the layer above it
+  remains the documented blind spot it already was. 63 findings removed; it also prevented 100 newly
+  fabricated failures that routing implicit styles through the chain path would otherwise have produced.
+
+- **An element that replaces `Template` no longer inherits the style's template triggers.** `MergeChain` has
+  had this rule for `BasedOn` since 1.0 ("the template was replaced"), but not for the element itself. The
+  maintainer's Kindling has `<Button Background="Transparent">` with its own one-line template, and it was
+  being given `DarkBtn`'s pressed-state white text while the local `Transparent` let the background pierce to
+  the window — two "white on the light theme's window, 1.2:1" failures for a state that does not exist.
+
+### Measured
+
+Seventeen pinned public projects (`scripts/verify-corpus.ps1`) plus the maintainer's three apps. Every removed
+finding is attributed above; no project lost a finding for any other reason.
+
+| project | pairs | fail | unresolved | coverage |
+|---|---|---|---|---|
+| ScreenToGif | 620 → 1025 | 62 → 147 | 1637 → 3213 | 27.5% → 24.2% |
+| HandyControl | 545 → 736 | 35 → 49 | 2497 → 2997 | 17.9% → 19.7% |
+| MaterialDesign | 386 → 385 | 112 → 117 | 2372 → 3873 | 14% → 9% |
+| wpfui | 94 → 96 | 16 → 16 | 446 → 969 | 17.4% → 9% |
+| MahApps | 84 → 88 | 1 → 1 | 1037 → 1285 | 7.5% → 6.4% |
+| Flow Launcher | 101 → 101 | 4 → 4 | 113 → 238 | 47.2% → 29.8% |
+| Playnite | 61 → 62 | 5 → 5 | 603 → 748 | 9.2% → 7.7% |
+| NETworkManager | 135 → 139 | 76 → 80 | 1299 → 1404 | 9.4% → 9% |
+| MAA | 101 → 96 | 13 → 13 | 258 → 258 | 28.1% → 27.1% |
+| WinUI Gallery | 111 → 111 | 6 → 6 | 224 → 225 | 33.1% → 33% |
+| VisualHFT, TwitchDownloader, GeekDesk, ILSpy, QuickLook, v2rayN, Bloxstrap | unchanged, or one site either way |
+
+The maintainer's own apps: Kindling 222 → 225 pairs, `disabledExempt` 6 → 37, **still 0 fail**; QuillNest
+949 → 951 pairs, `deadForeground` 4 → 2 (fewer phantom states to count), fail unchanged; Cornea unchanged.
+
+### Interfaces
+
+No change to the nine frozen faces beyond the two additions the freeze allows in a minor: the open set of
+unresolved reasons gains `template-painted`, and `Baseline.KeyVersion` goes to 2. The freeze covers the
+baseline file's *format*, not the spelling of its keys — see the 1.0.0 declaration. Anonymous statistics send
+`other` for the new reason until the collector's protocol lists it.
+
 ## 1.5.0 — 2026-11-16
 
 ### Upgrading（這一版有三個改動會動到計數，是 minor 不是 patch）

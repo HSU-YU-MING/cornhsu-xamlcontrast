@@ -734,7 +734,7 @@ public class JsonReportContractTests
         Assert.Equal(
             ["no-ancestor-background", "bound-or-gradient", "unknown-palette-key",
              "translucent-uncomposited", "same-brush-pair", "over-sibling-content", "in-style-template",
-             "unknown-style-key"],
+             "unknown-style-key", "template-painted"],
             Enum.GetValues<UnresolvedReason>().Select(Report.ReasonLabel));
     }
 

@@ -524,6 +524,7 @@ doesn't tell you whether anything can be done about it:
 | `over-sibling-content` | the text sits on a sibling `Image`/media element in the same Grid cell — the real backdrop is a picture, unknowable statically; pairing with the ancestor background would fabricate a ratio |
 | `in-style-template` | a text element with its own `Foreground` inside a style's `Template` setter (`<Setter Property="Template"><Setter.Value><ControlTemplate>`) — not graded yet (see Known limitations), counted so the gap shows in coverage |
 | `unknown-style-key` | the palette comes from separate dark and light dictionaries, and the element's style — `Style="{StaticResource K}"`, or a `BasedOn` in its chain — is defined in only one of them, so how the element looks in the other theme is unknown; the value is the style key. Before 1.2 this was counted as `unknown-palette-key` (and a `BasedOn` like this was graded against the background behind the element instead) |
+| `template-painted` | the text sits on a layer **inside** the control's template whose colour isn't knowable statically: it comes from a host property nobody set (a library control's default, which lives in C#), that layer's own background is a binding or gradient, or a trigger repainted it (a `Setter` with a `TargetName` pointing inside the template, or one that swaps the whole `Template`). The ancestor's colour is **not** a fallback here — the template painted over it. New in 1.6; before that these were graded against a background the repaint covers |
 
 `summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
 (default 50%) exits 3**, because a pass over a fraction of the project is not a pass — the same
@@ -772,11 +773,20 @@ Honest list — full blind-spot table with per-case evidence in the
   an inline `<X.Style>`) is not an implicit style. A style's own `<Style.Resources>` is resolved too, for the
   content of the elements that use that style — WPF's standard way to override a global implicit style for one
   control — and it beats the file's and the global one, is inherited through `BasedOn`, and does not reach the
-  styled element itself. Three parts still say nothing rather than guess:
-  the **trigger states** of an implicit style (the base state is graded), a **templated control** whose
-  template paints the background out of sight (`<hc:Shield Color="#1182c3"/>` — the label is on the badge,
-  not on the ancestor), and a type with **several competing global implicit styles**, where the winner
-  depends on the merge order at runtime
+  styled element itself. From 1.6 an implicit style takes the **same chain path as a named one**, so its
+  **trigger states** (hover, selected, checked) are graded as well; the finding's `element` then reads
+  `TextBlock⊕Style[implicit TextBlock]/base`, and an implicit style that touches no colour leaves the plain
+  label alone. One part still says nothing rather than guess: a type with **several competing global implicit
+  styles**, where the winner depends on the merge order at runtime
+- A **templated control**'s text is matched against the layer inside the template that paints it (1.6):
+  wherever the template holds host content — a `ContentPresenter`, a custom host taking
+  `Content="{TemplateBinding Content}"`, a text element whose colour comes from the host, a shape painting
+  `{TemplateBinding Foreground}` — the nearest painting ancestor **inside the template** is the backdrop, and
+  `{TemplateBinding P}` resolves against the host's own `P`. Two layers holding content are two findings; both
+  exist at runtime. What is still out of reach: a layer that is the content's **sibling** rather than its
+  ancestor (`Grid`-cell sibling backdrops are resolved in the markup tree, not inside templates), and a layer
+  a trigger repainted through a `TargetName` pointing into the template — both honestly `template-painted`
+  rather than matched against an ancestor the template covered
 - `VisualStateManager` state colours — state storyboards (`ColorAnimation`, brush key frames) and
   WinUI's `<VisualState.Setters>` — are **counted and listed, not graded**: `summary.stateColors` and
   `stateColorSites` in `report.json` name every site, and the console, Markdown and HTML reports say how

@@ -3,7 +3,7 @@
 project: playnite
 repo: https://github.com/JosefNemec/Playnite
 commit: e2e6efcda311fea38fcd92f61c8ca90811d97f28
-tool-commit: 07be1dd+dirty
+tool-commit: 164cda1+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: single
@@ -11,12 +11,12 @@ palette-degraded: False
 palette-keys: 26
 single-theme: True
 files: 272
-pairs: 61
-coverage: 9.2
-unresolved: 603
+pairs: 62
+coverage: 7.7
+unresolved: 748
 skipped: 0
 dead-foreground: 26
-disabled-exempt: 69
+disabled-exempt: 478
 converter-pairs: 0
 ui-component-pairs: 0
 parse-errors: 0
@@ -24,19 +24,20 @@ suppressed: 0
 state-colors: 8
 fail: 5
 warn: 0
-ok: 50
+ok: 51
 decorative: 6
 unresolved-by.bound-or-gradient: 10
 unresolved-by.in-style-template: 39
-unresolved-by.no-ancestor-background: 303
+unresolved-by.no-ancestor-background: 374
+unresolved-by.template-painted: 4
 unresolved-by.translucent-uncomposited: 16
-unresolved-by.unknown-palette-key: 235
-unknown-keys.ControlBackgroundBrush: 85
+unresolved-by.unknown-palette-key: 305
+unknown-keys.ControlBackgroundBrush: 183
 unknown-keys.MainBackgourndBrush: 1
 unknown-keys.OverlayMenuBackgroundBrush: 12
 unknown-keys.SelectionBrush: 1
 unknown-keys.TextBrush: 4
-unknown-keys.WindowBackgourndBrush: 132
+unknown-keys.WindowBackgourndBrush: 104
 # F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
 F  decorative  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/ProgressBar.xaml:9  Style[{x:Type ProgressBar}]/base  {DynamicResource HoverBrush} on {NormalBrushDark}  3.71/3.71  
 F  decorative  source/Playnite.DesktopApp/Windows/SearchWindow.xaml:66  Ellipse  {StaticResource GlyphBrush} ×0.1 on {NormalBrushDark}  1.20/1.20  
@@ -96,9 +97,10 @@ F  ok  source/Tools/PlayniteInstaller/Classic.xaml:279  Style[{x:Type ToolTip}]/
 F  ok  source/Tools/PlayniteInstaller/Classic.xaml:95  Style[{x:Type Button}]/base  {DynamicResource GlyphBrush} on {ButtonBackgroundBrush}  9.48/9.48  
 F  ok  source/Tools/PlayniteInstaller/Classic.xaml:95  Style[{x:Type Button}]/trigger  {DynamicResource TextBrush} on {ButtonBackgroundBrush}  15.37/15.37  
 F  ok  source/Tools/PlayniteInstaller/MainWindow.xaml:19  TextBlock⊕Style[→BaseTextBlockStyle]/base  {DynamicResource TextBrush} on #252422  13.85/13.85  
-F  ok  source/Tools/PlayniteInstaller/MainWindow.xaml:38  TextBlock  {DynamicResource TextBrush} on #252422  13.85/13.85  
-F  ok  source/Tools/PlayniteInstaller/MainWindow.xaml:80  TextBlock  {DynamicResource TextBrush} on #252422  13.85/13.85  
-F  ok  source/Tools/PlayniteInstaller/MainWindow.xaml:81  Hyperlink  {DynamicResource GlyphBrush} on #252422  8.54/8.54  
+F  ok  source/Tools/PlayniteInstaller/MainWindow.xaml:38  TextBlock⊕Style[implicit TextBlock]/base  {DynamicResource TextBrush} on #252422  13.85/13.85  
+F  ok  source/Tools/PlayniteInstaller/MainWindow.xaml:80  TextBlock⊕Style[implicit TextBlock]/base  {DynamicResource TextBrush} on #252422  13.85/13.85  
+F  ok  source/Tools/PlayniteInstaller/MainWindow.xaml:81  Hyperlink⊕Style[implicit Hyperlink]/base  {DynamicResource GlyphBrush} on #252422  8.54/8.54  
+F  ok  source/Tools/PlayniteInstaller/MainWindow.xaml:81  Hyperlink⊕Style[implicit Hyperlink]/trigger  {DynamicResource TextBrush} on #252422  13.85/13.85  
 # U  原因  檔案:行  值
 U  bound-or-gradient  source/Playnite.DesktopApp/Themes/Desktop/Default/CustomControls/ComboBoxList.xaml:14  {TemplateBinding Background}
 U  bound-or-gradient  source/Playnite.DesktopApp/Themes/Desktop/Default/CustomControls/ComboBoxList.xaml:18  {TemplateBinding Background}
@@ -159,12 +161,16 @@ U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/Ad
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/AddonUpdates.xaml:84  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:103  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:104  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:104  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:104  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:136  {DynamicResource WarningBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:145  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:146  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:151  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:158  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:159  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:159  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:159  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:178  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:86  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:87  {DynamicResource TextBrush}
@@ -174,8 +180,12 @@ U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/Br
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/BrowseAddons.xaml:97  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:102  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:103  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:103  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:103  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:114  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:115  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:115  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:115  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:42  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:43  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:46  {DynamicResource TextBrush}
@@ -184,26 +194,37 @@ U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/In
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:51  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:57  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:58  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:58  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:58  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:87  {DynamicResource WarningBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:91  {DynamicResource WarningBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:95  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:96  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:96  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledExtensions.xaml:96  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:42  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:43  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:46  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:47  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:54  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:55  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:55  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:55  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:80  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:84  {DynamicResource WarningBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:89  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:90  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:90  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:90  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:96  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:97  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:97  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/InstalledThemes.xaml:97  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/GameTaskView.xaml:102  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/GameTaskView.xaml:108  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/GameTaskView.xaml:112  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/GameTaskView.xaml:120  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/GameTaskView.xaml:125  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/GameTaskView.xaml:132  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/GameTaskView.xaml:138  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/GameTaskView.xaml:143  {DynamicResource TextBrush}
@@ -216,6 +237,8 @@ U  no-ancestor-background  source/Playnite.DesktopApp/Controls/GameTaskView.xaml
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/GameTaskView.xaml:63  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/GameTaskView.xaml:69  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/LibraryStatistics.xaml:154  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/LibraryStatistics.xaml:154  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/LibraryStatistics.xaml:154  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/LibraryStatistics.xaml:159  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/MetadataDownloadSettings.xaml:114  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/MetadataDownloadSettings.xaml:119  {DynamicResource TextBrush}
@@ -267,10 +290,16 @@ U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceDetailsView.xaml:95  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:36  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:37  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:37  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:37  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:42  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:43  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:43  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:43  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:57  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:58  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:58  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:58  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:73  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGeneral.xaml:91  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGridView.xaml:107  {DynamicResource TextBrush}
@@ -307,36 +336,24 @@ U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/General.xaml:131  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/General.xaml:137  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/General.xaml:138  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/General.xaml:138  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/General.xaml:138  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/General.xaml:146  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/General.xaml:33  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/General.xaml:45  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/General.xaml:46  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/General.xaml:46  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/General.xaml:46  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/General.xaml:54  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/General.xaml:63  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/GeneralAdvanced.xaml:37  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/GeneralAdvanced.xaml:40  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/GeneralAdvanced.xaml:41  {DynamicResource GlyphBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/GeneralAdvanced.xaml:41  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/GeneralAdvanced.xaml:41  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/LibrariesConfigWindowInfo.xaml:10  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:40  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:48  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:55  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:71  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:73  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:75  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:77  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/NoSettingsAvailable.xaml:10  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Performance.xaml:50  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:25  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:30  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:42  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:54  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:69  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:81  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Search.xaml:19  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Search.xaml:25  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Search.xaml:44  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Search.xaml:50  {DynamicResource TextBrush}
-U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Search.xaml:76  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Sorting.xaml:17  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Updates.xaml:29  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/SettingsSections/Updates.xaml:33  {DynamicResource TextBrush}
@@ -372,22 +389,52 @@ U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSectio
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Audio.xaml:26  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Audio.xaml:26  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:19  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:24  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:24  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:24  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:27  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:27  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:27  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:29  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:29  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:29  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:31  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:31  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:31  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:33  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:33  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:33  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:36  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:36  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:36  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:38  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:38  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:38  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/General.xaml:43  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:15  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:15  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:15  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:18  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:18  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:18  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:22  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:22  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:22  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:26  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:26  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:26  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:29  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:29  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:29  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:33  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:38  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:38  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Input.xaml:38  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Layout.xaml:18  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Layout.xaml:18  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Layout.xaml:18  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Layout.xaml:22  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Layout.xaml:22  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Layout.xaml:22  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Layout.xaml:26  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Layout.xaml:29  {DynamicResource TextBrush}
@@ -396,22 +443,48 @@ U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSectio
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Layout.xaml:44  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Layout.xaml:47  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:16  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:19  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:19  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:19  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:21  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:21  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:21  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:22  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:22  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:22  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:23  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:23  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:23  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:24  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:24  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:24  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:25  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:25  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:25  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:26  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:26  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:26  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:27  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:27  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:27  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:28  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:28  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:28  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:29  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:29  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Menus.xaml:29  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:18  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:20  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:26  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:26  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:26  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:28  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:28  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:28  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:32  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:38  {DynamicResource TextBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:43  {DynamicResource GlyphLightBrush}
+U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:43  {DynamicResource GlyphLightBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:43  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:47  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.FullscreenApp/Controls/SettingsSections/Visuals.xaml:49  {DynamicResource TextBrush}
@@ -452,6 +525,10 @@ U  no-ancestor-background  source/Playnite.FullscreenApp/Themes/Fullscreen/Defau
 U  no-ancestor-background  source/Playnite.FullscreenApp/Themes/Fullscreen/Default/Views/SettingsMenus.xaml:22  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Tests/TestPlugin/TestPluginUserControl.xaml:11  LimeGreen
 U  no-ancestor-background  source/Tests/TestPlugin/TestPluginUserControl.xaml:13  LimeGreen
+U  template-painted  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/Menu.xaml:169  {DynamicResource TextBrush}
+U  template-painted  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/Menu.xaml:169  {DynamicResource TextBrush}
+U  template-painted  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/Menu.xaml:169  {DynamicResource TextBrush}
+U  template-painted  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/Menu.xaml:169  {DynamicResource TextBrush}
 U  translucent-uncomposited  source/Playnite.DesktopApp/Themes/Desktop/Default/CustomControls/SidebarItem.xaml:4  Transparent
 U  translucent-uncomposited  source/Playnite.DesktopApp/Themes/Desktop/Default/CustomControls/SidebarItem.xaml:4  Transparent
 U  translucent-uncomposited  source/Playnite.DesktopApp/Themes/Desktop/Default/CustomControls/SidebarItem.xaml:4  Transparent
@@ -502,6 +579,8 @@ U  unknown-palette-key  source/Playnite.DesktopApp/Controls/LibraryStatistics.xa
 U  unknown-palette-key  source/Playnite.DesktopApp/Controls/LibraryStatistics.xaml:72  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Controls/LibraryStatistics.xaml:75  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Controls/LibraryStatistics.xaml:76  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/LibraryStatistics.xaml:76  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/LibraryStatistics.xaml:76  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Controls/LibraryStatistics.xaml:78  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceDetailsView.xaml:47  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceDetailsView.xaml:60  ControlBackgroundBrush
@@ -513,6 +592,30 @@ U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/App
 U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceGridView.xaml:98  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceListView.xaml:30  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/AppearanceListView.xaml:43  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:38  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:40  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:48  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:55  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:67  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:71  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:73  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:75  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Metadata.xaml:77  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:18  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:25  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:30  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:42  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:54  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:66  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:69  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Scripting.xaml:81  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Search.xaml:16  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Search.xaml:19  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Search.xaml:25  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Search.xaml:44  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Search.xaml:50  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Search.xaml:74  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Controls/SettingsSections/Search.xaml:76  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/CustomControls/NumericBoxes.xaml:19  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/CustomControls/NumericBoxes.xaml:27  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/CustomControls/NumericBoxes.xaml:35  ControlBackgroundBrush
@@ -524,10 +627,6 @@ U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/Defaul
 U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/ComboBox.xaml:9  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/ComboBox.xaml:9  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/Menu.xaml:169  ControlBackgroundBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/Menu.xaml:169  ControlBackgroundBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/Menu.xaml:169  ControlBackgroundBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/Menu.xaml:169  ControlBackgroundBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/Menu.xaml:169  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/RadioButton.xaml:9  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/TreeView.xaml:31  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Themes/Desktop/Default/DefaultControls/TreeView.xaml:31  ControlBackgroundBrush
@@ -538,18 +637,43 @@ U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:37  
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:38  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:43  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:44  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:44  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:44  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:49  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:50  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:50  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:50  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:55  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:56  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:56  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:56  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:61  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:62  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:62  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:62  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:68  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:69  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:81  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:97  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:69  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:69  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:79  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:81  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:95  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AboutWindow.xaml:97  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/AddonsWindow.xaml:40  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/CrashHandlerWindow.xaml:29  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/CrashHandlerWindow.xaml:33  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/DatabaseFieldsManagerWindow.xaml:114  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/DatabaseFieldsManagerWindow.xaml:135  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/DatabaseFieldsManagerWindow.xaml:156  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/DatabaseFieldsManagerWindow.xaml:177  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/DatabaseFieldsManagerWindow.xaml:198  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/DatabaseFieldsManagerWindow.xaml:219  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/DatabaseFieldsManagerWindow.xaml:23  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/DatabaseFieldsManagerWindow.xaml:240  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/DatabaseFieldsManagerWindow.xaml:261  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/DatabaseFieldsManagerWindow.xaml:308  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/DatabaseFieldsManagerWindow.xaml:329  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/DatabaseFieldsManagerWindow.xaml:373  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatedGameImportWindow.xaml:101  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatedGameImportWindow.xaml:168  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatedGameImportWindow.xaml:172  WindowBackgourndBrush
@@ -564,62 +688,83 @@ U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorDownloadWindo
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorDownloadWindow.xaml:78  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorDownloadWindow.xaml:86  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorDownloadWindow.xaml:87  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorDownloadWindow.xaml:87  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorDownloadWindow.xaml:87  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorImportWindow.xaml:62  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorImportWindow.xaml:70  ControlBackgroundBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:111  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:115  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:120  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:128  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:111  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:115  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:120  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:128  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:172  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:172  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:172  ControlBackgroundBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:199  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:202  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:206  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:207  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:211  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:228  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:232  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:237  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:238  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:238  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:272  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:274  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:276  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:288  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:293  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:298  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:303  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:307  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:312  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:317  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:323  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:329  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:353  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:356  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:359  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:389  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:395  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:438  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:442  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:447  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:452  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:459  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:467  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:473  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:524  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:527  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:195  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:199  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:202  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:206  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:207  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:211  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:228  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:232  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:237  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:238  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:238  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:253  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:272  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:274  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:276  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:284  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:288  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:293  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:298  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:303  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:307  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:312  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:317  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:323  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:329  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:334  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:353  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:356  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:359  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:364  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:378  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:389  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:395  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:420  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:438  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:442  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:447  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:452  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:459  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:467  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:473  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:522  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:524  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:527  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:58  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/ExtensionCrashHandlerWindow.xaml:30  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/FirstTimeStartupWindow.xaml:50  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/FirstTimeStartupWindow.xaml:59  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/FirstTimeStartupWindow.xaml:82  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/FirstTimeStartupWindow.xaml:96  WindowBackgourndBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:1034  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:1022  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:1034  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:1084  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:419  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:60  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:625  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:673  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:673  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:725  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:725  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:75  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:784  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:784  ControlBackgroundBrush
-U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:818  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:811  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:818  ControlBackgroundBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:863  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GoogleImageDownloadWindow.xaml:130  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GoogleImageDownloadWindow.xaml:56  ControlBackgroundBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/GoogleImageDownloadWindow.xaml:87  WindowBackgourndBrush
@@ -670,6 +815,8 @@ U  unknown-palette-key  source/Playnite.DesktopApp/Windows/MetadataComparisonWin
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/MetadataComparisonWindow.xaml:85  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/MetadataComparisonWindow.xaml:92  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/MetadataComparisonWindow.xaml:99  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/MetadataDownloadWindow.xaml:55  WindowBackgourndBrush
+U  unknown-palette-key  source/Playnite.DesktopApp/Windows/MetadataDownloadWindow.xaml:79  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/MultiItemSelectionWindow.xaml:23  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/ProgressWindow.xaml:24  WindowBackgourndBrush
 U  unknown-palette-key  source/Playnite.DesktopApp/Windows/RandomGameSelectWindow.xaml:27  WindowBackgourndBrush

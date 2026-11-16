@@ -423,6 +423,7 @@ fail／warn 另標 `symmetry: single-theme`。
 | `over-sibling-content` | 文字墊在同格子的兄弟 `Image`/媒體元素上 —— 真正的底是一張圖,靜態不可知;硬配祖先背景等於編造比值 |
 | `in-style-template` | Style 的 `Template` setter（`<Setter Property="Template"><Setter.Value><ControlTemplate>`）裡自己帶 `Foreground` 的文字元素 —— 還沒有評分（見已知限制），計入這裡讓覆蓋率反映這個缺口 |
 | `unknown-style-key` | 色盤來自分開的深／淺字典，而元素的 Style —— `Style="{StaticResource K}"`，或它鏈上的 `BasedOn` —— 只在其中一個字典裡定義，另一個主題下這個元素長什麼樣不知道；值是那個 Style 的鍵。1.2 之前算成 `unknown-palette-key`（`BasedOn` 的那一種則是拿元素後面的底去評） |
+| `template-painted` | 字畫在控制項模板**內部**某一層上，而那一層的顏色靜態看不到：來自宿主自己的屬性而沒人設過（函式庫控制項的預設值寫在 C# 裡）、那一層的底本身是 Binding／漸層，或是被觸發器重畫了（`TargetName` 指向模板內部元素的 `Setter`，或整個換掉 `Template` 的）。這一類**不退回祖先的底** —— 模板畫了一層蓋在上面，祖先的顏色根本沒露出來。1.6 新增；在那之前這些是拿「被重畫蓋掉的底」算出來的 |
 
 `summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 3** ——
 只掃到一小部分的「通過」不算通過,這是「0 組配對不算通過」那條不可設定規則的推廣。
@@ -605,13 +606,21 @@ Style 的 `Template` setter 裡自己帶 `Foreground` 的文字元素**還沒有
 或 `ContentPresenter` 顯示的宿主字色照舊由 Style 鏈評分。
 觸發態一次評一個、不組合：`IsMouseOver` 觸發換字色、`IsPressed` 觸發換底色的 Style，評的是「按下的底配平常的字色」
 （用鍵盤按下時看到的），不是滑鼠按下時同時有的 hover 字色。
-TargetName 指向模板**內部**元素（指向根的已解析）、跨元素同條件觸發器;
+跨元素同條件觸發器;
 隱含樣式（`<Style TargetType="X">` 無 x:Key）**已解析** —— 每個元素的底與字色都查得到它,
 作用範圍照 WPF 走:巢狀 `<X.Resources>` 只管那個元素的子樹、最內層優先、元素有自己的 Style 就不套、
 指派給屬性的樣式（`ItemContainerStyle`、`DataGridTextColumn.ElementStyle`、行內 `<X.Style>`）不算隱含樣式。
-還有三塊是「不說也不猜」:隱含樣式的**觸發態**（基礎態照評）、模板把底畫在看不到的那一層的**帶模板控制項**
-（`<hc:Shield Color="#1182c3"/>` 的白字在藍色徽章上,不是祖先的底）、
-以及同一個型別有**好幾個互相競爭的全域隱含樣式**（執行期看合併順序,靜態不可知）;
+1.6 起隱含樣式走**跟具名 Style 同一條鏈路徑**，所以**觸發態**（hover、選取、勾選）也評得到；
+那時 finding 的 `element` 會寫成 `TextBlock⊕Style[implicit TextBlock]/base`，而不動到顏色的隱含樣式
+照舊維持原本的標籤。只剩一塊是「不說也不猜」:同一個型別有**好幾個互相競爭的全域隱含樣式**
+（執行期看合併順序,靜態不可知）。
+**帶模板的控制項**（1.6）字改成配模板裡真正畫底的那一層 —— 模板裡放宿主內容的位置
+（`ContentPresenter`、接走 `Content="{TemplateBinding Content}"` 的自訂宿主、字色由宿主決定的文字元素、
+畫 `{TemplateBinding Foreground}` 的圖形），都對著它在**模板裡**最近一層畫底的祖先評，
+`{TemplateBinding P}` 回到宿主自己的 `P` 去解；兩層都放內容就是兩筆 finding（執行期兩層都在）。
+還做不到的是：畫底的那一層是內容的**兄弟**而不是祖先（`Grid` 格子裡的兄弟背板在標記樹裡解得出來，模板裡還不行），
+以及被 `TargetName` 指向模板內部的觸發器重畫掉的那一層 —— 兩種都誠實歸 `template-painted`，
+不拿一個被模板蓋住的祖先底去配;
 sibling 背景已解析 `Grid` 格子裡「佔滿格子的兄弟」(純色直接用;
 半透明的 —— 不論來自 brush 的 alpha 或元素自己的 `Opacity` —— 合成;Binding／漸層計入無法解析),
 文字疊兄弟 Image 誠實歸 `over-sibling-content`;版面無法得知的自訂 `*Panel`、衍生命名的 `*Canvas`／`*Grid` 裡,

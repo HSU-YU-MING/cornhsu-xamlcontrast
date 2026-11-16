@@ -496,6 +496,7 @@ public class NewRuleTests
            //   0.x 定義處記 skipped → 整組從報告消失、覆蓋率照樣 100%（謊報健康）
            //   1.0 定義處記 unresolved → 看得見「有一組沒評到」，覆蓋率照實掉下來，但那個 1.16:1 還是沒人說
            //   1.5 使用處評得到（隱含樣式套到元素身上）→ 直接報出 1.16:1 的 fail，覆蓋率回到 100%
+           //   1.6 改走鏈路徑（觸發態也評得到），所以標籤帶 ⊕Style[implicit …]（= baseline 的鍵，KeyVersion 2）
            // 不變的那條線：這一組**不能**是 skipped —— 它不是「看不見的東西」
     public void ImplicitStyleWithASeeThroughBackgroundIsGradedWhereItIsUsed()
     {
@@ -517,7 +518,7 @@ public class NewRuleTests
         Assert.Empty(r.UnresolvedSites);          // 使用處評到了 —— 定義處再記一筆就是同一組算兩次
         Assert.Equal(1.0, r.Coverage);
         var fail = Assert.Single(r.Findings, f => f.Category == Category.Fail);
-        Assert.Equal("ToggleButton", fail.Element);
+        Assert.Equal("ToggleButton⊕Style[implicit ToggleButton]/base", fail.Element);
         Assert.Equal("#EEEEEE", fail.Fg);
         Assert.Equal("#FFFFFF", fail.Bg);         // Transparent 只是穿透：真正的底是 Grid 的白
         Assert.Equal(Wcag.Contrast("#EEEEEE", "#FFFFFF"), fail.RatioDark);

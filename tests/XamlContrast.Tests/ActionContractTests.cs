@@ -283,7 +283,7 @@ public class ActionContractTests
         Assert.Equal(new HashSet<string> { "--json", "--md", "--html", "--sarif", "--fail-on", "--min-coverage", "--strict-palette", "--baseline" }, flags);
 
         using var fx = CliProjects.Passing().WithPalette();
-        fx.File("baseline.json", """{ "schemaVersion": 1, "entries": [] }""");
+        fx.File("baseline.json", $$"""{ "schemaVersion": 1, "keyVersion": {{Baseline.KeyVersion}}, "entries": [] }""");
         string P(string name) => Path.Combine(fx.Root, name);
         // 照 Action 的順序：旗標在前，root 接在 -- 後面
         var r = Cli.Run("--json", P("report.json"), "--md", P("report.md"), "--html", P("report.html"), "--sarif", P("report.sarif"),

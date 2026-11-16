@@ -12,12 +12,18 @@ namespace XamlContrast.Tests;
 ///
 /// 界線（這些測試一起把它釘住）：
 ///   • WPF 的優先序：元素屬性 &gt; 元素自己的 Style &gt; 隱含樣式。有自己的 Style 的元素**完全不套**隱含樣式。
-///   • 只取基礎 Setter，**觸發態不評** —— 走逐狀態路徑會讓 finding 的 element 標籤改變，
-///     也就是 baseline 的鍵改變（要遞增 KeyVersion、所有人重寫 baseline、連動 Parity 儀表板）。留到那一次一起做。
+///   • 1.6 起走的是**鏈路徑**（同具名 Style），所以觸發態也評得到；代價是 finding 的 element 標籤
+///     從 <c>TextBlock</c> 變成 <c>TextBlock⊕Style[implicit TextBlock]/base</c>，也就是 baseline 的鍵變了
+///     （1.6 把 <see cref="Baseline.KeyVersion"/> 從 1 遞增到 2）。
+///   • 只有「真的會影響顏色」的隱含樣式走鏈路徑：只設 Margin／FontSize 的不走，否則每一筆 finding 的
+///     element 都掛上 ⊕Style[implicit …]，白白動掉一批鍵。
 ///   • 字與底都出自同一個隱含樣式的那一組由定義處評，使用處不再評 —— 否則同一組算兩次。
 /// </summary>
 public class ImplicitStyleTests
 {
+    // 1.6 起隱含樣式走鏈路徑，element 標籤帶 ⊕Style[implicit …]（= baseline 的鍵，KeyVersion 2）
+    private const string TextBlockBase = "TextBlock⊕Style[implicit TextBlock]/base";
+
     [Fact] // 沒寫 Foreground 的文字，字色來自隱含樣式 —— 1.4 整組不在報告裡（連 unresolved 都沒有）
     public void TheForegroundFromAnImplicitStyleIsGraded()
     {
@@ -37,7 +43,60 @@ public class ImplicitStyleTests
         Assert.Equal("#BBBBBB", f.Fg);
         Assert.Equal("#FFFFFF", f.Bg);
         Assert.Equal(Category.Fail, f.Category);
-        Assert.Equal("TextBlock", f.Element); // 走的是元素路徑：標籤不變 = baseline 的鍵不變
+        Assert.Equal(TextBlockBase, f.Element); // 1.6：走鏈路徑，標籤帶 ⊕Style[implicit …]（KeyVersion 2）
+    }
+
+    [Fact] // 界線：不影響顏色的隱含樣式（只設 Margin／FontSize）不走鏈路徑 ——
+           // 走了只會讓每一筆 finding 的 element 都掛上 ⊕Style[implicit …]，白白動掉一批 baseline 的鍵
+    public void AnImplicitStyleThatDoesNotTouchColourLeavesTheLabelAlone()
+    {
+        using var fx = new Fixture().File("Main.xaml", """
+            <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              <Window.Resources>
+                <Style TargetType="TextBlock">
+                  <Setter Property="Margin" Value="4"/>
+                  <Setter Property="FontSize" Value="13"/>
+                </Style>
+              </Window.Resources>
+              <TextBlock Foreground="#BBBBBB" Text="字色是自己寫的"/>
+            </Window>
+            """);
+        var f = Assert.Single(fx.Run().Findings);
+        Assert.Equal("TextBlock", f.Element); // 標籤不動 = 這一類專案的 baseline 鍵不會無謂地變
+        Assert.Equal(13, f.FontSize);         // 但 FontSize 照舊從隱含樣式讀（1.5 的門檻判定）
+    }
+
+    [Fact] // 兩個主題各宣告一個隱含樣式 → 各評各的（@dark／@light），同具名 Style 的 perSide
+    public void TwoThemesWithTheirOwnImplicitStyleAreGradedSeparately()
+    {
+        using var fx = new Fixture()
+            .File("Themes/Dark.xaml", """
+                <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                  <SolidColorBrush x:Key="Bg" Color="#111111"/>
+                  <SolidColorBrush x:Key="Dim" Color="#2A2A2A"/>
+                  <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+                  <Style TargetType="TextBlock"><Setter Property="Foreground" Value="#222222"/></Style>
+                </ResourceDictionary>
+                """)
+            .File("Themes/Light.xaml", """
+                <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                  <SolidColorBrush x:Key="Bg" Color="#FFFFFF"/>
+                  <SolidColorBrush x:Key="Dim" Color="#E8E8E8"/>
+                  <SolidColorBrush x:Key="Fg" Color="#212121"/>
+                  <Style TargetType="TextBlock"><Setter Property="Foreground" Value="#EEEEEE"/></Style>
+                </ResourceDictionary>
+                """)
+            .File("Main.xaml", """
+                <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="{DynamicResource Bg}">
+                  <TextBlock Text="深淺各一個隱含樣式"/>
+                </Window>
+                """);
+        var labels = fx.Run().Findings.Select(f => f.Element).OrderBy(x => x).ToList();
+        Assert.Equal(
+            ["TextBlock⊕Style[implicit TextBlock]@dark/base", "TextBlock⊕Style[implicit TextBlock]@light/base"],
+            labels);
     }
 
     [Fact] // WPF：元素有自己的 Style 時，隱含樣式整個不套用（不是「補沒設到的屬性」）
@@ -167,9 +226,9 @@ public class ImplicitStyleTests
         Assert.Empty(fx.Run().Findings);
     }
 
-    [Fact] // 界線：隱含樣式的**觸發態**還不評（走逐狀態路徑會動到 baseline 的鍵，見類別註解）。
-           // 基礎態照樣評得到 —— 不是整個隱含樣式都不看
-    public void TriggerStatesOfAnImplicitStyleAreStillOutOfScope()
+    [Fact] // 1.6：隱含樣式的**觸發態**也評得到（走的是跟具名 Style 同一條鏈路徑）。
+           // 1.5 刻意不評，因為標籤 = baseline 的鍵會變；1.6 遞增 KeyVersion 一起做掉
+    public void TriggerStatesOfAnImplicitStyleAreGraded()
     {
         using var fx = new Fixture().File("Main.xaml", """
             <Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
@@ -183,16 +242,19 @@ public class ImplicitStyleTests
                   </Style.Triggers>
                 </Style>
               </Window.Resources>
-              <TextBlock Text="hover 的字色還沒評"/>
+              <TextBlock Text="hover 的字色也評"/>
             </Window>
             """);
         var r = fx.Run();
 
         // 基礎態：黑字白底 21:1
-        var f = Assert.Single(r.Findings, x => x.Element == "TextBlock");
+        var f = Assert.Single(r.Findings, x => x.Element == TextBlockBase);
         Assert.Equal("#000000", f.Fg);
-        // hover 那一組（#F0F0F0 on #FFFFFF = 1.13:1）這一版還不會出現在使用處
-        Assert.DoesNotContain(r.Findings, x => x.Fg == "#F0F0F0" && x.Element == "TextBlock");
+        Assert.Equal(Category.Ok, f.Category);
+        // hover 那一組（#F0F0F0 on #FFFFFF = 1.13:1）—— 1.5 看不到它，1.6 報出來
+        var hover = Assert.Single(r.Findings, x => x.Fg == "#F0F0F0");
+        Assert.Equal("TextBlock⊕Style[implicit TextBlock]/trigger", hover.Element);
+        Assert.Equal(Category.Fail, hover.Category);
     }
 
     [Fact] // 作用範圍：巢狀的 Resources 裡的隱含樣式只管那個元素的子樹。
@@ -297,11 +359,11 @@ public class ImplicitStyleTests
         var r = fx.Run();
 
         // 按鈕裡：白字疊紫底（6.93:1）—— 這就是 AccentBtn 設計意圖的樣子
-        var inside = Assert.Single(r.Findings, f => f.Element == "TextBlock" && f.Bg == "{Purple}");
+        var inside = Assert.Single(r.Findings, f => f.Element == TextBlockBase && f.Bg == "{Purple}");
         Assert.Equal("White", inside.Fg);
         Assert.Equal(Category.Ok, inside.Category);
         // 按鈕外：照舊吃全域的隱含樣式（Fg0 疊白底）
-        var outside = Assert.Single(r.Findings, f => f.Element == "TextBlock" && f.Bg == "{Bg}");
+        var outside = Assert.Single(r.Findings, f => f.Element == TextBlockBase && f.Bg == "{Bg}");
         Assert.Equal("{DynamicResource Fg0}", outside.Fg);
     }
 
@@ -322,7 +384,7 @@ public class ImplicitStyleTests
                 </Window>
                 """);
 
-        var label = Assert.Single(fx.Run().Findings, f => f.Element == "TextBlock");
+        var label = Assert.Single(fx.Run().Findings, f => f.Element == TextBlockBase);
         Assert.Equal("{DynamicResource Fg0}", label.Fg);   // 按鈕上的 Foreground="White" 贏不過隱含樣式
         Assert.Equal("{Purple}", label.Bg);
         Assert.Equal(Category.Fail, label.Category);       // 2.49:1
@@ -338,7 +400,7 @@ public class ImplicitStyleTests
                 </Window>
                 """);
 
-        Assert.Equal("White", Assert.Single(fx.Run().Findings, f => f.Element == "TextBlock").Fg);
+        Assert.Equal("White", Assert.Single(fx.Run().Findings, f => f.Element == TextBlockBase).Fg);
     }
 
     [Fact] // BasedOn:基底的 Style.Resources 也算，衍生自己宣告的蓋掉基底的
@@ -364,7 +426,7 @@ public class ImplicitStyleTests
                   </StackPanel>
                 </Window>
                 """);
-        var labels = fx.Run().Findings.Where(f => f.Element == "TextBlock").Select(f => f.Fg).ToList();
+        var labels = fx.Run().Findings.Where(f => f.Element == TextBlockBase).Select(f => f.Fg).ToList();
 
         Assert.Contains("White", labels);     // 繼承基底的
         Assert.Contains("#FFD700", labels);   // 衍生自己宣告的贏

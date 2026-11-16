@@ -50,11 +50,18 @@
 - [x] VisualStateManager 狀態顏色的計數器 —— 1.5：`summary.stateColors` ＋ `stateColorSites` 逐筆點名
       （含 WinUI 的 `<VisualState.Setters>`）。照舊不評，只是不再靜默。
       實測 WinUI Gallery 44 處、wpfui 18、HandyControl 15，而自家四個專案是 0
-- **隱含樣式的觸發態**（1.5 只做基礎 Setter）：要評它得讓元素走 `GradeChain` 的逐狀態路徑，
-  那會改變 finding 的 `element` 標籤 = **baseline 的鍵**，所以必須跟 `Baseline.KeyVersion` 的遞增、
-  Parity 儀表板那份手刻的鍵一起規劃成一次協調過的發版
-- **帶模板的控制項：模板裡哪一層畫底**（1.5 的三塊「不猜」之一，隱含與具名 Style 都一樣）——
-  現在只看模板根；根沒設底時字配到祖先，HandyControl 的 Shield 證明那可能是編出來的
+- [x] **隱含樣式的觸發態** —— 1.6：隱含樣式改走 `GradeChain` 的逐狀態路徑，所以 hover／選取／勾選都評得到。
+      代價如預期是 `element` 標籤（= baseline 的鍵）改變，所以 `Baseline.KeyVersion` 1 → 2，舊 baseline 被拒並叫人重寫。
+      只有「真的會動到顏色」的隱含樣式走這條，否則每一筆 finding 的鍵都會無謂地變
+- [x] **帶模板的控制項：模板裡哪一層畫底** —— 1.6：模板裡放宿主內容的位置，對著它在模板裡最近一層畫底的祖先評，
+      `{TemplateBinding P}` 回宿主身上解；兩層都放內容就兩筆。HandyControl 的 Shield 從「配祖先白底的 1:1 假 fail」
+      變成 7.46:1（#555）與 4.20:1（#1182C3），兩筆都是真的。解不出來的那一層記 `template-painted`，不退回祖先
+- **模板裡的兄弟背板**（1.6 新明文化的盲區）：畫底的那一層是內容的**兄弟**而不是祖先時還解不出來。
+  標記樹裡的兄弟背板早就解得出來（規則 17），模板裡還沒有 —— MaterialDesign 的按鈕模板就是這個形狀，
+  目前靠「宿主自己的 Background」接住，所以不會編造，但也還沒真的算出那一層
+- **觸發器重畫模板內部那一層**（1.6 起誠實記 `template-painted`）：`TargetName` 指向模板內部元素的顏色 Setter
+  要解析模板內部樹才算得出來。1.6 之前是拿基礎狀態的底去評 —— 編出來的；現在是誠實的不知道，
+  但那 63 組的答案其實靜態看得見（ScreenToGif 的 `ContentBorder` 寫死 `#90FFFFFF`），值得做
 
 ## 與 Parity 的交會點（構想，尚未排程）
 

@@ -59,7 +59,7 @@ public class UnresolvedBaselineTests
     public void BaselineWithoutTheSectionIsReadAndNotCompared()
     {
         using var fx = Project(Bound);
-        var known = Baseline.Parse("""{ "schemaVersion": 1, "keyVersion": 1, "entries": [] }""");
+        var known = Baseline.Parse($$"""{ "schemaVersion": 1, "keyVersion": {{Baseline.KeyVersion}}, "entries": [] }""");
         Assert.Null(known.Unresolved);
 
         var cmp = Baseline.Compare(fx.Run(), known);
@@ -83,7 +83,7 @@ public class UnresolvedBaselineTests
     public void InvalidSectionIsAnError(string section, string expect)
     {
         var ex = Assert.ThrowsAny<FormatException>(() =>
-            Baseline.Parse($$"""{ "schemaVersion": 1, "keyVersion": 1, "entries": [], "unresolved": {{section}} }"""));
+            Baseline.Parse($$"""{ "schemaVersion": 1, "keyVersion": {{Baseline.KeyVersion}}, "entries": [], "unresolved": {{section}} }"""));
         Assert.Contains(expect, ex.Message);
     }
 
@@ -258,7 +258,7 @@ public class UnresolvedBaselineTests
     public void AnOldBaselineIsRejectedWhenTheGateIsOn(bool flag, string expect)
     {
         using var fx = Project(Bound);
-        fx.File("baseline.json", """{ "schemaVersion": 1, "keyVersion": 1, "entries": [] }""");
+        fx.File("baseline.json", $$"""{ "schemaVersion": 1, "keyVersion": {{Baseline.KeyVersion}}, "entries": [] }""");
         if (!flag) fx.File(ToolConfig.FileName, """{ "failOnNewUnresolved": true }""");
         var args = new List<string> { fx.Root, "--baseline", Path.Combine(fx.Root, "baseline.json") };
         if (flag) args.Add("--fail-on-new-unresolved");

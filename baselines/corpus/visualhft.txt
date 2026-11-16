@@ -3,7 +3,7 @@
 project: visualhft
 repo: https://github.com/visualHFT/VisualHFT
 commit: 65b1d1270336864768180f5fbf8bae348694847f
-tool-commit: 07be1dd+dirty
+tool-commit: 164cda1+dirty
 frozen: 2026-11-16
 exit: 3
 palette-mode: single
@@ -91,13 +91,13 @@ F  ok  View/Dashboard.xaml:118  TextBlock  Black on #FFFFFF  21.00/21.00
 F  ok  View/Dashboard.xaml:121  TextBlock  Black on #FFFFFF  21.00/21.00  
 F  ok  View/Dashboard.xaml:124  TextBlock  Black on #FFFFFF  21.00/21.00  
 F  ok  View/Dashboard.xaml:51  TextBlock⊕Style[inline]/trigger  Red on {MaterialDesignPaper}  3.21/3.54  
-F  ok  View/ucOrderBook.xaml:124  TextBlock  #39AEDD on #434D4C  3.44/3.44  
-F  ok  View/ucOrderBook.xaml:125  TextBlock  #39AEDD on #434D4C  3.44/3.44  
-F  ok  View/ucOrderBook.xaml:126  TextBlock  #39AEDD on #434D4C  3.44/3.44  
-F  ok  View/ucOrderBook.xaml:145  TextBlock  #39AEDD on #434D4C  3.44/3.44  
-F  ok  View/ucOrderBook.xaml:146  TextBlock  #39AEDD on #434D4C  3.44/3.44  
-F  ok  View/ucOrderBook.xaml:147  TextBlock  #39AEDD on #434D4C  3.44/3.44  
-F  ok  View/ucOrderBook.xaml:161  TextBlock  White on #434D4C  8.73/8.73  
+F  ok  View/ucOrderBook.xaml:124  TextBlock⊕Style[implicit TextBlock]/base  #39AEDD on #434D4C  3.44/3.44  
+F  ok  View/ucOrderBook.xaml:125  TextBlock⊕Style[implicit TextBlock]/base  #39AEDD on #434D4C  3.44/3.44  
+F  ok  View/ucOrderBook.xaml:126  TextBlock⊕Style[implicit TextBlock]/base  #39AEDD on #434D4C  3.44/3.44  
+F  ok  View/ucOrderBook.xaml:145  TextBlock⊕Style[implicit TextBlock]/base  #39AEDD on #434D4C  3.44/3.44  
+F  ok  View/ucOrderBook.xaml:146  TextBlock⊕Style[implicit TextBlock]/base  #39AEDD on #434D4C  3.44/3.44  
+F  ok  View/ucOrderBook.xaml:147  TextBlock⊕Style[implicit TextBlock]/base  #39AEDD on #434D4C  3.44/3.44  
+F  ok  View/ucOrderBook.xaml:161  TextBlock⊕Style[implicit TextBlock]/base  White on #434D4C  8.73/8.73  
 F  ok  View/ucPositions.xaml:249  Style[TextBlock]/trigger  Black on #ADFF2F  17.12/17.12  
 F  ok  VisualHFT.Plugins/MarketConnectors.Binance/UserControls/PluginSettingsView.xaml:24  TextBlock  Black on #FFFFFF  21.00/21.00  
 F  ok  VisualHFT.Plugins/MarketConnectors.BitStamp/UserControls/PluginSettingsView.xaml:24  TextBlock  Black on #FFFFFF  21.00/21.00  
@@ -111,8 +111,8 @@ F  warn  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:56  TextBlock  Gr
 F  warn  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:58  TextBlock  Gray on #2D2D30  3.48/3.48  both-low
 F  warn  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:59  TextBlock  Gray on #2D2D30  3.48/3.48  both-low
 F  warn  View/Dashboard.xaml:75  TextBlock  Gray on {MaterialDesignPaper}  3.25/3.50  both-low
-F  warn  View/ucOrderBook.xaml:127  TextBlock  #39AEDD on #434D4C  3.44/3.44  both-low
-F  warn  View/ucOrderBook.xaml:148  TextBlock  #39AEDD on #434D4C  3.44/3.44  both-low
+F  warn  View/ucOrderBook.xaml:127  TextBlock⊕Style[implicit TextBlock]/base  #39AEDD on #434D4C  3.44/3.44  both-low
+F  warn  View/ucOrderBook.xaml:148  TextBlock⊕Style[implicit TextBlock]/base  #39AEDD on #434D4C  3.44/3.44  both-low
 # U  原因  檔案:行  值
 U  bound-or-gradient  AnalyticReports/AnalyticReports.xaml:37  {Binding GlobalEntries[0].Fill}
 U  bound-or-gradient  AnalyticReports/AnalyticReports.xaml:38  {Binding GlobalEntries[1].Fill}

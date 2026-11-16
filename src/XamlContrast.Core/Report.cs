@@ -59,6 +59,7 @@ public static partial class Report
         UnresolvedReason.OverSiblingContent => "over-sibling-content",
         UnresolvedReason.InStyleTemplate => "in-style-template",
         UnresolvedReason.UnknownStyleKey => "unknown-style-key",
+        UnresolvedReason.TemplatePainted => "template-painted",
         _ => "translucent-uncomposited",
     };
 

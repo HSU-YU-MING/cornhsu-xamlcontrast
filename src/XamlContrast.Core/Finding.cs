@@ -118,6 +118,11 @@ public enum UnresolvedReason
     /// ⚠ 1.2 之前算成 unknown-palette-key（K 是 Style 的鍵，不是色票的鍵），還混進 summary.unknownKeys；
     ///   BasedOn 的那一種甚至不計：缺基底的鏈照樣評，字配到祖先的底 —— 一個編出來的比值。</summary>
     UnknownStyleKey,
+    /// <summary>字畫在控制項模板裡某一層上，而那一層的顏色靜態看不到（1.6）：來自宿主自己的屬性而沒人設過
+    /// （函式庫控制項的預設值寫在 C# metadata 裡）、或那一層的底本身是 Binding／漸層。
+    /// ⚠ 這一類**不能**退回祖先的底 —— 模板畫了一層底在中間，祖先的顏色根本沒露出來。
+    /// 實例：HandyControl 的 <c>&lt;hc:Shield/&gt;</c> 沒寫 Color 時，徽章的底是控制項的預設強調色。</summary>
+    TemplatePainted,
 }
 
 /// <summary>XAML 裡以資源鍵 Key 用到的轉換器，與它的分析結果。</summary>
