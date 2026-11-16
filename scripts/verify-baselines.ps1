@@ -34,6 +34,11 @@
 # 指紋不一致本身不算驗收失敗（對象更新是正常的事），但一定會印出來，而且會改寫結論那一行：
 # 不會再出現「一致」卻其實是對著另一個版本的 App 比的情況。
 #
+# 1.6 起指紋也記 tool-commit（凍結這份快照的工具版本）。只記受測對象還差一步：對象沒變、
+# 數字卻差了，腳本只說得出「差異來自工具」，說不出是從哪一版開始差的。2026-11-16 實際踩到 ——
+# Kindling 一個位元都沒改而行號整批 +2，查了一輪才發現那份快照是用 1.5.0 發版前的建置凍的。
+# 現在那一行會直接給 git log <tool-commit>..HEAD -- src/。
+#
 # 舊快照（schemaVersion 5，0.x 寫的）照樣讀得懂：比對的欄位（summary 的計數器、findings 的 category／file／line）
 # 在 6 都還在。差別只在退出碼的期望 —— 見下面 $expExit。
 
@@ -119,6 +124,14 @@ function Write-Fingerprint {
     $lines.Add('# 對象也變了 → 先看下面哪些檔案動過（快照紅燈曾經兩個月都是 App 自己改了，不是工具回歸）。')
     $lines.Add("project: $full")
     $lines.Add("frozen: $(Get-Date -Format 'yyyy-MM-dd')")
+    # ⚠ 也要記「是哪個版本的工具凍的」。只記受測對象時有一個洞：對象沒變、數字卻差了，
+    #   腳本會說「差異來自工具」，但說不出是從哪一版開始差的 —— 2026-11-16 實際踩到：
+    #   指紋顯示 Kindling 一個位元都沒改，而行號整批 +2，查了一輪才發現那份快照是用
+    #   1.5.0 發版前的建置凍的（位移在 1.5.0 就已經是對的了，不是這次的改動）。
+    #   有這一行就能直接 git log <tool-commit>..HEAD -- src/ 看中間動了什麼。
+    $tool = Get-GitInfo $PSScriptRoot
+    $lines.Add("tool-commit: $($tool.commit)")
+    $lines.Add("tool-dirty: $($tool.dirty)")
     $lines.Add("git-repo: $($git.repo)")
     $lines.Add("git-commit: $($git.commit)")
     $lines.Add("git-dirty: $($git.dirty)")
@@ -280,6 +293,14 @@ foreach ($name in @('kindling', 'quillnest', 'cornea')) {
             Write-Host "    ⚠ 對象也變了（上面列出）—— 這些差異不一定是工具的回歸，先逐項歸因再決定要不要 -Update" -ForegroundColor Red
         } elseif ($null -ne $oldFp) {
             Write-Host "    對象沒變（git commit 與每個輸入檔的雜湊都一樣）—— 差異來自工具本身：回歸，或是這次刻意的改動" -ForegroundColor Red
+            # 「從哪一版開始差的」是歸因的第一步，說得出來就不必靠猜
+            if ($oldFp.header['tool-commit']) {
+                $tc = $oldFp.header['tool-commit']
+                $short = $tc.Substring(0, [Math]::Min(9, $tc.Length))
+                Write-Host "    這份快照是工具 commit $short 凍的$(if ($oldFp.header['tool-dirty'] -and $oldFp.header['tool-dirty'] -ne '0') { "（當時有 $($oldFp.header['tool-dirty']) 處未提交）" }) —— git log $short..HEAD -- src/ 看中間動了什麼" -ForegroundColor Red
+            } else {
+                Write-Host "    這份快照沒記是哪一版工具凍的（1.6 之前的指紋）—— 下次 -Update 會補上" -ForegroundColor DarkYellow
+            }
         }
     } elseif ($fpNotes.Count -gt 0) {
         # 數字一致但對象變了：不能單說「一致」—— 那會讓人以為是對同一個版本的 App 比的

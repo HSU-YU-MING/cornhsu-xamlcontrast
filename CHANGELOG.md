@@ -97,6 +97,16 @@ quietly since before 1.0. Together they account for every one of the 103 finding
   being given `DarkBtn`'s pressed-state white text while the local `Transparent` let the background pierce to
   the window — two "white on the light theme's window, 1.2:1" failures for a state that does not exist.
 
+### Guards
+
+- `scripts/verify-baselines.ps1` now records **which build of the tool froze the snapshot**
+  (`tool-commit` / `tool-dirty` in `baselines/<name>.project.txt`), and prints it when the audited project
+  is byte-identical but the numbers differ. The object fingerprint alone had a gap: it could say "the
+  difference comes from the tool" but not *from which version*. Hit for real while preparing this release —
+  Kindling had not changed by a single byte, yet a whole file's line numbers moved by +2; it took a rebuild
+  of 1.5.0 to find out that the stored snapshot had been frozen by a pre-1.5.0 build and the shift was
+  already correct in 1.5.0. The line now hands you `git log <tool-commit>..HEAD -- src/`.
+
 ### Measured
 
 Seventeen pinned public projects (`scripts/verify-corpus.ps1`) plus the maintainer's three apps. Every removed
