@@ -30,7 +30,7 @@ powershell -File .\scripts\verify-readme-sample.ps1  # README 示範輸出比對
 
 兩支都吃 `-Update`：確認新行為才是對的之後，一鍵重貼／重凍，然後**人工看 git diff 再 commit**。
 ⚠ `verify-baselines.ps1` 紅燈時**不要為了變綠就跑 `-Update`**：先逐項說明每個差異是哪個 commit 造成的，
-給維護者看過、同意之後才重凍（1.0 的那份說明在 `D:/擴充功能/nuget/稽核-2026-10-22/XamlContrast-快照變動說明.md`）。
+給維護者看過、同意之後才重凍（1.0 的那份說明在 `docs/歸檔/XamlContrast-快照變動說明.md`）。
 
 ## 守門機制：這個 repo 是四個套件裡做得最完整的，其他 repo 要抄的樣板
 
@@ -123,7 +123,7 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
     **匿名統計送出去的 JSON 不是凍結面**：它的真相源是 `D:\擴充功能\nuget\stats-collector\PROTOCOL.md`，跟收集站與 Parity 一起演進
     （改欄位先改協定、收集站先上線，工具才能送新欄位 —— 收集站多一個欄位就整筆拒收）。
   - **1.1.0 已發佈（2026-10-28）**：發版前研究倫理對「預設打開」的確認已取得、收集站 stats.cornhsu.com 已上線、
-    說明頁上的 stats@cornhsu.com 收得到信（`稽核-2026-10-22/統計功能規劃.md`）。
+    說明頁上的 stats@cornhsu.com 收得到信（`D:/擴充功能/nuget/stats-collector/docs/歸檔/統計功能規劃.md`）。
     預設送不送是**一個常數** `Stats.ShareByDefault`（`src/XamlContrast.Cli/Stats.cs`）：審查要求主動同意就改成 `false` ——
     之後只有使用者明確說好（`*_SHARE_STATS` 是 1／true／yes／on，或 `"stats": { "share": true }`）才送；config 的 `stats.share`
     不寫與 Action 的 `share-stats: 'true'` 本來就是「不表態」，預設值不必跟著改。協定說的「第一次在終端機詢問」那時才做，
@@ -275,7 +275,14 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   拿 Dark 的 Style 配淺色色票是執行期不存在的組合。另一側記的原因是 `unknown-style-key`（1.2；之前是 unknown-palette-key，
   還混進 `summary.unknownKeys`）。**BasedOn 也一樣**（1.2）：鏈上的基底「這個主題找不到、另一個主題找得到」時那一側不評
   （`StyleIndex.Merged.MissingBase`、`Auditor.OnlyInOtherTheme`）—— 之前缺基底的鏈照樣評，字配到祖先的底，是編出來的比值。
-  兩個主題都找不到的基底（函式庫樣式）照舊略過那一層，不然用函式庫的專案覆蓋率會整片掉。C#／單一主題模式不建這張表——Kindling 的 `DarkTheme.xaml`
+  兩個主題都找不到的基底（函式庫樣式）照舊略過那一層，不然用函式庫的專案覆蓋率會整片掉。
+  ⚠ **「行內 Style BasedOn 只在深色定義的 K、自己一個顏色都不設」（只加 Margin、只放管 Visibility 的 DataTrigger）也走這條**：
+  1.1 對淺色那一側什麼都不記（深色在定義處評、淺色沒有配對也沒有 unresolved —— 靜默消失），1.2 起記 unknown-style-key。
+  ZeroCel 1.1.0 → 1.8.0 的 unresolved +204 而配對數不動（2026-11-18 查過，兩版裝起來對最小重現逐筆比過）就是這個形狀：
+  **刻意的收緊，不是回歸**（1.2.0 的 Upgrading 有寫，`StyleChainTests.InlineStyleBasedOn…SetsNoColour` 釘住）。
+  沒有設定可以宣告「這個主題檔的 Style 是共用的」—— 放在 `Styles/DarkTheme.xaml` 的 Style 就是深色的；
+  Style 真的共用（淺色字典只蓋 brush）的專案，出口是把 Style 搬到檔名沒有 dark／light 的字典。
+  C#／單一主題模式不建這張表——Kindling 的 `DarkTheme.xaml`
   是 C# 色盤的靜態複本，兩個主題共用。
 - **WinUI／UWP 的 ThemeDictionaries（1.4，`PaletteDetector.ThemeDictionarySections`）**：同一個檔裡依 x:Key 分主題，
   不靠檔名。`Dark`（缺就用 `Default`）進深色側、`Light`（缺就用 `Default`）進淺色側，`HighContrast…` 不評；
@@ -652,7 +659,7 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 
 - **`baselines/*.json` 在 2026-10-23 依 1.0 重凍過一次（當時四份）**（schemaVersion 6，帶 `exitCode`）。
   重凍前四份都是紅的，每一個差異都歸因到 commit（逐 commit 重播 v0.6.1 之後的 82 個 src commit），
-  寫在 `D:/擴充功能/nuget/稽核-2026-10-22/XamlContrast-快照變動說明.md`，維護者逐項看過、同意之後才跑 `-Update`。
+  寫在 `docs/歸檔/XamlContrast-快照變動說明.md`，維護者逐項看過、同意之後才跑 `-Update`。
   其中 `celflow.json` 早在 1.0 之前就是紅的（2026-08-26 實跑：`pairs` 期望 363 實得 353），
   原因是 CelFlow.WPF 在 2026-08-18 改過四個 XAML 檔，不是工具的回歸；這次重凍一併吸收。
   2026-08-28 CelFlow 改名 ZeroCel，腳本已改指 `D:\應用程式\ZeroCel\frontend\ZeroCel.WPF`

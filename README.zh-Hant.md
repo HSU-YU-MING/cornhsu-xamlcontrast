@@ -142,7 +142,9 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
    `DarkTheme.xaml`、`Colors.Dark.xaml`；`Highlight.xaml`、`Starlight/` 不算）而且定義了色票，或另一個主題的
    對應檔存在（`Themes/Dark/Styles.xaml` ↔ `Themes/Light/Styles.xaml`）。裡面的 Style 只評那個主題，兩個主題的
    字典都定義的同 key Style 在使用處依主題各自解析（元素名顯示成 `Button⊕Style[Chip]@dark/base`；只有一個主題
-   定義的 key，另一個主題記 `unknown-palette-key`）。
+   定義的 key，另一個主題記 `unknown-style-key`，見下面的 unresolved 原因表）。**Style 也算在內：** 放在
+   `Styles/DarkTheme.xaml` 裡的 Style，對工具來說就是深色主題的 Style。如果 Style 其實是兩個主題共用、淺色字典只是
+   蓋掉 brush，把 Style 放到檔名沒有主題字眼的字典（`Styles/Controls.xaml`）、主題字典只留色票，它們就會兩個主題都評。
    **WinUI／UWP：** 字典裡的 `<ResourceDictionary.ThemeDictionaries>` 依 `x:Key` 拆開 —— `Dark`（沒有 `Dark` 時用
    `Default`）是深色主題、`Light`（或 `Default`）是淺色主題，`HighContrast…` 不評（那是使用者的系統色）；
    檔案其他部分照舊兩個主題共用。`{ThemeResource Key}` 跟 `{DynamicResource Key}` 一樣查色盤；1.8 起**帶命名空間
@@ -424,7 +426,7 @@ fail／warn 另標 `symmetry: single-theme`。
 | `same-brush-pair` | Style 把字色和底色設成**同一個** brush —— Material 系的模板不透明度慣用手法(模板把背景以 10~12% Opacity 畫成暈染);字面 1:1、執行期不是,模板動畫靜態看不到 |
 | `over-sibling-content` | 文字墊在同格子的兄弟 `Image`/媒體元素上 —— 真正的底是一張圖,靜態不可知;硬配祖先背景等於編造比值。1.8 起**控制項模板裡**的 `Image` 兄弟也歸這一類（之前會落到那張圖蓋住的那一層） |
 | `in-style-template` | Style 的 `Template` setter（`<Setter Property="Template"><Setter.Value><ControlTemplate>`）裡自己帶 `Foreground` 的文字元素 —— 還沒有評分（見已知限制），計入這裡讓覆蓋率反映這個缺口 |
-| `unknown-style-key` | 色盤來自分開的深／淺字典，而元素的 Style —— `Style="{StaticResource K}"`，或它鏈上的 `BasedOn` —— 只在其中一個字典裡定義，另一個主題下這個元素長什麼樣不知道；值是那個 Style 的鍵。1.2 之前算成 `unknown-palette-key`（`BasedOn` 的那一種則是拿元素後面的底去評） |
+| `unknown-style-key` | 色盤來自分開的深／淺字典，而元素的 Style —— `Style="{StaticResource K}"`，或它鏈上的 `BasedOn` —— 只在其中一個字典裡定義，另一個主題下這個元素長什麼樣不知道；值是那個 Style 的鍵。衍生的 Style 一個顏色都沒設也算（行內 `<Button.Style>` BasedOn `K`、只設 `Margin` 或只有一個管 `Visibility` 的 `DataTrigger`）：不知道的是基底。1.2 之前算成 `unknown-palette-key`；`BasedOn` 有設顏色的那一種是拿元素後面的底去評，沒設顏色的則完全沒算 —— 不是配對、也不是 unresolved —— 所以從 1.1 升上來，這種元素每個多一筆 unresolved、評分的配對數不動。沒有設定可以宣告：定義在檔名帶 dark／light 的字典裡的 Style 就屬於那個主題。Style 其實是共用的（另一個主題只蓋掉 brush）就把它搬到檔名沒有主題字眼的字典 |
 | `template-painted` | 字畫在控制項模板**內部**某一層上，而那一層的顏色靜態看不到：來自宿主自己的屬性而沒人設過（函式庫控制項的預設值寫在 C# 裡）、那一層的底本身是 Binding／漸層，或是被觸發器重畫了而那一層定不出來（整個換掉 `Template`、視覺由另一份模板畫、元素自己帶 `Template`、模板裡找不到任何放內容的位置，或重畫的值是漸層或 Binding）。這一類**不退回祖先的底** —— 模板畫了一層蓋在上面，祖先的顏色根本沒露出來。1.6 新增；在那之前這些是拿「被重畫蓋掉的底」算出來的。「重畫的元素正好就在字底下那一疊」的情形算得出來，不歸這一類；1.8 起「重畫的目標一個放內容的位置都沾不到」也算得出來 —— 它不在這段文字底下，底照舊成立 |
 
 `summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 3** ——
