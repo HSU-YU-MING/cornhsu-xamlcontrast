@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 未發佈
+
+- **Docs: `unknown-style-key` also counts a `BasedOn` that sets no colour — since 1.2, now written down.**
+  A project pinned to 1.1.0 compared it with 1.8.0 and found 204 more unresolved (`unknown-palette-key 201` →
+  `unknown-style-key 406`) with the graded pairs unchanged. Reproduced with both versions installed side by side:
+  the extra ones are inline styles (`<Button.Style><Style BasedOn="{StaticResource K}">`) based on a style that only
+  the dark dictionary defines, where the inline style itself only sets `Margin` or carries a `DataTrigger` on
+  `Visibility`. 1.1 recorded nothing for the light theme of such an element — no pair and no unresolved; 1.2 counts
+  it as `unknown-style-key`, as the 1.2.0 Upgrading note says for `BasedOn`. **Not a regression, no behaviour
+  change in this entry.** Both READMEs, `docs/config-schema.md` and `docs/公開介面盤點.md` still said a style key
+  only one theme defines is `unknown-palette-key` for the other — fixed, with the shape above spelled out, and
+  the exit named: there is no config switch; a style that lives in a dictionary named *dark* or *light* belongs
+  to that theme, so shared styles go in a dictionary without a theme word in its name. A test pins the shape.
+  *一個鎖在 1.1.0 的專案升 1.8.0 多出 204 筆 unresolved、配對數不動：是行內 Style BasedOn 只在深色定義的
+  Style、自己只設 Margin 或 Visibility 的 DataTrigger。1.1 對淺色那一側什麼都沒記，1.2 起記 `unknown-style-key` ——
+  刻意的，不是回歸。文件裡四處還寫著 `unknown-palette-key`，改掉，並寫明出口：Style 搬到檔名沒有主題字眼的字典。*
+
 ## 1.8.0 — 2026-11-16
 
 ### Upgrading（覆蓋率會掉，而且掉的是**本來就算錯**的那些；baseline 的鍵不動）

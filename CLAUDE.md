@@ -275,7 +275,14 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   拿 Dark 的 Style 配淺色色票是執行期不存在的組合。另一側記的原因是 `unknown-style-key`（1.2；之前是 unknown-palette-key，
   還混進 `summary.unknownKeys`）。**BasedOn 也一樣**（1.2）：鏈上的基底「這個主題找不到、另一個主題找得到」時那一側不評
   （`StyleIndex.Merged.MissingBase`、`Auditor.OnlyInOtherTheme`）—— 之前缺基底的鏈照樣評，字配到祖先的底，是編出來的比值。
-  兩個主題都找不到的基底（函式庫樣式）照舊略過那一層，不然用函式庫的專案覆蓋率會整片掉。C#／單一主題模式不建這張表——Kindling 的 `DarkTheme.xaml`
+  兩個主題都找不到的基底（函式庫樣式）照舊略過那一層，不然用函式庫的專案覆蓋率會整片掉。
+  ⚠ **「行內 Style BasedOn 只在深色定義的 K、自己一個顏色都不設」（只加 Margin、只放管 Visibility 的 DataTrigger）也走這條**：
+  1.1 對淺色那一側什麼都不記（深色在定義處評、淺色沒有配對也沒有 unresolved —— 靜默消失），1.2 起記 unknown-style-key。
+  ZeroCel 1.1.0 → 1.8.0 的 unresolved +204 而配對數不動（2026-11-18 查過，兩版裝起來對最小重現逐筆比過）就是這個形狀：
+  **刻意的收緊，不是回歸**（1.2.0 的 Upgrading 有寫，`StyleChainTests.InlineStyleBasedOn…SetsNoColour` 釘住）。
+  沒有設定可以宣告「這個主題檔的 Style 是共用的」—— 放在 `Styles/DarkTheme.xaml` 的 Style 就是深色的；
+  Style 真的共用（淺色字典只蓋 brush）的專案，出口是把 Style 搬到檔名沒有 dark／light 的字典。
+  C#／單一主題模式不建這張表——Kindling 的 `DarkTheme.xaml`
   是 C# 色盤的靜態複本，兩個主題共用。
 - **WinUI／UWP 的 ThemeDictionaries（1.4，`PaletteDetector.ThemeDictionarySections`）**：同一個檔裡依 x:Key 分主題，
   不靠檔名。`Dark`（缺就用 `Default`）進深色側、`Light`（缺就用 `Default`）進淺色側，`HighContrast…` 不評；

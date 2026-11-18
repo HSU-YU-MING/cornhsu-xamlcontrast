@@ -99,7 +99,8 @@
 另一個主題的對應檔（相對路徑某一段 dark↔light 互換）存在的（`Themes/Dark/Styles.xaml` ↔ `Themes/Light/Styles.xaml`；
 只放 Style、沒有對應檔的 `Styles/DarkButton.xaml` 不算）；以及 `pair` 模式指定的兩個檔。裡面的 Style 只評那一欄
 （另一個主題的比值是 null、對稱標 single-theme），兩個主題的字典都定義的同 key Style 在使用處依主題各自解析（元素名帶
-`@dark`／`@light`），只有一個主題定義的 key 在另一個主題記 unknown-palette-key（點名 Style key）。
+`@dark`／`@light`），只有一個主題定義的 key 在另一個主題記 unknown-style-key（1.2 起，之前是 unknown-palette-key；點名 Style key，鏈上的 `BasedOn` 基底也算，
+衍生的 Style 沒設顏色也算）。沒有設定可以把主題字典裡的 Style 宣告成共用：Style 真的共用就放到檔名沒有主題字眼的字典。
 根元素是 `Application` 或它的子類別（`<prism:PrismApplication>`、帶 `<Application.Resources>` 的 `<local:App>`）的
 檔是應用程式，資源是全域的。
 畫面檔（`Window`、`UserControl`…）就算提供了色票也照樣稽核；它們的區域 brush 跟 WPF 的資源查找一樣只在自己那個畫面裡

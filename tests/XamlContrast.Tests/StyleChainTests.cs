@@ -888,6 +888,35 @@ public class StyleChainTests
         Assert.Equal("OnlyDark", light.Value);
     }
 
+    // ── 同一條路的第三種形狀（2026-11-18，ZeroCel 1.1.0 → 1.8.0 的比對）：行內 Style BasedOn 只在深色定義的 K，
+    //    自己一個顏色都不設（只加 Margin、或只放一個管 Visibility 的 DataTrigger）。深色那一側字與底都來自 K、在定義處評，
+    //    使用處沒有配對；淺色那一側 1.1 什麼都不記 —— 沒評分、也不在任何計數器裡，跟 92520b2 那次一樣是靜默消失 ——
+    //    1.2 起跟有設顏色的行內 Style 一樣記 unknown-style-key。ZeroCel 多出來的 204 筆 unresolved（配對數不動）就是它：
+    //    刻意的收緊、不是回歸。這條測試釘住「不設顏色也要算」，免得哪天被當成雜訊「修」回去
+    [Theory]
+    [InlineData("""<Setter Property="Margin" Value="4"/>""")]
+    [InlineData("""<Style.Triggers><DataTrigger Binding="{Binding IsBusy}" Value="True"><Setter Property="Visibility" Value="Collapsed"/></DataTrigger></Style.Triggers>""")]
+    public void InlineStyleBasedOnAStyleDefinedInOneThemeOnlyIsUnresolvedEvenWhenItSetsNoColour(string body)
+    {
+        using var fx = OnlyDarkStyle("""<Style x:Key="OnlyDark" TargetType="Button"><Setter Property="Foreground" Value="{DynamicResource Fg}"/><Setter Property="Background" Value="{DynamicResource BtnBg}"/></Style>""");
+        fx.File("Views/Main.xaml", $$"""
+            <Grid Background="{DynamicResource Bg}">
+              <Button Content="x">
+                <Button.Style><Style TargetType="Button" BasedOn="{StaticResource OnlyDark}">{{body}}</Style></Button.Style>
+              </Button>
+            </Grid>
+            """);
+        var r = fx.Run();
+        // 深色：字與底同源（都是 OnlyDark 的），在定義處評一次，使用處不重複
+        Assert.DoesNotContain(r.Findings, f => f.File == "Views/Main.xaml");
+        Assert.Contains(r.Findings, f => f.File == "Themes/Dark.xaml" && f.Element == "Style[OnlyDark]/base");
+        // 淺色：基底不存在 —— 計數、點名基底的鍵，不評
+        var light = Assert.Single(r.UnresolvedSites, u => u.File == "Views/Main.xaml");
+        Assert.Equal(UnresolvedReason.UnknownStyleKey, light.Reason);
+        Assert.Equal("OnlyDark", light.Value);
+        Assert.Equal(1, r.Unresolved);
+    }
+
     [Fact] // 鏈更深一層也一樣：具名 Style 在共用字典、它的 BasedOn 基底只在深色字典
     public void SharedStyleBasedOnAStyleDefinedInOneThemeOnlyCountsTheOtherThemeAsUnresolved()
     {
