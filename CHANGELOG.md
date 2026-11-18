@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
-## 未發佈
+## 1.8.1 — 2026-11-18
 
 - **Docs: `unknown-style-key` also counts a `BasedOn` that sets no colour — since 1.2, now written down.**
   A project pinned to 1.1.0 compared it with 1.8.0 and found 204 more unresolved (`unknown-palette-key 201` →
