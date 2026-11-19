@@ -353,7 +353,7 @@ public class ActionContractTests
              // 0.x 不帶範圍，裝的是 NuGet 上最新的穩定版：下一個 major 一發佈，所有 @v1 的 workflow 就會跨過去。
              // "[1.*,2.0.0)" 取最高的 1.x 穩定版、而且不會越過 2.0.0（NuGet 的 "[1.0.0,2.0.0)" 會取最低的 1.0.0；
              // 光寫 "1.*"，在 NuGet 上還沒有穩定 1.x 時會裝到 2.0.0 —— 審查 1.0 B5 實測）
-    // 1.8.3 起裝進 $RUNNER_TEMP/xamlcontrast-tool（--tool-path），不裝成全域工具：使用者自己裝過、同一個 job 呼叫兩次都不會失敗
+             // 1.8.3 起裝進 $RUNNER_TEMP/xamlcontrast-tool（--tool-path），不裝成全域工具：使用者自己裝過、同一個 job 呼叫兩次都不會失敗
     [InlineData("", "tool|install|--tool-path|$RUNNER_TEMP/xamlcontrast-tool|Cornhsu.XamlContrast|--version|[1.*,2.0.0)|\n")]
     [InlineData("1.0.0", "tool|install|--tool-path|$RUNNER_TEMP/xamlcontrast-tool|Cornhsu.XamlContrast|--version|1.0.0|\n")]
     public void InstallPassesTheVersionOrTheFloatingMajor(string version, string expected)
