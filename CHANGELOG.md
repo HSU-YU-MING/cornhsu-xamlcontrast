@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 1.8.2 — 2026-11-19
+
+- **Security: the PR comment is truncated on a whole line.** When the Markdown report is over the comment
+  limit, the action cut it with `head -c 60000`, which can end in the middle of a line: the closing backtick
+  of a code span is lost, and a link or an @mention from the scanned project in the rest of that line
+  renders in the PR comment (it can also split a UTF-8 character). The action now drops the partial last
+  line (every line closes its own code spans). Found by an automated security review of the same step in
+  XamlFit 0.5.0; a test runs the step on a report whose cut point falls inside a code span. Only reports
+  over 60,000 bytes were affected. No change to inputs, the CLI or the report.
+  *PR 留言超過上限時截在整行上：`head -c` 會把一行切在 code span 中間，被切開那段裡的連結與 @ 提及在留言裡生效。*
+
 ## 1.8.1 — 2026-11-18
 
 - **Docs: `unknown-style-key` also counts a `BasedOn` that sets no colour — since 1.2, now written down.**
