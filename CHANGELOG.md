@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 1.8.3 — 2026-11-19
+
+- **The action installs the tool into its own folder.** It used `dotnet tool install --global`, which fails
+  when the job already installed the tool globally, and on the second call in one job (which the
+  `artifact-name` input says is supported). The tool now goes into `$RUNNER_TEMP/xamlcontrast-tool`, cleared
+  first, and that folder is put on the `PATH`. Inputs and outputs are unchanged.
+- **Windows runners.** The annotations drop the carriage return that `jq` adds on Windows. CI now runs the
+  action itself on `ubuntu-latest` and `windows-latest`, twice in one job, against the demo with this
+  branch's CLI. Until now CI only ran each step's script with stubs.
+
 ## 1.8.2 — 2026-11-19
 
 - **Security: the PR comment is truncated on a whole line.** When the Markdown report is over the comment

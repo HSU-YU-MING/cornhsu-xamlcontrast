@@ -353,13 +353,30 @@ public class ActionContractTests
              // 0.x 不帶範圍，裝的是 NuGet 上最新的穩定版：下一個 major 一發佈，所有 @v1 的 workflow 就會跨過去。
              // "[1.*,2.0.0)" 取最高的 1.x 穩定版、而且不會越過 2.0.0（NuGet 的 "[1.0.0,2.0.0)" 會取最低的 1.0.0；
              // 光寫 "1.*"，在 NuGet 上還沒有穩定 1.x 時會裝到 2.0.0 —— 審查 1.0 B5 實測）
-    [InlineData("", "tool|install|--global|Cornhsu.XamlContrast|--version|[1.*,2.0.0)|\n")]
-    [InlineData("1.0.0", "tool|install|--global|Cornhsu.XamlContrast|--version|1.0.0|\n")]
+    // 1.8.3 起裝進 $RUNNER_TEMP/xamlcontrast-tool（--tool-path），不裝成全域工具：使用者自己裝過、同一個 job 呼叫兩次都不會失敗
+    [InlineData("", "tool|install|--tool-path|$RUNNER_TEMP/xamlcontrast-tool|Cornhsu.XamlContrast|--version|[1.*,2.0.0)|\n")]
+    [InlineData("1.0.0", "tool|install|--tool-path|$RUNNER_TEMP/xamlcontrast-tool|Cornhsu.XamlContrast|--version|1.0.0|\n")]
     public void InstallPassesTheVersionOrTheFloatingMajor(string version, string expected)
     {
-        var r = RunStep("Install XamlContrast", new() { ["version"] = version });
+        string temp = "";
+        var path = "";
+        var r = RunStep("Install XamlContrast", new() { ["version"] = version }, inspectTemp: t =>
+        {
+            temp = t.Replace('\\', '/');
+            var f = Path.Combine(t, "github_path");
+            path = File.Exists(f) ? File.ReadAllText(f).Trim() : "";
+        });
         Assert.True(r.Exit == 0, r.ToString());
-        Assert.Equal(expected, r.Calls);
+        Assert.Equal(expected, r.Calls.Replace(temp, "$RUNNER_TEMP"));
+        // 後面的步驟靠 PATH 找到它（不是 $HOME/.dotnet/tools）
+        Assert.Equal("$RUNNER_TEMP/xamlcontrast-tool", path.Replace(temp, "$RUNNER_TEMP"));
+    }
+
+    [Fact] // 同一個 job 第二次呼叫：上一次留下的資料夾要先清掉，否則 `dotnet tool install` 說「已經安裝」而失敗
+    public void InstallClearsAnEarlierCallsFolder()
+    {
+        Assert.Contains("rm -rf -- \"$dir\"", Step("Install XamlContrast"));
+        Assert.DoesNotContain("--global Cornhsu.XamlContrast", Step("Install XamlContrast"));
     }
 
     [Fact] // 鎖的 major = CHANGELOG 最新發佈版的 major。發 2.0.0 時這裡會紅，提醒把 action.yml 一起改成 "[2.*,3.0.0)"。
