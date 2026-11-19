@@ -270,6 +270,30 @@ public class ActionContractTests
         Assert.Contains("""startswith("<!-- xamlcontrast-report -->")""", defaults.Calls);
     }
 
+    [Fact] // 1.8.2：報告超過留言上限時截在整行上。head -c 會把一行切在 code span 中間，收尾的反引號沒了，
+           // 被切開的那段裡的 [文字](網址)、@帳號 就在 PR 留言裡生效（XamlFit 0.5.0 提交後的自動安全審查抓到，這裡是同一段）
+    public void ATruncatedCommentEndsOnAWholeLine()
+    {
+        const string line = "| `[x](http://evil.example)` | `@someone` | 1.92:1 |\n";
+        Assert.NotEqual(0, 60000 % line.Length);   // 切點要落在一行中間，舊的 head -c 才會出事
+        var report = "## XamlContrast — WCAG contrast audit\n\n" + string.Concat(Enumerable.Repeat(line, 70000 / line.Length));
+        string? posted = null;
+        var r = RunStep("Comment report on PR", prepareTemp: temp =>
+            File.WriteAllText(Path.Combine(temp, "xamlcontrast-report.md"), report),
+            inspectTemp: temp => posted = File.ReadAllText(Path.Combine(temp, "xamlcontrast-comment.md")).Replace("\r\n", "\n"));
+        Assert.True(r.Exit == 0, r.ToString());
+        Assert.NotNull(posted);
+
+        // 留言 = 標記一行 + 報告的前面幾個整行 + 截斷提示
+        var afterMarker = posted![(posted.IndexOf('\n') + 1)..];
+        var notice = afterMarker.IndexOf("\n\n<sub>⚠️ Report truncated", StringComparison.Ordinal);
+        Assert.True(notice > 0, "沒有截斷提示");
+        var body = afterMarker[..notice];
+        Assert.EndsWith("\n", body);                                   // 停在整行上
+        Assert.StartsWith(body, report, StringComparison.Ordinal);     // 一個字都沒改，只是少了後面
+        Assert.InRange(body.Length, 60000 - line.Length, 60000);
+    }
+
     [Fact] // 沒有 outputs（凍結的現況）。新增 output 是 1.x 的 minor —— 退出碼只是內部的 step output
     public void ThereAreNoOutputs() => Assert.DoesNotMatch(new Regex("^outputs:", RegexOptions.Multiline), ActionYml);
 
