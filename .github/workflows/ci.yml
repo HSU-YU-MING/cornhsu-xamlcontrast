@@ -69,6 +69,63 @@ jobs:
           name: nupkg
           path: nupkg/*.nupkg
 
+  # 真的跑一次 action.yml（1.8.3 之前 CI 只用 stub 跑各 step 的腳本）：Linux 與 Windows 各一次，
+  # 同一個 job 呼叫兩次 —— 工具裝進 $RUNNER_TEMP/xamlcontrast-tool 之後，第二次安裝不能再因為「已經安裝」失敗。
+  # 裝的是這個分支打包的 CLI（本地 feed + nuget.config），不是 nuget.org 上的正式版。統計關掉（share-stats: false）
+  action:
+    name: Action 實跑（${{ matrix.os }}）
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+      - name: Pack this branch's CLI into a local feed
+        run: |
+          dotnet pack src/XamlContrast.Cli/XamlContrast.Cli.csproj -c Release -o ci-feed -p:Version=0.0.0-ci
+          printf '<configuration><packageSources><add key="ci" value="ci-feed" /></packageSources></configuration>\n' > nuget.config
+
+      # 示範專案刻意做壞：gate 一定要紅，報告要在紅之前就寫好
+      - name: First call (expects the gate to fail)
+        id: first
+        continue-on-error: true
+        uses: ./
+        with:
+          root: samples/demo
+          version: 0.0.0-ci
+          share-stats: 'false'
+          comment: 'false'
+          artifact-name: xamlcontrast-first-${{ matrix.os }}
+      - name: Second call in the same job
+        id: second
+        continue-on-error: true
+        uses: ./
+        with:
+          root: samples/demo
+          version: 0.0.0-ci
+          share-stats: 'false'
+          comment: 'false'
+          artifact-name: xamlcontrast-second-${{ matrix.os }}
+      - name: Both calls ran the audit and failed the gate
+        env:
+          FIRST: ${{ steps.first.outcome }}
+          SECOND: ${{ steps.second.outcome }}
+        run: |
+          test "$FIRST" = failure || { echo "expected the first call to fail the gate, got $FIRST"; exit 1; }
+          test "$SECOND" = failure || { echo "expected the second call to fail the gate, got $SECOND"; exit 1; }
+          r="$RUNNER_TEMP/xamlcontrast-report.json"
+          test -s "$r" || { echo "no JSON report from the second call"; exit 1; }
+          fails=$(jq '.summary.counts.fail' "$r" | tr -d '\r')
+          test "$fails" -eq 3 || { echo "expected 3 fail findings, got $fails"; exit 1; }
+          echo "ok: two calls, gate failed both times, 3 fail findings"
+
   build-test:
     name: Build + Test + demo 自我把關
     runs-on: ubuntu-latest   # 解析不依賴 WPF runtime —— Linux 可跑是賣點，CI 就用它證明

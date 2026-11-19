@@ -120,15 +120,21 @@ runs:
       env:
         XC_VERSION: ${{ inputs.version }}
       run: |
+        # 1.8.3 起裝進 $RUNNER_TEMP 的專用資料夾，不裝成全域工具（跟 XamlFit 0.7.0 一樣）：
+        #   - 使用者自己先 `dotnet tool install --global` 過時，全域安裝會失敗；
+        #   - 同一個 job 呼叫兩次（artifact-name 說可以），第二次的全域安裝也會失敗（「已經安裝」）；
+        #   - Windows runner 上 $HOME 是 Git Bash 的路徑，寫進 GITHUB_PATH 不可靠 —— RUNNER_TEMP 是 runner 自己的格式。
+        dir="$RUNNER_TEMP/xamlcontrast-tool"
+        rm -rf -- "$dir"
         if [ -n "$XC_VERSION" ]; then
-          dotnet tool install --global Cornhsu.XamlContrast --version "$XC_VERSION"
+          dotnet tool install --tool-path "$dir" Cornhsu.XamlContrast --version "$XC_VERSION"
         else
           # @v1 只跟隨 1.x（介面凍結的承諾）：不帶範圍會裝到 NuGet 上最新的穩定版，2.0.0 一發佈就跨 major。
           # "[1.*,2.0.0)" 取最高的 1.x 穩定版、而且上界擋住 2.0.0 —— 光寫 "1.*"，NuGet 上還沒有穩定的 1.x 時會裝到 2.0.0
           # （審查 1.0 B5 實測；有了上界就改成找不到版本而失敗）。發 2.0.0 時改成 "[2.*,3.0.0)"（ActionContractTests 會提醒）
-          dotnet tool install --global Cornhsu.XamlContrast --version "[1.*,2.0.0)"
+          dotnet tool install --tool-path "$dir" Cornhsu.XamlContrast --version "[1.*,2.0.0)"
         fi
-        echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+        echo "$dir" >> "$GITHUB_PATH"
 
     # 先跑、先產報告與註記，最後一步才依結論擋（讓失敗的 PR 也看得到完整輸出）
     - name: Run audit
@@ -251,7 +257,8 @@ runs:
           | (if .baseline == "known" then "notice" elif .category == "fail" or $gate == "warn" then "error" else "warning" end) as $level
           | (if .ratioLight == null then "\(.ratioDark):1 (dark theme only)" elif .ratioDark == null then "\(.ratioLight):1 (light theme only)" else "\(.ratioDark):1 dark / \(.ratioLight):1 light" end) as $ratio
           | "::\($level) file=\(($root + .file) | prop),line=\(.line)::\("contrast \($ratio) (need \(.threshold)) — fg=\(.fg) bg=\(.bg) [\(.symmetry)]\(if .baseline == "known" then " — known debt in the baseline" else "" end)" | esc)"
-        ' "$report" || true
+        ' "$report" | tr -d '\r' || true
+        # tr：Windows 上的 jq 以 CRLF 換行；訊息裡的 \r 上面已經跳脫成 %0D，這裡只會拿掉行尾那個
 
     # SARIF 的路徑是 root 相對 —— 先補上前綴變成 repo 相對，code scanning 才對得上檔案
     - name: Upload SARIF to code scanning
