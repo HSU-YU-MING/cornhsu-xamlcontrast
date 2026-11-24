@@ -85,64 +85,103 @@ public class ActionContractTests
         Assert.All(uris, u => Assert.Equal("Views/Main.xaml", u));
     }
 
-    [Theory] // 註記與 SARIF 改寫都把 working-directory + root 接成 workspace 相對前綴，再接上 finding 的
-             // root 相對路徑。前綴裡的 "./"、重複的 "/"、結尾的 "/" 不收乾淨，GitHub 就對不上檔案 ——
-             // 註記標不到 PR 的行上、code scanning 對不到檔（而且兩者都不報錯，是安靜地失效）
-    [InlineData(".", "src/MyApp", "src/MyApp/Views/Main.xaml")]     // 預設 working-directory
-    [InlineData(".", "src/MyApp/", "src/MyApp/Views/Main.xaml")]    // 結尾斜線
-    [InlineData("app", "src//MyApp", "app/src/MyApp/Views/Main.xaml")] // 重複斜線
-    [InlineData("./app/", "src", "app/src/Views/Main.xaml")]        // 開頭 ./ + 接縫處的雙斜線
-    [InlineData("a//b", "c//d", "a/b/c/d/Views/Main.xaml")]         // 不只收第一處
-    // root 是 "."（XAML 就在 repo 頂層，常見寫法）：舊版 sed 把 "./." 只收成 "."，接上 finding 變成
-    // "./Views/Main.xaml"，正是上面說的「./ 沒收乾淨」形狀；"src/." 原樣保留；"./" + "./src" 甚至收成 "/./src"
-    [InlineData(".", ".", "Views/Main.xaml")]
-    [InlineData(".", "src/.", "src/Views/Main.xaml")]
-    [InlineData("./", "./src", "src/Views/Main.xaml")]
-    [InlineData(".", "./app/./src", "app/src/Views/Main.xaml")]
-    public void ActionPrefixesFindingPathsIntoWorkspacePaths(string workingDirectory, string root, string expected)
+    /// <summary>（GITHUB_WORKSPACE、working-directory、root、註記該有的路徑、SARIF 該有的 uri）。finding 的檔案是 Views/Main.xaml。</summary>
+    public static TheoryData<string, string, string, string, string> RootSpellings()
     {
-        // 兩個步驟（Annotate failing pairs、Upload SARIF to code scanning）的前綴算法必須一字不差
-        var prefixLines = Regex.Matches(ActionYml, @"prefix=\$\(echo ""(?<echo>[^""]+)"" \| sed '(?<sed>[^']+)'\)")
-            .Select(m => (Echo: m.Groups["echo"].Value, Sed: m.Groups["sed"].Value)).ToList();
-        Assert.Equal(2, prefixLines.Count);
-        var (echo, sed) = Assert.Single(prefixLines.Distinct());
-        Assert.Equal("$XC_WORKDIR/$XC_ROOT", echo);
-        foreach (var step in new[] { "Annotate failing pairs", "Upload SARIF to code scanning" })
+        const string linux = "/home/runner/work/App/App", windows = @"D:\a\App\App";
+        var data = new TheoryData<string, string, string, string, string>();
+        void Add(string workspace, string workingDirectory, string root, string file, string? uri = null) =>
+            data.Add(workspace, workingDirectory, root, file, uri ?? file);
+
+        Add(linux, ".", "src/MyApp", "src/MyApp/Views/Main.xaml");        // 預設 working-directory
+        Add(linux, ".", "src/MyApp/", "src/MyApp/Views/Main.xaml");       // 結尾斜線
+        Add(linux, "app", "src//MyApp", "app/src/MyApp/Views/Main.xaml"); // 重複斜線
+        Add(linux, "./app/", "src", "app/src/Views/Main.xaml");           // 開頭 ./ + 接縫處的雙斜線
+        Add(linux, "a//b", "c//d", "a/b/c/d/Views/Main.xaml");            // 不只收第一處
+        // root 是 "."（XAML 就在 repo 頂層，常見寫法）：前綴要是空的，不能接出 "./Views/Main.xaml" 或 "/Views/Main.xaml"
+        Add(linux, ".", ".", "Views/Main.xaml");
+        Add(linux, ".", "src/.", "src/Views/Main.xaml");
+        Add(linux, "./", "./src", "src/Views/Main.xaml");
+        Add(linux, ".", "./app/./src", "app/src/Views/Main.xaml");
+        // 1.9.0 以前都對不上：..、反斜線、workspace 底下的絕對路徑（root 或 working-directory）
+        Add(linux, "build", "../src", "src/Views/Main.xaml");
+        Add(linux, "build/ci", "../../src/../app", "app/Views/Main.xaml");
+        Add(linux, "app", "..", "Views/Main.xaml");
+        Add(linux, ".", "src/..hidden/...", "src/..hidden/.../Views/Main.xaml"); // 以點開頭的資料夾名不是 ..
+        Add(linux, ".", linux + "/src", "src/Views/Main.xaml");
+        Add(linux, ".", linux, "Views/Main.xaml");
+        Add(linux, ".", linux + "/", "Views/Main.xaml");
+        Add(linux, "app", linux + "/src", "src/Views/Main.xaml");         // root 絕對時 working-directory 不算
+        Add(linux, linux + "/build", "../src", "src/Views/Main.xaml");
+        Add(linux, ".", linux + "-other/src", "home/runner/work/App/App-other/src/Views/Main.xaml"); // 只是字首相同，不在 workspace 裡
+        Add(windows, ".", @"src\App", "src/App/Views/Main.xaml");
+        Add(windows, @".\build", @"..\src\App\", "src/App/Views/Main.xaml");
+        Add(windows, ".", windows + @"\src", "src/Views/Main.xaml");
+        Add(windows, ".", windows + "/src", "src/Views/Main.xaml");       // ${{ github.workspace }}/src
+        Add(windows, ".", "D:/a/App/App/src", "src/Views/Main.xaml");
+        Add(windows, windows, "src", "src/Views/Main.xaml");
+        // SARIF 的 uri 是 URI：空白、%、#、中文要編碼，斜線不編；註記的 file 不是 URI，跳脫照 workflow command 的規格
+        Add(linux, ".", "My App", "My App/Views/Main.xaml", "My%20App/Views/Main.xaml");
+        Add(linux, "src", "../My App", "My App/Views/Main.xaml", "My%20App/Views/Main.xaml");
+        Add(linux, ".", linux + "/My App", "My App/Views/Main.xaml", "My%20App/Views/Main.xaml");
+        Add(linux, ".", "50% #1/中文", "50%25 #1/中文/Views/Main.xaml", "50%25%20%231/%E4%B8%AD%E6%96%87/Views/Main.xaml");
+        return data;
+    }
+
+    [Theory] // 註記與 SARIF 改寫都把 working-directory + root 接成 workspace 相對前綴，再接上 finding 的
+             // root 相對路徑。前綴沒收乾淨 GitHub 就對不上檔案 —— 註記標不到 PR 的行上、code scanning 對不到檔
+             // （而且兩者都不報錯，是安靜地失效）。真的跑那兩步，jq 換成把 --arg 記下來的 stub：任何機器都跑得到
+    [MemberData(nameof(RootSpellings))]
+    public void ActionPrefixesFindingPathsIntoWorkspacePaths(string workspace, string workingDirectory, string root, string file, string uri)
+    {
+        _ = uri; // 編碼在 jq 程式裡，由 PathStepsWriteTheRepositoryPath 看
+        foreach (var (step, report) in new[] { ("Annotate failing pairs", "xamlcontrast-report.json"), ("Upload SARIF to code scanning", "xamlcontrast.sarif") })
         {
             Assert.Matches(new Regex(@"^        XC_WORKDIR: \$\{\{ inputs\.working-directory \}\}$", RegexOptions.Multiline), Step(step));
             Assert.Matches(new Regex(@"^        XC_ROOT: \$\{\{ inputs\.root \}\}$", RegexOptions.Multiline), Step(step));
+            var r = RunStep(step, new() { ["root"] = root, ["working-directory"] = workingDirectory }, stubJq: true,
+                prepareTemp: t => File.WriteAllText(Path.Combine(t, report), "{}"), jobEnv: new() { ["GITHUB_WORKSPACE"] = workspace });
+            Assert.True(r.Exit == 0, r.ToString());
+            Assert.Equal($"root={file.Replace("%25", "%")[..^"Views/Main.xaml".Length]}\n", r.JqArgs);
         }
-
-        // 前綴非空才補 "/"（root 就是 workspace 頂層時前綴是空的，不能接出 "/Views/Main.xaml"），
-        // 之後直接接 finding 的 file —— 註記的 jq 與 SARIF 改寫的 jq 都是這樣接
-        Assert.Equal(2, Regex.Matches(ActionYml, @"if \[ -n ""\$prefix"" \]; then prefix=""\$prefix/""; fi").Count);
         Assert.Contains("file=\\(($root + .file) | prop)", ActionYml);
-        Assert.Contains("($root + .)", ActionYml);
-
-        var prefix = Sed(sed, $"{workingDirectory}/{root}");
-        if (prefix.Length > 0) prefix += "/";
-        Assert.Equal(expected, $"{prefix}Views/Main.xaml");
+        Assert.Contains("""|= (($root + .) | split("/") | map(@uri) | join("/"))""", ActionYml);
     }
 
-    /// <summary>只支援 action.yml 實際用到的子集：以 ; 串接的 s|BRE|替換|旗標。
-    /// 遇到子集以外的寫法就紅 —— 擴充 sed 的人要同步擴充這裡，而不是讓測試默默算錯。</summary>
-    private static string Sed(string script, string input)
+    [JqTheory] // 同一件事用真的 jq 跑到底：印出來的註記與改寫後的 SARIF
+    [MemberData(nameof(RootSpellings))]
+    public void PathStepsWriteTheRepositoryPath(string workspace, string workingDirectory, string root, string file, string uri)
     {
-        foreach (var raw in script.Split(';'))
-        {
-            var cmd = raw.Trim();
-            Assert.True(cmd.Length > 2 && cmd[0] == 's', $"不支援的 sed 指令：{cmd}");
-            var parts = cmd[2..].Split(cmd[1]);
-            Assert.True(parts.Length == 3, $"不支援的 sed 指令：{cmd}");
-            var (pattern, replacement, flags) = (parts[0], parts[1], parts[2]);
-            // BRE 與 .NET 正則在 ^ $ . * \. 上同義；+ ? ( ) { } 在 BRE 是字面值、在 .NET 不是
-            Assert.DoesNotMatch(@"[+?(){}]", pattern);
-            Assert.DoesNotMatch(@"[&\\]", replacement);
-            Assert.True(flags is "" or "g", $"不支援的 sed 旗標：{flags}");
-            var re = new Regex(pattern);
-            input = flags == "g" ? re.Replace(input, replacement) : re.Replace(input, replacement, 1);
-        }
-        return input;
+        var result = FailAndWarn();
+        StepRun Run(string step, string report, string content, Action<string>? inspect = null) =>
+            RunStep(step, new() { ["root"] = root, ["working-directory"] = workingDirectory },
+                prepareTemp: t => File.WriteAllText(Path.Combine(t, report), content), inspectTemp: inspect, jobEnv: new() { ["GITHUB_WORKSPACE"] = workspace });
+
+        var a = Run("Annotate failing pairs", "xamlcontrast-report.json", Report.ToJson(result));
+        Assert.True(a.Exit == 0, a.ToString());
+        var lines = a.Stdout.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        Assert.Equal(2, lines.Length);
+        Assert.All(lines, l => Assert.Contains($" file={file},line=", l));
+
+        var sarif = "";
+        var s = Run("Upload SARIF to code scanning", "xamlcontrast.sarif", Report.ToSarif(result, "0.0.0"),
+            t => sarif = File.ReadAllText(Path.Combine(t, "xamlcontrast.sarif")));
+        Assert.True(s.Exit == 0, s.ToString());
+        Assert.Equal([uri, uri], UrisOf(sarif));
+    }
+
+    private static List<string?> UrisOf(string sarif) =>
+        [.. JsonDocument.Parse(sarif).RootElement.GetProperty("runs")[0].GetProperty("results").EnumerateArray()
+            .Select(x => x.GetProperty("locations")[0].GetProperty("physicalLocation").GetProperty("artifactLocation").GetProperty("uri").GetString())];
+
+    [Fact] // Action 把整條 uri 一起編碼，前提是 CLI 輸出的是原樣的路徑。CLI 哪天自己編碼，Action 就要改成只編前綴
+           // （不然 %20 會變成 %2520）—— 這條紅了就是在提醒你
+    public void TheCliWritesSarifPathsUnencoded()
+    {
+        using var fx = new Fixture().File("My Views/50% #1.xaml", """
+            <Grid Background="#FFFFFF"><TextBlock Foreground="#EEEEEE" Text="x"/></Grid>
+            """);
+        Assert.Equal(["My Views/50% #1.xaml"], UrisOf(Report.ToSarif(fx.Run(), "0.0.0")));
     }
 
     /// <summary>action.yml 的 inputs：名稱 → (required, default)，值照 YAML 原文（含引號）。</summary>
@@ -547,6 +586,12 @@ public class ActionContractTests
         }
     }
 
+    /// <summary><see cref="JqFactAttribute"/> 的 Theory 版。</summary>
+    public sealed class JqTheoryAttribute : TheoryAttribute
+    {
+        public JqTheoryAttribute() => Skip = new JqFactAttribute().Skip;
+    }
+
     /// <summary>一個 step（`    - name: …`）到下一個 step 之間的內容。</summary>
     private static string Step(string name)
     {
@@ -576,7 +621,7 @@ public class ActionContractTests
     }
 
     /// <summary>XcEnv：xamlcontrast 的 stub 被呼叫時看到的統計開關（每次一行）；Summary：$GITHUB_STEP_SUMMARY 的內容。</summary>
-    private sealed record StepRun(int Exit, string Stdout, string Stderr, string Output, string Calls, string XcEnv = "", string Summary = "")
+    private sealed record StepRun(int Exit, string Stdout, string Stderr, string Output, string Calls, string XcEnv = "", string Summary = "", string JqArgs = "")
     {
         public override string ToString() => $"exit {Exit}\n--- stdout\n{Stdout}\n--- stderr\n{Stderr}\n--- calls\n{Calls}\n--- xamlcontrast env\n{XcEnv}\n--- summary\n{Summary}";
     }
@@ -587,10 +632,11 @@ public class ActionContractTests
     /// 把收到的參數一行一筆記到 $RUNNER_TEMP/calls（xamlcontrast 回 <paramref name="stubExit"/>），
     /// xamlcontrast 另外記下它看到的 XAMLCONTRAST_SHARE_STATS／DO_NOT_TRACK（$RUNNER_TEMP/xc-env）。
     /// <paramref name="jobEnv"/>：呼叫端在 workflow／job 層設的環境變數（composite 的 step 會繼承）。
+    /// <paramref name="stubJq"/>：jq 也換成 stub，把 --arg 的名稱與值記到 $RUNNER_TEMP/jq-args。
     /// <paramref name="inspectTemp"/>：bash 結束之後、暫存目錄刪掉之前看一眼 $RUNNER_TEMP。
     /// </summary>
     private static StepRun RunStep(string step, Dictionary<string, string>? inputs = null, int stubExit = 0, Action<string>? prepareTemp = null,
-        Action<string>? inspectTemp = null, Dictionary<string, string>? jobEnv = null)
+        Action<string>? inspectTemp = null, Dictionary<string, string>? jobEnv = null, bool stubJq = false)
     {
         var values = Inputs().ToDictionary(kv => kv.Key, kv => kv.Value.Default?.Trim('\'') ?? "");
         values["root"] = "src/App";
@@ -611,6 +657,16 @@ public class ActionContractTests
             }
 
             """;
+        if (stubJq)
+            stub += """
+                jq() {
+                  while [ "$#" -gt 0 ]; do
+                    if [ "$1" = --arg ]; then printf '%s=%s\n' "$2" "$3" >> "$RUNNER_TEMP/jq-args"; fi
+                    shift
+                  done
+                }
+
+                """;
         var script = Path.Combine(temp, "step.sh");
         File.WriteAllText(script, stub + RunScript(step));
         prepareTemp?.Invoke(temp);
@@ -620,6 +676,8 @@ public class ActionContractTests
             WorkingDirectory = dir.Root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            StandardOutputEncoding = System.Text.Encoding.UTF8, // 中文 Windows 的預設是 Big5
+            StandardErrorEncoding = System.Text.Encoding.UTF8,
             UseShellExecute = false,
         };
         foreach (var a in new[] { "--noprofile", "--norc", "-eo", "pipefail", Unix(script) }) psi.ArgumentList.Add(a);
@@ -627,6 +685,7 @@ public class ActionContractTests
         psi.Environment["GITHUB_OUTPUT"] = Unix(output);
         psi.Environment["GITHUB_PATH"] = Unix(Path.Combine(temp, "github_path"));
         psi.Environment["HOME"] = Unix(dir.Root);
+        psi.Environment["GITHUB_WORKSPACE"] = dir.Root; // 跑測試的 runner 自己的那個不能漏進來
         var summary = Path.Combine(temp, "step_summary");
         File.WriteAllText(summary, "");
         psi.Environment["GITHUB_STEP_SUMMARY"] = Unix(summary);
@@ -642,6 +701,6 @@ public class ActionContractTests
         inspectTemp?.Invoke(temp);
         string Text(string name) => Path.Combine(temp, name) is var f && File.Exists(f) ? File.ReadAllText(f).Replace("\r\n", "\n") : "";
         return new StepRun(p.ExitCode, stdout.Result, stderr.Result, File.ReadAllText(output).Replace("\r\n", "\n"),
-            Text("calls"), Text("xc-env"), Text("step_summary"));
+            Text("calls"), Text("xc-env"), Text("step_summary"), Text("jq-args"));
     }
 }

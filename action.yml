@@ -232,9 +232,9 @@ runs:
     # gate 不擋的 warn（--fail-on fail）是 warning、--baseline 的既有債是 notice（不擋，只提醒）。
     # （::error 註記吃 workspace 相對路徑；
     # findings 的 file 是「root 相對、正斜線」路徑，前綴 working-directory + root 即為
-    # workspace 路徑。前綴組完要把 "./"、"/./"、重複的 "/" 收乾淨，否則 GitHub 對不上檔案 ——
-    # root 是 "."（XAML 在 repo 頂層）時前綴是空的，不能接出 "./Views/…" 或 "/Views/…"；
-    # sed 先在頭尾補 "/" 讓每個 "." 段都夾在兩個 "/" 之間，再逐段剔除。）
+    # workspace 路徑。前綴要收乾淨（"./"、".."、重複的 "/"、反斜線、workspace 底下的絕對路徑），
+    # 否則 GitHub 對不上檔案 —— root 是 "."（XAML 在 repo 頂層）時前綴是空的，不能接出 "./Views/…" 或 "/Views/…"。
+    # 下面 SARIF 那一步是同一段，改的時候兩處一起改。）
     - name: Annotate failing pairs
       if: ${{ always() }}
       shell: bash
@@ -244,8 +244,14 @@ runs:
       run: |
         report="$RUNNER_TEMP/xamlcontrast-report.json"
         [ -f "$report" ] || exit 0
-        prefix=$(echo "$XC_WORKDIR/$XC_ROOT" | sed 's|^|/|; s|$|/|; s|//*|/|g; s|/\./|/|g; s|/\./|/|g; s|/\./|/|g; s|^/||; s|/$||')
-        if [ -n "$prefix" ]; then prefix="$prefix/"; fi
+        case "$XC_ROOT" in
+          /*|[A-Za-z]:*) path=$XC_ROOT ;;
+          *) path="$XC_WORKDIR/$XC_ROOT" ;;
+        esac
+        path=$(printf '%s' "$path" | tr '\\' '/')
+        workspace=$(printf '%s' "${GITHUB_WORKSPACE:-}" | tr '\\' '/')
+        if [ -n "$workspace" ]; then case "$path/" in "$workspace"/*) path=${path#"$workspace"} ;; esac; fi
+        prefix=$(printf '%s\n' "$path" | awk -F/ '{ n = 0; for (i = 1; i <= NF; i++) { if ($i == "" || $i == ".") continue; if ($i == "..") { if (n > 0) n--; continue }; a[++n] = $i }; for (i = 1; i <= n; i++) printf "%s/", a[i] }')
         # workflow command 的跳脫（GitHub 規格）：訊息跳脫 % \r \n，屬性值（file=…）另外跳脫 : 與 ,。
         # 不跳脫的話，檔名裡一個逗號就把 file 屬性切斷、一個換行就讓後面的內容落在行首變成另一個 workflow command
         jq -r --arg root "$prefix" '
@@ -271,10 +277,18 @@ runs:
       run: |
         f="$RUNNER_TEMP/xamlcontrast.sarif"
         [ -f "$f" ] || exit 0
-        prefix=$(echo "$XC_WORKDIR/$XC_ROOT" | sed 's|^|/|; s|$|/|; s|//*|/|g; s|/\./|/|g; s|/\./|/|g; s|/\./|/|g; s|^/||; s|/$||')
-        if [ -n "$prefix" ]; then prefix="$prefix/"; fi
+        case "$XC_ROOT" in
+          /*|[A-Za-z]:*) path=$XC_ROOT ;;
+          *) path="$XC_WORKDIR/$XC_ROOT" ;;
+        esac
+        path=$(printf '%s' "$path" | tr '\\' '/')
+        workspace=$(printf '%s' "${GITHUB_WORKSPACE:-}" | tr '\\' '/')
+        if [ -n "$workspace" ]; then case "$path/" in "$workspace"/*) path=${path#"$workspace"} ;; esac; fi
+        prefix=$(printf '%s\n' "$path" | awk -F/ '{ n = 0; for (i = 1; i <= NF; i++) { if ($i == "" || $i == ".") continue; if ($i == "..") { if (n > 0) n--; continue }; a[++n] = $i }; for (i = 1; i <= n; i++) printf "%s/", a[i] }')
+        # uri 是 URI：空白、%、#、中文都要編碼（斜線除外）。CLI 輸出的 uri 是原樣的路徑，所以整條一起編 ——
+        # 哪天 CLI 自己編了（XamlA11y 的 CLI 就是），這裡要改成只編 $root，否則會編兩次
         jq --arg root "$prefix" \
-          '(.runs[].results[].locations[].physicalLocation.artifactLocation.uri) |= ($root + .)' \
+          '(.runs[].results[].locations[].physicalLocation.artifactLocation.uri) |= (($root + .) | split("/") | map(@uri) | join("/"))' \
           "$f" > "$RUNNER_TEMP/xamlcontrast.repo.sarif"
         mv "$RUNNER_TEMP/xamlcontrast.repo.sarif" "$f"
     - name: Upload SARIF
