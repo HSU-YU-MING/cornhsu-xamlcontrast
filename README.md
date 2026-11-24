@@ -336,8 +336,8 @@ The reason is **required** — a bare `<!-- xamlcontrast-ignore -->` is invalid 
 same line. A misspelled one (wrong case, a colon with nothing after it, a missing colon, a reason
 that wraps onto a second line) does not suppress anything and is warned about the same way
 (`summary.invalidIgnores`). From 1.9, other comments may sit between the marker and its element — the
-ignore comments of several tools can be stacked in any order — but not another element, a
-commented-out one included. On a container, the marker covers everything inside it — its elements
+ignore comments of several tools can be stacked in any order — but not another element or text; a
+marker in front of text or a commented-out element is warned about too. On a container, the marker covers everything inside it — its elements
 and the `Style` definitions in its `Resources`. Suppressed pairs are counted in
 `summary.suppressed`; nothing disappears silently.
 

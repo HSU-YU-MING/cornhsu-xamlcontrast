@@ -117,7 +117,11 @@ public sealed partial class Auditor
     /// Reason 不是 null = 壓掉（值是理由原文，沒寫理由時是空字串）。</summary>
     private (string? Reason, string? Invalid) IgnoreStateOf(XElement el, string file)
     {
-        if (NearestMarker(el) is not { } c) return (null, null);
+        var (c, stranded) = NearestMarker(el);
+        if (c is null) return (null, null);
+        if (stranded)
+            return (null, $"{file}:{LineOfComment(c)}: xamlcontrast-ignore has a commented-out element or text after it (not suppressed)" +
+                          " — put the comment right before the element it is for");
         var m = IgnoreComment().Match(c.Value);
         if (!m.Success)
         {
@@ -134,27 +138,29 @@ public sealed partial class Auditor
 
     /// <summary>
     /// 元素前面最靠近的 xamlcontrast-ignore 標記（寫錯的也算，由呼叫端警告）；沒有是 null。
-    /// 中間可以隔不相關的註解（1.9 起）：四件套的 ignore 會疊在同一個元素上，只看最靠近的那一個的話，
+    /// 中間可以隔不相關的註解與處理指令（1.9 起）：四件套的 ignore 會疊在同一個元素上，只看最靠近的那一個的話，
     /// 標記不放最後就安靜失效。⚠ 自己寫錯的標記不是「不相關」—— 跳過它，警告說 not suppressed、配對卻被更前面那個壓掉。
     /// 隔了元素或文字內容就停。被註解掉的元素（註解內容以 &lt; 開頭）也算隔了元素：前面的 ignore 管的是它，
-    /// 不能因為它被註解掉就改壓下一個。
+    /// 不能因為它被註解掉就改壓下一個。Stranded = 標記在文字或被註解掉的元素前面（不壓，由呼叫端警告 ——
+    /// 不講的話，使用者只看到配對重新報出來，看不出自己的註解為什麼沒生效）。
     /// </summary>
-    private static XComment? NearestMarker(XElement el)
+    private static (XComment? Marker, bool Stranded) NearestMarker(XElement el)
     {
         // 由前往後走一遍：XNode.PreviousNode 每次都從父元素的第一個子節點找起，註解一多就是平方
-        List<XComment>? run = null;
+        List<XNode>? run = null;
         foreach (var node in el.NodesBeforeSelf())
         {
-            if (node is XText t && string.IsNullOrWhiteSpace(t.Value)) continue;
-            if (node is XComment c) (run ??= []).Add(c);
-            else run?.Clear();
+            if (node is XElement) run?.Clear();
+            else if (node is XComment || node is XText t && !string.IsNullOrWhiteSpace(t.Value)) (run ??= []).Add(node);
         }
+        var stranded = false;
         for (var i = (run?.Count ?? 0) - 1; i >= 0; i--)
         {
-            if (IgnoreCommentLenient().IsMatch(run![i].Value)) return run[i];
-            if (run[i].Value.AsSpan().TrimStart().StartsWith("<")) return null;
+            if (run![i] is not XComment c) { stranded = true; continue; }
+            if (IgnoreCommentLenient().IsMatch(c.Value)) return (c, stranded);
+            stranded |= c.Value.AsSpan().TrimStart().StartsWith("<");
         }
-        return null;
+        return (null, false);
     }
 
     /// <summary>一組配對被 ignore 壓掉：計數，並記在壓掉它的那個註解的理由底下（總和 = _suppressed）。
