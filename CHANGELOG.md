@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 1.9.0
+
+### Upgrading（只會多壓，不會少壓；baseline 的鍵不動）
+
+- **In short:** a `xamlcontrast-ignore` comment no longer has to be the comment closest to the element.
+  **A marker that had no effect until 1.8 can start suppressing**: if you have one with another comment
+  between it and its element, the pairs below it move from the findings to `summary.suppressed` — check that
+  the comment still means what you intended. Nothing that was suppressed before stops being suppressed.
+  A `baseline.json` that recorded such a pair as known debt reports it as paid off.
+  A misspelled marker in that position used to be silent and is now listed in `summary.invalidIgnores`
+  (a warning; it doesn't change the exit code).
+  **`Baseline.KeyVersion` stays 2 and `schemaVersion` stays 6.** The comment's own syntax is unchanged.
+  Measured effect: none on the maintainer's three apps and the seventeen public projects (every row identical). On 4,000 random comment
+  sequences, 1.8.3 and this version side by side: 0 suppressions lost, 0 warnings lost, 149 newly effective.
+  *簡單說：`xamlcontrast-ignore` 不必再是最靠近元素的那一個註解。1.8 以前因為中間夾了別的註解而沒作用的標記，
+  現在會開始壓 —— 請看一眼 `summary.suppressed` 有沒有變多。原本有效的不會失效。*
+
+### Fixed
+
+- **Ignore comments of several tools can be stacked on one element, in any order.** Only the comment closest
+  to the element was read, so in `<!-- xamlcontrast-ignore: c --><!-- xamla11y-ignore: a --><TextBlock …/>`
+  the first one did nothing: `suppressed 0`, exit 1, and no hint why. Unrelated comments — another tool's
+  marker, an ordinary note — and processing instructions are now skipped. The search still stops at an
+  element or at text content, and a commented-out element (a comment that starts with `<`) counts as an
+  element: the marker in front of it was meant for that one and doesn't move on to the next. A marker that
+  stops at text or at a commented-out element used to be silent and is now listed in
+  `summary.invalidIgnores`.
+- **A misspelled or reasonless marker is still reported and still doesn't suppress** when other comments
+  follow it, and it isn't skipped in favour of an earlier valid one: with several `xamlcontrast-ignore`
+  markers on one element, the closest decides, as before.
+  *四件套的 ignore 註解疊在同一個元素上時，順序不再有關係。不相關的註解與處理指令會跳過；隔了元素、
+  文字內容、或被註解掉的元素就停，停在文字或被註解掉的元素前面的會警告。寫錯或沒寫理由的標記照樣警告、照樣不壓，
+  也不會被當成不相關的跳過去。*
+
 ## 1.8.3 — 2026-11-19
 
 - **The action installs the tool into its own folder.** It used `dotnet tool install --global`, which fails

@@ -262,7 +262,8 @@ exit 1: 1 new unresolved pair(s) vs baseline
 
 完全沒寫理由的 `<!-- xamlcontrast-ignore -->` 視為無效並警告（配對照報）。標記要一字不差 ——
 小寫、有冒號、理由寫在同一行；寫錯的變體（大小寫不同、冒號後沒有理由、漏冒號、理由換到第二行）
-不會壓掉任何配對，並以同樣方式警告（`summary.invalidIgnores`）。標記寫在容器上時，涵蓋容器裡的
+不會壓掉任何配對，並以同樣方式警告（`summary.invalidIgnores`）。1.9 起標記與元素之間可以隔別的註解 ——
+幾支工具的 ignore 註解可以疊在一起，順序不拘 —— 但不能隔別的元素或文字；停在文字或被註解掉的元素前面的也會警告。標記寫在容器上時，涵蓋容器裡的
 一切 —— 元素，以及容器 `Resources` 裡的 `Style` 定義。
 
 ### Visual Studio 錯誤清單（MSBuild）

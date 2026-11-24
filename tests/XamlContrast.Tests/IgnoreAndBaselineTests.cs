@@ -152,15 +152,14 @@ public class IgnoreAndBaselineTests
         Assert.Equal("#CCCCCC", Assert.Single(r.Findings).Fg);
     }
 
-    [Theory] // 只有「緊鄰的前一個節點」是 ignore 註解才算數；一般註解、提到關鍵字的註解、
-             // 中間隔了別的註解或元素，都不能壓 —— 範圍一放寬，ignore 就是新的靜默退化通道
+    [Theory] // 夾在中間的一般註解會跳過（1.9 起），元素與文字內容不會；提到關鍵字的註解不是標記
     [InlineData("<!-- 一般註解 -->", false)]
     [InlineData("<!-- TODO: xamlcontrast-ignore: 之後再說 -->", false)] // 錨定在註解開頭，不是子字串
-    [InlineData("<!-- xamlcontrast-ignore: 浮水印 -->\n<!-- 另一個註解 -->", false)]
+    [InlineData("<!-- xamlcontrast-ignore: 浮水印 -->\n<!-- 另一個註解 -->", true)] // 1.8 以前是 false：只看最靠近元素的那一個
     [InlineData("<!-- xamlcontrast-ignore: 浮水印 -->\n<Border/>", false)]  // 被上面的 Border 用掉了
     [InlineData("<!-- xamlcontrast-ignore:浮水印 -->", true)]              // 冒號後不必空白
     [InlineData("<!--   xamlcontrast-ignore :  浮水印  -->", true)]        // 前後與冒號兩側的空白都容忍
-    public void OnlyAnAdjacentIgnoreCommentSuppresses(string before, bool suppressed)
+    public void OnlyAnIgnoreCommentBeforeTheElementSuppresses(string before, bool suppressed)
     {
         using var fx = new Fixture();
         fx.File("Main.xaml", $"""
@@ -174,6 +173,209 @@ public class IgnoreAndBaselineTests
         Assert.Equal(suppressed ? 0 : 1, r.Findings.Count);
         Assert.Empty(r.InvalidIgnores); // 這幾種都不是「沒附理由的 ignore」
     }
+
+    // ── 疊在同一個元素上的註解（1.9）：跳過不相關的往前找，中間隔了元素才停 ──
+    // 四件套的 ignore 會疊在同一個元素上。1.8.3 只看最靠近元素的那一個，xamlcontrast-ignore 不放最後就失效（suppressed 0、exit 1）
+
+    private const string Mine = "<!-- xamlcontrast-ignore: c -->";
+    private const string A11y = "<!-- xamla11y-ignore: a -->";
+    private const string Fit = "<!-- xamlfit-ignore: f -->";
+    private const string Keys = "<!-- xamlkeys-ignore: k -->";
+    private const string Note = "<!-- 一般說明：這一行是浮水印 -->";
+
+    private static AuditResult RunWithBefore(string before, string element = LowContrastText)
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#FFFFFF">
+              {before}
+              {element}
+            </Grid>
+            """);
+        return fx.Run();
+    }
+
+    public static TheoryData<string> StackedOrders()
+    {
+        var data = new TheoryData<string>();
+        // 兩支、三支、四支、夾一般說明：每一種順序都要有效
+        foreach (var set in new[]
+                 {
+                     new[] { Mine, A11y }, new[] { Mine, Fit }, new[] { Mine, Keys }, new[] { Mine, Note },
+                     new[] { Mine, A11y, Fit }, new[] { Mine, A11y, Note }, new[] { Mine, Note, Note },
+                     new[] { Mine, A11y, Fit, Keys }, new[] { Mine, A11y, Fit, Note },
+                 })
+            foreach (var order in Permutations(set).Select(p => string.Join("\n  ", p)).Distinct())
+                data.Add(order);
+        data.Add(Mine + A11y); // 寫在同一行、中間沒有空白
+        data.Add(Mine + "<!-- -->");
+        data.Add(Mine + "<!-- xamlcontrast-ignored by design -->");             // 不是整個字：不是標記
+        data.Add(Mine + "<!-- TODO: remove the xamlcontrast-ignore above -->"); // 在談標記，不是在用它
+        data.Add(Mine + "<!-- xamlcontrast-ignore: 比較近的那個 -->");
+        data.Add(Mine + "<?note 處理指令不是內容?>");
+        data.Add(Mine + A11y + "<?note x?>" + Note);
+        return data;
+    }
+
+    private static IEnumerable<string[]> Permutations(string[] items)
+        => items.Length <= 1
+            ? [items]
+            : items.SelectMany((x, i) => Permutations([.. items.Take(i), .. items.Skip(i + 1)]).Select(rest => (string[])[x, .. rest]));
+
+    [Theory]
+    [MemberData(nameof(StackedOrders))]
+    public void StackedCommentsDoNotDisableTheIgnoreInAnyOrder(string before)
+    {
+        var r = RunWithBefore(before);
+        Assert.Equal(1, r.Suppressed);
+        Assert.Empty(r.Findings);
+        Assert.Empty(r.InvalidIgnores);
+    }
+
+    [Theory] // Style 定義處與容器（祖先查詢）走同一個函式，也要跳得過
+    [InlineData(Mine + A11y + Fit)]
+    [InlineData(Mine + Note + A11y)]
+    [InlineData(A11y + Mine + Note)]
+    public void StackedIgnoreCoversStylesAndSubtrees(string before)
+    {
+        const string style = """
+            <Style x:Key="Faint" TargetType="Button">
+              <Setter Property="Background" Value="#FFFFFF"/>
+              <Setter Property="Foreground" Value="#EEEEEE"/>
+            </Style>
+            """;
+        var own = RunWithBefore("", $"<Grid.Resources>{before}{style}</Grid.Resources>");
+        Assert.Equal(1, own.Suppressed);
+        Assert.Empty(own.Findings);
+
+        var container = RunWithBefore(before,
+            $"""<Grid Background="#FFFFFF"><Grid.Resources>{style}</Grid.Resources>{LowContrastText}</Grid>""");
+        Assert.Equal(2, container.Suppressed);
+        Assert.Empty(container.Findings);
+    }
+
+    [Theory] // 一個註解還是只管下一個元素：隔了元素、屬性元素、文字內容就停，後面疊再多註解也一樣
+    [InlineData(Mine + "<Border/>" + A11y)]
+    [InlineData(Mine + "<Border/>" + Note + Fit)]
+    [InlineData(Mine + A11y + "<Grid.RowDefinitions/>" + Note)]
+    [InlineData(A11y + Fit + Note)]
+    public void AnIgnoreDoesNotReachPastAnElement(string before)
+    {
+        var r = RunWithBefore(before);
+        Assert.Equal(0, r.Suppressed);
+        Assert.Contains(r.Findings, f => f.Fg == "#EEEEEE");
+        Assert.Empty(r.InvalidIgnores);
+    }
+
+    [Theory] // 被註解掉的元素也是隔了元素：ignore 原本管的是它，不能因為它被註解掉就改壓下一個。
+             // 停下要講出來 —— 不講的話，使用者只看到問題重新報出來，要自己想到是中間那段註解的關係
+    [InlineData("xamlcontrast-ignore: c", "<!-- <TextBlock Text='草稿'/> -->")]
+    [InlineData("xamlcontrast-ignore: c", "<!--\n  <TextBlock Text='草稿'/>\n-->" + A11y)]
+    [InlineData("xamlcontrast-ignore: c", Note + "<!-- <A/> --><!-- <B/> -->" + Fit)]
+    [InlineData("XamlContrast-Ignore: c", "<!-- <TextBlock Text='草稿'/> -->")] // 自己也寫錯：照樣講一次，不講兩次
+    [InlineData("xamlcontrast-ignore: c", "文字內容")]                           // 文字也是內容
+    [InlineData("xamlcontrast-ignore: c", A11y + "文字內容" + Note)]
+    [InlineData("xamlcontrast-ignore: c", "<![CDATA[文字內容]]>" + Note)]
+    public void AnIgnoreStopsAtACommentedOutElementOrTextAndSaysSo(string marker, string between)
+    {
+        var r = RunWithBefore($"<!-- {marker} -->\n{between}");
+        Assert.Equal(0, r.Suppressed);
+        Assert.Single(r.Findings);
+        var w = Assert.Single(r.InvalidIgnores);
+        Assert.StartsWith("Main.xaml:2: ", w, StringComparison.Ordinal);
+        Assert.Contains("commented-out element or text", w, StringComparison.Ordinal);
+        Assert.Contains("not suppressed", w, StringComparison.Ordinal);
+    }
+
+    [Theory] // 對照組：有自己的標記在後面、那個元素還在、或根本沒有標記，就沒有東西要講
+    [InlineData(Mine + "<!-- <TextBlock Text='草稿'/> -->" + Mine, 1)]
+    [InlineData("<!-- <TextBlock Text='草稿'/> -->" + Mine, 1)]
+    [InlineData(Mine + "<Border/><!-- <TextBlock Text='草稿'/> -->", 0)]
+    [InlineData(A11y + "<!-- <TextBlock Text='草稿'/> -->", 0)]
+    [InlineData(A11y + "文字內容", 0)]
+    [InlineData("文字內容" + Mine, 1)]
+    public void ACommentedOutElementAloneIsNotWarnedAbout(string before, int suppressed)
+    {
+        var r = RunWithBefore(before);
+        Assert.Equal(suppressed, r.Suppressed);
+        Assert.Empty(r.InvalidIgnores);
+    }
+
+    [Theory] // 寫錯的標記不會因為後面疊了別的註解就安靜消失：照樣不壓、照樣警告，行號是那個註解自己的
+    [InlineData("xamlcontrast-ignore", "without a reason")]
+    [InlineData("xamlcontrast-ignore:", "malformed")]
+    [InlineData("XamlContrast-Ignore: watermark", "malformed")]
+    [InlineData("xamlcontrast-ignore 浮水印", "malformed")]
+    [InlineData("xamlcontrast-ignore: watermark text,\n  intentionally faint", "malformed")]
+    public void AnInvalidIgnoreBehindOtherCommentsIsStillWarnedAbout(string comment, string message)
+    {
+        foreach (var after in new[] { A11y, Note, Note + "\n" + Fit + "\n" + A11y })
+        {
+            var r = RunWithBefore($"<!-- {comment} -->\n{after}");
+            Assert.Equal(0, r.Suppressed);
+            Assert.Single(r.Findings);
+            var w = Assert.Single(r.InvalidIgnores);
+            Assert.StartsWith("Main.xaml:2: ", w, StringComparison.Ordinal);
+            Assert.Contains(message, w, StringComparison.Ordinal);
+            Assert.Contains("not suppressed", w, StringComparison.Ordinal);
+        }
+    }
+
+    [Theory] // 自己的標記有兩個時，最靠近元素的那個說了算 —— 跟 1.8 一樣。寫錯的不當成「不相關」跳過去：
+             // 跳過去的話，警告說 not suppressed、實際上卻被前面那個壓掉了
+    [InlineData("<!-- xamlcontrast-ignore -->")]
+    [InlineData("<!-- XamlContrast-Ignore: watermark -->")]
+    public void TheNearestOwnMarkerDecides(string invalid)
+    {
+        var nearestInvalid = RunWithBefore(Mine + invalid + A11y);
+        Assert.Equal(0, nearestInvalid.Suppressed);
+        Assert.Single(nearestInvalid.Findings);
+        Assert.Single(nearestInvalid.InvalidIgnores);
+
+        // 原本有效的不能失效：有效的在最近，前面疊了寫錯的 —— 照壓
+        var nearestValid = RunWithBefore(invalid + Mine);
+        Assert.Equal(1, nearestValid.Suppressed);
+        Assert.Empty(nearestValid.Findings);
+    }
+
+    [Fact] // requireReason 關掉時沒寫理由的也是有效標記，疊放一樣跳得過
+    public void StackedBareIgnoreWorksWhenAReasonIsNotRequired()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <Grid Background="#FFFFFF">
+              <!-- xamlcontrast-ignore -->
+              {A11y}
+              {LowContrastText}
+            </Grid>
+            """);
+        fx.File(ToolConfig.FileName, """{ "ignore": { "requireReason": false } }""");
+        var cfg = ToolConfig.Load(fx.Root);
+        var r = Auditor.Run(fx.Root, PaletteDetector.Detect(fx.Root, cfg), cfg);
+        Assert.Equal(1, r.Suppressed);
+        Assert.Empty(r.InvalidIgnores);
+    }
+
+    [Fact] // 根元素前面的註解在文件層（沒有父元素）
+    public void StackedCommentsBeforeTheRootElementWork()
+    {
+        using var fx = new Fixture();
+        fx.File("Main.xaml", $"""
+            <?xml version="1.0" encoding="utf-8"?>
+            {Mine}
+            {Note}
+            <Grid Background="#FFFFFF">
+              {LowContrastText}
+            </Grid>
+            """);
+        var r = fx.Run();
+        Assert.Equal(1, r.Suppressed);
+        Assert.Empty(r.Findings);
+    }
+
+    [Fact] // 統計分類用的理由是那個標記自己的，不是夾在中間的註解的
+    public void StackedIgnoreKeepsItsOwnReason()
+        => Assert.Equal("c", Assert.Single(RunWithBefore(Mine + A11y + Note).SuppressedReasons).Key);
 
     // ── baseline ratchet：承認既有債、只擋新增與惡化 ──
 
