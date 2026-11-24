@@ -3,7 +3,15 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
-## Unreleased
+## 1.9.1 — 2026-11-24
+
+### Upgrading
+
+- **In short:** only the GitHub Action changed; the tool gives the same results as 1.9.0.
+  If your workflow writes `root` in one of the ways below, or your XAML is in a folder whose name
+  needs encoding, code scanning alerts move to the right file: expect the ones at the old path to close and new ones
+  to open.
+  *簡單說：只改 GitHub Action，工具的結果不變。受影響的 workflow，code scanning 的警示會從錯的路徑移到對的檔案。*
 
 ### Fixed
 
