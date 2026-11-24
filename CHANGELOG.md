@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## Unreleased
+
+### Fixed
+
+- **PR annotations and code scanning locations for more ways of writing `root`** (GitHub Action). The finding's
+  path is relative to `root`, and the action puts the repository part in front of it. That part was wrong when
+  `root` was an absolute path (`${{ github.workspace }}/src`), contained `..` (`../src` with a
+  `working-directory`) or used backslashes (`src\App`), and when `working-directory` was an absolute path: the
+  annotation and the code scanning alert then pointed at a file that does not exist, with no error.
+- **Paths in the uploaded SARIF are URI-encoded** (GitHub Action): a folder such as `My App` is now
+  `My%20App`. The CLI's own `--sarif` file did not change.
+
 ## 1.9.0 — 2026-11-24
 
 ### Upgrading（只會多壓，不會少壓；baseline 的鍵不動）
