@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
-## 1.9.0
+## 1.9.0 — 2026-11-24
 
 ### Upgrading（只會多壓，不會少壓；baseline 的鍵不動）
 
