@@ -89,6 +89,68 @@ public class CliOutputTests
         Assert.Contains(verdict, File.ReadAllText(md));
     }
 
+    [Fact] // --baseline 模式的 Markdown：已知的債不能寫成「PASS · 1 fail」—— 讀的人分不出那 1 筆是新的還是早就知道的
+    public void MarkdownInBaselineModeCountsWhatIsNew()
+    {
+        using var fx = CliProjects.Failing();
+        var (baseline, md) = (Path.Combine(fx.Root, "baseline.json"), Path.Combine(fx.Root, "report.md"));
+        Assert.Equal(0, Cli.Run(fx.Root, "--write-baseline", baseline).Exit);
+
+        var known = Cli.Run(fx.Root, "--baseline", baseline, "--md", md);
+        Assert.True(known.Exit == 0, known.ToString());
+        var lines = File.ReadAllLines(md);
+        Assert.StartsWith("✅ **PASS** · **0 new or worse** than the baseline, 1 known · ", lines[2]);
+        Assert.DoesNotContain("fail", lines[2]);
+        Assert.Contains("| baseline | Location |", string.Join('\n', lines));
+        Assert.Single(lines, l => l.StartsWith("| known | ", StringComparison.Ordinal));
+
+        // 新的排在已知的前面，結論說幾筆是新的
+        fx.File("New.xaml", """
+            <Grid Background="#FFFFFF">
+              <TextBlock Foreground="#CFCFCF" Text="new"/>
+            </Grid>
+            """);
+        var added = Cli.Run(fx.Root, "--baseline", baseline, "--md", md);
+        Assert.True(added.Exit == 1, added.ToString());
+        lines = File.ReadAllLines(md);
+        Assert.StartsWith("❌ **FAIL** · **1 new or worse** than the baseline, 1 known · ", lines[2]);
+        var rows = lines.Where(l => l.StartsWith("| new | ", StringComparison.Ordinal) || l.StartsWith("| known | ", StringComparison.Ordinal)).ToList();
+        Assert.Equal(["| new |", "| known |"], rows.Select(l => l[..(l.IndexOf('|', 2) + 1)]));
+        Assert.Contains("New.xaml:2", rows[0]);
+    }
+
+    [Fact] // 這個 gate 不擋的 warn 不判新增或惡化，也不算進「新的」；多出來的 unresolved 擋下來時，結論要說是它
+    public void MarkdownInBaselineModeSaysWhyItFailed()
+    {
+        using var fx = CliProjects.Failing();
+        var (baseline, md) = (Path.Combine(fx.Root, "baseline.json"), Path.Combine(fx.Root, "report.md"));
+        Assert.Equal(0, Cli.Run(fx.Root, "--write-baseline", baseline).Exit);
+
+        fx.File("Warn.xaml", """
+            <Grid Background="#FFFFFF">
+              <TextBlock Foreground="#7F7F7F" Text="just below AA"/>
+            </Grid>
+            """);
+        var r = Cli.Run(fx.Root, "--baseline", baseline, "--fail-on", "fail", "--md", md);
+        Assert.True(r.Exit == 0, r.ToString());
+        Assert.StartsWith("✅ **PASS** · **0 new or worse** than the baseline, 1 known · 1 not gated · ", File.ReadAllLines(md)[2]);
+        Assert.Single(File.ReadAllLines(md), l => l.StartsWith("| not gated | ", StringComparison.Ordinal));
+
+        fx.File("Warn.xaml", "<Grid/>");
+        fx.File("Bound.xaml", """
+            <Grid Background="{Binding B}">
+              <TextBlock Foreground="#FFFFFF" Text="bound"/>
+            </Grid>
+            """);
+        r = Cli.Run(fx.Root, "--baseline", baseline, "--fail-on-new-unresolved", "--min-coverage", "0", "--md", md);
+        Assert.True(r.Exit == 1, r.ToString());
+        Assert.StartsWith("❌ **FAIL** · **0 new or worse** than the baseline, 1 known · **more unresolved than the baseline** · ", File.ReadAllLines(md)[2]);
+        // 只是多了、沒有要擋：不寫成原因
+        r = Cli.Run(fx.Root, "--baseline", baseline, "--min-coverage", "0", "--md", md);
+        Assert.True(r.Exit == 0, r.ToString());
+        Assert.DoesNotContain("more unresolved", File.ReadAllText(md));
+    }
+
     [Fact] // --show-unresolved 逐筆列出工具沒看到的地方；沒給旗標就不印；沒有 unresolved 時連標題都不印
     public void ShowUnresolvedListsBlindSpotsOnlyWhenAskedAndPresent()
     {
