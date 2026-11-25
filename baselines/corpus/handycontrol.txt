@@ -3,8 +3,8 @@
 project: handycontrol
 repo: https://github.com/HandyOrg/HandyControl
 commit: e9ad3d701b90e724399a413569fbd7f35a141053
-tool-commit: 46454a7+dirty
-frozen: 2026-11-16
+tool-commit: 718dade+dirty
+frozen: 2026-11-25
 exit: 3
 palette-mode: pair
 palette-degraded: False
@@ -12,8 +12,8 @@ palette-keys: 38
 single-theme: False
 files: 332
 pairs: 721
-coverage: 19.2
-unresolved: 3036
+coverage: 19
+unresolved: 3079
 skipped: 39
 dead-foreground: 112
 disabled-exempt: 1126
@@ -27,6 +27,7 @@ warn: 8
 ok: 640
 decorative: 24
 unresolved-by.bound-or-gradient: 1113
+unresolved-by.inherited-foreground: 43
 unresolved-by.in-style-template: 129
 unresolved-by.no-ancestor-background: 39
 unresolved-by.over-sibling-content: 6
@@ -2006,6 +2007,49 @@ U  in-style-template  src/Shared/HandyControl_Shared/Themes/Theme.xaml:8040  {Dy
 U  in-style-template  src/Shared/HandyControl_Shared/Themes/Theme.xaml:8044  {DynamicResource ThirdlyTextBrush}
 U  in-style-template  src/Shared/HandyControl_Shared/Themes/Theme.xaml:8171  {Binding BorderBrush,ElementName=border}
 U  in-style-template  src/Shared/HandyControl_Shared/Themes/Theme.xaml:8473  {Binding BorderBrush,ElementName=border}
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Styles/Base/ComboBoxBaseStyle.xaml:1072  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Styles/Base/ComboBoxBaseStyle.xaml:261  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Styles/Base/ComboBoxBaseStyle.xaml:333  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Styles/Base/ComboBoxBaseStyle.xaml:406  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Styles/Base/ComboBoxBaseStyle.xaml:765  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Styles/Base/ComboBoxBaseStyle.xaml:860  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Styles/Base/ComboBoxBaseStyle.xaml:977  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:5409  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:5479  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:5550  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:5897  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:5991  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:6106  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:6200  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:106  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:111  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:116  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:121  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:126  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:136  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:141  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:146  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:21  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:26  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:31  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:41  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:46  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:51  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:56  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:61  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:71  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:76  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:81  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:86  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:91  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControlDemo_Shared/UserControl/Controls/SideMenuDemo.xaml:96  TextBlock⊕Style[TextBlockFabricIcons]
+U  inherited-foreground  src/Shared/HandyControl_Shared/Themes/Theme.xaml:5430  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Shared/HandyControl_Shared/Themes/Theme.xaml:5507  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Shared/HandyControl_Shared/Themes/Theme.xaml:5585  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Shared/HandyControl_Shared/Themes/Theme.xaml:5953  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Shared/HandyControl_Shared/Themes/Theme.xaml:6054  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Shared/HandyControl_Shared/Themes/Theme.xaml:6176  TextBox⊕Style[ComboBoxEditableTextBox]
+U  inherited-foreground  src/Shared/HandyControl_Shared/Themes/Theme.xaml:6277  TextBox⊕Style[ComboBoxEditableTextBox]
 U  no-ancestor-background  src/Net_40/HandyControl_Net_40/Themes/Theme.xaml:8731  {DynamicResource ThirdlyTextBrush}
 U  no-ancestor-background  src/Shared/HandyControlDemo_Shared/UserControl/Main/NonClientAreaContent.xaml:101  {DynamicResource PrimaryTextBrush}
 U  no-ancestor-background  src/Shared/HandyControlDemo_Shared/UserControl/Main/NonClientAreaContent.xaml:112  {DynamicResource PrimaryTextBrush}

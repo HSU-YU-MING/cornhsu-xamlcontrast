@@ -60,6 +60,7 @@ public static partial class Report
         UnresolvedReason.InStyleTemplate => "in-style-template",
         UnresolvedReason.UnknownStyleKey => "unknown-style-key",
         UnresolvedReason.TemplatePainted => "template-painted",
+        UnresolvedReason.InheritedForeground => "inherited-foreground",
         _ => "translucent-uncomposited",
     };
 

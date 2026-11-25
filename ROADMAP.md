@@ -124,6 +124,25 @@
 - [x] **模板裡的 Image 兄弟** —— 1.8：改記 `over-sibling-content`，跟標記樹的規則 17(b) 同一個答案。
       之前是「看到內容元素就整層放棄、往外找」，等於拿圖後面那一層的顏色報比值。17 個公開專案與三個本機專案
       一個數字都沒變 —— 它關掉的是一條編造路徑。排在圖後面又畫了底的兄弟照舊蓋過那張圖
+- [x] **宿主的字串內容由 ContentPresenter 產生的 TextBlock 畫** —— 1.10：外部回報逼出來的（ZeroCel 前端，
+      1.8.3 說 757 組全過，真 App 裡紫色主要鈕是黑字疊紫底 2.66）。套得到那顆 TextBlock 的隱含樣式是
+      「設在元素上」的值，贏過從宿主繼承來的，所以 Style 上宣告的 `Foreground="White"` 畫不上去。
+      關鍵是分出 **`Application` 作用域**（模板產生的元素查隱含樣式時跳過視覺樹，`Window.Resources` 的同一份
+      樣式沒有作用），作用域靠追 App.xaml 的 `MergedDictionaries` 算。
+      實測：17 個公開專案**一列都沒變**（函式庫沒有 App.xaml），維護者自己的 Kindling **14 筆從 ok 變成
+      13 fail + 1 warn**，逐筆都是真的 —— `DarkBtn` 按下態同時設 `Background=PurpleD` 與 `Foreground="White"`，
+      而那個白色不會到位，淺色主題是 `#1B1B1B` 疊 `#534AB7` = 2.49。同一個檔的 `AccentBtn` 用
+      `<Style.Resources>` 正確修好了，照舊 ok（看不懂正確的修法就是在逼人寫多餘的程式碼）。
+- [x] **字色純粹靠繼承的文字元素不再靜默消失** —— 1.10：記 `inherited-foreground`。
+      同一份回報的第二種（ToggleButton 模板裡的 TextBlock 自帶一個只設 `Text` 的 Style，1.21:1），
+      1.9 之前 0 配對、0 unresolved、覆蓋率照樣 100%。實測 +1436 筆、0 筆 finding 變動。
+- **繼承模型（把 `inherited-foreground` 從「點名」變成「評得出來」）**：往上找到第一個宣告字色的祖先就評它；
+  整條都沒有才落到控制項的系統預設。⚠ **系統預設那一格是唯一的難處**，而且會編造：`ControlText` 只在
+  「沒有函式庫提供那個控制項的預設樣式」時才對，而 `ThemeLibraries.DetectInProject` 認不出 MahApps
+  （它的主題檔是建置時產生的，刻意沒有表）—— 填黑色會讓 NETworkManager 那一類專案冒出一批假 fail。
+  範圍也要先量：語料有 7351 處「連樣式都沒有、也沒寫字色」的文字元素，接上繼承之後那些全部變成新配對。
+  **前置條件：先想清楚「分不出控制項預設色」的出口**（config 宣告？只在沒偵測到任何函式庫時才填？），
+  不然這一步會把 1.10 誠實的點名換成一批編出來的數字。
 - **帶 Opacity 的兄弟（模板裡）**：量過了（1.8），17 個公開專案只有 **2 處**，都在 MaterialDesign，
   而且兩處現在**已經是誠實的** `no-ancestor-background`、不是編造。要算出來得在模板那條路上再寫一份
   Opacity 疊合（標記樹那一份在 `Auditor.SiblingBackdrop`，拿不到色盤），為 2 處維護兩份會漂開的判定不划算

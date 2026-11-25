@@ -3,8 +3,8 @@
 project: ilspy
 repo: https://github.com/icsharpcode/ILSpy
 commit: caff1a9549afc1a97b5319454fe602bfbde5ccde
-tool-commit: 46454a7+dirty
-frozen: 2026-11-16
+tool-commit: 718dade+dirty
+frozen: 2026-11-25
 exit: 3
 palette-mode: single
 palette-degraded: False

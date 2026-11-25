@@ -3,8 +3,8 @@
 project: bloxstrap
 repo: https://github.com/pizzaboxer/bloxstrap
 commit: 02db76006741f039b79ac7547b8054d7f3ccfc05
-tool-commit: 46454a7+dirty
-frozen: 2026-11-16
+tool-commit: 718dade+dirty
+frozen: 2026-11-25
 exit: 3
 palette-mode: pair
 palette-degraded: False
@@ -12,8 +12,8 @@ palette-keys: 313
 single-theme: False
 files: 38
 pairs: 18
-coverage: 14.4
-unresolved: 107
+coverage: 13.8
+unresolved: 112
 skipped: 0
 dead-foreground: 1
 disabled-exempt: 2
@@ -27,6 +27,7 @@ warn: 6
 ok: 10
 decorative: 0
 unresolved-by.bound-or-gradient: 8
+unresolved-by.inherited-foreground: 5
 unresolved-by.no-ancestor-background: 55
 unresolved-by.translucent-uncomposited: 3
 unresolved-by.unknown-palette-key: 41
@@ -60,6 +61,11 @@ U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ByfronDialog.xaml:31  {
 U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ByfronDialog.xaml:41  {Binding Foreground}
 U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/ByfronDialog.xaml:46  {Binding Foreground}
 U  bound-or-gradient  Bloxstrap/UI/Elements/Bootstrapper/FluentDialog.xaml:57  {Binding Path=BackgroundColourBrush, Mode=OneTime}
+U  inherited-foreground  Bloxstrap/UI/Elements/ContextMenu/ServerHistory.xaml:34  TextBlock⊕Style[inline]
+U  inherited-foreground  Bloxstrap/UI/Elements/Controls/OptionControl.xaml:27  TextBlock⊕Style[inline]
+U  inherited-foreground  Bloxstrap/UI/Elements/Dialogs/UninstallerDialog.xaml:36  TextBlock⊕Style[inline]
+U  inherited-foreground  Bloxstrap/UI/Elements/Settings/Pages/AppearancePage.xaml:110  TextBlock⊕Style[inline]
+U  inherited-foreground  Bloxstrap/UI/Elements/Settings/Pages/IntegrationsPage.xaml:114  TextBlock⊕Style[inline]
 U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:43  {DynamicResource TextFillColorTertiaryBrush}
 U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:45  {DynamicResource TextFillColorTertiaryBrush}
 U  no-ancestor-background  Bloxstrap/UI/Elements/About/Pages/AboutPage.xaml:72  {DynamicResource TextFillColorTertiaryBrush}

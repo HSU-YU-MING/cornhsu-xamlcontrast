@@ -3,6 +3,87 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 1.10.0 — 2026-11-25
+
+Two **false negatives** reported from the outside (ZeroCel's WPF front end, audited with 1.8.3): the tool
+said 757 of 757 pairs pass, while the real app showed black-on-purple at 2.66:1 on the light theme and
+black-on-near-black at 1.21:1 on the dark one. Neither was a miscalculation — both were pairs the tool
+graded with a colour that **never reaches the screen**, or dropped without counting.
+
+### Upgrading
+
+- **In short:** two audit-semantics changes, so counts move. (1) A control whose `Content` is a **string**
+  no longer gets graded with the `Foreground` the style declares, when an `Application`-scope implicit
+  `TextBlock` style overrides it — the pair's `fg` becomes the colour that actually paints. Findings can move
+  from `ok` to `fail`. (2) A text element whose own `Style` sets no colour anywhere is counted as
+  `inherited-foreground` instead of disappearing silently — **more unresolved, lower coverage, no new
+  findings**. `Baseline.KeyVersion` stays **2** and `schemaVersion` stays **6**.
+  *簡單說：兩件稽核語意的改動。(1) 宿主的字串內容由 ContentPresenter 產生的 TextBlock 畫，App 層的隱含
+  TextBlock 樣式贏過 Style 宣告的字色 —— 原本報 ok 的可能變 fail。(2) 文字元素自己的樣式一個字色都沒設時，
+  從「靜默消失」改成記 `inherited-foreground`，unresolved 變多、覆蓋率變低，但不會多出 finding。*
+- **Measured, (1) string content:** the seventeen public projects are **row-for-row identical** — none of them
+  merges an implicit text style into `Application.Resources` *and* uses it on string content through a template
+  the tool can see. The maintainer's own Kindling moves **14 findings out of `ok`: 13 fail + 1 warn**, all real.
+  `DarkBtn`'s pressed state sets `Background=PurpleD` **and** `Foreground="White"` — and that white never
+  arrives, so the light theme shows `Fg0` `#1B1B1B` on `#534AB7` = **2.49:1**. The file's own comment,
+  40 lines further down, documents exactly this WPF rule for `AccentBtn`; `AccentBtn` is correctly fixed
+  (through `<Style.Resources>`) and **stays `ok`**.
+  The affected rows' baseline keys change, because `fg` is part of the key (`file|element|fg|bg`). With
+  `--baseline` they come back as **new** and the old spellings as paid off: look at them (they are findings
+  that were passing with the wrong colour), then rewrite with `--write-baseline`.
+- **Measured, (2) inherited foreground:** +1,436 unresolved sites over 14 of the 17 public projects
+  (MaterialDesign 510, v2rayN 473, MahApps 167, NETworkManager 114, WinUI Gallery 48, HandyControl 43,
+  GeekDesk 42, Playnite 12, VisualHFT 10, Flow Launcher 5, MAA 5, Bloxstrap 5, ScreenToGif 1, QuickLook 1),
+  QuillNest 12 and Kindling 1. **No finding changed anywhere** — these sites produced nothing before, not even
+  a counter. Coverage falls where they are (GeekDesk 9.1% → 4.7%, WinUI Gallery 33% → 28.9%, VisualHFT
+  44.6% → 42.3%, MahApps 6.2% → 5.5%, MaterialDesign 6.8% → 6.3%), so a project close to `--min-coverage`
+  (default 50) can now land on **exit 3** — that is the honest reading: the tool really cannot see those
+  colours. With `failOnNewUnresolved` on, rewrite the baseline's `unresolved` section.
+
+### Fixed
+
+- **A declared `Foreground` that WPF ignores is no longer graded as if it applied.** When a control's
+  `Content` is a literal string, `ContentPresenter` builds a `TextBlock` for it, and an implicit style that
+  reaches that `TextBlock` sets the colour **on the element** — which beats the value inherited from the host.
+  So `<Setter Property="Foreground" Value="White"/>` on the button's style, or on one of its triggers, has no
+  effect on the screen, while the tool was reporting the ratio for that white. The colour now comes from the
+  nearest implicit style that applies, in WPF's lookup order: the one inside the template (the content
+  position's own `Resources`, or any layer above it), then the chain's `<Style.Resources>`, then an ancestor's,
+  then `Application`-scope. The host's own value is used only when none of them sets a colour.
+  - **`Application` scope is the distinction that matters, not "global".** An element a template builds skips
+    the visual tree when it looks for an implicit style, so the same `<Style TargetType="TextBlock">` in
+    `Window.Resources` does **nothing** to a button's text. Scope is resolved by following App.xaml's
+    `MergedDictionaries` (relative paths, `/Asm;component/…` and `pack://application:,,,` URIs, transitively).
+    A dictionary merged in C# at runtime cannot be followed, so it keeps 1.9's answer — the blind spot stays,
+    rather than being filled with a guess.
+  - **The correct fixes are understood, so already-fixed code stays green.** An implicit style in the
+    `ContentPresenter`'s own `Resources` (ZeroCel's fix) or in the style's `<Style.Resources>` (Kindling's, and
+    WPF's standard answer) wins, because it is nearer. A gate that cannot read the correct fix is a gate that
+    pushes people into writing redundant code.
+  - **Boundaries, all of them on purpose:** a `ContentPresenter` with `RecognizesAccessKey="True"` builds an
+    `AccessText`, not a `TextBlock` (259 sites in the corpus), so an implicit `TextBlock` style does not reach
+    it — and an implicit `AccessText` style does. Element children keep the host's foreground: it is what they
+    inherit, and they are walked on their own. `Content="{Binding …}"` keeps 1.9's answer, because "a string"
+    and "a whole subtree" cannot be told apart statically and guessing wrong would mean overwriting a colour
+    the author did write. Framework default templates are out of scope too: the rule only fires where the
+    template, and the content position in it, are visible in the project.
+- **Text whose colour is inherited is counted instead of dropped** — new unresolved reason
+  `inherited-foreground`. A text element with its own `Style` takes **no** implicit style, so when neither
+  that chain (`BasedOn` and triggers included) nor the element sets `Foreground`, the colour comes from an
+  ancestor and finally from the control's system default. The tool models neither inheritance nor control
+  defaults — but before 1.10 such a pair produced **no finding, no unresolved entry and no effect on
+  coverage**. ZeroCel's layer-visibility eye is exactly this: a `TextBlock` inside a `ToggleButton` template
+  carrying a `Style` that only sets `Text`, rendered as `ControlText` near-black on `#1A1A1A` = 1.21:1, while
+  the report said everything passed. The same shape is in the public corpus (QuickLook's
+  `ViewerPanel.xaml:202`, character for character). The site is named as `TextBlock⊕Style[inline]` or
+  `TextBlock⊕Style[K]` — what needs fixing is that style, which sets no colour.
+  **Not guessed:** the system default is not filled in as black. `SystemColors.ControlText` is only the right
+  answer when nothing above supplies a colour *and* no library provides the control's default style — and the
+  tool cannot tell those apart (MahApps' implicit styles, for one, are not detectable). Grading these needs an
+  inheritance model, which is on the ROADMAP; naming them is what 1.10 does.
+  **Not counted** (deliberately, for now): a text element with **no** style at all and no `Foreground` —
+  7,351 sites in the corpus, the same inheritance problem one level wider.
+
 ## 1.9.1 — 2026-11-24
 
 ### Upgrading

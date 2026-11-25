@@ -533,6 +533,7 @@ doesn't tell you whether anything can be done about it:
 | `in-style-template` | a text element with its own `Foreground` inside a style's `Template` setter (`<Setter Property="Template"><Setter.Value><ControlTemplate>`) — not graded yet (see Known limitations), counted so the gap shows in coverage |
 | `unknown-style-key` | the palette comes from separate dark and light dictionaries, and the element's style — `Style="{StaticResource K}"`, or a `BasedOn` in its chain — is defined in only one of them, so how the element looks in the other theme is unknown; the value is the style key. The element is counted even when the derived style adds nothing colour-related (an inline `<Button.Style>` based on `K` that only sets `Margin`, or only has a `DataTrigger` on `Visibility`): what is unknown is the base. Before 1.2 this was counted as `unknown-palette-key`; a `BasedOn` that set a colour was graded against the background behind the element instead, and one that set none was not counted at all — neither a pair nor an unresolved — so coming from 1.1 you can gain one unresolved per such element while the graded pairs stay the same. There is no config switch for this: a style defined in a dictionary named *dark* or *light* belongs to that theme. If the style is really shared (the other theme only overrides the brushes), move it to a dictionary without a theme word in its name |
 | `template-painted` | the text sits on a layer **inside** the control's template whose colour isn't knowable statically: it comes from a host property nobody set (a library control's default, which lives in C#), that layer's own background is a binding or gradient, or a trigger repainted it and that layer can't be placed (the trigger swaps the whole `Template`, the visual comes from another template, the element carries its own `Template`, the template offers no content position to compare against, or the repainted value is a gradient or a binding). The ancestor's colour is **not** a fallback here — the template painted over it. New in 1.6; before that these were graded against a background the repaint covers. A repaint of an element that *is* on the chain beneath the text is resolved and does not land here, and since 1.8 so is a repaint that touches **no** content position's chain at all — it isn't under this text, so the backdrop stands |
+| `inherited-foreground` | a text element has its own `Style`, and neither that chain (`BasedOn` and triggers included) nor the element sets `Foreground` — so the colour is inherited from an ancestor and finally from the control's system default (`ControlText`). An element with its own `Style` takes **no** implicit style, so a project-wide implicit `TextBlock` style does not supply it either. The tool models neither inheritance nor control defaults, so the pair isn't graded; the value names the style to fix (`TextBlock⊕Style[inline]`, `TextBlock⊕Style[Caption]`). New in 1.10 — before that these sites produced **nothing at all**: no finding, no unresolved entry, no effect on coverage. The shape that prompted it rendered near-black on `#1A1A1A` at 1.21:1 while the report said every pair passed. A text element with **no** style at all is not counted yet (same problem, one level wider — see Known limitations) |
 
 `summary.coverage` is the share of pairs that resolved. **A run below `--min-coverage`
 (default 50%) exits 3**, because a pass over a fraction of the project is not a pass — the same
@@ -785,6 +786,30 @@ Honest list — full blind-spot table with per-case evidence in the
   `TextBlock⊕Style[implicit TextBlock]/base`, and an implicit style that touches no colour leaves the plain
   label alone. One part still says nothing rather than guess: a type with **several competing global implicit
   styles**, where the winner depends on the merge order at runtime
+- A control whose `Content` is a **literal string** is graded with the colour that actually paints it (1.10).
+  `ContentPresenter` builds a `TextBlock` for the string, and an implicit style reaching that `TextBlock` sets
+  the colour **on the element**, which beats the value inherited from the host — so a `Foreground` declared on
+  the control's style, or on one of its triggers, can have no effect on screen at all. The colour comes from
+  the nearest implicit style in WPF's lookup order: inside the template (the content position's own
+  `Resources`, or any layer above it), then the chain's `<Style.Resources>`, then an ancestor's, then
+  **`Application` scope** — which is the distinction that matters, because an element a template builds skips
+  the visual tree, so the same style in `Window.Resources` does nothing to a button's text. App scope is
+  resolved by following App.xaml's `MergedDictionaries` (relative, `/Asm;component/…` and
+  `pack://application:,,,` URIs, transitively). Still out of reach, each keeping the host's own value rather
+  than a guess: a dictionary merged in **C# at runtime** (not followable), `Content="{Binding …}"` (a string
+  and a whole subtree can't be told apart statically), and a **framework default template** (the rule only
+  fires where the template and its content position are visible in the project). A `ContentPresenter` with
+  `RecognizesAccessKey="True"` builds an `AccessText`, so an implicit `TextBlock` style doesn't reach it —
+  an implicit `AccessText` style does. Element children keep the host's foreground: that is what they inherit,
+  and they are walked on their own
+- **Inherited text colour is not graded** — it is counted as `inherited-foreground` (1.10). A text element
+  with its own `Style` takes no implicit style, so when neither that chain nor the element sets `Foreground`,
+  the colour comes from an ancestor and finally from the control's system default. The system default is **not
+  filled in as black**: `ControlText` is only right when nothing above supplies a colour *and* no library
+  provides the control's default style, and those can't be told apart (MahApps' implicit styles, for one,
+  aren't detectable). A text element with **no** style at all and no `Foreground` isn't counted yet either —
+  7,351 sites in the seventeen public projects, the same problem one level wider. Grading both needs an
+  inheritance model (ROADMAP); until then the sites are named instead of dropped
 - A **templated control**'s text is matched against the layer inside the template that paints it (1.6):
   wherever the template holds host content — a `ContentPresenter`, a custom host taking
   `Content="{TemplateBinding Content}"`, a text element whose colour comes from the host, a shape painting

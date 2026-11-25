@@ -3,8 +3,8 @@
 project: screentogif
 repo: https://github.com/NickeManarin/ScreenToGif
 commit: a4d0a67c2131cd048ceec86cd40afc2f1a06f2fd
-tool-commit: 46454a7+dirty
-frozen: 2026-11-16
+tool-commit: 718dade+dirty
+frozen: 2026-11-25
 exit: 3
 palette-mode: pair
 palette-degraded: False
@@ -13,7 +13,7 @@ single-theme: False
 files: 113
 pairs: 1035
 coverage: 24.4
-unresolved: 3199
+unresolved: 3200
 skipped: 6
 dead-foreground: 101
 disabled-exempt: 401
@@ -27,6 +27,7 @@ warn: 73
 ok: 801
 decorative: 14
 unresolved-by.bound-or-gradient: 117
+unresolved-by.inherited-foreground: 1
 unresolved-by.in-style-template: 34
 unresolved-by.no-ancestor-background: 1701
 unresolved-by.template-painted: 264
@@ -1221,6 +1222,7 @@ U  in-style-template  ScreenToGif/Themes/Generic.xaml:848  {DynamicResource Elem
 U  in-style-template  ScreenToGif/Themes/Generic.xaml:851  {DynamicResource Element.Foreground.Medium}
 U  in-style-template  ScreenToGif/Themes/Generic.xaml:904  {DynamicResource Element.Foreground.Gray112}
 U  in-style-template  ScreenToGif/Windows/Other/Feedback.xaml:115  {DynamicResource Element.Foreground.Medium}
+U  inherited-foreground  Other/Translator/Themes/ComboBox.xaml:212  TextBox⊕Style[ComboBoxEditableTextBox]
 U  no-ancestor-background  Other/Translator/Themes/IconSet.xaml:100  #FF040707
 U  no-ancestor-background  Other/Translator/Themes/IconSet.xaml:1000  #ff7b7a7a
 U  no-ancestor-background  Other/Translator/Themes/IconSet.xaml:1004  #ffffffff

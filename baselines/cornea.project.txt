@@ -2,9 +2,9 @@
 # 旁邊那份快照是對這個版本的專案凍結的。驗收時重算一次再比：對象沒變 → 差異來自工具本身；
 # 對象也變了 → 先看下面哪些檔案動過（快照紅燈曾經兩個月都是 App 自己改了，不是工具回歸）。
 project: D:\應用程式\Cornea
-frozen: 2026-11-16
-tool-commit: c0b015be84c5215cdd596356a22ec83c0114c3bd
-tool-dirty: 6
+frozen: 2026-11-25
+tool-commit: 718dadec7d15dc3c161943a625a1c11e0105ec8d
+tool-dirty: 16
 git-repo: D:/應用程式/Cornea
 git-commit: e63b33b6f9c0a39e6c5def22b3be745d5df6818b
 git-dirty: 0

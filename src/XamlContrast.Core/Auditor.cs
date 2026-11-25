@@ -463,6 +463,57 @@ public sealed partial class Auditor
         return (null, null);
     }
 
+    /// <summary>作用中的 scoped 隱含樣式裡，這個型別最內層的那一條（指定主題，1.10）。</summary>
+    private StyleIndex.Merged? ScopedImplicitOne(string typeName, ThemeSide? side)
+    {
+        for (var i = _scopedStyles.Count - 1; i >= 0; i--)
+        {
+            var (od, ol) = _scopedStyles[i];
+            var owner = (side == ThemeSide.Light ? ol : od) ?? od ?? ol;
+            if (owner is null) continue;
+            if (_styles.ScopedImplicitChain(owner, typeName, side) is { } m) return m;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// 宿主的「字串內容」真正畫在什麼字色上（1.10）。null ＝照舊用宿主自己的 Foreground。
+    ///
+    /// <c>Content</c> 是字串時，ContentPresenter 自己產生一顆 TextBlock 來畫它 —— 而那顆 TextBlock
+    /// 套得到的隱含樣式，它的 <c>Foreground</c> Setter 是「設在元素上」的值，贏過從宿主繼承來的字色。
+    /// 所以宣告在 Style（或元素）上的 <c>Foreground="White"</c> 在畫面上完全沒有作用。
+    /// ⚠ 這也是為什麼要分 App 層與畫面層（<see cref="StyleIndex.AppImplicitChain"/>）：模板產生的元素
+    /// 查隱含樣式時跳過視覺樹，放在 <c>Window.Resources</c> 的同一份 Style 對它沒有作用。
+    ///
+    /// 查找順序＝WPF 的資源查找方向，最近的那一個贏：模板裡的 → 這條鏈的 <c>&lt;Style.Resources&gt;</c>
+    /// → 祖先帶下來的 → App 層。最近的那一個**沒設** <c>Foreground</c> 就是「沒有人蓋掉」，
+    /// 照舊繼承宿主的（回 null）。
+    /// </summary>
+    private string? StringContentForeground(StyleIndex.Merged chain, ThemeSide? side)
+    {
+        // 「模板裡有放內容的位置」是這條規則的證據：看得到那個機制才動手。看不到的（控制項的框架預設模板、
+        // 元素自己帶的模板）維持 1.9 的答案 —— 盲區明文留在 ROADMAP，不拿推論去蓋掉元素寫的值
+        if (chain.ContentTextType is not { } textType) return null;
+        var near = _styles.ChainOf(chain.ContentTextStyle, textType, side)
+                   ?? _styles.ScopedImplicitChain(chain, textType, side)
+                   ?? ScopedImplicitOne(textType, side)
+                   ?? AppImplicit(textType, side);
+        return near?.Props.TryGetValue("Foreground", out var v) == true ? v.V : null;
+    }
+
+    /// <summary>App 層的隱含樣式（1.10）。深淺兩份字典各宣告一個、而且字色寫法不同
+    /// （或只有一側有）時回 null —— 那是「不知道」，拿其中一側的值填兩欄就是編造（同 <c>Walk</c> 的 implicitSame）。</summary>
+    private StyleIndex.Merged? AppImplicit(string typeName, ThemeSide? side)
+    {
+        var s = side ?? _curSide;
+        if (s is not null || !_styles.HasThemeSides) return _styles.AppImplicitChain(typeName, s);
+        var d = _styles.AppImplicitChain(typeName, ThemeSide.Dark);
+        var l = _styles.AppImplicitChain(typeName, ThemeSide.Light);
+        if (d is null || l is null) return null;
+        return Fg(d) == Fg(l) ? d : null;
+        static string? Fg(StyleIndex.Merged m) => m.Props.TryGetValue("Foreground", out var v) ? v.V : null;
+    }
+
     private static int LineOf(XElement el) => el is IXmlLineInfo li && li.HasLineInfo() ? li.LineNumber : 0;
 
     /// <summary>無法解析要連「為什麼、在哪裡、卡在哪個值」一起記 —— 只給總數的話，
@@ -623,6 +674,21 @@ public sealed partial class Auditor
             handledFg = true;
         }
 
+        // ── 字色是繼承來的（1.10）──
+        // 文字元素有自己的 Style，而那條鏈一個 Foreground 都沒設、自己也沒寫：WPF 往祖先找繼承值，
+        // 最後落到控制項的系統預設（<ToggleButton> 沒套樣式時是 ControlText 近黑）。本工具不模擬繼承、
+        // 也不模擬控制項預設值 —— 但 1.9 之前這一組是**靜默消失**的：沒有 finding、沒有 unresolved、
+        // 覆蓋率照樣 100%。ZeroCel 的圖層眼睛（深色主題下 1.21:1）就是這樣被漏掉的。
+        // ⚠ 有自己的 Style 才算：元素沒有 Style 時隱含樣式還有機會給字色，而「連隱含樣式也沒有」
+        //   是另一個量級的形狀（語料 7351 處），那要有繼承模型才評得出來，見 ROADMAP
+        if (IsLeafText(el.Name.LocalName) && XamlBrush.Read(el, "Foreground") is null &&
+            (chain ?? chainLight) is { } colourless &&
+            NoForegroundAnywhere(chain) && NoForegroundAnywhere(chainLight))
+            // 點名「元素 ⊕ 那個樣式」而不是只點元素：要去修的是那個樣式（它沒設字色），
+            // 一個檔裡好幾個不同的樣式是不同的鍵。unresolved 的鍵是 file|reason|value
+            Unres(UnresolvedReason.InheritedForeground, file, LineOf(el),
+                $"{el.Name.LocalName}⊕{colourless.Label}");
+
         if (_cfg.NonText.UiComponents) GradeUiComponent(el, chain, chainLight, splitThemes, ancestorBd, localBgRaw, file, op, suppressedBy);
 
         // 這個元素的字型（WPF 優先序：本地 > Style > 隱含樣式 > 繼承）—— 它自己的 Foreground／Fill 用它評，子元素繼承它
@@ -636,6 +702,18 @@ public sealed partial class Auditor
         if (pushed) _scopedStyles.RemoveAt(_scopedStyles.Count - 1);
         _inheritedFont = outerFont;
     }
+
+    /// <summary>「Foreground 就是這個元素的文字本身」的元素（1.10）——
+    /// Button／CheckBox 之類不算：它們的 Foreground 是給內容繼承的，內容自己會被走到。</summary>
+    private static readonly string[] LeafTextEls =
+        ["TextBlock", "Run", "AccessText", "Label", "TextBox", "PasswordBox", "RichTextBox", "Hyperlink"];
+
+    /// <summary>後綴比對，同 <see cref="IsNonTextElement"/>（衍生控制項 MetroTextBox 之類也算）。</summary>
+    private static bool IsLeafText(string localName) => LeafTextEls.Any(localName.EndsWith);
+
+    /// <summary>這條鏈（含 BasedOn 與每個觸發態）一個 Foreground 都沒設；null 的鏈當成「沒設」。</summary>
+    private static bool NoForegroundAnywhere(StyleIndex.Merged? m)
+        => m is null || (!m.Props.ContainsKey("Foreground") && !m.States.Any(s => s.Set.ContainsKey("Foreground")));
 
     /// <summary>這個隱含樣式會不會改到顏色（1.6）：基礎 Setter 或任何觸發態動到 Foreground／Background，
     /// 或它帶模板（模板裡那幾層就是底）。只設 Margin／FontSize 的隱含樣式不走鏈路徑 ——
@@ -1077,6 +1155,10 @@ public sealed partial class Auditor
         }
         {
             var localFgRaw = XamlBrush.Read(el, "Foreground");
+            // 宿主的字串內容真正的字色（1.10）—— 整個狀態迴圈共用一份。元素自己換掉模板時 Style 那份模板
+            // 的 ContentPresenter 在執行期不存在（同 ownTemplate 的其他用法）
+            var contentFg = !ownTemplate && StyleIndex.HasStringContent(el)
+                ? StringContentForeground(chain, side) : null;
             var emitted = new HashSet<string>();
             var allStates = new List<StyleIndex.State> { new() };
             // 元素自己換掉模板 → Style 模板裡的觸發器不存在（見上面 ownTemplate）
@@ -1110,6 +1192,11 @@ public sealed partial class Auditor
                 else if (st.Set.TryGetValue("Foreground", out var sf)) { fgV = sf; fgSrc = st.SetSrc["Foreground"]; }
                 else if (chain.Props.TryGetValue("Foreground", out var pf)) { fgV = pf.V; fgSrc = pf.Src; }
                 if (fgV is null) continue;
+                // 字串內容的字色由套得到那顆 TextBlock 的隱含樣式決定，蓋過上面每一個「從宿主繼承」的來源
+                // （含觸發 Setter 與 TargetName 改到放內容那一層的字色：那些都是繼承值）。
+                // ⚠ fgSrc 刻意**不動**：它只管「這一組由定義處還是使用處評」的分工（SameSource），
+                //   換了來源會讓同一組在兩邊各算一次。這一格只換值，不換歸屬
+                if (contentFg is not null) fgV = contentFg;
 
                 string? bgV = null; object? bgSrc = null;
                 // 宿主自己的那個屬性（WPF 優先序：元素屬性 > Style 觸發 > Style Setter）——
@@ -1832,6 +1919,17 @@ public sealed partial class Auditor
             var states = new List<(string Name, StyleIndex.State? St)> { ("base", null) };
             states.AddRange(chain.States.Select(s => ("trigger", (StyleIndex.State?)s)));
 
+            // ── 這個 Style 畫的是某個元素的「字串內容」嗎（1.10）──
+            // 定義處看不到使用處的內容，所以反過來問索引：有沒有元素以這個 Style（或這個型別的隱含樣式）
+            // 畫字面字串。有的話，那段文字的字色是隱含 TextBlock 樣式的，不是這個 Style 宣告的那個
+            // （見 StringContentForeground）。⚠ 不猜「內容八成是字串」—— 問的是專案裡真的有沒有那種用法
+            var usedOnStringContent = key is not null
+                ? _styles.HasStringContentUser(key)
+                : style.Parent?.Name.LocalName.EndsWith(".Style", StringComparison.Ordinal) == true
+                    ? style.Parent.Parent is { } styleOwner && StyleIndex.HasStringContent(styleOwner)
+                    : ttName is not null && _styles.SomeStringContentElement(ttName);
+            var stringContentFg = usedOnStringContent ? StringContentForeground(chain, _curSide) : null;
+
             foreach (var (stateName, st) in states)
             {
                 string? Prop(string p, out int src)
@@ -1856,6 +1954,8 @@ public sealed partial class Auditor
                 var fgv = Prop("Foreground", out var fgSrc);
                 var bgv = Prop("Background", out var bgSrc);
                 if (fgv is null || bgv is null || fgSrc != selfId || bgSrc != selfId) continue;
+                // 字串內容的字色由隱含 TextBlock 樣式決定（1.10）—— 同元素端，只換值不換歸屬
+                if (stringContentFg is not null) fgv = stringContentFg;
                 var stDisabled = st?.Disabled ?? false;
                 if (fgDead) { _deadFg++; continue; }
                 // 停用態（IsEnabled=False 觸發）：WCAG 1.4.3 豁免，計數回報、不評分

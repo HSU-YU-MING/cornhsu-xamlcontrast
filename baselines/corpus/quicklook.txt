@@ -3,8 +3,8 @@
 project: quicklook
 repo: https://github.com/QL-Win/QuickLook
 commit: e2f19a0ba9097024cc6520dd03735abd26f425f8
-tool-commit: 46454a7+dirty
-frozen: 2026-11-16
+tool-commit: 718dade+dirty
+frozen: 2026-11-25
 exit: 3
 palette-mode: pair
 palette-degraded: False
@@ -13,7 +13,7 @@ single-theme: False
 files: 51
 pairs: 8
 coverage: 2.1
-unresolved: 380
+unresolved: 381
 skipped: 2
 dead-foreground: 4
 disabled-exempt: 4
@@ -27,6 +27,7 @@ warn: 2
 ok: 5
 decorative: 0
 unresolved-by.bound-or-gradient: 6
+unresolved-by.inherited-foreground: 1
 unresolved-by.in-style-template: 6
 unresolved-by.no-ancestor-background: 262
 unresolved-by.translucent-uncomposited: 99
@@ -57,6 +58,7 @@ U  in-style-template  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml
 U  in-style-template  QuickLook.Plugin/QuickLook.Plugin.DbViewer/Pagination.xaml:273  {DynamicResource TextFillColorPrimaryBrush}
 U  in-style-template  QuickLook.Plugin/QuickLook.Plugin.TextViewer/Controls/DropDownButton.xaml:37  {DynamicResource TextFillColorPrimaryBrush}
 U  in-style-template  QuickLook/Controls/BusyDecorator/BusyDecorator.xaml:12  {DynamicResource TextFillColorPrimaryBrush}
+U  inherited-foreground  QuickLook.Plugin/QuickLook.Plugin.VideoViewer/ViewerPanel.xaml:202  TextBlock⊕Style[inline]
 U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:101  {DynamicResource WindowTextForegroundAlternative}
 U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:107  {DynamicResource WindowTextForegroundAlternative}
 U  no-ancestor-background  QuickLook.Plugin/QuickLook.Plugin.AppViewer/InfoPanels/ApkInfoPanel.xaml:117  {DynamicResource WindowTextForegroundAlternative}

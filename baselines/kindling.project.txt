@@ -2,11 +2,11 @@
 # 旁邊那份快照是對這個版本的專案凍結的。驗收時重算一次再比：對象沒變 → 差異來自工具本身；
 # 對象也變了 → 先看下面哪些檔案動過（快照紅燈曾經兩個月都是 App 自己改了，不是工具回歸）。
 project: D:\應用程式\Kindling\Kindling.WPF
-frozen: 2026-11-16
-tool-commit: c0b015be84c5215cdd596356a22ec83c0114c3bd
-tool-dirty: 6
+frozen: 2026-11-25
+tool-commit: 718dadec7d15dc3c161943a625a1c11e0105ec8d
+tool-dirty: 13
 git-repo: D:/應用程式/Kindling
-git-commit: 57ce70b6383455e17a2ac2f6c783478dcaf90e77
+git-commit: 9501b2f8ae61e46437b5da028da4f441f13fdaa7
 git-dirty: 1
 inputs: 79
 # sha256(前 16 碼)  專案內相對路徑
@@ -64,7 +64,7 @@ DAA30FAF5FF21E76  Views/ApiKeyDialog.xaml
 0D6ADB8FAF522D29  Views/ApiKeyDialog.xaml.cs
 F9BA7B07ECD93B7C  Views/ChoiceDialog.xaml
 C63C3CCF7D1F8E8C  Views/ChoiceDialog.xaml.cs
-F29160B8FC5BE938  Views/ClipLibraryView.xaml
+77B0DEAF68ABF2CB  Views/ClipLibraryView.xaml
 0FA27742EB2BE647  Views/ClipLibraryView.xaml.cs
 D13209A5B4696CBD  Views/ExportSettingsDialog.xaml
 9E83363F7ACC4585  Views/ExportSettingsDialog.xaml.cs
