@@ -888,6 +888,12 @@ implementation match the design?"* (Figma vs rendered values); XamlContrast answ
 *"can people actually read it?"* One guards fidelity, the other guards legibility —
 they meet in the same PR checks list.
 
+Three more tools read the same XAML and share the exit codes, the baseline idea and the action inputs:
+[**XamlKeys**](https://github.com/HSU-YU-MING/cornhsu-xamlkeys) (resource keys that resolve to nothing or to the wrong definition),
+[**XamlFit**](https://github.com/HSU-YU-MING/cornhsu-xamlfit) (translated text that does not fit) and
+[**XamlA11y**](https://github.com/HSU-YU-MING/cornhsu-xamla11y) (controls a screen reader cannot name or a keyboard cannot
+reach). [All four in one job](https://github.com/HSU-YU-MING/cornhsu-xamla11y/blob/main/docs/four-tools.md).
+
 ## License
 
 MIT © [許彧銘 Hsu Yu-Ming](https://cornhsu.com/)
