@@ -151,10 +151,12 @@
       「!! 1 key(s) dropped —— 色票讀壞了」。實測只有 NETworkManager 動（`files` 163 → 168，五個
       `Resources/Styles/*Styles.xaml` 各有一個 `MahApps.Brushes.*` 在 `<Style.Resources>` 裡），色盤與每一筆
       finding 都沒變。⚠ 畫面檔自己的區域 brush 刻意不遮 —— 詳見下面那條。
-- **把透明色票當透明，不要當「讀不懂」**：`<SolidColorBrush x:Key="Ghost" Color="Transparent"/>` 現在被剔除、
-  列在「讀不懂」的名單上（用到它的地方記 `unknown-palette-key`），而工具其實讀得懂 —— 它就是透明，
-  應該穿透到祖先。改了會多出配對、覆蓋率上升、可能多出 finding，所以是獨立的一次稽核語意改進（minor ＋ Upgrading），
-  不夾帶在別的修正裡。順帶把那句警告的措辭分成兩種（真的讀不懂／刻意不當色票）。
+- [x] **把透明色票當透明，不要當「讀不懂」** —— 1.11：`Color="Transparent"` 就是 alpha 0，而
+      `Color="#00FFFFFF"`（同一個顏色）色盤本來就收，所以具名那個寫法是唯一的例外：鍵被剔除、列在
+      「讀不懂」的名單上，用到它的地方記 `unknown-palette-key`。實測 6 個專案有這種鍵，**17 個專案一筆
+      fail／warn 都沒變**：Playnite +45 組配對（`ControlBackgroundBrush` 是它最大的那個未知鍵，219 處，
+      現在對著彈出選單的底評出 12.91）、MahApps 反方向（覆蓋率 5.5% → 3.9%：底解開之後走得到後面每一個
+      觸發態，`template-painted` 205 → 769，那些字色真的是執行期才知道 —— 一筆藏十幾處變成十幾筆）。
 - **畫面檔的區域 brush 收斂到子樹**：現在是「整個檔」（1.0 就在的近似）。量過了（1.11）：MaterialDesign 的
   `DataGrids.xaml` 有三顆按鈕各自在 `<Button.Resources>` 裡把 `MaterialDesign.Brush.Primary` 換成
   Orange／DodgerBlue／Red，工具現在讓**先出現的那一個**贏、三顆都用它評 —— 三筆裡有兩筆是編的。

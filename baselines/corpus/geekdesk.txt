@@ -3,7 +3,7 @@
 project: geekdesk
 repo: https://github.com/BookerLiu/GeekDesk
 commit: 7f0e228f7827d0cb2b18a72549494f4fa637b990
-tool-commit: 9847844+dirty
+tool-commit: 10daaf1+dirty
 frozen: 2026-11-25
 exit: 3
 palette-mode: none

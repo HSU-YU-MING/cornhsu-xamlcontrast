@@ -3,12 +3,12 @@
 project: winuigallery
 repo: https://github.com/microsoft/WinUI-Gallery
 commit: 6de91feccadfbb0a796b71caedead5a2284f730e
-tool-commit: 9847844+dirty
+tool-commit: 10daaf1+dirty
 frozen: 2026-11-25
 exit: 3
 palette-mode: pair
 palette-degraded: False
-palette-keys: 573
+palette-keys: 575
 single-theme: False
 files: 196
 pairs: 111
@@ -30,8 +30,8 @@ unresolved-by.bound-or-gradient: 39
 unresolved-by.inherited-foreground: 48
 unresolved-by.no-ancestor-background: 130
 unresolved-by.over-sibling-content: 12
-unresolved-by.translucent-uncomposited: 7
-unresolved-by.unknown-palette-key: 37
+unresolved-by.translucent-uncomposited: 8
+unresolved-by.unknown-palette-key: 36
 unknown-keys.AcrylicBackgroundFillColorBaseBrush: 1
 unknown-keys.AcrylicBackgroundFillColorDefaultBrush: 3
 unknown-keys.AcrylicInAppFillColorDefaultBrush: 1
@@ -40,7 +40,6 @@ unknown-keys.ButtonBackgroundThemeBrush: 3
 unknown-keys.ButtonForeground: 3
 unknown-keys.CustomAcrylicInAppBrush: 1
 unknown-keys.CustomAcrylicInAppLuminosity: 1
-unknown-keys.HomePageBackgroundBrush: 1
 unknown-keys.InfoBarWarningSeverityIconBackground: 2
 unknown-keys.OverlayRadialGradient: 1
 unknown-keys.PrimaryColor: 1
@@ -390,6 +389,7 @@ U  over-sibling-content  WinUIGallery/Samples/VariableSizedWrapGrid/VariableSize
 U  over-sibling-content  WinUIGallery/Samples/VariableSizedWrapGrid/VariableSizedWrapGridPage.xaml:34  <Rectangle> in <VariableSizedWrapGrid>
 U  over-sibling-content  WinUIGallery/Samples/VariableSizedWrapGrid/VariableSizedWrapGridPage.xaml:38  <Rectangle> in <VariableSizedWrapGrid>
 U  translucent-uncomposited  WinUIGallery/Controls/HomePage/HomePageHeader.xaml:105  ControlAltFillColorQuarternaryBrush
+U  translucent-uncomposited  WinUIGallery/Pages/SearchResultsPage.xaml:84  HomePageBackgroundBrush
 U  translucent-uncomposited  WinUIGallery/SampleSupport/SamplePages/CardPage.xaml:86  {CardBackgroundFillColorDefaultBrush} over {SmokeFillColorDefaultBrush}
 U  translucent-uncomposited  WinUIGallery/Samples/FlipView/FlipViewPage.xaml:64  #A5FFFFFF
 U  translucent-uncomposited  WinUIGallery/Samples/Iconography/IconographyPage.xaml:68  CardBackgroundFillColorDefaultBrush
@@ -408,7 +408,6 @@ U  unknown-palette-key  WinUIGallery/Controls/HomePage/Tile.xaml:57  AcrylicBack
 U  unknown-palette-key  WinUIGallery/Controls/HomePage/Tile.xaml:73  AcrylicBackgroundFillColorDefaultBrush
 U  unknown-palette-key  WinUIGallery/Controls/HomePage/Tile.xaml:78  AcrylicBackgroundFillColorDefaultBrush
 U  unknown-palette-key  WinUIGallery/Controls/HorizontalScrollContainer.xaml:13  ButtonForeground
-U  unknown-palette-key  WinUIGallery/Pages/SearchResultsPage.xaml:84  HomePageBackgroundBrush
 U  unknown-palette-key  WinUIGallery/SampleSupport/SamplePages/ItemsRepeaterCollectionPage.xaml:50  AcrylicBackgroundFillColorBaseBrush
 U  unknown-palette-key  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:108  CustomAcrylicInAppBrush
 U  unknown-palette-key  WinUIGallery/Samples/Acrylic/AcrylicPage.xaml:186  CustomAcrylicInAppLuminosity

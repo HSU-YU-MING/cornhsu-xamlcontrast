@@ -14,7 +14,7 @@
 
 ```bash
 dotnet build XamlContrast.slnx -c Release
-dotnet test  XamlContrast.slnx -c Release          # 2026-11-25 實跑（Windows）：1445 綠、3 略過（沒有 jq 的機器略過 Action 註記的兩筆實跑；非 Linux 略過統計說明的標記檔）
+dotnet test  XamlContrast.slnx -c Release          # 2026-11-25 實跑（Windows）：1446 綠、3 略過（沒有 jq 的機器略過 Action 註記的兩筆實跑；非 Linux 略過統計說明的標記檔）
 dotnet format XamlContrast.slnx --verify-no-changes # CI 第一關，不過直接紅
 
 # 示範專案（刻意做壞的，exit 1 才是對的）
@@ -266,6 +266,14 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   退回全域主題色 —— 3 筆 warn 變 3 筆 fail，而那個顏色那三顆按鈕根本沒用到。兩種都不精確（本地層是整個檔、
   不是子樹），收斂到子樹是獨立的一件事（ROADMAP）。
   ⚠ 不成對的開始標籤一律遮到檔尾：寧可少收色票（退化會喊 exit 3），不要把區域資源收進全域色盤。
+- **`Color="Transparent"` 是色票**（1.11，`PaletteDetector.TransparentValue` = `#00FFFFFF`）：透明就是 alpha 0，
+  而十六進位的 `#00FFFFFF` 色盤本來就收 —— 具名那個寫法是唯一的例外（具名色表刻意沒有 Transparent，
+  `LiteralColor` 跟著排除它），於是鍵被剔除、列進「讀不懂」的名單，用到它的地方記 `unknown-palette-key`。
+  ⚠ **「讀得懂但剔除」比「讀不懂」更糟**：那句警告會讓人去找一個不存在的打字錯誤，而真正的影響是整批配對消失。
+  野外代價量過（2026-11-25）：Playnite 的 `ControlBackgroundBrush`（Desktop 預設主題就是 `Color="Transparent"`）
+  一個鍵 219 處，解開之後 +45 組配對。⚠ 解開一層底之後**走得到後面每一個觸發態**，所以 unresolved 可能
+  大幅增加、覆蓋率反而下降（MahApps 5.5% → 3.9%，`template-painted` 205 → 769）—— 那是「一筆藏十幾處」
+  變成「十幾筆各自點名」，不是回歸。17 個專案一筆 fail／warn 都沒變。
 - **檔名的 dark／light 提示只看「專案內相對路徑」。** 看完整路徑的話，專案放在
   `D:\dark-projects\` 底下會讓所有候選都染上 dark 提示、配對整個失效。
 - **一律 `Path.GetFullPath` 正規化分隔線。** `GetDirectoryName` 回傳反斜線，
@@ -797,11 +805,11 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   1.10 新增四條明文盲區（都在「字串內容」那一節）：`Content="{Binding}"`（分不出字串與子樹）、
   框架的預設模板、C# 在執行期合併的字典、**字色純粹靠繼承的文字元素**
   （有自己的樣式的那種記 `inherited-foreground`，連樣式都沒有的那 7351 處還沒計）。
-  1.11 把第一條從「維持宿主的字色」改成點名（`bound-content`），另外兩條新明文盲區：
-  **透明色票被當成「讀不懂」**（`Color="Transparent"` 的 brush 鍵被剔除、用到它的地方記
-  `unknown-palette-key`，而它其實該穿透到祖先）、**畫面檔的區域 brush 作用範圍是整個檔不是子樹**
-  （MaterialDesign 的 `DataGrids.xaml` 三顆按鈕各自換 `MaterialDesign.Brush.Primary`，現在先出現的那一個贏，
-  三筆裡兩筆是編的）。兩條都在 ROADMAP，都會動到計數，所以不夾帶在別的修正裡。
+  1.11 把第一條從「維持宿主的字色」改成點名（`bound-content`），並且把「透明色票被當成讀不懂」整個修掉
+  （見色盤偵測那一節）。新增一條明文盲區：**畫面檔的區域 brush 作用範圍是整個檔不是子樹**
+  （MaterialDesign 的 `DataGrids.xaml` 三顆按鈕各自把 `MaterialDesign.Brush.Primary` 換成不同的顏色，
+  現在先出現的那一個贏，三筆裡兩筆是編的）。要做對得按行號區間收範圍（同隱含樣式的 `ScopeOf`），
+  而且色盤的區域層要從「每檔一份」變成「每個範圍一份」—— 在 ROADMAP，會動到計數，不夾帶在別的修正裡。
 - **觸發器條件是「App 自己的旗標」時會報出執行期不存在的組合**（明文盲區，1.0 就在，1.6 只是變多）：
   ScreenToGif 用 `<Condition Property="DarkMode" Value="True"/>` 分深淺兩套字色，工具不知道那個屬性與主題相關，
   於是兩個狀態各對兩欄各評一次 —— 黑字配深色底、白字配淺色底各一筆。猜屬性名就違反「不猜」，所以照報，

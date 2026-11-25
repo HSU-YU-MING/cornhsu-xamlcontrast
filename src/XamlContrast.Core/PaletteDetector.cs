@@ -165,12 +165,26 @@ public static partial class PaletteDetector
     /// <summary>「有定義、但值讀不懂」的標記 —— 只在合併式色盤內部流通，見 <see cref="MergedXamlPalette"/>。</summary>
     private const string InvalidValue = "!invalid";
 
+    /// <summary><c>Color="Transparent"</c> 的色票值（1.11）。
+    ///
+    /// 透明就是 alpha 0，而 <c>Color="#00FFFFFF"</c> 這個寫法色盤本來就收 —— 所以把具名的
+    /// Transparent 折成同一個值，兩種寫法一致。
+    /// ⚠ 1.10 之前是**剔除**它（跟具名色表同一套，那張表刻意沒有 Transparent）：於是一個讀得懂的值
+    ///   被列進「!! N key(s) dropped —— 色票讀壞了」的名單，用到它的地方記 unknown-palette-key，
+    ///   而它其實該穿透到祖先。野外代價是量過的：Playnite 的 `ControlBackgroundBrush`（Desktop 預設主題裡
+    ///   就是 <c>Color="Transparent"</c>）一個鍵就有 219 處用到。</summary>
+    private const string TransparentValue = "#00FFFFFF";
+
     /// <summary>字面色值（#hex 或具名色）→ 正規化色碼（#RRGGBB／#AARRGGBB）；讀不懂回傳 null。
     /// WPF 也吃 #RGB／#ARGB 與完整的具名色表 —— 跟 ColorResolver 同一套（色票與使用處的標準要一致）。</summary>
     private static string? LiteralColor(string v)
-        => v.StartsWith('#') ? ColorResolver.NormalizeHex(v)
-           // {x:Static Colors.Red}（1.4）：色票寫成 Color="{x:Static Colors.Red}" 也是同一個具名色。Transparent 不在色票裡收（跟具名色同一套）
-           : ColorResolver.NamedHex(v) ?? (ColorResolver.StaticNamedColour(v) is { } s && s != "Transparent" ? s : null);
+    {
+        if (v.StartsWith('#')) return ColorResolver.NormalizeHex(v);
+        if (v.Trim().Equals("Transparent", StringComparison.OrdinalIgnoreCase)) return TransparentValue;
+        // {x:Static Colors.Red}（1.4）：色票寫成 Color="{x:Static Colors.Red}" 也是同一個具名色
+        return ColorResolver.NamedHex(v)
+               ?? (ColorResolver.StaticNamedColour(v) is { } s ? s == "Transparent" ? TransparentValue : s : null);
+    }
 
     /// <summary>
     /// 專案內的檔案，排除建置輸出（bin／obj）與點開頭的目錄（.git、.vs、.claude…）。

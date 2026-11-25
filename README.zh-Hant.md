@@ -136,7 +136,9 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
    或模板裡（`<ContentPresenter.Resources>`）的 brush **不算** —— 那是區域資源，只有用到那個樣式的地方
    看得到，所以 1.11 起它們既不會多出色票鍵，也不會讓一個只放樣式的字典變成色盤來源。視窗自己的區域 brush（`Window.Resources`、
    `UserControl.Resources`）跟 WPF 的資源查找一樣只在那個視窗裡看得到：在那裡蓋過色盤（引用 `Color` 的
-   區域 brush 依主題各自解析），只有某個視窗定義的鍵在其他地方一律是 `unknown-palette-key`。字典檔不算進
+   區域 brush 依主題各自解析），只有某個視窗定義的鍵在其他地方一律是 `unknown-palette-key`。`Color="Transparent"` 跟別的色票一樣收
+   （alpha 0，等同 `#00FFFFFF`，而那個寫法本來就收）：用到它的地方穿透到底下那一層，不再算成「讀不懂的鍵」
+   （1.11 —— 17 個公開專案裡，Playnite 的 `ControlBackgroundBrush` 一個鍵就 219 處）。字典檔不算進
    `summary.files` 的畫面數，但裡面的 Style（以及不在 Style 裡的 DataTemplate／ControlTemplate）照樣稽核。色盤依路徑裡任何位置的 dark／light 分成深淺兩組
    （`darktheme.xaml`、`Dark2.xaml`、`Themes/Dark/Colors/Palette.xaml` 都算）；檔名完全看不出主題（`Ocean.xaml`／
    `Nord.xaml`）、又有三個以上的鍵在不同字典裡值不同時，判成偵測退化，不靜默只評其中一套。

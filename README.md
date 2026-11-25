@@ -182,6 +182,9 @@ tried in this order, and the one that ran is always named on the first line of t
    local brushes (`Window.Resources`, `UserControl.Resources`) are visible only inside that window,
    as in WPF's resource lookup: there they override the palette (a local brush referencing a `Color`
    is resolved per theme), and a key only some window defines is `unknown-palette-key` everywhere else.
+   `Color="Transparent"` is a swatch like any other (alpha 0, the same as `#00FFFFFF`, which has always been
+   taken): uses of it paint through to whatever is behind, rather than counting as a key the tool cannot read
+   (1.11 — in the seventeen public projects Playnite's `ControlBackgroundBrush` alone is 219 sites).
    Dictionary files don't count as screens in `summary.files`, but their styles (and the templates of
    their data and control templates outside styles) are still audited. Files are grouped into dark and light by *dark* / *light* anywhere in their path
    (`darktheme.xaml`, `Dark2.xaml` and `Themes/Dark/Colors/Palette.xaml` all count); if no name tells
