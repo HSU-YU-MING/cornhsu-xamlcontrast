@@ -3,8 +3,8 @@
 project: playnite
 repo: https://github.com/JosefNemec/Playnite
 commit: e2e6efcda311fea38fcd92f61c8ca90811d97f28
-tool-commit: 46454a7+dirty
-frozen: 2026-11-16
+tool-commit: 718dade+dirty
+frozen: 2026-11-25
 exit: 3
 palette-mode: single
 palette-degraded: False
@@ -12,8 +12,8 @@ palette-keys: 26
 single-theme: True
 files: 272
 pairs: 62
-coverage: 7.3
-unresolved: 790
+coverage: 7.2
+unresolved: 802
 skipped: 0
 dead-foreground: 26
 disabled-exempt: 478
@@ -27,6 +27,7 @@ warn: 0
 ok: 51
 decorative: 6
 unresolved-by.bound-or-gradient: 10
+unresolved-by.inherited-foreground: 12
 unresolved-by.in-style-template: 39
 unresolved-by.no-ancestor-background: 375
 unresolved-by.template-painted: 4
@@ -151,6 +152,18 @@ U  in-style-template  source/Tools/PlayniteInstaller/Classic.xaml:137  {DynamicR
 U  in-style-template  source/Tools/PlayniteInstaller/Classic.xaml:141  {DynamicResource GlyphBrush}
 U  in-style-template  source/Tools/PlayniteInstaller/Classic.xaml:301  {DynamicResource GlyphBrush}
 U  in-style-template  source/Tools/PlayniteInstaller/Classic.xaml:306  {DynamicResource GlyphBrush}
+U  inherited-foreground  source/Playnite.DesktopApp/Controls/GamesGridView.xaml:102  TextBlock⊕Style[TextItemStyle]
+U  inherited-foreground  source/Playnite.DesktopApp/Controls/GamesGridView.xaml:78  TextBlock⊕Style[TextItemStyle]
+U  inherited-foreground  source/Playnite.DesktopApp/Controls/GamesGridView.xaml:90  TextBlock⊕Style[TextItemStyle]
+U  inherited-foreground  source/Playnite.DesktopApp/Windows/EmulatorsWindow.xaml:213  TextBox⊕Style[inline]
+U  inherited-foreground  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:138  TextBox⊕Style[TextBoxStyle]
+U  inherited-foreground  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:145  TextBox⊕Style[TextBoxStyle]
+U  inherited-foreground  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:265  TextBox⊕Style[TextBoxStyle]
+U  inherited-foreground  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:357  TextBox⊕Style[TextBoxStyle]
+U  inherited-foreground  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:378  TextBox⊕Style[TextBoxStyle]
+U  inherited-foreground  source/Playnite.DesktopApp/Windows/GameEditWindow.xaml:399  TextBox⊕Style[TextBoxStyle]
+U  inherited-foreground  source/Playnite.DesktopApp/Windows/SearchWindow.xaml:104  TextBox⊕Style[SearchWindowSearchBox]
+U  inherited-foreground  source/Playnite.FullscreenApp/Windows/TextInputWindow.xaml:48  TextBox⊕Style[TextInputTextbox]
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/AddonUpdates.xaml:46  {DynamicResource TextBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/AddonUpdates.xaml:46  {DynamicResource WarningBrush}
 U  no-ancestor-background  source/Playnite.DesktopApp/Controls/AddonsSections/AddonUpdates.xaml:46  {DynamicResource WarningBrush}

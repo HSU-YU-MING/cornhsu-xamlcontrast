@@ -123,6 +123,14 @@ public enum UnresolvedReason
     /// ⚠ 這一類**不能**退回祖先的底 —— 模板畫了一層底在中間，祖先的顏色根本沒露出來。
     /// 實例：HandyControl 的 <c>&lt;hc:Shield/&gt;</c> 沒寫 Color 時，徽章的底是控制項的預設強調色。</summary>
     TemplatePainted,
+    /// <summary>文字元素有自己的 Style，而那條鏈（連同 BasedOn 與觸發器）一個 <c>Foreground</c> 都沒設、
+    /// 元素自己也沒寫（1.10）—— WPF 這時往祖先找繼承值，最後落到控制項的系統預設色。
+    ///
+    /// ⚠ 元素有自己的 Style 就**完全不套**隱含樣式，所以「專案宣告了隱含 TextBlock 樣式」救不了這一格。
+    /// 本工具不模擬繼承、也不模擬控制項預設值，所以這一組算不出來 —— 但 1.9 之前是**靜默消失**：
+    /// 連 unresolved 都沒有，覆蓋率照樣 100%。實例：ZeroCel 的圖層眼睛（ToggleButton 模板裡的 TextBlock
+    /// 自帶一個只設 Text 的 Style），執行期是黑字疊近黑底 1.21:1，而工具回報「757 組全過」。</summary>
+    InheritedForeground,
 }
 
 /// <summary>XAML 裡以資源鍵 Key 用到的轉換器，與它的分析結果。</summary>

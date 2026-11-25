@@ -105,6 +105,12 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
       `~/.dotnet/tools` 寫進 `GITHUB_PATH`、Run audit 的 `--json` 落點固定在 `$RUNNER_TEMP/xamlcontrast-report.json`。
       改了任何一個，README 的那一步就安靜失效。
     - 協定跟 Parity repo 的伺服器端一起定，**不要單方面改**（伺服器照這個形狀實作，`CliPushTests` 釘住線上的樣子）。
+  - **1.10 的新增（凍結面，minor）**：unresolved 原因多一個 `inherited-foreground`（開放集，第 3 面；協定不認得的值送 `other`）。
+    CLI 旗標、JSON 欄位、Action input、config 都沒動，`schemaVersion` 維持 6。
+    ⚠ **`Baseline.KeyVersion` 維持 2**（刻意的）：字串內容那條規則換掉的是 `fg` 的**值**，不是鍵的寫法 ——
+    同 1.8 的 `State.ElementFg`（也換了 fg 的值、也沒遞增）。受影響的那幾筆的鍵確實會變，所以開 `--baseline` 的人
+    會看到「新增」＋「已還債」各一批，Upgrading 有寫要他們逐筆看過再 `--write-baseline` 重寫。
+    判準是「產生鍵的**方式**變了嗎」，不是「有沒有任何一筆的鍵變了」—— 後者等於每個稽核語意的改進都要遞增一次。
   - **1.6 的新增（凍結面，minor）**：unresolved 原因多一個 `template-painted`（開放集，第 3 面；協定不認得的值送 `other`）。
     **`Baseline.KeyVersion` 1 → 2**：隱含樣式改走鏈路徑（`element` 多 `⊕Style[implicit …]/base`）＋帶模板的控制項
     改配模板裡那一層（`bg` 的值變了），兩件都動到鍵的寫法。凍的是 baseline 檔的**格式**、不是鍵的寫法，所以是 minor。
@@ -403,6 +409,67 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   translucent-uncomposited 那一段多一個條件 `_styles.AppliesToSomeElement(ttName)` —— 專案裡真的有那個型別的元素
   才算「使用處評得到」；一個都沒有的話執行期套不到它，那一組不存在，照舊記 unresolved。
 
+### 字串內容的字色由隱含樣式決定（1.10，`StyleIndex` 的 `ContentTextType`／`ContentTextStyle`／`AppImplicitChain`／`ResolveAppScope` + `Auditor.StringContentForeground`）
+
+外部回報（2026-11-25，ZeroCel 前端用 1.8.3 整理）：工具說 757 組全過，真 App 裡淺色主題的紫色主要鈕是
+黑字疊紫底 2.66。原因不是算錯 —— 是工具拿一個**畫不上去的顏色**在評分。
+
+`Content` 是字串時 ContentPresenter 自己產生一顆 TextBlock 來畫它，而套得到那顆 TextBlock 的隱含樣式，
+它的 `Foreground` Setter 是「設在元素上」的值，**贏過從宿主繼承來的**。所以 Style（或它的觸發器）上
+宣告的 `Foreground="White"` 在畫面上完全沒有作用。Kindling 的 `DarkTheme.xaml` 自己在 `AccentBtn` 上方
+用 7 行註解寫了這條規則 —— 而同一個檔的 `DarkBtn` 按下態就踩在上面（13 筆真 fail，1.9 全報 ok）。
+
+- **`Application` 作用域才算，不是「全域」**（`ResolveAppScope`）。模板產生的元素查隱含樣式時**跳過視覺樹**，
+  所以同一份 `<Style TargetType="TextBlock">` 放在 `Window.Resources` 對按鈕的文字沒有作用。
+  作用域是追 App.xaml 的 `MergedDictionaries` 算出來的（相對路徑、`/Asm;component/…`、`pack://application:,,,`，
+  遞移；先照「相對於引用它的那個檔」解，再退回尾段比對）。
+  ⚠ 這個分別是必要的，不是潔癖：`_implicitGlobal` 收的是「根元素是 ResourceDictionary 或 Application 的檔、
+  而且整個檔的範圍」—— 裡面混著只被某個 Window 合併的字典。拿它當 App 層會對那種專案換掉一個其實沒被換掉的字色。
+  追不到的（C# 在執行期 `MergedDictionaries.Add` 的主題字典）維持 1.9 的答案 —— 盲區留著，不拿猜的去填。
+  ⚠ 這也是為什麼 17 個公開專案**一列都沒變**：五個控制項函式庫根本沒有 App.xaml，而語料裡的 App 沒有
+  「App 合併的隱含文字樣式 ＋ 用在看得見的模板的字串內容上」這個組合。**不要因為語料沒變就以為這條路是死碼**
+  （1.8 的教訓）：repro 與 Kindling 的 14 筆證明它跑得到，`StringContentTests` 釘住。
+- **`RecognizesAccessKey="True"` 的 ContentPresenter 產生 `AccessText`、不是 `TextBlock`**（`GeneratedTextType`）。
+  隱含 `TextBlock` 樣式對它沒有作用，隱含 `AccessText` 樣式才有。語料 259 處這樣寫 ——
+  不分這一刀就會對整批按鈕換掉一個沒被換掉的字色。
+- **`fgSrc` 刻意不動，只換值**（`Auditor` 兩個評分處）。`fgSrc` 管的是 `SameSource`：字與底同源的那一組由
+  定義處（`WalkStyles`）評、使用處讓掉。換了來源那一組會在兩邊各算一次；維持原樣則**配對數與歸屬完全不動**，
+  動的只有 `fg` 的值（這也是 `KeyVersion` 維持 2 的理由）。
+- **定義處不猜「內容八成是字串」，去問索引**（`_stringContentKeys`／`_stringContentTypes`／`HasStringContentUser`）：
+  有元素以這個 Style（或這個型別的隱含樣式）畫字面字串才換。`BasedOn` 的閉包要跟著走（行內 Style 的基底也在畫它）。
+- **看得懂正確的修法**：`ContentPresenter` 自己的 `Resources`（ZeroCel 的修法）與 `<Style.Resources>`
+  （Kindling 的修法，WPF 的標準答案）離那顆 TextBlock 更近，所以贏。
+  ⚠ 少了這一條，工具會對著**已經修好**的程式碼報 fail —— 1.5 的 Kindling 教訓：守門員看不懂正確的修法，
+  就是在逼人寫多餘的程式碼。
+- **只收字面字串**（`StyleIndex.HasStringContent`：`Content`／`Header` 屬性、文字節點、屬性元素寫法）。
+  `Content="{Binding Label}"` 執行期多半也是字串，但靜態分不出「字串」與「一整棵子樹」——
+  猜錯的方向是**把元素寫的字色蓋掉**，那會編造。維持 1.9 的答案。
+- **只在看得到那個機制時動手**：`chain.ContentTextType` 非 null（這個 Style 自己的模板裡真的有放內容的位置）。
+  框架的預設模板、元素自己帶的模板都不算。⚠ 不要拿 `TemplateLayers` 當條件 —— 那一格只收「模板裡找得到
+  畫底的祖先」的位置，而「整份模板只有一個 ContentPresenter、底靠宿主的 Setter 給」（透明按鈕）時它是空的。
+
+### 字色是繼承來的（1.10，`UnresolvedReason.InheritedForeground` + `Auditor.IsLeafText`／`NoForegroundAnywhere`）
+
+同一份回報的第二種：ToggleButton 模板裡的 TextBlock 自帶一個只設 `Text` 的 Style ⇒ 隱含樣式不套、自己沒寫
+字色 ⇒ 繼承沒套樣式的切換鈕的系統預設（近黑），深色主題下 1.21:1。1.9 之前這一組**靜默消失**：
+0 配對、0 unresolved、覆蓋率照樣 100% —— 正是這個工具存在的理由那一類失敗。
+
+- **不拿黑色去填。** `SystemColors.ControlText` 只在「上面沒有任何一層給字色」而且「沒有函式庫提供那個控制項的
+  預設樣式」時才是對的，而這兩件事分不出來 —— `ThemeLibraries.DetectInProject` 只認 Wpf.Ui／MaterialDesign／
+  HandyControl，**MahApps 刻意沒有表**，所以 MahApps 專案（語料的 NETworkManager）會被填成黑字 → 假 fail。
+  要評得出來得有繼承模型（ROADMAP），1.10 做的是「至少點名」。
+- **只收「有自己的 Style」的文字元素**（`chain` 或 `chainLight` 非 null，而且整條鏈連觸發器都沒設 Foreground）。
+  元素**沒有** Style 時隱含樣式還有機會給字色；「連隱含樣式也沒有」是另一個量級（語料 7351 處），同樣要繼承模型。
+- **只收「Foreground 就是它自己的文字」的元素**（`LeafTextEls`，後綴比對）：Button／CheckBox 不算 ——
+  它們的 Foreground 是給內容繼承的，而內容自己會被走到（收了就是同一段文字算兩次）。
+- **點名「元素 ⊕ 那個樣式」**（`TextBlock⊕Style[inline]`）：要去修的是那個樣式。unresolved 的鍵是
+  `file|reason|value`，所以一個檔裡不同的樣式是不同的鍵。⚠ 改這個寫法要遞增 `Baseline.KeyVersion`。
+- **量出來的代價（2026-11-25）**：17 個公開專案 +1436 筆、14/17 有變，**0 筆 finding 變動**；
+  QuillNest +12、Kindling +1。覆蓋率跟著掉（GeekDesk 9.1% → 4.7% 最多），所以本來貼著 `--min-coverage`
+  的專案可能變 exit 3。⚠ 這跟 VSM 那三次被否決的量測**不是同一件事**：VSM 的理由是「那些位置本來就在
+  `stateColors` 裡誠實列著，換成更吵的信號不是改進」，而這 1436 處**本來什麼都沒有**。
+  形狀在語料裡也不是孤例：QuickLook 的 `ViewerPanel.xaml:202` 跟回報的寫法一字不差。
+
 ### 模板裡哪一層畫底（1.6，`StyleIndex.ContentLayers`／`TemplateLayer` + `Auditor.TemplateChoices`／`TemplateLayerValue`）
 
 1.5 只看模板根（`TemplateRootBg`），根沒設底就讓字配**祖先**。1.6 把「模板裡放宿主內容的位置」找出來，
@@ -689,6 +756,9 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   畫在內容後面的兄弟（那是蓋住字）。1.5 處理掉兩條（VSM 狀態顏色**有計數器了**、隱含樣式**每個元素都解析**），
   1.6 一次做掉四條（隱含樣式的**觸發態**、模板裡哪一層畫底、模板裡的**兄弟**背板、
   觸發器重畫模板內部那一層）。收到相關 issue 時先確認是不是這幾條。
+  1.10 新增四條明文盲區（都在「字串內容」那一節）：`Content="{Binding}"`（分不出字串與子樹）、
+  框架的預設模板、C# 在執行期合併的字典、**字色純粹靠繼承的文字元素**
+  （有自己的樣式的那種記 `inherited-foreground`，連樣式都沒有的那 7351 處還沒計）。
 - **觸發器條件是「App 自己的旗標」時會報出執行期不存在的組合**（明文盲區，1.0 就在，1.6 只是變多）：
   ScreenToGif 用 `<Condition Property="DarkMode" Value="True"/>` 分深淺兩套字色，工具不知道那個屬性與主題相關，
   於是兩個狀態各對兩欄各評一次 —— 黑字配深色底、白字配淺色底各一筆。猜屬性名就違反「不猜」，所以照報，

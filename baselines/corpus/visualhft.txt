@@ -3,8 +3,8 @@
 project: visualhft
 repo: https://github.com/visualHFT/VisualHFT
 commit: 65b1d1270336864768180f5fbf8bae348694847f
-tool-commit: 46454a7+dirty
-frozen: 2026-11-16
+tool-commit: 718dade+dirty
+frozen: 2026-11-25
 exit: 3
 palette-mode: single
 palette-degraded: False
@@ -12,8 +12,8 @@ palette-keys: 160
 single-theme: False
 files: 49
 pairs: 83
-coverage: 44.6
-unresolved: 103
+coverage: 42.3
+unresolved: 113
 skipped: 0
 dead-foreground: 0
 disabled-exempt: 0
@@ -27,6 +27,7 @@ warn: 7
 ok: 29
 decorative: 3
 unresolved-by.bound-or-gradient: 65
+unresolved-by.inherited-foreground: 10
 unresolved-by.no-ancestor-background: 37
 unresolved-by.translucent-uncomposited: 1
 # F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
@@ -179,6 +180,16 @@ U  bound-or-gradient  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:35  
 U  bound-or-gradient  SDK-StudyTemplate/UserControls/TemplateStudyView.xaml:40  {Binding IndicatorColor}
 U  bound-or-gradient  UserControls/MetricTile.xaml:39  {Binding ValueColor}
 U  bound-or-gradient  View/ucOrderBook.xaml:183  <LinearGradientBrush>
+U  inherited-foreground  SDK-MarketConnectorTemplate/UserControls/PluginSettingsView.xaml:33  TextBox⊕Style[inline]
+U  inherited-foreground  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:135  TextBlock⊕Style[inline]
+U  inherited-foreground  TriggerEngine/View/TriggerSettingAddOrUpdate.xaml:163  TextBlock⊕Style[inline]
+U  inherited-foreground  VisualHFT.Plugins/MarketConnectors.Binance/UserControls/PluginSettingsView.xaml:105  TextBox⊕Style[inline]
+U  inherited-foreground  VisualHFT.Plugins/MarketConnectors.BitStamp/UserControls/PluginSettingsView.xaml:106  TextBox⊕Style[inline]
+U  inherited-foreground  VisualHFT.Plugins/MarketConnectors.Bitfinex/UserControls/PluginSettingsView.xaml:106  TextBox⊕Style[inline]
+U  inherited-foreground  VisualHFT.Plugins/MarketConnectors.Coinbase/UserControls/PluginSettingsView.xaml:109  TextBox⊕Style[inline]
+U  inherited-foreground  VisualHFT.Plugins/MarketConnectors.Gemini/MarketConnectors.Gemini/UserControls/PluginSettingsView.xaml:106  TextBox⊕Style[inline]
+U  inherited-foreground  VisualHFT.Plugins/MarketConnectors.Kraken/UserControls/PluginSettingsView.xaml:106  TextBox⊕Style[inline]
+U  inherited-foreground  VisualHFT.Plugins/MarketConnectors.KuCoin/UserControls/PluginSettingsView.xaml:109  TextBox⊕Style[inline]
 U  no-ancestor-background  SDK-MarketConnectorTemplate/UserControls/PluginSettingsView.xaml:26  Gray
 U  no-ancestor-background  SDK-MarketConnectorTemplate/UserControls/PluginSettingsView.xaml:49  Gray
 U  no-ancestor-background  SDK-MarketConnectorTemplate/UserControls/PluginSettingsView.xaml:60  Red

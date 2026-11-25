@@ -429,6 +429,7 @@ fail／warn 另標 `symmetry: single-theme`。
 | `in-style-template` | Style 的 `Template` setter（`<Setter Property="Template"><Setter.Value><ControlTemplate>`）裡自己帶 `Foreground` 的文字元素 —— 還沒有評分（見已知限制），計入這裡讓覆蓋率反映這個缺口 |
 | `unknown-style-key` | 色盤來自分開的深／淺字典，而元素的 Style —— `Style="{StaticResource K}"`，或它鏈上的 `BasedOn` —— 只在其中一個字典裡定義，另一個主題下這個元素長什麼樣不知道；值是那個 Style 的鍵。衍生的 Style 一個顏色都沒設也算（行內 `<Button.Style>` BasedOn `K`、只設 `Margin` 或只有一個管 `Visibility` 的 `DataTrigger`）：不知道的是基底。1.2 之前算成 `unknown-palette-key`；`BasedOn` 有設顏色的那一種是拿元素後面的底去評，沒設顏色的則完全沒算 —— 不是配對、也不是 unresolved —— 所以從 1.1 升上來，這種元素每個多一筆 unresolved、評分的配對數不動。沒有設定可以宣告：定義在檔名帶 dark／light 的字典裡的 Style 就屬於那個主題。Style 其實是共用的（另一個主題只蓋掉 brush）就把它搬到檔名沒有主題字眼的字典 |
 | `template-painted` | 字畫在控制項模板**內部**某一層上，而那一層的顏色靜態看不到：來自宿主自己的屬性而沒人設過（函式庫控制項的預設值寫在 C# 裡）、那一層的底本身是 Binding／漸層，或是被觸發器重畫了而那一層定不出來（整個換掉 `Template`、視覺由另一份模板畫、元素自己帶 `Template`、模板裡找不到任何放內容的位置，或重畫的值是漸層或 Binding）。這一類**不退回祖先的底** —— 模板畫了一層蓋在上面，祖先的顏色根本沒露出來。1.6 新增；在那之前這些是拿「被重畫蓋掉的底」算出來的。「重畫的元素正好就在字底下那一疊」的情形算得出來，不歸這一類；1.8 起「重畫的目標一個放內容的位置都沾不到」也算得出來 —— 它不在這段文字底下，底照舊成立 |
+| `inherited-foreground` | 文字元素有自己的 `Style`，而那條鏈（連同 `BasedOn` 與觸發器）一個 `Foreground` 都沒設、元素自己也沒寫 —— 字色是從祖先繼承來的，最後落到控制項的系統預設（`ControlText`）。元素有自己的 `Style` 就**完全不套**隱含樣式，所以專案裡的隱含 `TextBlock` 樣式也救不了這一格。本工具不模擬繼承、也不模擬控制項預設值，所以這一組不評分；值點名的是要去修的那個樣式（`TextBlock⊕Style[inline]`、`TextBlock⊕Style[Caption]`）。1.10 新增 —— 在那之前這種位置**什麼都不會留下**：沒有 finding、沒有 unresolved、覆蓋率照樣算滿。逼出這一條的形狀在畫面上是近黑色的字疊 `#1A1A1A`、1.21:1，而報告說每一組都過。元素**連樣式都沒有**的那一種還沒計（同一個問題、範圍更廣，見已知限制） |
 
 `summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 3** ——
 只掃到一小部分的「通過」不算通過,這是「0 組配對不算通過」那條不可設定規則的推廣。
@@ -619,6 +620,24 @@ Style 的 `Template` setter 裡自己帶 `Foreground` 的文字元素**還沒有
 那時 finding 的 `element` 會寫成 `TextBlock⊕Style[implicit TextBlock]/base`，而不動到顏色的隱含樣式
 照舊維持原本的標籤。只剩一塊是「不說也不猜」:同一個型別有**好幾個互相競爭的全域隱含樣式**
 （執行期看合併順序,靜態不可知）。
+宿主的 `Content` 是**字面字串**時，配的是真正畫上去的那個字色（1.10）—— ContentPresenter 會為字串
+產生一顆 `TextBlock`，而套得到那顆 TextBlock 的隱含樣式是「設在元素上」的值，贏過從宿主繼承來的，
+所以宣告在控制項樣式（或它的觸發器）上的 `Foreground` 在畫面上可能完全沒有作用。字色照 WPF 的
+資源查找方向取最近的那一個：模板裡的（放內容位置自己的 `Resources`、或它上面任何一層）、這條鏈的
+`<Style.Resources>`、祖先帶下來的，最後是 **`Application` 層** —— 這個分別才是關鍵：模板產生的元素
+查隱含樣式時跳過視覺樹，所以同一份樣式放在 `Window.Resources` 對按鈕的文字沒有作用。App 作用域是
+追 App.xaml 的 `MergedDictionaries` 算出來的（相對路徑、`/Asm;component/…`、`pack://application:,,,`，
+遞移）。還做不到的（一律維持宿主自己的值，不猜）：**C# 在執行期合併**進來的字典（追不到）、
+`Content="{Binding …}"`（靜態分不出「字串」與「一整棵子樹」）、**框架的預設模板**（只有模板與它裡面
+放內容的位置在專案裡看得到時才動手）。`RecognizesAccessKey="True"` 的 ContentPresenter 產生的是
+`AccessText`，隱含 `TextBlock` 樣式套不到它，隱含 `AccessText` 樣式才套得到。內容是子元素時照舊用
+宿主的字色：那正是子元素繼承到的值，而它們自己會被走到。
+**字色是繼承來的不評分**，改記 `inherited-foreground`（1.10）：文字元素有自己的 `Style` 就不套隱含樣式，
+那條鏈與元素都沒設 `Foreground` 時，字色來自祖先、最後是控制項的系統預設。**不拿黑色去填** ——
+`ControlText` 只在「上面沒有任何一層給字色」而且「沒有函式庫提供那個控制項的預設樣式」時才是對的，
+而這兩件事分不出來（MahApps 的隱含樣式就偵測不到）。元素**連樣式都沒有**、也沒寫 `Foreground` 的
+那一種同樣還沒計（17 個公開專案有 7351 處，同一個問題、範圍更廣）。兩者都要有繼承模型才評得出來
+（見 ROADMAP）；在那之前至少點名，不靜默丟掉。
 **帶模板的控制項**（1.6）字改成配模板裡真正畫底的那一層 —— 模板裡放宿主內容的位置
 （`ContentPresenter`、接走 `Content="{TemplateBinding Content}"` 的自訂宿主、字色由宿主決定的文字元素、
 畫 `{TemplateBinding Foreground}` 的圖形），都對著它在**模板裡**最近一層畫底的祖先評，

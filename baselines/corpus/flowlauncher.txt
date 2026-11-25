@@ -3,8 +3,8 @@
 project: flowlauncher
 repo: https://github.com/Flow-Launcher/Flow.Launcher
 commit: 236c847977abfe72d73de8cd8d2d0e4896c53647
-tool-commit: 46454a7+dirty
-frozen: 2026-11-16
+tool-commit: 718dade+dirty
+frozen: 2026-11-25
 exit: 3
 palette-mode: pair
 palette-degraded: False
@@ -12,8 +12,8 @@ palette-keys: 76
 single-theme: False
 files: 372
 pairs: 101
-coverage: 29.7
-unresolved: 239
+coverage: 29.3
+unresolved: 244
 skipped: 1
 dead-foreground: 21
 disabled-exempt: 46
@@ -27,6 +27,7 @@ warn: 5
 ok: 87
 decorative: 4
 unresolved-by.bound-or-gradient: 8
+unresolved-by.inherited-foreground: 5
 unresolved-by.in-style-template: 5
 unresolved-by.no-ancestor-background: 71
 unresolved-by.over-sibling-content: 1
@@ -157,6 +158,11 @@ U  in-style-template  Flow.Launcher/Resources/CustomControlTemplate.xaml:695  {D
 U  in-style-template  Flow.Launcher/Resources/SettingWindowStyle.xaml:321  {DynamicResource Color05B}
 U  in-style-template  Flow.Launcher/Resources/SettingWindowStyle.xaml:326  {DynamicResource Color05B}
 U  in-style-template  Flow.Launcher/SettingPages/Views/SettingsPanePluginStore.xaml:193  {DynamicResource Color05B}
+U  inherited-foreground  Plugins/Flow.Launcher.Plugin.Calculator/Views/CalculatorSettings.xaml:100  TextBlock⊕Style[inline]
+U  inherited-foreground  Plugins/Flow.Launcher.Plugin.Program/ProgramSuffixes.xaml:189  TextBox⊕Style[CustomFileTypeTextBox]
+U  inherited-foreground  Plugins/Flow.Launcher.Plugin.Program/ProgramSuffixes.xaml:227  TextBox⊕Style[CustomURLTypeTextBox]
+U  inherited-foreground  Plugins/Flow.Launcher.Plugin.Program/Views/ProgramSetting.xaml:167  TextBlock⊕Style[inline]
+U  inherited-foreground  Plugins/Flow.Launcher.Plugin.WebSearch/SettingsControl.xaml:95  TextBlock⊕Style[inline]
 U  no-ancestor-background  Flow.Launcher/HotkeyControl.xaml:8  {DynamicResource Color01B}
 U  no-ancestor-background  Flow.Launcher/Resources/Controls/CustomWindowTitleBar.xaml:26  {DynamicResource Color05B}
 U  no-ancestor-background  Flow.Launcher/Resources/Controls/CustomWindowTitleBar.xaml:67  {DynamicResource Color05B}

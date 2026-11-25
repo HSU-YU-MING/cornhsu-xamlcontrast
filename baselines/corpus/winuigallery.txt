@@ -3,8 +3,8 @@
 project: winuigallery
 repo: https://github.com/microsoft/WinUI-Gallery
 commit: 6de91feccadfbb0a796b71caedead5a2284f730e
-tool-commit: 46454a7+dirty
-frozen: 2026-11-16
+tool-commit: 718dade+dirty
+frozen: 2026-11-25
 exit: 3
 palette-mode: pair
 palette-degraded: False
@@ -12,8 +12,8 @@ palette-keys: 573
 single-theme: False
 files: 196
 pairs: 111
-coverage: 33
-unresolved: 225
+coverage: 28.9
+unresolved: 273
 skipped: 0
 dead-foreground: 0
 disabled-exempt: 0
@@ -27,6 +27,7 @@ warn: 6
 ok: 84
 decorative: 15
 unresolved-by.bound-or-gradient: 39
+unresolved-by.inherited-foreground: 48
 unresolved-by.no-ancestor-background: 130
 unresolved-by.over-sibling-content: 12
 unresolved-by.translucent-uncomposited: 7
@@ -198,6 +199,54 @@ U  bound-or-gradient  WinUIGallery/Samples/RadialGradientBrush/RadialGradientBru
 U  bound-or-gradient  WinUIGallery/Samples/StoragePickers/StoragePickersPage.xaml:114  {ThemeResource AccentTextFillColorPrimaryBrush}
 U  bound-or-gradient  WinUIGallery/Samples/Templates/TemplatesPage.xaml:85  {ThemeResource AccentFillColorDefaultBrush}
 U  bound-or-gradient  WinUIGallery/Samples/WrapPanel/WrapPanelPage.xaml:265  {ThemeResource AccentFillColorDefaultBrush}
+U  inherited-foreground  WinUIGallery/MainWindow.xaml:104  TextBox⊕Style[AutomationHelperStyle]
+U  inherited-foreground  WinUIGallery/MainWindow.xaml:108  TextBox⊕Style[AutomationHelperStyle]
+U  inherited-foreground  WinUIGallery/MainWindow.xaml:125  TextBox⊕Style[AutomationHelperStyle]
+U  inherited-foreground  WinUIGallery/Pages/SettingsPage.xaml:108  TextBlock⊕Style[SettingsSectionHeaderTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Pages/SettingsPage.xaml:45  TextBlock⊕Style[SettingsSectionHeaderTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml:52  TextBlock⊕Style[SubtitleHeadingTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml:120  RichTextBlock⊕Style[ScreenReaderOutputStyle]
+U  inherited-foreground  WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml:159  RichTextBlock⊕Style[ScreenReaderOutputStyle]
+U  inherited-foreground  WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml:180  RichTextBlock⊕Style[ScreenReaderOutputStyle]
+U  inherited-foreground  WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml:215  RichTextBlock⊕Style[ScreenReaderOutputStyle]
+U  inherited-foreground  WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml:89  RichTextBlock⊕Style[ScreenReaderOutputStyle]
+U  inherited-foreground  WinUIGallery/Samples/AppWindow/AppWindowPage.xaml:109  TextBlock⊕Style[SubtitleHeadingTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/AppWindow/AppWindowPage.xaml:12  TextBlock⊕Style[SubtitleHeadingTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/AutoSuggestBox/AutoSuggestBoxPage.xaml:19  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/ComboBox/ComboBoxPage.xaml:60  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/ComboBox/ComboBoxPage.xaml:79  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/ContentDialog/ContentDialogPage.xaml:19  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/ContentDialog/ContentDialogPage.xaml:33  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/CustomUserControls/CustomUserControlsPage.xaml:13  TextBlock⊕Style[SubtitleHeadingTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/CustomUserControls/CustomUserControlsPage.xaml:84  TextBlock⊕Style[SubtitleHeadingTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/CustomXamlConditionals/CustomXamlConditionalsPage.xaml:71  TextBlock⊕Style[ConditionalHeadingStyle]
+U  inherited-foreground  WinUIGallery/Samples/GridView/GridViewPage.xaml:137  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/GridView/GridViewPage.xaml:237  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/GridView/GridViewPage.xaml:238  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml:150  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml:353  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml:354  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/MenuFlyout/MenuFlyoutPage.xaml:114  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/MenuFlyout/MenuFlyoutPage.xaml:45  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/PasswordBox/PasswordBoxPage.xaml:28  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/ProgressBar/ProgressBarPage.xaml:53  TextBlock⊕Style[OutputTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:141  TextBlock⊕Style[ValueTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:143  TextBlock⊕Style[DescriptionTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:147  TextBlock⊕Style[ValueTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:149  TextBlock⊕Style[DescriptionTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:153  TextBlock⊕Style[ValueTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:155  TextBlock⊕Style[DescriptionTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:159  TextBlock⊕Style[ValueTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:161  TextBlock⊕Style[DescriptionTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:165  TextBlock⊕Style[ValueTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:167  TextBlock⊕Style[DescriptionTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:171  TextBlock⊕Style[ValueTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:173  TextBlock⊕Style[DescriptionTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:177  TextBlock⊕Style[ValueTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/Spacing/SpacingPage.xaml:179  TextBlock⊕Style[DescriptionTextStyle]
+U  inherited-foreground  WinUIGallery/Samples/TextBlock/TextBlockPage.xaml:34  TextBlock⊕Style[CustomTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml:101  TextBlock⊕Style[SubtitleHeadingTextBlockStyle]
+U  inherited-foreground  WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml:18  TextBlock⊕Style[SubtitleHeadingTextBlockStyle]
 U  no-ancestor-background  WinUIGallery/Controls/ControlExample.xaml:103  {ThemeResource SystemFillColorCriticalBrush}
 U  no-ancestor-background  WinUIGallery/Controls/HomePage/HomePageHeader.xaml:112  {ThemeResource ForegroundBrush}
 U  no-ancestor-background  WinUIGallery/Controls/HomePage/HomePageHeader.xaml:145  {ThemeResource TextFillColorPrimaryBrush}

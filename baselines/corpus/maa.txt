@@ -3,8 +3,8 @@
 project: maa
 repo: https://github.com/MaaAssistantArknights/MaaAssistantArknights.git
 commit: b666b84a317c603c561401ab5e5c7b12203d8271
-tool-commit: 46454a7+dirty
-frozen: 2026-11-16
+tool-commit: 718dade+dirty
+frozen: 2026-11-25
 exit: 3
 palette-mode: pair
 palette-degraded: False
@@ -12,8 +12,8 @@ palette-keys: 279
 single-theme: False
 files: 87
 pairs: 96
-coverage: 27.1
-unresolved: 258
+coverage: 26.7
+unresolved: 263
 skipped: 0
 dead-foreground: 0
 disabled-exempt: 0
@@ -27,6 +27,7 @@ warn: 27
 ok: 41
 decorative: 15
 unresolved-by.bound-or-gradient: 10
+unresolved-by.inherited-foreground: 5
 unresolved-by.no-ancestor-background: 86
 unresolved-by.over-sibling-content: 6
 unresolved-by.translucent-uncomposited: 143
@@ -145,6 +146,11 @@ U  bound-or-gradient  src/MaaWpfGui/Views/UI/RootView.xaml:141  {Binding OtherBu
 U  bound-or-gradient  src/MaaWpfGui/Views/UI/RootView.xaml:141  {Binding OtherButtonHoverBackground, RelativeSource={RelativeSource AncestorType=hc:Window}}
 U  bound-or-gradient  src/MaaWpfGui/Views/UserControl/Settings/BackgroundSettings.xaml:212  {Binding CurrentMonetColor}
 U  bound-or-gradient  src/MaaWpfGui/Views/UserControl/Settings/GameSettingsUserControl.xaml:46  <LinearGradientBrush>
+U  inherited-foreground  src/MaaWpfGui/Styles/Controls/UpdateCredentialInput.xaml:15  TextBlock⊕Style[→MaaTextBlockDefaultStyle]
+U  inherited-foreground  src/MaaWpfGui/Styles/Controls/UpdateCredentialInput.xaml:68  Hyperlink⊕Style[inline]
+U  inherited-foreground  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:221  TextBlock⊕Style[→TextBlockBaseStyle]
+U  inherited-foreground  src/MaaWpfGui/Views/UI/TaskQueueView.xaml:550  TextBlock⊕Style[→MaaTextBlockDefaultStyle]
+U  inherited-foreground  src/MaaWpfGui/Views/UserControl/Settings/HotKeyEditorUserControl.xaml:10  TextBox⊕Style[inline]
 U  no-ancestor-background  src/MaaWpfGui/Styles/Controls/LogSectionDivider.xaml:16  {DynamicResource BorderBrush}
 U  no-ancestor-background  src/MaaWpfGui/Styles/Controls/LogSectionDivider.xaml:22  {DynamicResource TraceLogBrush}
 U  no-ancestor-background  src/MaaWpfGui/Styles/Controls/LogSectionDivider.xaml:22  {DynamicResource TraceLogBrush}

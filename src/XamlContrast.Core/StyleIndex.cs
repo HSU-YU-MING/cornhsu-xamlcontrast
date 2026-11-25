@@ -96,6 +96,10 @@ internal sealed partial class StyleIndex
         => el.Attribute("Content")?.Value.Trim() == "{TemplateBinding Content}"
            || el.Attribute("Text")?.Value.Trim() == "{TemplateBinding Text}";
 
+    /// <summary>這個元素是「放宿主內容的位置」嗎（<c>ContentPresenter</c> 系，或整個接過宿主內容的自訂元素）。</summary>
+    private static bool IsPrimaryContentHolder(XElement el, string localName)
+        => localName is "ContentPresenter" or "ContentControl" || IsHostContentHolder(el);
+
     internal sealed class Record
     {
         public required int Id;
@@ -165,6 +169,23 @@ internal sealed partial class StyleIndex
         /// 於是那個修正在報告上「沒發生」—— 得在元素上再明寫一次才檢得到。
         /// </summary>
         public Dictionary<string, Record> ScopedImplicit = new(StringComparer.Ordinal);
+        /// <summary>
+        /// 這個 Style 自己的模板裡，離「放宿主內容的位置」最近的那個隱含 <c>TextBlock</c> 樣式（1.10）。
+        ///
+        /// 宿主的 <c>Content</c> 是字串時，ContentPresenter 自己產生一個 TextBlock 來畫它 ——
+        /// 那顆 TextBlock 的字色由套得到它的隱含樣式決定，不是從宿主繼承來的
+        /// （見 <see cref="AppImplicitChain"/>）。模板裡（ContentPresenter 自己的 Resources、或模板中間
+        /// 任何一層的 Resources）宣告的隱含樣式離它更近，所以贏過 App 層那一個 —— 這正是 WPF 修
+        /// 「App 層隱含樣式蓋掉按鈕字色」的手法之一，看不懂它就會對著已經修好的程式碼報 fail。
+        /// </summary>
+        public Record? ContentTextStyle;
+        /// <summary>這個 Style 自己的模板裡，放宿主內容的位置會把字串內容畫成哪個型別的元素
+        /// （<c>TextBlock</c>，或 <c>RecognizesAccessKey="True"</c> 時的 <c>AccessText</c>）；
+        /// 模板裡沒有放內容的位置是 null，也就是「看不到那個機制」（1.10）。
+        /// ⚠ 與 <see cref="TemplateLayers"/> 不同：那一格只收「在模板裡找得到畫底的祖先」的位置，
+        /// 而這一格問的是「有沒有那個位置」—— 整份模板只有一個 ContentPresenter、底靠宿主的 Setter 給
+        /// （透明按鈕的常見寫法）時 TemplateLayers 是空的，但字串內容照樣由它畫。</summary>
+        public string? ContentTextType;
     }
 
     internal sealed class Merged
@@ -185,6 +206,11 @@ internal sealed partial class StyleIndex
         public List<TemplateLayer> TemplateLayers = new();
         /// <summary>生效模板裡「在內容底下那一疊上」的具名元素（1.7）—— 見 <see cref="Record.ContentChainNames"/>。</summary>
         public HashSet<string> ContentChainNames = new(StringComparer.Ordinal);
+        /// <summary>生效模板裡那個隱含 <c>TextBlock</c> 樣式（1.10，同 <see cref="TemplateLayers"/>：
+        /// 衍生自帶模板時整個換掉）—— 見 <see cref="Record.ContentTextStyle"/>。</summary>
+        public Record? ContentTextStyle;
+        /// <summary>生效模板裡放內容的位置把字串內容畫成哪個型別（1.10）—— 見 <see cref="Record.ContentTextType"/>。</summary>
+        public string? ContentTextType;
         public string? TemplateRootBorderThickness;
         public required string Label;
         /// <summary>鏈上有任何一層定義在只屬於一個主題的字典檔裡 —— 另一個主題下解析到的是別的 Style（或沒有）</summary>
@@ -246,6 +272,23 @@ internal sealed partial class StyleIndex
 
     // 專案裡出現過的元素型別名（屬性元素 <X.Y> 不算）
     private readonly HashSet<string> _elementTypes = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// <c>Application.Resources</c> 看得到的檔（1.10）：App.xaml 自己，加上從它的
+    /// <c>MergedDictionaries</c> 一路追下去的字典檔。
+    ///
+    /// ⚠ 這個分別是必要的，不是潔癖：模板自己產生的元素（<c>Content</c> 是字串時 ContentPresenter 產生的
+    /// 那顆 TextBlock）查隱含樣式時**跳過視覺樹**，只看得到 App 層與模板自己的資源 ——
+    /// 同一份 Style 寫在 <c>Window.Resources</c> 裡對按鈕的文字完全沒有作用。
+    /// 追不到的（C# 在執行期 <c>MergedDictionaries.Add</c> 進去的主題字典）照舊維持 1.9 的答案，
+    /// 也就是「宿主自己的 Foreground」—— 盲區留著，不拿猜的去填。
+    /// </summary>
+    private readonly HashSet<string> _appScopeFiles = new(StringComparer.OrdinalIgnoreCase);
+
+    // 有元素以 Style="{…Resource K}" 引用、而且那個元素的內容是字串的 Style 鍵（1.10）
+    private readonly HashSet<string> _stringContentKeys = new(StringComparer.Ordinal);
+    // 內容是字串的元素的型別名（同上，給隱含樣式的定義處用）
+    private readonly HashSet<string> _stringContentTypes = new(StringComparer.Ordinal);
 
     /// <summary>
     /// 這個型別的隱含樣式，在這個檔的這一行適用的是哪一筆：
@@ -473,7 +516,7 @@ internal sealed partial class StyleIndex
                     .Any(a => !a.Name.LocalName.Contains('.') &&
                               a.Name.LocalName.EndsWith("Template", StringComparison.Ordinal)))
                 continue;
-            var primary = ln is "ContentPresenter" or "ContentControl" || IsHostContentHolder(host);
+            var primary = IsPrimaryContentHolder(host, ln);
             if (!primary && !IsHostTextHolder(host, ln) && !IsHostForegroundShape(host)) continue;
             // chainNames：這個位置底下那一疊上的每個具名元素（1.7）—— 連「這一格之後被跳過」的位置也要收。
             // own：**只有這個位置**那一疊上的名字（1.9）。狀態層的守門問的是記錄層的問題（union 才對），
@@ -629,6 +672,65 @@ internal sealed partial class StyleIndex
 
 
 
+    /// <summary>
+    /// 模板裡放宿主內容的位置：字串內容會產生哪個型別的元素，以及由內而外第一個套得到它的隱含樣式（1.10）——
+    /// 那個位置自己的 <c>Resources</c>、模板中間任何一層的 <c>Resources</c>、<c>ControlTemplate.Resources</c>。
+    ///
+    /// 模板裡的隱含樣式是 WPF 修「App 層隱含樣式蓋掉按鈕字色」的手法之一（另一個是
+    /// <c>&lt;Style.Resources&gt;</c>，見 <see cref="Record.ScopedImplicit"/>）。
+    /// ⚠ 少了這一條，工具會對著**已經修好**的程式碼報 fail —— 守門員看不懂正確的修法，
+    /// 就是在逼人寫多餘的程式碼（1.5 的 Kindling 教訓，CLAUDE.md 有記）。
+    ///
+    /// ⚠ <c>RecognizesAccessKey="True"</c> 的 ContentPresenter 產生的是 <c>AccessText</c> 不是
+    /// <c>TextBlock</c>（它要處理 <c>_File</c> 這種助記鍵）—— 隱含 <c>TextBlock</c> 樣式對它沒有作用。
+    /// 語料裡有 259 處這樣寫，不分這一刀就會對整批按鈕換掉一個其實沒被換掉的字色。
+    /// </summary>
+    private (string? Type, Record? Style) ContentTextImplicit(XElement tmpl, string file)
+    {
+        string? firstType = null;
+        foreach (var host in tmpl.Descendants())
+        {
+            var ln = host.Name.LocalName;
+            if (ln.Contains('.', StringComparison.Ordinal)) continue; // 屬性元素
+            // 巢狀模板裡的位置是別的控制項的內容（同 ContentLayers）
+            if (host.Ancestors().TakeWhile(a => !ReferenceEquals(a, tmpl))
+                    .Any(a => !a.Name.LocalName.Contains('.', StringComparison.Ordinal) &&
+                              a.Name.LocalName.EndsWith("Template", StringComparison.Ordinal)))
+                continue;
+            if (!IsPrimaryContentHolder(host, ln)) continue;
+            var type = GeneratedTextType(host);
+            firstType ??= type;
+            for (var e = host; e is not null; e = e.Parent)
+            {
+                if (!e.Name.LocalName.Contains('.', StringComparison.Ordinal) &&
+                    ImplicitInResourcesOf(e, type, file) is { } r) return (type, r);
+                if (ReferenceEquals(e, tmpl)) break;
+            }
+        }
+        return (firstType, null);
+    }
+
+    /// <summary>字串內容在這個位置上會變成哪個型別的元素：<c>AccessText</c>（助記鍵）或 <c>TextBlock</c>。</summary>
+    private static string GeneratedTextType(XElement holder)
+        => holder.Attribute("RecognizesAccessKey")?.Value.Trim().Equals("True", StringComparison.OrdinalIgnoreCase) == true
+            ? "AccessText" : "TextBlock";
+
+    /// <summary>這個元素的 <c>&lt;X.Resources&gt;</c> 裡那個型別的隱含樣式（含中間那層 ResourceDictionary），沒有是 null。</summary>
+    private Record? ImplicitInResourcesOf(XElement owner, string typeName, string file)
+    {
+        var res = owner.Elements().FirstOrDefault(c => c.Name.LocalName == owner.Name.LocalName + ".Resources");
+        if (res is null) return null;
+        var level = res.Elements().SelectMany(e => e.Name.LocalName == "ResourceDictionary" ? e.Elements() : [e]);
+        foreach (var cand in level.Where(e => e.Name.LocalName == "Style"))
+        {
+            if (cand.Attribute(XKey) is not null) continue;
+            if (cand.Attribute("TargetType")?.Value is not { } tt) continue;
+            var m = TargetTypeName().Match(tt);
+            if (m.Success && m.Groups["t"].Value == typeName) return CreateRecord(cand, file);
+        }
+        return null;
+    }
+
     internal Record CreateRecord(XElement style, string file)
     {
         var rec = new Record { Id = ++_seq, File = file, Side = _sideOf?.Invoke(file) };
@@ -675,6 +777,12 @@ internal sealed partial class StyleIndex
                     && IsBackdropProp(tp) && XamlBrush.SetterValue(st) is not null)
                     repainted.Add(tname);
         if (ownTmpl is not null) rec.TemplateLayers = ContentLayers(ownTmpl, repainted, rec.ContentChainNames);
+        if (ownTmpl is not null)
+        {
+            var (contentType, contentStyle) = ContentTextImplicit(ownTmpl, file);
+            rec.ContentTextType = contentType;
+            rec.ContentTextStyle = contentStyle;
+        }
         var focusEl = ownTmpl?.Descendants()
             .FirstOrDefault(e => NotTemplateBound(XamlBrush.Read(e, "Stroke") ?? XamlBrush.Read(e, "BorderBrush")) is not null);
         if (focusEl is not null)
@@ -783,6 +891,10 @@ internal sealed partial class StyleIndex
     public static StyleIndex Build(string root, Func<string, ThemeSide?>? sideOf = null, ToolConfig? cfg = null)
     {
         var idx = new StyleIndex { _sideOf = sideOf, _cfg = cfg ?? new ToolConfig() };
+        // App 作用域的追蹤（1.10）：哪些檔是 App.xaml、每個檔合併了哪些字典 —— 迴圈結束後再從 App 往下追
+        var allFiles = new List<string>();
+        var appRoots = new List<string>();
+        var mergedFrom = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         foreach (var f in PaletteDetector.EnumerateFiles(root, "*.xaml"))
         {
             XDocument doc;
@@ -791,6 +903,12 @@ internal sealed partial class StyleIndex
             catch { continue; }
             if (doc.Root is null) continue;
             var isGlobal = doc.Root.Name.LocalName == "ResourceDictionary" || PaletteDetector.IsApplicationRoot(doc.Root); // 含 Application 子類別
+            allFiles.Add(f);
+            if (PaletteDetector.IsApplicationRoot(doc.Root)) appRoots.Add(f);
+            var sources = doc.Descendants()
+                .Where(e => e.Name.LocalName == "ResourceDictionary")
+                .Select(e => e.Attribute("Source")?.Value).OfType<string>().ToList();
+            if (sources.Count > 0) mergedFrom[f] = sources;
             foreach (var style in doc.Descendants().Where(e => e.Name.LocalName == "Style"))
             {
                 var rec = idx.CreateRecord(style, f);
@@ -839,25 +957,149 @@ internal sealed partial class StyleIndex
                 if (!el.Name.LocalName.Contains('.', StringComparison.Ordinal)) idx._elementTypes.Add(el.Name.LocalName);
                 if (el.Name.LocalName == "FontFamily" && el.Attribute(XKey)?.Value is { } fontKey)
                     idx._fontFamilies.TryAdd(fontKey, el.Value.Trim());
+                // 內容是字串的元素（1.10）：它的文字由 ContentPresenter 產生的 TextBlock 畫，
+                // 所以套得到 App 層的隱含樣式。定義處（WalkStyles）看不到使用處的內容，靠這兩張表問
+                if (!el.Name.LocalName.Contains('.', StringComparison.Ordinal) && HasStringContent(el))
+                {
+                    idx._stringContentTypes.Add(el.Name.LocalName);
+                    if (el.Attribute("Style")?.Value is { } sc && ResourceRef().Match(sc.Trim()) is { Success: true } scm)
+                        idx._stringContentKeys.Add(scm.Groups["k"].Value);
+                }
                 if (el.Attribute("Style")?.Value is { } s && ResourceRef().Match(s.Trim()) is { Success: true } m)
                     idx._usedKeys.Add(m.Groups["k"].Value);
                 // 行內 Style 一定被那個元素用到 —— 它的 BasedOn 基底也在使用處評
                 if (el.Name.LocalName == "Style" && el.Parent?.Name.LocalName.EndsWith(".Style", StringComparison.Ordinal) == true &&
                     el.Attribute("BasedOn")?.Value is { } bo && ResourceRef().Match(bo.Trim()) is { Success: true } bm)
+                {
                     idx._usedKeys.Add(bm.Groups["k"].Value);
+                    // 行內 Style 的擁有者內容是字串 → 它的基底也在畫字串內容（1.10）
+                    if (el.Parent?.Parent is { } owner && HasStringContent(owner)) idx._stringContentKeys.Add(bm.Groups["k"].Value);
+                }
             }
         }
+        idx.ResolveAppScope(allFiles, appRoots, mergedFrom);
         // BasedOn 的閉包：用到的 Style 的基底也會在使用處的合併鏈裡被評到
         var basesOf = idx._byFile.Values.SelectMany(map => map.Values)
             .Where(r => r.Key is not null && r.BasedOn is not null)
             .GroupBy(r => r.Key!, StringComparer.Ordinal)
             .ToDictionary(g => g.Key, g => g.Select(r => r.BasedOn!).ToList(), StringComparer.Ordinal);
-        var queue = new Queue<string>(idx._usedKeys);
-        while (queue.Count > 0)
-            if (basesOf.TryGetValue(queue.Dequeue(), out var bases))
-                foreach (var b in bases)
-                    if (idx._usedKeys.Add(b)) queue.Enqueue(b);
+        Closure(idx._usedKeys, basesOf);
+        Closure(idx._stringContentKeys, basesOf); // 畫字串內容的 Style 的基底也在畫它
         return idx;
+
+        static void Closure(HashSet<string> keys, Dictionary<string, List<string>> basesOf)
+        {
+            var queue = new Queue<string>(keys);
+            while (queue.Count > 0)
+                if (basesOf.TryGetValue(queue.Dequeue(), out var bases))
+                    foreach (var b in bases)
+                        if (keys.Add(b)) queue.Enqueue(b);
+        }
+    }
+
+    /// <summary>
+    /// App.xaml 的 <c>MergedDictionaries</c> 一路追下去，把 <c>Application.Resources</c> 看得到的檔收齊（1.10）。
+    ///
+    /// <c>Source</c> 的寫法：相對路徑、<c>pack://application:,,,/Asm;component/Themes/X.xaml</c>、
+    /// <c>/Asm;component/…</c>。先照「相對於引用它的那個檔」解，解不到再拿尾段去比對專案裡的檔
+    /// （同一個檔名出現在兩個地方時全收 —— 多收只會讓「App 層看得到」成立，而那個判斷本身還要再過
+    /// <see cref="Agree"/> 與「有沒有設 Foreground」兩道）。<c>{Binding}</c> 之類解不開的一律跳過。
+    /// </summary>
+    private void ResolveAppScope(List<string> allFiles, List<string> appRoots, Dictionary<string, List<string>> mergedFrom)
+    {
+        if (appRoots.Count == 0) return;
+        // 正規化：全小寫、正斜線 —— 比對只拿尾段。⚠ 用 TryAdd 不用 ToDictionary：
+        // 同一個檔以兩種寫法進來（正規化後撞鍵）會讓 ToDictionary 丟例外，而這裡丟例外等於整個稽核掛掉
+        var byPath = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var f in allFiles) byPath.TryAdd(Norm(Path.GetFullPath(f)), f);
+        var queue = new Queue<string>();
+        foreach (var a in appRoots)
+            if (_appScopeFiles.Add(a)) queue.Enqueue(a);
+        while (queue.Count > 0)
+        {
+            var f = queue.Dequeue();
+            if (!mergedFrom.TryGetValue(f, out var sources)) continue;
+            foreach (var raw in sources)
+                foreach (var hit in Resolve(raw, f))
+                    if (_appScopeFiles.Add(hit)) queue.Enqueue(hit);
+        }
+        return;
+
+        static string Norm(string p) => p.Replace('\\', '/').ToLowerInvariant();
+
+        IEnumerable<string> Resolve(string raw, string fromFile)
+        {
+            var rel = raw.Trim();
+            if (rel.StartsWith('{') || rel.Length == 0) return []; // {Binding}／{x:Static} 之類：解不開
+            if (rel.StartsWith("pack://", StringComparison.OrdinalIgnoreCase))
+            {
+                var at = rel.IndexOf(",,,", StringComparison.Ordinal);
+                if (at < 0) return [];
+                rel = rel[(at + 3)..];
+            }
+            var comp = rel.IndexOf(";component/", StringComparison.OrdinalIgnoreCase);
+            if (comp >= 0) rel = rel[(comp + ";component/".Length)..];
+            rel = Norm(rel).TrimStart('/');
+            if (rel.Length == 0) return [];
+            // 1) 相對於引用它的那個檔
+            var near = Norm(Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(fromFile))!, rel)));
+            if (byPath.TryGetValue(near, out var one)) return [one];
+            // 2) 尾段比對（元件資源的 /Asm;component/… 相對的是那個組件的根，不是這個檔）
+            return byPath.Where(kv => kv.Key.EndsWith('/' + rel, StringComparison.Ordinal)).Select(kv => kv.Value).ToList();
+        }
+    }
+
+    /// <summary>
+    /// 這個元素的內容是「字面上的字串」嗎（1.10）—— <c>Content</c>／<c>Header</c> 屬性寫死的字、
+    /// 或 <c>&lt;Button&gt;文字&lt;/Button&gt;</c> 這種文字節點。
+    ///
+    /// ⚠ 只認字面值。<c>Content="{Binding Label}"</c> 執行期多半也是字串（那時一樣由 ContentPresenter
+    /// 產生 TextBlock），但靜態分不出「字串」與「一整棵子樹」—— 猜錯的方向是「把宿主的字色換掉」，
+    /// 那會編造。維持 1.9 的答案，盲區明文記在 ROADMAP。
+    /// </summary>
+    internal static bool HasStringContent(XElement el)
+    {
+        foreach (var p in (ReadOnlySpan<string>)["Content", "Header"])
+            if (el.Attribute(p)?.Value is { } v && v.Trim().Length > 0 &&
+                !(v.TrimStart().StartsWith('{') && !v.TrimStart().StartsWith("{}", StringComparison.Ordinal)))
+                return true;
+        // 文字節點：<Button>文字</Button>。視覺子元素（屬性元素 <X.Y> 不算）在的話內容是那棵子樹，不是字串
+        if (el.Nodes().OfType<XText>().Any(t => t.Value.Trim().Length > 0) &&
+            !el.Elements().Any(e => !e.Name.LocalName.Contains('.', StringComparison.Ordinal)))
+            return true;
+        // <Button.Content>文字</Button.Content>：屬性元素寫法
+        foreach (var p in (ReadOnlySpan<string>)["Content", "Header"])
+            if (el.Elements().FirstOrDefault(e => e.Name.LocalName == el.Name.LocalName + "." + p) is { } pe &&
+                !pe.Elements().Any() && pe.Value.Trim().Length > 0)
+                return true;
+        return false;
+    }
+
+    /// <summary>有元素以 <c>Style=</c> 用這個 Style、而且那個元素的內容是字串（含 BasedOn 的閉包，1.10）。</summary>
+    public bool HasStringContentUser(string key) => _stringContentKeys.Contains(key);
+
+    /// <summary>專案裡有這個型別的元素、內容是字串（1.10；給隱含樣式的定義處用）。</summary>
+    public bool SomeStringContentElement(string typeName) => _stringContentTypes.Contains(typeName);
+
+    /// <summary>
+    /// <c>Application.Resources</c> 層的隱含樣式（1.10）—— 模板自己產生的元素只看得到這一層與模板自己的資源。
+    /// 候選不一致（<see cref="Agree"/>）或追不到 App 作用域時是 null：那時維持「宿主自己的 Foreground」。
+    /// </summary>
+    public Merged? AppImplicitChain(string typeName, ThemeSide? side)
+    {
+        var cands = side is { } s ? _implicitBySide[s].GetValueOrDefault(typeName) : _implicitGlobal.GetValueOrDefault(typeName);
+        if (cands is null) return null;
+        var inApp = cands.Where(r => _appScopeFiles.Contains(r.File)).ToList();
+        return inApp.Count == 0 ? null : ChainOf(Agree(inApp), typeName, side);
+    }
+
+    /// <summary>單一 Record 的合併鏈（BasedOn ＋ 同條件觸發器），標籤同隱含樣式。</summary>
+    public Merged? ChainOf(Record? rec, string typeName, ThemeSide? side)
+    {
+        if (rec is null) return null;
+        var merged = MergeChain(rec, new HashSet<string>(), $"Style[implicit {typeName}]", side);
+        merged.States = MergeSameCondition(merged.States);
+        return merged;
     }
 
     private void AddBySide(Dictionary<ThemeSide, Dictionary<string, Record>> tables, string key, Record rec)
@@ -929,6 +1171,8 @@ internal sealed partial class StyleIndex
                 merged.TemplateRootBorderThickness = m.TemplateRootBorderThickness;
                 merged.TemplateLayers = m.TemplateLayers;
                 merged.ContentChainNames = m.ContentChainNames;
+                merged.ContentTextStyle = m.ContentTextStyle;
+                merged.ContentTextType = m.ContentTextType;
                 merged.HasTemplate = merged.HasTemplate || m.HasTemplate;
                 foreach (var (k, v) in m.ScopedImplicit) merged.ScopedImplicit[k] = v; // 基底的先進，下面讓衍生蓋掉
             }
@@ -965,7 +1209,13 @@ internal sealed partial class StyleIndex
         }
         // 模板分層與「有沒有人畫宿主的字」只跟**自己的**模板有關（1.6）：rec.HasTemplate 連巢狀 Style
         // 的模板也算，拿它當條件會把基底模板的分層清掉
-        if (rec.OwnTemplate) { merged.TemplateLayers = rec.TemplateLayers; merged.ContentChainNames = rec.ContentChainNames; }
+        if (rec.OwnTemplate)
+        {
+            merged.TemplateLayers = rec.TemplateLayers;
+            merged.ContentChainNames = rec.ContentChainNames;
+            merged.ContentTextStyle = rec.ContentTextStyle;
+            merged.ContentTextType = rec.ContentTextType;
+        }
         return merged;
     }
 

@@ -20,12 +20,13 @@
     "failOnNewUnresolved": false,
     "files": 30,
     "pairs": 951,
-    "coverage": 91.3,
-    "unresolved": 91,
+    "coverage": 90.2,
+    "unresolved": 103,
     "unresolvedBy": {
       "bound-or-gradient": 32,
       "no-ancestor-background": 30,
       "translucent-uncomposited": 16,
+      "inherited-foreground": 12,
       "in-style-template": 12,
       "template-painted": 1
     },
@@ -61,6 +62,13 @@
       "line": 706,
       "reason": "bound-or-gradient",
       "value": "\u003CSolidColorBrush Color={Binding Event.ColorHex} Opacity=0.3\u003E",
+      "baseline": null
+    },
+    {
+      "file": "Views/CalendarView.xaml",
+      "line": 793,
+      "reason": "inherited-foreground",
+      "value": "TextBlock\u2295Style[inline]",
       "baseline": null
     },
     {
@@ -261,6 +269,27 @@
     },
     {
       "file": "Views/ProjectView.xaml",
+      "line": 478,
+      "reason": "inherited-foreground",
+      "value": "TextBlock\u2295Style[inline]",
+      "baseline": null
+    },
+    {
+      "file": "Views/ProjectView.xaml",
+      "line": 531,
+      "reason": "inherited-foreground",
+      "value": "TextBlock\u2295Style[inline]",
+      "baseline": null
+    },
+    {
+      "file": "Views/ProjectView.xaml",
+      "line": 559,
+      "reason": "inherited-foreground",
+      "value": "TextBlock\u2295Style[inline]",
+      "baseline": null
+    },
+    {
+      "file": "Views/ProjectView.xaml",
       "line": 611,
       "reason": "no-ancestor-background",
       "value": "{DynamicResource TextSecondaryBrush}",
@@ -302,6 +331,13 @@
       "baseline": null
     },
     {
+      "file": "Views/StickyNotesView.xaml",
+      "line": 475,
+      "reason": "inherited-foreground",
+      "value": "TextBlock\u2295Style[inline]",
+      "baseline": null
+    },
+    {
       "file": "Views/StickyNoteWindow.xaml",
       "line": 164,
       "reason": "bound-or-gradient",
@@ -331,6 +367,20 @@
     },
     {
       "file": "Views/StickyNoteWindow.xaml",
+      "line": 195,
+      "reason": "inherited-foreground",
+      "value": "TextBlock\u2295Style[inline]",
+      "baseline": null
+    },
+    {
+      "file": "Views/StickyNoteWindow.xaml",
+      "line": 209,
+      "reason": "inherited-foreground",
+      "value": "TextBlock\u2295Style[inline]",
+      "baseline": null
+    },
+    {
+      "file": "Views/StickyNoteWindow.xaml",
       "line": 225,
       "reason": "bound-or-gradient",
       "value": "{Binding ColorHex}",
@@ -341,6 +391,20 @@
       "line": 225,
       "reason": "bound-or-gradient",
       "value": "{Binding ColorHex}",
+      "baseline": null
+    },
+    {
+      "file": "Views/StickyNoteWindow.xaml",
+      "line": 230,
+      "reason": "inherited-foreground",
+      "value": "TextBlock\u2295Style[inline]",
+      "baseline": null
+    },
+    {
+      "file": "Views/StickyNoteWindow.xaml",
+      "line": 247,
+      "reason": "inherited-foreground",
+      "value": "TextBlock\u2295Style[inline]",
       "baseline": null
     },
     {
@@ -369,6 +433,20 @@
       "line": 273,
       "reason": "bound-or-gradient",
       "value": "{Binding ColorHex}",
+      "baseline": null
+    },
+    {
+      "file": "Views/StickyNoteWindow.xaml",
+      "line": 278,
+      "reason": "inherited-foreground",
+      "value": "TextBlock\u2295Style[inline]",
+      "baseline": null
+    },
+    {
+      "file": "Views/StickyNoteWindow.xaml",
+      "line": 292,
+      "reason": "inherited-foreground",
+      "value": "TextBlock\u2295Style[inline]",
       "baseline": null
     },
     {
@@ -432,6 +510,13 @@
       "line": 114,
       "reason": "bound-or-gradient",
       "value": "{Binding StatusColorHex, Converter={StaticResource HexColorToBrushConverter}}",
+      "baseline": null
+    },
+    {
+      "file": "Views/TodoView.xaml",
+      "line": 277,
+      "reason": "inherited-foreground",
+      "value": "TextBlock\u2295Style[inline]",
       "baseline": null
     },
     {

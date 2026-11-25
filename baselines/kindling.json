@@ -1,7 +1,7 @@
 {
   "schemaVersion": 6,
   "toolVersion": "0.0.0-dev",
-  "exitCode": 0,
+  "exitCode": 1,
   "summary": {
     "paletteMode": "csharp",
     "paletteDegraded": false,
@@ -20,11 +20,12 @@
     "failOnNewUnresolved": false,
     "files": 15,
     "pairs": 225,
-    "coverage": 97.8,
-    "unresolved": 5,
+    "coverage": 97.4,
+    "unresolved": 6,
     "unresolvedBy": {
       "in-style-template": 3,
-      "over-sibling-content": 2
+      "over-sibling-content": 2,
+      "inherited-foreground": 1
     },
     "unknownKeys": {},
     "skipped": 1,
@@ -39,9 +40,9 @@
     "invalidIgnoreCount": 0,
     "invalidIgnores": [],
     "counts": {
-      "fail": 0,
-      "warn": 0,
-      "ok": 222,
+      "fail": 13,
+      "warn": 1,
+      "ok": 208,
       "decorative": 3
     }
   },
@@ -79,6 +80,13 @@
       "line": 323,
       "reason": "over-sibling-content",
       "value": "\u003CImage\u003E",
+      "baseline": null
+    },
+    {
+      "file": "Views/RegenerateWorkspaceWindow.xaml",
+      "line": 347,
+      "reason": "inherited-foreground",
+      "value": "TextBlock\u2295Style[inline]",
       "baseline": null
     }
   ],
@@ -172,23 +180,23 @@
       "file": "Themes/DarkTheme.xaml",
       "line": 146,
       "element": "Style[DarkBtn]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "fail",
+      "symmetry": "light-fails",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -256,17 +264,17 @@
       "file": "Themes/DarkTheme.xaml",
       "line": 225,
       "element": "Style[DangerBtn]/base",
-      "fg": "{DynamicResource DangerFg}",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{DangerBg}",
-      "ratioDark": 6.84,
-      "ratioLight": 5.72,
+      "ratioDark": 8.02,
+      "ratioLight": 14.59,
       "colors": {
         "dark": {
-          "fg": "#F4D6D5",
+          "fg": "#EEEEEE",
           "bg": "#7A2E2D"
         },
         "light": {
-          "fg": "#B02418",
+          "fg": "#1B1B1B",
           "bg": "#FDE7E9"
         }
       },
@@ -284,17 +292,17 @@
       "file": "Themes/DarkTheme.xaml",
       "line": 225,
       "element": "Style[DangerBtn]/trigger",
-      "fg": "{DynamicResource DangerFg}",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{DangerBgHover}",
-      "ratioDark": 5.84,
-      "ratioLight": 4.87,
+      "ratioDark": 6.86,
+      "ratioLight": 12.42,
       "colors": {
         "dark": {
-          "fg": "#F4D6D5",
+          "fg": "#EEEEEE",
           "bg": "#8A3534"
         },
         "light": {
-          "fg": "#B02418",
+          "fg": "#1B1B1B",
           "bg": "#F7D2D6"
         }
       },
@@ -312,23 +320,23 @@
       "file": "Themes/DarkTheme.xaml",
       "line": 225,
       "element": "Style[DangerBtn]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{DangerSolid}",
-      "ratioDark": 4.96,
-      "ratioLight": 4.93,
+      "ratioDark": 4.28,
+      "ratioLight": 3.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#CC3A3A"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#D13438"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "warn",
+      "symmetry": "both-low",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -1516,23 +1524,23 @@
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 25,
       "element": "Style[Button]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "fail",
+      "symmetry": "light-fails",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -1544,23 +1552,23 @@
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 38,
       "element": "Style[Button]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "fail",
+      "symmetry": "light-fails",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -1572,23 +1580,23 @@
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 67,
       "element": "Style[Button]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "fail",
+      "symmetry": "light-fails",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -1600,23 +1608,23 @@
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 80,
       "element": "Style[Button]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "fail",
+      "symmetry": "light-fails",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -1628,23 +1636,23 @@
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 93,
       "element": "Style[Button]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "fail",
+      "symmetry": "light-fails",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -1656,23 +1664,23 @@
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 156,
       "element": "Style[Button]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "fail",
+      "symmetry": "light-fails",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -1684,23 +1692,23 @@
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 169,
       "element": "Style[Button]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "fail",
+      "symmetry": "light-fails",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -1712,23 +1720,23 @@
       "file": "Views/ExportSettingsDialog.xaml",
       "line": 182,
       "element": "Style[Button]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "fail",
+      "symmetry": "light-fails",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -2356,23 +2364,23 @@
       "file": "Views/GenerateDialog.xaml",
       "line": 139,
       "element": "Style[Button]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "fail",
+      "symmetry": "light-fails",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -2384,23 +2392,23 @@
       "file": "Views/GenerateDialog.xaml",
       "line": 153,
       "element": "Style[Button]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "fail",
+      "symmetry": "light-fails",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -2412,23 +2420,23 @@
       "file": "Views/GenerateDialog.xaml",
       "line": 196,
       "element": "Style[Button]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "fail",
+      "symmetry": "light-fails",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,
@@ -2440,23 +2448,23 @@
       "file": "Views/GenerateDialog.xaml",
       "line": 210,
       "element": "Style[Button]/trigger",
-      "fg": "White",
+      "fg": "{DynamicResource Fg0}",
       "bg": "{PurpleD}",
-      "ratioDark": 6.93,
-      "ratioLight": 6.93,
+      "ratioDark": 5.97,
+      "ratioLight": 2.49,
       "colors": {
         "dark": {
-          "fg": "#FFFFFF",
+          "fg": "#EEEEEE",
           "bg": "#534AB7"
         },
         "light": {
-          "fg": "#FFFFFF",
+          "fg": "#1B1B1B",
           "bg": "#534AB7"
         }
       },
       "threshold": 4.5,
-      "category": "ok",
-      "symmetry": null,
+      "category": "fail",
+      "symmetry": "light-fails",
       "isText": true,
       "isLargeText": false,
       "fontSize": 12,

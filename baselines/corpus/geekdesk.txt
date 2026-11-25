@@ -3,8 +3,8 @@
 project: geekdesk
 repo: https://github.com/BookerLiu/GeekDesk
 commit: 7f0e228f7827d0cb2b18a72549494f4fa637b990
-tool-commit: 46454a7+dirty
-frozen: 2026-11-16
+tool-commit: 718dade+dirty
+frozen: 2026-11-25
 exit: 3
 palette-mode: none
 palette-degraded: True
@@ -12,8 +12,8 @@ palette-keys: 27
 single-theme: False
 files: 33
 pairs: 4
-coverage: 9.1
-unresolved: 40
+coverage: 4.7
+unresolved: 82
 skipped: 0
 dead-foreground: 0
 disabled-exempt: 0
@@ -27,6 +27,7 @@ warn: 0
 ok: 4
 decorative: 0
 unresolved-by.bound-or-gradient: 20
+unresolved-by.inherited-foreground: 42
 unresolved-by.no-ancestor-background: 8
 unresolved-by.translucent-uncomposited: 10
 unresolved-by.unknown-palette-key: 2
@@ -57,6 +58,48 @@ U  bound-or-gradient  Control/Windows/PixelColorPickerWindow.xaml:57  <VisualBru
 U  bound-or-gradient  Control/Windows/ToDoInfoWindow.xaml:108  {DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}
 U  bound-or-gradient  Control/Windows/ToDoWindow.xaml:90  {DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}
 U  bound-or-gradient  Resource/Dictionary/CommonStyle.xaml:28  <LinearGradientBrush>
+U  inherited-foreground  Control/Other/BGNmaeDialog.xaml:26  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Other/BGNmaeDialog.xaml:27  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/Other/BacklogNotificatin.xaml:40  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/Other/CustomIconUrlDialog.xaml:23  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Other/CustomIconUrlDialog.xaml:26  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/Other/CustomIconUrlDialog.xaml:31  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Other/CustomIconUrlDialog.xaml:34  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/Other/IconInfoDialog.xaml:26  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Other/IconInfoDialog.xaml:27  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/Other/IconInfoDialog.xaml:30  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Other/IconInfoDialog.xaml:41  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Other/IconInfoDialog.xaml:51  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Other/IconInfoDialog.xaml:52  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/Other/IconInfoUrlDialog.xaml:25  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Other/IconInfoUrlDialog.xaml:26  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/Other/IconInfoUrlDialog.xaml:30  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Other/IconInfoUrlDialog.xaml:31  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/Other/IconInfoUrlDialog.xaml:35  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Other/PasswordDialog.xaml:53  PasswordBox⊕Style[PassBox]
+U  inherited-foreground  Control/Other/PasswordDialog.xaml:54  PasswordBox⊕Style[PassBox]
+U  inherited-foreground  Control/Other/PasswordDialog.xaml:55  PasswordBox⊕Style[PassBox]
+U  inherited-foreground  Control/Other/PasswordDialog.xaml:56  PasswordBox⊕Style[PassBox]
+U  inherited-foreground  Control/Other/PasswordDialog.xaml:67  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/UserControls/Config/MotionControl.xaml:102  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/UserControls/Config/MotionControl.xaml:123  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/UserControls/Config/MotionControl.xaml:145  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/UserControls/PannelCard/LeftCardControl.xaml:189  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/Windows/IconfontWindow.xaml:54  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/Windows/PixelColorPickerWindow.xaml:76  TextBlock⊕Style[TextKey]
+U  inherited-foreground  Control/Windows/PixelColorPickerWindow.xaml:77  TextBlock⊕Style[TextValue]
+U  inherited-foreground  Control/Windows/PixelColorPickerWindow.xaml:79  TextBlock⊕Style[TextKey]
+U  inherited-foreground  Control/Windows/PixelColorPickerWindow.xaml:80  TextBlock⊕Style[TextValue]
+U  inherited-foreground  Control/Windows/ToDoInfoWindow.xaml:45  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Windows/ToDoInfoWindow.xaml:48  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/Windows/ToDoInfoWindow.xaml:52  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Windows/ToDoInfoWindow.xaml:53  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/Windows/ToDoInfoWindow.xaml:64  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Windows/ToDoInfoWindow.xaml:75  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Windows/ToDoInfoWindow.xaml:87  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  Control/Windows/ToDoInfoWindow.xaml:90  TextBox⊕Style[MyTextBoxStyle]
+U  inherited-foreground  Control/Windows/ToDoInfoWindow.xaml:97  TextBlock⊕Style[LeftTB]
+U  inherited-foreground  MainWindow.xaml:268  TextBox⊕Style[MyTextBoxStyle]
 U  no-ancestor-background  Control/Other/CustomIconUrlDialog.xaml:24  Red
 U  no-ancestor-background  Control/Other/CustomIconUrlDialog.xaml:32  Red
 U  no-ancestor-background  Control/Other/CustomIconUrlDialog.xaml:36  Red

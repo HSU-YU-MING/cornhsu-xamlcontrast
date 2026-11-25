@@ -3,8 +3,8 @@
 project: networkmanager
 repo: https://github.com/BornToBeRoot/NETworkManager.git
 commit: 350d81fa7257d1f436187c767706e789013c077a
-tool-commit: 46454a7+dirty
-frozen: 2026-11-16
+tool-commit: 718dade+dirty
+frozen: 2026-11-25
 exit: 3
 palette-mode: pair
 palette-degraded: False
@@ -12,8 +12,8 @@ palette-keys: 291
 single-theme: False
 files: 163
 pairs: 139
-coverage: 9
-unresolved: 1408
+coverage: 8.4
+unresolved: 1522
 skipped: 0
 dead-foreground: 0
 disabled-exempt: 140
@@ -27,6 +27,7 @@ warn: 0
 ok: 52
 decorative: 7
 unresolved-by.bound-or-gradient: 98
+unresolved-by.inherited-foreground: 114
 unresolved-by.in-style-template: 11
 unresolved-by.no-ancestor-background: 1008
 unresolved-by.template-painted: 4
@@ -289,6 +290,120 @@ U  in-style-template  Source/NETworkManager/Views/PingMonitorHostView.xaml:278  
 U  in-style-template  Source/NETworkManager/Views/PortScannerView.xaml:858  {DynamicResource MahApps.Brushes.Gray5}
 U  in-style-template  Source/NETworkManager/Views/PortScannerView.xaml:863  {DynamicResource MahApps.Brushes.Gray5}
 U  in-style-template  Source/NETworkManager/Views/SettingsView.xaml:55  {DynamicResource MahApps.Brushes.Gray3}
+U  inherited-foreground  Source/NETworkManager/Controls/SNMPCredentialsControl.xaml:108  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Controls/SNMPCredentialsControl.xaml:141  PasswordBox⊕Style[→DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Controls/SNMPCredentialsControl.xaml:184  PasswordBox⊕Style[→DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Controls/SNMPCredentialsControl.xaml:63  PasswordBox⊕Style[→DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Controls/WebConsoleControl.xaml:98  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Controls/WindowsCredentialsControl.xaml:43  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Controls/WindowsCredentialsControl.xaml:57  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Controls/WindowsCredentialsControl.xaml:70  PasswordBox⊕Style[→DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/MainWindow.xaml:468  TextBox⊕Style[→SearchTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/CredentialsChangePasswordChildWindow.xaml:41  PasswordBox⊕Style[DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/CredentialsChangePasswordChildWindow.xaml:49  PasswordBox⊕Style[DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/CredentialsChangePasswordChildWindow.xaml:57  PasswordBox⊕Style[DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/CredentialsPasswordChildWindow.xaml:35  PasswordBox⊕Style[DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/CredentialsSetPasswordChildWindow.xaml:39  PasswordBox⊕Style[DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/CredentialsSetPasswordChildWindow.xaml:47  PasswordBox⊕Style[DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/CustomCommandChildWindow.xaml:43  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/DashboardSettingsView.xaml:120  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/DashboardSettingsView.xaml:23  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/DashboardSettingsView.xaml:45  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/DashboardSettingsView.xaml:80  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ExportChildWindow.xaml:76  TextBox⊕Style[BrowseFolderTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/FirewallRuleChildWindow.xaml:204  TextBox⊕Style[BrowseFolderTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/FirewallView.xaml:676  TextBox⊕Style[→TextBlockAsTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/FirewallView.xaml:93  TextBox⊕Style[SearchTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/GroupChildWindow.xaml:1128  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/GroupChildWindow.xaml:1167  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/GroupChildWindow.xaml:1205  PasswordBox⊕Style[→DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/GroupChildWindow.xaml:1448  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/GroupChildWindow.xaml:1456  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/GroupChildWindow.xaml:1671  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/GroupChildWindow.xaml:1802  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/GroupChildWindow.xaml:916  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/GroupChildWindow.xaml:969  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/IPScannerSettingsView.xaml:282  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/IPScannerView.xaml:393  TextBox⊕Style[SearchTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:100  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:140  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:156  PasswordBox⊕Style[DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:175  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:61  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ImportAdComputersChildWindow.xaml:76  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ImportCsvFileChildWindow.xaml:42  TextBox⊕Style[BrowseFolderTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PingMonitorHostView.xaml:167  TextBlock⊕Style[inline]
+U  inherited-foreground  Source/NETworkManager/Views/PortScannerView.xaml:250  TextBox⊕Style[SearchTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PowerShellConnectChildWindow.xaml:77  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PowerShellConnectChildWindow.xaml:82  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PowerShellSettingsView.xaml:15  TextBox⊕Style[BrowseFolderTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PowerShellSettingsView.xaml:48  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PowerShellSettingsView.xaml:53  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:1610  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:1689  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:1779  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:1840  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:1909  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:2091  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:2223  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:2277  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:2436  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:2475  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:2513  PasswordBox⊕Style[→DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:2763  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:2815  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:2836  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:2981  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:3018  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:3207  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:3289  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:3460  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:3501  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:3622  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:3715  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfileChildWindow.xaml:3776  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/ProfilesView.xaml:184  TextBox⊕Style[SearchTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYConnectChildWindow.xaml:214  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYSettingsView.xaml:109  TextBox⊕Style[BrowseFolderTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYSettingsView.xaml:124  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYSettingsView.xaml:141  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYSettingsView.xaml:155  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYSettingsView.xaml:204  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYSettingsView.xaml:21  TextBox⊕Style[BrowseFolderTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYSettingsView.xaml:218  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYSettingsView.xaml:232  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYSettingsView.xaml:246  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYSettingsView.xaml:260  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYSettingsView.xaml:57  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYSettingsView.xaml:70  TextBox⊕Style[BrowseFolderTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/PuTTYSettingsView.xaml:92  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/RDAPView.xaml:237  TextBox⊕Style[TextBlockAsTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/RDAPView.xaml:448  TextBox⊕Style[TextBlockAsTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/RDAPView.xaml:645  TextBox⊕Style[ConsoleTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/RemoteDesktopConnectChildWindow.xaml:126  PasswordBox⊕Style[DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:128  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/RemoteDesktopSettingsView.xaml:92  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/RunCommandChildWindow.xaml:106  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/SNMPOIDProfileChildWindow.xaml:41  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/SNMPOIDProfileChildWindow.xaml:73  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/SNMPSettingsView.xaml:110  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/SNMPView.xaml:160  PasswordBox⊕Style[→DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/SNMPView.xaml:219  TextBox⊕Style[→DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/SNMPView.xaml:300  PasswordBox⊕Style[→DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/SNMPView.xaml:375  PasswordBox⊕Style[→DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/SNMPView.xaml:702  TextBox⊕Style[→ConsoleTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/SettingsLanguageView.xaml:30  TextBox⊕Style[SearchTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/SettingsProfilesView.xaml:25  TextBox⊕Style[→BrowseFolderTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/SettingsSettingsView.xaml:23  TextBox⊕Style[→BrowseFolderTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/SettingsView.xaml:35  TextBox⊕Style[SearchTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/SpeedTestWidgetView.xaml:72  TextBlock⊕Style[inline]
+U  inherited-foreground  Source/NETworkManager/Views/TigerVNCSettingsView.xaml:15  TextBox⊕Style[BrowseFolderTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/TigerVNCSettingsView.xaml:36  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/TracerouteView.xaml:127  TextBlock⊕Style[inline]
+U  inherited-foreground  Source/NETworkManager/Views/WakeOnLANSettingsView.xaml:15  TextBox⊕Style[DefaultTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/WhoisView.xaml:130  TextBox⊕Style[→ConsoleTextBox]
+U  inherited-foreground  Source/NETworkManager/Views/WiFiConnectChildWindow.xaml:163  PasswordBox⊕Style[DefaultPasswordBox]
+U  inherited-foreground  Source/NETworkManager/Views/WiFiConnectChildWindow.xaml:99  PasswordBox⊕Style[DefaultPasswordBox]
 U  no-ancestor-background  Source/NETworkManager/CommandLineWindow.xaml:116  {DynamicResource MahApps.Brushes.Text}
 U  no-ancestor-background  Source/NETworkManager/CommandLineWindow.xaml:122  {DynamicResource MahApps.Brushes.Accent}
 U  no-ancestor-background  Source/NETworkManager/CommandLineWindow.xaml:51  {DynamicResource MahApps.Brushes.Text}
