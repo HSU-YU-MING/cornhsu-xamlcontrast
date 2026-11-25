@@ -14,7 +14,7 @@
 
 ```bash
 dotnet build XamlContrast.slnx -c Release
-dotnet test  XamlContrast.slnx -c Release          # 2026-11-13 實跑（Windows）：1178 綠、2 略過（沒有 jq 的機器略過 Action 註記的實跑；非 Linux 略過統計說明的標記檔）
+dotnet test  XamlContrast.slnx -c Release          # 2026-11-25 實跑（Windows）：1445 綠、3 略過（沒有 jq 的機器略過 Action 註記的兩筆實跑；非 Linux 略過統計說明的標記檔）
 dotnet format XamlContrast.slnx --verify-no-changes # CI 第一關，不過直接紅
 
 # 示範專案（刻意做壞的，exit 1 才是對的）
@@ -105,6 +105,11 @@ README 的示範區塊**整整漂了兩個版本沒人發現**——印出來的
       `~/.dotnet/tools` 寫進 `GITHUB_PATH`、Run audit 的 `--json` 落點固定在 `$RUNNER_TEMP/xamlcontrast-report.json`。
       改了任何一個，README 的那一步就安靜失效。
     - 協定跟 Parity repo 的伺服器端一起定，**不要單方面改**（伺服器照這個形狀實作，`CliPushTests` 釘住線上的樣子）。
+  - **1.11 的新增（凍結面，minor）**：unresolved 原因多兩個 `content-style-trigger`、`bound-content`
+    （開放集，第 3 面；協定不認得的值送 `other`）。CLI 旗標、JSON 欄位、Action input、config 都沒動，
+    `schemaVersion` 維持 6、**`Baseline.KeyVersion` 維持 2**（這一版只讓某些配對改走 unresolved，一筆鍵的
+    寫法都沒動）。⚠ 改的是**哪些組評得出來**：原本的 fail／ok 可能變成 unresolved，開 `--baseline` 的人
+    會看到一批「已還債」—— 那不是修好了，是工具不再宣稱知道它。Upgrading 有寫。
   - **1.10 的新增（凍結面，minor）**：unresolved 原因多一個 `inherited-foreground`（開放集，第 3 面；協定不認得的值送 `other`）。
     CLI 旗標、JSON 欄位、Action input、config 都沒動，`schemaVersion` 維持 6。
     ⚠ **`Baseline.KeyVersion` 維持 2**（刻意的）：字串內容那條規則換掉的是 `fg` 的**值**，不是鍵的寫法 ——
@@ -248,6 +253,19 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
 
 ### 色盤偵測
 
+- **`<Style.Resources>` 與模板裡的 brush 不是色票**（1.11，`PaletteDetector.MaskScopedResources`）：
+  那是區域資源，只有「用到那個樣式的地方」看得到。色盤是**正則掃原始文字**的，所以結構判斷靠遮罩：
+  掃之前把 `<Style>` 與任何 `…Template` 的整個子樹換成空白（同註解那一步，`ReadXamlWithoutComments`）。
+  ⚠ 不遮的話只放樣式的字典會變成「色盤來源」—— 檔數與鍵數虛胖（而那正是挑色盤的判準）、不算進
+  `summary.files`，值不是色票時還印「!! 1 key(s) dropped —— 色票讀壞了」，對著一個根本不是色票的東西喊。
+  野外實測：NETworkManager 五個 `Resources/Styles/*Styles.xaml` 各有一個 `MahApps.Brushes.*` 在
+  `<Style.Resources>` 裡（`files` 163 → 168，色盤 291 鍵不變）。
+  ⚠ **畫面檔自己的區域層刻意不遮**（`maskScoped: false`，只有 `LocalOverrides` 與 `MergedXamlPalette` 的
+  screen 分支）：寫在 `<Button.Resources>`（哪怕在 DataTemplate 深處）的 brush 執行期真的蓋過全域，
+  而那一層本來就只有那個檔看得到。遮掉的話 MaterialDesign 的 `DataGrids.xaml` 三顆按鈕會從本地的 Orange
+  退回全域主題色 —— 3 筆 warn 變 3 筆 fail，而那個顏色那三顆按鈕根本沒用到。兩種都不精確（本地層是整個檔、
+  不是子樹），收斂到子樹是獨立的一件事（ROADMAP）。
+  ⚠ 不成對的開始標籤一律遮到檔尾：寧可少收色票（退化會喊 exit 3），不要把區域資源收進全域色盤。
 - **檔名的 dark／light 提示只看「專案內相對路徑」。** 看完整路徑的話，專案放在
   `D:\dark-projects\` 底下會讓所有候選都染上 dark 提示、配對整個失效。
 - **一律 `Path.GetFullPath` 正規化分隔線。** `GetDirectoryName` 回傳反斜線，
@@ -409,7 +427,7 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   translucent-uncomposited 那一段多一個條件 `_styles.AppliesToSomeElement(ttName)` —— 專案裡真的有那個型別的元素
   才算「使用處評得到」；一個都沒有的話執行期套不到它，那一組不存在，照舊記 unresolved。
 
-### 字串內容的字色由隱含樣式決定（1.10，`StyleIndex` 的 `ContentTextType`／`ContentTextStyle`／`AppImplicitChain`／`ResolveAppScope` + `Auditor.StringContentForeground`）
+### 字串內容的字色由隱含樣式決定（1.10／1.11，`StyleIndex` 的 `ContentTextType`／`ContentTextStyle`／`AppImplicitChain`／`ResolveAppScope` + `Auditor.StringContentForeground`）
 
 外部回報（2026-11-25，ZeroCel 前端用 1.8.3 整理）：工具說 757 組全過，真 App 裡淺色主題的紫色主要鈕是
 黑字疊紫底 2.66。原因不是算錯 —— 是工具拿一個**畫不上去的顏色**在評分。
@@ -441,9 +459,29 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   （Kindling 的修法，WPF 的標準答案）離那顆 TextBlock 更近，所以贏。
   ⚠ 少了這一條，工具會對著**已經修好**的程式碼報 fail —— 1.5 的 Kindling 教訓：守門員看不懂正確的修法，
   就是在逼人寫多餘的程式碼。
-- **只收字面字串**（`StyleIndex.HasStringContent`：`Content`／`Header` 屬性、文字節點、屬性元素寫法）。
+- **只有字面字串才換值**（`StyleIndex.HasStringContent`：`Content`／`Header` 屬性、文字節點、屬性元素寫法）。
   `Content="{Binding Label}"` 執行期多半也是字串，但靜態分不出「字串」與「一整棵子樹」——
-  猜錯的方向是**把元素寫的字色蓋掉**，那會編造。維持 1.9 的答案。
+  猜錯的方向是**把元素寫的字色蓋掉**，那會編造。1.10 這一格維持 1.9 的答案（宿主宣告的字色），
+  1.11 起改記 `bound-content`（見下一條）—— 兩邊都不猜，但「拿畫不上去的字色回報過關」比「不知道」更糟。
+- **那條鏈自己的觸發器也會設字色 ⇒ 不評分**（1.11，`content-style-trigger`）：哪個狀態在執行期成立靜態
+  不可知（條件多半是 Binding）。⚠ 這是「看得懂正確的修法」的另一半：ZeroCel 照 1.10 的建議修好（`DataTrigger`
+  把字色翻成白色、畫出來 6.93），而只讀觸發**前**那個 Setter 的話，工具對**已經修好**的程式碼照舊報同樣 8 筆
+  fail。⚠ **停用態不算**（`st.Disabled`）：那是 WCAG 1.4.3 豁免的狀態，基礎狀態的字色照舊是正常狀態的答案。
+- **內容是 markup extension ⇒ 不評分**（1.11，`bound-content`、`StyleIndex.MarkupContent`）：
+  `{Binding}`／`{x:Static res:Strings.Go}`／`{DynamicResource K}`。1.10 這一格維持「宿主宣告的字色」，
+  而那正是畫不上去的那一個 —— **謊報健康**：多語言專案每一句話都是 `{x:Static res:Strings.…}`，
+  ZeroCel 11-19 把字搬進資源檔之後，同一種病 1.10 只抓到少數寫死在標記裡的。
+  ⚠ 往「字串」猜會往另一邊錯（蓋掉元素真的宣告的字色），所以兩邊都不猜。
+  ⚠ **只在字色真的會被換掉時記**（`content.Fg != fgV`）：隱含樣式的字色跟宿主一樣時沒有不確定，照舊評分 ——
+  少這一條，每一個 `Content="{Binding}"` 都會變成雜訊。
+  ⚠ **記在 SameSource／停用態之後**（元素端）、停用態之後（定義處）：排在前面的話，讓給定義處的那些與
+  停用態會在兩邊各記一次。
+  ⚠ 定義處（`WalkStyles`）用 `_markupContentKeys`／`_markupContentTypes` 問索引，而且**只在沒有任何字面字串
+  使用處時**才算：有字面字串的話那個答案是確定的（換值），定義處一筆報不出兩種答案。
+- **宿主自己宣告 `ContentTemplate` ⇒ 整條規則不適用**（1.11，`StyleIndex.HasContentTemplate`）：
+  內容由那份 DataTemplate 畫，ContentPresenter 不產生 TextBlock。⚠ 這一格 1.10 漏了，所以
+  `<Button ContentTemplate="…" Content="literal"/>` 的字色會被換成一個沒換掉的值。索引（兩張表）與
+  元素端、定義處三處都要判（`ContentTemplateProps` 也查 `chain.Props`：Style 的 Setter 設的也算）。
 - **只在看得到那個機制時動手**：`chain.ContentTextType` 非 null（這個 Style 自己的模板裡真的有放內容的位置）。
   框架的預設模板、元素自己帶的模板都不算。⚠ 不要拿 `TemplateLayers` 當條件 —— 那一格只收「模板裡找得到
   畫底的祖先」的位置，而「整份模板只有一個 ContentPresenter、底靠宿主的 Setter 給」（透明按鈕）時它是空的。
@@ -759,6 +797,11 @@ ratchet 判成「已還債」→ 綠燈，還印出「paid off N」恭喜你把�
   1.10 新增四條明文盲區（都在「字串內容」那一節）：`Content="{Binding}"`（分不出字串與子樹）、
   框架的預設模板、C# 在執行期合併的字典、**字色純粹靠繼承的文字元素**
   （有自己的樣式的那種記 `inherited-foreground`，連樣式都沒有的那 7351 處還沒計）。
+  1.11 把第一條從「維持宿主的字色」改成點名（`bound-content`），另外兩條新明文盲區：
+  **透明色票被當成「讀不懂」**（`Color="Transparent"` 的 brush 鍵被剔除、用到它的地方記
+  `unknown-palette-key`，而它其實該穿透到祖先）、**畫面檔的區域 brush 作用範圍是整個檔不是子樹**
+  （MaterialDesign 的 `DataGrids.xaml` 三顆按鈕各自換 `MaterialDesign.Brush.Primary`，現在先出現的那一個贏，
+  三筆裡兩筆是編的）。兩條都在 ROADMAP，都會動到計數，所以不夾帶在別的修正裡。
 - **觸發器條件是「App 自己的旗標」時會報出執行期不存在的組合**（明文盲區，1.0 就在，1.6 只是變多）：
   ScreenToGif 用 `<Condition Property="DarkMode" Value="True"/>` 分深淺兩套字色，工具不知道那個屬性與主題相關，
   於是兩個狀態各對兩欄各評一次 —— 黑字配深色底、白字配淺色底各一筆。猜屬性名就違反「不猜」，所以照報，

@@ -3,7 +3,7 @@
 project: materialdesign
 repo: https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit
 commit: 087728011a8d71926ccf86cb28dc99439e9b1c3f
-tool-commit: 718dade+dirty
+tool-commit: 9847844+dirty
 frozen: 2026-11-25
 exit: 3
 palette-mode: pair

@@ -289,6 +289,10 @@ internal sealed partial class StyleIndex
     private readonly HashSet<string> _stringContentKeys = new(StringComparer.Ordinal);
     // 內容是字串的元素的型別名（同上，給隱含樣式的定義處用）
     private readonly HashSet<string> _stringContentTypes = new(StringComparer.Ordinal);
+    // 同兩張表，但內容是 markup extension（{Binding}／{x:Static}／資源引用）的（1.11）——
+    // 那時「會不會產生一顆 TextBlock」靜態分不出來，定義處要據此記 bound-content 而不是拿宿主的字色評分
+    private readonly HashSet<string> _markupContentKeys = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _markupContentTypes = new(StringComparer.Ordinal);
 
     /// <summary>
     /// 這個型別的隱含樣式，在這個檔的這一行適用的是哪一筆：
@@ -959,11 +963,20 @@ internal sealed partial class StyleIndex
                     idx._fontFamilies.TryAdd(fontKey, el.Value.Trim());
                 // 內容是字串的元素（1.10）：它的文字由 ContentPresenter 產生的 TextBlock 畫，
                 // 所以套得到 App 層的隱含樣式。定義處（WalkStyles）看不到使用處的內容，靠這兩張表問
-                if (!el.Name.LocalName.Contains('.', StringComparison.Ordinal) && HasStringContent(el))
+                // ⚠ 宿主自己指定 ContentTemplate 時內容由那份 DataTemplate 畫，ContentPresenter 不產生
+                //   TextBlock —— 兩張表都不收它（1.11），否則定義處會對一個沒被換掉的字色換值
+                if (!el.Name.LocalName.Contains('.', StringComparison.Ordinal) && HasStringContent(el) && !HasContentTemplate(el))
                 {
                     idx._stringContentTypes.Add(el.Name.LocalName);
                     if (el.Attribute("Style")?.Value is { } sc && ResourceRef().Match(sc.Trim()) is { Success: true } scm)
                         idx._stringContentKeys.Add(scm.Groups["k"].Value);
+                }
+                // 內容是 markup extension 的（1.11）：同兩張表，但答案是「不知道」而不是「換成隱含樣式的字色」
+                else if (!el.Name.LocalName.Contains('.', StringComparison.Ordinal) && MarkupContent(el) is not null && !HasContentTemplate(el))
+                {
+                    idx._markupContentTypes.Add(el.Name.LocalName);
+                    if (el.Attribute("Style")?.Value is { } mc && ResourceRef().Match(mc.Trim()) is { Success: true } mcm)
+                        idx._markupContentKeys.Add(mcm.Groups["k"].Value);
                 }
                 if (el.Attribute("Style")?.Value is { } s && ResourceRef().Match(s.Trim()) is { Success: true } m)
                     idx._usedKeys.Add(m.Groups["k"].Value);
@@ -973,7 +986,11 @@ internal sealed partial class StyleIndex
                 {
                     idx._usedKeys.Add(bm.Groups["k"].Value);
                     // 行內 Style 的擁有者內容是字串 → 它的基底也在畫字串內容（1.10）
-                    if (el.Parent?.Parent is { } owner && HasStringContent(owner)) idx._stringContentKeys.Add(bm.Groups["k"].Value);
+                    if (el.Parent?.Parent is { } owner && !HasContentTemplate(owner))
+                    {
+                        if (HasStringContent(owner)) idx._stringContentKeys.Add(bm.Groups["k"].Value);
+                        else if (MarkupContent(owner) is not null) idx._markupContentKeys.Add(bm.Groups["k"].Value);
+                    }
                 }
             }
         }
@@ -985,6 +1002,7 @@ internal sealed partial class StyleIndex
             .ToDictionary(g => g.Key, g => g.Select(r => r.BasedOn!).ToList(), StringComparer.Ordinal);
         Closure(idx._usedKeys, basesOf);
         Closure(idx._stringContentKeys, basesOf); // 畫字串內容的 Style 的基底也在畫它
+        Closure(idx._markupContentKeys, basesOf);
         return idx;
 
         static void Closure(HashSet<string> keys, Dictionary<string, List<string>> basesOf)
@@ -1075,11 +1093,43 @@ internal sealed partial class StyleIndex
         return false;
     }
 
+    /// <summary>
+    /// 宿主的內容是 markup extension 時回傳那個寫法（1.11）：<c>{Binding Label}</c>、
+    /// <c>{x:Static res:Strings.Go}</c>、<c>{DynamicResource GoText}</c>。
+    ///
+    /// 執行期那個值多半是字串（那時 ContentPresenter 一樣產生 TextBlock、隱含樣式一樣生效），
+    /// 但也可能是一整棵子樹（那時隱含樣式不生效）—— 靜態分不出來，而兩種的字色不一樣。
+    /// 猜「八成是字串」會把元素寫的字色蓋掉；拿宿主宣告的字色評分則是謊報健康
+    /// （多語言專案的字全在 <c>{x:Static res:Strings.…}</c> 裡）。所以兩邊都不猜，記 bound-content。
+    /// </summary>
+    internal static string? MarkupContent(XElement el)
+    {
+        foreach (var p in (ReadOnlySpan<string>)["Content", "Header"])
+            if (el.Attribute(p)?.Value.Trim() is { Length: > 0 } v && v.StartsWith('{') &&
+                !v.StartsWith("{}", StringComparison.Ordinal))
+                return v;
+        return null;
+    }
+
+    /// <summary>宿主指定了自己的內容模板（1.11）—— 那時內容由那份 DataTemplate 畫，
+    /// ContentPresenter 不會產生 TextBlock，字串內容那條規則整個不適用（字色照舊從宿主繼承）。</summary>
+    internal static bool HasContentTemplate(XElement el)
+        => ContentTemplateProps.Any(p => el.Attribute(p) is not null
+            || el.Elements().Any(c => c.Name.LocalName == el.Name.LocalName + "." + p));
+
+    internal static readonly string[] ContentTemplateProps =
+        ["ContentTemplate", "ContentTemplateSelector", "HeaderTemplate", "HeaderTemplateSelector"];
+
     /// <summary>有元素以 <c>Style=</c> 用這個 Style、而且那個元素的內容是字串（含 BasedOn 的閉包，1.10）。</summary>
     public bool HasStringContentUser(string key) => _stringContentKeys.Contains(key);
 
     /// <summary>專案裡有這個型別的元素、內容是字串（1.10；給隱含樣式的定義處用）。</summary>
     public bool SomeStringContentElement(string typeName) => _stringContentTypes.Contains(typeName);
+
+    /// <summary>同上兩個，但內容是 markup extension（1.11）—— 定義處據此記 bound-content。</summary>
+    public bool HasMarkupContentUser(string key) => _markupContentKeys.Contains(key);
+
+    public bool SomeMarkupContentElement(string typeName) => _markupContentTypes.Contains(typeName);
 
     /// <summary>
     /// <c>Application.Resources</c> 層的隱含樣式（1.10）—— 模板自己產生的元素只看得到這一層與模板自己的資源。

@@ -379,7 +379,12 @@ public static partial class PaletteDetector
         if (!IsScreenFile(file)) return overrides;
         // 畫面自己的 ThemeDictionaries（WinUI，1.4）：深淺各用自己那一份。⚠ 不拆的話整份檔一起解，同鍵先出現的贏 ——
         //   深色欄拿到 Default／Light 那一份的值，是編出來的比值（WinUI Gallery 的 XamlResourcesPage 實測抓到）
-        if (ReadTextOrNull(file) is not { } text) return overrides;
+        // ⚠ 這一層**不遮** <Style>／模板裡的資源（1.11）：畫面檔自己寫在 <Button.Resources>（哪怕在
+        //   DataTemplate 深處）的 brush 在執行期真的蓋過全域，而這一層的可見範圍本來就只有這個檔。
+        //   遮掉的話 MaterialDesign 的 DataGrids.xaml 那三顆按鈕會從「本地的 Orange」退回全域主題色 ——
+        //   兩種都不精確（本地層是整個檔，不是子樹），但那是 1.0 就在的既有近似，不在這一版的範圍內。
+        //   1.11 遮的是**全域色盤**那幾條路：區域資源不該讓一個只放樣式的檔變成主題色票來源。
+        if (ReadTextOrNull(file, maskScoped: false) is not { } text) return overrides;
         if (ThemeDictionarySections(text) is { } td)
         {
             var neutral = LocalOverridesOf(td.Neutral, global);
@@ -525,11 +530,57 @@ public static partial class PaletteDetector
     ///   也被收進色盤，而且同鍵後者覆蓋前者 —— 報告用一個已經失效的值算出篤定的比值，
     ///   舊值比較亮時就藏掉真實的 fail；被註解掉的 brush 也會讓畫面檔看起來像色盤來源。
     /// </summary>
-    private static string ReadXamlWithoutComments(string file)
-        => XmlComment().Replace(File.ReadAllText(file), " ");
+    private static string ReadXamlWithoutComments(string file, bool maskScoped = true)
+    {
+        var text = XmlComment().Replace(File.ReadAllText(file), " ");
+        return maskScoped ? MaskScopedResources(text) : text;
+    }
 
     [GeneratedRegex("<!--.*?-->", RegexOptions.Singleline)]
     private static partial Regex XmlComment();
+
+    /// <summary>
+    /// 把 <c>&lt;Style&gt;</c> 與各種模板的整個子樹換成空白（1.11）。
+    ///
+    /// 它們裡面的 <c>&lt;Style.Resources&gt;</c>／<c>&lt;ContentPresenter.Resources&gt;</c> 是
+    /// **區域資源**：只有「用到這個樣式的地方」看得到，不是主題色票。
+    /// ⚠ 不遮的話，只放樣式的檔案會因為裡面一個 brush 就被當成色盤來源 —— 鍵數與檔數虛胖
+    ///   （而那正是「挑哪個檔當色盤」的判準），而且那個值讀不懂時偵測描述會印
+    ///   「!! 1 key(s) dropped —— 色票讀壞了」，對著一個根本不是色票的東西喊。
+    ///   實例（ZeroCel 回報 2）：<c>&lt;Style TargetType="ScrollViewer"&gt;</c> 的 Style.Resources 裡
+    ///   一個 <c>{x:Static SystemColors.ControlBrushKey}</c> 的透明 brush，就讓 Styles/Controls.xaml
+    ///   從畫面檔變成色盤檔（2 個檔 → 3 個檔 ＋ 一句假警報）。
+    ///
+    /// ⚠ 不成對的開始標籤（XAML 本身壞了）一律遮到檔尾：寧可少收色票（色盤退化會喊 exit 3），
+    ///   不要把區域資源收進全域色盤 —— 那是安靜地用錯值算出一個篤定的比值。
+    /// </summary>
+    private static string MaskScopedResources(string text)
+    {
+        var tags = ScopedTag().Matches(text);
+        if (tags.Count == 0) return text;
+        var sb = new System.Text.StringBuilder(text);
+        for (var i = 0; i < tags.Count; i++)
+        {
+            var open = tags[i];
+            if (open.Groups["close"].Length > 0 || open.Groups["tail"].Value.EndsWith('/')) continue;
+            var name = open.Groups["name"].Value;
+            var end = text.Length;
+            for (int j = i + 1, depth = 1; j < tags.Count; j++)
+            {
+                if (tags[j].Groups["name"].Value != name) continue; // XML 正確巢狀：同名的才配對
+                if (tags[j].Groups["close"].Length > 0) { if (--depth == 0) { end = tags[j].Index + tags[j].Length; break; } }
+                else if (!tags[j].Groups["tail"].Value.EndsWith('/')) depth++;
+            }
+            for (var k = open.Index; k < end; k++) if (sb[k] is not ('\n' or '\r')) sb[k] = ' ';
+            while (i + 1 < tags.Count && tags[i + 1].Index < end) i++; // 遮掉的範圍裡的標籤不用再看
+        }
+        return sb.ToString();
+    }
+
+    /// <summary>區域資源的外殼標籤：<c>&lt;Style&gt;</c> 與任何 <c>…Template</c>（可帶命名空間前綴）。
+    /// ⚠ 名字後面一定要接空白／<c>/</c>／<c>&gt;</c>，否則 <c>&lt;Style.Resources&gt;</c> 自己也會中。</summary>
+    [GeneratedRegex("""<(?<close>/?)(?<name>(?:\w+:)?(?:Style|\w*Template))(?=[\s/>])(?<tail>[^>]*)>""")]
+    private static partial Regex ScopedTag();
 
     /// <summary>C# 三元組同一個根因：整行被 // 註解掉的舊列不是色盤。</summary>
     private static bool IsCSharpCommentLine(string line) => line.AsSpan().TrimStart().StartsWith("//");
@@ -542,17 +593,17 @@ public static partial class PaletteDetector
 
     /// <summary>單一檔案裡的 &lt;Color x:Key&gt; 定義（供跨檔解析 brush 引用）。
     /// <paramref name="keepInvalid"/>：讀不懂的值記成 <see cref="InvalidValue"/> 而不是略過（合併式色盤用）。</summary>
-    internal static Dictionary<string, string> ParseColorDefs(string file, bool keepInvalid = false)
+    internal static Dictionary<string, string> ParseColorDefs(string file, bool keepInvalid = false, bool maskScoped = true)
     {
         string text;
-        try { text = ReadXamlWithoutComments(file); } catch { return new Dictionary<string, string>(); }
+        try { text = ReadXamlWithoutComments(file, maskScoped); } catch { return new Dictionary<string, string>(); }
         return ParseColorDefsText(text, keepInvalid);
     }
 
     /// <summary>剔除註解後的檔案內容；讀不到回傳 null（呼叫端照舊走讀檔失敗的路徑）。</summary>
-    private static string? ReadTextOrNull(string file)
+    private static string? ReadTextOrNull(string file, bool maskScoped = true)
     {
-        try { return ReadXamlWithoutComments(file); } catch { return null; }
+        try { return ReadXamlWithoutComments(file, maskScoped); } catch { return null; }
     }
 
     /// <summary>同上，對一段已讀進來（已剔除註解）的 XAML 文字 —— ThemeDictionaries 的每一個主題字典各解一次。</summary>
@@ -787,8 +838,9 @@ public static partial class PaletteDetector
                 }
             }
 
-            var colors = ParseColorDefs(f, keepInvalid: true);
-            var (lit, refs) = ParseBrushDefs(f, keepInvalid: true);
+            // 畫面檔的區域層不遮（同 LocalOverrides 的理由）；字典檔與 App.xaml 遮
+            var colors = ParseColorDefs(f, keepInvalid: true, maskScoped: !screen);
+            var (lit, refs) = ParseBrushDefs(f, keepInvalid: true, maskScoped: !screen);
             if (screen)
             {
                 if (colors.Count > 0) localColorFiles.Add((f, colors));
@@ -943,10 +995,10 @@ public static partial class PaletteDetector
     /// <paramref name="keepInvalid"/>：有 x:Key 但色值讀不懂（七位數、Binding、Color 寫成屬性元素…）
     /// 的 brush 記成 <see cref="InvalidValue"/> 而不是略過（合併式色盤用）。</summary>
     internal static (Dictionary<string, string> Literal, Dictionary<string, string> Ref) ParseBrushDefs(
-        string file, bool keepInvalid = false)
+        string file, bool keepInvalid = false, bool maskScoped = true)
     {
         string text;
-        try { text = ReadXamlWithoutComments(file); } catch { return (new Dictionary<string, string>(), new Dictionary<string, string>()); }
+        try { text = ReadXamlWithoutComments(file, maskScoped); } catch { return (new Dictionary<string, string>(), new Dictionary<string, string>()); }
         return ParseBrushDefsText(text, keepInvalid);
     }
 

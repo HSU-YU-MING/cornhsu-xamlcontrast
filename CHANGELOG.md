@@ -3,6 +3,90 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## 1.11.0 — 2026-11-25
+
+Three more from the same reporter (ZeroCel's WPF front end), after re-auditing with 1.10.0. The 1.10 rule
+itself checked out — run against the code from **before** their fix, 1.8.3 found 0 pairs below AA and 1.10.0
+found the **8** real ones, and `inherited-foreground` turned up a genuine bug they had not seen (a pinned
+timeline cell at 1.45:1 / 1.21:1). What 1.10 got wrong is the two **edges** of that same rule, plus one
+misleading palette warning.
+
+### Upgrading
+
+- **In short:** two audit-semantics changes and one palette-scope fix. (1) When the implicit style that paints
+  a host's string content has a **trigger** that sets `Foreground`, the pair is no longer graded with the
+  pre-trigger colour — it becomes `content-style-trigger`. Findings can move from `fail` to unresolved.
+  (2) When the host's `Content` is a **markup extension** (`{Binding}`, `{x:Static res:Strings.Go}`,
+  `{DynamicResource K}`) and such an implicit style exists, the pair becomes `bound-content` instead of being
+  graded with the host's declared colour — findings can move from `ok` to unresolved. (3) Brushes written
+  inside a `<Style.Resources>` or a template are no longer collected as palette keys. `Baseline.KeyVersion`
+  stays **2**, `schemaVersion` stays **6**.
+  *簡單說：兩件稽核語意的改動與一件色盤範圍的修正。(1) 畫字串內容的那個隱含樣式有觸發器會設字色時改記
+  `content-style-trigger`，原本的 fail 可能變成 unresolved。(2) 宿主的內容是 markup extension 時改記
+  `bound-content`，原本的 ok 可能變成 unresolved。(3) `<Style.Resources>` 與模板裡的 brush 不再算色票。*
+- **Measured:** the seventeen public projects are **row-for-row identical** on (1) and (2) — the same reason
+  1.10 was flat there: none of them merges an implicit text style into `Application.Resources` *and* uses it
+  on content through a template the tool can see. ⚠ That is not evidence the code path is dead (the 1.8
+  lesson): both are reproduced end to end with the CLI, and `StringContentTests` pins eight boundaries.
+  On (3) one project moves: **NETworkManager `files` 163 → 168**, because five styles-only dictionaries
+  (`Resources/Styles/{ComboBox,ContextMenu,NumericUpDown,PasswordBox,TextBox}Styles.xaml`) each held one
+  `MahApps.Brushes.*` brush inside a `<Style.Resources>` and so counted as palette sources. Its palette is
+  **unchanged** (291 keys) and so is every finding, unresolved site and counter in all seventeen; the three
+  local projects (Kindling, QuillNest, Cornea) are unchanged too.
+- **If you gate on `--baseline`:** rows that move to unresolved come back as *paid off*. They are not fixed —
+  the tool stopped claiming to know them. Read them, then rewrite with `--write-baseline`. With
+  `failOnNewUnresolved` on, the new reasons add entries to the `unresolved` section.
+
+### Fixed
+
+- **A fix the tool could not read is no longer reported as a fail.** 1.10 told ZeroCel that an implicit style
+  on the `ContentPresenter` is the way to repaint string content; they did exactly that, with a `DataTrigger`
+  that flips the ink to white over the accent colour (6.93:1 on the screen) — and 1.10 kept reporting the same
+  8 failures, because it only read the Setter **before** the triggers. Any trigger on that chain that sets
+  `Foreground` now makes the pair `content-style-trigger`: which state holds at runtime is not knowable
+  statically, and the condition is usually a binding. A trigger that only fires on `IsEnabled=False` does not
+  count — that state is exempt from WCAG 1.4.3, so the base colour is still the answer for the normal state.
+  **A gate that cannot read the correct fix is a gate that forces people to write redundant code** (the 1.5
+  Kindling lesson, now on the other side of the same rule).
+- **`Content="{x:Static res:Strings.Go}"` is no longer graded as if the host's declared colour applied.**
+  1.10 only treated a **literal** string as string content, and kept 1.9's answer for everything else. But
+  that answer is the host's declared `Foreground`, which is exactly the colour that does **not** reach the
+  screen when an implicit style repaints the generated `TextBlock` — so the tool reported a pass (6.93:1) for
+  text that renders at 2.66:1. In a localized project this is the common case, not an edge: every caption is
+  `{x:Static res:Strings.…}`, so after ZeroCel moved their strings into resource files, 1.10 only caught the
+  few written straight into the markup. Guessing "it is probably a string" errs the other way (it would
+  overwrite a colour the element really declares), so neither answer is assumed: the pair is counted as
+  `bound-content` and the content expression is named. Two boundaries keep it from being noise — when the
+  implicit style's colour **equals** the host's there is no ambiguity, and a host that declares its own
+  `ContentTemplate` is not affected at all (that template draws the content, so no `TextBlock` is generated).
+  - **The same `ContentTemplate` boundary also applies to 1.10's literal-string rule**, where it was missing:
+    a `<Button ContentTemplate="…" Content="literal"/>` no longer has its colour replaced.
+- **Brushes inside a `<Style.Resources>` or a template are not palette.** They are scoped resources — visible
+  only where that style is used — but the palette scanner collected them as theme swatches. A dictionary that
+  holds nothing but styles therefore counted as a **palette source**: it inflated the file and key counts that
+  decide where the palette comes from, it stopped being counted as an audited file, and when its value was one
+  the tool does not take as a swatch the report printed `!! 1 key(s) dropped — a theme defines them with a
+  colour value the tool cannot read`, pointing at something that was never a swatch
+  (`<SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent"/>` inside a
+  `ScrollViewer` style). The scanner now masks `<Style>` and template subtrees.
+  - ⚠ **A screen's own local brushes are deliberately left alone**, even in a `DataTemplate`: they really do
+    override the palette at runtime, and that layer is already file-scoped. Masking them there would push
+    MaterialDesign's three per-button `<Button.Resources>` overrides back to the global theme colour — 3 warn
+    turning into 3 fail against a colour those buttons never use. Both answers are approximations (the local
+    layer is the whole file, not the subtree); narrowing it is a separate change, not this one.
+
+### Known limitations
+
+- A palette key whose brush is `Color="Transparent"` is still dropped and named in that same
+  `!! N key(s) dropped` line, although the tool reads it perfectly well — uses of it count as
+  `unknown-palette-key` rather than painting through to the ancestor. Honest but blunt, and the wording
+  overstates it; treating such keys as transparent would change pair counts, so it is on the ROADMAP rather
+  than slipped into this release.
+- `{x:Static}` content is **named, not resolved**. Resolving it would mean reading the project's
+  `*.Designer.cs` / `.resx` to check that the member is a `string`, and reading `*.cs` for anything but the
+  C# palette is an opt-in scope widening (frozen face 9, same as `converters.constantBrushes`) — a 2.0 change
+  if it were on by default.
+
 ## 1.10.0 — 2026-11-25
 
 Two **false negatives** reported from the outside (ZeroCel's WPF front end, audited with 1.8.3): the tool
