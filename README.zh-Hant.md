@@ -707,6 +707,12 @@ sibling 背景已解析 `Grid` 格子裡「佔滿格子的兄弟」(純色直接
 （Figma vs 渲染後的真實數值）；XamlContrast 回答「**做出來的東西看不看得見**」。
 一個守還原度、一個守可讀性，在同一張 PR 檢查清單上會合。
 
+另外三支讀的是同一份 XAML，退出碼、baseline、Action 輸入都一樣：
+[**XamlKeys**](https://github.com/HSU-YU-MING/cornhsu-xamlkeys)（資源鍵找不找得到）、
+[**XamlFit**](https://github.com/HSU-YU-MING/cornhsu-xamlfit)（翻譯後放不放得下）、
+[**XamlA11y**](https://github.com/HSU-YU-MING/cornhsu-xamla11y)（螢幕閱讀器念不念得出來、鍵盤到不到得了）。
+[四支放在同一個 job](https://github.com/HSU-YU-MING/cornhsu-xamla11y/blob/main/docs/four-tools.md)（英文）。
+
 ## 授權
 
 MIT © [許彧銘 Hsu Yu-Ming](https://cornhsu.com/)
