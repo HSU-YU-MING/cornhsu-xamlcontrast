@@ -522,6 +522,108 @@ public class PaletteDetectorTests
         Assert.DoesNotContain("conflicting", d.Description); // 註解不是第二份定義
     }
 
+    [Fact] // 1.11：Color="Transparent" 就是 alpha 0，而 Color="#00FFFFFF" 色盤本來就收 —— 兩種寫法要給同一個答案。
+           //   剔除它等於把一個讀得懂的值列進「讀不懂」的名單，用到它的地方記 unknown-palette-key，
+           //   而它其實該穿透到底下那一層。野外代價量過：Playnite 的 ControlBackgroundBrush 一個鍵 219 處
+    public void ATransparentPaletteBrushShowsWhatIsBehindIt()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#111111"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <SolidColorBrush x:Key="Glass" Color="Transparent"/>
+            </ResourceDictionary>
+            """)
+          .File("Themes/Light.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <SolidColorBrush x:Key="Bg" Color="#FAFAFA"/>
+              <SolidColorBrush x:Key="Fg" Color="#212121"/>
+              <SolidColorBrush x:Key="Glass" Color="Transparent"/>
+            </ResourceDictionary>
+            """)
+          .File("Main.xaml", """
+            <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    Background="{DynamicResource Bg}">
+              <Border Background="{DynamicResource Glass}">
+                <TextBlock Foreground="{DynamicResource Fg}" Text="hi"/>
+              </Border>
+            </Window>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(("#00FFFFFF", "#00FFFFFF"), d.Palette.Entries["Glass"]);
+        Assert.DoesNotContain("dropped", d.Description);
+
+        var r = fx.Run();
+        Assert.Empty(r.UnresolvedSites);                       // 之前是兩筆 unknown-palette-key（Glass）
+        var f = Assert.Single(r.Findings);
+        Assert.Equal(Category.Ok, f.Category);
+        Assert.Equal(16.28, Math.Round(f.RatioDark, 2));       // 透明層疊完就是 #111111，所以等於 #EEEEEE 直接疊 #111111
+    }
+
+    [Fact] // 1.11（ZeroCel 回報 2 的第三件）：<Style.Resources> 裡的 brush 是區域資源，不是主題色票 ——
+           //   收了的話只放樣式的檔案會被當成色盤來源（檔數與鍵數虛胖，而那正是挑色盤的判準），
+           //   值讀不懂時還會印一句「色票讀壞了」，對著一個根本不是色票的東西喊
+    public void BrushesInsideAStyleAreNotPartOfThePalette()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", DarkDict)
+          .File("Themes/Light.xaml", LightDict)
+          .File("Styles/Controls.xaml", """
+            <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Style TargetType="ScrollViewer">
+                <Style.Resources>
+                  <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Transparent"/>
+                  <SolidColorBrush x:Key="Scoped" Color="#123456"/>
+                </Style.Resources>
+                <Setter Property="Template">
+                  <Setter.Value>
+                    <ControlTemplate TargetType="ScrollViewer">
+                      <ContentPresenter>
+                        <ContentPresenter.Resources>
+                          <SolidColorBrush x:Key="InTemplate" Color="#654321"/>
+                        </ContentPresenter.Resources>
+                      </ContentPresenter>
+                    </ControlTemplate>
+                  </Setter.Value>
+                </Setter>
+              </Style>
+            </ResourceDictionary>
+            """);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(3, d.Palette.Count);                               // Bg／Fg／Accent，不多不少
+        Assert.False(d.Palette.Entries.ContainsKey("Scoped"));
+        Assert.False(d.Palette.Entries.ContainsKey("InTemplate"));
+        Assert.DoesNotContain("dropped", d.Description);                // 不是色票，就不該出現在「讀不懂」的名單上
+        Assert.DoesNotContain("3 file(s)", d.Description);              // 只放樣式的檔不是色盤來源
+    }
+
+    [Fact] // ⚠ 界線：遮的是 <Style>／模板的子樹，字典最外層的色票一個都不能少
+    public void BrushesAtTheTopLevelOfADictionaryWithStylesAreStillPalette()
+    {
+        using var fx = new Fixture();
+        fx.File("Themes/Dark.xaml", """
+            <ResourceDictionary xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+              <Style TargetType="Button"><Setter Property="Padding" Value="4"/></Style>
+              <SolidColorBrush x:Key="Bg" Color="#212121"/>
+              <Style TargetType="TextBlock"/>
+              <SolidColorBrush x:Key="Fg" Color="#EEEEEE"/>
+              <Style TargetType="Border">
+                <Style.Resources><SolidColorBrush x:Key="Bg" Color="#FF0000"/></Style.Resources>
+              </Style>
+              <SolidColorBrush x:Key="Accent" Color="#42A5F5"/>
+            </ResourceDictionary>
+            """)
+          .File("Themes/Light.xaml", LightDict);
+        var d = PaletteDetector.Detect(fx.Root);
+        Assert.Equal(3, d.Palette.Count);
+        Assert.Equal(("#212121", "#FAFAFA"), d.Palette.Entries["Bg"]);  // 區域的 #FF0000 沒有蓋掉它
+        Assert.Equal(("#EEEEEE", "#212121"), d.Palette.Entries["Fg"]);
+        Assert.Equal(("#42A5F5", "#2196F3"), d.Palette.Entries["Accent"]);
+    }
+
     [Fact] // C# 三元組同一個根因：註解掉的舊列不是色盤
     public void CommentedOutCSharpTuplesAreNotPartOfThePalette()
     {

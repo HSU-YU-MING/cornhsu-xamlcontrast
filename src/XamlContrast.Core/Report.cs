@@ -61,6 +61,8 @@ public static partial class Report
         UnresolvedReason.UnknownStyleKey => "unknown-style-key",
         UnresolvedReason.TemplatePainted => "template-painted",
         UnresolvedReason.InheritedForeground => "inherited-foreground",
+        UnresolvedReason.ContentStyleTrigger => "content-style-trigger",
+        UnresolvedReason.BoundContent => "bound-content",
         _ => "translucent-uncomposited",
     };
 

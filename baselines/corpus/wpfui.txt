@@ -3,17 +3,17 @@
 project: wpfui
 repo: https://github.com/lepoco/wpfui
 commit: ffebacd61058170cf63864b7d5aa730cffff848a
-tool-commit: 718dade+dirty
+tool-commit: 10daaf1+dirty
 frozen: 2026-11-25
 exit: 3
 palette-mode: pair
 palette-degraded: False
-palette-keys: 381
+palette-keys: 395
 single-theme: False
 files: 219
 pairs: 96
-coverage: 8.8
-unresolved: 999
+coverage: 8.7
+unresolved: 1010
 skipped: 14
 dead-foreground: 16
 disabled-exempt: 146
@@ -30,10 +30,9 @@ unresolved-by.bound-or-gradient: 28
 unresolved-by.in-style-template: 21
 unresolved-by.no-ancestor-background: 118
 unresolved-by.template-painted: 205
-unresolved-by.translucent-uncomposited: 608
-unresolved-by.unknown-palette-key: 19
+unresolved-by.translucent-uncomposited: 620
+unresolved-by.unknown-palette-key: 18
 unknown-keys.AccentButtonBackground: 1
-unknown-keys.HyperlinkButtonBackground: 1
 unknown-keys.InfoBadgeInformationSeverityBackgroundBrush: 2
 unknown-keys.RadioButtonOuterEllipseCheckedStrokePointerOver: 1
 unknown-keys.StripedBackgroundBrush: 12
@@ -640,6 +639,7 @@ U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/ComboBoxP
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/DropDownButtonPage.xaml:26  {DynamicResource ButtonBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:32  {DynamicResource HyperlinkButtonBackgroundPointerOver}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:32  {DynamicResource HyperlinkButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:32  {DynamicResource HyperlinkButtonBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:38  {DynamicResource CheckBoxBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:38  {DynamicResource CheckBoxBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:38  {DynamicResource CheckBoxBackground}
@@ -653,8 +653,10 @@ U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/Hyperlink
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:38  {DynamicResource CheckBoxBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:50  {DynamicResource HyperlinkButtonBackgroundPointerOver}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:50  {DynamicResource HyperlinkButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:50  {DynamicResource HyperlinkButtonBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:62  {DynamicResource HyperlinkButtonBackgroundPointerOver}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:62  {DynamicResource HyperlinkButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/HyperlinkButtonPage.xaml:62  {DynamicResource HyperlinkButtonBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/RadioButtonPage.xaml:45  {DynamicResource CheckBoxBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/RadioButtonPage.xaml:45  {DynamicResource CheckBoxBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/BasicInput/RadioButtonPage.xaml:45  {DynamicResource CheckBoxBackground}
@@ -752,14 +754,19 @@ U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:1
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:195  CardBackground
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:210  {DynamicResource HyperlinkButtonBackgroundPointerOver}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:210  {DynamicResource HyperlinkButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:210  {DynamicResource HyperlinkButtonBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:216  {DynamicResource HyperlinkButtonBackgroundPointerOver}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:216  {DynamicResource HyperlinkButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:216  {DynamicResource HyperlinkButtonBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:222  {DynamicResource HyperlinkButtonBackgroundPointerOver}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:222  {DynamicResource HyperlinkButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:222  {DynamicResource HyperlinkButtonBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:228  {DynamicResource HyperlinkButtonBackgroundPointerOver}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:228  {DynamicResource HyperlinkButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:228  {DynamicResource HyperlinkButtonBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:234  {DynamicResource HyperlinkButtonBackgroundPointerOver}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:234  {DynamicResource HyperlinkButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:234  {DynamicResource HyperlinkButtonBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:90  {DynamicResource CardBackgroundPointerOver}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:90  {DynamicResource CardBackgroundPressed}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DashboardPage.xaml:90  {DynamicResource CardBackground}
@@ -781,6 +788,7 @@ U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/Icons
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:169  CardBackgroundFillColorSecondaryBrush
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:36  {DynamicResource HyperlinkButtonBackgroundPointerOver}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:36  {DynamicResource HyperlinkButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:36  {DynamicResource HyperlinkButtonBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:59  {DynamicResource CheckBoxBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:59  {DynamicResource CheckBoxBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:59  {DynamicResource CheckBoxBackground}
@@ -794,6 +802,7 @@ U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/Icons
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/IconsPage.xaml:59  {DynamicResource CheckBoxBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/TypographyPage.xaml:22  {DynamicResource HyperlinkButtonBackgroundPointerOver}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/TypographyPage.xaml:22  {DynamicResource HyperlinkButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DesignGuidance/TypographyPage.xaml:22  {DynamicResource HyperlinkButtonBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/ContentDialogPage.xaml:26  {DynamicResource CheckBoxBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/ContentDialogPage.xaml:26  {DynamicResource CheckBoxBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/DialogsAndFlyouts/ContentDialogPage.xaml:26  {DynamicResource CheckBoxBackground}
@@ -860,6 +869,7 @@ U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Media/CanvasPage.xam
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Media/CanvasPage.xaml:38  CardBackgroundFillColorDefaultBrush
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Media/WebViewPage.xaml:30  {DynamicResource HyperlinkButtonBackgroundPointerOver}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Media/WebViewPage.xaml:30  {DynamicResource HyperlinkButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Media/WebViewPage.xaml:30  {DynamicResource HyperlinkButtonBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:107  CardBackgroundFillColorDefaultBrush
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:114  {DynamicResource NavigationViewItemBackground}
 U  translucent-uncomposited  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:118  {DynamicResource NavigationViewItemBackground}
@@ -1075,6 +1085,7 @@ U  translucent-uncomposited  src/Wpf.Ui/Controls/DatePicker/DatePicker.xaml:40  
 U  translucent-uncomposited  src/Wpf.Ui/Controls/Expander/Expander.xaml:81  {DynamicResource ExpanderHeaderBackground}
 U  translucent-uncomposited  src/Wpf.Ui/Controls/HyperlinkButton/HyperlinkButton.xaml:20  {DynamicResource HyperlinkButtonBackgroundPointerOver}
 U  translucent-uncomposited  src/Wpf.Ui/Controls/HyperlinkButton/HyperlinkButton.xaml:20  {DynamicResource HyperlinkButtonBackgroundPressed}
+U  translucent-uncomposited  src/Wpf.Ui/Controls/HyperlinkButton/HyperlinkButton.xaml:20  {DynamicResource HyperlinkButtonBackground}
 U  translucent-uncomposited  src/Wpf.Ui/Controls/ListBox/ListBoxItem.xaml:15  {DynamicResource MenuBarItemBackgroundSelected}
 U  translucent-uncomposited  src/Wpf.Ui/Controls/ListView/ListViewItem.xaml:94  Transparent
 U  translucent-uncomposited  src/Wpf.Ui/Controls/NavigationView/NavigationView.xaml:20  Transparent
@@ -1130,7 +1141,6 @@ U  unknown-palette-key  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationView
 U  unknown-palette-key  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:72  StripedBackgroundBrush
 U  unknown-palette-key  src/Wpf.Ui.Gallery/Views/Pages/Navigation/NavigationViewPage.xaml:85  StripedBackgroundBrush
 U  unknown-palette-key  src/Wpf.Ui/Controls/Button/Button.xaml:214  AccentButtonBackground
-U  unknown-palette-key  src/Wpf.Ui/Controls/HyperlinkButton/HyperlinkButton.xaml:20  HyperlinkButtonBackground
 U  unknown-palette-key  src/Wpf.Ui/Controls/InfoBadge/InfoBadge.xaml:121  InfoBadgeInformationSeverityBackgroundBrush
 U  unknown-palette-key  src/Wpf.Ui/Controls/InfoBadge/InfoBadge.xaml:61  InfoBadgeInformationSeverityBackgroundBrush
 U  unknown-palette-key  src/Wpf.Ui/Controls/RadioButton/RadioButton.xaml:25  RadioButtonOuterEllipseCheckedStrokePointerOver

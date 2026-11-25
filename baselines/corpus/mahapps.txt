@@ -3,20 +3,20 @@
 project: mahapps
 repo: https://github.com/MahApps/MahApps.Metro
 commit: 9466e8acd96591e1f552841bc5357f376552bb57
-tool-commit: 718dade+dirty
+tool-commit: 10daaf1+dirty
 frozen: 2026-11-25
 exit: 3
 palette-mode: single
 palette-degraded: False
-palette-keys: 107
+palette-keys: 266
 single-theme: True
 files: 309
 pairs: 89
-coverage: 5.5
-unresolved: 1525
+coverage: 3.9
+unresolved: 2207
 skipped: 4
 dead-foreground: 110
-disabled-exempt: 271
+disabled-exempt: 405
 converter-pairs: 0
 ui-component-pairs: 0
 parse-errors: 0
@@ -26,13 +26,13 @@ fail: 3
 warn: 5
 ok: 79
 decorative: 2
-unresolved-by.bound-or-gradient: 204
+unresolved-by.bound-or-gradient: 206
 unresolved-by.inherited-foreground: 167
 unresolved-by.in-style-template: 27
 unresolved-by.no-ancestor-background: 264
-unresolved-by.template-painted: 205
-unresolved-by.translucent-uncomposited: 11
-unresolved-by.unknown-palette-key: 647
+unresolved-by.template-painted: 769
+unresolved-by.translucent-uncomposited: 17
+unresolved-by.unknown-palette-key: 757
 unknown-keys.MahApps.Brushes.Accent2: 2
 unknown-keys.MahApps.Brushes.Accent3: 2
 unknown-keys.MahApps.Brushes.Accent4: 2
@@ -62,7 +62,7 @@ unknown-keys.MahApps.Brushes.SliderTrack.Normal: 1
 unknown-keys.MahApps.Brushes.SystemControlBackgroundChromeWhite: 2
 unknown-keys.MahApps.Brushes.SystemControlErrorTextForeground: 2
 unknown-keys.MahApps.Brushes.SystemControlForegroundAltMediumHigh: 3
-unknown-keys.MahApps.Brushes.SystemControlForegroundBaseHigh: 69
+unknown-keys.MahApps.Brushes.SystemControlForegroundBaseHigh: 149
 unknown-keys.MahApps.Brushes.SystemControlForegroundBaseMedium: 7
 unknown-keys.MahApps.Brushes.SystemControlForegroundBaseMediumHigh: 2
 unknown-keys.MahApps.Brushes.SystemControlForegroundChromeBlackHigh: 2
@@ -70,13 +70,12 @@ unknown-keys.MahApps.Brushes.SystemControlForegroundChromeWhite: 1
 unknown-keys.MahApps.Brushes.SystemControlHighlightAccent: 5
 unknown-keys.MahApps.Brushes.SystemControlHighlightAltAccent: 2
 unknown-keys.MahApps.Brushes.SystemControlHighlightAltAltMediumHigh: 2
-unknown-keys.MahApps.Brushes.SystemControlHighlightAltBaseHigh: 5
+unknown-keys.MahApps.Brushes.SystemControlHighlightAltBaseHigh: 7
 unknown-keys.MahApps.Brushes.SystemControlHighlightAltChromeWhite: 1
 unknown-keys.MahApps.Brushes.SystemControlHighlightBaseHigh: 4
 unknown-keys.MahApps.Brushes.SystemControlPageTextBaseHigh: 1
 unknown-keys.MahApps.Brushes.SystemControlPageTextBaseMedium: 50
 unknown-keys.MahApps.Brushes.SystemControlPageTextChromeBlackMediumLow: 1
-unknown-keys.MahApps.Brushes.SystemControlTransparent: 8
 unknown-keys.MahApps.Brushes.TextBlock.FloatingMessage: 30
 unknown-keys.MahApps.Brushes.TextControl.Background: 2
 unknown-keys.MahApps.Brushes.TextControl.Foreground: 21
@@ -88,23 +87,23 @@ unknown-keys.MahApps.Brushes.TextControl.WinUI.ButtonForegroundPressed: 2
 unknown-keys.MahApps.Brushes.TextControl.WinUI.Foreground: 32
 unknown-keys.MahApps.Brushes.TextControl.WinUI.ForegroundFocused: 3
 unknown-keys.MahApps.Brushes.TextControl.WinUI.ForegroundPointerOver: 4
-unknown-keys.MahApps.Brushes.Transparent: 4
 unknown-keys.MahApps.Brushes.Validation: 1
 unknown-keys.MahApps.Brushes.Window.Background.Backdrop.Acrylic: 1
 unknown-keys.MahApps.Brushes.Window.Background.Backdrop.Auto: 1
 unknown-keys.MahApps.Brushes.WinUI.AccentFillDefault: 9
 unknown-keys.MahApps.Brushes.WinUI.AccentTextFillSecondary: 1
 unknown-keys.MahApps.Brushes.WinUI.AccentTextFillTertiary: 1
-unknown-keys.MahApps.Brushes.WinUI.CardBackgroundFillSecondary: 32
+unknown-keys.MahApps.Brushes.WinUI.CardBackgroundFillSecondary: 34
 unknown-keys.MahApps.Brushes.WinUI.ControlStrongFillDefault: 11
-unknown-keys.MahApps.Brushes.WinUI.SolidBackgroundFillBase: 2
+unknown-keys.MahApps.Brushes.WinUI.SolidBackgroundFillBase: 11
+unknown-keys.MahApps.Brushes.WinUI.SolidBackgroundFillTertiary: 1
 unknown-keys.MahApps.Brushes.WinUI.SystemFillAttention: 1
 unknown-keys.MahApps.Brushes.WinUI.SystemFillCaution: 2
 unknown-keys.MahApps.Brushes.WinUI.SystemFillCritical: 3
 unknown-keys.MahApps.Brushes.WinUI.TextInverse: 1
 unknown-keys.MahApps.Brushes.WinUI.TextOnAccentPrimary: 4
 unknown-keys.MahApps.Brushes.WinUI.TextOnAccentSecondary: 1
-unknown-keys.MahApps.Brushes.WinUI.TextPrimary: 60
+unknown-keys.MahApps.Brushes.WinUI.TextPrimary: 88
 unknown-keys.MahApps.Brushes.WinUI.TextSecondary: 19
 # F  分類  檔案:行  元素  字 on 底  深/淺比值  對稱
 F  decorative  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:303  MetroProgressBar  {DynamicResource MahApps.Brushes.Accent} on {MahApps.Brushes.ThemeBackground}  1.00/1.00  
@@ -290,6 +289,7 @@ U  bound-or-gradient  src/MahApps.Metro/Themes/ContentDialog.xaml:433  {Template
 U  bound-or-gradient  src/MahApps.Metro/Themes/ContentDialog.xaml:450  {Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}
 U  bound-or-gradient  src/MahApps.Metro/Themes/ContentDialog.xaml:475  {TemplateBinding Foreground}
 U  bound-or-gradient  src/MahApps.Metro/Themes/ContentDialog.xaml:487  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}
+U  bound-or-gradient  src/MahApps.Metro/Themes/ContentDialog.xaml:487  {Binding RelativeSource={RelativeSource AncestorType={x:Type FrameworkElement}}, Path=(TextElement.Foreground)}
 U  bound-or-gradient  src/MahApps.Metro/Themes/ContentDialog.xaml:495  {Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}
 U  bound-or-gradient  src/MahApps.Metro/Themes/ContentDialog.xaml:86  {TemplateBinding TitleBarBackground}
 U  bound-or-gradient  src/MahApps.Metro/Themes/Dialogs/InputDialog.xaml:180  {TemplateBinding MessageForeground}
@@ -350,6 +350,7 @@ U  bound-or-gradient  src/MahApps.Metro/Themes/MetroWindow.xaml:370  <MultiBindi
 U  bound-or-gradient  src/MahApps.Metro/Themes/MetroWindow.xaml:463  {TemplateBinding FlyoutOverlayBrush}
 U  bound-or-gradient  src/MahApps.Metro/Themes/MetroWindow.xaml:49  {TemplateBinding WindowTitleBrush}
 U  bound-or-gradient  src/MahApps.Metro/Themes/MetroWindow.xaml:98  <MultiBinding>
+U  bound-or-gradient  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:294  {TemplateBinding Background}
 U  bound-or-gradient  src/MahApps.Metro/Themes/NumericUpDown.xaml:390  {Binding RelativeSource={RelativeSource AncestorType={x:Type Control}}, Path=Foreground, Mode=OneWay}
 U  bound-or-gradient  src/MahApps.Metro/Themes/NumericUpDown.xaml:390  {Binding RelativeSource={RelativeSource AncestorType={x:Type Control}}, Path=Foreground, Mode=OneWay}
 U  bound-or-gradient  src/MahApps.Metro/Themes/NumericUpDown.xaml:390  {Binding RelativeSource={RelativeSource AncestorType={x:Type Control}}, Path=Foreground, Mode=OneWay}
@@ -859,6 +860,222 @@ U  no-ancestor-background  src/Mahapps.Metro.Tests/Views/DialogCustomTitleWindow
 U  no-ancestor-background  src/Mahapps.Metro.Tests/Views/DialogCustomTitleWindow.xaml:20  Blue
 U  no-ancestor-background  src/Mahapps.Metro.Tests/Views/ProgressBarWindow.xaml:16  Red
 U  no-ancestor-background  src/Mahapps.Metro.Tests/Views/ProgressBarWindow.xaml:25  Blue
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:422  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:422  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPressed)}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:425  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
@@ -867,6 +1084,42 @@ U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/B
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:428  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPressed)}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:431  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:431  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:390  {DynamicResource MahApps.Brushes.ToggleSwitch.ContentForeground}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:390  {DynamicResource MahApps.Brushes.ToggleSwitch.ContentForeground}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/HeaderExamples.xaml:445  {DynamicResource MahApps.Brushes.ToggleSwitch.ContentForeground}
@@ -943,6 +1196,240 @@ U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/S
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/Sliders.xaml:541  {DynamicResource MahApps.Brushes.Gray2}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/Sliders.xaml:549  {DynamicResource MahApps.Brushes.Gray2}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/Sliders.xaml:560  {DynamicResource MahApps.Brushes.Gray2}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:52  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:52  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:52  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:52  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:53  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:53  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:53  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:53  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:55  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:55  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:55  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:55  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:92  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:92  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:92  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:92  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:93  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:93  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:93  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:93  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:95  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:95  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:95  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:95  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:100  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:100  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:100  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:100  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:102  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:102  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:102  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:102  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:103  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:103  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:103  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:103  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:104  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:104  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:104  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:104  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:106  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:106  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:106  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:106  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:110  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:110  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:110  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:110  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:111  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:111  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:111  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:111  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:114  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:114  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:114  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:114  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:116  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:116  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:116  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:116  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:117  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:117  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:117  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:117  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:134  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:134  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:134  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:134  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:135  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:135  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:135  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:135  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:137  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:137  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:137  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:137  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:165  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:165  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:165  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:165  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:166  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:166  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:166  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:166  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:171  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:171  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:171  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:171  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:173  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:173  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:173  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:173  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:174  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:174  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:174  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:174  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:175  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:175  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:175  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:175  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:177  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:177  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:177  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:177  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:181  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:181  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:181  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:181  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:182  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:182  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:182  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:182  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:185  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:185  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:185  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:185  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:187  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:187  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:187  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:187  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:188  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:188  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:188  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:188  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:205  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:205  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:205  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:205  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:206  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:206  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:206  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:206  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:208  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:208  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:208  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:208  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:94  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:94  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:94  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:94  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:95  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:95  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:95  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:95  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:40  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:40  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPressed)}
 U  template-painted  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:45  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:RadioButtonHelper.ForegroundPointerOver)}
@@ -1043,15 +1530,93 @@ U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {Bindin
 U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.MouseLeftButtonPressedForegroundBrush), Mode=OneWay}
 U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.MouseRightButtonPressedForegroundBrush), Mode=OneWay}
 U  template-painted  src/MahApps.Metro/Styles/Controls.TreeView.xaml:70  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.SelectedForegroundBrush), Mode=OneWay}
+U  template-painted  src/MahApps.Metro/Styles/Win10/Controls.xaml:113  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/Win10/Controls.xaml:113  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/Win10/Controls.xaml:113  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/Win10/Controls.xaml:113  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/Win10/Controls.xaml:114  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/Win10/Controls.xaml:114  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/Win10/Controls.xaml:114  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/Win10/Controls.xaml:114  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/Win10/Controls.xaml:115  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/Win10/Controls.xaml:115  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/Win10/Controls.xaml:115  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/Win10/Controls.xaml:115  {DynamicResource MahApps.Brushes.MenuItem.Win10.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/WinUI/Controls.xaml:111  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/WinUI/Controls.xaml:111  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/WinUI/Controls.xaml:111  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/WinUI/Controls.xaml:111  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/WinUI/Controls.xaml:112  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/WinUI/Controls.xaml:112  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/WinUI/Controls.xaml:112  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/WinUI/Controls.xaml:112  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/WinUI/Controls.xaml:113  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/WinUI/Controls.xaml:113  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/WinUI/Controls.xaml:113  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro/Styles/WinUI/Controls.xaml:113  {DynamicResource MahApps.Brushes.MenuItem.WinUI.Foreground}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:66  {DynamicResource MahApps.Brushes.Text}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:66  {DynamicResource MahApps.Brushes.Text}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:677  {DynamicResource MahApps.Brushes.TextControl.Foreground}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:677  {DynamicResource MahApps.Brushes.TextControl.Foreground}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:739  {DynamicResource MahApps.Brushes.TextControl.WinUI.Foreground}
 U  template-painted  src/MahApps.Metro/Themes/DateTimePicker.xaml:739  {DynamicResource MahApps.Brushes.TextControl.WinUI.Foreground}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
 U  template-painted  src/MahApps.Metro/Themes/FlipView.xaml:386  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
 U  template-painted  src/MahApps.Metro/Themes/FlipView.xaml:386  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:ItemHelper.HoverForegroundBrush), Mode=OneWay}
 U  template-painted  src/MahApps.Metro/Themes/MetroWindow.xaml:630  {DynamicResource MahApps.Brushes.ThemeForeground}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundChecked)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.CheckGlyphForegroundUncheckedPressed)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundChecked)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundCheckedPressed)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminate)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminateMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundIndeterminatePressed)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUnchecked)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedMouseOver)}
+U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  {Binding RelativeSource={RelativeSource TemplatedParent}, Path=(mah:CheckBoxHelper.ForegroundUncheckedPressed)}
 U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:879  {DynamicResource MahApps.Brushes.ComboBox.Win10.Foreground}
 U  template-painted  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:969  {DynamicResource MahApps.Brushes.ComboBox.WinUI.Foreground}
 U  template-painted  src/MahApps.Metro/Themes/RangeSlider.xaml:281  {DynamicResource MahApps.Brushes.Gray1}
@@ -1064,9 +1629,13 @@ U  template-painted  src/Mahapps.Metro.Tests/Views/SliderWindow.xaml:13  {Dynami
 U  template-painted  src/Mahapps.Metro.Tests/Views/SliderWindow.xaml:19  {DynamicResource MahApps.Brushes.Gray2}
 U  template-painted  src/Mahapps.Metro.Tests/Views/SliderWindow.xaml:32  {DynamicResource MahApps.Brushes.Gray1}
 U  template-painted  src/Mahapps.Metro.Tests/Views/SliderWindow.xaml:39  {DynamicResource MahApps.Brushes.Gray2}
+U  translucent-uncomposited  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:241  {DynamicResource MahApps.Brushes.Transparent}
+U  translucent-uncomposited  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:249  {DynamicResource MahApps.Brushes.Transparent}
+U  translucent-uncomposited  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:257  {DynamicResource MahApps.Brushes.Transparent}
 U  translucent-uncomposited  src/MahApps.Metro/Styles/Controls.DataGrid.xaml:425  Transparent
 U  translucent-uncomposited  src/MahApps.Metro/Styles/Controls.PasswordBox.xaml:56  {MahApps.Brushes.ThemeForeground} ×0.8 over nothing
 U  translucent-uncomposited  src/MahApps.Metro/Styles/Controls.TreeView.xaml:12  Transparent
+U  translucent-uncomposited  src/MahApps.Metro/Themes/DateTimePicker.xaml:22  {DynamicResource MahApps.Brushes.Transparent}
 U  translucent-uncomposited  src/MahApps.Metro/Themes/DateTimePicker.xaml:591  Transparent
 U  translucent-uncomposited  src/MahApps.Metro/Themes/FlipView.xaml:11  Transparent
 U  translucent-uncomposited  src/MahApps.Metro/Themes/FlipView.xaml:11  Transparent
@@ -1075,6 +1644,8 @@ U  translucent-uncomposited  src/MahApps.Metro/Themes/InfoBar.xaml:12  Transpare
 U  translucent-uncomposited  src/MahApps.Metro/Themes/InfoBar.xaml:196  Transparent
 U  translucent-uncomposited  src/MahApps.Metro/Themes/InfoBar.xaml:196  Transparent
 U  translucent-uncomposited  src/MahApps.Metro/Themes/PipsPager.xaml:61  Transparent
+U  translucent-uncomposited  src/MahApps.Metro/Themes/WindowButtonCommands.xaml:248  {DynamicResource MahApps.Brushes.Transparent}
+U  translucent-uncomposited  src/MahApps.Metro/Themes/WindowCommands.xaml:266  {DynamicResource MahApps.Brushes.Transparent}
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/Badges.xaml:209  MahApps.Brushes.Gray3
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/Badges.xaml:257  MahApps.Brushes.Gray3
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/Badges.xaml:323  MahApps.Brushes.Gray3
@@ -1093,6 +1664,42 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleView
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:202  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:207  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:211  MahApps.Brushes.Button.Flat.Foreground.Pressed
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:369  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:372  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:373  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:374  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:375  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:376  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:394  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:395  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:396  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:397  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:398  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:399  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:422  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:422  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:425  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:425  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:428  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:428  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:431  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/ButtonsExample.xaml:431  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:61  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DataGridExamples.xaml:72  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DateExamples.xaml:110  MahApps.Brushes.Gray3
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DateExamples.xaml:111  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleViews/DateExamples.xaml:118  MahApps.Brushes.Gray3
@@ -1238,6 +1845,12 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWind
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:218  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:223  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:48  MahApps.Brushes.IdealForeground
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:539  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:542  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/FlyoutDemo.xaml:545  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/ExampleWindows/VSDemo.xaml:36  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Demo/Styles/XamlDisplay.xaml:24  MahApps.Brushes.Gray10
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/MainWindow.xaml:150  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
@@ -1258,7 +1871,12 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/Bu
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ButtonPage.xaml:118  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ButtonPage.xaml:124  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ButtonPage.xaml:139  MahApps.Brushes.Button.Flat.Foreground.Pressed
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ButtonPage.xaml:84  MahApps.Brushes.WinUI.SolidBackgroundFillBase
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ButtonPage.xaml:96  MahApps.Brushes.Button.Flat.Foreground.Pressed
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:30  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/CheckBoxPage.xaml:42  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ColorPage.xaml:20  MahApps.Brushes.WinUI.TextSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ColorPickerPage.xaml:33  MahApps.Brushes.TextControl.Background
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ColorPickerPage.xaml:47  MahApps.Brushes.TextControl.WinUI.Background
@@ -1271,14 +1889,20 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/Da
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DatePickerPage.xaml:44  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DateTimePickerPage.xaml:31  MahApps.Brushes.TextBlock.FloatingMessage
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DateTimePickerPage.xaml:43  MahApps.Brushes.TextBlock.FloatingMessage
-U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
-U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
-U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
-U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
-U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
-U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
-U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
-U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.SystemControlTransparent
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:52  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:53  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:55  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:92  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:93  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/DropDownButtonPage.xaml:95  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.WinUI.SolidBackgroundFillBase
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.WinUI.SolidBackgroundFillBase
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.WinUI.SolidBackgroundFillBase
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.WinUI.SolidBackgroundFillBase
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.WinUI.SolidBackgroundFillBase
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.WinUI.SolidBackgroundFillBase
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.WinUI.SolidBackgroundFillBase
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:37  MahApps.Brushes.WinUI.SolidBackgroundFillBase
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:52  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
@@ -1296,6 +1920,7 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/Ex
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ExpanderPage.xaml:67  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/IconsPage.xaml:110  MahApps.Brushes.WinUI.TextSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/IconsPage.xaml:119  MahApps.Brushes.WinUI.SolidBackgroundFillTertiary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/IconsPage.xaml:141  MahApps.Brushes.WinUI.TextSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/IconsPage.xaml:35  MahApps.Brushes.WinUI.TextSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ListBoxPage.xaml:54  MahApps.Brushes.WinUI.TextPrimary
@@ -1309,6 +1934,38 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/Li
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ListViewPage.xaml:208  MahApps.Brushes.Gray7
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ListViewPage.xaml:89  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ListViewPage.xaml:89  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:100  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:102  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:103  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:104  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:106  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:110  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:111  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:114  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:116  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:117  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:134  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:135  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:137  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:156  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:165  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:166  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:171  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:173  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:174  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:175  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:177  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:181  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:182  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:185  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:187  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:188  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:205  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:206  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:208  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:85  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:94  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MenuPage.xaml:95  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MultiSelectionComboBoxPage.xaml:107  MahApps.Brushes.TextControl.WinUI.Background
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MultiSelectionComboBoxPage.xaml:107  MahApps.Brushes.TextControl.WinUI.Foreground
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/MultiSelectionComboBoxPage.xaml:37  MahApps.Brushes.Gray9
@@ -1321,11 +1978,21 @@ U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/Pr
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ProgressRingPage.xaml:52  MahApps.Brushes.WinUI.AccentFillDefault
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ProgressRingPage.xaml:68  MahApps.Brushes.WinUI.AccentFillDefault
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/ProgressRingPage.xaml:71  MahApps.Brushes.WinUI.AccentFillDefault
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:40  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:40  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:45  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:45  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:58  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:58  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:63  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RadioButtonPage.xaml:63  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/RangeSliderPage.xaml:35  MahApps.Brushes.WinUI.ControlStrongFillDefault
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:102  MahApps.Brushes.WinUI.TextSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:104  MahApps.Brushes.WinUI.TextSecondary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:115  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:125  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:132  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:140  MahApps.Brushes.WinUI.CardBackgroundFillSecondary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:150  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:158  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro.Samples/MahApps.Metro.Gallery/Pages/SettingsPage.xaml:177  MahApps.Brushes.WinUI.TextPrimary
@@ -1391,7 +2058,6 @@ U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Buttons.xaml:254  MahA
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Buttons.xaml:254  MahApps.Brushes.WinUI.TextOnAccentPrimary
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Buttons.xaml:282  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Buttons.xaml:282  MahApps.Brushes.SystemControlForegroundBaseHigh
-U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Buttons.xaml:544  MahApps.Brushes.Transparent
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Buttons.xaml:589  MahApps.Brushes.Gray8
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Buttons.xaml:638  MahApps.Brushes.SystemControlHighlightAccent
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Buttons.xaml:638  MahApps.Brushes.SystemControlHighlightAltChromeWhite
@@ -1541,6 +2207,10 @@ U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:378  MahA
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:378  MahApps.Brushes.SystemControlHighlightAltBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:378  MahApps.Brushes.SystemControlHighlightAltBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:424  MahApps.Brushes.SystemControlHighlightAltBaseHigh
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:522  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:522  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:522  MahApps.Brushes.SystemControlHighlightAltBaseHigh
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:522  MahApps.Brushes.SystemControlHighlightAltBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:555  MahApps.Brushes.SystemControlForegroundBaseMedium
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:573  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:647  MahApps.Brushes.WinUI.TextPrimary
@@ -1550,12 +2220,20 @@ U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:647  MahA
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:683  MahApps.Brushes.WinUI.TextOnAccentPrimary
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:683  MahApps.Brushes.WinUI.TextOnAccentPrimary
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:683  MahApps.Brushes.WinUI.TextOnAccentSecondary
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:788  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:788  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:823  MahApps.Brushes.WinUI.TextSecondary
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Toolbar.xaml:857  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Tooltip.xaml:112  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Tooltip.xaml:112  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Tooltip.xaml:177  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro/Styles/Controls.Tooltip.xaml:177  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro/Styles/Win10/Controls.xaml:113  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro/Styles/Win10/Controls.xaml:114  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro/Styles/Win10/Controls.xaml:115  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro/Styles/WinUI/Controls.xaml:111  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro/Styles/WinUI/Controls.xaml:112  MahApps.Brushes.WinUI.TextPrimary
+U  unknown-palette-key  src/MahApps.Metro/Styles/WinUI/Controls.xaml:113  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro/Themes/AnalogClock.xaml:17  MahApps.Brushes.Accent3
 U  unknown-palette-key  src/MahApps.Metro/Themes/AnalogClock.xaml:31  MahApps.Brushes.Accent4
 U  unknown-palette-key  src/MahApps.Metro/Themes/AutoSuggestBox.xaml:42  MahApps.Brushes.TextBlock.FloatingMessage
@@ -1580,7 +2258,6 @@ U  unknown-palette-key  src/MahApps.Metro/Themes/ContentDialog.xaml:908  MahApps
 U  unknown-palette-key  src/MahApps.Metro/Themes/ContentDialog.xaml:946  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:22  MahApps.Brushes.Gray8
 U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:22  MahApps.Brushes.Gray9
-U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:22  MahApps.Brushes.Transparent
 U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:591  MahApps.Brushes.Gray8
 U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:591  MahApps.Brushes.IdealForeground
 U  unknown-palette-key  src/MahApps.Metro/Themes/DateTimePicker.xaml:66  MahApps.Brushes.TextBlock.FloatingMessage
@@ -1591,8 +2268,12 @@ U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/InputDialog.xaml:197  M
 U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/InputDialog.xaml:203  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/InputDialog.xaml:328  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/InputDialog.xaml:334  MahApps.Brushes.Button.Flat.Foreground.Pressed
+U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:230  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:242  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:248  MahApps.Brushes.Button.Flat.Foreground.Pressed
+U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:376  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:396  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/LoginDialog.xaml:402  MahApps.Brushes.Button.Flat.Foreground.Pressed
 U  unknown-palette-key  src/MahApps.Metro/Themes/Dialogs/MessageDialog.xaml:246  MahApps.Brushes.Button.Flat.Foreground.Pressed
@@ -1668,6 +2349,8 @@ U  unknown-palette-key  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:149
 U  unknown-palette-key  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:22  MahApps.Brushes.Gray
 U  unknown-palette-key  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:294  MahApps.Brushes.Accent2
 U  unknown-palette-key  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:294  MahApps.Brushes.Highlight
+U  unknown-palette-key  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  MahApps.Brushes.SystemControlForegroundBaseHigh
+U  unknown-palette-key  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:68  MahApps.Brushes.SystemControlForegroundBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:879  MahApps.Brushes.SystemControlHighlightAltBaseHigh
 U  unknown-palette-key  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:879  MahApps.Brushes.TextControl.Foreground
 U  unknown-palette-key  src/MahApps.Metro/Themes/MultiSelectionComboBox.xaml:879  MahApps.Brushes.TextControl.Foreground
@@ -1715,8 +2398,6 @@ U  unknown-palette-key  src/MahApps.Metro/Themes/SplitButton.xaml:504  MahApps.B
 U  unknown-palette-key  src/MahApps.Metro/Themes/SplitButton.xaml:504  MahApps.Brushes.WinUI.TextPrimary
 U  unknown-palette-key  src/MahApps.Metro/Themes/Tile.xaml:6  MahApps.Brushes.IdealForeground
 U  unknown-palette-key  src/MahApps.Metro/Themes/Tile.xaml:6  MahApps.Brushes.IdealForeground
-U  unknown-palette-key  src/MahApps.Metro/Themes/WindowButtonCommands.xaml:248  MahApps.Brushes.Transparent
-U  unknown-palette-key  src/MahApps.Metro/Themes/WindowCommands.xaml:266  MahApps.Brushes.Transparent
 U  unknown-palette-key  src/Mahapps.Metro.Tests/Views/SliderWindow.xaml:13  MahApps.Brushes.Gray1
 U  unknown-palette-key  src/Mahapps.Metro.Tests/Views/SliderWindow.xaml:19  MahApps.Brushes.Gray2
 U  unknown-palette-key  src/Mahapps.Metro.Tests/Views/SliderWindow.xaml:32  MahApps.Brushes.Gray1

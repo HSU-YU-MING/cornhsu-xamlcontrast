@@ -136,6 +136,34 @@
 - [x] **字色純粹靠繼承的文字元素不再靜默消失** —— 1.10：記 `inherited-foreground`。
       同一份回報的第二種（ToggleButton 模板裡的 TextBlock 自帶一個只設 `Text` 的 Style，1.21:1），
       1.9 之前 0 配對、0 unresolved、覆蓋率照樣 100%。實測 +1436 筆、0 筆 finding 變動。
+- [x] **畫字串內容的隱含樣式有觸發器 ⇒ 不評分** —— 1.11：同一個回報人用 1.10 複驗之後的第一件。
+      照 1.10 的建議修好（`ContentPresenter` 的隱含樣式用 `DataTrigger` 把字色翻成白色，畫出來 6.93）之後，
+      工具只讀觸發**前**那個 Setter，照舊報同樣 8 筆 fail —— 改記 `content-style-trigger`。
+      只在 `IsEnabled=False` 觸發的不算（WCAG 1.4.3 豁免，基礎狀態的字色照舊是正常狀態的答案）。
+      **看不懂正確的修法就是在逼人寫多餘的程式碼**，這次是同一條規則的另一邊。
+- [x] **內容是 markup extension ⇒ 不評分** —— 1.11：第二件，而且是「漏判」那一類。
+      1.10 只收字面字串，其餘維持 1.9 的答案 —— 而那個答案是宿主宣告的字色，正是畫不上去的那一個。
+      多語言專案每一句話都是 `{x:Static res:Strings.…}`，所以同一種病 1.10 只抓到少數寫死在標記裡的。
+      改記 `bound-content`（點名那個內容的寫法）。猜「八成是字串」會往另一邊錯（蓋掉元素真的宣告的字色）。
+      界線兩條：隱含樣式的字色跟宿主一樣時沒有不確定、宿主自己宣告 `ContentTemplate` 時整個不適用。
+- [x] **`<Style.Resources>` 與模板裡的 brush 不算色票** —— 1.11：第三件。區域資源被收成主題色票，
+      讓一個只放樣式的字典變成「色盤來源」（檔數與鍵數虛胖，而那正是挑色盤的判準），值不是色票時還印
+      「!! 1 key(s) dropped —— 色票讀壞了」。實測只有 NETworkManager 動（`files` 163 → 168，五個
+      `Resources/Styles/*Styles.xaml` 各有一個 `MahApps.Brushes.*` 在 `<Style.Resources>` 裡），色盤與每一筆
+      finding 都沒變。⚠ 畫面檔自己的區域 brush 刻意不遮 —— 詳見下面那條。
+- [x] **把透明色票當透明，不要當「讀不懂」** —— 1.11：`Color="Transparent"` 就是 alpha 0，而
+      `Color="#00FFFFFF"`（同一個顏色）色盤本來就收，所以具名那個寫法是唯一的例外：鍵被剔除、列在
+      「讀不懂」的名單上，用到它的地方記 `unknown-palette-key`。實測 6 個專案有這種鍵，**17 個專案一筆
+      fail／warn 都沒變**：Playnite +45 組配對（`ControlBackgroundBrush` 是它最大的那個未知鍵，219 處，
+      現在對著彈出選單的底評出 12.91）、MahApps 反方向（覆蓋率 5.5% → 3.9%：底解開之後走得到後面每一個
+      觸發態，`template-painted` 205 → 769，那些字色真的是執行期才知道 —— 一筆藏十幾處變成十幾筆）。
+- **畫面檔的區域 brush 收斂到子樹**：現在是「整個檔」（1.0 就在的近似）。量過了（1.11）：MaterialDesign 的
+  `DataGrids.xaml` 有三顆按鈕各自在 `<Button.Resources>` 裡把 `MaterialDesign.Brush.Primary` 換成
+  Orange／DodgerBlue／Red，工具現在讓**先出現的那一個**贏、三顆都用它評 —— 三筆裡有兩筆是編的。
+  要做對得按行號區間收範圍（同隱含樣式的 `ScopeOf`），而且色盤那一層得從「每檔一份」變成「每個範圍一份」。
+- **`{x:Static res:Strings.X}` 解析成字串**：要讀專案的 `*.Designer.cs`／`.resx` 確認那個成員是 `string`。
+  讀 `*.cs` 做色盤以外的事是**擴大稽核範圍**（第 9 面，同 `converters.constantBrushes`）—— 預設開要等 2.0，
+  所以這條只能是 opt-in 的設定。先確認有人要：`bound-content` 已經誠實點名，解析它換到的是「少一筆 unresolved」。
 - **繼承模型（把 `inherited-foreground` 從「點名」變成「評得出來」）**：往上找到第一個宣告字色的祖先就評它；
   整條都沒有才落到控制項的系統預設。⚠ **系統預設那一格是唯一的難處**，而且會編造：`ControlText` 只在
   「沒有函式庫提供那個控制項的預設樣式」時才對，而 `ThemeLibraries.DetectInProject` 認不出 MahApps

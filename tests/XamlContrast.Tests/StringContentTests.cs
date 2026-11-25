@@ -38,7 +38,7 @@ public class StringContentTests
     // App.xaml 合併 Styles/Controls.xaml；Controls.xaml 裡有隱含 TextBlock 樣式（深色字）
     // 與一個「宣告白字」的 AccentBtn（模板：Border 畫底，裡面一個 ContentPresenter）
     private static Fixture AppScope(string accentExtra = "", string presenter = "<ContentPresenter/>",
-        string implicitType = "TextBlock") => new Fixture()
+        string implicitType = "TextBlock", string implicitExtra = "") => new Fixture()
         .File("App.xaml", """
             <Application xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -56,6 +56,7 @@ public class StringContentTests
                                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
               <Style TargetType="{{implicitType}}">
                 <Setter Property="Foreground" Value="#1B1B1B"/>
+                {{implicitExtra}}
               </Style>
               <Style x:Key="AccentBtn" TargetType="Button">
                 <Setter Property="Background" Value="#534AB7"/>
@@ -235,13 +236,97 @@ public class StringContentTests
         Assert.Contains(fx.Run().Findings, f => f.Fg == "White" && f.Bg == "#534AB7");
     }
 
-    [Fact] // ⚠ 界線：Content="{Binding …}" 執行期多半也是字串，但靜態分不出「字串」與「一棵子樹」——
-           //   猜錯的方向是把宿主寫的字色換掉，那會編造。維持 1.9 的答案（明文盲區）
-    public void BoundContentKeepsTheHostForeground()
+    [Fact] // 1.11（回報 2 的第二件）：Content="{Binding …}" 執行期多半也是字串，但靜態分不出
+           //   「字串」與「一棵子樹」，兩種的字色不一樣 —— 猜任一邊都會編造，所以誠實地記 bound-content。
+           //   1.10 拿宿主宣告的字色評分（過關），而真 App 裡那是 2.66:1
+    public void BoundContentIsUnresolvedWhenAnImplicitStyleWouldRepaintIt()
     {
         using var fx = AppScope().Screen("""<Button Style="{StaticResource AccentBtn}" Content="{Binding Label}"/>""");
 
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        // 這一顆只寫 Style=，所以字與底同源、那一組由定義處評 —— 不確定的也記在定義處
+        Assert.Contains(r.UnresolvedSites, u => u.Reason == UnresolvedReason.BoundContent);
+    }
+
+    [Fact] // 回報 2 的原形：多語言專案的字全在 {x:Static res:Strings.…} 裡，所以同一種病
+           //   1.10 只抓到直接寫在畫面上的那幾個字
+    public void StaticResourceStringContentIsUnresolvedToo()
+    {
+        // 兩顆都自己寫底與字色（回報裡的最小例子就是這個形狀）→ 兩組都在使用處評，各自有答案
+        using var fx = AppScope().Screen("""
+            <StackPanel>
+              <Button Style="{StaticResource AccentBtn}" Background="#534AB7" Foreground="White" Content="補這一段"/>
+              <Button Style="{StaticResource AccentBtn}" Background="#534AB7" Foreground="White" Content="{x:Static r:Strings.Go}"/>
+            </StackPanel>
+            """);
+
+        var r = fx.Run();
+        Assert.Contains(r.Findings, f => f.Fg == "#1B1B1B" && f.File == "Main.xaml");   // 字面字串那一顆照舊抓到
+        Assert.Contains(r.UnresolvedSites, u => u.Reason == UnresolvedReason.BoundContent
+                                                && u.File == "Main.xaml" && u.Value == "{x:Static r:Strings.Go}");
+    }
+
+    [Fact] // ⚠ 界線：隱含樣式的字色跟宿主宣告的一樣 → 字串與子樹的答案相同，沒有不確定，照舊評分
+    public void BoundContentIsGradedWhenTheImplicitStyleAgreesWithTheHost()
+    {
+        using var fx = AppScope(implicitType: "TextBlock")
+            .Screen("""<Button Style="{StaticResource AccentBtn}" Foreground="#1B1B1B" Content="{Binding Label}"/>""");
+
+        var r = fx.Run();
+        Assert.Equal("#1B1B1B", Assert.Single(r.Findings).Fg);
+        Assert.DoesNotContain(r.UnresolvedSites, u => u.File == "Main.xaml");
+    }
+
+    [Fact] // ⚠ 界線：專案沒有會換字色的隱含樣式 → 字色就是宿主的，字串或子樹都一樣（絕大多數專案是這一格）
+    public void BoundContentKeepsTheHostForegroundWithoutAnImplicitTextStyle()
+    {
+        using var fx = AppScope(implicitType: "Label")
+            .Screen("""<Button Style="{StaticResource AccentBtn}" Content="{Binding Label}"/>""");
+
         Assert.Equal("White", Assert.Single(fx.Run().Findings).Fg);
+    }
+
+    [Fact] // ⚠ 界線（1.11）：宿主自己指定 ContentTemplate → 內容由那份 DataTemplate 畫，
+           //   ContentPresenter 不產生 TextBlock，隱含樣式整個不適用
+    public void AContentTemplateKeepsTheHostForeground()
+    {
+        using var fx = AppScope().Screen("""
+            <Button Style="{StaticResource AccentBtn}" ContentTemplate="{StaticResource Tmpl}" Content="補這一段"/>
+            """);
+
+        Assert.Equal("White", Assert.Single(fx.Run().Findings).Fg);
+    }
+
+    [Fact] // 回報 2 的第一件：照 1.10 的建議修好之後（觸發器把字色翻成白色），工具還是報同樣的 fail ——
+           //   守門員看不懂正確的修法，就是在逼人寫多餘的程式碼
+    public void AnImplicitContentStyleWithAForegroundTriggerIsUnresolved()
+    {
+        using var fx = AppScope(implicitExtra: """
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsAccent}" Value="True">
+                <Setter Property="Foreground" Value="White"/>
+              </DataTrigger>
+            </Style.Triggers>
+            """).Screen("""<Button Style="{StaticResource AccentBtn}" Content="補這一段"/>""");
+
+        var r = fx.Run();
+        Assert.Empty(r.Findings);
+        Assert.Contains(r.UnresolvedSites, u => u.Reason == UnresolvedReason.ContentStyleTrigger);
+    }
+
+    [Fact] // ⚠ 界線：只有停用態換字色 → 那是 WCAG 1.4.3 豁免的狀態，正常狀態的字色照舊算得出來
+    public void ADisabledOnlyTriggerStillGradesTheNormalState()
+    {
+        using var fx = AppScope(implicitExtra: """
+            <Style.Triggers>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="Gray"/>
+              </Trigger>
+            </Style.Triggers>
+            """).Screen("""<Button Style="{StaticResource AccentBtn}" Content="補這一段"/>""");
+
+        Assert.Equal("#1B1B1B", Assert.Single(fx.Run().Findings).Fg);
     }
 
     [Fact] // ⚠ 界線：模板把字畫在 AccessText 上（不是 ContentPresenter）——隱含 TextBlock 樣式對它沒有作用

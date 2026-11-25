@@ -132,9 +132,13 @@ ControlTemplate 子樹、Style setter 配對、觸發態、死 setter 過濾、�
 
 1. **合併字典・深淺俱全** —— 專案裡所有定義了具 key 的 `Color`／`SolidColorBrush` 的 XAML
    併成一份色盤，且每個鍵深淺兩套值都有。排在最前面，因為真實專案的色票常拆散在多個字典裡，
-   「挑單一檔」會漏。`Application.Resources` 算字典；視窗自己的區域 brush（`Window.Resources`、
+   「挑單一檔」會漏。`Application.Resources` 算字典；寫在 `<Style.Resources>`
+   或模板裡（`<ContentPresenter.Resources>`）的 brush **不算** —— 那是區域資源，只有用到那個樣式的地方
+   看得到，所以 1.11 起它們既不會多出色票鍵，也不會讓一個只放樣式的字典變成色盤來源。視窗自己的區域 brush（`Window.Resources`、
    `UserControl.Resources`）跟 WPF 的資源查找一樣只在那個視窗裡看得到：在那裡蓋過色盤（引用 `Color` 的
-   區域 brush 依主題各自解析），只有某個視窗定義的鍵在其他地方一律是 `unknown-palette-key`。字典檔不算進
+   區域 brush 依主題各自解析），只有某個視窗定義的鍵在其他地方一律是 `unknown-palette-key`。`Color="Transparent"` 跟別的色票一樣收
+   （alpha 0，等同 `#00FFFFFF`，而那個寫法本來就收）：用到它的地方穿透到底下那一層，不再算成「讀不懂的鍵」
+   （1.11 —— 17 個公開專案裡，Playnite 的 `ControlBackgroundBrush` 一個鍵就 219 處）。字典檔不算進
    `summary.files` 的畫面數，但裡面的 Style（以及不在 Style 裡的 DataTemplate／ControlTemplate）照樣稽核。色盤依路徑裡任何位置的 dark／light 分成深淺兩組
    （`darktheme.xaml`、`Dark2.xaml`、`Themes/Dark/Colors/Palette.xaml` 都算）；檔名完全看不出主題（`Ocean.xaml`／
    `Nord.xaml`）、又有三個以上的鍵在不同字典裡值不同時，判成偵測退化，不靜默只評其中一套。
@@ -430,6 +434,8 @@ fail／warn 另標 `symmetry: single-theme`。
 | `unknown-style-key` | 色盤來自分開的深／淺字典，而元素的 Style —— `Style="{StaticResource K}"`，或它鏈上的 `BasedOn` —— 只在其中一個字典裡定義，另一個主題下這個元素長什麼樣不知道；值是那個 Style 的鍵。衍生的 Style 一個顏色都沒設也算（行內 `<Button.Style>` BasedOn `K`、只設 `Margin` 或只有一個管 `Visibility` 的 `DataTrigger`）：不知道的是基底。1.2 之前算成 `unknown-palette-key`；`BasedOn` 有設顏色的那一種是拿元素後面的底去評，沒設顏色的則完全沒算 —— 不是配對、也不是 unresolved —— 所以從 1.1 升上來，這種元素每個多一筆 unresolved、評分的配對數不動。沒有設定可以宣告：定義在檔名帶 dark／light 的字典裡的 Style 就屬於那個主題。Style 其實是共用的（另一個主題只蓋掉 brush）就把它搬到檔名沒有主題字眼的字典 |
 | `template-painted` | 字畫在控制項模板**內部**某一層上，而那一層的顏色靜態看不到：來自宿主自己的屬性而沒人設過（函式庫控制項的預設值寫在 C# 裡）、那一層的底本身是 Binding／漸層，或是被觸發器重畫了而那一層定不出來（整個換掉 `Template`、視覺由另一份模板畫、元素自己帶 `Template`、模板裡找不到任何放內容的位置，或重畫的值是漸層或 Binding）。這一類**不退回祖先的底** —— 模板畫了一層蓋在上面，祖先的顏色根本沒露出來。1.6 新增；在那之前這些是拿「被重畫蓋掉的底」算出來的。「重畫的元素正好就在字底下那一疊」的情形算得出來，不歸這一類；1.8 起「重畫的目標一個放內容的位置都沾不到」也算得出來 —— 它不在這段文字底下，底照舊成立 |
 | `inherited-foreground` | 文字元素有自己的 `Style`，而那條鏈（連同 `BasedOn` 與觸發器）一個 `Foreground` 都沒設、元素自己也沒寫 —— 字色是從祖先繼承來的，最後落到控制項的系統預設（`ControlText`）。元素有自己的 `Style` 就**完全不套**隱含樣式，所以專案裡的隱含 `TextBlock` 樣式也救不了這一格。本工具不模擬繼承、也不模擬控制項預設值，所以這一組不評分；值點名的是要去修的那個樣式（`TextBlock⊕Style[inline]`、`TextBlock⊕Style[Caption]`）。1.10 新增 —— 在那之前這種位置**什麼都不會留下**：沒有 finding、沒有 unresolved、覆蓋率照樣算滿。逼出這一條的形狀在畫面上是近黑色的字疊 `#1A1A1A`、1.21:1，而報告說每一組都過。元素**連樣式都沒有**的那一種還沒計（同一個問題、範圍更廣，見已知限制） |
+| `content-style-trigger` | 宿主的字串內容由 `ContentPresenter` 產生的那顆 `TextBlock` 畫，而它套得到的隱含樣式**自己的觸發器**也會設 `Foreground` —— 哪一個狀態在執行期成立靜態不可知（條件多半是 Binding）。1.11 新增：只看觸發前那個 Setter 的話，工具會對**已經修好**的程式碼報 fail —— 逼出這一條的形狀是用 `DataTrigger` 把強調色按鈕上的字翻成白色（畫出來 6.93:1），而 1.10 照舊報 2.66:1。值點名要去看的那個樣式（`Style[implicit TextBlock]`）。只在 `IsEnabled=False` 時觸發的不算：那個狀態本來就是 WCAG 1.4.3 豁免的 |
+| `bound-content` | 宿主的 `Content`／`Header` 是 markup extension（`{Binding Label}`、`{x:Static res:Strings.Go}`、`{DynamicResource GoText}`），**而且**專案有一個會把字串內容換成別的顏色的隱含樣式。值是字串時 `ContentPresenter` 會產生一顆 `TextBlock`，隱含樣式生效；是一整棵子樹時不會，字色照舊從宿主繼承 —— 兩種的答案不一樣，而靜態分不出是哪一種，所以這一組不評分，值是那個內容的寫法。1.11 新增 —— 在那之前是拿宿主宣告的字色評分，於是**對一段畫出來是別的顏色的文字回報「過關」**。這在多語言專案上影響最大：每一句話都是 `{x:Static res:Strings.…}`，1.10 那條規則只抓到少數直接寫在標記裡的字。隱含樣式的字色跟宿主**一樣**時沒有不確定，照舊評分；宿主自己宣告 `ContentTemplate` 的也照舊（內容由那份模板畫，不是產生出來的 `TextBlock`） |
 
 `summary.coverage` 是解析成功的比例。**低於 `--min-coverage`(預設 50%)會 exit 3** ——
 只掃到一小部分的「通過」不算通過,這是「0 組配對不算通過」那條不可設定規則的推廣。
@@ -627,9 +633,12 @@ Style 的 `Template` setter 裡自己帶 `Foreground` 的文字元素**還沒有
 `<Style.Resources>`、祖先帶下來的，最後是 **`Application` 層** —— 這個分別才是關鍵：模板產生的元素
 查隱含樣式時跳過視覺樹，所以同一份樣式放在 `Window.Resources` 對按鈕的文字沒有作用。App 作用域是
 追 App.xaml 的 `MergedDictionaries` 算出來的（相對路徑、`/Asm;component/…`、`pack://application:,,,`，
-遞移）。還做不到的（一律維持宿主自己的值，不猜）：**C# 在執行期合併**進來的字典（追不到）、
-`Content="{Binding …}"`（靜態分不出「字串」與「一整棵子樹」）、**框架的預設模板**（只有模板與它裡面
-放內容的位置在專案裡看得到時才動手）。`RecognizesAccessKey="True"` 的 ContentPresenter 產生的是
+遞移）。還做不到的（維持宿主自己的值，不猜）：**C# 在執行期合併**進來的字典（追不到）、**框架的預設模板**
+（只有模板與它裡面放內容的位置在專案裡看得到時才動手）。另外兩種改成點名而不是猜（1.11）：內容是
+markup extension（`{Binding}`、`{x:Static res:Strings.Go}`、`{DynamicResource K}`）時記 `bound-content`
+—— 靜態分不出「字串」與「一整棵子樹」，而兩種的字色不一樣；隱含樣式自己的觸發器也設 `Foreground` 時記
+`content-style-trigger`。宿主自己宣告 `ContentTemplate` 的照舊用宿主的字色：內容由那份模板畫，
+不是產生出來的 `TextBlock`。`RecognizesAccessKey="True"` 的 ContentPresenter 產生的是
 `AccessText`，隱含 `TextBlock` 樣式套不到它，隱含 `AccessText` 樣式才套得到。內容是子元素時照舊用
 宿主的字色：那正是子元素繼承到的值，而它們自己會被走到。
 **字色是繼承來的不評分**，改記 `inherited-foreground`（1.10）：文字元素有自己的 `Style` 就不套隱含樣式，

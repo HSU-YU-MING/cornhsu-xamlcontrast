@@ -3,7 +3,7 @@
 project: quicklook
 repo: https://github.com/QL-Win/QuickLook
 commit: e2f19a0ba9097024cc6520dd03735abd26f425f8
-tool-commit: 718dade+dirty
+tool-commit: 10daaf1+dirty
 frozen: 2026-11-25
 exit: 3
 palette-mode: pair

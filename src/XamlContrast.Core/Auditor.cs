@@ -489,17 +489,28 @@ public sealed partial class Auditor
     /// → 祖先帶下來的 → App 層。最近的那一個**沒設** <c>Foreground</c> 就是「沒有人蓋掉」，
     /// 照舊繼承宿主的（回 null）。
     /// </summary>
-    private string? StringContentForeground(StyleIndex.Merged chain, ThemeSide? side)
+    private ContentText StringContentForeground(StyleIndex.Merged chain, ThemeSide? side)
     {
         // 「模板裡有放內容的位置」是這條規則的證據：看得到那個機制才動手。看不到的（控制項的框架預設模板、
         // 元素自己帶的模板）維持 1.9 的答案 —— 盲區明文留在 ROADMAP，不拿推論去蓋掉元素寫的值
-        if (chain.ContentTextType is not { } textType) return null;
+        if (chain.ContentTextType is not { } textType) return default;
         var near = _styles.ChainOf(chain.ContentTextStyle, textType, side)
                    ?? _styles.ScopedImplicitChain(chain, textType, side)
                    ?? ScopedImplicitOne(textType, side)
                    ?? AppImplicit(textType, side);
-        return near?.Props.TryGetValue("Foreground", out var v) == true ? v.V : null;
+        if (near is null) return default;
+        // 那條鏈自己的觸發器也會換字色（1.11）→ 哪個狀態成立靜態不可知（條件多半是 Binding），不評分。
+        // ⚠ 停用態不算：那是 WCAG 1.4.3 豁免的狀態，基礎狀態的字色照舊是「正常狀態」的答案。
+        // ⚠ 這一格是回報 2 的第一件：ZeroCel 照 1.10 的建議用 DataTrigger 把字色翻成白色（畫出來 6.93:1），
+        //   而只看觸發前那個 Setter 的話，工具對**已經修好**的程式碼照舊報 2.66:1 的 fail
+        if (near.States.Any(st => !st.Disabled && st.Set.ContainsKey("Foreground")))
+            return new ContentText(null, UnresolvedReason.ContentStyleTrigger, near.Label);
+        return new ContentText(near.Props.TryGetValue("Foreground", out var v) ? v.V : null, null, near.Label);
     }
+
+    /// <summary>字串內容畫出來的字色（1.10／1.11）。<see cref="Fg"/> 非 null ＝換成這個值；
+    /// <see cref="Why"/> 非 null ＝這一組算不出來，記這個原因（點名 <see cref="Where"/>）。</summary>
+    private readonly record struct ContentText(string? Fg, UnresolvedReason? Why, string? Where);
 
     /// <summary>App 層的隱含樣式（1.10）。深淺兩份字典各宣告一個、而且字色寫法不同
     /// （或只有一側有）時回 null —— 那是「不知道」，拿其中一側的值填兩欄就是編造（同 <c>Walk</c> 的 implicitSame）。</summary>
@@ -1157,8 +1168,19 @@ public sealed partial class Auditor
             var localFgRaw = XamlBrush.Read(el, "Foreground");
             // 宿主的字串內容真正的字色（1.10）—— 整個狀態迴圈共用一份。元素自己換掉模板時 Style 那份模板
             // 的 ContentPresenter 在執行期不存在（同 ownTemplate 的其他用法）
-            var contentFg = !ownTemplate && StyleIndex.HasStringContent(el)
-                ? StringContentForeground(chain, side) : null;
+            // ⚠ 宿主指定了自己的 ContentTemplate（含 Style 設的）→ 內容由那份 DataTemplate 畫，
+            //   ContentPresenter 不產生 TextBlock，這條規則整個不適用（1.11）
+            var templated = StyleIndex.HasContentTemplate(el)
+                            || StyleIndex.ContentTemplateProps.Any(chain.Props.ContainsKey);
+            var literalContent = !ownTemplate && !templated && StyleIndex.HasStringContent(el);
+            // 內容是 markup extension（1.11）：會不會產生那顆 TextBlock 靜態分不出來 —— 字色真的會被換掉時記 bound-content
+            var markupContent = !ownTemplate && !templated && !literalContent && StyleIndex.MarkupContent(el) is not null;
+            var content = literalContent || markupContent ? StringContentForeground(chain, side) : default;
+            var contentFg = literalContent ? content.Fg : null;
+            // 字面字串＋那條鏈有觸發 → content-style-trigger；內容本身不確定 → bound-content（更根本的那一個）
+            var contentWhy = markupContent
+                ? content.Fg is not null || content.Why is not null ? UnresolvedReason.BoundContent : null
+                : content.Why;
             var emitted = new HashSet<string>();
             var allStates = new List<StyleIndex.State> { new() };
             // 元素自己換掉模板 → Style 模板裡的觸發器不存在（見上面 ownTemplate）
@@ -1266,6 +1288,13 @@ public sealed partial class Auditor
                                         && !st.LayerTouched.Overlaps(chain.ContentChainNames);
                 if (st.UnknownLayer && !st.Set.ContainsKey("Background") && tmplLayers is null && !repaintOffContent)
                 { Unres(UnresolvedReason.TemplatePainted, file, LineOf(el), fgV); continue; }
+
+                // 字串內容的字色算不出來（1.11）：拿宿主宣告的那個字色評分 ＝ 謊報健康。
+                // ⚠ 排在 SameSource／停用態之後：那兩個先濾掉的話，停用態與「讓給定義處」的那些
+                //   會在這裡變成 unresolved 的雜訊，而且同一組在定義處與使用處各記一次
+                if (contentWhy is { } cwhy &&
+                    (contentWhy != UnresolvedReason.BoundContent || !string.Equals(content.Fg, fgV, StringComparison.Ordinal)))
+                { Unres(cwhy, file, LineOf(el), (cwhy == UnresolvedReason.BoundContent ? StyleIndex.MarkupContent(el) : content.Where)!); continue; }
 
                 var fgAll = ResolveColour(fgV, pal);
                 if (fgAll is null) continue;
@@ -1928,7 +1957,21 @@ public sealed partial class Auditor
                 : style.Parent?.Name.LocalName.EndsWith(".Style", StringComparison.Ordinal) == true
                     ? style.Parent.Parent is { } styleOwner && StyleIndex.HasStringContent(styleOwner)
                     : ttName is not null && _styles.SomeStringContentElement(ttName);
-            var stringContentFg = usedOnStringContent ? StringContentForeground(chain, _curSide) : null;
+            // 內容是 markup extension 的使用處（1.11）—— 只在「沒有任何字面字串的使用處」時算：
+            // 有字面字串的話那個答案是確定的（換值），定義處一筆報不出兩種答案
+            var usedOnMarkupContent = !usedOnStringContent && (key is not null
+                ? _styles.HasMarkupContentUser(key)
+                : style.Parent?.Name.LocalName.EndsWith(".Style", StringComparison.Ordinal) == true
+                    ? style.Parent.Parent is { } mOwner && StyleIndex.MarkupContent(mOwner) is not null
+                    : ttName is not null && _styles.SomeMarkupContentElement(ttName));
+            // 宿主自己指定內容模板（Style 的 Setter）→ 內容不是 ContentPresenter 產生的 TextBlock（1.11）
+            var contentTemplated = StyleIndex.ContentTemplateProps.Any(chain.Props.ContainsKey);
+            var content = !contentTemplated && (usedOnStringContent || usedOnMarkupContent)
+                ? StringContentForeground(chain, _curSide) : default;
+            var stringContentFg = usedOnStringContent ? content.Fg : null;
+            var contentWhy = usedOnMarkupContent
+                ? content.Fg is not null || content.Why is not null ? UnresolvedReason.BoundContent : null
+                : content.Why;
 
             foreach (var (stateName, st) in states)
             {
@@ -1963,6 +2006,10 @@ public sealed partial class Auditor
                 // 同元素端：狀態重畫了看不到的那一層、而且自己沒給底 → 不能拿基礎狀態的底去配
                 if (st?.UnknownLayer == true && !st.Set.ContainsKey("Background"))
                 { Unres(UnresolvedReason.TemplatePainted, file, line, fgv); continue; }
+                // 字串內容的字色算不出來（1.11）—— 同元素端，排在停用態之後
+                if (contentWhy is { } cwhy &&
+                    (contentWhy != UnresolvedReason.BoundContent || !string.Equals(content.Fg, fgv, StringComparison.Ordinal)))
+                { Unres(cwhy, file, line, content.Where!); continue; }
                 var fgAll = ResolveColour(fgv, _pal);
                 var bgAll = ResolveColour(bgv, _pal);
                 if (fgAll is null || bgAll is null) continue;

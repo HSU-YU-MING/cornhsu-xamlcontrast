@@ -131,6 +131,22 @@ public enum UnresolvedReason
     /// 連 unresolved 都沒有，覆蓋率照樣 100%。實例：ZeroCel 的圖層眼睛（ToggleButton 模板裡的 TextBlock
     /// 自帶一個只設 Text 的 Style），執行期是黑字疊近黑底 1.21:1，而工具回報「757 組全過」。</summary>
     InheritedForeground,
+    /// <summary>字串內容畫出來的那顆 TextBlock，套得到的隱含樣式**自己的觸發器**也會換字色（1.11）——
+    /// 哪一個狀態在執行期成立靜態不可知（條件多半是 Binding），所以這一組不評分。
+    ///
+    /// ⚠ 這是「看懂正確的修法」的另一半：ZeroCel 照 1.10 的建議，在 ContentPresenter 的隱含樣式上
+    /// 用 DataTrigger 把字色翻成白色（畫出來是白字疊紫底 6.93:1），而 1.10 只看觸發前的那個 Setter，
+    /// 對**已經修好**的程式碼照舊報 2.66:1 的 fail —— 守門員看不懂正確的修法，就是在逼人寫多餘的程式碼。</summary>
+    ContentStyleTrigger,
+    /// <summary>宿主的 <c>Content</c>／<c>Header</c> 是 markup extension（<c>{Binding}</c>、
+    /// <c>{x:Static res:Strings.Go}</c>、<c>{DynamicResource K}</c>），而專案有一個會換掉字串內容字色的
+    /// 隱含樣式（1.11）—— 靜態分不出那個值是「字串」（ContentPresenter 自己產生 TextBlock，隱含樣式生效）
+    /// 還是「一整棵子樹」（隱含樣式不生效，字色照舊從宿主繼承），兩種的字色不一樣。
+    ///
+    /// ⚠ 1.10 這一格拿宿主宣告的字色評分 ＝ **謊報健康**：多語言專案的字全在 <c>{x:Static res:Strings.…}</c>
+    /// 裡，ZeroCel 11-19 之後整批漏判（真 App 量到 2.66:1，工具說 6.93:1 過關）。
+    /// 猜「八成是字串」會往另一邊錯（把元素寫的字色蓋掉），所以兩邊都不猜、改成誠實地點名。</summary>
+    BoundContent,
 }
 
 /// <summary>XAML 裡以資源鍵 Key 用到的轉換器，與它的分析結果。</summary>

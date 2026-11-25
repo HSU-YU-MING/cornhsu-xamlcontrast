@@ -3,14 +3,14 @@
 project: networkmanager
 repo: https://github.com/BornToBeRoot/NETworkManager.git
 commit: 350d81fa7257d1f436187c767706e789013c077a
-tool-commit: 718dade+dirty
+tool-commit: 10daaf1+dirty
 frozen: 2026-11-25
 exit: 3
 palette-mode: pair
 palette-degraded: False
-palette-keys: 291
+palette-keys: 360
 single-theme: False
-files: 163
+files: 168
 pairs: 139
 coverage: 8.4
 unresolved: 1522
