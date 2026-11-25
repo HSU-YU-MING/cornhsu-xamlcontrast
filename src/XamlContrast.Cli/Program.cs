@@ -309,7 +309,7 @@ if (sarifPath is not null && !TryWrite(sarifPath, Report.ToSarif(result, ToolVer
 if (writeBaselinePath is not null && exitCode == 0 &&
     !TryWrite(writeBaselinePath, Baseline.Write(result), "baseline", $" ({fail + warn} known pair(s) below AA)")) return 2;
 
-if (mdPath is not null && !TryWrite(mdPath, Report.ToMarkdown(result, exitCode), "markdown")) return 2;
+if (mdPath is not null && !TryWrite(mdPath, Report.ToMarkdown(result, exitCode, context), "markdown")) return 2;
 
 // 單檔 HTML（1.1）：與 --json 同一份 context（判定、gate、baseline 逐筆結果）；寫不出去一樣是 2
 if (htmlPath is not null && !TryWrite(htmlPath, Report.ToHtml(result, context), "html")) return 2;

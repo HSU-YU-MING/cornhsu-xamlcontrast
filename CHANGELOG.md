@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/) / [SemVer](https://semver.org/).
 
+## Unreleased
+
+### Changed
+
+- **With `--baseline`, the Markdown report (the PR comment) counts what is new.** It used to say
+  `✅ PASS · 1 fail` when the one failing pair was known debt. Now: `0 new or worse than the baseline, 1 known`,
+  each row says `new`, `worsened`, `known` or `not gated`, the new ones come first, and when the job fails
+  because of unresolved pairs the verdict says so. Without a baseline nothing changes. Exit codes, JSON, SARIF
+  and HTML are untouched.
+  *簡單說：接了 baseline 的 PR 留言改數「新的或惡化的」，不再把已知的債寫成「PASS · 1 fail」。*
+
 ## 1.11.0 — 2026-11-25
 
 Three more from the same reporter (ZeroCel's WPF front end), after re-auditing with 1.10.0. The 1.10 rule
